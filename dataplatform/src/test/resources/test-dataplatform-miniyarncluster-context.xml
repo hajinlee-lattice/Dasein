@@ -8,8 +8,14 @@
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-   <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler"/>
-   <bean id="taskExecutor" class="org.springframework.core.task.SyncTaskExecutor"/>
-   <bean id="yarnContainer" class="com.latticeengines.dataplatform.service.impl.KillApplicationContainer"/>
+	<bean id="yarnCluster" class="org.springframework.yarn.test.support.YarnClusterFactoryBean">
+	    <property name="clusterId" value="LocalTestYarnClusterTests"/>
+	    <property name="autoStart" value="true"/>
+	    <property name="nodes" value="1"/>
+	</bean>
+
+	<bean id="yarnConfiguration" class="org.springframework.yarn.test.support.ConfigurationDelegatingFactoryBean">
+        <property name="cluster" ref="yarnCluster"/>
+    </bean>
 
 </beans>

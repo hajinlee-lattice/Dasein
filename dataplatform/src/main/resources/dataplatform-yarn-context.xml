@@ -3,22 +3,20 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xmlns:yarn="http://www.springframework.org/schema/yarn"
    xmlns:context="http://www.springframework.org/schema/context"
-   xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
+   xsi:schemaLocation="
+      http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-   <context:property-placeholder location="file:/home/fmeng/workspace/dataplatform/target/classes/env/dev/application.properties" system-properties-mode="OVERRIDE"/>
-   
-   <yarn:configuration>
-      fs.defaultFS=${hd.fs}
-      yarn.resourcemanager.address=${hd.rm}
-   </yarn:configuration>
 
-   <yarn:localresources/>
+    <!--  Submission yarn configuration -->
+    <yarn:configuration>
+       fs.defaultFS=${dataplatform.fs.defaultFS}
+       yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
+       yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
+    </yarn:configuration>
 
-   <yarn:environment/>
-
-   <yarn:client/>
-
+    
+      
 </beans>

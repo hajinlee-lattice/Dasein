@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:yarn="http://www.springframework.org/schema/yarn"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+	  http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+    
+	<yarn:localresources>
+	    <yarn:copy src="file:target/dependency/spring-beans*" dest="/lib/" />
+	    <yarn:copy src="file:target/dependency/spring-yarn*" dest="/lib/" />
+	    <yarn:copy src="file:target/dependency/spring-data*" dest="/lib/" />
+	    <yarn:copy src="file:target/dependency/spring-expression*" dest="/lib/" />
+	    <yarn:copy src="file:target/dependency/spring-co*" dest="/lib/" />
+	    <yarn:copy src="file:target/dependency/spring-aop*" dest="/lib/" />
+		<yarn:copy src="file:target/*.jar" dest="/app/kill-application/" />
+		<yarn:copy src="file:${DATAPLATFORM_PROPDIR}/dataplatform.properties" dest="/app/kill-application" />
+		<yarn:hdfs path="/app/kill-application/dataplatform.properties" />
+		<yarn:hdfs path="/app/kill-application/*.jar" />
+		<yarn:hdfs path="/lib/*" />
+	</yarn:localresources>
+
+	<yarn:environment include-system-env="false">
+		<yarn:classpath />
+	</yarn:environment>
+
+	<yarn:client app-name="kill-application">
+		<yarn:master-runner
+			context-file="com/latticeengines/dataplatform/service/impl/appmaster-context.xml" />
+	</yarn:client>
+
+	<yarn:client app-name="another-kill-application" id="anotherYarnClient">
+		<yarn:master-runner
+			context-file="com/latticeengines/dataplatform/service/impl/appmaster-context.xml" />
+	</yarn:client>
+</beans>

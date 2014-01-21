@@ -33,7 +33,6 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 		return yarnClient.listApplications();
 	}
 
-
 	@Override
 	public ApplicationReport getJobReportById(ApplicationId appId) {
 		List<ApplicationReport> reports = getJobReportsAll();
@@ -60,8 +59,8 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 	}
 
 	@Override
-	public ApplicationId submitJob(String appName) {
-		YarnClient client = getYarnClient(appName);
+	public ApplicationId submitJob(String yarnClientName) {
+		YarnClient client = getYarnClient(yarnClientName);
 		ApplicationId applicationId = client.submitApplication();
 		return applicationId;
 	}
@@ -77,8 +76,6 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 			if (StringUtils.isEmpty(yarnClientName)) {
 				throw new IllegalStateException("yarn client name cannot be empty");
 			}
-			// context = new ClassPathXmlApplicationContext(contextFile);
-			// YarnClient client = (YarnClient) context.getBean(YarnSystemConstants.DEFAULT_ID_CLIENT);
 			YarnClient client = (YarnClient) applicationContext.getBean(yarnClientName);
 			return client;
 		} catch (Throwable e) {
@@ -95,6 +92,5 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		this.applicationContext = applicationContext;
-		
 	}
 }
