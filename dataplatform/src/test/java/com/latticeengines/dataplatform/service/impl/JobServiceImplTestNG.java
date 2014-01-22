@@ -24,13 +24,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 	@Autowired
 	private JobService jobService;
 	
-	@Test
+	@Test(groups="functional")
 	public void testGetJobReportsAll() throws Exception {
 		List<ApplicationReport> applications = jobService.getJobReportsAll();
 		assertNotNull(applications);
 	}
 
-	@Test
+	@Test(groups="functional")
 	public void testKillApplication() throws Exception {
 		ApplicationId applicationId = submitApplication();
 		YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
@@ -41,7 +41,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		assertTrue(state.equals(YarnApplicationState.KILLED));
 	}
 
-	@Test
+	@Test(groups="functional")
 	public void testGetJobReportByUser() throws Exception {
 		ApplicationId applicationId = submitApplication();
 		YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
@@ -64,7 +64,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		assertTrue(reports.size() > numJobs);
 	}
 
-	@Test
+	@Test(groups="functional")
 	public void testSubmitJob() throws Exception {
 		ApplicationId applicationId = jobService.submitJob("anotherYarnClient");
 		YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
