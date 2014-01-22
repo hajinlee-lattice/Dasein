@@ -9,14 +9,9 @@
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-
-    <!--  Submission yarn configuration -->
-    <yarn:configuration>
-       fs.defaultFS=${dataplatform.fs.defaultFS}
-       yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
-       yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
-    </yarn:configuration>
-
-    
+    <yarn:client app-name="python" id="pythonClient">
+        <yarn:master-runner
+            context-file="python/dataplatform-python-appmaster-context.xml" />
+    </yarn:client>
       
 </beans>

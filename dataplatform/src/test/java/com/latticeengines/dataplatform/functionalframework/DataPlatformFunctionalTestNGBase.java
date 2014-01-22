@@ -130,7 +130,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 	 * @see ApplicationInfo
 	 */
 	protected ApplicationInfo submitApplicationAndWaitState(long timeout, TimeUnit unit, YarnApplicationState... applicationStates) throws Exception {
-		Assert.notEmpty(applicationStates, "Need to have atleast one state");
+		Assert.notEmpty(applicationStates, "Need to have at least one state");
 		Assert.notNull(yarnClient, "Yarn client must be set");
 
 		YarnApplicationState state = null;

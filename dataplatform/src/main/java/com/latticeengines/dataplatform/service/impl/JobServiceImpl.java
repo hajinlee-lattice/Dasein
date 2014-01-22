@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
@@ -92,5 +93,13 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		this.applicationContext = applicationContext;
+	}
+	
+	@SuppressWarnings("resource")
+	public static void main(String[] args) {
+		ApplicationContext context = new ClassPathXmlApplicationContext("dataplatform-context.xml", "dataplatform-properties-context.xml");
+		JobService jobService = (JobService) context.getBean("jobService");
+		ApplicationId appId = jobService.submitJob("yarnClient");
+	
 	}
 }

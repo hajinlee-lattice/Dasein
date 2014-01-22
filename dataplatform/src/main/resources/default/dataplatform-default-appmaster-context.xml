@@ -7,20 +7,18 @@
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-	<bean id="taskScheduler"
-		  class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler" />
+	<bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler" />
 	<bean id="taskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
-	<bean id="yarnEventPublisher"
-		  class="org.springframework.yarn.event.DefaultYarnEventPublisher" />
+	<bean id="yarnEventPublisher" class="org.springframework.yarn.event.DefaultYarnEventPublisher" />
 	<bean class="org.springframework.yarn.event.LoggingListener">
 		<constructor-arg value="info" />
 	</bean>
-	
-	<context:property-placeholder location="classpath*:dataplatform.properties"/>
-    <import resource="classpath:dataplatform-yarn-config-context.xml"/>
+
+	<context:property-placeholder location="classpath*:dataplatform.properties" />
+	<import resource="classpath:dataplatform-yarn-config-context.xml" />
 
 	<yarn:localresources>
-		<yarn:hdfs path="/app/kill-application/*.jar" />
+		<yarn:hdfs path="/app/dataplatform/*.jar" />
 		<yarn:hdfs path="/lib/*" />
 	</yarn:localresources>
 
@@ -29,12 +27,14 @@
 	</yarn:environment>
 
 	<yarn:master>
-		<yarn:container-allocator 
-		    virtualcores="2"
-			memory="64" 
-			priority="0" />
-		<yarn:container-runner
-			context-file="com/latticeengines/dataplatform/service/impl/container-context.xml" />
+		<yarn:container-allocator />
+		<yarn:container-command>
+                        <![CDATA[
+                        date
+                        1><LOG_DIR>/Container.stdout
+                        2><LOG_DIR>/Container.stderr
+                        ]]>
+		</yarn:container-command>
 	</yarn:master>
 
 </beans>
