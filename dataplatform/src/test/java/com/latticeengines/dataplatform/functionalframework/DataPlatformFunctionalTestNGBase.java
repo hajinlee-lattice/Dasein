@@ -25,7 +25,8 @@ import org.springframework.yarn.test.junit.ApplicationInfo;
 })
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 	
-	protected Configuration configuration;
+	@Autowired
+	protected Configuration yarnConfiguration;
 
 	protected YarnCluster yarnCluster;
 
@@ -38,17 +39,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 	 * @return the Yarn cluster config
 	 */
 	public Configuration getConfiguration() {
-		return configuration;
-	}
-
-	/**
-	 * Sets the {@link Configuration}.
-	 *
-	 * @param configuration the Configuration
-	 */
-	@Autowired
-	public void setConfiguration(Configuration configuration) {
-		this.configuration = configuration;
+		return yarnConfiguration;
 	}
 
 	/**

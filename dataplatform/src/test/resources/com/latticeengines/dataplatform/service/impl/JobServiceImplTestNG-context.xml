@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:yarn="http://www.springframework.org/schema/yarn"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:yarn="http://www.springframework.org/schema/yarn"
+	xmlns:hdp="http://www.springframework.org/schema/hadoop"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="
 	  http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-      http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+      http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+      http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
     
 	<yarn:localresources>
 	    <yarn:copy src="file:target/dependency/spring-beans*" dest="/lib/" />
@@ -15,9 +18,9 @@
 	    <yarn:copy src="file:target/dependency/spring-expression*" dest="/lib/" />
 	    <yarn:copy src="file:target/dependency/spring-co*" dest="/lib/" />
 	    <yarn:copy src="file:target/dependency/spring-aop*" dest="/lib/" />
-		<yarn:copy src="file:target/*.jar" dest="/app/kill-application/" />
-		<yarn:hdfs path="/app/kill-application/*.jar" />
-		<yarn:hdfs path="/lib/*" />
+		 <yarn:copy src="file:target/*.jar" dest="/app/kill-application/" />
+		 <yarn:hdfs path="/app/kill-application/*.jar" visibility="PRIVATE"/>
+		 <yarn:hdfs path="/lib/*" visibility="PUBLIC"/>
 	</yarn:localresources>
 
 	<yarn:environment include-system-env="false">
@@ -31,6 +34,30 @@
 
 	<yarn:client app-name="another-kill-application" id="anotherYarnClient">
 		<yarn:master-runner
-			context-file="com/latticeengines/dataplatform/service/impl/appmaster-context.xml" />
+			context-file="com/latticeengines/dataplatform/service/impl/restart-appmaster-context.xml" />
 	</yarn:client>
+	
+	<!-- MRJob configuration -->
+   <hdp:configuration id="hadoopConfiguration">
+        fs.defaultFS=${dataplatform.fs.defaultFS}
+        yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
+        yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
+        mapred.job.tracker=${dataplatform.mapred.job.tracker}
+        mapreduce.job.queuename=default
+        yarn.app.mapreduce.am.resource.cpu-vcores=2
+        mapreduce.map.memory.mb=2048
+        mapreduce.map.cpu.vcores=2
+   </hdp:configuration>
+   
+   <hdp:cache create-symlink="true">
+      <hdp:classpath value="/app/kill-application/le-dataplatform-1.0.0-SNAPSHOT-tests.jar" />
+   </hdp:cache>
+ 
+   <!-- Configures the word count job. -->
+   <hdp:job id="wordCountJob"
+            input-path="/input"
+            output-path="/output"
+            mapper="com.latticeengines.dataplatform.service.impl.WordMapper"
+            reducer="com.latticeengines.dataplatform.service.impl.WordReducer"/>
+   
 </beans>

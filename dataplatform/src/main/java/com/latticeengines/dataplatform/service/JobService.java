@@ -13,7 +13,9 @@ public interface JobService {
 
 	List<ApplicationReport> getJobReportByUser(String user);
 
-	ApplicationId submitJob(String yarnClientName);
+	ApplicationId submitYarnJob(String yarnClientName);
+
+	ApplicationId submitMRJob(String mrJobName);
 
 	void killJob(ApplicationId appId);
 

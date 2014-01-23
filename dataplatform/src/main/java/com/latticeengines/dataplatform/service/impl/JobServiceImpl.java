@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.TypeConverter;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.springframework.beans.BeansException;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.data.hadoop.mapreduce.JobRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
@@ -59,7 +62,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 	}
 
 	@Override
-	public ApplicationId submitJob(String yarnClientName) {
+	public ApplicationId submitYarnJob(String yarnClientName) {
 		YarnClient client = getYarnClient(yarnClientName);
 		ApplicationId applicationId = client.submitApplication();
 		return applicationId;
@@ -93,5 +96,41 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 			throws BeansException {
 		this.applicationContext = applicationContext;
 	}
-	
+
+	@Override
+	public ApplicationId submitMRJob(String mrJobName) {
+		Job job = getJob(mrJobName);
+		JobRunner runner = new JobRunner();
+		runner.setJob(job);
+		try {
+			runner.setWaitForCompletion(false);
+			runner.call();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			log.error("failed to submit MapReduce job " + mrJobName);
+			e.printStackTrace();
+		}
+		return TypeConverter.toYarn(job.getJobID()).getAppId();
+	}
+
+	private Job getJob(String mrJobName) {
+		ConfigurableApplicationContext context = null;
+		try {
+			if (StringUtils.isEmpty(mrJobName)) {
+				throw new IllegalStateException("MapReduce job name cannot be empty");
+			}
+			Job job = (Job) applicationContext.getBean(mrJobName);
+			// clone the job
+			job = Job.getInstance(job.getConfiguration());
+			return job;
+		} catch (Throwable e) {
+			log.error("Error happend while getting hdp:job " + mrJobName, e);
+		} finally {
+			if (context != null) {
+				context.close();
+			}
+		}
+		return null;
+	}
+
 }
