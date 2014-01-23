@@ -10,7 +10,7 @@
 
 	<bean id="yarnEventPublisher" class="org.springframework.yarn.event.DefaultYarnEventPublisher"/>
 
-	<context:property-placeholder location="application.properties"/>
+	<context:property-placeholder location="dataplatform.properties"/>
 
 	<yarn:configuration>
 		fs.defaultFS=${SHDP_HD_FS}
