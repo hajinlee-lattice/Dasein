@@ -18,9 +18,9 @@
 	    <yarn:copy src="file:target/dependency/spring-expression*" dest="/lib/" />
 	    <yarn:copy src="file:target/dependency/spring-co*" dest="/lib/" />
 	    <yarn:copy src="file:target/dependency/spring-aop*" dest="/lib/" />
-		 <yarn:copy src="file:target/*.jar" dest="/app/kill-application/" />
-		 <yarn:hdfs path="/app/kill-application/*.jar" visibility="PRIVATE"/>
-		 <yarn:hdfs path="/lib/*" visibility="PUBLIC"/>
+		<yarn:copy src="file:target/*.jar" dest="/app/kill-application/" />
+		<yarn:hdfs path="/app/kill-application/*.jar" visibility="PRIVATE"/>
+		<yarn:hdfs path="/lib/*" visibility="PUBLIC"/>
 	</yarn:localresources>
 
 	<yarn:environment include-system-env="false">

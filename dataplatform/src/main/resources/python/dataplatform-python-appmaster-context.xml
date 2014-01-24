@@ -14,11 +14,14 @@
 		<constructor-arg value="info" />
 	</bean>
 
-	<context:property-placeholder location="classpath*:dataplatform.properties" />
-	<import resource="classpath:dataplatform-yarn-config-context.xml" />
+    <yarn:configuration>
+        fs.defaultFS=${SHDP_HD_FS}
+        yarn.resourcemanager.address=${SHDP_HD_RM}
+        yarn.resourcemanager.scheduler.address=${SHDP_HD_SCHEDULER}
+    </yarn:configuration>
 
 	<yarn:localresources>
-		<yarn:hdfs path="/app/dataplatform/*.jar" />
+		<yarn:hdfs path="/app/dataplatform/*" />
 		<yarn:hdfs path="/lib/*" />
 	</yarn:localresources>
 
@@ -27,12 +30,17 @@
 	</yarn:environment>
 
 	<yarn:master>
-		<yarn:container-allocator />
+        <yarn:container-allocator
+            virtualcores="$$VIRTUALCORES$$"
+            memory="$$MEMORY$$"
+            priority="$$PRIORITY$$" />
+
 		<yarn:container-command>
                         <![CDATA[
-                        date
-                        1><LOG_DIR>/Container.stdout
-                        2><LOG_DIR>/Container.stderr
+                        /usr/bin/python
+                        $$PYTHON_SCRIPT$$
+                        1><LOG_DIR>/PythonContainer.stdout
+                        2><LOG_DIR>/PythonContainer.stderr
                         ]]>
 		</yarn:container-command>
 	</yarn:master>

@@ -72,7 +72,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 	}
 
 	@Test(groups="functional")
-	public void testSubmitJob() throws Exception {
+	public void testSubmitYarnJob() throws Exception {
 		ApplicationId applicationId = jobService.submitYarnJob("anotherYarnClient");
 		YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
 
@@ -99,7 +99,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		    Path path = new Path(dir);
 		    if (fileSystem.exists(path)) {
 		    	fileSystem.delete(path, true);
-		        System.out.println("Delete dir " + dir);
+		        System.out.println("Deleted dir " + dir);
 		    }
 		    
 		    Path inputFilepath = new Path("/input/file1.txt");

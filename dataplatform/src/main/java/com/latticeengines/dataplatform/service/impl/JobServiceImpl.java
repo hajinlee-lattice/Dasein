@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TypeConverter;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -15,33 +16,44 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.hadoop.mapreduce.JobRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
+import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.yarn.client.YarnClientCustomization;
+import com.latticeengines.dataplatform.yarn.client.YarnClientCustomizationRegistry;
 
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
-	
+
 	private static final Log log = LogFactory.getLog(JobServiceImpl.class);
-	
+
 	private ApplicationContext applicationContext;
+
+	@Autowired
+	private YarnClient defaultYarnClient;
+
+	@Autowired
+	private Configuration yarnConfiguration;
 	
 	@Autowired
-	private YarnClient yarnClient;
+	private YarnClientCustomizationRegistry yarnClientCustomizationRegistry;
 
 	@Override
 	public List<ApplicationReport> getJobReportsAll() {
-		return yarnClient.listApplications();
+		return defaultYarnClient.listApplications();
 	}
 
 	@Override
 	public ApplicationReport getJobReportById(ApplicationId appId) {
 		List<ApplicationReport> reports = getJobReportsAll();
 		for (ApplicationReport report : reports) {
-			if (report != null && report.getApplicationId() != null 
-				&& report.getApplicationId().equals(appId)) {
+			if (report != null && report.getApplicationId() != null
+					&& report.getApplicationId().equals(appId)) {
 				return report;
 			}
 		}
@@ -53,8 +65,8 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 		List<ApplicationReport> reports = getJobReportsAll();
 		List<ApplicationReport> userReports = new ArrayList<ApplicationReport>();
 		for (ApplicationReport report : reports) {
-			if (report != null && report.getUser() != null 
-				&& report.getUser().equalsIgnoreCase(user)) {
+			if (report != null && report.getUser() != null
+					&& report.getUser().equalsIgnoreCase(user)) {
 				userReports.add(report);
 			}
 		}
@@ -63,26 +75,65 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
 	@Override
 	public ApplicationId submitYarnJob(String yarnClientName) {
-		YarnClient client = getYarnClient(yarnClientName);
+		CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
+		addCustomizations(client, yarnClientName);
 		ApplicationId applicationId = client.submitApplication();
 		return applicationId;
 	}
 
+	private void addCustomizations(CommandYarnClient client, String clientName) {
+		YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
+		
+		ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer();
+		int memory = customization.getMemory();
+		int virtualCores = customization.getVirtualcores();
+		int priority = customization.getPriority();
+		String queue = customization.getQueue();
+		List<String> commands = customization.getCommands();
+		
+		if (resourceLocalizer != null) {
+			client.setResourceLocalizer(resourceLocalizer);
+		}
+		
+		if (memory > 0) {
+			client.setMemory(memory);
+		}
+		
+		if (virtualCores > 0) {
+			client.setVirtualcores(virtualCores);
+		}
+		
+		if (priority > 0) {
+			client.setPriority(priority);
+		}
+		
+		if (queue != null) {
+			client.setQueue(queue);
+		}
+		
+		if (commands != null) {
+			client.setCommands(commands);
+		}
+	}
+
 	@Override
 	public void killJob(ApplicationId appId) {
-		yarnClient.killApplication(appId);
+		defaultYarnClient.killApplication(appId);
 	}
 
 	private YarnClient getYarnClient(String yarnClientName) {
 		ConfigurableApplicationContext context = null;
 		try {
 			if (StringUtils.isEmpty(yarnClientName)) {
-				throw new IllegalStateException("yarn client name cannot be empty");
+				throw new IllegalStateException(
+						"Yarn client name cannot be empty.");
 			}
-			YarnClient client = (YarnClient) applicationContext.getBean(yarnClientName);
+			YarnClient client = (YarnClient) applicationContext
+					.getBean(yarnClientName);
 			return client;
 		} catch (Throwable e) {
-			log.error("Error happend while getting yarnClient for application " + yarnClientName, e);
+			log.error("Error while getting yarnClient for application "
+					+ yarnClientName, e);
 		} finally {
 			if (context != null) {
 				context.close();
@@ -106,8 +157,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 			runner.setWaitForCompletion(false);
 			runner.call();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			log.error("failed to submit MapReduce job " + mrJobName);
+			log.error("Failed to submit MapReduce job " + mrJobName);
 			e.printStackTrace();
 		}
 		return TypeConverter.toYarn(job.getJobID()).getAppId();
@@ -117,7 +167,8 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 		ConfigurableApplicationContext context = null;
 		try {
 			if (StringUtils.isEmpty(mrJobName)) {
-				throw new IllegalStateException("MapReduce job name cannot be empty");
+				throw new IllegalStateException(
+						"MapReduce job name cannot be empty");
 			}
 			Job job = (Job) applicationContext.getBean(mrJobName);
 			// clone the job
@@ -131,6 +182,14 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 			}
 		}
 		return null;
+	}
+
+	public static void main(String[] args) {
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"dataplatform-context.xml",
+				"dataplatform-properties-context.xml");
+		JobService jobService = (JobService) context.getBean("jobService");
+		jobService.submitYarnJob("defaultYarnClient");
 	}
 
 }

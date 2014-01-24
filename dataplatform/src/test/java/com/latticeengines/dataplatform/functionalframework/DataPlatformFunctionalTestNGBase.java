@@ -1,20 +1,32 @@
 package com.latticeengines.dataplatform.functionalframework;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.Assert;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
+import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.test.context.YarnCluster;
 import org.springframework.yarn.test.junit.ApplicationInfo;
+import org.testng.annotations.BeforeClass;
 
 
 @TestExecutionListeners({
@@ -31,6 +43,38 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 	protected YarnCluster yarnCluster;
 
 	protected YarnClient yarnClient;
+	
+	@BeforeClass(groups="functional")
+	public void setupRunEnvironment() throws Exception {
+		FileSystem fs = FileSystem.get(yarnConfiguration);
+		// Delete directories
+		fs.delete(new Path("/app"), true);
+		fs.delete(new Path("/lib"), true);
+		// Make directories
+		fs.mkdirs(new Path("/app/dataplatform"));
+		fs.mkdirs(new Path("/lib"));
+		// Copy jars from build to hdfs
+		List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
+		copyEntries.add(new CopyEntry("file:target/dependency/*.jar", "/lib", false));
+		copyEntries.add(new CopyEntry("file:target/*.jar", "/app/dataplatform", false));
+		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		
+		for (CopyEntry e : copyEntries) {
+			for (String pattern : StringUtils.commaDelimitedListToStringArray(e.getSrc())) {
+				for (Resource res : resolver.getResources(pattern)) {
+					Path destinationPath = getDestinationPath(e, res);
+					FSDataOutputStream os = fs.create(destinationPath);
+					FileCopyUtils.copy(res.getInputStream(), os);
+				}
+			}
+		}
+		
+	}
+
+	private Path getDestinationPath(CopyEntry entry, Resource res) throws IOException {
+		Path dest = new Path(entry.getDest(), res.getFilename());
+		return dest;
+	}
 
 	/**
 	 * Gets the running cluster runtime
@@ -56,7 +100,6 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 	 *
 	 * @param yarnCluster the Yarn cluster
 	 */
-	//@Autowired
 	public void setYarnCluster(YarnCluster yarnCluster) {
 		this.yarnCluster = yarnCluster;
 	}

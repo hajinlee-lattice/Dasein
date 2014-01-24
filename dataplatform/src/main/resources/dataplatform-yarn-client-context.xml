@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xmlns:yarn="http://www.springframework.org/schema/yarn"
-   xmlns:context="http://www.springframework.org/schema/context"
-   xsi:schemaLocation="
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:yarn="http://www.springframework.org/schema/yarn"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
       http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <yarn:localresources>
-        <yarn:copy src="file:target/dependency/spring-beans*" dest="/lib/" />
-        <yarn:copy src="file:target/dependency/spring-yarn*" dest="/lib/" />
-        <yarn:copy src="file:target/dependency/spring-data*" dest="/lib/" />
-        <yarn:copy src="file:target/dependency/spring-expression*" dest="/lib/" />
-        <yarn:copy src="file:target/dependency/spring-co*" dest="/lib/" />
-        <yarn:copy src="file:target/dependency/spring-aop*" dest="/lib/" />
-        <yarn:copy src="file:target/dependency/spring-tx*" dest="/lib/" />
-        <yarn:copy src="file:target/*.jar" dest="/app/dataplatform/" />
-        <yarn:hdfs path="/app/dataplatform/*.jar" />
-        <yarn:hdfs path="/lib/*" />
-    </yarn:localresources>
+	<bean id="hdfsEntriesList" class="java.util.ArrayList" scope="prototype" />
+    <bean id="copyEntriesList" class="java.util.ArrayList" scope="prototype" />
 
-    <yarn:environment include-system-env="false">
-        <yarn:classpath />
-    </yarn:environment>
+	<bean id="defaultYarnLocalResources"
+		class="org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean"
+		scope="prototype">
+		<property name="configuration">
+			<ref bean="yarnConfiguration" />
+		</property>
+		<property name="hdfsEntries">
+			<ref bean="hdfsEntriesList" />
+		</property>
+        <property name="copyEntries">
+            <ref bean="copyEntriesList" />
+        </property>
+	</bean>
 
-    <import resource="classpath:default/dataplatform-default-yarn-client-context.xml" />
-    <import resource="classpath:R/dataplatform-R-yarn-client-context.xml" />
-    <import resource="classpath:python/dataplatform-python-yarn-client-context.xml" />
+	<import resource="classpath:default/dataplatform-default-yarn-client-context.xml" />
+	<import resource="classpath:R/dataplatform-R-yarn-client-context.xml" /> 
+    <import resource="classpath:python/dataplatform-python-yarn-client-context.xml" /> 
 </beans>

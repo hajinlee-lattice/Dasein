@@ -14,10 +14,11 @@
 		<constructor-arg value="info" />
 	</bean>
 
-	<context:property-placeholder location="classpath*:dataplatform.properties" />
+	<context:property-placeholder location="dataplatform.properties" />
 	<import resource="classpath:dataplatform-yarn-config-context.xml" />
 
 	<yarn:localresources>
+	    <yarn:copy src="file:target/dependency/spring-beans*" dest="/lib1/" />
 		<yarn:hdfs path="/app/dataplatform/*.jar" />
 		<yarn:hdfs path="/lib/*" />
 	</yarn:localresources>

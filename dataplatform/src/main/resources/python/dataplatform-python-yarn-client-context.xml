@@ -9,9 +9,14 @@
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <yarn:client app-name="python" id="pythonClient">
-        <yarn:master-runner
-            context-file="python/dataplatform-python-appmaster-context.xml" />
-    </yarn:client>
+    <bean id="pythonClient" class="org.springframework.yarn.fs.PrototypeYarnClientFactoryBean" scope="prototype">
+        <property name="appName" value="default" />
+        <property name="configuration">
+            <ref bean="yarnConfiguration" />
+        </property>
+        <property name="resourceLocalizer">
+            <ref bean="defaultYarnLocalResources" />
+        </property>
+    </bean>
       
 </beans>

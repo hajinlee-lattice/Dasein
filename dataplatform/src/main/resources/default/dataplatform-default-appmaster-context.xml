@@ -11,26 +11,29 @@
 	<bean id="taskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
 	<bean id="yarnEventPublisher" class="org.springframework.yarn.event.DefaultYarnEventPublisher" />
 	<bean class="org.springframework.yarn.event.LoggingListener">
-		<constructor-arg value="info" />
+		<constructor-arg value="debug" />
 	</bean>
 
-	<context:property-placeholder location="classpath*:dataplatform.properties" />
-	<import resource="classpath:dataplatform-yarn-config-context.xml" />
+    <context:property-placeholder location="classpath*:dataplatform.properties"/>
+    <import resource="classpath:dataplatform-yarn-config-context.xml"/>
 
-	<yarn:localresources>
-		<yarn:hdfs path="/app/dataplatform/*.jar" />
-		<yarn:hdfs path="/lib/*" />
-	</yarn:localresources>
-
-	<yarn:environment>
-		<yarn:classpath />
-	</yarn:environment>
-
+    <yarn:environment>
+        <yarn:classpath />
+    </yarn:environment>
+    
+    <yarn:localresources>
+        <yarn:hdfs path="/app/dataplatform/*" />
+        <yarn:hdfs path="/lib/*" />
+    </yarn:localresources>
+    
 	<yarn:master>
-		<yarn:container-allocator />
+        <yarn:container-allocator
+            virtualcores="1"
+            memory="64"
+            priority="0" />
 		<yarn:container-command>
                         <![CDATA[
-                        date
+                        cat launch_container.sh 
                         1><LOG_DIR>/Container.stdout
                         2><LOG_DIR>/Container.stderr
                         ]]>
