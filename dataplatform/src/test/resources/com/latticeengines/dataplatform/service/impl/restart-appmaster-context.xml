@@ -19,8 +19,8 @@
 	</yarn:configuration>
 
 	<yarn:localresources>
-		<yarn:hdfs path="/app/kill-application/*" />
-		<yarn:hdfs path="/lib/*"/>
+		<yarn:hdfs path="/app/kill-application/*" visibility="PUBLIC"/>
+		<yarn:hdfs path="/lib/*" visibility="PUBLIC"/>
 	</yarn:localresources>
 
 	<yarn:environment>

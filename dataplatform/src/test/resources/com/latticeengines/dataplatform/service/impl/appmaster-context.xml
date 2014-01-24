@@ -20,7 +20,7 @@
     <import resource="classpath:dataplatform-yarn-config-context.xml"/>
 
 	<yarn:localresources>
-       <yarn:hdfs path="/app/kill-application/*.jar" visibility="PRIVATE"/>
+       <yarn:hdfs path="/app/kill-application/*.jar" visibility="PUBLIC"/>
        <yarn:hdfs path="/lib/*" visibility="PUBLIC"/>
 	</yarn:localresources>
 

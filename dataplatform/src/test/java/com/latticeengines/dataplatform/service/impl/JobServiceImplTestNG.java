@@ -40,7 +40,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 	@Test(groups="functional")
 	public void testKillApplication() throws Exception {
 		ApplicationId applicationId = submitApplication();
-		YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
 		assertNotNull(state);
 		jobService.killJob(applicationId);
 		state = getState(applicationId);
@@ -51,7 +51,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 	@Test(groups="functional")
 	public void testGetJobReportByUser() throws Exception {
 		ApplicationId applicationId = submitApplication();
-		YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
 		assertNotNull(state);
 		jobService.killJob(applicationId);
 		state = getState(applicationId);
@@ -64,17 +64,19 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		int numJobs = reports.size();
 		assertTrue(numJobs > 0);
 		
-		submitApplication();
+		applicationId = submitApplication();
 		
-		state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+		state = waitState(applicationId, 10, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
 		reports = jobService.getJobReportByUser(app.getUser());
 		assertTrue(reports.size() > numJobs);
+		jobService.killJob(applicationId);
+		
 	}
 
 	@Test(groups="functional")
 	public void testSubmitYarnJob() throws Exception {
 		ApplicationId applicationId = jobService.submitYarnJob("anotherYarnClient");
-		YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
 
 		state = getState(applicationId);
 		assertNotNull(state);
@@ -85,6 +87,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		List<ApplicationReport> reports = jobService.getJobReportByUser(app.getUser());
 		int numJobs = reports.size();
 		assertTrue(numJobs > 0);
+		jobService.killJob(applicationId);
 	}
 
 	@Test(groups="functional")

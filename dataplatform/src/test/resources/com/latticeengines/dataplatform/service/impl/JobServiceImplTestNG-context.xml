@@ -36,28 +36,30 @@
 		<yarn:master-runner
 			context-file="com/latticeengines/dataplatform/service/impl/restart-appmaster-context.xml" />
 	</yarn:client>
-	
+
 	<!-- MRJob configuration -->
-   <hdp:configuration id="hadoopConfiguration">
-        fs.defaultFS=${dataplatform.fs.defaultFS}
-        yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
-        yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
-        mapred.job.tracker=${dataplatform.mapred.job.tracker}
-        mapreduce.job.queuename=default
-        yarn.app.mapreduce.am.resource.cpu-vcores=2
-        mapreduce.map.memory.mb=2048
-        mapreduce.map.cpu.vcores=2
-   </hdp:configuration>
-   
-   <hdp:cache create-symlink="true">
-      <hdp:classpath value="/app/kill-application/le-dataplatform-1.0.0-SNAPSHOT-tests.jar" />
-   </hdp:cache>
- 
-   <!-- Configures the word count job. -->
-   <hdp:job id="wordCountJob"
-            input-path="/input"
-            output-path="/output"
-            mapper="com.latticeengines.dataplatform.service.impl.WordMapper"
-            reducer="com.latticeengines.dataplatform.service.impl.WordReducer"/>
-   
+	<hdp:configuration id="hadoopConfiguration">
+		fs.defaultFS=${dataplatform.fs.defaultFS}
+		yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
+		yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
+		mapred.job.tracker=${dataplatform.mapred.job.tracker}
+		mapreduce.job.queuename=default
+		yarn.app.mapreduce.am.resource.cpu-vcores=2
+		mapreduce.map.memory.mb=2048
+		mapreduce.map.cpu.vcores=2
+	</hdp:configuration>
+
+	<hdp:cache create-symlink="true">
+		<hdp:classpath value="/lib/*.jar" />
+		<hdp:classpath value="/app/kill-application/le-dataplatform-1.0.0-SNAPSHOT-tests.jar" />
+	</hdp:cache>
+
+	<!-- Configures the word count job. -->
+	<hdp:job id="wordCountJob" 
+		input-path="/input" 
+		output-path="/output"
+		number-reducers="1"
+		mapper="com.latticeengines.dataplatform.service.impl.WordMapper"
+		reducer="com.latticeengines.dataplatform.service.impl.WordReducer" />
+
 </beans>
