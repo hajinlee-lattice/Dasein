@@ -1,5 +1,6 @@
 package com.latticeengines.dataplatform.yarn.client;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,19 +25,17 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 	}
 
 	@Override
-	public ResourceLocalizer getResourceLocalizer() {
-		return new DefaultResourceLocalizer(configuration, getHdfsEntries(),
-				getCopyEntries());
+	public ResourceLocalizer getResourceLocalizer(String containerLaunchContextFile) {
+		Collection<CopyEntry> copyEntries = getCopyEntries();
+		copyEntries.add(new LocalResourcesFactoryBean.CopyEntry(
+				"file:" + containerLaunchContextFile,
+				"/app/dataplatform", false));
+		return new DefaultResourceLocalizer(configuration, getHdfsEntries(), copyEntries);
 	}
 
 	@Override
 	public Collection<CopyEntry> getCopyEntries() {
-		Collection<LocalResourcesFactoryBean.CopyEntry> copyEntries = new ArrayList<LocalResourcesFactoryBean.CopyEntry>();
-		copyEntries
-				.add(new LocalResourcesFactoryBean.CopyEntry(
-						"file:src/main/resources/default/dataplatform-default-appmaster-context.xml",
-						"/app/dataplatform", false));
-
+		Collection<LocalResourcesFactoryBean.CopyEntry> copyEntries = new ArrayList<LocalResourcesFactoryBean.CopyEntry>(); 
 		return copyEntries;
 	}
 
@@ -83,17 +82,23 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 
 	@Override
 	public String getContainerLauncherContextFile() {
-		return "dataplatform-default-appmaster-context.xml";
+		return "default/dataplatform-default-appmaster-context.xml";
 	}
 
 	@Override
-	public List<String> getCommands() {
+	public List<String> getCommands(String containerLauncherContextFile) {
+		File contextFile = new File(containerLauncherContextFile);
+		if (!contextFile.exists()) {
+			throw new IllegalStateException("Container launcher context file " + containerLauncherContextFile
+			+ " does not exist.");
+		}
 		return Arrays
 				.<String> asList(new String[] {
-						"$JAVA_HOME/bin/java",
-						"org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile",
-						getContainerLauncherContextFile(), "yarnAppmaster",
-						"1><LOG_DIR>/Appmaster.stdout",
+						"$JAVA_HOME/bin/java", //
+						"org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
+						contextFile.getName(), // 
+						"yarnAppmaster", //
+						"1><LOG_DIR>/Appmaster.stdout", //
 						"2><LOG_DIR>/Appmaster.stderr" });
 	}
 

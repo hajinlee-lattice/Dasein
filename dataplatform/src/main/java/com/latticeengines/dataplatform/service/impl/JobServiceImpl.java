@@ -1,7 +1,9 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -21,11 +23,9 @@ import org.springframework.data.hadoop.mapreduce.JobRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
-import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.latticeengines.dataplatform.service.JobService;
-import com.latticeengines.dataplatform.yarn.client.YarnClientCustomization;
-import com.latticeengines.dataplatform.yarn.client.YarnClientCustomizationRegistry;
+import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
@@ -38,10 +38,11 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 	private YarnClient defaultYarnClient;
 
 	@Autowired
-	private Configuration yarnConfiguration;
+	private YarnClientCustomizationService yarnClientCustomizationService;
 	
 	@Autowired
-	private YarnClientCustomizationRegistry yarnClientCustomizationRegistry;
+	private Configuration yarnConfiguration;
+	
 
 	@Override
 	public List<ApplicationReport> getJobReportsAll() {
@@ -75,45 +76,14 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
 	@Override
 	public ApplicationId submitYarnJob(String yarnClientName) {
+		Map<String, String> containerProperties = new HashMap<String, String>();
+		containerProperties.put("VIRTUALCORES", "1");
+		containerProperties.put("MEMORY", "64");
+		containerProperties.put("PRIORITY", "0");
 		CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
-		addCustomizations(client, yarnClientName);
+		yarnClientCustomizationService.addCustomizations(client, yarnClientName, containerProperties);
 		ApplicationId applicationId = client.submitApplication();
 		return applicationId;
-	}
-
-	private void addCustomizations(CommandYarnClient client, String clientName) {
-		YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
-		
-		ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer();
-		int memory = customization.getMemory();
-		int virtualCores = customization.getVirtualcores();
-		int priority = customization.getPriority();
-		String queue = customization.getQueue();
-		List<String> commands = customization.getCommands();
-		
-		if (resourceLocalizer != null) {
-			client.setResourceLocalizer(resourceLocalizer);
-		}
-		
-		if (memory > 0) {
-			client.setMemory(memory);
-		}
-		
-		if (virtualCores > 0) {
-			client.setVirtualcores(virtualCores);
-		}
-		
-		if (priority > 0) {
-			client.setPriority(priority);
-		}
-		
-		if (queue != null) {
-			client.setQueue(queue);
-		}
-		
-		if (commands != null) {
-			client.setCommands(commands);
-		}
 	}
 
 	@Override

@@ -11,7 +11,7 @@ public interface YarnClientCustomization {
 	
 	String getClientId();
 
-	ResourceLocalizer getResourceLocalizer();
+	ResourceLocalizer getResourceLocalizer(String containerLaunchContextFile);
 	
 	Collection<CopyEntry> getCopyEntries();
 	
@@ -27,5 +27,5 @@ public interface YarnClientCustomization {
 	
 	String getContainerLauncherContextFile();
 	
-	List<String> getCommands();
+	List<String> getCommands(String containerLaunchContextFile);
 }

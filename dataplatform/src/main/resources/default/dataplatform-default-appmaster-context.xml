@@ -28,9 +28,9 @@
     
 	<yarn:master>
         <yarn:container-allocator
-            virtualcores="1"
-            memory="64"
-            priority="0" />
+            virtualcores="$$VIRTUALCORES$$"
+            memory="$$MEMORY$$"
+            priority="$$PRIORITY$$" />
 		<yarn:container-command>
                         <![CDATA[
                         cat launch_container.sh 

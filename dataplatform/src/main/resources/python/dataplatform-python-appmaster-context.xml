@@ -34,8 +34,7 @@
             virtualcores="$$VIRTUALCORES$$"
             memory="$$MEMORY$$"
             priority="$$PRIORITY$$" />
-
-		<yarn:container-command>
+        <yarn:container-command>
                         <![CDATA[
                         /usr/bin/python
                         $$PYTHON_SCRIPT$$

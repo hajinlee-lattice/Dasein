@@ -28,7 +28,10 @@
 	</yarn:environment>
 
 	<yarn:master>
-		<yarn:container-allocator />
+        <yarn:container-allocator
+            virtualcores="$$VIRTUALCORES$$"
+            memory="$$MEMORY$$"
+            priority="$$PRIORITY$$" />
 		<yarn:container-command>
                         <![CDATA[
                         date
