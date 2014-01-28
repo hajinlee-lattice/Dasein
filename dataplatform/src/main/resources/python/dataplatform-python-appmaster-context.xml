@@ -20,8 +20,8 @@
 	<yarn:localresources>
 		<yarn:hdfs path="/app/dataplatform/*" />
 		<yarn:hdfs path="/lib/*" />
-		<yarn:hdfs path="$$TRAINING_HDFS_PATH$$" />
-		<yarn:hdfs path="$$TEST_HDFS_PATH$$" />
+		<yarn:hdfs path="$$TRAINING$$" />
+		<yarn:hdfs path="$$TEST$$" />
 	</yarn:localresources>
 
 	<yarn:environment>
@@ -40,7 +40,7 @@
                         org.springframework.yarn.container.CommandLineContainerRunner
                         python/dataplatform-python-container-context.xml
                         yarnContainer
-                        TRAINING_FILE_NAME=$$TRAINING_FILE_NAME$$ TEST_FILE_NAME=$$TEST_FILE_NAME$$ PYTHONSCRIPT=$$PYTHONSCRIPT$$
+                        TRAINING=$$TRAINING$$ TEST=$$TEST$$ PYTHONSCRIPT=$$PYTHONSCRIPT$$
                         1><LOG_DIR>/PythonContainer.stdout
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>

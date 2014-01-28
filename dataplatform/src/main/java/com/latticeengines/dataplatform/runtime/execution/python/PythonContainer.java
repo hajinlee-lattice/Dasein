@@ -36,10 +36,16 @@ public class PythonContainer implements YarnContainer {
 			log.info("Key = " + parameter.getKey().toString() + " Value = " + parameter.getValue().toString());
 		}
 		
-		trainingFileName = parameters.getProperty(PythonContainerProperty.TRAINING_FILE_NAME.name());
-		testFileName = parameters.getProperty(PythonContainerProperty.TEST_FILE_NAME.name());
+		trainingFileName = parameters.getProperty(PythonContainerProperty.TRAINING.name());
+		testFileName = parameters.getProperty(PythonContainerProperty.TEST.name());
 		pythonScript = parameters.getProperty(PythonContainerProperty.PYTHONSCRIPT.name());
-		pythonScript = pythonScript.substring(pythonScript.lastIndexOf("/")+1, pythonScript.length());
+		trainingFileName = getFileNameOnly(trainingFileName);
+		testFileName = getFileNameOnly(testFileName);
+		pythonScript = getFileNameOnly(pythonScript);
+	}
+	
+	private String getFileNameOnly(String path) {
+		return path.substring(path.lastIndexOf("/")+1, path.length());
 	}
 
 }

@@ -103,11 +103,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		containerProperties.put("VIRTUALCORES", "1");
 		containerProperties.put("MEMORY", "64");
 		containerProperties.put("PRIORITY", "0");
-		containerProperties.put("TRAINING_HDFS_PATH", "/training/nn_train.dat");
-		containerProperties.put("TEST_HDFS_PATH", "/test/nn_test.dat");
-		containerProperties.put("TRAINING_FILE_NAME", "nn_train.dat");
-		containerProperties.put("TEST_HDFS_PATH", "/test/nn_test.dat");
-		containerProperties.put("TEST_FILE_NAME", "nn_test.dat");
+		containerProperties.put("TRAINING", "/training/nn_train.dat");
+		containerProperties.put("TEST", "/test/nn_test.dat");
 		URL pythonScriptUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.py");
 		containerProperties.put("PYTHONSCRIPT", pythonScriptUrl.getFile());
 		

@@ -45,7 +45,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 		String defaultFs = configuration.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
 		Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = new ArrayList<LocalResourcesFactoryBean.TransferEntry>();
 		hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
-				LocalResourceType.ARCHIVE, //
+				LocalResourceType.FILE, //
 				LocalResourceVisibility.PUBLIC, //
 				"/lib/*", //
 				defaultFs, //
@@ -104,13 +104,12 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 		}
 		String propStr = containerProperties.toString();
 		
-		return Arrays
-				.<String> asList(new String[] {
+		return Arrays.<String> asList(new String[] {
 						"$JAVA_HOME/bin/java", //
 						"org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
 						contextFile.getName(), // 
 						"yarnAppmaster", //
-						propStr.substring(1, propStr.length()-1).replaceAll(",", " "),
+						propStr.substring(1, propStr.length()-1).replaceAll(",", " "), //
 						"1><LOG_DIR>/Appmaster.stdout", //
 						"2><LOG_DIR>/Appmaster.stderr" });
 	}
