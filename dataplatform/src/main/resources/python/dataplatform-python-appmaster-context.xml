@@ -20,6 +20,8 @@
 	<yarn:localresources>
 		<yarn:hdfs path="/app/dataplatform/*" />
 		<yarn:hdfs path="/lib/*" />
+		<yarn:hdfs path="$$TRAINING_HDFS_PATH$$" />
+		<yarn:hdfs path="$$TEST_HDFS_PATH$$" />
 	</yarn:localresources>
 
 	<yarn:environment>
@@ -43,15 +45,6 @@
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>
         </yarn:container-command>
-        <!--                       
-        <yarn:container-command>
-                        <![CDATA[
-                        cat launch_container.sh 
-                        1><LOG_DIR>/PythonContainer.stdout
-                        2><LOG_DIR>/PythonContainer.stderr
-                        ]]>
-        </yarn:container-command>
-         -->
 	</yarn:master>
 
 </beans>
