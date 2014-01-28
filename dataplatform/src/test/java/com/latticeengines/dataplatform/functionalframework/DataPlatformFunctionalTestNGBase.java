@@ -51,11 +51,12 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 		fs.delete(new Path("/app"), true);
 		fs.delete(new Path("/lib"), true);
 		// Make directories
-		fs.mkdirs(new Path("/app/dataplatform"));
+		fs.mkdirs(new Path("/app/dataplatform/scripts"));
 		fs.mkdirs(new Path("/lib"));
 		// Copy jars from build to hdfs
 		List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 		copyEntries.add(new CopyEntry("file:target/dependency/*.jar", "/lib", false));
+		copyEntries.add(new CopyEntry("file:src/main/python/lefwk/*.py", "/app/dataplatform/scripts", false));
 		copyEntries.add(new CopyEntry("file:target/*.jar", "/app/dataplatform", false));
 		doCopy(fs, copyEntries);
 	}

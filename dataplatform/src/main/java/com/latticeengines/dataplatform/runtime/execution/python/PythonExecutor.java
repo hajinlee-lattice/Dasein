@@ -1,6 +1,5 @@
 package com.latticeengines.dataplatform.runtime.execution.python;
 
-import org.apache.hadoop.fs.Path;
 
 public class PythonExecutor {
 
@@ -17,7 +16,7 @@ public class PythonExecutor {
 		return instance;
 	}
 	
-	public void execute(Path trainingData, Path testData) {
+	public void execute(String trainingData, String testData) {
 		
 	}
 }

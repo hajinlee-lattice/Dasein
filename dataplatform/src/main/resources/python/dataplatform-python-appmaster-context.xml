@@ -19,6 +19,7 @@
 
 	<yarn:localresources>
 		<yarn:hdfs path="/app/dataplatform/*" />
+		<yarn:hdfs path="/app/dataplatform/scripts/*" />
 		<yarn:hdfs path="/lib/*" />
 		<yarn:hdfs path="$$TRAINING$$" />
 		<yarn:hdfs path="$$TEST$$" />
@@ -28,7 +29,7 @@
 		<yarn:classpath />
 	</yarn:environment>
 
-	<yarn:master class="com.latticeengines.dataplatform.runtime.execution.python.PythonAppMaster">
+	<yarn:master>
         <yarn:container-allocator
             virtualcores="$$VIRTUALCORES$$"
             memory="$$MEMORY$$"
@@ -36,11 +37,8 @@
 
         <yarn:container-command>
                         <![CDATA[
-                        $JAVA_HOME/bin/java
-                        org.springframework.yarn.container.CommandLineContainerRunner
-                        python/dataplatform-python-container-context.xml
-                        yarnContainer
-                        TRAINING=$$TRAINING$$ TEST=$$TEST$$ PYTHONSCRIPT=$$PYTHONSCRIPT$$
+                        /usr/bin/python
+                        Launcher.py $$TRAINING$$ $$TEST$$ $$SCHEMA$$ $$PYTHONSCRIPT$$
                         1><LOG_DIR>/PythonContainer.stdout
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>

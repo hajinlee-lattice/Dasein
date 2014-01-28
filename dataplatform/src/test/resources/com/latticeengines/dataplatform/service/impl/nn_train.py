@@ -1,1 +1,2 @@
-import os
+def train(trainingData, testData, schema):
+    print(trainingData)
