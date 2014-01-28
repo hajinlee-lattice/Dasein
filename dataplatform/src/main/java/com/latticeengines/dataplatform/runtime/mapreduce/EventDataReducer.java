@@ -18,5 +18,8 @@ public class EventDataReducer extends
 			Context context) throws IOException, InterruptedException {
 
 	}
+	
+	public static void main(String[] args) {
+	}
 
 }

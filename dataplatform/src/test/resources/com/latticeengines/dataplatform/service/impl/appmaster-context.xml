@@ -33,8 +33,17 @@
 		    virtualcores="2"
 			memory="64" 
 			priority="0" />
-		<yarn:container-runner
-			context-file="com/latticeengines/dataplatform/service/impl/container-context.xml" />
+        <yarn:container-command>
+                        <![CDATA[
+                        $JAVA_HOME/bin/java
+                        org.springframework.yarn.container.CommandLineContainerRunner
+                        com/latticeengines/dataplatform/service/impl/container-context.xml
+                        yarnContainer
+                        x=1 y=2
+                        1><LOG_DIR>/Container.stdout
+                        2><LOG_DIR>/Container.stderr
+                        ]]>
+        </yarn:container-command>
 	</yarn:master>
 
 </beans>

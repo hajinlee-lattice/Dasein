@@ -43,15 +43,13 @@ public class CustomAppmaster extends StaticEventingAppmaster implements Containe
 
 	private final static Log log = LogFactory.getLog(CustomAppmaster.class);
 
-
-
 	/** Queue for failed containers */
 	private Queue<ContainerId> failed = new ConcurrentLinkedQueue<ContainerId>();
 
 	@Override
 	protected void onInit() throws Exception {
 		super.onInit();
-		if(getLauncher() instanceof AbstractLauncher) {
+		if (getLauncher() instanceof AbstractLauncher) {
 			((AbstractLauncher)getLauncher()).addInterceptor(this);
 		}
 	}

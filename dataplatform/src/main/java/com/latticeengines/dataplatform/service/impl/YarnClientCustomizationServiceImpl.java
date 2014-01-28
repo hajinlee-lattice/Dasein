@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
+import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.yarn.client.YarnClientCustomization;
 import com.latticeengines.dataplatform.yarn.client.YarnClientCustomizationRegistry;
 
@@ -27,18 +29,20 @@ public class YarnClientCustomizationServiceImpl implements
 
 	@Override
 	public void addCustomizations(CommandYarnClient client, String clientName,
-			Map<String, String> containerProperties) {
+			Properties containerProperties) {
 		
-		YarnClientCustomization customization = yarnClientCustomizationRegistry
-				.getCustomization(clientName);
+		YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
+		if (customization == null) {
+			return;
+		}
 		String fileName = createContainerLauncherContextFile(customization, containerProperties);
-
-		ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer(fileName);
+		containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
+		ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer(containerProperties);
 		int memory = customization.getMemory();
 		int virtualCores = customization.getVirtualcores();
 		int priority = customization.getPriority();
 		String queue = customization.getQueue();
-		List<String> commands = customization.getCommands(fileName);
+		List<String> commands = customization.getCommands(containerProperties);
 
 		if (resourceLocalizer != null) {
 			client.setResourceLocalizer(resourceLocalizer);
@@ -68,7 +72,7 @@ public class YarnClientCustomizationServiceImpl implements
 
 	private String createContainerLauncherContextFile(
 			YarnClientCustomization customization,
-			Map<String, String> containerProperties) {
+			Properties containerProperties) {
 		String contextFileName = customization.getContainerLauncherContextFile();
 		InputStream contextFileUrlFromClasspathAsStream = ClassLoader
 				.getSystemResourceAsStream(contextFileName);
@@ -78,8 +82,8 @@ public class YarnClientCustomizationServiceImpl implements
 			String sb = new String(stream.toByteArray());
 			
 			if (containerProperties != null) {			
-				for (Map.Entry<String, String> entry : containerProperties.entrySet()) {
-					sb = sb.replaceAll("\\$\\$" + entry.getKey() + "\\$\\$", entry.getValue());
+				for (Map.Entry<Object, Object> entry : containerProperties.entrySet()) {
+					sb = sb.replaceAll("\\$\\$" + entry.getKey().toString() + "\\$\\$", entry.getValue().toString());
 				}
 			}
 			contextFileName = contextFileName.replaceFirst("/", "-");

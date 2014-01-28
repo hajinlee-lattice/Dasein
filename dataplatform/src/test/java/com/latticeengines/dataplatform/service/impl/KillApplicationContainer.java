@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -37,6 +38,9 @@ public class KillApplicationContainer implements YarnContainer {
 
 	@Override
 	public void setParameters(Properties parameters) {
+		for (Entry<Object, Object> parameter : parameters.entrySet()) {
+			log.info("Key = " + parameter.getKey().toString() + " Value = " + parameter.getValue().toString());
+		}
 	}
 
 }

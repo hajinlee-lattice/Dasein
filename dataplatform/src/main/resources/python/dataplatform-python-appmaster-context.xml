@@ -14,11 +14,8 @@
 		<constructor-arg value="info" />
 	</bean>
 
-    <yarn:configuration>
-        fs.defaultFS=${SHDP_HD_FS}
-        yarn.resourcemanager.address=${SHDP_HD_RM}
-        yarn.resourcemanager.scheduler.address=${SHDP_HD_SCHEDULER}
-    </yarn:configuration>
+    <context:property-placeholder location="classpath*:dataplatform.properties"/>
+    <import resource="classpath:dataplatform-yarn-config-context.xml"/>
 
 	<yarn:localresources>
 		<yarn:hdfs path="/app/dataplatform/*" />
@@ -29,19 +26,32 @@
 		<yarn:classpath />
 	</yarn:environment>
 
-	<yarn:master>
+	<yarn:master class="com.latticeengines.dataplatform.runtime.execution.python.PythonAppMaster">
         <yarn:container-allocator
             virtualcores="$$VIRTUALCORES$$"
             memory="$$MEMORY$$"
             priority="$$PRIORITY$$" />
+
         <yarn:container-command>
                         <![CDATA[
-                        /usr/bin/python
-                        $$PYTHON_SCRIPT$$
+                        $JAVA_HOME/bin/java
+                        org.springframework.yarn.container.CommandLineContainerRunner
+                        python/dataplatform-python-container-context.xml
+                        yarnContainer
+                        TRAINING_FILE_NAME=$$TRAINING_FILE_NAME$$ TEST_FILE_NAME=$$TEST_FILE_NAME$$ PYTHONSCRIPT=$$PYTHONSCRIPT$$
                         1><LOG_DIR>/PythonContainer.stdout
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>
-		</yarn:container-command>
+        </yarn:container-command>
+        <!--                       
+        <yarn:container-command>
+                        <![CDATA[
+                        cat launch_container.sh 
+                        1><LOG_DIR>/PythonContainer.stdout
+                        2><LOG_DIR>/PythonContainer.stderr
+                        ]]>
+        </yarn:container-command>
+         -->
 	</yarn:master>
 
 </beans>

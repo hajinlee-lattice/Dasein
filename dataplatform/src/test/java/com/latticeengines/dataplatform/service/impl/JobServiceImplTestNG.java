@@ -3,43 +3,63 @@ package com.latticeengines.dataplatform.service.impl;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
 
-@ContextConfiguration(locations = {
-    "classpath:com/latticeengines/dataplatform/service/impl/JobServiceImplTestNG-context.xml"
-})
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
 	@Autowired
 	private JobService jobService;
+	
+	@BeforeClass(groups="functional")
+	public void setup() throws Exception {
+		FileSystem fs = FileSystem.get(yarnConfiguration);
+
+		fs.delete(new Path("/training"), true);
+		fs.delete(new Path("/test"), true);
+
+		fs.mkdirs(new Path("/training"));
+		fs.mkdirs(new Path("/test"));
+
+		List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
+		URL trainingFileUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.dat");
+		URL testFileUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_test.dat");
+		String trainingFilePath = "file:" + trainingFileUrl.getFile();
+		String testFilePath = "file:" + testFileUrl.getFile();
+		copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
+		copyEntries.add(new CopyEntry(testFilePath, "/test", false));
+		doCopy(fs, copyEntries);
+	}
 	
 	@Test(groups="functional")
 	public void testGetJobReportsAll() throws Exception {
 		List<ApplicationReport> applications = jobService.getJobReportsAll();
 		assertNotNull(applications);
 	}
-
+	
 	@Test(groups="functional")
 	public void testKillApplication() throws Exception {
-		ApplicationId applicationId = submitApplication();
+		Properties containerProperties = new Properties();
+		containerProperties.put("VIRTUALCORES", "1");
+		containerProperties.put("MEMORY", "64");
+		containerProperties.put("PRIORITY", "0");
+		ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", containerProperties);
 		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
 		assertNotNull(state);
 		jobService.killJob(applicationId);
@@ -50,7 +70,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
 	@Test(groups="functional")
 	public void testGetJobReportByUser() throws Exception {
-		ApplicationId applicationId = submitApplication();
+		Properties containerProperties = new Properties();
+		containerProperties.put("VIRTUALCORES", "1");
+		containerProperties.put("MEMORY", "64");
+		containerProperties.put("PRIORITY", "0");
+		ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", containerProperties);
 		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
 		assertNotNull(state);
 		jobService.killJob(applicationId);
@@ -64,7 +88,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		int numJobs = reports.size();
 		assertTrue(numJobs > 0);
 		
-		applicationId = submitApplication();
+		applicationId = jobService.submitYarnJob("defaultYarnClient", containerProperties);
 		
 		state = waitState(applicationId, 10, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
 		reports = jobService.getJobReportByUser(app.getUser());
@@ -74,22 +98,26 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 	}
 
 	@Test(groups="functional")
-	public void testSubmitYarnJob() throws Exception {
-		ApplicationId applicationId = jobService.submitYarnJob("anotherYarnClient");
-		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
-
-		state = getState(applicationId);
+	public void testSubmitPythonYarnJob() throws Exception {
+		Properties containerProperties = new Properties();
+		containerProperties.put("VIRTUALCORES", "1");
+		containerProperties.put("MEMORY", "64");
+		containerProperties.put("PRIORITY", "0");
+		containerProperties.put("TRAINING_HDFS_PATH", "/training/nn_train.dat");
+		containerProperties.put("TEST_HDFS_PATH", "/test/nn_test.dat");
+		containerProperties.put("TRAINING_FILE_NAME", "nn_train.dat");
+		containerProperties.put("TEST_HDFS_PATH", "/test/nn_test.dat");
+		containerProperties.put("TEST_FILE_NAME", "nn_test.dat");
+		URL pythonScriptUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.py");
+		containerProperties.put("PYTHONSCRIPT", pythonScriptUrl.getFile());
+		
+		ApplicationId applicationId = jobService.submitYarnJob("pythonClient", containerProperties);
+		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
 		assertNotNull(state);
-		assertTrue(!state.equals(YarnApplicationState.FAILED));
-		
 		ApplicationReport app = jobService.getJobReportById(applicationId);
-		
-		List<ApplicationReport> reports = jobService.getJobReportByUser(app.getUser());
-		int numJobs = reports.size();
-		assertTrue(numJobs > 0);
-		jobService.killJob(applicationId);
+		assertNotNull(app);
 	}
-
+/*
 	@Test(groups="functional")
 	public void testSubmitMRJob() throws Exception {
 		
@@ -134,5 +162,5 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		assertNotNull(state);
 		assertTrue(!state.equals(YarnApplicationState.FAILED));
 	}
-	
+*/	
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
@@ -18,40 +19,45 @@ import org.springframework.yarn.fs.ResourceLocalizer;
 
 public class DefaultYarnClientCustomization implements YarnClientCustomization {
 
-	private Configuration configuration;
+	protected Configuration configuration;
 
 	public DefaultYarnClientCustomization(Configuration configuration) {
 		this.configuration = configuration;
 	}
 
 	@Override
-	public ResourceLocalizer getResourceLocalizer(String containerLaunchContextFile) {
-		Collection<CopyEntry> copyEntries = getCopyEntries();
-		copyEntries.add(new LocalResourcesFactoryBean.CopyEntry(
-				"file:" + containerLaunchContextFile,
-				"/app/dataplatform", false));
-		return new DefaultResourceLocalizer(configuration, getHdfsEntries(), copyEntries);
+	public ResourceLocalizer getResourceLocalizer(Properties containerProperties) {
+		return new DefaultResourceLocalizer(configuration, getHdfsEntries(containerProperties), getCopyEntries(containerProperties));
 	}
 
 	@Override
-	public Collection<CopyEntry> getCopyEntries() {
+	public Collection<CopyEntry> getCopyEntries(Properties containerProperties) {
 		Collection<LocalResourcesFactoryBean.CopyEntry> copyEntries = new ArrayList<LocalResourcesFactoryBean.CopyEntry>(); 
+		String containerLaunchContextFile = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
+		copyEntries.add(new LocalResourcesFactoryBean.CopyEntry(
+				"file:" + containerLaunchContextFile,
+				"/app/dataplatform", false));
 		return copyEntries;
 	}
 
 	@Override
-	public Collection<TransferEntry> getHdfsEntries() {
-		String defaultFs = configuration
-				.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
+	public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
+		String defaultFs = configuration.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
 		Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = new ArrayList<LocalResourcesFactoryBean.TransferEntry>();
 		hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
 				LocalResourceType.ARCHIVE, //
-				LocalResourceVisibility.PUBLIC, "/lib/*", defaultFs, defaultFs,
+				LocalResourceVisibility.PUBLIC, //
+				"/lib/*", //
+				defaultFs, //
+				defaultFs, //
 				false));
 		hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
 				LocalResourceType.FILE, //
-				LocalResourceVisibility.PUBLIC, "/app/dataplatform/*",
-				defaultFs, defaultFs, false));
+				LocalResourceVisibility.PUBLIC, //
+				"/app/dataplatform/*", //
+				defaultFs, //
+				defaultFs, //
+				false));
 		return hdfsEntries;
 	}
 
@@ -86,20 +92,27 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 	}
 
 	@Override
-	public List<String> getCommands(String containerLauncherContextFile) {
-		File contextFile = new File(containerLauncherContextFile);
+	public List<String> getCommands(Properties containerProperties) {
+		String containerLaunchContextFile = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
+		if (containerLaunchContextFile == null) {
+			throw new IllegalStateException("Property " + ContainerProperty.APPMASTER_CONTEXT_FILE + " does not exist.");
+		}
+		File contextFile = new File(containerLaunchContextFile);
 		if (!contextFile.exists()) {
-			throw new IllegalStateException("Container launcher context file " + containerLauncherContextFile
+			throw new IllegalStateException("Container launcher context file " + containerLaunchContextFile
 			+ " does not exist.");
 		}
+		String propStr = containerProperties.toString();
+		
 		return Arrays
 				.<String> asList(new String[] {
 						"$JAVA_HOME/bin/java", //
 						"org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
 						contextFile.getName(), // 
 						"yarnAppmaster", //
+						propStr.substring(1, propStr.length()-1).replaceAll(",", " "),
 						"1><LOG_DIR>/Appmaster.stdout", //
 						"2><LOG_DIR>/Appmaster.stderr" });
 	}
-
+	
 }

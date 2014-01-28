@@ -57,6 +57,10 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 		List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 		copyEntries.add(new CopyEntry("file:target/dependency/*.jar", "/lib", false));
 		copyEntries.add(new CopyEntry("file:target/*.jar", "/app/dataplatform", false));
+		doCopy(fs, copyEntries);
+	}
+	
+	protected void doCopy(FileSystem fs, List<CopyEntry> copyEntries) throws Exception {
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		
 		for (CopyEntry e : copyEntries) {
@@ -71,7 +75,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 		
 	}
 
-	private Path getDestinationPath(CopyEntry entry, Resource res) throws IOException {
+	protected Path getDestinationPath(CopyEntry entry, Resource res) throws IOException {
 		Path dest = new Path(entry.getDest(), res.getFilename());
 		return dest;
 	}

@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.yarn.client;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
@@ -11,11 +12,11 @@ public interface YarnClientCustomization {
 	
 	String getClientId();
 
-	ResourceLocalizer getResourceLocalizer(String containerLaunchContextFile);
+	ResourceLocalizer getResourceLocalizer(Properties properties);
 	
-	Collection<CopyEntry> getCopyEntries();
+	Collection<CopyEntry> getCopyEntries(Properties properties);
 	
-	Collection<TransferEntry> getHdfsEntries();
+	Collection<TransferEntry> getHdfsEntries(Properties properties);
 	
 	int getMemory();
 	
@@ -27,5 +28,5 @@ public interface YarnClientCustomization {
 	
 	String getContainerLauncherContextFile();
 	
-	List<String> getCommands(String containerLaunchContextFile);
+	List<String> getCommands(Properties properties);
 }

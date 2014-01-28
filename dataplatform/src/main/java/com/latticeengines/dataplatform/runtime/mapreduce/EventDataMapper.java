@@ -10,20 +10,21 @@ import org.apache.hadoop.mapreduce.Mapper;
 
 public class EventDataMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
 	
-	private int samplingRate;
+	private int sampleSize;
+	private static int ALL = -1;
 	
 	@Override
 	public void setup(Context context) {
 		Configuration config = context.getConfiguration();
-		samplingRate = config.getInt("le.sampling.rate", -1);
+		sampleSize = config.getInt("le.sample.size", ALL);
 	}
 	
     @Override
     public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-    	// implement sampling
-    	if (samplingRate > 0) {
+    	// do reservoir sampling if sample size > 0
+    	if (sampleSize > 0) {
     		int randomValue = (int) Math.random() * 99;
-    		if (randomValue > samplingRate) {
+    		if (randomValue > sampleSize) {
     			return;
     		}
     	}

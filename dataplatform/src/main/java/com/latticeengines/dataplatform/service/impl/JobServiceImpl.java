@@ -1,9 +1,8 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -75,13 +74,9 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 	}
 
 	@Override
-	public ApplicationId submitYarnJob(String yarnClientName) {
-		Map<String, String> containerProperties = new HashMap<String, String>();
-		containerProperties.put("VIRTUALCORES", "1");
-		containerProperties.put("MEMORY", "64");
-		containerProperties.put("PRIORITY", "0");
+	public ApplicationId submitYarnJob(String yarnClientName, Properties properties) {
 		CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
-		yarnClientCustomizationService.addCustomizations(client, yarnClientName, containerProperties);
+		yarnClientCustomizationService.addCustomizations(client, yarnClientName, properties);
 		ApplicationId applicationId = client.submitApplication();
 		return applicationId;
 	}
@@ -119,7 +114,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 	}
 
 	@Override
-	public ApplicationId submitMRJob(String mrJobName) {
+	public ApplicationId submitMRJob(String mrJobName, Properties properties) {
 		Job job = getJob(mrJobName);
 		JobRunner runner = new JobRunner();
 		runner.setJob(job);
@@ -159,7 +154,12 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 				"dataplatform-context.xml",
 				"dataplatform-properties-context.xml");
 		JobService jobService = (JobService) context.getBean("jobService");
-		jobService.submitYarnJob("defaultYarnClient");
+		Properties containerProperties = new Properties();
+		containerProperties.put("VIRTUALCORES", "1");
+		containerProperties.put("MEMORY", "64");
+		containerProperties.put("PRIORITY", "0");
+
+		jobService.submitYarnJob("defaultYarnClient", containerProperties);
 	}
 
 }
