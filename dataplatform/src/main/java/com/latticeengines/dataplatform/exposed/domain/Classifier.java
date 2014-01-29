@@ -39,7 +39,7 @@ public class Classifier implements HasName {
 		return features;
 	}
 
-	public void addFeatures(Field feature) {
+	public void addFeature(Field feature) {
 		features.add(feature);
 	}
 

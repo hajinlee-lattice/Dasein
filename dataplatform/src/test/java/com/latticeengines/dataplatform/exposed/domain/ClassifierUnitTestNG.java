@@ -8,11 +8,14 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.util.JsonHelper;
 
-public class DataSchemaUnitTestNG {
+public class ClassifierUnitTestNG {
 	
 	@Test(groups="unit")
 	public void testSerialize() throws Exception {
+		Classifier classifier = new Classifier();
+		classifier.setName("NeuralNetworkClassifier");
 		DataSchema schema = new DataSchema();
+		classifier.setSchema(schema);
 		schema.setName("IrisDataSet");
 		schema.setType("record");
 		Field sepalLength = new Field();
@@ -37,8 +40,16 @@ public class DataSchemaUnitTestNG {
 		schema.addField(petalWidth);
 		schema.addField(category);
 		
-		String jsonString = schema.toString();
-		DataSchema deserializedSchema = JsonHelper.deserialize(jsonString, DataSchema.class);
-		assertEquals(deserializedSchema.toString(), jsonString);
+		classifier.addFeature(sepalLength);
+		classifier.addFeature(sepalWidth);
+		classifier.addFeature(petalLength);
+		classifier.addTarget(category);
+		
+		String jsonString = classifier.toString();
+		Classifier deserializedClassifier = JsonHelper.deserialize(jsonString, Classifier.class);
+		assertEquals(deserializedClassifier.toString(), jsonString);
+
 	}
 }
+
+	

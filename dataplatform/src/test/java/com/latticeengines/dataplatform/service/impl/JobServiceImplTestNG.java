@@ -33,20 +33,28 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
 		fs.delete(new Path("/training"), true);
 		fs.delete(new Path("/test"), true);
+		fs.delete(new Path("/datascientist1"), true);
 
 		fs.mkdirs(new Path("/training"));
 		fs.mkdirs(new Path("/test"));
+		fs.mkdirs(new Path("/datascientist1"));
 
 		List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 		URL trainingFileUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.dat");
 		URL testFileUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_test.dat");
+		URL jsonUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/iris.json");
+		URL pythnScriptUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.py");
 		String trainingFilePath = "file:" + trainingFileUrl.getFile();
 		String testFilePath = "file:" + testFileUrl.getFile();
+		String jsonFilePath = "file:" + jsonUrl.getFile();
+		String pythnScriptPath = "file:" + pythnScriptUrl.getFile();
 		copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
 		copyEntries.add(new CopyEntry(testFilePath, "/test", false));
+		copyEntries.add(new CopyEntry(jsonFilePath, "/datascientist1", false));
+		copyEntries.add(new CopyEntry(pythnScriptPath, "/datascientist1", false));
 		doCopy(fs, copyEntries);
 	}
-	
+
 	@Test(groups="functional")
 	public void testGetJobReportsAll() throws Exception {
 		List<ApplicationReport> applications = jobService.getJobReportsAll();
@@ -105,8 +113,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		containerProperties.put("PRIORITY", "0");
 		containerProperties.put("TRAINING", "/training/nn_train.dat");
 		containerProperties.put("TEST", "/test/nn_test.dat");
-		URL pythonScriptUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.py");
-		containerProperties.put("PYTHONSCRIPT", pythonScriptUrl.getFile());
+		containerProperties.put("SCHEMA", "/datascientist1/iris.json");
+		containerProperties.put("PYTHONSCRIPT", "/datascientist1/nn_train.py");
 		
 		ApplicationId applicationId = jobService.submitYarnJob("pythonClient", containerProperties);
 		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
@@ -114,7 +122,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		ApplicationReport app = jobService.getJobReportById(applicationId);
 		assertNotNull(app);
 	}
-/*
+
+	/*
 	@Test(groups="functional")
 	public void testSubmitMRJob() throws Exception {
 		

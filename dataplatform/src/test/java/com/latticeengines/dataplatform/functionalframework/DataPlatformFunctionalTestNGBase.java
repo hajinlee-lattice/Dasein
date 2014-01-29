@@ -56,7 +56,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 		// Copy jars from build to hdfs
 		List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 		copyEntries.add(new CopyEntry("file:target/dependency/*.jar", "/lib", false));
-		copyEntries.add(new CopyEntry("file:src/main/python/lefwk/*.py", "/app/dataplatform/scripts", false));
+		copyEntries.add(new CopyEntry("file:src/main/python/launcher.py", "/app/dataplatform/scripts", false));
 		copyEntries.add(new CopyEntry("file:target/*.jar", "/app/dataplatform", false));
 		doCopy(fs, copyEntries);
 	}
