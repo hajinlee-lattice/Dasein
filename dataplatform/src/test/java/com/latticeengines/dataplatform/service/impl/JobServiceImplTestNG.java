@@ -111,10 +111,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		containerProperties.put("VIRTUALCORES", "1");
 		containerProperties.put("MEMORY", "64");
 		containerProperties.put("PRIORITY", "0");
-		containerProperties.put("TRAINING", "/training/nn_train.dat");
-		containerProperties.put("TEST", "/test/nn_test.dat");
 		containerProperties.put("SCHEMA", "/datascientist1/iris.json");
-		containerProperties.put("PYTHONSCRIPT", "/datascientist1/nn_train.py");
 		
 		ApplicationId applicationId = jobService.submitYarnJob("pythonClient", containerProperties);
 		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);

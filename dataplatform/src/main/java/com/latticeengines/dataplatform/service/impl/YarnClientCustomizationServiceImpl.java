@@ -35,6 +35,7 @@ public class YarnClientCustomizationServiceImpl implements
 		if (customization == null) {
 			return;
 		}
+		customization.beforeCreateLocalLauncherContextFile(containerProperties);
 		String fileName = createContainerLauncherContextFile(customization, containerProperties);
 		containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
 		ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer(containerProperties);
@@ -74,8 +75,7 @@ public class YarnClientCustomizationServiceImpl implements
 			YarnClientCustomization customization,
 			Properties containerProperties) {
 		String contextFileName = customization.getContainerLauncherContextFile();
-		InputStream contextFileUrlFromClasspathAsStream = ClassLoader
-				.getSystemResourceAsStream(contextFileName);
+		InputStream contextFileUrlFromClasspathAsStream = ClassLoader.getSystemResourceAsStream(contextFileName);
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		try {
 			FileCopyUtils.copy(contextFileUrlFromClasspathAsStream, stream);

@@ -113,5 +113,9 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 						"1><LOG_DIR>/Appmaster.stdout", //
 						"2><LOG_DIR>/Appmaster.stderr" });
 	}
+
+	@Override
+	public void beforeCreateLocalLauncherContextFile(Properties properties) {
+	}
 	
 }

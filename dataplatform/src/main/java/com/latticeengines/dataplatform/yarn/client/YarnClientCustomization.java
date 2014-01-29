@@ -11,6 +11,8 @@ import org.springframework.yarn.fs.ResourceLocalizer;
 public interface YarnClientCustomization {
 	
 	String getClientId();
+	
+	void beforeCreateLocalLauncherContextFile(Properties properties);
 
 	ResourceLocalizer getResourceLocalizer(Properties properties);
 	

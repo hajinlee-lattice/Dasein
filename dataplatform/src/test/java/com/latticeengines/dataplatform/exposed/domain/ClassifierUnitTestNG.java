@@ -45,7 +45,12 @@ public class ClassifierUnitTestNG {
 		classifier.addFeature(petalLength);
 		classifier.addTarget(category);
 		
+		classifier.setTrainingDataHdfsPath("/training/nn_train.dat");
+		classifier.setTestDataHdfsPath("/training/nn_test.dat");
+		classifier.setPythonScriptHdfsPath("/datascientist1/nn_train.py");
+		
 		String jsonString = classifier.toString();
+		System.out.println(jsonString);
 		Classifier deserializedClassifier = JsonHelper.deserialize(jsonString, Classifier.class);
 		assertEquals(deserializedClassifier.toString(), jsonString);
 
