@@ -21,11 +21,10 @@ class ArgumentParser(object):
         csvfile = open(dataFileName, 'Ur')
         tmp = []
         for row in csv.reader(csvfile, delimiter=','):
-            print(row)
-            eggs = []
+            rowlist = []
             for i in range(len(row)):
-                eggs.append(self.convertType(row[i], i))
-            tmp.append(eggs)
+                rowlist.append(self.convertType(row[i], i))
+            tmp.append(rowlist)
         return tmp
     
     def getSchema(self):
