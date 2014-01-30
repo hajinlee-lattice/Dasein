@@ -13,6 +13,7 @@ public class Classifier implements HasName {
 	private String trainingDataHdfsPath;
 	private String testDataHdfsPath;
 	private String pythonScriptHdfsPath;
+	private String modelHdfsDir;
 	private DataSchema schema;
 	private List<Field> features = new ArrayList<Field>();
 	private List<Field> targets = new ArrayList<Field>();
@@ -90,6 +91,16 @@ public class Classifier implements HasName {
 	@Override
 	public String toString() {
 		return JsonHelper.serialize(this);
+	}
+
+	@JsonProperty("model_data_dir")
+	public String getModelHdfsDir() {
+		return modelHdfsDir;
+	}
+
+	@JsonProperty("model_data_dir")
+	public void setModelHdfsDir(String modelHdfsDir) {
+		this.modelHdfsDir = modelHdfsDir;
 	}
 
 }

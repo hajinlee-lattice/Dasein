@@ -46,8 +46,9 @@ public class ClassifierUnitTestNG {
 		classifier.addTarget(category);
 		
 		classifier.setTrainingDataHdfsPath("/training/nn_train.dat");
-		classifier.setTestDataHdfsPath("/training/nn_test.dat");
+		classifier.setTestDataHdfsPath("/test/nn_test.dat");
 		classifier.setPythonScriptHdfsPath("/datascientist1/nn_train.py");
+		classifier.setModelHdfsDir("/datascientist1/result");
 		
 		String jsonString = classifier.toString();
 		System.out.println(jsonString);

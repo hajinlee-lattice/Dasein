@@ -1,5 +1,6 @@
 package com.latticeengines.dataplatform.service.impl;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -21,6 +22,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.util.HdfsHelper;
 
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -118,6 +120,10 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		assertNotNull(state);
 		ApplicationReport app = jobService.getJobReportById(applicationId);
 		assertNotNull(app);
+		state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+		assertEquals(state, YarnApplicationState.FINISHED);
+		String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, "/datascientist1/result/a.txt");
+		assertEquals(modelContents.trim(), "this is a model");
 	}
 
 	/*

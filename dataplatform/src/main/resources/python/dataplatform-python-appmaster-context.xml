@@ -29,6 +29,7 @@
 
 	<yarn:environment>
 		<yarn:classpath />
+		SHDP_HD_FSWEB=${dataplatform.fs.web.defaultFS}
 	</yarn:environment>
 
 	<yarn:master>

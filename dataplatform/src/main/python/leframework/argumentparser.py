@@ -2,13 +2,16 @@ import json
 import csv
 
 class ArgumentParser(object):
+    """
+    This class is responsible for parsing the json file as understood by the 
+    LE data platform.
+    """
     def __init__(self, schema):
         jsonData = open(schema).read()
         self.schema = json.loads(jsonData)
         self.fields = self.schema["schema"]["fields"]
         
     def convertType(self, cell, index):
-        print(self.fields[index])
         fieldType = self.fields[index]["type"][0]
         
         if fieldType == "int":

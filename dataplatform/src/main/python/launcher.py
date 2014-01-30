@@ -1,5 +1,8 @@
+import os
+import pwd
 import sys
 from leframework import argumentparser
+from leframework import webhdfs
 
 
 def stripPath(fileName):
@@ -22,5 +25,12 @@ if __name__ == "__main__":
     test = parser.createList(stripPath(sys.argv[2]))
     script = stripPath(sys.argv[4])
     execfile(script)
-    globals()['train'](training, test, parser.getSchema())
+    schema = parser.getSchema()
+    modelFilePath = globals()['train'](training, test, schema)
+    hdfs = webhdfs.get_webhdfs("localhost", 50070, pwd.getpwuid(os.getuid())[0])
+    modelDirPath = schema["model_data_dir"]
+    hdfs.mkdir(modelDirPath)
+    hdfsFilePath = stripPath(modelFilePath)
+    hdfs.copyFromLocal(modelFilePath, modelDirPath + "/" + hdfsFilePath)
+     
     
