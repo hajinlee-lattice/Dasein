@@ -8,25 +8,23 @@ from urlparse import urlparse
 
 def stripPath(fileName):
     #return fileName
-    return fileName[fileName.rfind('/')+1 : fileName.__len__()]
+    return fileName[fileName.rfind('/')+1:fileName.__len__()]
 
 if __name__ == "__main__":
     """
     Transform the inputs into python objects and invoke user python script.
     
     Arguments:
-    sys.argv[1] -- training data file
-    sys.argv[2] -- test data file
-    sys.argv[3] -- schema json file
-    sys.argv[4] -- user python script
+    sys.argv[1] -- schema json file
     """
 
-    parser = argumentparser.createParser(stripPath(sys.argv[3]))
-    training = parser.createList(stripPath(sys.argv[1]))
-    test = parser.createList(stripPath(sys.argv[2]))
-    script = stripPath(sys.argv[4])
-    execfile(script)
+    parser = argumentparser.createParser(stripPath(sys.argv[1]))
     schema = parser.getSchema()
+    training = parser.createList(stripPath(schema["training_data"]))
+    test = parser.createList(stripPath(schema["test_data"]))
+    script = stripPath(schema["python_script"])
+    execfile(script)
+    
     modelFilePath = globals()['train'](training, test, schema)
     
     o = urlparse(os.environ['SHDP_HD_FSWEB'])
@@ -34,6 +32,6 @@ if __name__ == "__main__":
     modelDirPath = schema["model_data_dir"]
     hdfs.mkdir(modelDirPath)
     hdfsFilePath = stripPath(modelFilePath)
-    hdfs.copyFromLocal(modelFilePath, modelDirPath + "/" + hdfsFilePath)
+    hdfs.copyFromLocal(modelFilePath, "%s/%s" % (modelDirPath, hdfsFilePath))
      
     

@@ -14,7 +14,7 @@
 		<constructor-arg value="debug" />
 	</bean>
 
-    <context:property-placeholder location="classpath*:dataplatform.properties"/>
+    <context:property-placeholder location="file:dataplatform.properties"/>
     <import resource="classpath:dataplatform-yarn-config-context.xml"/>
 
     <yarn:environment>

@@ -14,7 +14,7 @@
 		<constructor-arg value="info" />
 	</bean>
 
-    <context:property-placeholder location="classpath*:dataplatform.properties"/>
+    <context:property-placeholder location="file:dataplatform.properties"/>
     <import resource="classpath:dataplatform-yarn-config-context.xml"/>
 
 	<yarn:localresources>
@@ -41,7 +41,7 @@
         <yarn:container-command>
                         <![CDATA[
                         /usr/bin/python
-                        launcher.py $$TRAINING$$ $$TEST$$ $$SCHEMA$$ $$PYTHONSCRIPT$$
+                        launcher.py $$SCHEMA$$
                         1><LOG_DIR>/PythonContainer.stdout
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>
