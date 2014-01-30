@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URL;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -126,8 +127,19 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		assertNotNull(app);
 		state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
 		assertEquals(state, YarnApplicationState.FINISHED);
-		String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, "/datascientist1/result/model.txt");
+		
+		NumberFormat appIdFormat = getAppIdFormat();
+		String jobId = applicationId.getClusterTimestamp() + "_" + appIdFormat.format(applicationId.getId());
+		String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, 
+				"/datascientist1/result/" + jobId + "/model.txt");
 		assertEquals(modelContents.trim(), "this is the generated model.");
+	}
+	
+	private NumberFormat getAppIdFormat() {
+        NumberFormat fmt = NumberFormat.getInstance();
+        fmt.setGroupingUsed(false);
+        fmt.setMinimumIntegerDigits(4);
+        return fmt;
 	}
 
 	/*

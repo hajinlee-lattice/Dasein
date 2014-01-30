@@ -28,6 +28,12 @@ def validateEnvAndParameters(schema):
     validateSchemaParam(schema, "training_data")
     validateSchemaParam(schema, "test_data")
     validateSchemaParam(schema, "python_script")
+    validateSchemaParam(schema, "model_data_dir")
+    
+def getModelDirPath(schema):
+    appIdList = os.environ['CONTAINER_ID'].split("_")[1:3]
+    modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
+    return modelDirPath
 
 if __name__ == "__main__":
     """
@@ -48,12 +54,18 @@ if __name__ == "__main__":
     script = stripPath(schema["python_script"])
     execfile(script)
     
+    # Execute the packaged script from the client and get the returned file
+    # that contains the generated model data
     modelFilePath = globals()['train'](training, test, schema)
     
     webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
     hdfs = webhdfs.createWebHdfs(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
-    modelDirPath = schema["model_data_dir"]
+    
+    # Create model directory
+    modelDirPath = getModelDirPath(schema)
     hdfs.mkdir(modelDirPath)
+    
+    # Copy the model data file from local to hdfs
     hdfsFilePath = stripPath(modelFilePath)
     hdfs.copyFromLocal(modelFilePath, "%s/%s" % (modelDirPath, hdfsFilePath))
      
