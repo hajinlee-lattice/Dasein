@@ -61,13 +61,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		doCopy(fs, copyEntries);
 	}
 
-	@Test(groups="functional")
+	@Test(groups="functional", enabled=true)
 	public void testGetJobReportsAll() throws Exception {
 		List<ApplicationReport> applications = jobService.getJobReportsAll();
 		assertNotNull(applications);
 	}
 	
-	@Test(groups="functional")
+	@Test(groups="functional", enabled=true)
 	public void testKillApplication() throws Exception {
 		Properties containerProperties = new Properties();
 		containerProperties.put("VIRTUALCORES", "1");
@@ -82,7 +82,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		assertTrue(state.equals(YarnApplicationState.KILLED));
 	}
 
-	@Test(groups="functional")
+	@Test(groups="functional", enabled=true)
 	public void testGetJobReportByUser() throws Exception {
 		Properties containerProperties = new Properties();
 		containerProperties.put("VIRTUALCORES", "1");
