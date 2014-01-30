@@ -4,12 +4,14 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -45,15 +47,17 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		URL trainingFileUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.dat");
 		URL testFileUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_test.dat");
 		URL jsonUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/iris.json");
-		URL pythnScriptUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.py");
+		URL pythonScriptUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.py");
+		URL modelUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/model.txt");
 		String trainingFilePath = "file:" + trainingFileUrl.getFile();
 		String testFilePath = "file:" + testFileUrl.getFile();
 		String jsonFilePath = "file:" + jsonUrl.getFile();
-		String pythnScriptPath = "file:" + pythnScriptUrl.getFile();
+		String pythonScriptPath = "file:" + pythonScriptUrl.getFile();
+		FileUtils.copyFileToDirectory(new File(modelUrl.getFile()), new File("/tmp"));
 		copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
 		copyEntries.add(new CopyEntry(testFilePath, "/test", false));
 		copyEntries.add(new CopyEntry(jsonFilePath, "/datascientist1", false));
-		copyEntries.add(new CopyEntry(pythnScriptPath, "/datascientist1", false));
+		copyEntries.add(new CopyEntry(pythonScriptPath, "/datascientist1", false));
 		doCopy(fs, copyEntries);
 	}
 
@@ -122,8 +126,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		assertNotNull(app);
 		state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
 		assertEquals(state, YarnApplicationState.FINISHED);
-		String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, "/datascientist1/result/a.txt");
-		assertEquals(modelContents.trim(), "this is a model");
+		String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, "/datascientist1/result/model.txt");
+		assertEquals(modelContents.trim(), "this is the generated model.");
 	}
 
 	/*

@@ -3,6 +3,7 @@ import pwd
 import sys
 from leframework import argumentparser
 from leframework import webhdfs
+from urlparse import urlparse
 
 
 def stripPath(fileName):
@@ -27,7 +28,9 @@ if __name__ == "__main__":
     execfile(script)
     schema = parser.getSchema()
     modelFilePath = globals()['train'](training, test, schema)
-    hdfs = webhdfs.get_webhdfs("localhost", 50070, pwd.getpwuid(os.getuid())[0])
+    
+    o = urlparse(os.environ['SHDP_HD_FSWEB'])
+    hdfs = webhdfs.createWebHdfs(o.hostname, o.port, pwd.getpwuid(os.getuid())[0])
     modelDirPath = schema["model_data_dir"]
     hdfs.mkdir(modelDirPath)
     hdfsFilePath = stripPath(modelFilePath)

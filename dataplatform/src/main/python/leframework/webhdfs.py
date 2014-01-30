@@ -26,13 +26,13 @@ class WebHDFS(object):
     """
     
     def __init__(self, namenode_host, namenode_port, hdfs_username):
-        self.namenode_host=namenode_host
+        self.namenode_host = namenode_host
         self.namenode_port = namenode_port
         self.username = hdfs_username
         
     
     def mkdir(self, path):
-        if os.path.isabs(path)==False:
+        if os.path.isabs(path) == False:
             raise Exception("Only absolute paths supported: %s"%(path))
         
         url_path = WEBHDFS_CONTEXT_ROOT + path +'?op=MKDIRS&user.name='+self.username
@@ -45,7 +45,7 @@ class WebHDFS(object):
         
         
     def rmdir(self, path):
-        if os.path.isabs(path)==False:
+        if os.path.isabs(path) == False:
             raise Exception("Only absolute paths supported: %s"%(path))
         
         url_path = WEBHDFS_CONTEXT_ROOT + path +'?op=DELETE&recursive=true&user.name='+self.username
@@ -74,7 +74,7 @@ class WebHDFS(object):
         redirect_host = result.netloc[:result.netloc.index(":")]
         redirect_port = result.netloc[(result.netloc.index(":")+1):]
         # Bug in WebHDFS 0.20.205 => requires param otherwise a NullPointerException is thrown
-        redirect_path = result.path + "?" + result.query + "&replication="+str(replication) 
+        redirect_path = result.path + "?" + result.query + "&replication=" + str(replication) 
             
         logger.debug("Send redirect to: host: %s, port: %s, path: %s "%(redirect_host, redirect_port, redirect_path))
         fileUploadClient = httplib.HTTPConnection(redirect_host, 
@@ -98,7 +98,7 @@ class WebHDFS(object):
         response = httpClient.getresponse()
         # if file is empty GET returns a response with length == NONE and
         # no msg["location"]
-        if response.length!=None:
+        if response.length != None:
             msg = response.msg
             redirect_location = msg["location"]
             logger.debug("HTTP Response: %d, %s"%(response.status, response.reason))
@@ -131,7 +131,7 @@ class WebHDFS(object):
      
      
     def listdir(self, path):
-        if os.path.isabs(path)==False:
+        if os.path.isabs(path) == False:
             raise Exception("Only absolute paths supported: %s"%(path))
         
         url_path = urllib.quote(WEBHDFS_CONTEXT_ROOT + path+'?op=LISTSTATUS&user.name='+self.username)
@@ -155,6 +155,6 @@ class WebHDFS(object):
                                             timeout=600)
         return httpClient
     
-def get_webhdfs(namenode_host, namenode_port, user):
+def createWebHdfs(namenode_host, namenode_port, user):
     return WebHDFS(namenode_host, namenode_port, user)
     
