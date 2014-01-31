@@ -44,8 +44,15 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
 	protected YarnClient yarnClient;
 	
+	protected boolean doYarnClusterSetup() {
+		return true;
+	}
+	
 	@BeforeClass(groups="functional")
 	public void setupRunEnvironment() throws Exception {
+		if (!doYarnClusterSetup()) {
+			return;
+		}
 		FileSystem fs = FileSystem.get(yarnConfiguration);
 		// Delete directories
 		fs.delete(new Path("/app"), true);
