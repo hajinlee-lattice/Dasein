@@ -75,7 +75,7 @@ public class YarnClientCustomizationServiceImpl implements
 			YarnClientCustomization customization,
 			Properties containerProperties) {
 		String contextFileName = customization.getContainerLauncherContextFile();
-		InputStream contextFileUrlFromClasspathAsStream = ClassLoader.getSystemResourceAsStream(contextFileName);
+		InputStream contextFileUrlFromClasspathAsStream = getClass().getResourceAsStream(contextFileName);
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		try {
 			FileCopyUtils.copy(contextFileUrlFromClasspathAsStream, stream);

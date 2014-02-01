@@ -15,7 +15,7 @@ public class RClientCustomization extends DefaultYarnClientCustomization {
 
 	@Override
 	public String getContainerLauncherContextFile() {
-		return "R/dataplatform-R-appmaster-context.xml";
+		return "/R/dataplatform-R-appmaster-context.xml";
 	}
 
 }

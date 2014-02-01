@@ -88,6 +88,8 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 		model.setTestDataHdfsPath("/test/test.dat");
 		model.setModelHdfsDir("/datascientist2/model");
 		
+		System.out.println(model.toString());
+		
 		List<ApplicationId> appIds = modelingService.submitModel(model);
 		
 		for (ApplicationId appId : appIds) {

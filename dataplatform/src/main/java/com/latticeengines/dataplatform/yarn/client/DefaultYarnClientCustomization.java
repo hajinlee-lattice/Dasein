@@ -89,7 +89,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 
 	@Override
 	public String getContainerLauncherContextFile() {
-		return "default/dataplatform-default-appmaster-context.xml";
+		return "/default/dataplatform-default-appmaster-context.xml";
 	}
 
 	@Override

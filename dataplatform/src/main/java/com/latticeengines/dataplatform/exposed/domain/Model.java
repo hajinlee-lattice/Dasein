@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import com.latticeengines.dataplatform.util.JsonHelper;
+
 public class Model implements HasName {
 
 	private String name;
@@ -95,6 +97,11 @@ public class Model implements HasName {
 	@JsonProperty("model_dir_data")
 	public void setModelHdfsDir(String modelHdfsDir) {
 		this.modelHdfsDir = modelHdfsDir;
+	}
+	
+	@Override
+	public String toString() {
+		return JsonHelper.serialize(this);
 	}
 
 }
