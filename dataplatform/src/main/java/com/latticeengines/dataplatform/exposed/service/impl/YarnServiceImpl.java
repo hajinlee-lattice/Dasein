@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.exposed.service.impl;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,10 +16,23 @@ public class YarnServiceImpl implements YarnService {
 	
 	@Autowired
 	private Configuration yarnConfiguration;
+
+	private String getResourceManagerEndpoint() {
+		String rmHostPort = yarnConfiguration.get("yarn.resourcemanager.webapp.address");
+		return "http://" + rmHostPort + "/ws/v1/cluster";
+	}
 	
 	@Override
 	public SchedulerTypeInfo getSchedulerInfo() {
-		String rmRestEndpointBaseUrl = yarnConfiguration.get("yarn.resourcemanager.webapp.address"); 
-		return rmRestTemplate.getForObject("http://" + rmRestEndpointBaseUrl + "/ws/v1/cluster/scheduler", SchedulerTypeInfo.class);
+		String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
+		return rmRestTemplate.getForObject(rmRestEndpointBaseUrl +"/scheduler", SchedulerTypeInfo.class);
 	}
+	
+	@Override
+	public AppsInfo getApplications() {
+		String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
+		return rmRestTemplate.getForObject(rmRestEndpointBaseUrl +"/apps", AppsInfo.class);
+	}
+	
+ 
 }
