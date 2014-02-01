@@ -6,7 +6,7 @@
         {"name":"sepal_width","type":["float","0.0"]},
         {"name":"petal_length","type":["float","0.0"]},
         {"name":"petal_width","type":["float","0.0"]},
-        {"name":"category","type":["string","null"]}
+        {"name":"category","type":["int","null"]}
     ],
     "type":"record"
 }

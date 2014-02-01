@@ -14,9 +14,9 @@ public class Classifier implements HasName {
 	private String testDataHdfsPath;
 	private String pythonScriptHdfsPath;
 	private String modelHdfsDir;
-	private DataSchema schema;
-	private List<Field> features = new ArrayList<Field>();
-	private List<Field> targets = new ArrayList<Field>();
+	private String schemaHdfsPath;
+	private List<String> features = new ArrayList<String>();
+	private List<String> targets = new ArrayList<String>();
 	
 	@Override
 	@JsonProperty("name")
@@ -60,31 +60,31 @@ public class Classifier implements HasName {
 		this.pythonScriptHdfsPath = pythonScriptHdfsPath;
 	}
 
-	@JsonProperty("schema")
-	public DataSchema getSchema() {
-		return schema;
-	}
-
-	@JsonProperty("schema")
-	public void setSchema(DataSchema schema) {
-		this.schema = schema;
-	}
-
 	@JsonProperty("features")
-	public List<Field> getFeatures() {
+	public List<String> getFeatures() {
 		return features;
 	}
+	
+	@JsonProperty("features")
+	public void setFeatures(List<String> features) {
+		this.features = features;
+	}
 
-	public void addFeature(Field feature) {
+	public void addFeature(String feature) {
 		features.add(feature);
 	}
 
 	@JsonProperty("targets")
-	public List<Field> getTargets() {
+	public List<String> getTargets() {
 		return targets;
 	}
+	
+	@JsonProperty("targets")
+	public void setTargets(List<String> targets) {
+		this.targets = targets;
+	}
 
-	public void addTarget(Field target) {
+	public void addTarget(String target) {
 		targets.add(target);
 	}
 	
@@ -101,6 +101,16 @@ public class Classifier implements HasName {
 	@JsonProperty("model_data_dir")
 	public void setModelHdfsDir(String modelHdfsDir) {
 		this.modelHdfsDir = modelHdfsDir;
+	}
+
+	@JsonProperty("schema")
+	public String getSchemaHdfsPath() {
+		return schemaHdfsPath;
+	}
+
+	@JsonProperty("schema")
+	public void setSchemaHdfsPath(String schemaHdfsPath) {
+		this.schemaHdfsPath = schemaHdfsPath;
 	}
 
 }

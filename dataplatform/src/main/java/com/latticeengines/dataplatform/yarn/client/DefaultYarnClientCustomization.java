@@ -37,9 +37,6 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 		copyEntries.add(new LocalResourcesFactoryBean.CopyEntry(
 				"file:" + containerLaunchContextFile,
 				"/app/dataplatform", false));
-		String dataplatformProps = "file:" + System.getProperty("DATAPLATFORM_PROPDIR") + "/dataplatform.properties";
-		copyEntries.add(new LocalResourcesFactoryBean.CopyEntry(
-				dataplatformProps, "/app/dataplatform", false));
 		
 		return copyEntries;
 	}

@@ -41,7 +41,7 @@
         <yarn:container-command>
                         <![CDATA[
                         /usr/bin/python
-                        launcher.py $$SCHEMA$$
+                        launcher.py $$METADATA$$
                         1><LOG_DIR>/PythonContainer.stdout
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>

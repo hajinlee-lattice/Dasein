@@ -8,6 +8,7 @@ import java.io.File;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +24,7 @@ import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.util.HdfsHelper;
@@ -62,13 +64,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		doCopy(fs, copyEntries);
 	}
 
-	@Test(groups="functional", enabled=true)
+	@Test(groups="functional", enabled=false)
 	public void testGetJobReportsAll() throws Exception {
 		List<ApplicationReport> applications = jobService.getJobReportsAll();
 		assertNotNull(applications);
 	}
 	
-	@Test(groups="functional", enabled=true)
+	@Test(groups="functional", enabled=false)
 	public void testKillApplication() throws Exception {
 		Properties containerProperties = new Properties();
 		containerProperties.put("VIRTUALCORES", "1");
@@ -83,7 +85,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		assertTrue(state.equals(YarnApplicationState.KILLED));
 	}
 
-	@Test(groups="functional", enabled=true)
+	@Test(groups="functional", enabled=false)
 	public void testGetJobReportByUser() throws Exception {
 		Properties containerProperties = new Properties();
 		containerProperties.put("VIRTUALCORES", "1");
@@ -114,11 +116,21 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
 	@Test(groups="functional")
 	public void testSubmitPythonYarnJob() throws Exception {
+		Classifier classifier = new Classifier();
+		classifier.setName("IrisClassifier");
+		classifier.setFeatures(Arrays.<String>asList(new String[] { "" }));
+		classifier.setTargets(Arrays.<String>asList(new String[] { "category" }));
+		classifier.setSchemaHdfsPath("/datascientist1/iris.json");
+		classifier.setModelHdfsDir("/datascientist1/result");
+		classifier.setPythonScriptHdfsPath("/datascientist1/nn_train.py");
+		classifier.setTrainingDataHdfsPath("/training/nn_train.dat");
+		classifier.setTestDataHdfsPath("/test/nn_test.dat");
+		
 		Properties containerProperties = new Properties();
 		containerProperties.put("VIRTUALCORES", "1");
 		containerProperties.put("MEMORY", "64");
 		containerProperties.put("PRIORITY", "0");
-		containerProperties.put("SCHEMA", "/datascientist1/iris.json");
+		containerProperties.put("METADATA", classifier.toString());
 		
 		ApplicationId applicationId = jobService.submitYarnJob("pythonClient", containerProperties);
 		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);

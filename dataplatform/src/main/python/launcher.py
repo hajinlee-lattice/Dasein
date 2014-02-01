@@ -43,7 +43,7 @@ if __name__ == "__main__":
     sys.argv[1] -- schema json file
     """
 
-    parser = argumentparser.createParser(stripPath(sys.argv[1]))
+    parser = argumentparser.createParser(sys.argv[1])
     schema = parser.getSchema()
     
     # Fail fast if required parameters are not set

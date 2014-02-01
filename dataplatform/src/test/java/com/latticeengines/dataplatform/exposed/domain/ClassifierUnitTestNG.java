@@ -14,10 +14,7 @@ public class ClassifierUnitTestNG {
 	public void testSerialize() throws Exception {
 		Classifier classifier = new Classifier();
 		classifier.setName("NeuralNetworkClassifier");
-		DataSchema schema = new DataSchema();
-		classifier.setSchema(schema);
-		schema.setName("IrisDataSet");
-		schema.setType("record");
+		classifier.setSchemaHdfsPath("/datascientist1/iris.json");
 		Field sepalLength = new Field();
 		sepalLength.setName("sepal_length");
 		sepalLength.setType(Arrays.<String>asList(new String[] { "float", "0.0" }));
@@ -34,16 +31,10 @@ public class ClassifierUnitTestNG {
 		category.setName("category");
 		category.setType(Arrays.<String>asList(new String[] { "string", "null" }));
 		
-		schema.addField(sepalLength);
-		schema.addField(sepalWidth);
-		schema.addField(petalLength);
-		schema.addField(petalWidth);
-		schema.addField(category);
-		
-		classifier.addFeature(sepalLength);
-		classifier.addFeature(sepalWidth);
-		classifier.addFeature(petalLength);
-		classifier.addTarget(category);
+		classifier.addFeature(sepalLength.getName());
+		classifier.addFeature(sepalWidth.getName());
+		classifier.addFeature(petalLength.getName());
+		classifier.addTarget(category.getName());
 		
 		classifier.setTrainingDataHdfsPath("/training/nn_train.dat");
 		classifier.setTestDataHdfsPath("/test/nn_test.dat");
