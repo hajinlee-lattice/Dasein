@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.latticeengines.api.domain.AppIds;
+import com.latticeengines.api.domain.AppSubmission;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 
@@ -20,7 +20,8 @@ public class ModelResource {
     @RequestMapping(value = "/submit", method = RequestMethod.POST, 
     				headers="Accept=application/xml, application/json")
     @ResponseBody
-	public AppIds submit(@RequestBody Model model) {
-    	return new AppIds(modelingService.submitModel(model));
+	public AppSubmission submit(@RequestBody Model model) {
+    	AppSubmission submission = new AppSubmission(modelingService.submitModel(model));
+    	return submission;
     }
 }
