@@ -1,5 +1,3 @@
-def train(trainingData, testData, schema):
+def train(trainingData, testData, schema, modelFile):
     print(trainingData)
-    with open('/tmp/nn_trained.txt','w') as f:
-        f.write("some model")
-    return "/tmp/nn_trained.txt"
+    modelFile.write("some model")

@@ -11,7 +11,7 @@ import com.latticeengines.dataplatform.util.JsonHelper;
 public class DataSchemaUnitTestNG {
 	
 	@Test(groups="unit")
-	public void testSerialize() throws Exception {
+	public void testSerDe() throws Exception {
 		DataSchema schema = new DataSchema();
 		schema.setName("IrisDataSet");
 		schema.setType("record");

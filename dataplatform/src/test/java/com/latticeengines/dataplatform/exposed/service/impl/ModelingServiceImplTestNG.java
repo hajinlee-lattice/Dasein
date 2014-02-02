@@ -87,6 +87,8 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 		model.setTrainingDataHdfsPath("/training/train.dat");
 		model.setTestDataHdfsPath("/test/test.dat");
 		model.setModelHdfsDir("/datascientist2/model");
+		model.setFeatures(Arrays.<String>asList(new String[] { "sepal_length", "sepal_width", "petal_length", "petal_width"}));
+		model.setTargets(Arrays.<String>asList(new String[] { "category" }));
 		
 		System.out.println(model.toString());
 		

@@ -1,7 +1,7 @@
 import os
 import pwd
 import sys
-from leframework import argumentparser
+from leframework import argumentparser as ap
 from leframework import webhdfs
 from urlparse import urlparse
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     sys.argv[1] -- schema json file
     """
 
-    parser = argumentparser.createParser(sys.argv[1])
+    parser = ap.ArgumentParser(sys.argv[1])
     schema = parser.getSchema()
     
     # Fail fast if required parameters are not set
@@ -56,10 +56,14 @@ if __name__ == "__main__":
     
     # Execute the packaged script from the client and get the returned file
     # that contains the generated model data
-    modelFilePath = globals()['train'](training, test, schema)
+    modelFilePath = os.environ['CONTAINER_ID'] + "_model.txt"
+    modelFile = open(modelFilePath, "w")
+    globals()['train'](training, test, schema, modelFile)
+    modelFile.close()
     
+    # Create webhdfs instance for writing to hdfs
     webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
-    hdfs = webhdfs.createWebHdfs(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
+    hdfs = webhdfs.WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
     
     # Create model directory
     modelDirPath = getModelDirPath(schema)

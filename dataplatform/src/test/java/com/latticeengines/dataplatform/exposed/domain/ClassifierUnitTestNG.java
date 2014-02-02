@@ -11,7 +11,7 @@ import com.latticeengines.dataplatform.util.JsonHelper;
 public class ClassifierUnitTestNG {
 	
 	@Test(groups="unit")
-	public void testSerialize() throws Exception {
+	public void testSerDe() throws Exception {
 		Classifier classifier = new Classifier();
 		classifier.setName("NeuralNetworkClassifier");
 		classifier.setSchemaHdfsPath("/datascientist1/iris.json");

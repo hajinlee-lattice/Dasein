@@ -142,8 +142,9 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		
 		NumberFormat appIdFormat = getAppIdFormat();
 		String jobId = applicationId.getClusterTimestamp() + "_" + appIdFormat.format(applicationId.getId());
-		String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, 
-				"/datascientist1/result/" + jobId + "/model.txt");
+		String modelFile = HdfsHelper.getFilesForDir(yarnConfiguration, 
+				"/datascientist1/result/" + jobId).get(0);
+		String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, modelFile);
 		assertEquals(modelContents.trim(), "this is the generated model.");
 	}
 	

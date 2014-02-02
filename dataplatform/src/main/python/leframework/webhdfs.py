@@ -5,8 +5,8 @@ import json
 import urllib
 import logging
 
-logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level = logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
+                    format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(name='webhdfs')
 
 WEBHDFS_CONTEXT_ROOT="/webhdfs/v1"
@@ -152,6 +152,4 @@ class WebHDFS(object):
                                             timeout=600)
         return httpClient
     
-def createWebHdfs(namenode_host, namenode_port, user):
-    return WebHDFS(namenode_host, namenode_port, user)
     

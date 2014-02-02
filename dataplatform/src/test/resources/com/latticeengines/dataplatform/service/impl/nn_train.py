@@ -1,3 +1,3 @@
-def train(trainingData, testData, schema):
+def train(trainingData, testData, schema, modelFile):
     print(trainingData)
-    return "/tmp/model.txt"
+    modelFile.write("this is the generated model.")
