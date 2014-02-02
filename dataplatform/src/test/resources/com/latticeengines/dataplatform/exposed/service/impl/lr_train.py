@@ -1,8 +1,8 @@
 from sklearn import linear_model
 
 def train(trainingData, testData, schema, modelFile):
-    X_train = trainingData[:,0:4]
-    Y_train = trainingData[:,4]
+    X_train = trainingData[:, schema["featureIndex"]]
+    Y_train = trainingData[:, schema["targetIndex"]]
     
     clf = linear_model.LogisticRegression()
     clf.fit(X_train, Y_train)

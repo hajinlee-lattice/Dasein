@@ -15,16 +15,15 @@ class ArgumentParser(object):
     """
     def __init__(self, metadataFile):
         metadataJson = open(self.stripPath(metadataFile)).read()
-        logger.debug("JSON metadata %s" % (metadataJson))
+        logger.debug("JSON metadata %s" % metadataJson)
         self.metadataSchema = json.loads(metadataJson)
-        logger.debug("JSON data schema file name %s" % (self.stripPath(self.metadataSchema["schema"])))
+        logger.debug("JSON data schema file name %s" % self.stripPath(self.metadataSchema["schema"]))
         dataSchemaJsonData = open(self.stripPath(self.metadataSchema["schema"])).read()
-        logger.debug("JSON data schema %s" % (dataSchemaJsonData))
+        logger.debug("JSON data schema %s" % dataSchemaJsonData)
         dataSchema = json.loads(dataSchemaJsonData)
         self.fields = dataSchema["fields"]
         self.features = set(self.metadataSchema["features"])
         self.targets = set(self.metadataSchema["targets"])
-        print(self.features)
         
     def stripPath(self, fileName):
         return fileName[fileName.rfind('/')+1:len(fileName)]
@@ -42,6 +41,7 @@ class ArgumentParser(object):
     def createList(self, dataFileName):
         csvfile = open(dataFileName, 'Ur')
         tmp = []
+        self.featureIndex = set()
         for row in csv.reader(csvfile, delimiter=','):
             rowlist = []
             for i in range(len(row)):
@@ -49,10 +49,20 @@ class ArgumentParser(object):
                 fieldType = field["type"][0]
                 fieldName = field["name"]
                 if (fieldType != 'string' and (fieldName in self.features or fieldName in self.targets)):
+                    if fieldName in self.targets:
+                        self.targetIndex = i
+                    elif i not in self.featureIndex:
+                        self.featureIndex.add(i)
                     rowlist.append(self.convertType(row[i], fieldType))
             tmp.append(rowlist)
         return np.array(tmp)
     
     def getSchema(self):
         return self.metadataSchema
+    
+    def getFeatureTuple(self):
+        return tuple(self.featureIndex)
+    
+    def getTargetIndex(self):
+        return self.targetIndex
 

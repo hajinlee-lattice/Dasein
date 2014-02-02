@@ -52,6 +52,8 @@ if __name__ == "__main__":
     training = parser.createList(stripPath(schema["training_data"]))
     test = parser.createList(stripPath(schema["test_data"]))
     script = stripPath(schema["python_script"])
+    schema["featureIndex"] = parser.getFeatureTuple();
+    schema["targetIndex"] = parser.getTargetIndex()
     execfile(script)
     
     # Execute the packaged script from the client and get the returned file
