@@ -4,7 +4,10 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -14,12 +17,15 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -29,6 +35,7 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 
+@ContextConfiguration(locations = { "classpath:com/latticeengines/dataplatform/service/impl/JobServiceImplTestNG-context.xml" })
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
 	@Autowired
@@ -113,7 +120,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		jobService.killJob(applicationId);
 		
 	}
-
+	
 	@Test(groups="functional")
 	public void testSubmitPythonYarnJob() throws Exception {
 		Classifier classifier = new Classifier();
@@ -155,7 +162,6 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         return fmt;
 	}
 
-	/*
 	@Test(groups="functional")
 	public void testSubmitMRJob() throws Exception {
 		
@@ -193,12 +199,12 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 			}
 		}
 		
-		ApplicationId applicationId = jobService.submitMRJob("wordCountJob");
+		ApplicationId applicationId = jobService.submitMRJob("wordCountJob", null);
 		YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
 
 		state = getState(applicationId);
 		assertNotNull(state);
 		assertTrue(!state.equals(YarnApplicationState.FAILED));
 	}
-*/	
+
 }

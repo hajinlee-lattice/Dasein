@@ -13,6 +13,7 @@
        fs.defaultFS=${dataplatform.fs.defaultFS}
        yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
        yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
+       yarn.nodemanager.remote-app-log-dir=${dataplatform.yarn.nodemanager.remote-app-log-dir}
     </yarn:configuration>
       
 </beans>

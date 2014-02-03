@@ -31,6 +31,6 @@
             input-path="/input"
             output-path="/output"
             mapper="com.latticeengines.dataplatform.runtime.mapreduce.EventDataMapper"
-            reducer="com.latticeengines.dataplatform.service.impl.WordReducer"/>
+            reducer="com.latticeengines.dataplatform.runtime.mapreduce.EventDataReducer"/>
    
 </beans>

@@ -116,6 +116,13 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 	@Override
 	public ApplicationId submitMRJob(String mrJobName, Properties properties) {
 		Job job = getJob(mrJobName);
+		if (properties != null) {
+			Configuration config = job.getConfiguration();
+			for (Object key : properties.keySet()) {
+				config.set(key.toString(), properties.getProperty((String) key));
+			}
+		}
+
 		JobRunner runner = new JobRunner();
 		runner.setJob(job);
 		try {

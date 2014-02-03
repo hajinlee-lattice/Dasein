@@ -12,14 +12,9 @@
       http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
     
 	<yarn:localresources>
-	    <yarn:copy src="file:target/dependency/spring-beans*" dest="/lib/" />
-	    <yarn:copy src="file:target/dependency/spring-yarn*" dest="/lib/" />
-	    <yarn:copy src="file:target/dependency/spring-data*" dest="/lib/" />
-	    <yarn:copy src="file:target/dependency/spring-expression*" dest="/lib/" />
-	    <yarn:copy src="file:target/dependency/spring-co*" dest="/lib/" />
-	    <yarn:copy src="file:target/dependency/spring-aop*" dest="/lib/" />
-		<yarn:copy src="file:target/*.jar" dest="/app/kill-application/" />
-		<yarn:hdfs path="/app/kill-application/*.jar" visibility="PRIVATE"/>
+	    <yarn:copy src="file:target/dependency/*" dest="/lib/" />
+        <yarn:copy src="file:target/*.jar" dest="/app/dataplatform/" />
+		<yarn:hdfs path="/app/*.jar" visibility="PRIVATE"/>
 		<yarn:hdfs path="/lib/*" visibility="PUBLIC"/>
 	</yarn:localresources>
 
@@ -43,15 +38,16 @@
 		yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
 		yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
 		mapred.job.tracker=${dataplatform.mapred.job.tracker}
-		mapreduce.job.queuename=default
-		yarn.app.mapreduce.am.resource.cpu-vcores=2
+		yarn.app.mapreduce.am.resource.cpu-vcores=1
 		mapreduce.map.memory.mb=2048
-		mapreduce.map.cpu.vcores=2
+		mapreduce.reduce.memory.mb=2048
+		mapreduce.map.cpu.vcores=1
+		mapreduce.reduce.cpu.vcores=1
 	</hdp:configuration>
 
 	<hdp:cache create-symlink="true">
 		<hdp:classpath value="/lib/*.jar" />
-		<hdp:classpath value="/app/kill-application/le-dataplatform-1.0.0-SNAPSHOT-tests.jar" />
+		<hdp:classpath value="/app/dataplatform/*.jar" />
 	</hdp:cache>
 
 	<!-- Configures the word count job. -->
