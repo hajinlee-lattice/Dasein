@@ -205,6 +205,10 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		state = getState(applicationId);
 		assertNotNull(state);
 		assertTrue(!state.equals(YarnApplicationState.FAILED));
+
+		ApplicationReport app = jobService.getJobReportById(applicationId);
+		String log = HdfsHelper.getApplicationLog(yarnConfiguration, app.getUser(), applicationId.toString());
+		assertTrue(!log.isEmpty());
 	}
 
 }

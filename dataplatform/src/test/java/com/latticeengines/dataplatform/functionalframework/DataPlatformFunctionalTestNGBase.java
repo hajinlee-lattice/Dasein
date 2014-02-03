@@ -65,7 +65,11 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 		copyEntries.add(new CopyEntry("file:target/dependency/*.jar", "/lib", false));
 		copyEntries.add(new CopyEntry("file:src/main/python/launcher.py", "/app/dataplatform/scripts", false));
 		copyEntries.add(new CopyEntry("file:target/*.jar", "/app/dataplatform", false));
-		String dataplatformProps = "file:" + System.getProperty("DATAPLATFORM_PROPDIR") + "/dataplatform.properties";
+		String dataplatformPropDir = System.getProperty("DATAPLATFORM_PROPDIR");
+		if (StringUtils.isEmpty(dataplatformPropDir)) {
+			dataplatformPropDir = System.getenv().get("DATAPLATFORM_PROPDIR");
+		}
+		String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
 		copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
 		doCopy(fs, copyEntries);
 	}
