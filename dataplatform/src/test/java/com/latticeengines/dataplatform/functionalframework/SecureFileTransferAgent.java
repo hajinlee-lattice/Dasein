@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemOptions;
+import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.Selectors;
 import org.apache.commons.vfs.impl.StandardFileSystemManager;
 import org.apache.commons.vfs.provider.sftp.SftpFileSystemConfigBuilder;
@@ -59,6 +60,11 @@ public class SecureFileTransferAgent {
 
 			// Create remote file object
 			FileObject remoteFile = manager.resolveFile(sftpUri, opts);
+
+			if (remoteFile.getType() == FileType.FOLDER) {
+				log.error("cannot copy directories: " + remoteFile.getURL());
+				return false;
+			}
 
 			// Copy local file to sftp server
 			switch (option) {

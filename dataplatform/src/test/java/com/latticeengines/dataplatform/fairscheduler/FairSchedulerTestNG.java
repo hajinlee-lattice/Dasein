@@ -154,8 +154,8 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		out.println("</allocations>");
 		out.close();
 
-		secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(), remoteFairSchedulerFilePath,
-				FileTransferOption.UPLOAD);
+		assertTrue(secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(),
+				remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
 		Thread.sleep(15000L);
 		Properties configuration = new Properties();
@@ -345,8 +345,8 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		out.println("</allocations>");
 		out.close();
 
-		secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(), remoteFairSchedulerFilePath,
-				FileTransferOption.UPLOAD);
+		assertTrue(secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(),
+				remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
 		Properties configuration = new Properties();
 		configuration.put("mapreduce.job.queuename", "Common.FastLane");
@@ -417,8 +417,8 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		out.println("</allocations>");
 		out.close();
 
-		secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(), remoteFairSchedulerFilePath,
-				FileTransferOption.UPLOAD);
+		assertTrue(secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(),
+				remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
 		// Sleep for 20s to allow fair scheduler to pickup new setting
 		Thread.sleep(20000);
@@ -464,8 +464,8 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 	private void verifyPreemption(ApplicationId applicationId) throws IOException, FileNotFoundException {
 		File tempRMLogFile = File.createTempFile("resource-manager", ".log");
 
-		secureFileTransferAgent.fileTranser(tempRMLogFile.getAbsolutePath(), remoteRMLogPath,
-				FileTransferOption.DOWNLOAD);
+		assertTrue(secureFileTransferAgent.fileTranser(tempRMLogFile.getAbsolutePath(), remoteRMLogPath,
+				FileTransferOption.DOWNLOAD));
 
 		BufferedReader br = new BufferedReader(new FileReader(tempRMLogFile));
 		boolean isPreemptContainer = false;
