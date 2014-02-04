@@ -32,28 +32,48 @@ class ArgumentParser(object):
         return self.fields[index]
     
     def convertType(self, cell, fieldType):
-        if fieldType == "int":
+        if (fieldType == "int"):
             return int(cell)
-        elif fieldType == "float":
+        elif (fieldType == "float"):
             return float(cell)
         return cell
 
     def createList(self, dataFileName):
+        '''
+          Creates a numpy matrix from the data set in dataFileName. It only creates data in memory for features and targets.
+        '''
         csvfile = open(dataFileName, 'Ur')
         tmp = []
+        
+        # k is the index of the features/target in the resulting data
+        k = 0
+        # l is the index in the original data set
+        l = 0
+        included = set()
         self.featureIndex = set()
+        for f in self.fields:
+            fType = f["type"][0]
+            fName = f["name"]
+            if fType != 'string' and (fName in self.features or fName in self.targets):
+                included.add(l)
+                print("Adding " + fName)
+                if fName in self.targets:
+                    self.targetIndex = k
+                if fName in self.features:
+                    self.featureIndex.add(k)
+                k = k+1
+            l = l+1
+        
         for row in csv.reader(csvfile, delimiter=','):
             rowlist = []
-            for i in range(len(row)):
-                field = self.getField(i)
-                fieldType = field["type"][0]
-                fieldName = field["name"]
-                if (fieldType != 'string' and (fieldName in self.features or fieldName in self.targets)):
-                    if fieldName in self.targets:
-                        self.targetIndex = i
-                    elif i not in self.featureIndex:
-                        self.featureIndex.add(i)
-                    rowlist.append(self.convertType(row[i], fieldType))
+            if len(row) != len(self.fields):
+                msg = "Data-metadata mismatch. Metadata has %s, while data has %s fields." % (len(self.fields), len(row))
+                raise Exception(msg)
+            for i in included:
+                try:
+                    rowlist.append(self.convertType(row[i], self.getField(i)["type"][0]))
+                except Exception:
+                    print("Issue with index " + str(i))
             tmp.append(rowlist)
         return np.array(tmp)
     

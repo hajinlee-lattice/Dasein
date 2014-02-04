@@ -48,13 +48,6 @@ public class ClassifierUnitTestNG {
 
 	}
 	
-	@Test(groups = "unit")
-	public void createDemoClassifierJson() {
-		Classifier classifier = new Classifier();
-		classifier.setTrainingDataHdfsPath("/demo/train.dat");
-		classifier.setTrainingDataHdfsPath("/demo/test.dat");
-		classifier.setSchemaHdfsPath("/demo/metadata.json");
-	}
 }
 
 	
