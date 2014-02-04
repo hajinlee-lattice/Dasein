@@ -14,6 +14,8 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -30,6 +32,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInf
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -56,6 +59,8 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
 	@Value("${dataplatform.yarn.resourcemanager.log.location}")
 	private String remoteRMLogPath;
+
+	private List<ApplicationId> applcationsSubmittedPerTest = new LinkedList<ApplicationId>();
 
 	@BeforeMethod(groups = "functional")
 	public void setup() throws Exception {
@@ -105,7 +110,22 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
 	}
 
-	@Test(groups = "functional")
+	@AfterMethod(groups = "functional")
+	public void cleanUp() throws Exception {
+		
+		YarnApplicationState state;
+		for (ApplicationId appId : applcationsSubmittedPerTest) {
+			state = getState(appId);
+			if (state != null && !state.equals(YarnApplicationState.FAILED) &&
+					!state.equals(YarnApplicationState.FINISHED) &&
+					!state.equals(YarnApplicationState.KILLED)) {
+				jobService.killJob(appId);
+			};
+		}
+		applcationsSubmittedPerTest.clear();
+	}
+
+	@Test(groups = "functional", enabled = true)
 	public void testFairSchedulerJobVIP() throws Exception {
 
 		File tempFairSchedulerFile = File.createTempFile("fair-scheduler", ".xml");
@@ -157,14 +177,17 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		assertTrue(secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(),
 				remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
-		Thread.sleep(15000L);
+		Thread.sleep(20000L);
 		Properties configuration = new Properties();
 		configuration.put("mapreduce.job.queuename", "Dell.FastLane");
 		ApplicationId applicationIdDell = jobService.submitMRJob("wordCountJob1", configuration);
+		applcationsSubmittedPerTest.add(applicationIdDell);
 		configuration.put("mapreduce.job.queuename", "HP.FastLane");
 		ApplicationId applicationIdHP = jobService.submitMRJob("wordCountJob2", configuration);
+		applcationsSubmittedPerTest.add(applicationIdHP);
 		configuration.put("mapreduce.job.queuename", "VIP.FastLane");
 		ApplicationId applicationIdVIP = jobService.submitMRJob("wordCountJob", configuration);
+		applcationsSubmittedPerTest.add(applicationIdVIP);
 		YarnApplicationState state = waitState(applicationIdVIP, 300, TimeUnit.SECONDS, YarnApplicationState.FAILED,
 				YarnApplicationState.FINISHED);
 
@@ -178,21 +201,17 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		if (state.equals(YarnApplicationState.FINISHED)) {
 			long dellJobFinishTime = jobService.getJobReportById(applicationIdDell).getFinishTime();
 			assertTrue(dellJobFinishTime >= vipJobFinishTime);
-		} else {
-			jobService.killJob(applicationIdDell);
 		}
 
 		state = getState(applicationIdHP);
 		if (state.equals(YarnApplicationState.FINISHED)) {
 			long hpJobFinishTime = jobService.getJobReportById(applicationIdHP).getFinishTime();
 			assertTrue(hpJobFinishTime >= vipJobFinishTime);
-		} else {
-			jobService.killJob(applicationIdHP);
 		}
 
 	}
 
-	@Test(groups = "functional")
+	@Test(groups = "functional", enabled = true)
 	public void testFairSchedulerJobFailure() throws Exception {
 
 		File tempFairSchedulerFile = File.createTempFile("fair-scheduler", ".xml");
@@ -256,14 +275,17 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(), remoteFairSchedulerFilePath,
 				FileTransferOption.UPLOAD);
 
-		Thread.sleep(15000L);
+		Thread.sleep(20000L);
 		Properties configuration = new Properties();
 		configuration.put("mapreduce.job.queuename", "Common.FastLane");
 		ApplicationId applicationId = jobService.submitMRJob("wordCountJob", configuration);
+		applcationsSubmittedPerTest.add(applicationId);
 		configuration.put("mapreduce.job.queuename", "Dell.FastLane");
 		ApplicationId applicationId2 = jobService.submitMRJob("wordCountJob1", configuration);
+		applcationsSubmittedPerTest.add(applicationId2);
 		configuration.put("mapreduce.job.queuename", "HP.FastLane");
 		ApplicationId applicationId3 = jobService.submitMRJob("wordCountJob2", configuration);
+		applcationsSubmittedPerTest.add(applicationId3);
 		YarnApplicationState state = waitState(applicationId2, 120, TimeUnit.SECONDS, YarnApplicationState.FAILED,
 				YarnApplicationState.FINISHED);
 		assertNotNull(state);
@@ -283,7 +305,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		verifyPreemption(applicationId);
 	}
 
-	@Test(groups = "functional")
+	@Test(groups = "functional", enabled = true)
 	public void testFairSchedulerJob() throws Exception {
 
 		File tempFairSchedulerFile = File.createTempFile("fair-scheduler", ".xml");
@@ -348,13 +370,17 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		assertTrue(secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(),
 				remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
+		Thread.sleep(20000L);
 		Properties configuration = new Properties();
 		configuration.put("mapreduce.job.queuename", "Common.FastLane");
 		ApplicationId applicationId = jobService.submitMRJob("wordCountJob", configuration);
+		applcationsSubmittedPerTest.add(applicationId);
 		configuration.put("mapreduce.job.queuename", "Dell.FastLane");
 		ApplicationId applicationId2 = jobService.submitMRJob("wordCountJob1", configuration);
+		applcationsSubmittedPerTest.add(applicationId2);
 		configuration.put("mapreduce.job.queuename", "HP.FastLane");
 		ApplicationId applicationId3 = jobService.submitMRJob("wordCountJob2", configuration);
+		applcationsSubmittedPerTest.add(applicationId3);
 		YarnApplicationState state = waitState(applicationId, 300, TimeUnit.SECONDS, YarnApplicationState.FAILED,
 				YarnApplicationState.FINISHED);
 
@@ -371,7 +397,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
 	}
 
-	@Test(groups = "functional")
+	@Test(groups = "functional", enabled = true)
 	public void testFairSchedulerPreemptingJob() throws Exception {
 
 		File tempFairSchedulerFile = File.createTempFile("fair-scheduler", ".xml");
@@ -421,7 +447,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 				remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
 		// Sleep for 20s to allow fair scheduler to pickup new setting
-		Thread.sleep(20000);
+		Thread.sleep(20000L);
 
 		// SchedulerInfo is private field from SchedulerTypeInfo
 		SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
@@ -442,10 +468,12 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		Properties configuration = new Properties();
 		configuration.put("mapreduce.job.queuename", "Common.FastLane");
 		ApplicationId applicationId = jobService.submitMRJob("wordCountJob", configuration);
+		applcationsSubmittedPerTest.add(applicationId);
 		Thread.sleep(10000);
 		configuration.put("mapreduce.job.queuename", "Dell.FastLane");
 		// configuration.put("mapreduce.map.memory.mb", "4096");
 		ApplicationId applicationId2 = jobService.submitMRJob("wordCountJob1", configuration);
+		applcationsSubmittedPerTest.add(applicationId2);
 		YarnApplicationState state = waitState(applicationId, 600, TimeUnit.SECONDS, YarnApplicationState.FAILED,
 				YarnApplicationState.FINISHED);
 
@@ -492,6 +520,46 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 			br.close();
 		}
 		assertTrue(isPreemptContainer);
+	}
+
+	@Test(groups = "functional", enabled = true)
+	public void testFairSchedulerDisableQueue() throws Exception {
+
+		File tempFairSchedulerFile = File.createTempFile("fair-scheduler", ".xml");
+
+		// Fair Scheduler won't remove existing queue after refresh even if that
+		// queue is removed from fair-scheduler.xml
+		PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
+		out.println("<?xml version=\"1.0\"?>");
+		out.println("<allocations>");
+		out.println("	<queue name=\"DisabledQueue\">");
+		out.println("		<weight>2</weight>");
+		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+		out.println("		<queue name=\"FastLane\">");
+		out.println("			<weight>2</weight>");
+		out.println("			<maxRunningApps>0</maxRunningApps>");
+		out.println("			<maxResources>0 mb,0 vcores</maxResources>");
+		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+		out.println("		</queue>");
+		out.println("	</queue>");
+		out.println("	<defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
+		out.println("	<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+		out.println("</allocations>");
+		out.close();
+
+		assertTrue(secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(),
+				remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
+
+		Thread.sleep(20000L);
+		Properties configuration = new Properties();
+		configuration.put("mapreduce.job.queuename", "DisabledQueue.FastLane");
+		ApplicationId applicationId = jobService.submitMRJob("wordCountJob", configuration);
+		applcationsSubmittedPerTest.add(applicationId);
+		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS);
+		assertNotNull(state);
+		assertTrue(state.equals(YarnApplicationState.ACCEPTED));
+
 	}
 
 }
