@@ -76,6 +76,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 	@Override
 	public ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties, Properties containerProperties) {
 		CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
+		yarnClientCustomizationService.validate(client, yarnClientName, appMasterProperties, containerProperties);
 		yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties, containerProperties);
 		ApplicationId applicationId = client.submitApplication();
 		return applicationId;

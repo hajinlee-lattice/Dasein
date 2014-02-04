@@ -47,6 +47,14 @@ public class ClassifierUnitTestNG {
 		assertEquals(deserializedClassifier.toString(), jsonString);
 
 	}
+	
+	@Test(groups = "unit")
+	public void createDemoClassifierJson() {
+		Classifier classifier = new Classifier();
+		classifier.setTrainingDataHdfsPath("/demo/train.dat");
+		classifier.setTrainingDataHdfsPath("/demo/test.dat");
+		classifier.setSchemaHdfsPath("/demo/metadata.json");
+	}
 }
 
 	

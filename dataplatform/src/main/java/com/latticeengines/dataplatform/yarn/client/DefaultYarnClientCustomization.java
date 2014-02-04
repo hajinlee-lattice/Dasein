@@ -121,5 +121,11 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 	@Override
 	public void beforeCreateLocalLauncherContextFile(Properties properties) {
 	}
-	
+
+	@Override
+	public void validate(Properties appMasterProperties,
+			Properties containerProperties) {
+		
+	}
+
 }

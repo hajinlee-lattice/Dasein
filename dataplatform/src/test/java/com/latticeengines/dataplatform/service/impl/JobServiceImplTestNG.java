@@ -127,7 +127,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 	public void testSubmitPythonYarnJob() throws Exception {
 		Classifier classifier = new Classifier();
 		classifier.setName("IrisClassifier");
-		classifier.setFeatures(Arrays.<String>asList(new String[] { "" }));
+		classifier.setFeatures(Arrays.<String>asList(new String[] { "sepal_length", "sepal_width", "petal_length", "petal_width"}));
 		classifier.setTargets(Arrays.<String>asList(new String[] { "category" }));
 		classifier.setSchemaHdfsPath("/datascientist1/iris.json");
 		classifier.setModelHdfsDir("/datascientist1/result");
@@ -160,7 +160,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 	}
 	
 
-	@Test(groups="functional")
+	@Test(groups = "functional", enabled = true)
 	public void testSubmitMRJob() throws Exception {
 		
 		Configuration conf = (Configuration) applicationContext.getBean("hadoopConfiguration");

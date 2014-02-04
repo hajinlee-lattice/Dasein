@@ -31,4 +31,6 @@ public interface YarnClientCustomization {
 	String getContainerLauncherContextFile(Properties properties);
 	
 	List<String> getCommands(Properties properties);
+	
+	void validate(Properties appMasterProperties, Properties containerProperties);
 }

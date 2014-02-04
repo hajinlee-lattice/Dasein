@@ -1,0 +1,1 @@
+{"name":"NeuralNetworkClassifier","training_data":"/training/train.dat","test_data":"/test/test.dat","python_script":"/datascientist1/lr_train.py","features":["sepal_length","sepal_width","petal_width", "petal_length"],"targets":["category"],"model_data_dir":"/datascientist1/result","schema":"/datascientist1/iris.json"}

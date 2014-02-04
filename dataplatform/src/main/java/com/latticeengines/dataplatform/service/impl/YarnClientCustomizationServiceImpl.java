@@ -96,4 +96,15 @@ public class YarnClientCustomizationServiceImpl implements
 		}
 	}
 
+	@Override
+	public void validate(CommandYarnClient client, String clientName,
+			Properties appMasterProperties, Properties containerProperties) {
+		YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
+		if (customization == null) {
+			return;
+		}
+		customization.validate(appMasterProperties, containerProperties);
+	}
+	
+
 }
