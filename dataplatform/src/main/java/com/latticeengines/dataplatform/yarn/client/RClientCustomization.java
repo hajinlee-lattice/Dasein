@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.yarn.client;
 
+import java.util.Properties;
+
 import org.apache.hadoop.conf.Configuration;
 
 public class RClientCustomization extends DefaultYarnClientCustomization {
@@ -14,7 +16,7 @@ public class RClientCustomization extends DefaultYarnClientCustomization {
 	}
 
 	@Override
-	public String getContainerLauncherContextFile() {
+	public String getContainerLauncherContextFile(Properties properties) {
 		return "/R/dataplatform-R-appmaster-context.xml";
 	}
 

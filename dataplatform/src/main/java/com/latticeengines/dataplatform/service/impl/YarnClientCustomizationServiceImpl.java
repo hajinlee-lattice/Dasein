@@ -28,21 +28,20 @@ public class YarnClientCustomizationServiceImpl implements
 	private YarnClientCustomizationRegistry yarnClientCustomizationRegistry;
 
 	@Override
-	public void addCustomizations(CommandYarnClient client, String clientName,
-			Properties containerProperties) {
+	public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties, Properties containerProperties) {
 		
 		YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
 		if (customization == null) {
 			return;
 		}
 		customization.beforeCreateLocalLauncherContextFile(containerProperties);
-		String fileName = createContainerLauncherContextFile(customization, containerProperties);
+		String fileName = createContainerLauncherContextFile(customization, appMasterProperties, containerProperties);
 		containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
 		ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer(containerProperties);
-		int memory = customization.getMemory();
-		int virtualCores = customization.getVirtualcores();
-		int priority = customization.getPriority();
-		String queue = customization.getQueue();
+		int memory = customization.getMemory(appMasterProperties);
+		int virtualCores = customization.getVirtualcores(appMasterProperties);
+		int priority = customization.getPriority(appMasterProperties);
+		String queue = customization.getQueue(appMasterProperties);
 		List<String> commands = customization.getCommands(containerProperties);
 
 		if (resourceLocalizer != null) {
@@ -73,8 +72,9 @@ public class YarnClientCustomizationServiceImpl implements
 
 	private String createContainerLauncherContextFile(
 			YarnClientCustomization customization,
+			Properties appMasterProperties,
 			Properties containerProperties) {
-		String contextFileName = customization.getContainerLauncherContextFile();
+		String contextFileName = customization.getContainerLauncherContextFile(appMasterProperties);
 		InputStream contextFileUrlFromClasspathAsStream = getClass().getResourceAsStream(contextFileName);
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		try {

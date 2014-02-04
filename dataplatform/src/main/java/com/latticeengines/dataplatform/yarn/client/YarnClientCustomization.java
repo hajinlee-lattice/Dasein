@@ -20,15 +20,15 @@ public interface YarnClientCustomization {
 	
 	Collection<TransferEntry> getHdfsEntries(Properties properties);
 	
-	int getMemory();
+	int getMemory(Properties properties);
 	
-	int getPriority();
+	int getPriority(Properties properties);
 	
-	String getQueue();
+	String getQueue(Properties properties);
 	
-	int getVirtualcores();
+	int getVirtualcores(Properties properties);
 	
-	String getContainerLauncherContextFile();
+	String getContainerLauncherContextFile(Properties properties);
 	
 	List<String> getCommands(Properties properties);
 }

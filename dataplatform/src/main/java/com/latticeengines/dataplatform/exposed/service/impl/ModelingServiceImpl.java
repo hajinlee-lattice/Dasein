@@ -37,13 +37,15 @@ public class ModelingServiceImpl implements ModelingService {
 			classifier.setFeatures(model.getFeatures());
 			classifier.setTargets(model.getTargets());
 			classifier.setPythonScriptHdfsPath(algorithm.getScript());
+			Properties appMasterProperties = new Properties();
+			appMasterProperties.put("QUEUE", model.getQueue() + ".Priority" + algorithm.getPriority());
 			Properties containerProperties = new Properties();
 			containerProperties.put("VIRTUALCORES", "1");
 			containerProperties.put("MEMORY", "64");
 			containerProperties.put("PRIORITY", "0");
 			containerProperties.put("METADATA", classifier.toString());
 			
-			applicationIds.add(jobService.submitYarnJob("pythonClient", containerProperties));
+			applicationIds.add(jobService.submitYarnJob("pythonClient", appMasterProperties, containerProperties));
 		}
 		return applicationIds;
 	}

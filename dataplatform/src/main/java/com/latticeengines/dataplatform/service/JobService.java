@@ -14,7 +14,7 @@ public interface JobService {
 
 	List<ApplicationReport> getJobReportByUser(String user);
 
-	ApplicationId submitYarnJob(String yarnClientName, Properties properties);
+	ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties, Properties containerProperties);
 
 	ApplicationId submitMRJob(String mrJobName, Properties properties);
 

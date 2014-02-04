@@ -13,6 +13,7 @@ public class Algorithm implements HasName {
 	private String script;
 	private String containerProperties;
 	private String algorithmProperties;
+	private int priority;
 	
 	@Override
 	@JsonProperty("name")
@@ -79,6 +80,16 @@ public class Algorithm implements HasName {
 	@Override
 	public String toString() {
 		return JsonHelper.serialize(this);
+	}
+
+	@JsonProperty("priority")
+	public int getPriority() {
+		return priority;
+	}
+
+	@JsonProperty("priority")
+	public void setPriority(int priority) {
+		this.priority = priority;
 	}
 
 }

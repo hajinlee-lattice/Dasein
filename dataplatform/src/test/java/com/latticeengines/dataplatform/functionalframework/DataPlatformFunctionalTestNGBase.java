@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.functionalframework;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -72,6 +73,13 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 		String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
 		copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
 		doCopy(fs, copyEntries);
+	}
+	
+	protected NumberFormat getAppIdFormat() {
+        NumberFormat fmt = NumberFormat.getInstance();
+        fmt.setGroupingUsed(false);
+        fmt.setMinimumIntegerDigits(4);
+        return fmt;
 	}
 	
 	protected void doCopy(FileSystem fs, List<CopyEntry> copyEntries) throws Exception {

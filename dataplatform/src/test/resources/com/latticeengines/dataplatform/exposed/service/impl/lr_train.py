@@ -12,6 +12,7 @@ def train(trainingData, testData, schema, modelFile):
     writeModel(modelFile, coefficients, intercept)
 
 def writeModel(modelFile, coefficients, intercept):
+    modelFile.write("Logistic Regression Model\n")
     numCoeff = len(coefficients) 
     modelFile.write(str(numCoeff) + "\n")
     for i in range(0, numCoeff):

@@ -6,5 +6,5 @@ import org.springframework.yarn.client.CommandYarnClient;
 
 public interface YarnClientCustomizationService {
 
-	void addCustomizations(CommandYarnClient client, String clientName, Properties properties);
+	void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties, Properties containerProperties);
 }

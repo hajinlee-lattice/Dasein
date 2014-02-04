@@ -68,27 +68,30 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 	}
 
 	@Override
-	public int getMemory() {
-		return -1;
+	public int getMemory(Properties properties) {
+		String memory = properties.getProperty(AppMasterProperty.MEMORY.name(), "-1");
+		return Integer.parseInt(memory);
 	}
 
 	@Override
-	public int getPriority() {
-		return -1;
+	public int getPriority(Properties properties) {
+		String priority = properties.getProperty(AppMasterProperty.PRIORITY.name(), "-1");
+		return Integer.parseInt(priority);
 	}
 
 	@Override
-	public String getQueue() {
-		return null;
+	public String getQueue(Properties properties) {
+		return properties.getProperty(AppMasterProperty.QUEUE.name());
 	}
 
 	@Override
-	public int getVirtualcores() {
-		return -1;
+	public int getVirtualcores(Properties properties) {
+		String virtualCores = properties.getProperty(AppMasterProperty.VIRTUALCORES.name(), "-1");
+		return Integer.parseInt(virtualCores);
 	}
 
 	@Override
-	public String getContainerLauncherContextFile() {
+	public String getContainerLauncherContextFile(Properties properties) {
 		return "/default/dataplatform-default-appmaster-context.xml";
 	}
 

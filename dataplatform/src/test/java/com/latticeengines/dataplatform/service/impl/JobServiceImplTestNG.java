@@ -79,11 +79,12 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 	
 	@Test(groups="functional", enabled=false)
 	public void testKillApplication() throws Exception {
+		Properties appMasterProperties = new Properties();
 		Properties containerProperties = new Properties();
 		containerProperties.put("VIRTUALCORES", "1");
 		containerProperties.put("MEMORY", "64");
 		containerProperties.put("PRIORITY", "0");
-		ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", containerProperties);
+		ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
 		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
 		assertNotNull(state);
 		jobService.killJob(applicationId);
@@ -94,11 +95,12 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
 	@Test(groups="functional", enabled=false)
 	public void testGetJobReportByUser() throws Exception {
+		Properties appMasterProperties = new Properties();
 		Properties containerProperties = new Properties();
 		containerProperties.put("VIRTUALCORES", "1");
 		containerProperties.put("MEMORY", "64");
 		containerProperties.put("PRIORITY", "0");
-		ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", containerProperties);
+		ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
 		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
 		assertNotNull(state);
 		jobService.killJob(applicationId);
@@ -112,7 +114,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		int numJobs = reports.size();
 		assertTrue(numJobs > 0);
 		
-		applicationId = jobService.submitYarnJob("defaultYarnClient", containerProperties);
+		applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
 		
 		state = waitState(applicationId, 10, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
 		reports = jobService.getJobReportByUser(app.getUser());
@@ -133,13 +135,15 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		classifier.setTrainingDataHdfsPath("/training/nn_train.dat");
 		classifier.setTestDataHdfsPath("/test/nn_test.dat");
 		
+		Properties appMasterProperties = new Properties();
+		
 		Properties containerProperties = new Properties();
 		containerProperties.put("VIRTUALCORES", "1");
 		containerProperties.put("MEMORY", "64");
 		containerProperties.put("PRIORITY", "0");
 		containerProperties.put("METADATA", classifier.toString());
 		
-		ApplicationId applicationId = jobService.submitYarnJob("pythonClient", containerProperties);
+		ApplicationId applicationId = jobService.submitYarnJob("pythonClient", appMasterProperties, containerProperties);
 		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
 		assertNotNull(state);
 		ApplicationReport app = jobService.getJobReportById(applicationId);
@@ -155,12 +159,6 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		assertEquals(modelContents.trim(), "this is the generated model.");
 	}
 	
-	private NumberFormat getAppIdFormat() {
-        NumberFormat fmt = NumberFormat.getInstance();
-        fmt.setGroupingUsed(false);
-        fmt.setMinimumIntegerDigits(4);
-        return fmt;
-	}
 
 	@Test(groups="functional")
 	public void testSubmitMRJob() throws Exception {

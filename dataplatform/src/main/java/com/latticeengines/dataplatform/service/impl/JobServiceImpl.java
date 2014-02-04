@@ -74,9 +74,9 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 	}
 
 	@Override
-	public ApplicationId submitYarnJob(String yarnClientName, Properties properties) {
+	public ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties, Properties containerProperties) {
 		CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
-		yarnClientCustomizationService.addCustomizations(client, yarnClientName, properties);
+		yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties, containerProperties);
 		ApplicationId applicationId = client.submitApplication();
 		return applicationId;
 	}
@@ -161,12 +161,17 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 				"dataplatform-context.xml",
 				"dataplatform-properties-context.xml");
 		JobService jobService = (JobService) context.getBean("jobService");
+		Properties appMasterProperties = new Properties();
+		appMasterProperties.put("VIRTUALCORES", "1");
+		appMasterProperties.put("MEMORY", "64");
+		appMasterProperties.put("PRIORITY", "0");
+
 		Properties containerProperties = new Properties();
 		containerProperties.put("VIRTUALCORES", "1");
 		containerProperties.put("MEMORY", "64");
 		containerProperties.put("PRIORITY", "0");
 
-		jobService.submitYarnJob("defaultYarnClient", containerProperties);
+		jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
 	}
 
 }

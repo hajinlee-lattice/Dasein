@@ -13,6 +13,7 @@ public class Model implements HasName {
 	private String testDataHdfsPath;
 	private String schemaHdfsPath;
 	private String modelHdfsDir;
+	private String queue;
 	private List<String> features;
 	private List<String> targets;
 	private ModelDefinition modelDefinition;
@@ -102,6 +103,16 @@ public class Model implements HasName {
 	@Override
 	public String toString() {
 		return JsonHelper.serialize(this);
+	}
+
+	@JsonProperty("queue")
+	public String getQueue() {
+		return queue;
+	}
+
+	@JsonProperty("queue")
+	public void setQueue(String queue) {
+		this.queue = queue;
 	}
 
 }

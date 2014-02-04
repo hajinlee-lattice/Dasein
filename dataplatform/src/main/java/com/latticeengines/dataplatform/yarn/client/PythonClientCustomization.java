@@ -25,7 +25,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 	}
 
 	@Override
-	public String getContainerLauncherContextFile() {
+	public String getContainerLauncherContextFile(Properties properties) {
 		return "/python/dataplatform-python-appmaster-context.xml";
 	}
 
