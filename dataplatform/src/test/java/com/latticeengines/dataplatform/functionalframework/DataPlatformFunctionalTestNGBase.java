@@ -90,7 +90,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return fmt;
 	}
 	
-	protected void doCopy(FileSystem fs, List<CopyEntry> copyEntries) throws Exception {
+	public void doCopy(FileSystem fs, List<CopyEntry> copyEntries) throws Exception {
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		
 		for (CopyEntry e : copyEntries) {
