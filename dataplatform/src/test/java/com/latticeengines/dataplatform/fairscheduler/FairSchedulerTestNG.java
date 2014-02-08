@@ -397,6 +397,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Test(groups = "functional", enabled = true)
 	public void testFairSchedulerPreemptingJob() throws Exception {
 

@@ -8,8 +8,6 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
@@ -25,8 +23,6 @@ import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
-	private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
-	
 	public PythonClientCustomization(Configuration configuration) {
 		super(configuration);
 	}

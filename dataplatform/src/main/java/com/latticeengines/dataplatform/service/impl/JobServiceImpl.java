@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.data.hadoop.mapreduce.JobRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.CommandYarnClient;
@@ -155,25 +154,6 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 			}
 		}
 		return null;
-	}
-
-	public static void main(String[] args) throws Exception {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
-				"dataplatform-context.xml",
-				"dataplatform-properties-context.xml");
-		JobService jobService = (JobService) context.getBean("jobService");
-		Properties appMasterProperties = new Properties();
-		appMasterProperties.put("VIRTUALCORES", "1");
-		appMasterProperties.put("MEMORY", "64");
-		appMasterProperties.put("PRIORITY", "0");
-
-		Properties containerProperties = new Properties();
-		containerProperties.put("VIRTUALCORES", "1");
-		containerProperties.put("MEMORY", "64");
-		containerProperties.put("PRIORITY", "0");
-
-		jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
-		
 	}
 
 }
