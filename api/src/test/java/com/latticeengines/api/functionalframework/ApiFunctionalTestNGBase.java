@@ -30,7 +30,7 @@ public class ApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 		return true;
 	}
 	
-	@BeforeClass(groups="functional")
+	@BeforeClass(groups = "functional")
 	public void setupRunEnvironment() throws Exception {
 		if (!doYarnClusterSetup()) {
 			return;
