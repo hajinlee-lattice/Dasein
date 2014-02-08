@@ -13,6 +13,7 @@
         <hadoop.version>2.2.0.2.0.6.0-76</hadoop.version>
         <spring.data.version>2.0.0.M4-hadoop22</spring.data.version>
         <avro.version>1.7.6</avro.version>
+        <sqoop.version>1.4.4</sqoop.version>
     </properties>
 
     <parent>
@@ -85,16 +86,16 @@
             <artifactId>spring-data-hadoop</artifactId>
             <version>${spring.data.version}</version>
         </dependency>
-	    <dependency>
-	        <groupId>org.springframework.data</groupId>
-	        <artifactId>spring-yarn-core</artifactId>
-	        <version>${spring.data.version}</version>
-	    </dependency>    
-	    <dependency>
-	        <groupId>org.springframework.data</groupId>
-	        <artifactId>spring-yarn-test</artifactId>
-	        <version>${spring.data.version}</version>
-	    </dependency> 
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-yarn-core</artifactId>
+            <version>${spring.data.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-yarn-test</artifactId>
+            <version>${spring.data.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
@@ -105,7 +106,18 @@
             <artifactId>avro-mapred</artifactId>
             <version>${avro.version}</version>
         </dependency>
-	       	    	    
+        <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>sqljdbc4</artifactId>
+            <version>3.0</version>
+        </dependency>
+        <!-- 
+        <dependency>
+            <groupId>org.apache.sqoop</groupId>
+            <artifactId>sqoop</artifactId>
+            <version>${sqoop.version}</version>
+        </dependency>
+        -->
     </dependencies>
 
 </project>

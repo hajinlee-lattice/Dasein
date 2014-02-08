@@ -157,7 +157,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 		return null;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"dataplatform-context.xml",
 				"dataplatform-properties-context.xml");
@@ -173,6 +173,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 		containerProperties.put("PRIORITY", "0");
 
 		jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
+		
 	}
 
 }

@@ -19,10 +19,7 @@ public class EventDataProcessorJob extends Configured implements Tool {
 		Path outPath = new Path(args[1]);
 		FileOutputFormat.setOutputPath(job, outPath);
 		job.setJarByClass(EventDataProcessorJob.class);
-
-		//AvroJob.setInputSchema(jobConf, IN_SCHEMA);
-		//AvroJob.setOutputSchema(jobConf, OUT_SCHEMA);
-
+		
 		job.setMapperClass(EventDataMapper.class);
 		job.setReducerClass(EventDataReducer.class);
 
