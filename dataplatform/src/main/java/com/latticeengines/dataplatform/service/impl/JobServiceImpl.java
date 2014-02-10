@@ -77,8 +77,13 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 		CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
 		yarnClientCustomizationService.validate(client, yarnClientName, appMasterProperties, containerProperties);
 		yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties, containerProperties);
-		ApplicationId applicationId = client.submitApplication();
-		return applicationId;
+		
+		try {
+			ApplicationId applicationId = client.submitApplication();
+			return applicationId;
+		} finally {
+			yarnClientCustomizationService.finalize(yarnClientName, appMasterProperties, containerProperties);
+		}
 	}
 
 	@Override
@@ -93,8 +98,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 				throw new IllegalStateException(
 						"Yarn client name cannot be empty.");
 			}
-			YarnClient client = (YarnClient) applicationContext
-					.getBean(yarnClientName);
+			YarnClient client = (YarnClient) applicationContext.getBean(yarnClientName);
 			return client;
 		} catch (Throwable e) {
 			log.error("Error while getting yarnClient for application "

@@ -9,4 +9,6 @@ public interface YarnClientCustomizationService {
 	void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties, Properties containerProperties);
 	
 	void validate(CommandYarnClient client, String clientName, Properties appMasterProperties, Properties containerProperties);
+
+	void finalize(String clientName, Properties appMasterProperties, Properties containerProperties);
 }

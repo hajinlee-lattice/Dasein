@@ -33,4 +33,6 @@ public interface YarnClientCustomization {
 	List<String> getCommands(Properties properties);
 	
 	void validate(Properties appMasterProperties, Properties containerProperties);
+	
+	void finalize(Properties appMasterProperties, Properties containerProperties);
 }

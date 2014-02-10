@@ -8,6 +8,8 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
@@ -22,6 +24,8 @@ import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
+	
+	private static final Log log = LogFactory.getLog(PythonClientCustomization.class);	
 
 	public PythonClientCustomization(Configuration configuration) {
 		super(configuration);
@@ -111,6 +115,19 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 			}
 		}
 		
+	}
+
+	@Override
+	public void finalize(Properties appMasterProperties, Properties containerProperties) {
+		super.finalize(appMasterProperties, containerProperties);
+		String metadataFileName = containerProperties.getProperty(PythonContainerProperty.METADATA.name());
+		
+		if (metadataFileName != null) {
+			File metadataFile = new File(metadataFileName);
+			if (!metadataFile.delete()) {
+				log.warn("Could not delete metadata file " + metadataFileName);
+			}
+		}
 	}
 
 }

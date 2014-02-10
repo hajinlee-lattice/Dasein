@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
@@ -18,6 +20,7 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
 public class DefaultYarnClientCustomization implements YarnClientCustomization {
+	private static final Log log = LogFactory.getLog(DefaultYarnClientCustomization.class);
 
 	protected Configuration configuration;
 
@@ -126,6 +129,18 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 	public void validate(Properties appMasterProperties,
 			Properties containerProperties) {
 		
+	}
+
+	@Override
+	public void finalize(Properties appMasterProperties, Properties containerProperties) {
+		String contextFileName = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
+		
+		if (contextFileName != null) {
+			File contextFile = new File(contextFileName);
+			if (!contextFile.delete()) {
+				log.warn("Could not delete launch context file " + contextFileName);
+			}
+		}
 	}
 
 }

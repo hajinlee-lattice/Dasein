@@ -86,7 +86,9 @@ public class YarnClientCustomizationServiceImpl implements
 					sb = sb.replaceAll("\\$\\$" + entry.getKey().toString() + "\\$\\$", entry.getValue().toString());
 				}
 			}
+			contextFileName = contextFileName.substring(1);
 			contextFileName = contextFileName.replaceFirst("/", "-");
+			
 			File contextFile = new File(contextFileName + "-" + System.currentTimeMillis());
 			FileUtils.write(contextFile, sb);
 			return contextFile.getAbsolutePath();
@@ -104,6 +106,13 @@ public class YarnClientCustomizationServiceImpl implements
 			return;
 		}
 		customization.validate(appMasterProperties, containerProperties);
+	}
+
+	@Override
+	public void finalize(String clientName, Properties appMasterProperties,
+			Properties containerProperties) {
+		YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
+		customization.finalize(appMasterProperties, containerProperties);
 	}
 	
 

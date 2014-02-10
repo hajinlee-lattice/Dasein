@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -32,8 +33,10 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.util.HdfsHelper;
+import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
 @ContextConfiguration(locations = { "classpath:com/latticeengines/dataplatform/service/impl/JobServiceImplTestNG-context.xml" })
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
@@ -41,7 +44,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 	@Autowired
 	private JobService jobService;
 	
-	@BeforeClass(groups="functional")
+	@BeforeClass(groups = "functional")
 	public void setup() throws Exception {
 		FileSystem fs = FileSystem.get(yarnConfiguration);
 
@@ -71,13 +74,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		doCopy(fs, copyEntries);
 	}
 
-	@Test(groups="functional", enabled=false)
+	@Test(groups = "functional", enabled = false)
 	public void testGetJobReportsAll() throws Exception {
 		List<ApplicationReport> applications = jobService.getJobReportsAll();
 		assertNotNull(applications);
 	}
 	
-	@Test(groups="functional", enabled=false)
+	@Test(groups = "functional", enabled = false)
 	public void testKillApplication() throws Exception {
 		Properties appMasterProperties = new Properties();
 		Properties containerProperties = new Properties();
@@ -93,7 +96,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		assertTrue(state.equals(YarnApplicationState.KILLED));
 	}
 
-	@Test(groups="functional", enabled=false)
+	@Test(groups = "functional", enabled = false)
 	public void testGetJobReportByUser() throws Exception {
 		Properties appMasterProperties = new Properties();
 		Properties containerProperties = new Properties();
@@ -123,7 +126,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		
 	}
 	
-	@Test(groups="functional")
+	@Test(groups = "functional")
 	public void testSubmitPythonYarnJob() throws Exception {
 		Classifier classifier = new Classifier();
 		classifier.setName("IrisClassifier");
@@ -157,6 +160,12 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 				"/datascientist1/result/" + jobId).get(0);
 		String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, modelFile);
 		assertEquals(modelContents.trim(), "this is the generated model.");
+		
+		String contextFileName = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
+		String metadataFileName = containerProperties.getProperty(PythonContainerProperty.METADATA.name());
+		
+		assertFalse(new File(contextFileName).exists());
+		assertFalse(new File(metadataFileName).exists());
 	}
 	
 
