@@ -393,7 +393,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 										+ runTime + " seconds");
 							} else {
 								System.out.println("				" + appId + " state " + report.getYarnApplicationState()
-										+ " FinalStatus" + report.getFinalApplicationStatus());
+										+ " FinalStatus " + report.getFinalApplicationStatus());
 							}
 						}
 					} else {
