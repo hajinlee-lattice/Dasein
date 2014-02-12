@@ -297,6 +297,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		appIdsList.add(appIdsPerQueue);
 		appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
 
+		/*
 		appIdsPerQueue = new ArrayList<ApplicationId>();
 		appIdsList.add(appIdsPerQueue);
 		for (int j = 0; j < 2; j++) {
@@ -304,6 +305,8 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 			appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
 		}
 
+        */
+		
 		if (isLong) {
 			appIdsPerQueue = new ArrayList<ApplicationId>();
 			appIdsList.add(appIdsPerQueue);
@@ -386,8 +389,15 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 					if (showStatusOnly) {
 						for (ApplicationId appId : appIdsPerQueue) {
 							ApplicationReport report = jobService.getJobReportById(appId);
-							System.out.println("				" + appId + " state " + report.getYarnApplicationState()
-									+ " FinalStatus" + report.getFinalApplicationStatus());
+							if (report.getYarnApplicationState() == YarnApplicationState.FINISHED) {
+								double runTime = (report.getFinishTime() - report.getStartTime()) / 1000.0;
+								System.out.println("				" + appId + " state " + report.getYarnApplicationState()
+										+ " FinalStatus" + report.getFinalApplicationStatus() + " totalRunTime "
+										+ runTime + " seconds");
+							} else {
+								System.out.println("				" + appId + " state " + report.getYarnApplicationState()
+										+ " FinalStatus" + report.getFinalApplicationStatus());
+							}
 						}
 					} else {
 						reportRunStatisitic(jobReport, jobRunStartTime, queueWaitTimes, appIdsPerQueue);
