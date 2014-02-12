@@ -297,15 +297,12 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		appIdsList.add(appIdsPerQueue);
 		appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
 
-		/*
 		appIdsPerQueue = new ArrayList<ApplicationId>();
 		appIdsList.add(appIdsPerQueue);
 		for (int j = 0; j < 2; j++) {
 			Properties[] p1 = getPropertiesPair(classifier5Mins, "Priority1." + queue);
 			appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
 		}
-
-        */
 		
 		if (isLong) {
 			appIdsPerQueue = new ArrayList<ApplicationId>();
