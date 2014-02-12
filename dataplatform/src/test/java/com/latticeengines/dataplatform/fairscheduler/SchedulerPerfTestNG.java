@@ -389,7 +389,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 							if (report.getYarnApplicationState() == YarnApplicationState.FINISHED) {
 								double runTime = (report.getFinishTime() - report.getStartTime()) / 1000.0;
 								System.out.println("				" + appId + " state " + report.getYarnApplicationState()
-										+ " FinalStatus" + report.getFinalApplicationStatus() + " totalRunTime "
+										+ " FinalStatus " + report.getFinalApplicationStatus() + " totalRunTime "
 										+ runTime + " seconds");
 							} else {
 								System.out.println("				" + appId + " state " + report.getYarnApplicationState()
