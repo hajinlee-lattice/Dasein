@@ -7,15 +7,20 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
+import com.latticeengines.dataplatform.exposed.exception.LedpCode;
+import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
+import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.yarn.client.YarnClientCustomization;
 import com.latticeengines.dataplatform.yarn.client.YarnClientCustomizationRegistry;
@@ -23,6 +28,9 @@ import com.latticeengines.dataplatform.yarn.client.YarnClientCustomizationRegist
 @Component("yarnClientCustomizationService")
 public class YarnClientCustomizationServiceImpl implements
 		YarnClientCustomizationService {
+	
+	@Autowired
+	private Configuration yarnConfiguration;
 
 	@Autowired
 	private YarnClientCustomizationRegistry yarnClientCustomizationRegistry;
@@ -34,6 +42,13 @@ public class YarnClientCustomizationServiceImpl implements
 		if (customization == null) {
 			return;
 		}
+		String dir = UUID.randomUUID().toString();
+		try {
+			HdfsHelper.mkdir(yarnConfiguration, "/app/dataplatform/" + dir);
+		} catch (Exception e) {
+			throw new LedpException(LedpCode.LEDP_00000, e, new String[] { dir });
+		}
+		containerProperties.put(ContainerProperty.JOBDIR.name(), dir);
 		customization.beforeCreateLocalLauncherContextFile(containerProperties);
 		String fileName = createContainerLauncherContextFile(customization, appMasterProperties, containerProperties);
 		containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
@@ -89,7 +104,7 @@ public class YarnClientCustomizationServiceImpl implements
 			contextFileName = contextFileName.substring(1);
 			contextFileName = contextFileName.replaceFirst("/", "-");
 			
-			File contextFile = new File(contextFileName + "-" + System.currentTimeMillis());
+			File contextFile = new File(contextFileName);
 			FileUtils.write(contextFile, sb);
 			return contextFile.getAbsolutePath();
 

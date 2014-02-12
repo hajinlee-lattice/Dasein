@@ -139,6 +139,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 		classifier.setTestDataHdfsPath("/test/nn_test.dat");
 		
 		Properties appMasterProperties = new Properties();
+		appMasterProperties.put("QUEUE", "Priority0.A");
 		
 		Properties containerProperties = new Properties();
 		containerProperties.put("VIRTUALCORES", "1");
@@ -169,7 +170,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 	}
 	
 
-	@Test(groups = "functional", enabled = true)
+	@Test(groups = "functional", enabled = false)
 	public void testSubmitMRJob() throws Exception {
 		
 		Configuration conf = (Configuration) applicationContext.getBean("hadoopConfiguration");

@@ -18,7 +18,7 @@
     <import resource="classpath:dataplatform-yarn-config-context.xml"/>
 
 	<yarn:localresources>
-		<yarn:hdfs path="/app/dataplatform/*" />
+		<yarn:hdfs path="/app/dataplatform/$$JOBDIR$$/*" />
 		<yarn:hdfs path="/app/dataplatform/scripts/*" />
 		<yarn:hdfs path="/lib/*" />
 		<yarn:hdfs path="$$TRAINING$$" />
@@ -41,7 +41,7 @@
         <yarn:container-command>
                         <![CDATA[
                         /usr/bin/python
-                        launcher.py $$METADATA$$
+                        launcher.py $$METADATA$$ $$JOBDIR$$
                         1><LOG_DIR>/PythonContainer.stdout
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>

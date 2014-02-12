@@ -1,6 +1,8 @@
 package com.latticeengines.dataplatform.exposed.exception;
 
 public enum LedpCode {
+	// Low level errors: 00000-09999
+	LEDP_00000("Could not create hdfs dir {0}."), //
 	// Validation service: 10000-10999
 	LEDP_10000("Metadata schema is null."), //
 	LEDP_10001("Metadata schema is not retrievable from hdfs."), //
@@ -13,6 +15,7 @@ public enum LedpCode {
 	LEDP_11001("Failed connecting to db."), //
 	LEDP_11002("Issue running query {0}."), //
 	LEDP_11003("Unsupported type {0} for determining default value.");
+
 	
 	private String message;
 	

@@ -51,7 +51,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 			properties.put(PythonContainerProperty.PYTHONSCRIPT.name(), classifier.getPythonScriptHdfsPath());
 			properties.put(PythonContainerProperty.SCHEMA.name(), classifier.getSchemaHdfsPath());
 			
-			File metadataFile = new File("metadata-" + System.currentTimeMillis() +".json");
+			File metadataFile = new File("metadata.json");
 			FileUtils.writeStringToFile(metadataFile, metadata);
 			properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
 		} catch (Exception e) {
@@ -64,7 +64,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 		Collection<CopyEntry> copyEntries = super.getCopyEntries(containerProperties);
 		String metadataFilePath = containerProperties.getProperty(ContainerProperty.METADATA.name());
 		copyEntries.add(new LocalResourcesFactoryBean.CopyEntry(
-				"file:" + metadataFilePath, "/app/dataplatform", false));
+				"file:" + metadataFilePath, getJobDir(containerProperties), false));
 		return copyEntries;
 				
 	}

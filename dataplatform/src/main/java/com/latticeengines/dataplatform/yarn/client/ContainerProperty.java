@@ -6,6 +6,7 @@ public enum ContainerProperty {
 	VIRTUALCORES, //
 	MEMORY, //
 	PRIORITY, //
-	METADATA;
+	METADATA, //
+	JOBDIR;
 	
 }

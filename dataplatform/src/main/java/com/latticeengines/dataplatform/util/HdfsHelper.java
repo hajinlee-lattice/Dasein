@@ -28,6 +28,11 @@ public class HdfsHelper {
 			throw new IllegalArgumentException("No Enum specified for this string");
 		}
 	};
+	
+	public static final void mkdir(Configuration configuration, String dir) throws Exception {
+		FileSystem fs = FileSystem.get(configuration);
+		fs.mkdirs(new Path(dir));
+	}
 
 	public static final String getHdfsFileContents(Configuration configuration,
 			String hdfsPath) throws Exception {

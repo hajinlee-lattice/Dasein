@@ -32,6 +32,10 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 	public ResourceLocalizer getResourceLocalizer(Properties containerProperties) {
 		return new DefaultResourceLocalizer(configuration, getHdfsEntries(containerProperties), getCopyEntries(containerProperties));
 	}
+	
+	protected String getJobDir(Properties containerProperties) {
+		return "/app/dataplatform/" + containerProperties.getProperty(ContainerProperty.JOBDIR.name());
+	}
 
 	@Override
 	public Collection<CopyEntry> getCopyEntries(Properties containerProperties) {
@@ -39,7 +43,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 		String containerLaunchContextFile = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
 		copyEntries.add(new LocalResourcesFactoryBean.CopyEntry(
 				"file:" + containerLaunchContextFile,
-				"/app/dataplatform", false));
+				getJobDir(containerProperties), false));
 		
 		return copyEntries;
 	}
@@ -58,7 +62,21 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 		hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
 				LocalResourceType.FILE, //
 				LocalResourceVisibility.PUBLIC, //
-				"/app/dataplatform/*", //
+				"/app/dataplatform/*.properties", //
+				defaultFs, //
+				defaultFs, //
+				false));
+		hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
+				LocalResourceType.FILE, //
+				LocalResourceVisibility.PUBLIC, //
+				"/app/dataplatform/*.jar", //
+				defaultFs, //
+				defaultFs, //
+				false));
+		hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
+				LocalResourceType.FILE, //
+				LocalResourceVisibility.PUBLIC, //
+				getJobDir(containerProperties) + "/*", //
 				defaultFs, //
 				defaultFs, //
 				false));

@@ -3,6 +3,7 @@ import time
 
 def train(trainingData, testData, schema, modelFile):
     print("Container %s" % (os.environ['CONTAINER_ID']))
-    print("Sleeping for 2 mins...")
+    print("Sleeping for 2 min...")
+    print("Start : %s" % time.ctime())
     time.sleep(120)
-    print("Done")
+    print("End : %s" % time.ctime())
