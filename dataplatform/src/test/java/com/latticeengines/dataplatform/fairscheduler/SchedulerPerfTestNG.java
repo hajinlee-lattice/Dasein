@@ -1,23 +1,44 @@
 package com.latticeengines.dataplatform.fairscheduler;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.functionalframework.SecureFileTransferAgent;
+import com.latticeengines.dataplatform.functionalframework.SecureFileTransferAgent.FileTransferOption;
 import com.latticeengines.dataplatform.service.JobService;
 
 /**
@@ -79,9 +100,13 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 	@Value("${dataplatform.yarn.resourcemanager.fairscheduler.xml.location}")
 	private String remoteFairSchedulerFilePath;
 	
+	@Value("${dataplatform.yarn.resourcemanager.log.location}")
+	private String remoteRMLogPath;
+
 	private Classifier classifier1Min;
 	private Classifier classifier5Mins;
 	private Classifier classifier10Mins;
+	private Map<String, List<List<List<ApplicationId>>>> customerJobsToAppIdMap = new HashMap<String, List<List<List<ApplicationId>>>>();
 
 	@Override
 	protected boolean doYarnClusterSetup() {
@@ -160,30 +185,88 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		doCopy(fs, copyEntries);
 	}	
 	
+	@AfterMethod
+	private void cleanUp() {
+		customerJobsToAppIdMap.clear();
+	}
+
 	@Test(groups = "perf", enabled = false)
 	public void testSubmit() throws Exception {
-		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
-		appIds.addAll(longRun("Priority0.A"));
+		List<List<List<ApplicationId>>> appIdsPerRuns;
+		System.out.println("Test 1: ");
+
+		appIdsPerRuns = longRun("A");
+		customerJobsToAppIdMap.put("A", appIdsPerRuns);
+		System.out.println("		Customer A submits Analytic Run ");
 		Thread.sleep(20000L);
-		appIds.addAll(longRun("Priority0.B"));
+
+		appIdsPerRuns = longRun("B");
+		customerJobsToAppIdMap.put("B", appIdsPerRuns);
+		System.out.println("		Customer B submits Analytic Run 20 seconds later ");
+
+		showRunReport();
 	}
 	
 	@Test(groups = "perf", enabled = true)
 	public void testSubmit2() throws Exception {
-		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
+		List<List<List<ApplicationId>>> appIdsPerRuns;
+
+		System.out.println("Test 2: ");
 		// A
 		for (int i = 0; i < 9; i++) {
-			appIds.addAll(shortRun("A"));
+			appIdsPerRuns = shortRun("A");
+			List<List<List<ApplicationId>>> appIdsAllRuns = customerJobsToAppIdMap.get("A");
+			if (appIdsAllRuns == null) {
+				customerJobsToAppIdMap.put("A", appIdsPerRuns);
+			} else {
+				appIdsAllRuns.addAll(appIdsPerRuns);
+			}
+
+			System.out.println("		Customer A submits Analytic Run Short at " + i + " second" + (i > 0 ? "s" : ""));
 			Thread.sleep(1000L);
 		}
 		Thread.sleep(7000L);
 
 		// B
-		appIds.addAll(shortRun("B"));
+		appIdsPerRuns = shortRun("B");
+		customerJobsToAppIdMap.put("B", appIdsPerRuns);
+		System.out.println("		Customer B submits Analytic Run Short at 15 seconds");
 		Thread.sleep(5000L);
 		
 		// C
-		appIds.addAll(shortRun("C"));
+		appIdsPerRuns = shortRun("C");
+		customerJobsToAppIdMap.put("C", appIdsPerRuns);
+		System.out.println("		Customer C submits Analytic Run Short at 20 seconds");
+
+		showRunReport();
+	}
+
+	@Test(groups = "perf", enabled = false)
+	public void testSubmit3() throws Exception {
+		List<List<List<ApplicationId>>> appIdsPerRuns;
+
+		System.out.println("Test 3: ");
+
+		// Customer A, B, C, D, E, F, G
+		for (char customer = 'A', index = 0; customer < 'I'; customer++, index++) {
+			appIdsPerRuns = longRun(String.valueOf(customer));
+			customerJobsToAppIdMap.put(String.valueOf(customer), appIdsPerRuns);
+			if (index == 0) {
+				System.out.println("		Customer " + customer + " submits Analytic Run ");
+			} else {
+				System.out.println("		Customer " + customer + " submits Analytic Run at " + index + " second"
+						+ (index == 1 ? "" : "s"));
+			}
+			Thread.sleep(1000L);
+		}
+
+		//Customer I
+		appIdsPerRuns = longRun("A");
+		customerJobsToAppIdMap.put(String.valueOf("I"), appIdsPerRuns);
+		System.out.println("		Customer I submits Analytic Run at 8 seconds ");
+		Thread.sleep(1000L);
+
+		showRunReport();
 	}
 
 	private Properties[] getPropertiesPair(Classifier classifier, String queue) {
@@ -199,32 +282,223 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		return new Properties[] { appMasterProperties, containerProperties };
 	}
 	
-	private List<ApplicationId> shortRun(String queue) {
-		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
-		Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0." + queue);
-		appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
-		
-		for (int j = 0; j < 2; j++) {
-			Properties[] p1 = getPropertiesPair(classifier5Mins, "Priority1." + queue);
-			appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
-		}
-		return appIds; 
+	private List<List<List<ApplicationId>>> shortRun(String queue) {
+		return run(queue, false);
 	}
 
-	private List<ApplicationId> longRun(String queue) {
-		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
+	private List<List<List<ApplicationId>>> longRun(String queue) {
+		return run(queue, true);
+	}
+
+	private List<List<List<ApplicationId>>> run(String queue, boolean isLong) {
+		List<ApplicationId> appIdsPerQueue = new ArrayList<ApplicationId>();
+		List<List<ApplicationId>> appIdsList = new ArrayList<List<ApplicationId>>();
 		Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0." + queue);
-		appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
-		
+		appIdsList.add(appIdsPerQueue);
+		appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
+
+		appIdsPerQueue = new ArrayList<ApplicationId>();
+		appIdsList.add(appIdsPerQueue);
 		for (int j = 0; j < 2; j++) {
 			Properties[] p1 = getPropertiesPair(classifier5Mins, "Priority1." + queue);
-			appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
+			appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
 		}
 
-		for (int j = 0; j < 8; j++) {
-			Properties[] p1 = getPropertiesPair(classifier10Mins, "Priority2." + queue);
-			appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
+		if (isLong) {
+			appIdsPerQueue = new ArrayList<ApplicationId>();
+			appIdsList.add(appIdsPerQueue);
+			for (int j = 0; j < 8; j++) {
+				Properties[] p1 = getPropertiesPair(classifier10Mins, "Priority2." + queue);
+				appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
+			}
 		}
-		return appIds; 
+
+		List<List<List<ApplicationId>>> appIdsPerRunList = new ArrayList<List<List<ApplicationId>>>();
+
+		appIdsPerRunList.add(appIdsList);
+		return appIdsPerRunList;
+	}
+
+	private Map<ApplicationId, ApplicationReport> waitForAllJobToFinsih() throws Exception {
+
+		List<ApplicationId> appIds = getAllRunningAppIds();
+
+		Map<ApplicationId, ApplicationReport> jobStatus = new HashMap<ApplicationId, ApplicationReport>();
+		List<ApplicationId> jobStatusToCollect = new ArrayList<ApplicationId>(appIds);
+
+		long startTime = System.currentTimeMillis();
+		long nextReportTime = 60000L;
+		while (!jobStatusToCollect.isEmpty()) {
+			ApplicationId appId = jobStatusToCollect.get(0);
+			YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS, YarnApplicationState.FAILED,
+					YarnApplicationState.FINISHED);
+			if (state == null) {
+				System.out.println("ERROR: Invalid State detected");
+				jobStatusToCollect.remove(appId);
+				continue;
+			}
+			if (state.equals(YarnApplicationState.FAILED) || state.equals(YarnApplicationState.FINISHED)) {
+				jobStatusToCollect.remove(appId);
+				jobStatus.put(appId, jobService.getJobReportById(appId));
+			}
+			long runningTime = System.currentTimeMillis() - startTime;
+			if (runningTime > nextReportTime) {
+				System.out.println("\nReport status after " + runningTime / 1000 + " seconds");
+				reportAllJobsStatus(null, null, null, true);
+				nextReportTime += 60000L;
+			}
+			if (runningTime > 1800000) {
+				System.out.println("ERROR: jobs are not finished in 30 minutes!");
+				break;
+			}
+		}
+		return jobStatus;
+	}
+
+	private List<ApplicationId> getAllRunningAppIds() {
+		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
+
+		Iterator<String> customerIterator = customerJobsToAppIdMap.keySet().iterator();
+		while (customerIterator.hasNext()) {
+			String customer = customerIterator.next();
+			for (List<List<ApplicationId>> run : customerJobsToAppIdMap.get(customer)) {
+				for (List<ApplicationId> appIdsPerQueue : run) {
+					appIds.addAll(appIdsPerQueue);
+				}
+			}
+		}
+		return appIds;
+	}
+
+	private void reportAllJobsStatus(Map<ApplicationId, ApplicationReport> jobReport,
+			Map<String, Date> jobRunStartTime, Map<String, List<Double>> queueWaitTimes, boolean showStatusOnly) {
+
+		Iterator<String> customerIterator = customerJobsToAppIdMap.keySet().iterator();
+		while (customerIterator.hasNext()) {
+			String customer = customerIterator.next();
+			System.out.println("	Customer " + customer);
+			int runIndex = 1;
+			for (List<List<ApplicationId>> run : customerJobsToAppIdMap.get(customer)) {
+				System.out.println("		Analytic Run " + runIndex++);
+				int priorityIndex = 0;
+				for (List<ApplicationId> appIdsPerQueue : run) {
+					System.out.println("			Priority " + priorityIndex++);
+					if (showStatusOnly) {
+						for (ApplicationId appId : appIdsPerQueue) {
+							ApplicationReport report = jobService.getJobReportById(appId);
+							System.out.println("				" + appId + " status " + report.getYarnApplicationState());
+						}
+					} else {
+						reportRunStatisitic(jobReport, jobRunStartTime, queueWaitTimes, appIdsPerQueue);
+					}
+				}
+			}
+		}
+	}
+
+	private void reportRunStatisitic(Map<ApplicationId, ApplicationReport> jobReport, 
+			Map<String, Date> jobRunStartTime, Map<String, List<Double>> queueWaitTimes,
+			List<ApplicationId> appIds) {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+		formatter.setTimeZone(TimeZone.getTimeZone("EST"));
+		for (ApplicationId appId : appIds) {
+			ApplicationReport report = jobReport.get(appId);
+			double elapsedTime = (report.getFinishTime() - report.getStartTime()) / 1000.0;
+			String startTime = formatter.format(new Date(report.getStartTime()));
+			String endTime = formatter.format(new Date(report.getFinishTime()));
+			Date runStartTime = jobRunStartTime.get(appId.toString());
+			double waitTime = runStartTime == null ? -1.0
+					: (runStartTime.getTime() - report.getStartTime() - 10800000) / 1000.0;
+			List<Double> items = queueWaitTimes.get(report.getQueue());
+			if (items == null) {
+				items = new ArrayList<Double>();
+				items.add(waitTime);
+				if (waitTime == -1) {
+					System.out.println("ERROR: cannot find job " + appId + " start time");
+				}
+				queueWaitTimes.put(report.getQueue(), items);
+			} else {
+				items.add(waitTime);
+				if (waitTime == -1) {
+					System.out.println("ERROR: cannot find job " + appId + " start time");
+				}
+			}
+			System.out.println("					" + appId + " - submitTime: " + startTime + " - finishTime: " + endTime
+					+ " - elapsed: " + elapsedTime + " seconds " + " - waitTime: " + waitTime + " seconds");
+		}
+	}
+
+	private void showRunReport() throws Exception {
+
+		Map<ApplicationId, ApplicationReport> jobReport = waitForAllJobToFinsih();
+		Map<String, Date> jobRunStartTime = collectStatistics();
+		Map<String, List<Double>> queueWaitTimes = new HashMap<String, List<Double>>();
+
+		System.out.println("Report all job status ");
+		reportAllJobsStatus(jobReport, jobRunStartTime, queueWaitTimes, false);
+
+		System.out.println("\n Qeueue Statistics");
+		Iterator<String> iterator = queueWaitTimes.keySet().iterator();
+		while (iterator.hasNext()) {
+			String queue = iterator.next();
+			List<Double> items = queueWaitTimes.get(queue);
+			Collections.sort(items);
+			double totalWaitTime = 0.0;
+			for (Double waitTime : items) {
+				totalWaitTime += waitTime;
+			}
+			int totalJobs = items.size();
+			int mediaIndex = totalJobs / 2;
+			System.out.println("	Queue: " + queue);
+			System.out.println("		total jobs run: " + totalJobs);
+			System.out.println("		average wait time: " + totalWaitTime / items.size()
+					+ " seconds");
+			System.out.println("		median wait time (" + mediaIndex + "): " + items.get(mediaIndex) + " seconds");
+			System.out.println("		min wait time: " + items.get(0) + " seconds");
+			System.out.println("		max wait time: " + items.get(totalJobs - 1) + " seconds");
+		}
+	}
+
+	private Map<String, Date> collectStatistics() throws IOException,
+			FileNotFoundException, ParseException {
+		
+		File tempRMLogFile = File.createTempFile("resource-manager", ".log");
+		 
+		secureFileTransferAgent.fileTranser(tempRMLogFile.getAbsolutePath(), remoteRMLogPath,
+				FileTransferOption.DOWNLOAD);
+	    
+		List<ApplicationId> applicationIds = getAllRunningAppIds();
+		Map<String, Date> runStartTimestamp = new HashMap<String, Date>();
+		for (ApplicationId appId : applicationIds) {
+			runStartTimestamp.put(appId.toString(), null);
+		}
+		
+		//String tempRMLogFile = "/tmp/resource-manager5877012632523028921.log";
+		BufferedReader br = new BufferedReader(new FileReader(tempRMLogFile));
+		try {
+			String line = br.readLine();
+			Pattern pattern = Pattern.compile("application_.+?State change from ACCEPTED to RUNNING");
+			Matcher matcher = null;
+
+			while (line != null) {
+				String appIdStr;
+				String timestampStr;
+				matcher = pattern.matcher(line);
+				if (matcher.find()) {
+					appIdStr = matcher.group();
+					appIdStr = appIdStr.substring(0, appIdStr.indexOf(' '));
+					if (runStartTimestamp.containsKey(appIdStr)) {
+						timestampStr = line.substring(0, 23);
+						Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS", Locale.ENGLISH).parse(timestampStr);
+						runStartTimestamp.put(appIdStr, date);
+					}
+				}
+				line = br.readLine();
+			}
+			tempRMLogFile.delete();
+		} finally {
+			br.close();
+		}
+		return runStartTimestamp;
 	}
 }
