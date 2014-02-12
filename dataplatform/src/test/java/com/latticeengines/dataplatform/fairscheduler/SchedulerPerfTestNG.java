@@ -167,17 +167,17 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
 		// A
 		for (int i = 0; i < 9; i++) {
-			appIds.addAll(shortRun("Priority0.A"));
+			appIds.addAll(shortRun("A"));
 			Thread.sleep(1000L);
 		}
 		Thread.sleep(7000L);
 
 		// B
-		appIds.addAll(shortRun("Priority0.B"));
+		appIds.addAll(shortRun("B"));
 		Thread.sleep(5000L);
 		
 		// C
-		appIds.addAll(shortRun("Priority0.C"));
+		appIds.addAll(shortRun("C"));
 	}
 
 	private Properties[] getPropertiesPair(Classifier classifier, String queue) {
@@ -195,11 +195,11 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 	
 	private List<ApplicationId> shortRun(String queue) {
 		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
-		Properties[] p0 = getPropertiesPair(classifier1Min, queue);
+		Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0." + queue);
 		appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
 		
 		for (int j = 0; j < 2; j++) {
-			Properties[] p1 = getPropertiesPair(classifier2Mins, queue);
+			Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1." + queue);
 			appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
 		}
 		return appIds; 
@@ -207,16 +207,16 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 
 	private List<ApplicationId> longRun(String queue) {
 		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
-		Properties[] p0 = getPropertiesPair(classifier1Min, queue);
+		Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0." + queue);
 		appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
 		
 		for (int j = 0; j < 2; j++) {
-			Properties[] p1 = getPropertiesPair(classifier2Mins, queue);
+			Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1." + queue);
 			appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
 		}
 
 		for (int j = 0; j < 8; j++) {
-			Properties[] p1 = getPropertiesPair(classifier4Mins, queue);
+			Properties[] p1 = getPropertiesPair(classifier4Mins, "Priority2." + queue);
 			appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
 		}
 		return appIds; 
