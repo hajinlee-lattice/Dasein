@@ -1,8 +1,5 @@
 package com.latticeengines.dataplatform.fairscheduler;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,10 +18,57 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.functionalframework.SecureFileTransferAgent;
-import com.latticeengines.dataplatform.functionalframework.SecureFileTransferAgent.FileTransferOption;
 import com.latticeengines.dataplatform.service.JobService;
 
-public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
+/**
+<?xml version="1.0"?>
+<allocations>
+    <queue name="Priority0">
+        <weight>1000</weight>
+        <queue name="A">
+            <minResources>1100 mb,2 vcores</minResources>
+            <schedulingPolicy>fifo</schedulingPolicy>
+        </queue>
+        <queue name="B">
+            <minResources>1100 mb,2 vcores</minResources>
+            <schedulingPolicy>fifo</schedulingPolicy>
+        </queue>
+        <queue name="C">
+            <minResources>1100 mb,2 vcores</minResources>
+            <schedulingPolicy>fifo</schedulingPolicy>
+        </queue>
+    </queue>
+    <queue name="Priority1">
+        <weight>10</weight>
+        <queue name="A">
+            <schedulingPolicy>fifo</schedulingPolicy>
+        </queue>
+        <queue name="B">
+            <schedulingPolicy>fifo</schedulingPolicy>
+        </queue>
+        <queue name="C">
+            <schedulingPolicy>fifo</schedulingPolicy>
+        </queue>
+
+    </queue>
+    <queue name="Priority2">
+        <weight>1</weight>
+        <queue name="A">
+            <schedulingPolicy>fifo</schedulingPolicy>
+        </queue>
+        <queue name="B">
+            <schedulingPolicy>fifo</schedulingPolicy>
+        </queue>
+        <queue name="C">
+            <schedulingPolicy>fifo</schedulingPolicy>
+        </queue>
+
+    </queue>
+    <defaultMinSharePreemptionTimeout>30</defaultMinSharePreemptionTimeout>
+    <fairSharePreemptionTimeout>30</fairSharePreemptionTimeout>
+</allocations>	 
+*/
+public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 	
 	@Autowired
 	private JobService jobService;
@@ -39,7 +83,11 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 	private Classifier classifier2Mins;
 	private Classifier classifier4Mins;
 
-	@BeforeClass(groups = "functional")
+	protected boolean doYarnClusterSetup() {
+		return false;
+	}
+
+	@BeforeClass(groups = "perf")
 	public void setup() throws Exception {
 		classifier1Min = new Classifier();
 		classifier1Min.setName("IrisClassifier");
@@ -104,141 +152,32 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		copyEntries.add(new CopyEntry(train4MinsScriptPath, "/scheduler", false));
 
 		doCopy(fs, copyEntries);
-		//setupScheduler();
-	}
+	}	
 	
-	private void setupScheduler() throws Exception {
-		File tempFairSchedulerFile = File.createTempFile("fair-scheduler", ".xml");
-
-		// Fair Scheduler won't remove existing queue after refresh even if that
-		// queue is removed from fair-scheduler.xml
-		PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
-		out.println("<?xml version=\"1.0\"?>");
-		out.println("<allocations>");
-		out.println("	<queue name=\"Priority0\">");
-		out.println("		<weight>1000</weight>");
-		out.println("	    <queue name=\"A\">");
-		out.println("		    <minResources>1100 mb,2 vcores</minResources>");
-		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	    <queue name=\"B\">");
-		out.println("		    <minResources>1100 mb,2 vcores</minResources>");
-		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	    <queue name=\"C\">");
-		out.println("		    <minResources>1100 mb,2 vcores</minResources>");
-		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("    </queue>");
-		out.println("	<queue name=\"Priority1\">");
-		out.println("		<weight>10</weight>");
-		out.println("	    <queue name=\"A\">");
-		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	    <queue name=\"B\">");
-		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	    <queue name=\"C\">");
-		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("    </queue>");
-		out.println("	<queue name=\"Priority2\">");
-		out.println("		<weight>1</weight>");
-		out.println("	    <queue name=\"A\">");
-		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	    <queue name=\"B\">");
-		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	    <queue name=\"C\">");
-		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("    </queue>");
-		out.println("	<defaultMinSharePreemptionTimeout>30</defaultMinSharePreemptionTimeout>");
-		out.println("	<fairSharePreemptionTimeout>30</fairSharePreemptionTimeout>");
-		out.println("</allocations>");
-		out.close();
-
-		secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(), remoteFairSchedulerFilePath,
-				FileTransferOption.UPLOAD);
-		Thread.sleep(15000L);
-	}
-	
-	
-	@Test(groups = "functional", enabled = false)
+	@Test(groups = "perf", enabled = false)
 	public void testSubmit() throws Exception {
 		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
-		// P0 job
-		Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.A");
-		appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
-		// P1 job
-		for (int i = 0; i < 2; i++) {
-			Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.A");
-			appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
-		}
-
-		// P2 job
-		for (int i = 0; i < 8; i++) {
-			Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.A");
-			appIds.add(jobService.submitYarnJob("pythonClient", p2[0], p2[1]));
-		}
+		appIds.addAll(longRun("Priority0.A"));
 		Thread.sleep(20000L);
-		// 1 P0 job
-		// P0 job
-		p0 = getPropertiesPair(classifier1Min, "Priority0.B");
-		appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
-		// P1 job
-		for (int i = 0; i < 2; i++) {
-			Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.B");
-			appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
-		}
-
-		// P2 job
-		for (int i = 0; i < 8; i++) {
-			Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.B");
-			appIds.add(jobService.submitYarnJob("pythonClient", p2[0], p2[1]));
-		}
+		appIds.addAll(longRun("Priority0.B"));
 	}
 	
-	@Test(groups = "functional", enabled = true)
+	@Test(groups = "perf", enabled = true)
 	public void testSubmit2() throws Exception {
 		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
 		// A
-		for (int i = 0; i < 3; i++) {
-			Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.A");
-			appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
-			
-			for (int j = 0; j < 2; j++) {
-				Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.A");
-				appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
-			}
-
-			Thread.sleep(5000L);
+		for (int i = 0; i < 9; i++) {
+			appIds.addAll(shortRun("Priority0.A"));
+			Thread.sleep(1000L);
 		}
+		Thread.sleep(7000L);
 
 		// B
-		for (int i = 0; i < 1; i++) {
-			Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.B");
-			appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
-			
-			for (int j = 0; j < 2; j++) {
-				Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.B");
-				appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
-			}
-			Thread.sleep(5000L);
-		}
+		appIds.addAll(shortRun("Priority0.B"));
+		Thread.sleep(5000L);
 		
 		// C
-		for (int i = 0; i < 1; i++) {
-			Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.C");
-			appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
-			
-			for (int j = 0; j < 2; j++) {
-				Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.C");
-				appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
-			}
-			Thread.sleep(5000L);
-		}
+		appIds.addAll(shortRun("Priority0.C"));
 	}
 
 	private Properties[] getPropertiesPair(Classifier classifier, String queue) {
@@ -254,4 +193,32 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		return new Properties[] { appMasterProperties, containerProperties };
 	}
 	
+	private List<ApplicationId> shortRun(String queue) {
+		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
+		Properties[] p0 = getPropertiesPair(classifier1Min, queue);
+		appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
+		
+		for (int j = 0; j < 2; j++) {
+			Properties[] p1 = getPropertiesPair(classifier2Mins, queue);
+			appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
+		}
+		return appIds; 
+	}
+
+	private List<ApplicationId> longRun(String queue) {
+		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
+		Properties[] p0 = getPropertiesPair(classifier1Min, queue);
+		appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
+		
+		for (int j = 0; j < 2; j++) {
+			Properties[] p1 = getPropertiesPair(classifier2Mins, queue);
+			appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
+		}
+
+		for (int j = 0; j < 8; j++) {
+			Properties[] p1 = getPropertiesPair(classifier4Mins, queue);
+			appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
+		}
+		return appIds; 
+	}
 }
