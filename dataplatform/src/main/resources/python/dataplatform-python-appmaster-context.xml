@@ -20,7 +20,6 @@
 	<yarn:localresources>
 		<yarn:hdfs path="/app/dataplatform/$$JOBDIR$$/*" />
 		<yarn:hdfs path="/app/dataplatform/scripts/*" />
-		<yarn:hdfs path="/lib/*" />
 		<yarn:hdfs path="$$TRAINING$$" />
 		<yarn:hdfs path="$$TEST$$" />
 		<yarn:hdfs path="$$SCHEMA$$" />

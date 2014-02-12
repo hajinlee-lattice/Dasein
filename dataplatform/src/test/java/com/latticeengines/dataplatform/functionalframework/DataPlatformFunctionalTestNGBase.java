@@ -49,6 +49,10 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 		return true;
 	}
 	
+	protected boolean doDependencyLibraryCopy() {
+		return true;
+	}
+	
 	public DataPlatformFunctionalTestNGBase() {
 		
 	}
@@ -65,21 +69,28 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 		FileSystem fs = FileSystem.get(yarnConfiguration);
 		// Delete directories
 		fs.delete(new Path("/app"), true);
-		fs.delete(new Path("/lib"), true);
+		
 		// Make directories
 		fs.mkdirs(new Path("/app/dataplatform/scripts"));
-		fs.mkdirs(new Path("/lib"));
+
 		// Copy jars from build to hdfs
 		String dataplatformPropDir = System.getProperty("DATAPLATFORM_PROPDIR");
 		if (StringUtils.isEmpty(dataplatformPropDir)) {
 			dataplatformPropDir = System.getenv().get("DATAPLATFORM_PROPDIR");
 		}
 		List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
-		copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/dependency/*.jar", "/lib", false));
+		
 		copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/launcher.py", "/app/dataplatform/scripts", false));
-		copyEntries.add(new CopyEntry("file:target/*.jar", "/app/dataplatform", false));
 		String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
+		copyEntries.add(new CopyEntry("file:target/*.jar", "/app/dataplatform", false));
 		copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
+
+		if (doDependencyLibraryCopy()) {
+			fs.delete(new Path("/lib"), true);
+			fs.mkdirs(new Path("/lib"));
+			copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/dependency/*.jar", "/lib", false));
+		}
+		
 		doCopy(fs, copyEntries);
 	}
 	

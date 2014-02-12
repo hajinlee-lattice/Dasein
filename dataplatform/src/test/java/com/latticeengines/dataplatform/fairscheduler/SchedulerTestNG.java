@@ -104,7 +104,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		copyEntries.add(new CopyEntry(train4MinsScriptPath, "/scheduler", false));
 
 		doCopy(fs, copyEntries);
-		//setupScheduler();
+		setupScheduler();
 	}
 	
 	private void setupScheduler() throws Exception {
