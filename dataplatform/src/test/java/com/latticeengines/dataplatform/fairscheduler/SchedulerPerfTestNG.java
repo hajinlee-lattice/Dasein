@@ -386,7 +386,8 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 					if (showStatusOnly) {
 						for (ApplicationId appId : appIdsPerQueue) {
 							ApplicationReport report = jobService.getJobReportById(appId);
-							System.out.println("				" + appId + " status " + report.getYarnApplicationState());
+							System.out.println("				" + appId + " state " + report.getYarnApplicationState()
+									+ " FinalStatus" + report.getFinalApplicationStatus());
 						}
 					} else {
 						reportRunStatisitic(jobReport, jobRunStartTime, queueWaitTimes, appIdsPerQueue);
