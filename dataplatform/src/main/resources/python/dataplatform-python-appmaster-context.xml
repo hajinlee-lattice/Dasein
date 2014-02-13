@@ -31,7 +31,7 @@
 		SHDP_HD_FSWEB=${dataplatform.fs.web.defaultFS}
 	</yarn:environment>
 
-	<yarn:master>
+	<yarn:master class="com.latticeengines.dataplatform.runtime.execution.python.PythonAppMaster">
         <yarn:container-allocator
             virtualcores="$$VIRTUALCORES$$"
             memory="$$MEMORY$$"
