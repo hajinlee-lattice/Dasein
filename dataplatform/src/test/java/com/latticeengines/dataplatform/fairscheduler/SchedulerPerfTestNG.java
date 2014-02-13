@@ -347,10 +347,6 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 				reportAllJobsStatus(null, null, null, true);
 				nextReportTime += 60000L;
 			}
-			if (runningTime > 1800000) {
-				System.out.println("ERROR: jobs are not finished in 30 minutes!");
-				break;
-			}
 		}
 		return jobStatus;
 	}
