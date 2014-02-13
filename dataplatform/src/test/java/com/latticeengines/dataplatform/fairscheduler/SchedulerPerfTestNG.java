@@ -1,9 +1,11 @@
 package com.latticeengines.dataplatform.fairscheduler;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
@@ -204,6 +206,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		customerJobsToAppIdMap.put("B", appIdsPerRuns);
 		System.out.println("		Customer B submits Analytic Run 20 seconds later ");
 
+		dumpAppIdsToFile();
 		showRunReport();
 	}
 	
@@ -238,6 +241,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		customerJobsToAppIdMap.put("C", appIdsPerRuns);
 		System.out.println("		Customer C submits Analytic Run Short at 20 seconds");
 
+		dumpAppIdsToFile();
 		showRunReport();
 	}
 
@@ -266,9 +270,40 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		System.out.println("		Customer I submits Analytic Run at 8 seconds ");
 		Thread.sleep(1000L);
 
+		dumpAppIdsToFile();
 		showRunReport();
 	}
 
+	private void dumpAppIdsToFile() throws IOException {
+
+		File tempRMLogFile = File.createTempFile("application-id", ".log");
+
+		FileWriter fw = new FileWriter(tempRMLogFile);
+		BufferedWriter bw = new BufferedWriter(fw);
+		try {
+
+			Iterator<String> customerIterator = customerJobsToAppIdMap.keySet().iterator();
+			while (customerIterator.hasNext()) {
+				String customer = customerIterator.next();
+				bw.write("	Customer " + customer + "\n");
+				int runIndex = 1;
+				for (List<List<ApplicationId>> run : customerJobsToAppIdMap.get(customer)) {
+					bw.write("		Analytic Run " + runIndex++ + "\n");
+					int priorityIndex = 0;
+					for (List<ApplicationId> appIdsPerQueue : run) {
+						bw.write("			Priority " + priorityIndex++ + "\n");
+						for (ApplicationId appId : appIdsPerQueue) {
+							bw.write("					" + appId + "\n");
+						}
+					}
+				}
+			}
+			System.out.println("Generated submitted AppIds " + tempRMLogFile.getAbsolutePath());
+		} finally {
+			bw.close();
+		}
+	}
+	
 	private Properties[] getPropertiesPair(Classifier classifier, String queue) {
 		Properties containerProperties = new Properties();
 		containerProperties.put("VIRTUALCORES", "1");
@@ -477,7 +512,6 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 			runStartTimestamp.put(appId.toString(), null);
 		}
 		
-		//String tempRMLogFile = "/tmp/resource-manager5877012632523028921.log";
 		BufferedReader br = new BufferedReader(new FileReader(tempRMLogFile));
 		try {
 			String line = br.readLine();
