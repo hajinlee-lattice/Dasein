@@ -32,6 +32,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -206,8 +207,8 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		customerJobsToAppIdMap.put("B", appIdsPerRuns);
 		System.out.println("		Customer B submits Analytic Run 20 seconds later ");
 
-		dumpAppIdsToFile();
-		showRunReport();
+		dumpAppIdsToFile(customerJobsToAppIdMap);
+		generateRunReport(customerJobsToAppIdMap);
 	}
 	
 	@Test(groups = "perf", enabled = true)
@@ -241,8 +242,8 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		customerJobsToAppIdMap.put("C", appIdsPerRuns);
 		System.out.println("		Customer C submits Analytic Run Short at 20 seconds");
 
-		dumpAppIdsToFile();
-		showRunReport();
+		dumpAppIdsToFile(customerJobsToAppIdMap);
+		generateRunReport(customerJobsToAppIdMap);
 	}
 
 	@Test(groups = "perf", enabled = false)
@@ -270,11 +271,67 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		System.out.println("		Customer I submits Analytic Run at 8 seconds ");
 		Thread.sleep(1000L);
 
-		dumpAppIdsToFile();
-		showRunReport();
+		dumpAppIdsToFile(customerJobsToAppIdMap);
+		generateRunReport(customerJobsToAppIdMap);
 	}
 
-	private void dumpAppIdsToFile() throws IOException {
+	@Test(groups = "perf", enabled = false)
+	public void generateTestRunReport() throws Exception {
+		// after each test run, all jobIds are dumped to a temp file
+		// you can find the file name from test rule console output
+		// use this test helper method to reload them and monitor the progress
+		String filePath = "/tmp/application-id9097432288354550211.log";
+		try {
+			Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap = loadAppIdsFromFile(filePath);
+			generateRunReport(jobsToAppIdMap);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private Map<String, List<List<List<ApplicationId>>>> loadAppIdsFromFile (String filePath) throws IOException {
+		Map<String, List<List<List<ApplicationId>>>> appIdsMap = new HashMap<String, List<List<List<ApplicationId>>>>();
+		
+		BufferedReader br = new BufferedReader(new FileReader(filePath));
+		try {
+			String line = br.readLine();
+
+			while (line != null) {
+				if (StringUtils.isEmpty(line)) {
+					line = br.readLine();
+					continue;
+				}
+				String customer;
+				String[] rawData = line.split(":");
+				customer = rawData[0];
+				List<List<List<ApplicationId>>> runs = new ArrayList<List<List<ApplicationId>>>();
+				appIdsMap.put(customer, runs);
+				for (int runIndex = 1; runIndex < rawData.length; runIndex++) {
+					List<List<ApplicationId>> queues = new ArrayList<List<ApplicationId>>();
+					runs.add(queues);
+					for (String appIdsStr : rawData[runIndex].split("#")) {
+						List<ApplicationId> appIds = new ArrayList<ApplicationId>();
+						queues.add(appIds);
+						for (String appIdStr : appIdsStr.split(",")) {
+							String[] appIdSplit = appIdStr.split("_");
+							appIds.add(ApplicationId.newInstance(Long.valueOf(appIdSplit[1]),
+									Integer.valueOf(appIdSplit[2])));
+						}
+					}
+				}
+				line = br.readLine();
+			}
+		} finally {
+			br.close();
+		}
+		return appIdsMap;
+	}
+
+	private void dumpAppIdsToFile(Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap) throws IOException {
 
 		File tempRMLogFile = File.createTempFile("application-id", ".log");
 
@@ -282,21 +339,26 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		BufferedWriter bw = new BufferedWriter(fw);
 		try {
 
-			Iterator<String> customerIterator = customerJobsToAppIdMap.keySet().iterator();
+			Iterator<String> customerIterator = jobsToAppIdMap.keySet().iterator();
 			while (customerIterator.hasNext()) {
 				String customer = customerIterator.next();
-				bw.write("	Customer " + customer + "\n");
-				int runIndex = 1;
-				for (List<List<ApplicationId>> run : customerJobsToAppIdMap.get(customer)) {
-					bw.write("		Analytic Run " + runIndex++ + "\n");
-					int priorityIndex = 0;
+				bw.write(customer + ":");
+				int runIndex = 0;
+				for (List<List<ApplicationId>> run : jobsToAppIdMap.get(customer)) {
+					bw.write(runIndex > 0 ? ":" : "");
+					int queueIndex = 0;
 					for (List<ApplicationId> appIdsPerQueue : run) {
-						bw.write("			Priority " + priorityIndex++ + "\n");
+						bw.write(queueIndex > 0 ? "#" : "");
+						int appIdIndex = 0;
 						for (ApplicationId appId : appIdsPerQueue) {
-							bw.write("					" + appId + "\n");
+							bw.write((appIdIndex > 0 ? "," : "") + appId);
+							appIdIndex++;
 						}
+						queueIndex++;
 					}
+					runIndex++;
 				}
+				bw.write("\n");
 			}
 			System.out.println("Generated submitted AppIds " + tempRMLogFile.getAbsolutePath());
 		} finally {
@@ -354,9 +416,10 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		return appIdsPerRunList;
 	}
 
-	private Map<ApplicationId, ApplicationReport> waitForAllJobToFinsih() throws Exception {
+	private Map<ApplicationId, ApplicationReport> waitForAllJobToFinsih(
+			Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap) throws Exception {
 
-		List<ApplicationId> appIds = getAllRunningAppIds();
+		List<ApplicationId> appIds = getAllRunningAppIds(jobsToAppIdMap);
 
 		Map<ApplicationId, ApplicationReport> jobStatus = new HashMap<ApplicationId, ApplicationReport>();
 		List<ApplicationId> jobStatusToCollect = new ArrayList<ApplicationId>(appIds);
@@ -379,20 +442,20 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 			long runningTime = System.currentTimeMillis() - startTime;
 			if (runningTime > nextReportTime) {
 				System.out.println("\nReport status after " + runningTime / 1000 + " seconds");
-				reportAllJobsStatus(null, null, null, true);
+				reportAllJobsStatus(null, null, null, jobsToAppIdMap, true);
 				nextReportTime += 60000L;
 			}
 		}
 		return jobStatus;
 	}
 
-	private List<ApplicationId> getAllRunningAppIds() {
+	private List<ApplicationId> getAllRunningAppIds(Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap) {
 		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
 
-		Iterator<String> customerIterator = customerJobsToAppIdMap.keySet().iterator();
+		Iterator<String> customerIterator = jobsToAppIdMap.keySet().iterator();
 		while (customerIterator.hasNext()) {
 			String customer = customerIterator.next();
-			for (List<List<ApplicationId>> run : customerJobsToAppIdMap.get(customer)) {
+			for (List<List<ApplicationId>> run : jobsToAppIdMap.get(customer)) {
 				for (List<ApplicationId> appIdsPerQueue : run) {
 					appIds.addAll(appIdsPerQueue);
 				}
@@ -402,14 +465,14 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 	}
 
 	private void reportAllJobsStatus(Map<ApplicationId, ApplicationReport> jobReport,
-			Map<String, Date> jobRunStartTime, Map<String, List<Double>> queueWaitTimes, boolean showStatusOnly) {
+			Map<String, Date> jobRunStartTime, Map<String, List<Double>> queueWaitTimes, Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap, boolean showStatusOnly) {
 
-		Iterator<String> customerIterator = customerJobsToAppIdMap.keySet().iterator();
+		Iterator<String> customerIterator = jobsToAppIdMap.keySet().iterator();
 		while (customerIterator.hasNext()) {
 			String customer = customerIterator.next();
 			System.out.println("	Customer " + customer);
 			int runIndex = 1;
-			for (List<List<ApplicationId>> run : customerJobsToAppIdMap.get(customer)) {
+			for (List<List<ApplicationId>> run : jobsToAppIdMap.get(customer)) {
 				System.out.println("		Analytic Run " + runIndex++);
 				int priorityIndex = 0;
 				for (List<ApplicationId> appIdsPerQueue : run) {
@@ -467,14 +530,14 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		}
 	}
 
-	private void showRunReport() throws Exception {
+	private void generateRunReport(Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap) throws Exception {
 
-		Map<ApplicationId, ApplicationReport> jobReport = waitForAllJobToFinsih();
-		Map<String, Date> jobRunStartTime = collectStatistics();
+		Map<ApplicationId, ApplicationReport> jobReport = waitForAllJobToFinsih(jobsToAppIdMap);
+		Map<String, Date> jobRunStartTime = collectStatistics(jobsToAppIdMap);
 		Map<String, List<Double>> queueWaitTimes = new HashMap<String, List<Double>>();
 
 		System.out.println("Report all job status ");
-		reportAllJobsStatus(jobReport, jobRunStartTime, queueWaitTimes, false);
+		reportAllJobsStatus(jobReport, jobRunStartTime, queueWaitTimes, jobsToAppIdMap, false);
 
 		System.out.println("\n Qeueue Statistics");
 		Iterator<String> iterator = queueWaitTimes.keySet().iterator();
@@ -498,7 +561,8 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		}
 	}
 
-	private Map<String, Date> collectStatistics() throws IOException,
+	private Map<String, Date> collectStatistics(Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap)
+			throws IOException,
 			FileNotFoundException, ParseException {
 		
 		File tempRMLogFile = File.createTempFile("resource-manager", ".log");
@@ -506,7 +570,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		secureFileTransferAgent.fileTranser(tempRMLogFile.getAbsolutePath(), remoteRMLogPath,
 				FileTransferOption.DOWNLOAD);
 	    
-		List<ApplicationId> applicationIds = getAllRunningAppIds();
+		List<ApplicationId> applicationIds = getAllRunningAppIds(jobsToAppIdMap);
 		Map<String, Date> runStartTimestamp = new HashMap<String, Date>();
 		for (ApplicationId appId : applicationIds) {
 			runStartTimestamp.put(appId.toString(), null);
@@ -539,4 +603,5 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 		}
 		return runStartTimestamp;
 	}
+
 }
