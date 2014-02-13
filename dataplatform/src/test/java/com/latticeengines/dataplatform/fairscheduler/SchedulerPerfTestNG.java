@@ -285,10 +285,8 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 			Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap = loadAppIdsFromFile(filePath);
 			generateRunReport(jobsToAppIdMap);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

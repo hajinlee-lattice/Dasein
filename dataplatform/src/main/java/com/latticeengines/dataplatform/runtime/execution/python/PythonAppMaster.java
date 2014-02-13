@@ -75,10 +75,18 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 		if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
 			try {
 				Thread.sleep(15000L);
+				log.info("Container " + status.getContainerId().toString() + " preempted. Reallocating.");
 			} catch (InterruptedException e) {
 				log.error(e);
 			}
 			getAllocator().allocateContainers(1);
+			return true;
+		}
+		log.info(status.getDiagnostics());
+		
+		if (status.getExitStatus() == ContainerExitStatus.ABORTED) {
+			log.info("Container releasing " + status.getContainerId().toString() + ".");
+			log.info("Ignoring abort error.");
 			return true;
 		}
 		log.info(status.getDiagnostics());
