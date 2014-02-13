@@ -95,8 +95,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 		ConfigurableApplicationContext context = null;
 		try {
 			if (StringUtils.isEmpty(yarnClientName)) {
-				throw new IllegalStateException(
-						"Yarn client name cannot be empty.");
+				throw new IllegalStateException("Yarn client name cannot be empty.");
 			}
 			YarnClient client = (YarnClient) applicationContext.getBean(yarnClientName);
 			return client;
@@ -133,8 +132,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 			runner.setWaitForCompletion(false);
 			runner.call();
 		} catch (Exception e) {
-			log.error("Failed to submit MapReduce job " + mrJobName);
-			e.printStackTrace();
+			log.error("Failed to submit MapReduce job " + mrJobName, e);
 		}
 		return TypeConverter.toYarn(job.getJobID()).getAppId();
 	}

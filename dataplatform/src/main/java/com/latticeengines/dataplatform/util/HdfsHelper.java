@@ -34,6 +34,11 @@ public class HdfsHelper {
 		fs.mkdirs(new Path(dir));
 	}
 
+	public static final void rmdir(Configuration configuration, String dir) throws Exception {
+		FileSystem fs = FileSystem.get(configuration);
+		fs.delete(new Path(dir), true);
+	}
+
 	public static final String getHdfsFileContents(Configuration configuration,
 			String hdfsPath) throws Exception {
 		FileSystem fs = FileSystem.get(configuration);

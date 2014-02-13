@@ -70,8 +70,6 @@ if __name__ == "__main__":
     # Create model directory
     modelDirPath = getModelDirPath(schema)
     hdfs.mkdir(modelDirPath)
-    # Delete the job dir from hdfs
-    hdfs.rmdir("/app/dataplatform/" + sys.argv[2])
     
     # Copy the model data file from local to hdfs
     hdfsFilePath = stripPath(modelFilePath)

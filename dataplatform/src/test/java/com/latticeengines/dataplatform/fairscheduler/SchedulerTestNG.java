@@ -118,15 +118,15 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		out.println("	<queue name=\"Priority0\">");
 		out.println("		<weight>1000</weight>");
 		out.println("	    <queue name=\"A\">");
-		out.println("		    <minResources>1100 mb,2 vcores</minResources>");
+		out.println("		    <minResources>2048 mb,2 vcores</minResources>");
 		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
 		out.println("		</queue>");
 		out.println("	    <queue name=\"B\">");
-		out.println("		    <minResources>1100 mb,2 vcores</minResources>");
+		out.println("		    <minResources>2048 mb,2 vcores</minResources>");
 		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
 		out.println("		</queue>");
 		out.println("	    <queue name=\"C\">");
-		out.println("		    <minResources>1100 mb,2 vcores</minResources>");
+		out.println("		    <minResources>2048 mb,2 vcores</minResources>");
 		out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
 		out.println("		</queue>");
 		out.println("    </queue>");
@@ -165,7 +165,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 	}
 	
 	
-	@Test(groups = "functional", enabled = false)
+	@Test(groups = "functional", enabled = true)
 	public void testSubmit() throws Exception {
 		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
 		// P0 job
@@ -178,7 +178,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		}
 
 		// P2 job
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 4; i++) {
 			Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.A");
 			appIds.add(jobService.submitYarnJob("pythonClient", p2[0], p2[1]));
 		}
@@ -194,13 +194,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 		}
 
 		// P2 job
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 4; i++) {
 			Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.B");
 			appIds.add(jobService.submitYarnJob("pythonClient", p2[0], p2[1]));
 		}
 	}
 	
-	@Test(groups = "functional", enabled = true)
+	@Test(groups = "functional", enabled = false)
 	public void testSubmit2() throws Exception {
 		List<ApplicationId> appIds = new ArrayList<ApplicationId>();
 		// A
