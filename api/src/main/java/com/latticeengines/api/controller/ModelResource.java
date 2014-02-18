@@ -14,6 +14,7 @@ import com.latticeengines.dataplatform.exposed.service.ModelingService;
 @Controller
 public class ModelResource {
 	
+	
 	@Autowired
 	private ModelingService modelingService;
 
