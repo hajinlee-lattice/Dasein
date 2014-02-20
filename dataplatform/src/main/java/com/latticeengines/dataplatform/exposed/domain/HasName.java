@@ -2,8 +2,8 @@ package com.latticeengines.dataplatform.exposed.domain;
 
 public interface HasName {
 
-	String getName();
+    String getName();
 
-	void setName(String name);
+    void setName(String name);
 
 }

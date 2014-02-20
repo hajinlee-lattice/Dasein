@@ -8,111 +8,111 @@ import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class Model implements HasName {
 
-	private String name;
-	private String trainingDataHdfsPath;
-	private String testDataHdfsPath;
-	private String schemaHdfsPath;
-	private String modelHdfsDir;
-	private String queue;
-	private List<String> features;
-	private List<String> targets;
-	private ModelDefinition modelDefinition;
-	
-	@Override
-	@JsonProperty("name")
-	public String getName() {
-		return name;
-	}
+    private String name;
+    private String trainingDataHdfsPath;
+    private String testDataHdfsPath;
+    private String schemaHdfsPath;
+    private String modelHdfsDir;
+    private String queue;
+    private List<String> features;
+    private List<String> targets;
+    private ModelDefinition modelDefinition;
 
-	@Override
-	@JsonProperty("name")
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Override
+    @JsonProperty("name")
+    public String getName() {
+        return name;
+    }
 
-	@JsonProperty("model_definition")
-	public ModelDefinition getModelDefinition() {
-		return modelDefinition;
-	}
+    @Override
+    @JsonProperty("name")
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	@JsonProperty("model_definition")
-	public void setModelDefinition(ModelDefinition modelDefinition) {
-		this.modelDefinition = modelDefinition;
-	}
+    @JsonProperty("model_definition")
+    public ModelDefinition getModelDefinition() {
+        return modelDefinition;
+    }
 
-	@JsonProperty("features")
-	public List<String> getFeatures() {
-		return features;
-	}
+    @JsonProperty("model_definition")
+    public void setModelDefinition(ModelDefinition modelDefinition) {
+        this.modelDefinition = modelDefinition;
+    }
 
-	@JsonProperty("features")
-	public void setFeatures(List<String> features) {
-		this.features = features;
-	}
+    @JsonProperty("features")
+    public List<String> getFeatures() {
+        return features;
+    }
 
-	@JsonProperty("targets")
-	public List<String> getTargets() {
-		return targets;
-	}
+    @JsonProperty("features")
+    public void setFeatures(List<String> features) {
+        this.features = features;
+    }
 
-	@JsonProperty("targets")
-	public void setTargets(List<String> targets) {
-		this.targets = targets;
-	}
+    @JsonProperty("targets")
+    public List<String> getTargets() {
+        return targets;
+    }
 
-	@JsonProperty("training_data")
-	public String getTrainingDataHdfsPath() {
-		return trainingDataHdfsPath;
-	}
+    @JsonProperty("targets")
+    public void setTargets(List<String> targets) {
+        this.targets = targets;
+    }
 
-	@JsonProperty("training_data")
-	public void setTrainingDataHdfsPath(String trainingDataHdfsPath) {
-		this.trainingDataHdfsPath = trainingDataHdfsPath;
-	}
+    @JsonProperty("training_data")
+    public String getTrainingDataHdfsPath() {
+        return trainingDataHdfsPath;
+    }
 
-	@JsonProperty("test_data")
-	public String getTestDataHdfsPath() {
-		return testDataHdfsPath;
-	}
+    @JsonProperty("training_data")
+    public void setTrainingDataHdfsPath(String trainingDataHdfsPath) {
+        this.trainingDataHdfsPath = trainingDataHdfsPath;
+    }
 
-	@JsonProperty("test_data")
-	public void setTestDataHdfsPath(String testDataHdfsPath) {
-		this.testDataHdfsPath = testDataHdfsPath;
-	}
+    @JsonProperty("test_data")
+    public String getTestDataHdfsPath() {
+        return testDataHdfsPath;
+    }
 
-	@JsonProperty("schema")
-	public String getSchemaHdfsPath() {
-		return schemaHdfsPath;
-	}
+    @JsonProperty("test_data")
+    public void setTestDataHdfsPath(String testDataHdfsPath) {
+        this.testDataHdfsPath = testDataHdfsPath;
+    }
 
-	@JsonProperty("schema")
-	public void setSchemaHdfsPath(String schemaHdfsPath) {
-		this.schemaHdfsPath = schemaHdfsPath;
-	}
+    @JsonProperty("schema")
+    public String getSchemaHdfsPath() {
+        return schemaHdfsPath;
+    }
 
-	@JsonProperty("model_dir_data")
-	public String getModelHdfsDir() {
-		return modelHdfsDir;
-	}
+    @JsonProperty("schema")
+    public void setSchemaHdfsPath(String schemaHdfsPath) {
+        this.schemaHdfsPath = schemaHdfsPath;
+    }
 
-	@JsonProperty("model_dir_data")
-	public void setModelHdfsDir(String modelHdfsDir) {
-		this.modelHdfsDir = modelHdfsDir;
-	}
-	
-	@Override
-	public String toString() {
-		return JsonHelper.serialize(this);
-	}
+    @JsonProperty("model_dir_data")
+    public String getModelHdfsDir() {
+        return modelHdfsDir;
+    }
 
-	@JsonProperty("queue")
-	public String getQueue() {
-		return queue;
-	}
+    @JsonProperty("model_dir_data")
+    public void setModelHdfsDir(String modelHdfsDir) {
+        this.modelHdfsDir = modelHdfsDir;
+    }
 
-	@JsonProperty("queue")
-	public void setQueue(String queue) {
-		this.queue = queue;
-	}
+    @Override
+    public String toString() {
+        return JsonHelper.serialize(this);
+    }
+
+    @JsonProperty("queue")
+    public String getQueue() {
+        return queue;
+    }
+
+    @JsonProperty("queue")
+    public void setQueue(String queue) {
+        this.queue = queue;
+    }
 
 }

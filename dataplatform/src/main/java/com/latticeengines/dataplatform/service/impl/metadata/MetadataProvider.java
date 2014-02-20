@@ -5,13 +5,13 @@ import java.sql.Connection;
 import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 
 public interface MetadataProvider {
-	
-	String getName();
 
-	Connection getConnection(DbCreds creds);
-	
-	String getType(String dbType);
+    String getName();
 
-	String getDefaultValue(String dbType);
-	
+    Connection getConnection(DbCreds creds);
+
+    String getType(String dbType);
+
+    String getDefaultValue(String dbType);
+
 }

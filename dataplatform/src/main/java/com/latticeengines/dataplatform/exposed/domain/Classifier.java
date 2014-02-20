@@ -9,108 +9,108 @@ import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class Classifier implements HasName {
 
-	private String name;
-	private String trainingDataHdfsPath;
-	private String testDataHdfsPath;
-	private String pythonScriptHdfsPath;
-	private String modelHdfsDir;
-	private String schemaHdfsPath;
-	private List<String> features = new ArrayList<String>();
-	private List<String> targets = new ArrayList<String>();
-	
-	@Override
-	@JsonProperty("name")
-	public String getName() {
-		return name;
-	}
+    private String name;
+    private String trainingDataHdfsPath;
+    private String testDataHdfsPath;
+    private String pythonScriptHdfsPath;
+    private String modelHdfsDir;
+    private String schemaHdfsPath;
+    private List<String> features = new ArrayList<String>();
+    private List<String> targets = new ArrayList<String>();
 
-	@Override
-	@JsonProperty("name")
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Override
+    @JsonProperty("name")
+    public String getName() {
+        return name;
+    }
 
-	@JsonProperty("training_data")
-	public String getTrainingDataHdfsPath() {
-		return trainingDataHdfsPath;
-	}
+    @Override
+    @JsonProperty("name")
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	@JsonProperty("training_data")
-	public void setTrainingDataHdfsPath(String trainingDataHdfsPath) {
-		this.trainingDataHdfsPath = trainingDataHdfsPath;
-	}
+    @JsonProperty("training_data")
+    public String getTrainingDataHdfsPath() {
+        return trainingDataHdfsPath;
+    }
 
-	@JsonProperty("test_data")
-	public String getTestDataHdfsPath() {
-		return testDataHdfsPath;
-	}
+    @JsonProperty("training_data")
+    public void setTrainingDataHdfsPath(String trainingDataHdfsPath) {
+        this.trainingDataHdfsPath = trainingDataHdfsPath;
+    }
 
-	@JsonProperty("test_data")
-	public void setTestDataHdfsPath(String testDataHdfsPath) {
-		this.testDataHdfsPath = testDataHdfsPath;
-	}
+    @JsonProperty("test_data")
+    public String getTestDataHdfsPath() {
+        return testDataHdfsPath;
+    }
 
-	@JsonProperty("python_script")
-	public String getPythonScriptHdfsPath() {
-		return pythonScriptHdfsPath;
-	}
+    @JsonProperty("test_data")
+    public void setTestDataHdfsPath(String testDataHdfsPath) {
+        this.testDataHdfsPath = testDataHdfsPath;
+    }
 
-	@JsonProperty("python_script")
-	public void setPythonScriptHdfsPath(String pythonScriptHdfsPath) {
-		this.pythonScriptHdfsPath = pythonScriptHdfsPath;
-	}
+    @JsonProperty("python_script")
+    public String getPythonScriptHdfsPath() {
+        return pythonScriptHdfsPath;
+    }
 
-	@JsonProperty("features")
-	public List<String> getFeatures() {
-		return features;
-	}
-	
-	@JsonProperty("features")
-	public void setFeatures(List<String> features) {
-		this.features = features;
-	}
+    @JsonProperty("python_script")
+    public void setPythonScriptHdfsPath(String pythonScriptHdfsPath) {
+        this.pythonScriptHdfsPath = pythonScriptHdfsPath;
+    }
 
-	public void addFeature(String feature) {
-		features.add(feature);
-	}
+    @JsonProperty("features")
+    public List<String> getFeatures() {
+        return features;
+    }
 
-	@JsonProperty("targets")
-	public List<String> getTargets() {
-		return targets;
-	}
-	
-	@JsonProperty("targets")
-	public void setTargets(List<String> targets) {
-		this.targets = targets;
-	}
+    @JsonProperty("features")
+    public void setFeatures(List<String> features) {
+        this.features = features;
+    }
 
-	public void addTarget(String target) {
-		targets.add(target);
-	}
-	
-	@Override
-	public String toString() {
-		return JsonHelper.serialize(this);
-	}
+    public void addFeature(String feature) {
+        features.add(feature);
+    }
 
-	@JsonProperty("model_data_dir")
-	public String getModelHdfsDir() {
-		return modelHdfsDir;
-	}
+    @JsonProperty("targets")
+    public List<String> getTargets() {
+        return targets;
+    }
 
-	@JsonProperty("model_data_dir")
-	public void setModelHdfsDir(String modelHdfsDir) {
-		this.modelHdfsDir = modelHdfsDir;
-	}
+    @JsonProperty("targets")
+    public void setTargets(List<String> targets) {
+        this.targets = targets;
+    }
 
-	@JsonProperty("schema")
-	public String getSchemaHdfsPath() {
-		return schemaHdfsPath;
-	}
+    public void addTarget(String target) {
+        targets.add(target);
+    }
 
-	@JsonProperty("schema")
-	public void setSchemaHdfsPath(String schemaHdfsPath) {
-		this.schemaHdfsPath = schemaHdfsPath;
-	}
+    @Override
+    public String toString() {
+        return JsonHelper.serialize(this);
+    }
+
+    @JsonProperty("model_data_dir")
+    public String getModelHdfsDir() {
+        return modelHdfsDir;
+    }
+
+    @JsonProperty("model_data_dir")
+    public void setModelHdfsDir(String modelHdfsDir) {
+        this.modelHdfsDir = modelHdfsDir;
+    }
+
+    @JsonProperty("schema")
+    public String getSchemaHdfsPath() {
+        return schemaHdfsPath;
+    }
+
+    @JsonProperty("schema")
+    public void setSchemaHdfsPath(String schemaHdfsPath) {
+        this.schemaHdfsPath = schemaHdfsPath;
+    }
 
 }

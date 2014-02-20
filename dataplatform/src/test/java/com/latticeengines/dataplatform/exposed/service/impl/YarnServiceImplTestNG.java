@@ -12,22 +12,22 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 
 public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
-	@Autowired
-	private YarnService yarnService;
-	
-	protected boolean doYarnClusterSetup() {
-		return false;
-	}
-	
-	@Test(groups="functional")
-	public void getSchedulerInfo() {
-		SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
-		assertNotNull(schedulerInfo);
-	}
+    @Autowired
+    private YarnService yarnService;
 
-	@Test(groups="functional")
-	public void getApps() {
-		AppsInfo appsInfo = yarnService.getApplications();
-		assertNotNull(appsInfo);
-	}
+    protected boolean doYarnClusterSetup() {
+        return false;
+    }
+
+    @Test(groups = "functional")
+    public void getSchedulerInfo() {
+        SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
+        assertNotNull(schedulerInfo);
+    }
+
+    @Test(groups = "functional")
+    public void getApps() {
+        AppsInfo appsInfo = yarnService.getApplications();
+        assertNotNull(appsInfo);
+    }
 }

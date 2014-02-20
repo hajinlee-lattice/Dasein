@@ -8,6 +8,6 @@ import com.latticeengines.dataplatform.exposed.domain.Model;
 
 public interface ModelingService {
 
-	List<ApplicationId> submitModel(Model model);
-	
+    List<ApplicationId> submitModel(Model model);
+
 }

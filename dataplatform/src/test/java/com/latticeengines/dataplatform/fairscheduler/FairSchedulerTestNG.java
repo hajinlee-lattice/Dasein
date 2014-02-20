@@ -45,522 +45,567 @@ import com.latticeengines.dataplatform.service.JobService;
 @ContextConfiguration(locations = { "classpath:com/latticeengines/dataplatform/fairscheduler/FairSchedulerTestNG-context.xml" })
 public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
-	@Autowired
-	private JobService jobService;
+    @Autowired
+    private JobService jobService;
 
-	@Autowired
-	private YarnService yarnService;
+    @Autowired
+    private YarnService yarnService;
 
-	@Autowired
-	private SecureFileTransferAgent secureFileTransferAgent;
+    @Autowired
+    private SecureFileTransferAgent secureFileTransferAgent;
 
-	@Value("${dataplatform.yarn.resourcemanager.fairscheduler.xml.location}")
-	private String remoteFairSchedulerFilePath;
+    @Value("${dataplatform.yarn.resourcemanager.fairscheduler.xml.location}")
+    private String remoteFairSchedulerFilePath;
 
-	@Value("${dataplatform.yarn.resourcemanager.log.location}")
-	private String remoteRMLogPath;
+    @Value("${dataplatform.yarn.resourcemanager.log.location}")
+    private String remoteRMLogPath;
 
-	private List<ApplicationId> applcationsSubmittedPerTest = new LinkedList<ApplicationId>();
+    private List<ApplicationId> applcationsSubmittedPerTest = new LinkedList<ApplicationId>();
 
-	@BeforeMethod(groups = "functional")
-	public void setup() throws Exception {
+    @BeforeMethod(groups = "functional")
+    public void setup() throws Exception {
 
-		FileSystem fileSystem = null;
-		FSDataOutputStream fileOut = null;
-		try {
-			fileSystem = FileSystem.get(yarnConfiguration);
-			String dir = "/output";
-			Path path = new Path(dir);
-			if (fileSystem.exists(path)) {
-				fileSystem.delete(path, true);
-				System.out.println("Deleted dir " + dir);
-			}
-			Path path1 = new Path("/output1");
-			if (fileSystem.exists(path1)) {
-				fileSystem.delete(path1, true);
-				System.out.println("Deleted dir /output1");
-			}
-			Path path2 = new Path("/output2");
-			if (fileSystem.exists(path2)) {
-				fileSystem.delete(path2, true);
-				System.out.println("Deleted dir /output2");
-			}
+        FileSystem fileSystem = null;
+        FSDataOutputStream fileOut = null;
+        try {
+            fileSystem = FileSystem.get(yarnConfiguration);
+            String dir = "/output";
+            Path path = new Path(dir);
+            if (fileSystem.exists(path)) {
+                fileSystem.delete(path, true);
+                System.out.println("Deleted dir " + dir);
+            }
+            Path path1 = new Path("/output1");
+            if (fileSystem.exists(path1)) {
+                fileSystem.delete(path1, true);
+                System.out.println("Deleted dir /output1");
+            }
+            Path path2 = new Path("/output2");
+            if (fileSystem.exists(path2)) {
+                fileSystem.delete(path2, true);
+                System.out.println("Deleted dir /output2");
+            }
 
-			Path inputFilepath = new Path("/input/file1.txt");
-			if (fileSystem.exists(inputFilepath)) {
-				fileSystem.delete(inputFilepath, true);
-			}
+            Path inputFilepath = new Path("/input/file1.txt");
+            if (fileSystem.exists(inputFilepath)) {
+                fileSystem.delete(inputFilepath, true);
+            }
 
-			// Create a new file and write data to it.
-			fileOut = fileSystem.create(inputFilepath);
-			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fileOut));
-			writer.write("Watson is awesome\n");
-			writer.flush();
-			fileOut.flush();
-		} catch (IOException e) {
-			throw new IllegalStateException(e); 
-		} finally {
-			try {
-				fileOut.close();
-				fileSystem.close();
-			} catch (IOException e) {
-				throw new IllegalStateException(e);
-			}
-		}
+            // Create a new file and write data to it.
+            fileOut = fileSystem.create(inputFilepath);
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+                    fileOut));
+            writer.write("Watson is awesome\n");
+            writer.flush();
+            fileOut.flush();
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        } finally {
+            try {
+                fileOut.close();
+                fileSystem.close();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
 
-	}
+    }
 
-	@AfterMethod(groups = "functional")
-	public void cleanUp() throws Exception {
-		
-		YarnApplicationState state;
-		for (ApplicationId appId : applcationsSubmittedPerTest) {
-			state = getState(appId);
-			if (state != null && !state.equals(YarnApplicationState.FAILED) &&
-					!state.equals(YarnApplicationState.FINISHED) &&
-					!state.equals(YarnApplicationState.KILLED)) {
-				jobService.killJob(appId);
-			};
-		}
-		applcationsSubmittedPerTest.clear();
-	}
+    @AfterMethod(groups = "functional")
+    public void cleanUp() throws Exception {
 
-	@Test(groups = "functional", enabled = true)
-	public void testFairSchedulerJobVIP() throws Exception {
+        YarnApplicationState state;
+        for (ApplicationId appId : applcationsSubmittedPerTest) {
+            state = getState(appId);
+            if (state != null && !state.equals(YarnApplicationState.FAILED)
+                    && !state.equals(YarnApplicationState.FINISHED)
+                    && !state.equals(YarnApplicationState.KILLED)) {
+                jobService.killJob(appId);
+            }
+            ;
+        }
+        applcationsSubmittedPerTest.clear();
+    }
 
-		File tempFairSchedulerFile = File.createTempFile("fair-scheduler", ".xml");
+    @Test(groups = "functional", enabled = true)
+    public void testFairSchedulerJobVIP() throws Exception {
 
-		// Fair Scheduler won't remove existing queue after refresh even if that
-		// queue is removed from fair-scheduler.xml
-		PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
-		out.println("<?xml version=\"1.0\"?>");
-		out.println("<allocations>");
-		out.println("	<queue name=\"Dell\">");
-		out.println("		<weight>5</weight>");
-		out.println("		<minResources>2048 mb,2 vcores</minResources>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<minSharePreemptionTimeout>3</minSharePreemptionTimeout>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>5</weight>");
-		out.println("			<minResources>4096 mb,4 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"HP\">");
-		out.println("		<weight>5</weight>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<minResources>2048 mb,2 vcores</minResources>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>5</weight>");
-		out.println("			<minResources>4096 mb,4 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"VIP\">");
-		out.println("		<weight>20</weight>");
-		out.println("		<minResources>6096 mb,6 vcores</minResources>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>20</weight>");
-		out.println("			<minResources>8096 mb,8 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
-		out.println("	<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("</allocations>");
-		out.close();
+        File tempFairSchedulerFile = File.createTempFile("fair-scheduler",
+                ".xml");
 
-		assertTrue(secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(),
-				remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
+        // Fair Scheduler won't remove existing queue after refresh even if that
+        // queue is removed from fair-scheduler.xml
+        PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
+        out.println("<?xml version=\"1.0\"?>");
+        out.println("<allocations>");
+        out.println("	<queue name=\"Dell\">");
+        out.println("		<weight>5</weight>");
+        out.println("		<minResources>2048 mb,2 vcores</minResources>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<minSharePreemptionTimeout>3</minSharePreemptionTimeout>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>5</weight>");
+        out.println("			<minResources>4096 mb,4 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"HP\">");
+        out.println("		<weight>5</weight>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<minResources>2048 mb,2 vcores</minResources>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>5</weight>");
+        out.println("			<minResources>4096 mb,4 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"VIP\">");
+        out.println("		<weight>20</weight>");
+        out.println("		<minResources>6096 mb,6 vcores</minResources>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>20</weight>");
+        out.println("			<minResources>8096 mb,8 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
+        out.println("	<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("</allocations>");
+        out.close();
 
-		Thread.sleep(20000L);
-		Properties configuration = new Properties();
-		configuration.put("mapreduce.job.queuename", "Dell.FastLane");
-		ApplicationId applicationIdDell = jobService.submitMRJob("wordCountJob1", configuration);
-		applcationsSubmittedPerTest.add(applicationIdDell);
-		configuration.put("mapreduce.job.queuename", "HP.FastLane");
-		ApplicationId applicationIdHP = jobService.submitMRJob("wordCountJob2", configuration);
-		applcationsSubmittedPerTest.add(applicationIdHP);
-		configuration.put("mapreduce.job.queuename", "VIP.FastLane");
-		ApplicationId applicationIdVIP = jobService.submitMRJob("wordCountJob", configuration);
-		applcationsSubmittedPerTest.add(applicationIdVIP);
-		YarnApplicationState state = waitState(applicationIdVIP, 300, TimeUnit.SECONDS, YarnApplicationState.FAILED,
-				YarnApplicationState.FINISHED);
+        assertTrue(secureFileTransferAgent.fileTranser(
+                tempFairSchedulerFile.getAbsolutePath(),
+                remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
-		state = getState(applicationIdVIP);
-		assertNotNull(state);
-		assertTrue(state.equals(YarnApplicationState.FINISHED));
-		long vipJobFinishTime = jobService.getJobReportById(applicationIdVIP).getFinishTime();
+        Thread.sleep(20000L);
+        Properties configuration = new Properties();
+        configuration.put("mapreduce.job.queuename", "Dell.FastLane");
+        ApplicationId applicationIdDell = jobService.submitMRJob(
+                "wordCountJob1", configuration);
+        applcationsSubmittedPerTest.add(applicationIdDell);
+        configuration.put("mapreduce.job.queuename", "HP.FastLane");
+        ApplicationId applicationIdHP = jobService.submitMRJob("wordCountJob2",
+                configuration);
+        applcationsSubmittedPerTest.add(applicationIdHP);
+        configuration.put("mapreduce.job.queuename", "VIP.FastLane");
+        ApplicationId applicationIdVIP = jobService.submitMRJob("wordCountJob",
+                configuration);
+        applcationsSubmittedPerTest.add(applicationIdVIP);
+        YarnApplicationState state = waitState(applicationIdVIP, 300,
+                TimeUnit.SECONDS, YarnApplicationState.FAILED,
+                YarnApplicationState.FINISHED);
 
-		state = getState(applicationIdDell);
-		assertNotNull(state);
-		if (state.equals(YarnApplicationState.FINISHED)) {
-			long dellJobFinishTime = jobService.getJobReportById(applicationIdDell).getFinishTime();
-			assertTrue(dellJobFinishTime >= vipJobFinishTime);
-		}
+        state = getState(applicationIdVIP);
+        assertNotNull(state);
+        assertTrue(state.equals(YarnApplicationState.FINISHED));
+        long vipJobFinishTime = jobService.getJobReportById(applicationIdVIP)
+                .getFinishTime();
 
-		state = getState(applicationIdHP);
-		if (state.equals(YarnApplicationState.FINISHED)) {
-			long hpJobFinishTime = jobService.getJobReportById(applicationIdHP).getFinishTime();
-			assertTrue(hpJobFinishTime >= vipJobFinishTime);
-		}
+        state = getState(applicationIdDell);
+        assertNotNull(state);
+        if (state.equals(YarnApplicationState.FINISHED)) {
+            long dellJobFinishTime = jobService.getJobReportById(
+                    applicationIdDell).getFinishTime();
+            assertTrue(dellJobFinishTime >= vipJobFinishTime);
+        }
 
-	}
+        state = getState(applicationIdHP);
+        if (state.equals(YarnApplicationState.FINISHED)) {
+            long hpJobFinishTime = jobService.getJobReportById(applicationIdHP)
+                    .getFinishTime();
+            assertTrue(hpJobFinishTime >= vipJobFinishTime);
+        }
 
-	@Test(groups = "functional", enabled = true)
-	public void testFairSchedulerJobFailure() throws Exception {
+    }
 
-		File tempFairSchedulerFile = File.createTempFile("fair-scheduler", ".xml");
+    @Test(groups = "functional", enabled = true)
+    public void testFairSchedulerJobFailure() throws Exception {
 
-		// Fair Scheduler won't remove existing queue after refresh even if that
-		// queue is removed from fair-scheduler.xml
-		PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
-		out.println("<?xml version=\"1.0\"?>");
-		out.println("<allocations>");
-		out.println("	<queue name=\"Dell\">");
-		out.println("		<weight>5</weight>");
-		out.println("		<minResources>4096 mb,4 vcores</minResources>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<minSharePreemptionTimeout>3</minSharePreemptionTimeout>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>5</weight>");
-		out.println("			<minResources>4096 mb,4 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"HP\">");
-		out.println("		<weight>5</weight>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<minResources>4096 mb,4 vcores</minResources>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>5</weight>");
-		out.println("			<minResources>4096 mb,4 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"Common\">");
-		out.println("		<weight>2</weight>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>2</weight>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"VIP\">");
-		out.println("		<weight>20</weight>");
-		out.println("		<minResources>6096 mb,6 vcores</minResources>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>5</weight>");
-		out.println("			<minResources>8096 mb,8 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"Experimental\">");
-		out.println("		<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("	</queue>");
-		out.println("	<defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
-		out.println("	<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("</allocations>");
-		out.close();
+        File tempFairSchedulerFile = File.createTempFile("fair-scheduler",
+                ".xml");
 
-		secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(), remoteFairSchedulerFilePath,
-				FileTransferOption.UPLOAD);
+        // Fair Scheduler won't remove existing queue after refresh even if that
+        // queue is removed from fair-scheduler.xml
+        PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
+        out.println("<?xml version=\"1.0\"?>");
+        out.println("<allocations>");
+        out.println("	<queue name=\"Dell\">");
+        out.println("		<weight>5</weight>");
+        out.println("		<minResources>4096 mb,4 vcores</minResources>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<minSharePreemptionTimeout>3</minSharePreemptionTimeout>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>5</weight>");
+        out.println("			<minResources>4096 mb,4 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"HP\">");
+        out.println("		<weight>5</weight>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<minResources>4096 mb,4 vcores</minResources>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>5</weight>");
+        out.println("			<minResources>4096 mb,4 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"Common\">");
+        out.println("		<weight>2</weight>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>2</weight>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"VIP\">");
+        out.println("		<weight>20</weight>");
+        out.println("		<minResources>6096 mb,6 vcores</minResources>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>5</weight>");
+        out.println("			<minResources>8096 mb,8 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"Experimental\">");
+        out.println("		<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("	</queue>");
+        out.println("	<defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
+        out.println("	<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("</allocations>");
+        out.close();
 
-		Thread.sleep(20000L);
-		Properties configuration = new Properties();
-		configuration.put("mapreduce.job.queuename", "Common.FastLane");
-		ApplicationId applicationId = jobService.submitMRJob("wordCountJob", configuration);
-		applcationsSubmittedPerTest.add(applicationId);
-		configuration.put("mapreduce.job.queuename", "Dell.FastLane");
-		ApplicationId applicationId2 = jobService.submitMRJob("wordCountJob1", configuration);
-		applcationsSubmittedPerTest.add(applicationId2);
-		configuration.put("mapreduce.job.queuename", "HP.FastLane");
-		ApplicationId applicationId3 = jobService.submitMRJob("wordCountJob2", configuration);
-		applcationsSubmittedPerTest.add(applicationId3);
-		YarnApplicationState state = waitState(applicationId2, 120, TimeUnit.SECONDS, YarnApplicationState.FAILED,
-				YarnApplicationState.FINISHED);
-		assertNotNull(state);
-		assertTrue(state.equals(YarnApplicationState.FINISHED));
+        secureFileTransferAgent.fileTranser(
+                tempFairSchedulerFile.getAbsolutePath(),
+                remoteFairSchedulerFilePath, FileTransferOption.UPLOAD);
 
-		state = getState(applicationId3);
-		if (!state.equals(YarnApplicationState.FINISHED)) {
-			state = waitState(applicationId3, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
-		}
-		assertNotNull(state);
-		assertTrue(state.equals(YarnApplicationState.FINISHED));
-		
-		state = getState(applicationId);
-		assertNotNull(state);
-		assertTrue(state.equals(YarnApplicationState.FAILED)); // this job fails after two preemption
+        Thread.sleep(20000L);
+        Properties configuration = new Properties();
+        configuration.put("mapreduce.job.queuename", "Common.FastLane");
+        ApplicationId applicationId = jobService.submitMRJob("wordCountJob",
+                configuration);
+        applcationsSubmittedPerTest.add(applicationId);
+        configuration.put("mapreduce.job.queuename", "Dell.FastLane");
+        ApplicationId applicationId2 = jobService.submitMRJob("wordCountJob1",
+                configuration);
+        applcationsSubmittedPerTest.add(applicationId2);
+        configuration.put("mapreduce.job.queuename", "HP.FastLane");
+        ApplicationId applicationId3 = jobService.submitMRJob("wordCountJob2",
+                configuration);
+        applcationsSubmittedPerTest.add(applicationId3);
+        YarnApplicationState state = waitState(applicationId2, 120,
+                TimeUnit.SECONDS, YarnApplicationState.FAILED,
+                YarnApplicationState.FINISHED);
+        assertNotNull(state);
+        assertTrue(state.equals(YarnApplicationState.FINISHED));
 
-		verifyPreemption(applicationId);
-	}
+        state = getState(applicationId3);
+        if (!state.equals(YarnApplicationState.FINISHED)) {
+            state = waitState(applicationId3, 120, TimeUnit.SECONDS,
+                    YarnApplicationState.FINISHED);
+        }
+        assertNotNull(state);
+        assertTrue(state.equals(YarnApplicationState.FINISHED));
 
-	@Test(groups = "functional", enabled = true)
-	public void testFairSchedulerJob() throws Exception {
+        state = getState(applicationId);
+        assertNotNull(state);
+        assertTrue(state.equals(YarnApplicationState.FAILED)); // this job fails
+                                                               // after two
+                                                               // preemption
 
-		File tempFairSchedulerFile = File.createTempFile("fair-scheduler", ".xml");
+        verifyPreemption(applicationId);
+    }
 
-		// Fair Scheduler won't remove existing queue after refresh even if that
-		// queue is removed from fair-scheduler.xml
-		PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
-		out.println("<?xml version=\"1.0\"?>");
-		out.println("<allocations>");
-		out.println("	<queue name=\"Dell\">");
-		out.println("		<weight>5</weight>");
-		out.println("		<minResources>4096 mb,4 vcores</minResources>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<minSharePreemptionTimeout>3</minSharePreemptionTimeout>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>5</weight>");
-		out.println("			<minResources>4096 mb,4 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"HP\">");
-		out.println("		<weight>5</weight>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<minResources>4096 mb,4 vcores</minResources>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>5</weight>");
-		out.println("			<minResources>4096 mb,4 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"Common\">");
-		out.println("		<weight>2</weight>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>2</weight>");
-		out.println("			<minResources>2048 mb,2 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"VIP\">");
-		out.println("		<weight>20</weight>");
-		out.println("		<minResources>6096 mb,6 vcores</minResources>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>5</weight>");
-		out.println("			<minResources>8096 mb,8 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"Experimental\">");
-		out.println("		<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("	</queue>");
-		out.println("	<defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
-		out.println("	<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("</allocations>");
-		out.close();
+    @Test(groups = "functional", enabled = true)
+    public void testFairSchedulerJob() throws Exception {
 
-		assertTrue(secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(),
-				remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
+        File tempFairSchedulerFile = File.createTempFile("fair-scheduler",
+                ".xml");
 
-		Thread.sleep(20000L);
-		Properties configuration = new Properties();
-		configuration.put("mapreduce.job.queuename", "Common.FastLane");
-		ApplicationId applicationId = jobService.submitMRJob("wordCountJob", configuration);
-		applcationsSubmittedPerTest.add(applicationId);
-		configuration.put("mapreduce.job.queuename", "Dell.FastLane");
-		ApplicationId applicationId2 = jobService.submitMRJob("wordCountJob1", configuration);
-		applcationsSubmittedPerTest.add(applicationId2);
-		configuration.put("mapreduce.job.queuename", "HP.FastLane");
-		ApplicationId applicationId3 = jobService.submitMRJob("wordCountJob2", configuration);
-		applcationsSubmittedPerTest.add(applicationId3);
-		YarnApplicationState state = waitState(applicationId, 300, TimeUnit.SECONDS, YarnApplicationState.FAILED,
-				YarnApplicationState.FINISHED);
+        // Fair Scheduler won't remove existing queue after refresh even if that
+        // queue is removed from fair-scheduler.xml
+        PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
+        out.println("<?xml version=\"1.0\"?>");
+        out.println("<allocations>");
+        out.println("	<queue name=\"Dell\">");
+        out.println("		<weight>5</weight>");
+        out.println("		<minResources>4096 mb,4 vcores</minResources>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<minSharePreemptionTimeout>3</minSharePreemptionTimeout>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>5</weight>");
+        out.println("			<minResources>4096 mb,4 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"HP\">");
+        out.println("		<weight>5</weight>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<minResources>4096 mb,4 vcores</minResources>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>5</weight>");
+        out.println("			<minResources>4096 mb,4 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"Common\">");
+        out.println("		<weight>2</weight>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>2</weight>");
+        out.println("			<minResources>2048 mb,2 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"VIP\">");
+        out.println("		<weight>20</weight>");
+        out.println("		<minResources>6096 mb,6 vcores</minResources>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>5</weight>");
+        out.println("			<minResources>8096 mb,8 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"Experimental\">");
+        out.println("		<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("	</queue>");
+        out.println("	<defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
+        out.println("	<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("</allocations>");
+        out.close();
 
-		assertNotNull(state);
-		assertTrue(state.equals(YarnApplicationState.FINISHED));
-		long commonJobFinishTime = jobService.getJobReportById(applicationId).getFinishTime();
-		long hpJobFinishTime = jobService.getJobReportById(applicationId3).getFinishTime();
-		long dellJobFinishTime = jobService.getJobReportById(applicationId2).getFinishTime();
-		System.out.println("HPJobFinishTime " + hpJobFinishTime);
-		System.out.println("CommonJobFinishTime " + commonJobFinishTime);
-		System.out.println("DellJobFinishTime " + dellJobFinishTime);
-		assertTrue(hpJobFinishTime <= commonJobFinishTime);
-		assertTrue(dellJobFinishTime <= commonJobFinishTime);
+        assertTrue(secureFileTransferAgent.fileTranser(
+                tempFairSchedulerFile.getAbsolutePath(),
+                remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
-	}
+        Thread.sleep(20000L);
+        Properties configuration = new Properties();
+        configuration.put("mapreduce.job.queuename", "Common.FastLane");
+        ApplicationId applicationId = jobService.submitMRJob("wordCountJob",
+                configuration);
+        applcationsSubmittedPerTest.add(applicationId);
+        configuration.put("mapreduce.job.queuename", "Dell.FastLane");
+        ApplicationId applicationId2 = jobService.submitMRJob("wordCountJob1",
+                configuration);
+        applcationsSubmittedPerTest.add(applicationId2);
+        configuration.put("mapreduce.job.queuename", "HP.FastLane");
+        ApplicationId applicationId3 = jobService.submitMRJob("wordCountJob2",
+                configuration);
+        applcationsSubmittedPerTest.add(applicationId3);
+        YarnApplicationState state = waitState(applicationId, 300,
+                TimeUnit.SECONDS, YarnApplicationState.FAILED,
+                YarnApplicationState.FINISHED);
 
-	@SuppressWarnings("rawtypes")
-	@Test(groups = "functional", enabled = true)
-	public void testFairSchedulerPreemptingJob() throws Exception {
+        assertNotNull(state);
+        assertTrue(state.equals(YarnApplicationState.FINISHED));
+        long commonJobFinishTime = jobService.getJobReportById(applicationId)
+                .getFinishTime();
+        long hpJobFinishTime = jobService.getJobReportById(applicationId3)
+                .getFinishTime();
+        long dellJobFinishTime = jobService.getJobReportById(applicationId2)
+                .getFinishTime();
+        System.out.println("HPJobFinishTime " + hpJobFinishTime);
+        System.out.println("CommonJobFinishTime " + commonJobFinishTime);
+        System.out.println("DellJobFinishTime " + dellJobFinishTime);
+        assertTrue(hpJobFinishTime <= commonJobFinishTime);
+        assertTrue(dellJobFinishTime <= commonJobFinishTime);
 
-		File tempFairSchedulerFile = File.createTempFile("fair-scheduler", ".xml");
+    }
 
-		// Fair Scheduler won't remove existing queue after refresh even if that
-		// queue is removed from fair-scheduler.xml
-		PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
-		out.println("<?xml version=\"1.0\"?>");
-		out.println("<allocations>");
-		out.println("	<queue name=\"Dell\">");
-		out.println("		<weight>5</weight>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<minResources>4096 mb,4 vcores</minResources>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>5</weight>");
-		out.println("			<minResources>4096 mb,4 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"Common\">");
-		out.println("		<weight>2</weight>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>5</weight>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<queue name=\"VIP\">");
-		out.println("		<weight>20</weight>");
-		out.println("		<minResources>6096 mb,6 vcores</minResources>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>5</weight>");
-		out.println("			<minResources>8096 mb,8 vcores</minResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
-		out.println("	<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("</allocations>");
-		out.close();
+    @SuppressWarnings("rawtypes")
+    @Test(groups = "functional", enabled = true)
+    public void testFairSchedulerPreemptingJob() throws Exception {
 
-		assertTrue(secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(),
-				remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
+        File tempFairSchedulerFile = File.createTempFile("fair-scheduler",
+                ".xml");
 
-		// Sleep for 20s to allow fair scheduler to pickup new setting
-		Thread.sleep(20000L);
+        // Fair Scheduler won't remove existing queue after refresh even if that
+        // queue is removed from fair-scheduler.xml
+        PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
+        out.println("<?xml version=\"1.0\"?>");
+        out.println("<allocations>");
+        out.println("	<queue name=\"Dell\">");
+        out.println("		<weight>5</weight>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<minResources>4096 mb,4 vcores</minResources>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>5</weight>");
+        out.println("			<minResources>4096 mb,4 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"Common\">");
+        out.println("		<weight>2</weight>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>5</weight>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<queue name=\"VIP\">");
+        out.println("		<weight>20</weight>");
+        out.println("		<minResources>6096 mb,6 vcores</minResources>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>5</weight>");
+        out.println("			<minResources>8096 mb,8 vcores</minResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
+        out.println("	<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("</allocations>");
+        out.close();
 
-		// SchedulerInfo is private field from SchedulerTypeInfo
-		SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
-		Field field = SchedulerTypeInfo.class.getDeclaredField("schedulerInfo");
-		field.setAccessible(true);
-		FairSchedulerInfo fairScheduler = (FairSchedulerInfo) field.get(schedulerInfo);
-		Iterator iter = fairScheduler.getRootQueueInfo().getChildQueues().iterator();
-		while (iter.hasNext()) {
-			FairSchedulerQueueInfo queue = (FairSchedulerQueueInfo) iter.next();
-			if (queue.getQueueName().equalsIgnoreCase("root.Dell")) {
-				assertTrue(queue.getSchedulingPolicy().equalsIgnoreCase("fair"));
-				System.out.println(queue.getMinResources().toString());
-				assertTrue(queue.getMinResources().getMemory() == 4096);
-				assertTrue(queue.getMinResources().getvCores() == 4);
-			}
-		}
+        assertTrue(secureFileTransferAgent.fileTranser(
+                tempFairSchedulerFile.getAbsolutePath(),
+                remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
-		Properties configuration = new Properties();
-		configuration.put("mapreduce.job.queuename", "Common.FastLane");
-		ApplicationId applicationId = jobService.submitMRJob("wordCountJob", configuration);
-		applcationsSubmittedPerTest.add(applicationId);
-		Thread.sleep(10000);
-		configuration.put("mapreduce.job.queuename", "Dell.FastLane");
-		// configuration.put("mapreduce.map.memory.mb", "4096");
-		ApplicationId applicationId2 = jobService.submitMRJob("wordCountJob1", configuration);
-		applcationsSubmittedPerTest.add(applicationId2);
-		YarnApplicationState state = waitState(applicationId, 600, TimeUnit.SECONDS, YarnApplicationState.FAILED,
-				YarnApplicationState.FINISHED);
+        // Sleep for 20s to allow fair scheduler to pickup new setting
+        Thread.sleep(20000L);
 
-		state = getState(applicationId);
-		assertNotNull(state);
-		assertTrue(!state.equals(YarnApplicationState.FAILED));
-		long commonJobFinishTime = jobService.getJobReportById(applicationId).getFinishTime();
-		long dellJobFinishTime = jobService.getJobReportById(applicationId2).getFinishTime();
-		System.out.println("CommonJobFinishTime " + commonJobFinishTime);
-		System.out.println("DellJobFinishTime " + dellJobFinishTime);
-		assertTrue(dellJobFinishTime <= commonJobFinishTime);
-		
-		verifyPreemption(applicationId);
-	}
+        // SchedulerInfo is private field from SchedulerTypeInfo
+        SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
+        Field field = SchedulerTypeInfo.class.getDeclaredField("schedulerInfo");
+        field.setAccessible(true);
+        FairSchedulerInfo fairScheduler = (FairSchedulerInfo) field
+                .get(schedulerInfo);
+        Iterator iter = fairScheduler.getRootQueueInfo().getChildQueues()
+                .iterator();
+        while (iter.hasNext()) {
+            FairSchedulerQueueInfo queue = (FairSchedulerQueueInfo) iter.next();
+            if (queue.getQueueName().equalsIgnoreCase("root.Dell")) {
+                assertTrue(queue.getSchedulingPolicy().equalsIgnoreCase("fair"));
+                System.out.println(queue.getMinResources().toString());
+                assertTrue(queue.getMinResources().getMemory() == 4096);
+                assertTrue(queue.getMinResources().getvCores() == 4);
+            }
+        }
 
-	private void verifyPreemption(ApplicationId applicationId) throws IOException, FileNotFoundException {
-		File tempRMLogFile = File.createTempFile("resource-manager", ".log");
+        Properties configuration = new Properties();
+        configuration.put("mapreduce.job.queuename", "Common.FastLane");
+        ApplicationId applicationId = jobService.submitMRJob("wordCountJob",
+                configuration);
+        applcationsSubmittedPerTest.add(applicationId);
+        Thread.sleep(10000);
+        configuration.put("mapreduce.job.queuename", "Dell.FastLane");
+        // configuration.put("mapreduce.map.memory.mb", "4096");
+        ApplicationId applicationId2 = jobService.submitMRJob("wordCountJob1",
+                configuration);
+        applcationsSubmittedPerTest.add(applicationId2);
+        YarnApplicationState state = waitState(applicationId, 600,
+                TimeUnit.SECONDS, YarnApplicationState.FAILED,
+                YarnApplicationState.FINISHED);
 
-		assertTrue(secureFileTransferAgent.fileTranser(tempRMLogFile.getAbsolutePath(), remoteRMLogPath,
-				FileTransferOption.DOWNLOAD));
+        state = getState(applicationId);
+        assertNotNull(state);
+        assertTrue(!state.equals(YarnApplicationState.FAILED));
+        long commonJobFinishTime = jobService.getJobReportById(applicationId)
+                .getFinishTime();
+        long dellJobFinishTime = jobService.getJobReportById(applicationId2)
+                .getFinishTime();
+        System.out.println("CommonJobFinishTime " + commonJobFinishTime);
+        System.out.println("DellJobFinishTime " + dellJobFinishTime);
+        assertTrue(dellJobFinishTime <= commonJobFinishTime);
 
-		BufferedReader br = new BufferedReader(new FileReader(tempRMLogFile));
-		boolean isPreemptContainer = false;
-		try {
-			String line = br.readLine();
-			Pattern pattern = Pattern.compile("Preempting container.+?from queue root.Common.FastLane");
-			Matcher matcher = null;
+        verifyPreemption(applicationId);
+    }
 
-			boolean foundApplication = false;
-			String applicationIdStr = applicationId.toString();
-			while (line != null) {
-				if (!foundApplication && line.contains(applicationIdStr)) {
-					foundApplication = true;
-				}
-				if (foundApplication) {
-					matcher = pattern.matcher(line);
-					if (matcher.find()) {
-						isPreemptContainer = true;
-					}
-				}
-				line = br.readLine();
-			}
-		} finally {
-			br.close();
-		}
-		assertTrue(isPreemptContainer);
-	}
+    private void verifyPreemption(ApplicationId applicationId)
+            throws IOException, FileNotFoundException {
+        File tempRMLogFile = File.createTempFile("resource-manager", ".log");
 
-	@Test(groups = "functional", enabled = true)
-	public void testFairSchedulerDisableQueue() throws Exception {
+        assertTrue(secureFileTransferAgent.fileTranser(
+                tempRMLogFile.getAbsolutePath(), remoteRMLogPath,
+                FileTransferOption.DOWNLOAD));
 
-		File tempFairSchedulerFile = File.createTempFile("fair-scheduler", ".xml");
+        BufferedReader br = new BufferedReader(new FileReader(tempRMLogFile));
+        boolean isPreemptContainer = false;
+        try {
+            String line = br.readLine();
+            Pattern pattern = Pattern
+                    .compile("Preempting container.+?from queue root.Common.FastLane");
+            Matcher matcher = null;
 
-		// Fair Scheduler won't remove existing queue after refresh even if that
-		// queue is removed from fair-scheduler.xml
-		PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
-		out.println("<?xml version=\"1.0\"?>");
-		out.println("<allocations>");
-		out.println("	<queue name=\"DisabledQueue\">");
-		out.println("		<weight>2</weight>");
-		out.println("		<schedulingPolicy>fair</schedulingPolicy>");
-		out.println("		<queue name=\"FastLane\">");
-		out.println("			<weight>2</weight>");
-		out.println("			<maxRunningApps>0</maxRunningApps>");
-		out.println("			<maxResources>0 mb,0 vcores</maxResources>");
-		out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
-		out.println("		</queue>");
-		out.println("	</queue>");
-		out.println("	<defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
-		out.println("	<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-		out.println("</allocations>");
-		out.close();
+            boolean foundApplication = false;
+            String applicationIdStr = applicationId.toString();
+            while (line != null) {
+                if (!foundApplication && line.contains(applicationIdStr)) {
+                    foundApplication = true;
+                }
+                if (foundApplication) {
+                    matcher = pattern.matcher(line);
+                    if (matcher.find()) {
+                        isPreemptContainer = true;
+                    }
+                }
+                line = br.readLine();
+            }
+        } finally {
+            br.close();
+        }
+        assertTrue(isPreemptContainer);
+    }
 
-		assertTrue(secureFileTransferAgent.fileTranser(tempFairSchedulerFile.getAbsolutePath(),
-				remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
+    @Test(groups = "functional", enabled = true)
+    public void testFairSchedulerDisableQueue() throws Exception {
 
-		Thread.sleep(20000L);
-		Properties configuration = new Properties();
-		configuration.put("mapreduce.job.queuename", "DisabledQueue.FastLane");
-		ApplicationId applicationId = jobService.submitMRJob("wordCountJob", configuration);
-		applcationsSubmittedPerTest.add(applicationId);
-		YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS);
-		assertNotNull(state);
-		assertTrue(state.equals(YarnApplicationState.ACCEPTED));
+        File tempFairSchedulerFile = File.createTempFile("fair-scheduler",
+                ".xml");
 
-	}
+        // Fair Scheduler won't remove existing queue after refresh even if that
+        // queue is removed from fair-scheduler.xml
+        PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
+        out.println("<?xml version=\"1.0\"?>");
+        out.println("<allocations>");
+        out.println("	<queue name=\"DisabledQueue\">");
+        out.println("		<weight>2</weight>");
+        out.println("		<schedulingPolicy>fair</schedulingPolicy>");
+        out.println("		<queue name=\"FastLane\">");
+        out.println("			<weight>2</weight>");
+        out.println("			<maxRunningApps>0</maxRunningApps>");
+        out.println("			<maxResources>0 mb,0 vcores</maxResources>");
+        out.println("			<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("			<schedulingPolicy>fifo</schedulingPolicy>");
+        out.println("		</queue>");
+        out.println("	</queue>");
+        out.println("	<defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
+        out.println("	<fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
+        out.println("</allocations>");
+        out.close();
+
+        assertTrue(secureFileTransferAgent.fileTranser(
+                tempFairSchedulerFile.getAbsolutePath(),
+                remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
+
+        Thread.sleep(20000L);
+        Properties configuration = new Properties();
+        configuration.put("mapreduce.job.queuename", "DisabledQueue.FastLane");
+        ApplicationId applicationId = jobService.submitMRJob("wordCountJob",
+                configuration);
+        applcationsSubmittedPerTest.add(applicationId);
+        YarnApplicationState state = waitState(applicationId, 30,
+                TimeUnit.SECONDS);
+        assertNotNull(state);
+        assertTrue(state.equals(YarnApplicationState.ACCEPTED));
+
+    }
 
 }

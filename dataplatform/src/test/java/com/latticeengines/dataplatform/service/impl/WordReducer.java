@@ -10,10 +10,11 @@ public class WordReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
     protected static final String TARGET_WORD = "Watson";
 
     @Override
-    protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+    protected void reduce(Text key, Iterable<IntWritable> values,
+            Context context) throws IOException, InterruptedException {
         if (containsTargetWord(key)) {
             int wordCount = 0;
-            for (IntWritable value: values) {
+            for (IntWritable value : values) {
                 wordCount += value.get();
             }
             context.write(key, new IntWritable(wordCount));

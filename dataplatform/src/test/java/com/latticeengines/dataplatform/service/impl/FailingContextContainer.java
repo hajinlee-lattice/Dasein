@@ -22,34 +22,36 @@ import org.springframework.yarn.container.AbstractYarnContainer;
 import org.springframework.yarn.container.YarnContainer;
 
 /**
- * Simple {@link YarnContainer} example which is able
- * to exist with error status to demonstrate how it is
- * handled on Application Master.
- *
+ * Simple {@link YarnContainer} example which is able to exist with error status
+ * to demonstrate how it is handled on Application Master.
+ * 
  * @author Janne Valkealahti
- *
+ * 
  */
 public class FailingContextContainer extends AbstractYarnContainer {
 
-	private static final Log log = LogFactory.getLog(FailingContextContainer.class);
+    private static final Log log = LogFactory
+            .getLog(FailingContextContainer.class);
 
-	@Override
-	protected void runInternal() {
-		log.info("Hello from FailingContextContainer");
+    @Override
+    protected void runInternal() {
+        log.info("Hello from FailingContextContainer");
 
-		// just get the last number from "container_1377159599818_0001_01_000002"
-		String containerIdString = getEnvironment(YarnSystemConstants.SYARN_CONTAINER_ID);
-		int containerId = Integer.parseInt(containerIdString.substring(containerIdString.length()-1));
+        // just get the last number from
+        // "container_1377159599818_0001_01_000002"
+        String containerIdString = getEnvironment(YarnSystemConstants.SYARN_CONTAINER_ID);
+        int containerId = Integer.parseInt(containerIdString
+                .substring(containerIdString.length() - 1));
 
-		// We just use the container id found from token variable
-		// to fail first container (with id 2)
-		if ((containerId == 2)) {
-			log.info("Exiting with error");
-			System.exit(1);
-		} else {
-			log.info("Exiting with ok");
-			System.exit(0);
-		}
-	}
+        // We just use the container id found from token variable
+        // to fail first container (with id 2)
+        if ((containerId == 2)) {
+            log.info("Exiting with error");
+            System.exit(1);
+        } else {
+            log.info("Exiting with ok");
+            System.exit(0);
+        }
+    }
 
 }

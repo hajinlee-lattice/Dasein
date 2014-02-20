@@ -21,13 +21,16 @@ public class PropertiesHelper extends PropertyPlaceholderConfigurer {
     }
 
     @Override
-    protected void processProperties(ConfigurableListableBeanFactory beanFactory, Properties props) throws BeansException {
+    protected void processProperties(
+            ConfigurableListableBeanFactory beanFactory, Properties props)
+            throws BeansException {
         super.processProperties(beanFactory, props);
 
         propertiesMap = new HashMap<String, String>();
         for (Object key : props.keySet()) {
             String keyStr = key.toString();
-            String valueStr = resolvePlaceholder(keyStr, props, springSystemPropertiesMode);
+            String valueStr = resolvePlaceholder(keyStr, props,
+                    springSystemPropertiesMode);
             propertiesMap.put(keyStr, valueStr);
         }
     }

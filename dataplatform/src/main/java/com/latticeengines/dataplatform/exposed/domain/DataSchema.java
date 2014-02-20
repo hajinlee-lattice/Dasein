@@ -9,42 +9,42 @@ import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class DataSchema implements HasName {
 
-	private String name;
-	private String type;
-	private List<Field> fields = new ArrayList<Field>();
-	
-	@Override
-	@JsonProperty("name")
-	public String getName() {
-		return name;
-	}
+    private String name;
+    private String type;
+    private List<Field> fields = new ArrayList<Field>();
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
+    @Override
+    @JsonProperty("name")
+    public String getName() {
+        return name;
+    }
 
-	@JsonProperty("type")
-	public String getType() {
-		return type;
-	}
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
-	
-	@JsonProperty("fields")
-	public List<Field> getFields() {
-		return fields;
-	}
-	
-	public void addField(Field field) {
-		fields.add(field);
-	}
-	
-	@Override
-	public String toString() {
-		return JsonHelper.serialize(this);
-	}
+    @JsonProperty("type")
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @JsonProperty("fields")
+    public List<Field> getFields() {
+        return fields;
+    }
+
+    public void addField(Field field) {
+        fields.add(field);
+    }
+
+    @Override
+    public String toString() {
+        return JsonHelper.serialize(this);
+    }
 
 }

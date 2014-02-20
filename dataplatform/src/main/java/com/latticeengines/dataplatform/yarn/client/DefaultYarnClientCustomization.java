@@ -20,146 +20,166 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
 public class DefaultYarnClientCustomization implements YarnClientCustomization {
-	private static final Log log = LogFactory.getLog(DefaultYarnClientCustomization.class);
+    private static final Log log = LogFactory
+            .getLog(DefaultYarnClientCustomization.class);
 
-	protected Configuration configuration;
+    protected Configuration configuration;
 
-	public DefaultYarnClientCustomization(Configuration configuration) {
-		this.configuration = configuration;
-	}
+    public DefaultYarnClientCustomization(Configuration configuration) {
+        this.configuration = configuration;
+    }
 
-	@Override
-	public ResourceLocalizer getResourceLocalizer(Properties containerProperties) {
-		return new DefaultResourceLocalizer(configuration, getHdfsEntries(containerProperties), getCopyEntries(containerProperties));
-	}
-	
-	protected String getJobDir(Properties containerProperties) {
-		return "/app/dataplatform/" + containerProperties.getProperty(ContainerProperty.JOBDIR.name());
-	}
+    @Override
+    public ResourceLocalizer getResourceLocalizer(Properties containerProperties) {
+        return new DefaultResourceLocalizer(configuration,
+                getHdfsEntries(containerProperties),
+                getCopyEntries(containerProperties));
+    }
 
-	@Override
-	public Collection<CopyEntry> getCopyEntries(Properties containerProperties) {
-		Collection<LocalResourcesFactoryBean.CopyEntry> copyEntries = new ArrayList<LocalResourcesFactoryBean.CopyEntry>(); 
-		String containerLaunchContextFile = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
-		copyEntries.add(new LocalResourcesFactoryBean.CopyEntry(
-				"file:" + containerLaunchContextFile,
-				getJobDir(containerProperties), false));
-		
-		return copyEntries;
-	}
+    protected String getJobDir(Properties containerProperties) {
+        return "/app/dataplatform/"
+                + containerProperties.getProperty(ContainerProperty.JOBDIR
+                        .name());
+    }
 
-	@Override
-	public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
-		String defaultFs = configuration.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
-		Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = new ArrayList<LocalResourcesFactoryBean.TransferEntry>();
-		hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
-				LocalResourceType.FILE, //
-				LocalResourceVisibility.PUBLIC, //
-				"/lib/*", //
-				defaultFs, //
-				defaultFs, //
-				false));
-		hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
-				LocalResourceType.FILE, //
-				LocalResourceVisibility.PUBLIC, //
-				"/app/dataplatform/*.properties", //
-				defaultFs, //
-				defaultFs, //
-				false));
-		hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
-				LocalResourceType.FILE, //
-				LocalResourceVisibility.PUBLIC, //
-				"/app/dataplatform/*.jar", //
-				defaultFs, //
-				defaultFs, //
-				false));
-		hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
-				LocalResourceType.FILE, //
-				LocalResourceVisibility.PUBLIC, //
-				getJobDir(containerProperties) + "/*", //
-				defaultFs, //
-				defaultFs, //
-				false));
-		return hdfsEntries;
-	}
+    @Override
+    public Collection<CopyEntry> getCopyEntries(Properties containerProperties) {
+        Collection<LocalResourcesFactoryBean.CopyEntry> copyEntries = new ArrayList<LocalResourcesFactoryBean.CopyEntry>();
+        String containerLaunchContextFile = containerProperties
+                .getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
+        copyEntries.add(new LocalResourcesFactoryBean.CopyEntry("file:"
+                + containerLaunchContextFile, getJobDir(containerProperties),
+                false));
 
-	@Override
-	public String getClientId() {
-		return "defaultYarnClient";
-	}
+        return copyEntries;
+    }
 
-	@Override
-	public int getMemory(Properties properties) {
-		String memory = properties.getProperty(AppMasterProperty.MEMORY.name(), "-1");
-		return Integer.parseInt(memory);
-	}
+    @Override
+    public Collection<TransferEntry> getHdfsEntries(
+            Properties containerProperties) {
+        String defaultFs = configuration
+                .get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
+        Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = new ArrayList<LocalResourcesFactoryBean.TransferEntry>();
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
+                LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                "/lib/*", //
+                defaultFs, //
+                defaultFs, //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
+                LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                "/app/dataplatform/*.properties", //
+                defaultFs, //
+                defaultFs, //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
+                LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                "/app/dataplatform/*.jar", //
+                defaultFs, //
+                defaultFs, //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(
+                LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                getJobDir(containerProperties) + "/*", //
+                defaultFs, //
+                defaultFs, //
+                false));
+        return hdfsEntries;
+    }
 
-	@Override
-	public int getPriority(Properties properties) {
-		String priority = properties.getProperty(AppMasterProperty.PRIORITY.name(), "-1");
-		return Integer.parseInt(priority);
-	}
+    @Override
+    public String getClientId() {
+        return "defaultYarnClient";
+    }
 
-	@Override
-	public String getQueue(Properties properties) {
-		return properties.getProperty(AppMasterProperty.QUEUE.name());
-	}
+    @Override
+    public int getMemory(Properties properties) {
+        String memory = properties.getProperty(AppMasterProperty.MEMORY.name(),
+                "-1");
+        return Integer.parseInt(memory);
+    }
 
-	@Override
-	public int getVirtualcores(Properties properties) {
-		String virtualCores = properties.getProperty(AppMasterProperty.VIRTUALCORES.name(), "-1");
-		return Integer.parseInt(virtualCores);
-	}
+    @Override
+    public int getPriority(Properties properties) {
+        String priority = properties.getProperty(
+                AppMasterProperty.PRIORITY.name(), "-1");
+        return Integer.parseInt(priority);
+    }
 
-	@Override
-	public String getContainerLauncherContextFile(Properties properties) {
-		return "/default/dataplatform-default-appmaster-context.xml";
-	}
+    @Override
+    public String getQueue(Properties properties) {
+        return properties.getProperty(AppMasterProperty.QUEUE.name());
+    }
 
-	@Override
-	public List<String> getCommands(Properties containerProperties) {
-		String containerLaunchContextFile = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
-		if (containerLaunchContextFile == null) {
-			throw new IllegalStateException("Property " + ContainerProperty.APPMASTER_CONTEXT_FILE + " does not exist.");
-		}
-		File contextFile = new File(containerLaunchContextFile);
-		if (!contextFile.exists()) {
-			throw new IllegalStateException("Container launcher context file " + containerLaunchContextFile
-			+ " does not exist.");
-		}
-		String propStr = containerProperties.toString();
-		
-		return Arrays.<String> asList(new String[] {
-						"$JAVA_HOME/bin/java", //
-						//"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y", //
-						"org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
-						contextFile.getName(), // 
-						"yarnAppmaster", //
-						propStr.substring(1, propStr.length()-1).replaceAll(",", " "), //
-						"1><LOG_DIR>/Appmaster.stdout", //
-						"2><LOG_DIR>/Appmaster.stderr" });
-	}
+    @Override
+    public int getVirtualcores(Properties properties) {
+        String virtualCores = properties.getProperty(
+                AppMasterProperty.VIRTUALCORES.name(), "-1");
+        return Integer.parseInt(virtualCores);
+    }
 
-	@Override
-	public void beforeCreateLocalLauncherContextFile(Properties properties) {
-	}
+    @Override
+    public String getContainerLauncherContextFile(Properties properties) {
+        return "/default/dataplatform-default-appmaster-context.xml";
+    }
 
-	@Override
-	public void validate(Properties appMasterProperties,
-			Properties containerProperties) {
-		
-	}
+    @Override
+    public List<String> getCommands(Properties containerProperties) {
+        String containerLaunchContextFile = containerProperties
+                .getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
+        if (containerLaunchContextFile == null) {
+            throw new IllegalStateException("Property "
+                    + ContainerProperty.APPMASTER_CONTEXT_FILE
+                    + " does not exist.");
+        }
+        File contextFile = new File(containerLaunchContextFile);
+        if (!contextFile.exists()) {
+            throw new IllegalStateException("Container launcher context file "
+                    + containerLaunchContextFile + " does not exist.");
+        }
+        String propStr = containerProperties.toString();
 
-	@Override
-	public void finalize(Properties appMasterProperties, Properties containerProperties) {
-		String contextFileName = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
-		
-		if (contextFileName != null) {
-			File contextFile = new File(contextFileName);
-			if (!contextFile.delete()) {
-				log.warn("Could not delete launch context file " + contextFileName);
-			}
-		}
-	}
+        return Arrays
+                .<String> asList(new String[] {
+                        "$JAVA_HOME/bin/java", //
+                        // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
+                        // //
+                        "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
+                        contextFile.getName(), //
+                        "yarnAppmaster", //
+                        propStr.substring(1, propStr.length() - 1).replaceAll(
+                                ",", " "), //
+                        "1><LOG_DIR>/Appmaster.stdout", //
+                        "2><LOG_DIR>/Appmaster.stderr" });
+    }
+
+    @Override
+    public void beforeCreateLocalLauncherContextFile(Properties properties) {
+    }
+
+    @Override
+    public void validate(Properties appMasterProperties,
+            Properties containerProperties) {
+
+    }
+
+    @Override
+    public void finalize(Properties appMasterProperties,
+            Properties containerProperties) {
+        String contextFileName = containerProperties
+                .getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
+
+        if (contextFileName != null) {
+            File contextFile = new File(contextFileName);
+            if (!contextFile.delete()) {
+                log.warn("Could not delete launch context file "
+                        + contextFileName);
+            }
+        }
+    }
 
 }

@@ -27,108 +27,118 @@ import com.latticeengines.dataplatform.yarn.client.YarnClientCustomizationRegist
 
 @Component("yarnClientCustomizationService")
 public class YarnClientCustomizationServiceImpl implements
-		YarnClientCustomizationService {
-	
-	@Autowired
-	private Configuration yarnConfiguration;
+        YarnClientCustomizationService {
 
-	@Autowired
-	private YarnClientCustomizationRegistry yarnClientCustomizationRegistry;
+    @Autowired
+    private Configuration yarnConfiguration;
 
-	@Override
-	public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties, Properties containerProperties) {
-		
-		YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
-		if (customization == null) {
-			return;
-		}
-		String dir = UUID.randomUUID().toString();
-		try {
-			HdfsHelper.mkdir(yarnConfiguration, "/app/dataplatform/" + dir);
-		} catch (Exception e) {
-			throw new LedpException(LedpCode.LEDP_00000, e, new String[] { dir });
-		}
-		containerProperties.put(ContainerProperty.JOBDIR.name(), dir);
-		customization.beforeCreateLocalLauncherContextFile(containerProperties);
-		String fileName = createContainerLauncherContextFile(customization, appMasterProperties, containerProperties);
-		containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
-		ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer(containerProperties);
-		int memory = customization.getMemory(appMasterProperties);
-		int virtualCores = customization.getVirtualcores(appMasterProperties);
-		int priority = customization.getPriority(appMasterProperties);
-		String queue = customization.getQueue(appMasterProperties);
-		List<String> commands = customization.getCommands(containerProperties);
+    @Autowired
+    private YarnClientCustomizationRegistry yarnClientCustomizationRegistry;
 
-		if (resourceLocalizer != null) {
-			client.setResourceLocalizer(resourceLocalizer);
-		}
+    @Override
+    public void addCustomizations(CommandYarnClient client, String clientName,
+            Properties appMasterProperties, Properties containerProperties) {
 
-		if (memory > 0) {
-			client.setMemory(memory);
-		}
+        YarnClientCustomization customization = yarnClientCustomizationRegistry
+                .getCustomization(clientName);
+        if (customization == null) {
+            return;
+        }
+        String dir = UUID.randomUUID().toString();
+        try {
+            HdfsHelper.mkdir(yarnConfiguration, "/app/dataplatform/" + dir);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_00000, e,
+                    new String[] { dir });
+        }
+        containerProperties.put(ContainerProperty.JOBDIR.name(), dir);
+        customization.beforeCreateLocalLauncherContextFile(containerProperties);
+        String fileName = createContainerLauncherContextFile(customization,
+                appMasterProperties, containerProperties);
+        containerProperties.put(
+                ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
+        ResourceLocalizer resourceLocalizer = customization
+                .getResourceLocalizer(containerProperties);
+        int memory = customization.getMemory(appMasterProperties);
+        int virtualCores = customization.getVirtualcores(appMasterProperties);
+        int priority = customization.getPriority(appMasterProperties);
+        String queue = customization.getQueue(appMasterProperties);
+        List<String> commands = customization.getCommands(containerProperties);
 
-		if (virtualCores > 0) {
-			client.setVirtualcores(virtualCores);
-		}
+        if (resourceLocalizer != null) {
+            client.setResourceLocalizer(resourceLocalizer);
+        }
 
-		if (priority > 0) {
-			client.setPriority(priority);
-		}
+        if (memory > 0) {
+            client.setMemory(memory);
+        }
 
-		if (queue != null) {
-			client.setQueue(queue);
-		}
+        if (virtualCores > 0) {
+            client.setVirtualcores(virtualCores);
+        }
 
-		if (commands != null) {
-			client.setCommands(commands);
-		}
+        if (priority > 0) {
+            client.setPriority(priority);
+        }
 
-	}
+        if (queue != null) {
+            client.setQueue(queue);
+        }
 
-	private String createContainerLauncherContextFile(
-			YarnClientCustomization customization,
-			Properties appMasterProperties,
-			Properties containerProperties) {
-		String contextFileName = customization.getContainerLauncherContextFile(appMasterProperties);
-		InputStream contextFileUrlFromClasspathAsStream = getClass().getResourceAsStream(contextFileName);
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		try {
-			FileCopyUtils.copy(contextFileUrlFromClasspathAsStream, stream);
-			String sb = new String(stream.toByteArray());
-			
-			if (containerProperties != null) {			
-				for (Map.Entry<Object, Object> entry : containerProperties.entrySet()) {
-					sb = sb.replaceAll("\\$\\$" + entry.getKey().toString() + "\\$\\$", entry.getValue().toString());
-				}
-			}
-			contextFileName = contextFileName.substring(1);
-			contextFileName = contextFileName.replaceFirst("/", "-");
-			
-			File contextFile = new File(contextFileName);
-			FileUtils.write(contextFile, sb);
-			return contextFile.getAbsolutePath();
+        if (commands != null) {
+            client.setCommands(commands);
+        }
 
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
-	}
+    }
 
-	@Override
-	public void validate(CommandYarnClient client, String clientName,
-			Properties appMasterProperties, Properties containerProperties) {
-		YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
-		if (customization == null) {
-			return;
-		}
-		customization.validate(appMasterProperties, containerProperties);
-	}
+    private String createContainerLauncherContextFile(
+            YarnClientCustomization customization,
+            Properties appMasterProperties, Properties containerProperties) {
+        String contextFileName = customization
+                .getContainerLauncherContextFile(appMasterProperties);
+        InputStream contextFileUrlFromClasspathAsStream = getClass()
+                .getResourceAsStream(contextFileName);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        try {
+            FileCopyUtils.copy(contextFileUrlFromClasspathAsStream, stream);
+            String sb = new String(stream.toByteArray());
 
-	@Override
-	public void finalize(String clientName, Properties appMasterProperties,
-			Properties containerProperties) {
-		YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
-		customization.finalize(appMasterProperties, containerProperties);
-	}
-	
+            if (containerProperties != null) {
+                for (Map.Entry<Object, Object> entry : containerProperties
+                        .entrySet()) {
+                    sb = sb.replaceAll("\\$\\$" + entry.getKey().toString()
+                            + "\\$\\$", entry.getValue().toString());
+                }
+            }
+            contextFileName = contextFileName.substring(1);
+            contextFileName = contextFileName.replaceFirst("/", "-");
+
+            File contextFile = new File(contextFileName);
+            FileUtils.write(contextFile, sb);
+            return contextFile.getAbsolutePath();
+
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public void validate(CommandYarnClient client, String clientName,
+            Properties appMasterProperties, Properties containerProperties) {
+        YarnClientCustomization customization = yarnClientCustomizationRegistry
+                .getCustomization(clientName);
+        if (customization == null) {
+            return;
+        }
+        customization.validate(appMasterProperties, containerProperties);
+    }
+
+    @Override
+    public void finalize(String clientName, Properties appMasterProperties,
+            Properties containerProperties) {
+        YarnClientCustomization customization = yarnClientCustomizationRegistry
+                .getCustomization(clientName);
+        customization.finalize(appMasterProperties, containerProperties);
+    }
 
 }

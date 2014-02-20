@@ -5,9 +5,9 @@ import org.apache.hadoop.util.Tool;
 
 public class EventDataProcessorJob extends Configured implements Tool {
 
-	@Override
-	public int run(String[] args) throws Exception {
-		return 0;
-	}
+    @Override
+    public int run(String[] args) throws Exception {
+        return 0;
+    }
 
 }

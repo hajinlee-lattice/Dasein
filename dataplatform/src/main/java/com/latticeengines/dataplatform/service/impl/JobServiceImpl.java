@@ -28,134 +28,139 @@ import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
 
-	private static final Log log = LogFactory.getLog(JobServiceImpl.class);
+    private static final Log log = LogFactory.getLog(JobServiceImpl.class);
 
-	private ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
-	@Autowired
-	private YarnClient defaultYarnClient;
+    @Autowired
+    private YarnClient defaultYarnClient;
 
-	@Autowired
-	private YarnClientCustomizationService yarnClientCustomizationService;
-	
-	@Autowired
-	private Configuration yarnConfiguration;
-	
+    @Autowired
+    private YarnClientCustomizationService yarnClientCustomizationService;
 
-	@Override
-	public List<ApplicationReport> getJobReportsAll() {
-		return defaultYarnClient.listApplications();
-	}
+    @Autowired
+    private Configuration yarnConfiguration;
 
-	@Override
-	public ApplicationReport getJobReportById(ApplicationId appId) {
-		List<ApplicationReport> reports = getJobReportsAll();
-		for (ApplicationReport report : reports) {
-			if (report != null && report.getApplicationId() != null
-					&& report.getApplicationId().equals(appId)) {
-				return report;
-			}
-		}
-		return null;
-	}
+    @Override
+    public List<ApplicationReport> getJobReportsAll() {
+        return defaultYarnClient.listApplications();
+    }
 
-	@Override
-	public List<ApplicationReport> getJobReportByUser(String user) {
-		List<ApplicationReport> reports = getJobReportsAll();
-		List<ApplicationReport> userReports = new ArrayList<ApplicationReport>();
-		for (ApplicationReport report : reports) {
-			if (report != null && report.getUser() != null
-					&& report.getUser().equalsIgnoreCase(user)) {
-				userReports.add(report);
-			}
-		}
-		return userReports;
-	}
+    @Override
+    public ApplicationReport getJobReportById(ApplicationId appId) {
+        List<ApplicationReport> reports = getJobReportsAll();
+        for (ApplicationReport report : reports) {
+            if (report != null && report.getApplicationId() != null
+                    && report.getApplicationId().equals(appId)) {
+                return report;
+            }
+        }
+        return null;
+    }
 
-	@Override
-	public ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties, Properties containerProperties) {
-		CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
-		yarnClientCustomizationService.validate(client, yarnClientName, appMasterProperties, containerProperties);
-		yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties, containerProperties);
-		
-		try {
-			ApplicationId applicationId = client.submitApplication();
-			return applicationId;
-		} finally {
-			yarnClientCustomizationService.finalize(yarnClientName, appMasterProperties, containerProperties);
-		}
-	}
+    @Override
+    public List<ApplicationReport> getJobReportByUser(String user) {
+        List<ApplicationReport> reports = getJobReportsAll();
+        List<ApplicationReport> userReports = new ArrayList<ApplicationReport>();
+        for (ApplicationReport report : reports) {
+            if (report != null && report.getUser() != null
+                    && report.getUser().equalsIgnoreCase(user)) {
+                userReports.add(report);
+            }
+        }
+        return userReports;
+    }
 
-	@Override
-	public void killJob(ApplicationId appId) {
-		defaultYarnClient.killApplication(appId);
-	}
+    @Override
+    public ApplicationId submitYarnJob(String yarnClientName,
+            Properties appMasterProperties, Properties containerProperties) {
+        CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
+        yarnClientCustomizationService.validate(client, yarnClientName,
+                appMasterProperties, containerProperties);
+        yarnClientCustomizationService.addCustomizations(client,
+                yarnClientName, appMasterProperties, containerProperties);
 
-	private YarnClient getYarnClient(String yarnClientName) {
-		ConfigurableApplicationContext context = null;
-		try {
-			if (StringUtils.isEmpty(yarnClientName)) {
-				throw new IllegalStateException("Yarn client name cannot be empty.");
-			}
-			YarnClient client = (YarnClient) applicationContext.getBean(yarnClientName);
-			return client;
-		} catch (Throwable e) {
-			log.error("Error while getting yarnClient for application "
-					+ yarnClientName, e);
-		} finally {
-			if (context != null) {
-				context.close();
-			}
-		}
-		return null;
-	}
+        try {
+            ApplicationId applicationId = client.submitApplication();
+            return applicationId;
+        } finally {
+            yarnClientCustomizationService.finalize(yarnClientName,
+                    appMasterProperties, containerProperties);
+        }
+    }
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		this.applicationContext = applicationContext;
-	}
+    @Override
+    public void killJob(ApplicationId appId) {
+        defaultYarnClient.killApplication(appId);
+    }
 
-	@Override
-	public ApplicationId submitMRJob(String mrJobName, Properties properties) {
-		Job job = getJob(mrJobName);
-		if (properties != null) {
-			Configuration config = job.getConfiguration();
-			for (Object key : properties.keySet()) {
-				config.set(key.toString(), properties.getProperty((String) key));
-			}
-		}
+    private YarnClient getYarnClient(String yarnClientName) {
+        ConfigurableApplicationContext context = null;
+        try {
+            if (StringUtils.isEmpty(yarnClientName)) {
+                throw new IllegalStateException(
+                        "Yarn client name cannot be empty.");
+            }
+            YarnClient client = (YarnClient) applicationContext
+                    .getBean(yarnClientName);
+            return client;
+        } catch (Throwable e) {
+            log.error("Error while getting yarnClient for application "
+                    + yarnClientName, e);
+        } finally {
+            if (context != null) {
+                context.close();
+            }
+        }
+        return null;
+    }
 
-		JobRunner runner = new JobRunner();
-		runner.setJob(job);
-		try {
-			runner.setWaitForCompletion(false);
-			runner.call();
-		} catch (Exception e) {
-			log.error("Failed to submit MapReduce job " + mrJobName, e);
-		}
-		return TypeConverter.toYarn(job.getJobID()).getAppId();
-	}
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext)
+            throws BeansException {
+        this.applicationContext = applicationContext;
+    }
 
-	private Job getJob(String mrJobName) {
-		ConfigurableApplicationContext context = null;
-		try {
-			if (StringUtils.isEmpty(mrJobName)) {
-				throw new IllegalStateException(
-						"MapReduce job name cannot be empty");
-			}
-			Job job = (Job) applicationContext.getBean(mrJobName);
-			// clone the job
-			job = Job.getInstance(job.getConfiguration());
-			return job;
-		} catch (Throwable e) {
-			log.error("Error happend while getting hdp:job " + mrJobName, e);
-		} finally {
-			if (context != null) {
-				context.close();
-			}
-		}
-		return null;
-	}
+    @Override
+    public ApplicationId submitMRJob(String mrJobName, Properties properties) {
+        Job job = getJob(mrJobName);
+        if (properties != null) {
+            Configuration config = job.getConfiguration();
+            for (Object key : properties.keySet()) {
+                config.set(key.toString(), properties.getProperty((String) key));
+            }
+        }
+
+        JobRunner runner = new JobRunner();
+        runner.setJob(job);
+        try {
+            runner.setWaitForCompletion(false);
+            runner.call();
+        } catch (Exception e) {
+            log.error("Failed to submit MapReduce job " + mrJobName, e);
+        }
+        return TypeConverter.toYarn(job.getJobID()).getAppId();
+    }
+
+    private Job getJob(String mrJobName) {
+        ConfigurableApplicationContext context = null;
+        try {
+            if (StringUtils.isEmpty(mrJobName)) {
+                throw new IllegalStateException(
+                        "MapReduce job name cannot be empty");
+            }
+            Job job = (Job) applicationContext.getBean(mrJobName);
+            // clone the job
+            job = Job.getInstance(job.getConfiguration());
+            return job;
+        } catch (Throwable e) {
+            log.error("Error happend while getting hdp:job " + mrJobName, e);
+        } finally {
+            if (context != null) {
+                context.close();
+            }
+        }
+        return null;
+    }
 
 }

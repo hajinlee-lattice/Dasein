@@ -15,7 +15,6 @@
  */
 package com.latticeengines.dataplatform.service.impl;
 
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
@@ -32,56 +31,59 @@ import org.springframework.yarn.am.StaticEventingAppmaster;
 import org.springframework.yarn.am.container.AbstractLauncher;
 
 /**
- * Custom appmaster example for manually handling failed containers,
- * using container associated data for passing some state
- * into re-launched container.
- *
+ * Custom appmaster example for manually handling failed containers, using
+ * container associated data for passing some state into re-launched container.
+ * 
  * @author Janne Valkealahti
- *
+ * 
  */
-public class CustomAppmaster extends StaticEventingAppmaster implements ContainerLauncherInterceptor {
+public class CustomAppmaster extends StaticEventingAppmaster implements
+        ContainerLauncherInterceptor {
 
-	private final static Log log = LogFactory.getLog(CustomAppmaster.class);
+    private final static Log log = LogFactory.getLog(CustomAppmaster.class);
 
-	/** Queue for failed containers */
-	private Queue<ContainerId> failed = new ConcurrentLinkedQueue<ContainerId>();
+    /** Queue for failed containers */
+    private Queue<ContainerId> failed = new ConcurrentLinkedQueue<ContainerId>();
 
-	@Override
-	protected void onInit() throws Exception {
-		super.onInit();
-		if (getLauncher() instanceof AbstractLauncher) {
-			((AbstractLauncher)getLauncher()).addInterceptor(this);
-		}
-	}
+    @Override
+    protected void onInit() throws Exception {
+        super.onInit();
+        if (getLauncher() instanceof AbstractLauncher) {
+            ((AbstractLauncher) getLauncher()).addInterceptor(this);
+        }
+    }
 
-	@Override
-	public ContainerLaunchContext preLaunch(Container container, ContainerLaunchContext context) {
-		ContainerId containerId = container.getId();
-		Integer attempt = 1;
-		ContainerId failedContainerId = failed.poll();
-		Object assignedData = (failedContainerId != null ? getContainerAssign().getAssignedData(failedContainerId) : null);
-		if (assignedData != null) {
-			attempt = (Integer) assignedData;
-			attempt += 1;
-		}
-		getContainerAssign().assign(containerId, attempt);
+    @Override
+    public ContainerLaunchContext preLaunch(Container container,
+            ContainerLaunchContext context) {
+        ContainerId containerId = container.getId();
+        Integer attempt = 1;
+        ContainerId failedContainerId = failed.poll();
+        Object assignedData = (failedContainerId != null ? getContainerAssign()
+                .getAssignedData(failedContainerId) : null);
+        if (assignedData != null) {
+            attempt = (Integer) assignedData;
+            attempt += 1;
+        }
+        getContainerAssign().assign(containerId, attempt);
 
-		Map<String, String> env = new HashMap<String, String>(context.getEnvironment());
-		env.put("customappmaster.attempt", attempt.toString());
-		context.setEnvironment(env);
-		return context;
-	}
+        Map<String, String> env = new HashMap<String, String>(
+                context.getEnvironment());
+        env.put("customappmaster.attempt", attempt.toString());
+        context.setEnvironment(env);
+        return context;
+    }
 
-	@Override
-	protected boolean onContainerFailed(ContainerStatus status) {
-		ContainerId containerId = status.getContainerId();
-		log.info("onContainerFailed: " + containerId);
+    @Override
+    protected boolean onContainerFailed(ContainerStatus status) {
+        ContainerId containerId = status.getContainerId();
+        log.info("onContainerFailed: " + containerId);
 
-		if (status.getExitStatus() > 0) {
-			failed.add(containerId);
-			getAllocator().allocateContainers(1);
-		}
-		return true;
-	}
+        if (status.getExitStatus() > 0) {
+            failed.add(containerId);
+            getAllocator().allocateContainers(1);
+        }
+        return true;
+    }
 
 }

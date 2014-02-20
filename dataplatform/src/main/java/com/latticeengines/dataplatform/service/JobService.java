@@ -8,16 +8,17 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 
 public interface JobService {
 
-	List<ApplicationReport> getJobReportsAll();
+    List<ApplicationReport> getJobReportsAll();
 
-	ApplicationReport getJobReportById(ApplicationId appId);
+    ApplicationReport getJobReportById(ApplicationId appId);
 
-	List<ApplicationReport> getJobReportByUser(String user);
+    List<ApplicationReport> getJobReportByUser(String user);
 
-	ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties, Properties containerProperties);
+    ApplicationId submitYarnJob(String yarnClientName,
+            Properties appMasterProperties, Properties containerProperties);
 
-	ApplicationId submitMRJob(String mrJobName, Properties properties);
+    ApplicationId submitMRJob(String mrJobName, Properties properties);
 
-	void killJob(ApplicationId appId);
+    void killJob(ApplicationId appId);
 
 }

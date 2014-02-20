@@ -9,12 +9,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MetadataProviderMapping {
 
-	@Bean
-	public Map<String, MetadataProvider> metadataProviders()
-	  {
-	    Map<String, MetadataProvider> mappings = new HashMap<String, MetadataProvider>();
-	    SQLServerMetadataProvider ssMdProvider = new SQLServerMetadataProvider();
-	    mappings.put(ssMdProvider.getName(), ssMdProvider);
-	    return mappings;
-	  }
+    @Bean
+    public Map<String, MetadataProvider> metadataProviders() {
+        Map<String, MetadataProvider> mappings = new HashMap<String, MetadataProvider>();
+        SQLServerMetadataProvider ssMdProvider = new SQLServerMetadataProvider();
+        mappings.put(ssMdProvider.getName(), ssMdProvider);
+        return mappings;
+    }
 }

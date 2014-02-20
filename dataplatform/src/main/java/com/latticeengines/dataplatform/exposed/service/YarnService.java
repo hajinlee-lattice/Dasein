@@ -5,8 +5,8 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInf
 
 public interface YarnService {
 
-	SchedulerTypeInfo getSchedulerInfo();
+    SchedulerTypeInfo getSchedulerInfo();
 
-	AppsInfo getApplications();
+    AppsInfo getApplications();
 
 }

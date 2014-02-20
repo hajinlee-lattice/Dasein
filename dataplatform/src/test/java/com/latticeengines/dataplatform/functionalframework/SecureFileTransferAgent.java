@@ -16,75 +16,80 @@ import org.springframework.stereotype.Component;
 @Component("secureFileTransferAgent")
 public class SecureFileTransferAgent {
 
-	private final static Log log = LogFactory.getLog(SecureFileTransferAgent.class);
+    private final static Log log = LogFactory
+            .getLog(SecureFileTransferAgent.class);
 
-	@Value("${dataplatform.yarn.resourcemanager.sftp.address}")
-	private String serverAddress;
+    @Value("${dataplatform.yarn.resourcemanager.sftp.address}")
+    private String serverAddress;
 
-	@Value("${dataplatform.yarn.resourcemanager.sftp.userid}")
-	private String userId;
+    @Value("${dataplatform.yarn.resourcemanager.sftp.userid}")
+    private String userId;
 
-	@Value("${dataplatform.yarn.resourcemanager.sftp.password}")
-	private String password;
-	
-	public static enum FileTransferOption {
-		UPLOAD, DOWNLOAD
-	}
+    @Value("${dataplatform.yarn.resourcemanager.sftp.password}")
+    private String password;
 
-	public boolean fileTranser(String fileToFTP, String remoteFileToReplace, FileTransferOption option) {
+    public static enum FileTransferOption {
+        UPLOAD, DOWNLOAD
+    }
 
-		StandardFileSystemManager manager = new StandardFileSystemManager();
+    public boolean fileTranser(String fileToFTP, String remoteFileToReplace,
+            FileTransferOption option) {
 
-		try {
+        StandardFileSystemManager manager = new StandardFileSystemManager();
 
-			// check if the file exists
-			File file = new File(fileToFTP);
-			if (!file.exists() && FileTransferOption.UPLOAD == option) {
-				throw new RuntimeException("Error. Local file not found");
-			}
-			// Initializes the file manager
-			manager.init();
+        try {
 
-			// Setup our SFTP configuration
-			FileSystemOptions opts = new FileSystemOptions();
-			SftpFileSystemConfigBuilder.getInstance().setStrictHostKeyChecking(opts, "no");
-			SftpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts, false);
-			SftpFileSystemConfigBuilder.getInstance().setTimeout(opts, 10000);
+            // check if the file exists
+            File file = new File(fileToFTP);
+            if (!file.exists() && FileTransferOption.UPLOAD == option) {
+                throw new RuntimeException("Error. Local file not found");
+            }
+            // Initializes the file manager
+            manager.init();
 
-			// Create the SFTP URI using the host name, userid, password, remote
-			// path and file name
-			String sftpUri = "sftp://" + userId + ":" + password + "@" + serverAddress + remoteFileToReplace;
+            // Setup our SFTP configuration
+            FileSystemOptions opts = new FileSystemOptions();
+            SftpFileSystemConfigBuilder.getInstance().setStrictHostKeyChecking(
+                    opts, "no");
+            SftpFileSystemConfigBuilder.getInstance().setUserDirIsRoot(opts,
+                    false);
+            SftpFileSystemConfigBuilder.getInstance().setTimeout(opts, 10000);
 
-			// Create local file object
-			FileObject localFile = manager.resolveFile(file.getAbsolutePath());
+            // Create the SFTP URI using the host name, userid, password, remote
+            // path and file name
+            String sftpUri = "sftp://" + userId + ":" + password + "@"
+                    + serverAddress + remoteFileToReplace;
 
-			// Create remote file object
-			FileObject remoteFile = manager.resolveFile(sftpUri, opts);
+            // Create local file object
+            FileObject localFile = manager.resolveFile(file.getAbsolutePath());
 
-			if (remoteFile.getType() == FileType.FOLDER) {
-				log.error("cannot copy directories: " + remoteFile.getURL());
-				return false;
-			}
+            // Create remote file object
+            FileObject remoteFile = manager.resolveFile(sftpUri, opts);
 
-			// Copy local file to sftp server
-			switch (option) {
-				case UPLOAD: 
-					remoteFile.copyFrom(localFile, Selectors.SELECT_SELF);
-					log.info("File upload successful");
-					break;
-				case DOWNLOAD:
-					localFile.copyFrom(remoteFile, Selectors.SELECT_SELF);
-					log.info("File download successful");
-					break;
-			}
-		} catch (Exception ex) {
-			log.error(ex);
-			return false;
-		} finally {
-			manager.close();
-		}
+            if (remoteFile.getType() == FileType.FOLDER) {
+                log.error("cannot copy directories: " + remoteFile.getURL());
+                return false;
+            }
 
-		return true;
-	}
+            // Copy local file to sftp server
+            switch (option) {
+            case UPLOAD:
+                remoteFile.copyFrom(localFile, Selectors.SELECT_SELF);
+                log.info("File upload successful");
+                break;
+            case DOWNLOAD:
+                localFile.copyFrom(remoteFile, Selectors.SELECT_SELF);
+                log.info("File download successful");
+                break;
+            }
+        } catch (Exception ex) {
+            log.error(ex);
+            return false;
+        } finally {
+            manager.close();
+        }
+
+        return true;
+    }
 
 }

@@ -5,5 +5,5 @@ import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 
 public interface MetadataService {
 
-	DataSchema createDataSchema(DbCreds creds, String tableName);
+    DataSchema createDataSchema(DbCreds creds, String tableName);
 }

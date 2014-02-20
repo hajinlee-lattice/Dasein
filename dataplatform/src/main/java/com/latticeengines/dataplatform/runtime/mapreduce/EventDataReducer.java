@@ -7,19 +7,19 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 public class EventDataReducer extends
-		Reducer<Text, IntWritable, Text, IntWritable> {
+        Reducer<Text, IntWritable, Text, IntWritable> {
 
-	@Override
-	public void setup(Context context) {
-	}
+    @Override
+    public void setup(Context context) {
+    }
 
-	@Override
-	protected void reduce(Text key, Iterable<IntWritable> values,
-			Context context) throws IOException, InterruptedException {
+    @Override
+    protected void reduce(Text key, Iterable<IntWritable> values,
+            Context context) throws IOException, InterruptedException {
 
-	}
-	
-	public static void main(String[] args) {
-	}
+    }
+
+    public static void main(String[] args) {
+    }
 
 }

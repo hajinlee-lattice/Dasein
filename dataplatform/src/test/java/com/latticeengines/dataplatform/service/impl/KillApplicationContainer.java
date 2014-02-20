@@ -16,31 +16,33 @@ import org.springframework.yarn.container.YarnContainer;
  */
 public class KillApplicationContainer implements YarnContainer {
 
-	private static final Log log = LogFactory.getLog(KillApplicationContainer.class);
+    private static final Log log = LogFactory
+            .getLog(KillApplicationContainer.class);
 
-	@Override
-	public void run() {
-		log.info("Hello from KillApplicationContainer, gonna sleep next 2 minutes...");
+    @Override
+    public void run() {
+        log.info("Hello from KillApplicationContainer, gonna sleep next 2 minutes...");
 
-		for (int i = 0; i < 24; i++) {
-			log.info("Waiting to get killed");
-			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-			}
-		}
-		log.info("Hello from KillApplicationContainer; it seems I wasn't killed.");
-	}
+        for (int i = 0; i < 24; i++) {
+            log.info("Waiting to get killed");
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+            }
+        }
+        log.info("Hello from KillApplicationContainer; it seems I wasn't killed.");
+    }
 
-	@Override
-	public void setEnvironment(Map<String, String> environment) {
-	}
+    @Override
+    public void setEnvironment(Map<String, String> environment) {
+    }
 
-	@Override
-	public void setParameters(Properties parameters) {
-		for (Entry<Object, Object> parameter : parameters.entrySet()) {
-			log.info("Key = " + parameter.getKey().toString() + " Value = " + parameter.getValue().toString());
-		}
-	}
+    @Override
+    public void setParameters(Properties parameters) {
+        for (Entry<Object, Object> parameter : parameters.entrySet()) {
+            log.info("Key = " + parameter.getKey().toString() + " Value = "
+                    + parameter.getValue().toString());
+        }
+    }
 
 }
