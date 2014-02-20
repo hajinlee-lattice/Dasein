@@ -1,35 +1,26 @@
 package com.latticeengines.dataplatform.runtime.metric.impl;
 
 import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AMRunningToContainerLaunchWaitTime;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AnalyticJobMetrics;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AppId;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.ContainerId;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.Priority;
 
 import org.apache.hadoop.metrics2.MetricsCollector;
 import org.apache.hadoop.metrics2.MetricsRecordBuilder;
-import org.apache.hadoop.metrics2.MetricsSource;
 
-import com.latticeengines.dataplatform.runtime.metric.MetricProvider;
+import com.latticeengines.dataplatform.runtime.metric.AnalyticJobBaseMetric;
+import com.latticeengines.dataplatform.runtime.metric.MetricsProvider;
 
-public class ContainerLaunchWaitTimeMetric implements MetricsSource {
+public class ContainerLaunchWaitTimeMetric extends AnalyticJobBaseMetric {
     
-    private MetricProvider provider;
-    
-    public ContainerLaunchWaitTimeMetric(MetricProvider provider) {
-        this.provider = provider;
+    public ContainerLaunchWaitTimeMetric(MetricsProvider provider) {
+        super(provider);
     }
 
     @Override
     public void getMetrics(MetricsCollector collector, boolean all) {
+        MetricsProvider provider = getProvider();
         long waitTime = provider.getContainerWaitTime();
         
         if (waitTime >= 0) {
-            MetricsRecordBuilder rb = collector.addRecord(AnalyticJobMetrics) //
-                    .setContext("ledpjob") //
-                    .tag(AppId, provider.getAppAttemptId()) //
-                    .tag(ContainerId, provider.getContainerId()) //
-                    .tag(Priority, provider.getPriority());
+            MetricsRecordBuilder rb = getMetricBuilder(provider, collector, all);
             rb.addGauge(AMRunningToContainerLaunchWaitTime, waitTime);
         }
     }

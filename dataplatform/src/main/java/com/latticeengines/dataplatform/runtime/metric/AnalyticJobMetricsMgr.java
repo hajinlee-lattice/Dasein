@@ -9,7 +9,7 @@ import org.apache.hadoop.metrics2.lib.DefaultMetricsSystem;
 import com.latticeengines.dataplatform.runtime.metric.impl.ContainerLaunchWaitTimeMetric;
 import com.latticeengines.dataplatform.runtime.metric.impl.NumberPreemptionsMetric;
 
-public class AnalyticJobMetricsMgr implements MetricProvider {
+public class AnalyticJobMetricsMgr implements MetricsProvider {
 
     private long appStartTime;
     private long containerLaunchTime;

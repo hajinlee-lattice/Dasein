@@ -1,6 +1,6 @@
 package com.latticeengines.dataplatform.runtime.metric;
 
-public interface MetricProvider {
+public interface MetricsProvider {
 
     long getContainerWaitTime();
     

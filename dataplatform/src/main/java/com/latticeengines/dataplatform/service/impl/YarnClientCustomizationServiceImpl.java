@@ -21,6 +21,7 @@ import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.dataplatform.util.HdfsHelper;
+import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.yarn.client.YarnClientCustomization;
 import com.latticeengines.dataplatform.yarn.client.YarnClientCustomizationRegistry;
@@ -57,6 +58,8 @@ public class YarnClientCustomizationServiceImpl implements
                 appMasterProperties, containerProperties);
         containerProperties.put(
                 ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
+        String queuePropName = AppMasterProperty.QUEUE.name();
+        containerProperties.setProperty(queuePropName, appMasterProperties.getProperty(queuePropName));
         ResourceLocalizer resourceLocalizer = customization
                 .getResourceLocalizer(containerProperties);
         int memory = customization.getMemory(appMasterProperties);

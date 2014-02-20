@@ -1,34 +1,25 @@
 package com.latticeengines.dataplatform.runtime.metric.impl;
 
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AnalyticJobMetrics;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AppId;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.ContainerId;
 import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.NumberOfContainerPreemptions;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.Priority;
 
 import org.apache.hadoop.metrics2.MetricsCollector;
 import org.apache.hadoop.metrics2.MetricsRecordBuilder;
-import org.apache.hadoop.metrics2.MetricsSource;
 
-import com.latticeengines.dataplatform.runtime.metric.MetricProvider;
+import com.latticeengines.dataplatform.runtime.metric.AnalyticJobBaseMetric;
+import com.latticeengines.dataplatform.runtime.metric.MetricsProvider;
 
-public class NumberPreemptionsMetric implements MetricsSource {
+public class NumberPreemptionsMetric extends AnalyticJobBaseMetric {
 
-    private MetricProvider provider;
-
-    public NumberPreemptionsMetric(MetricProvider provider) {
-        this.provider = provider;
+    public NumberPreemptionsMetric(MetricsProvider provider) {
+        super(provider);
     }
 
     @Override
     public void getMetrics(MetricsCollector collector, boolean all) {
+        MetricsProvider provider = getProvider();
         long numPreemptions = provider.getNumberPreemptions();
 
-        MetricsRecordBuilder rb = collector.addRecord(AnalyticJobMetrics) //
-                .setContext("ledpjob") //
-                .tag(AppId, provider.getAppAttemptId()) //
-                .tag(ContainerId, provider.getContainerId()) //
-                .tag(Priority, provider.getPriority());
+        MetricsRecordBuilder rb = getMetricBuilder(provider, collector, all);
         rb.addCounter(NumberOfContainerPreemptions, numPreemptions);
     }
 
