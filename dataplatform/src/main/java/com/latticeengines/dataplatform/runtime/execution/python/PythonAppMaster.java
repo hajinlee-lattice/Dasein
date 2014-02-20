@@ -16,6 +16,9 @@ import org.springframework.yarn.am.ContainerLauncherInterceptor;
 import org.springframework.yarn.am.StaticEventingAppmaster;
 import org.springframework.yarn.am.container.AbstractLauncher;
 
+import com.latticeengines.dataplatform.exposed.exception.LedpCode;
+import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsMgr;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
@@ -26,14 +29,18 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
 
     @Autowired
     private Configuration yarnConfiguration;
+    
+    private AnalyticJobMetricsMgr analyticJobMetricsMgr = null;
 
     @Override
     protected void onInit() throws Exception {
-        log.info("Total memory used = " + Runtime.getRuntime().totalMemory());
+        log.info("Initializing application.");
         super.onInit();
         if (getLauncher() instanceof AbstractLauncher) {
             ((AbstractLauncher) getLauncher()).addInterceptor(this);
         }
+        analyticJobMetricsMgr = AnalyticJobMetricsMgr.getInstance(getApplicationAttemptId().toString());
+        analyticJobMetricsMgr.setAppStartTime(System.currentTimeMillis());
     }
 
     @Override
@@ -46,6 +53,15 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
                     + parameter.getValue().toString());
         }
         super.setParameters(parameters);
+        
+        String priority = parameters.getProperty(ContainerProperty.PRIORITY.name());
+        
+        if (priority == null) {
+            throw new LedpException(LedpCode.LEDP_12000);
+        }
+        
+        analyticJobMetricsMgr.setPriority(priority);
+        analyticJobMetricsMgr.initialize();
     }
 
     @Override
@@ -53,6 +69,15 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
             ContainerLaunchContext context) {
         log.info("Container id = " + container.getId().toString());
         return context;
+    }
+    
+    @Override
+    protected void onContainerLaunched(Container container) {
+        String containerId = container.getId().toString();
+        log.info("Container id = " + containerId  + " launching.");
+        analyticJobMetricsMgr.setContainerId(containerId);
+        analyticJobMetricsMgr.setContainerLaunchTime(System.currentTimeMillis());
+        super.onContainerLaunched(container);
     }
 
     private void cleanupJobDir() {
@@ -77,6 +102,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     @Override
     protected boolean onContainerFailed(ContainerStatus status) {
         if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
+            analyticJobMetricsMgr.incrementNumberPreemptions();
             try {
                 Thread.sleep(15000L);
                 log.info("Container " + status.getContainerId().toString()

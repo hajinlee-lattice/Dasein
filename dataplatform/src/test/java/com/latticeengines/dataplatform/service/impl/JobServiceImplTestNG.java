@@ -46,6 +46,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        new File("/tmp/ledpjob-metrics.out").delete();
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
         fs.delete(new Path("/training"), true);
