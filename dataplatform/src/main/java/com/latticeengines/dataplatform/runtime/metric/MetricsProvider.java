@@ -11,4 +11,6 @@ public interface MetricsProvider {
     String getContainerId();
     
     String getPriority();
+    
+    String getQueue();
 }

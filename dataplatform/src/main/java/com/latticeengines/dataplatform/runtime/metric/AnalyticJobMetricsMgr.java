@@ -16,9 +16,11 @@ public class AnalyticJobMetricsMgr implements MetricsProvider {
     private final String appAttemptId;
     private String priority;
     private String containerId;
+    private String queue;
     private int numberPreemptions;
     private static AnalyticJobMetricsMgr instance;
     private MetricsSystem ms;
+    private boolean completed = false;
     
     private AnalyticJobMetricsMgr(String appAttemptId) {
         this.appAttemptId = appAttemptId;
@@ -48,11 +50,15 @@ public class AnalyticJobMetricsMgr implements MetricsProvider {
     }
     
     public void finalize() {
+        completed = true;
         ms.publishMetricsNow();
     }
     
     @Override
     public long getContainerWaitTime() {
+        if (completed) {
+            return 0;
+        }
         return getContainerLaunchTime() - getAppStartTime();
     }
 
@@ -102,6 +108,15 @@ public class AnalyticJobMetricsMgr implements MetricsProvider {
 
     public void incrementNumberPreemptions() {
         numberPreemptions++;
+    }
+
+    @Override
+    public String getQueue() {
+        return queue;
+    }
+
+    public void setQueue(String queue) {
+        this.queue = queue;
     }
     
     

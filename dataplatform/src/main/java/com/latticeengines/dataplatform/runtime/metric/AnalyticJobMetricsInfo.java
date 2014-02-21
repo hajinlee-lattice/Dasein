@@ -7,6 +7,7 @@ public enum AnalyticJobMetricsInfo implements MetricsInfo {
     AppId("Application attempt id"), //
     ContainerId("Container id"), //
     Priority("Priority"), //
+    Queue("Queue"), //
     AMSubmissionToRunningWaitTime("Submission to app master execution wait time"), //
     AMRunningToContainerLaunchWaitTime("Container launch wait time"), //
     NumberOfContainerPreemptions("Number of container preemptions");

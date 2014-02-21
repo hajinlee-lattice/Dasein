@@ -1,9 +1,11 @@
 package com.latticeengines.dataplatform.runtime.metric;
 
 import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AnalyticJobMetrics;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AppId;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.ContainerId;
 import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.Priority;
+import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.Queue;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.metrics2.MetricsCollector;
 import org.apache.hadoop.metrics2.MetricsRecordBuilder;
@@ -21,12 +23,14 @@ public abstract class AnalyticJobBaseMetric implements MetricsSource {
         return metricsProvider;
     }
     
-    protected MetricsRecordBuilder getMetricBuilder(MetricsProvider provider, MetricsCollector collector, boolean all) {
-        MetricsRecordBuilder rb = collector.addRecord(AnalyticJobMetrics) //
+    protected List<MetricsRecordBuilder> getMetricsBuilders(MetricsProvider provider, MetricsCollector collector, boolean all) {
+        List<MetricsRecordBuilder> builderList = new ArrayList<MetricsRecordBuilder>();
+        builderList.add(collector.addRecord(AnalyticJobMetrics) //
                 .setContext("ledpjob") //
-                .tag(AppId, provider.getAppAttemptId()) //
-                .tag(ContainerId, provider.getContainerId()) //
-                .tag(Priority, provider.getPriority());
-        return rb;
+                .tag(Queue, provider.getQueue()));
+        builderList.add(collector.addRecord(AnalyticJobMetrics) //
+                .setContext("ledpjob") //
+                .tag(Priority, provider.getPriority()));
+        return builderList;
     }
 }

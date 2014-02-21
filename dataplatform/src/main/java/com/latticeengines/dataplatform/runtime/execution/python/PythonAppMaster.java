@@ -20,6 +20,7 @@ import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsMgr;
 import com.latticeengines.dataplatform.util.HdfsHelper;
+import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
 public class PythonAppMaster extends StaticEventingAppmaster implements
@@ -55,12 +56,14 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         super.setParameters(parameters);
         
         String priority = parameters.getProperty(ContainerProperty.PRIORITY.name());
-        
         if (priority == null) {
             throw new LedpException(LedpCode.LEDP_12000);
         }
-        
         analyticJobMetricsMgr.setPriority(priority);
+        
+        String queue = parameters.getProperty(AppMasterProperty.QUEUE.name());
+        analyticJobMetricsMgr.setQueue(queue);
+
         analyticJobMetricsMgr.initialize();
     }
 
@@ -93,6 +96,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
 
     @Override
     protected void onContainerCompleted(ContainerStatus status) {
+        analyticJobMetricsMgr.finalize();
         if (status.getExitStatus() != ContainerExitStatus.PREEMPTED) {
             cleanupJobDir();
         }

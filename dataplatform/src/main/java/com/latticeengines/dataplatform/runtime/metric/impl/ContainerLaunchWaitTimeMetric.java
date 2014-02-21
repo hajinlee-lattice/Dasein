@@ -17,11 +17,14 @@ public class ContainerLaunchWaitTimeMetric extends AnalyticJobBaseMetric {
     @Override
     public void getMetrics(MetricsCollector collector, boolean all) {
         MetricsProvider provider = getProvider();
+        
         long waitTime = provider.getContainerWaitTime();
         
         if (waitTime >= 0) {
-            MetricsRecordBuilder rb = getMetricBuilder(provider, collector, all);
-            rb.addGauge(AMRunningToContainerLaunchWaitTime, waitTime);
+            for (MetricsRecordBuilder rb : getMetricsBuilders(provider, collector, all)) {
+                rb.addGauge(AMRunningToContainerLaunchWaitTime, waitTime);
+            }
+            
         }
     }
 

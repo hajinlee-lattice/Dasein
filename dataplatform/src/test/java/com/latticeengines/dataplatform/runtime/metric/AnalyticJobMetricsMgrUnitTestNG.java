@@ -18,10 +18,12 @@ public class AnalyticJobMetricsMgrUnitTestNG {
         AnalyticJobMetricsMgr mgr = Mockito.spy(AnalyticJobMetricsMgr.getInstance("app_xyz_01"));
         Mockito.when(mgr.getContainerId()).thenReturn("app_xyz_c1_01");
         Mockito.when(mgr.getAppStartTime()).thenReturn(1L);
-        Mockito.when(mgr.getContainerLaunchTime()).thenReturn(3001L);
+        Mockito.when(mgr.getContainerLaunchTime()).thenReturn(3000L);
+        Mockito.when(mgr.getQueue()).thenReturn("Priority0.A");
+        Mockito.when(mgr.getPriority()).thenReturn("0");
 
         mgr.initialize();
-        Thread.sleep(15000L);
+        Thread.sleep(60000L);
         mgr.finalize();
     }
 }

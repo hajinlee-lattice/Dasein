@@ -19,8 +19,11 @@ public class NumberPreemptionsMetric extends AnalyticJobBaseMetric {
         MetricsProvider provider = getProvider();
         long numPreemptions = provider.getNumberPreemptions();
 
-        MetricsRecordBuilder rb = getMetricBuilder(provider, collector, all);
-        rb.addCounter(NumberOfContainerPreemptions, numPreemptions);
+        for (MetricsRecordBuilder rb : getMetricsBuilders(provider, collector, all)) {
+            rb.addCounter(NumberOfContainerPreemptions, numPreemptions);
+        }
+
+
     }
 
 }
