@@ -20,7 +20,7 @@ public class AnalyticJobMetricsMgr implements MetricsProvider {
     private int numberPreemptions;
     private static AnalyticJobMetricsMgr instance;
     private MetricsSystem ms;
-    private boolean completed = false;
+    private volatile boolean completed = false;
     
     private AnalyticJobMetricsMgr(String appAttemptId) {
         this.appAttemptId = appAttemptId;

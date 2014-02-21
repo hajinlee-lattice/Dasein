@@ -96,7 +96,10 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
 
     @Override
     protected void onContainerCompleted(ContainerStatus status) {
-        analyticJobMetricsMgr.finalize();
+        if (status.getExitStatus() == ContainerExitStatus.SUCCESS) {
+            analyticJobMetricsMgr.finalize();
+        }
+        
         if (status.getExitStatus() != ContainerExitStatus.PREEMPTED) {
             cleanupJobDir();
         }
