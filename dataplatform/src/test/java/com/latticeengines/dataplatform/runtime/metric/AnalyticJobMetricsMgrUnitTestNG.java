@@ -2,7 +2,9 @@ package com.latticeengines.dataplatform.runtime.metric;
 
 import java.io.File;
 
+import org.apache.commons.io.FileUtils;
 import org.mockito.Mockito;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -23,7 +25,11 @@ public class AnalyticJobMetricsMgrUnitTestNG {
         Mockito.when(mgr.getPriority()).thenReturn("0");
 
         mgr.initialize();
-        Thread.sleep(60000L);
+        Thread.sleep(10000L);
         mgr.finalize();
+        
+        String contents = FileUtils.readFileToString(new File("/tmp/ledpjob-metrics.out"));
+        Assert.assertTrue(contents.contains("AMRunningToContainerLaunchWaitTime=2999"));
+        Assert.assertTrue(contents.contains("AMRunningToContainerLaunchWaitTime=0"));
     }
 }
