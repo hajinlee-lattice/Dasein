@@ -20,7 +20,7 @@ public class NumberPreemptionsMetric extends AnalyticJobBaseMetric {
             return;
         }
         MetricsProvider provider = getProvider();
-        long numPreemptions = provider.getNumberPreemptions();
+        int numPreemptions = provider.getNumberPreemptions();
 
         log.info("Num container preemptions = " + numPreemptions);
         for (MetricsRecordBuilder rb : getMetricsBuilders(provider, collector, all)) {
