@@ -9,6 +9,7 @@ import com.latticeengines.dataplatform.runtime.metric.AnalyticJobBaseMetric;
 import com.latticeengines.dataplatform.runtime.metric.MetricsProvider;
 
 public class ContainerLaunchWaitTimeMetric extends AnalyticJobBaseMetric {
+    
     public ContainerLaunchWaitTimeMetric(MetricsProvider provider) {
         super(provider, AMRunningToContainerLaunchWaitTime);
     }
@@ -23,10 +24,11 @@ public class ContainerLaunchWaitTimeMetric extends AnalyticJobBaseMetric {
         long waitTime = provider.getContainerWaitTime();
         
         if (waitTime >= 0) {
+            log.info("Wait time = " + waitTime);
             for (MetricsRecordBuilder rb : getMetricsBuilders(provider, collector, all)) {
                 rb.addGauge(AMRunningToContainerLaunchWaitTime, waitTime);
             }
-            setChanged(true);
+            setChanged(false);
         }
     }
 

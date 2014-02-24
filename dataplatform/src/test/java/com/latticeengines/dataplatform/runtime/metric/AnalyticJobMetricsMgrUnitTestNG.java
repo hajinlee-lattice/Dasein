@@ -40,7 +40,7 @@ public class AnalyticJobMetricsMgrUnitTestNG {
             }
             
         }).start();
-        Thread.sleep(10000L);
+        Thread.sleep(60000L);
         mgr.finalize();
         
         String contents = FileUtils.readFileToString(new File("/tmp/ledpjob-metrics.out"));

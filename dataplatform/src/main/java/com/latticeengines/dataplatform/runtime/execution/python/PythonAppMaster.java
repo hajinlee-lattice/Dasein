@@ -105,6 +105,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
             analyticJobMetricsMgr.setAppEndTime(System.currentTimeMillis());
             analyticJobMetricsMgr.setChanged(AMRunningToContainerLaunchWaitTime.name());
             analyticJobMetricsMgr.setChanged(AMElapsedTime.name());
+            analyticJobMetricsMgr.setChanged(NumberOfContainerPreemptions.name());
             analyticJobMetricsMgr.finalize();
         }
         

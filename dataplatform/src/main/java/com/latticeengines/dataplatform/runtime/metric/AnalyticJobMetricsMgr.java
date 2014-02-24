@@ -112,6 +112,9 @@ public class AnalyticJobMetricsMgr implements MetricsProvider {
 
     @Override
     public int getNumberPreemptions() {
+        if (completed) {
+            return 0;
+        }
         return numberPreemptions;
     }
 
@@ -138,9 +141,6 @@ public class AnalyticJobMetricsMgr implements MetricsProvider {
 
     @Override
     public long getApplicationElapsedTime() {
-        if (completed) {
-            return 0;
-        }
         return getAppEndTime() - getAppStartTime();
     }
     

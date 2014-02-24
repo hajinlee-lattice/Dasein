@@ -24,6 +24,7 @@ public class ApplicationElapsedTimeMetric extends AnalyticJobBaseMetric {
         long elapsedTime = provider.getApplicationElapsedTime();
         
         if (elapsedTime >= 0) {
+            log.info("Elapsed time = " + elapsedTime);
             for (MetricsRecordBuilder rb : getMetricsBuilders(provider, collector, all)) {
                 rb.addGauge(AMElapsedTime, elapsedTime);
             }
