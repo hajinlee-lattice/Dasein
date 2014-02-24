@@ -6,11 +6,13 @@ import org.apache.hadoop.metrics2.MetricsSystem;
 import org.apache.hadoop.metrics2.lib.DefaultMetricsSystem;
 
 import com.latticeengines.dataplatform.runtime.metric.impl.ApplicationElapsedTimeMetric;
+import com.latticeengines.dataplatform.runtime.metric.impl.ApplicationLaunchWaitTimeMetric;
 import com.latticeengines.dataplatform.runtime.metric.impl.ContainerLaunchWaitTimeMetric;
 import com.latticeengines.dataplatform.runtime.metric.impl.NumberPreemptionsMetric;
 
 public class AnalyticJobMetricsMgr implements MetricsProvider {
 
+    private long appSubmissionTime;
     private long appStartTime;
     private long appEndTime;
     private long containerLaunchTime;
@@ -44,6 +46,7 @@ public class AnalyticJobMetricsMgr implements MetricsProvider {
         new ContainerLaunchWaitTimeMetric(this);
         new NumberPreemptionsMetric(this);
         new ApplicationElapsedTimeMetric(this);
+        new ApplicationLaunchWaitTimeMetric(this);
         
         Map<String, AnalyticJobBaseMetric> map = AnalyticJobBaseMetric.getRegistry();
         
@@ -142,6 +145,22 @@ public class AnalyticJobMetricsMgr implements MetricsProvider {
     @Override
     public long getApplicationElapsedTime() {
         return getAppEndTime() - getAppStartTime();
+    }
+
+    public long getAppSubmissionTime() {
+        return appSubmissionTime;
+    }
+
+    public void setAppSubmissionTime(long appSubmissionTime) {
+        this.appSubmissionTime = appSubmissionTime;
+    }
+
+    @Override
+    public long getApplicationWaitTime() {
+        if (completed) {
+            return 0;
+        }
+        return getAppStartTime() - getAppSubmissionTime();
     }
     
     

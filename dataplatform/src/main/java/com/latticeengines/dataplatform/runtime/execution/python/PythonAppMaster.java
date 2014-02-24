@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.runtime.execution.python;
 
 import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AMElapsedTime;
 import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AMRunningToContainerLaunchWaitTime;
+import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AMSubmissionToRunningWaitTime;
 import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.NumberOfContainerPreemptions;
 
 import java.util.Map;
@@ -22,6 +23,7 @@ import org.springframework.yarn.am.container.AbstractLauncher;
 
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsMgr;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
@@ -35,6 +37,9 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     @Autowired
     private Configuration yarnConfiguration;
     
+    @Autowired
+    private YarnService yarnService;
+    
     private AnalyticJobMetricsMgr analyticJobMetricsMgr = null;
     
     private String pythonContainerId;
@@ -46,8 +51,31 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         if (getLauncher() instanceof AbstractLauncher) {
             ((AbstractLauncher) getLauncher()).addInterceptor(this);
         }
-        analyticJobMetricsMgr = AnalyticJobMetricsMgr.getInstance(getApplicationAttemptId().toString());
-        analyticJobMetricsMgr.setAppStartTime(System.currentTimeMillis());
+        String appAttemptId = getApplicationAttemptId().toString();
+        final String appId = getApplicationId(appAttemptId);
+                
+        analyticJobMetricsMgr = AnalyticJobMetricsMgr.getInstance(appAttemptId);
+        final long appStartTime = System.currentTimeMillis();
+        analyticJobMetricsMgr.setAppStartTime(appStartTime);
+        
+        log.info("Application id = " + getApplicationId(appId));
+        
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                long appSubmissionTime = yarnService.getApplication(appId).getStartTime();
+                log.info("Start app latency = " + (appStartTime - appSubmissionTime));
+                analyticJobMetricsMgr.setAppSubmissionTime(appSubmissionTime);
+                analyticJobMetricsMgr.setChanged(AMSubmissionToRunningWaitTime.name());
+            }
+            
+        }).start();
+    }
+    
+    private String getApplicationId(String appAttemptId) {
+        String[] tokens = appAttemptId.split("_");
+        return "application_" + tokens[1] + "_" + tokens[2];
     }
 
     @Override

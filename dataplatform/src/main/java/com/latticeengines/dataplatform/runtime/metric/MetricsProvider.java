@@ -15,4 +15,6 @@ public interface MetricsProvider {
     String getQueue();
 
     long getApplicationElapsedTime();
+    
+    long getApplicationWaitTime();
 }
