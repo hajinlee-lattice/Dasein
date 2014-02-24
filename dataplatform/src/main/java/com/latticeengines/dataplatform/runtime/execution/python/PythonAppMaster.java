@@ -36,6 +36,8 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     private Configuration yarnConfiguration;
     
     private AnalyticJobMetricsMgr analyticJobMetricsMgr = null;
+    
+    private String pythonContainerId;
 
     @Override
     protected void onInit() throws Exception {
@@ -74,14 +76,15 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     @Override
     public ContainerLaunchContext preLaunch(Container container,
             ContainerLaunchContext context) {
-        log.info("Container id = " + container.getId().toString());
+        pythonContainerId = container.getId().toString();
+        log.info("Container id = " + pythonContainerId);
         return context;
     }
     
     @Override
     protected void onContainerLaunched(Container container) {
         String containerId = container.getId().toString();
-        log.info("Container id = " + containerId  + " launching.");
+        log.info("Launching container id = " + containerId  + ".");
         analyticJobMetricsMgr.setContainerId(containerId);
         analyticJobMetricsMgr.setContainerLaunchTime(System.currentTimeMillis());
         analyticJobMetricsMgr.setChanged(AMRunningToContainerLaunchWaitTime.name());
@@ -102,6 +105,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     @Override
     protected void onContainerCompleted(ContainerStatus status) {
         if (status.getExitStatus() == ContainerExitStatus.SUCCESS) {
+            log.info("Container id = " + status.getContainerId().toString()  + " completed.");
             analyticJobMetricsMgr.setAppEndTime(System.currentTimeMillis());
             analyticJobMetricsMgr.setChanged(AMRunningToContainerLaunchWaitTime.name());
             analyticJobMetricsMgr.setChanged(AMElapsedTime.name());
@@ -117,13 +121,14 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
 
     @Override
     protected boolean onContainerFailed(ContainerStatus status) {
+        String containerId = status.getContainerId().toString();
+        
         if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
             analyticJobMetricsMgr.incrementNumberPreemptions();
             analyticJobMetricsMgr.setChanged(NumberOfContainerPreemptions.name());
             try {
-                Thread.sleep(15000L);
-                log.info("Container " + status.getContainerId().toString()
-                        + " preempted. Reallocating.");
+                Thread.sleep(5000L);
+                log.info("Container " + containerId + " preempted. Reallocating.");
             } catch (InterruptedException e) {
                 log.error(e);
             }
@@ -133,11 +138,14 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         log.info(status.getDiagnostics());
 
         if (status.getExitStatus() == ContainerExitStatus.ABORTED) {
-            log.info("Container releasing " + status.getContainerId().toString() + ".");
-            log.info("Ignoring abort error.");
-            return true;
+            if (!containerId.equals(pythonContainerId)) {
+                log.info("Releasing container " + containerId + ". Ignoring abort error.");
+                return true;
+            } else {
+                return false;
+            }
         }
-        log.info(status.getDiagnostics());
+        
         return false;
     }
 
