@@ -97,6 +97,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = "perf")
     public void setup() throws Exception {
+        new File("/tmp/ledpjob-metrics.out").delete();
         classifier1Min = new Classifier();
         classifier1Min.setName("IrisClassifier");
         classifier1Min
@@ -232,15 +233,13 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         // B
         appIdsPerRuns = shortRun("B");
         customerJobsToAppIdMap.put("B", appIdsPerRuns);
-        System.out
-                .println("		Customer B submits Analytic Run Short at 15 seconds");
+        System.out.println("		Customer B submits Analytic Run Short at 15 seconds");
         Thread.sleep(5000L);
 
         // C
         appIdsPerRuns = shortRun("C");
         customerJobsToAppIdMap.put("C", appIdsPerRuns);
-        System.out
-                .println("		Customer C submits Analytic Run Short at 20 seconds");
+        System.out.println("		Customer C submits Analytic Run Short at 20 seconds");
 
         dumpAppIdsToFile(customerJobsToAppIdMap);
         generateRunReport(customerJobsToAppIdMap);
@@ -405,11 +404,15 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 
         appIdsPerQueue = new ArrayList<ApplicationId>();
         appIdsList.add(appIdsPerQueue);
-        for (int j = 0; j < 2; j++) {
-            Properties[] p1 = getPropertiesPair(classifier5Mins, "Priority1."
-                    + queue);
-            appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p1[0],
-                    p1[1]));
+        
+        
+        if (isLong) {
+            for (int j = 0; j < 2; j++) {
+                Properties[] p1 = getPropertiesPair(classifier5Mins, "Priority1."
+                        + queue);
+                appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p1[0],
+                        p1[1]));
+            }
         }
 
         if (isLong) {

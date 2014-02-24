@@ -1,17 +1,18 @@
 package com.latticeengines.dataplatform.runtime.metric;
 
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AMRunningToContainerLaunchWaitTime;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.NumberOfContainerPreemptions;
+import java.util.Map;
 
 import org.apache.hadoop.metrics2.MetricsSystem;
 import org.apache.hadoop.metrics2.lib.DefaultMetricsSystem;
 
+import com.latticeengines.dataplatform.runtime.metric.impl.ApplicationElapsedTimeMetric;
 import com.latticeengines.dataplatform.runtime.metric.impl.ContainerLaunchWaitTimeMetric;
 import com.latticeengines.dataplatform.runtime.metric.impl.NumberPreemptionsMetric;
 
 public class AnalyticJobMetricsMgr implements MetricsProvider {
 
     private long appStartTime;
+    private long appEndTime;
     private long containerLaunchTime;
     private final String appAttemptId;
     private String priority;
@@ -40,13 +41,21 @@ public class AnalyticJobMetricsMgr implements MetricsProvider {
     }
     
     public void initialize() {
-        ContainerLaunchWaitTimeMetric containerWaitTimeMetric = new ContainerLaunchWaitTimeMetric(this);
-        NumberPreemptionsMetric numPreemptionsMetric = new NumberPreemptionsMetric(this);
-        ms.register(AMRunningToContainerLaunchWaitTime.name(),
-                AMRunningToContainerLaunchWaitTime.description(), containerWaitTimeMetric);
-        ms.register(NumberOfContainerPreemptions.name(),
-                NumberOfContainerPreemptions.description(), numPreemptionsMetric);
+        new ContainerLaunchWaitTimeMetric(this);
+        new NumberPreemptionsMetric(this);
+        new ApplicationElapsedTimeMetric(this);
+        
+        Map<String, AnalyticJobBaseMetric> map = AnalyticJobBaseMetric.getRegistry();
+        
+        for (AnalyticJobBaseMetric metric : map.values()) {
+            ms.register(metric.getName(), metric.getDescription(), metric);
+        }
+        
         ms.init("ledpjob");
+    }
+    
+    public void setChanged(String name) {
+        AnalyticJobBaseMetric.getRegistry().get(name).setChanged(true);
     }
     
     public void finalize() {
@@ -117,6 +126,22 @@ public class AnalyticJobMetricsMgr implements MetricsProvider {
 
     public void setQueue(String queue) {
         this.queue = queue;
+    }
+
+    public long getAppEndTime() {
+        return appEndTime;
+    }
+
+    public void setAppEndTime(long appEndTime) {
+        this.appEndTime = appEndTime;
+    }
+
+    @Override
+    public long getApplicationElapsedTime() {
+        if (completed) {
+            return 0;
+        }
+        return getAppEndTime() - getAppStartTime();
     }
     
     

@@ -10,6 +10,7 @@ public enum AnalyticJobMetricsInfo implements MetricsInfo {
     Queue("Queue"), //
     AMSubmissionToRunningWaitTime("Submission to app master execution wait time"), //
     AMRunningToContainerLaunchWaitTime("Container launch wait time"), //
+    AMElapsedTime("Application elapsed time"), //
     NumberOfContainerPreemptions("Number of container preemptions");
 
     private final String description;

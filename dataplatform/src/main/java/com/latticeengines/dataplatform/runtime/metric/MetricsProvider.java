@@ -13,4 +13,6 @@ public interface MetricsProvider {
     String getPriority();
     
     String getQueue();
+
+    long getApplicationElapsedTime();
 }

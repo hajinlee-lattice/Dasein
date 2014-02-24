@@ -1,5 +1,9 @@
 package com.latticeengines.dataplatform.runtime.execution.python;
 
+import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AMElapsedTime;
+import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AMRunningToContainerLaunchWaitTime;
+import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.NumberOfContainerPreemptions;
+
 import java.util.Map;
 import java.util.Properties;
 
@@ -80,6 +84,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         log.info("Container id = " + containerId  + " launching.");
         analyticJobMetricsMgr.setContainerId(containerId);
         analyticJobMetricsMgr.setContainerLaunchTime(System.currentTimeMillis());
+        analyticJobMetricsMgr.setChanged(AMRunningToContainerLaunchWaitTime.name());
         super.onContainerLaunched(container);
     }
 
@@ -97,6 +102,9 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     @Override
     protected void onContainerCompleted(ContainerStatus status) {
         if (status.getExitStatus() == ContainerExitStatus.SUCCESS) {
+            analyticJobMetricsMgr.setAppEndTime(System.currentTimeMillis());
+            analyticJobMetricsMgr.setChanged(AMRunningToContainerLaunchWaitTime.name());
+            analyticJobMetricsMgr.setChanged(AMElapsedTime.name());
             analyticJobMetricsMgr.finalize();
         }
         
@@ -110,6 +118,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     protected boolean onContainerFailed(ContainerStatus status) {
         if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
             analyticJobMetricsMgr.incrementNumberPreemptions();
+            analyticJobMetricsMgr.setChanged(NumberOfContainerPreemptions.name());
             try {
                 Thread.sleep(15000L);
                 log.info("Container " + status.getContainerId().toString()
@@ -123,8 +132,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         log.info(status.getDiagnostics());
 
         if (status.getExitStatus() == ContainerExitStatus.ABORTED) {
-            log.info("Container releasing "
-                    + status.getContainerId().toString() + ".");
+            log.info("Container releasing " + status.getContainerId().toString() + ".");
             log.info("Ignoring abort error.");
             return true;
         }
