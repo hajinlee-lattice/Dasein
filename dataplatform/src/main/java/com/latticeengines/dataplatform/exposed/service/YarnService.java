@@ -8,7 +8,7 @@ public interface YarnService {
 
     SchedulerTypeInfo getSchedulerInfo();
 
-    AppsInfo getApplications();
+    AppsInfo getApplications(String queryString);
 
     AppInfo getApplication(String appId);
 

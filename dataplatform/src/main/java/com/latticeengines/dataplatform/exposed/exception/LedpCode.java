@@ -3,6 +3,8 @@ package com.latticeengines.dataplatform.exposed.exception;
 public enum LedpCode {
     // Low level errors: 00000-09999
     LEDP_00000("Could not create hdfs dir {0}."), //
+    LEDP_00001("Could not collect Yarn Queue information from ResourceManager"),
+    LEDP_00002("Generic system error"),
     // Validation service: 10000-10999
     LEDP_10000("Metadata schema is null."), //
     LEDP_10001("Metadata schema is not retrievable from hdfs."), //
@@ -16,8 +18,10 @@ public enum LedpCode {
     LEDP_11002("Issue running query {0}."), //
     LEDP_11003("Unsupported type {0} for determining default value."), //
     // Runtime service: 12000-12999
-    LEDP_12000("Parameter PRIORITY undefined for analytics job.");
-
+    LEDP_12000("Parameter PRIORITY undefined for analytics job."),
+    LEDP_12001("Unsupported queue assignment policy"),
+    LEDP_12002("No queue available to run job");
+    
     private String message;
 
     LedpCode(String message) {

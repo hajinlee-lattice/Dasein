@@ -39,7 +39,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void getApps() {
-        AppsInfo appsInfo = yarnService.getApplications();
+        AppsInfo appsInfo = yarnService.getApplications(null);
         assertNotNull(appsInfo);
     }
     

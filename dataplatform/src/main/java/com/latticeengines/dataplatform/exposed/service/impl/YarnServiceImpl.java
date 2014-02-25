@@ -31,10 +31,18 @@ public class YarnServiceImpl implements YarnService {
     }
 
     @Override
-    public AppsInfo getApplications() {
+    public AppsInfo getApplications(String queryString) {
         String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-        return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps",
+        if ((queryString == null) || (queryString.length() == 0))
+        {
+        	return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps",
                 AppsInfo.class);
+        }
+        else
+        {
+        	return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps?queryString",
+                    AppsInfo.class);
+        }
     }
     
     @Override
