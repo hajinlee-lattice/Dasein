@@ -60,25 +60,19 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
         URL trainingFileUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.dat");
-        URL testFileUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/service/impl/nn_test.dat");
-        URL jsonUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/service/impl/iris.json");
-        URL pythonScriptUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.py");
-        URL modelUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/service/impl/model.txt");
+        URL testFileUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_test.dat");
+        URL jsonUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/iris.json");
+        URL pythonScriptUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.py");
+        URL modelUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/model.txt");
         String trainingFilePath = "file:" + trainingFileUrl.getFile();
         String testFilePath = "file:" + testFileUrl.getFile();
         String jsonFilePath = "file:" + jsonUrl.getFile();
         String pythonScriptPath = "file:" + pythonScriptUrl.getFile();
-        FileUtils.copyFileToDirectory(new File(modelUrl.getFile()), new File(
-                "/tmp"));
+        FileUtils.copyFileToDirectory(new File(modelUrl.getFile()), new File("/tmp"));
         copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
         copyEntries.add(new CopyEntry(testFilePath, "/test", false));
         copyEntries.add(new CopyEntry(jsonFilePath, "/datascientist1", false));
-        copyEntries.add(new CopyEntry(pythonScriptPath, "/datascientist1",
-                false));
+        copyEntries.add(new CopyEntry(pythonScriptPath, "/datascientist1", false));
         doCopy(fs, copyEntries);
     }
 
@@ -95,10 +89,9 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         containerProperties.put("VIRTUALCORES", "1");
         containerProperties.put("MEMORY", "64");
         containerProperties.put("PRIORITY", "0");
-        ApplicationId applicationId = jobService.submitYarnJob(
-                "defaultYarnClient", appMasterProperties, containerProperties);
-        YarnApplicationState state = waitState(applicationId, 30,
-                TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+                containerProperties);
+        YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
         assertNotNull(state);
         jobService.killJob(applicationId);
         state = getState(applicationId);
@@ -113,10 +106,9 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         containerProperties.put("VIRTUALCORES", "1");
         containerProperties.put("MEMORY", "64");
         containerProperties.put("PRIORITY", "0");
-        ApplicationId applicationId = jobService.submitYarnJob(
-                "defaultYarnClient", appMasterProperties, containerProperties);
-        YarnApplicationState state = waitState(applicationId, 30,
-                TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+                containerProperties);
+        YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
         assertNotNull(state);
         jobService.killJob(applicationId);
         state = getState(applicationId);
@@ -125,16 +117,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         ApplicationReport app = jobService.getJobReportById(applicationId);
 
-        List<ApplicationReport> reports = jobService.getJobReportByUser(app
-                .getUser());
+        List<ApplicationReport> reports = jobService.getJobReportByUser(app.getUser());
         int numJobs = reports.size();
         assertTrue(numJobs > 0);
 
-        applicationId = jobService.submitYarnJob("defaultYarnClient",
-                appMasterProperties, containerProperties);
+        applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
 
-        state = waitState(applicationId, 10, TimeUnit.SECONDS,
-                YarnApplicationState.RUNNING);
+        state = waitState(applicationId, 10, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
         reports = jobService.getJobReportByUser(app.getUser());
         assertTrue(reports.size() > numJobs);
         jobService.killJob(applicationId);
@@ -145,12 +134,9 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void testSubmitPythonYarnJob() throws Exception {
         Classifier classifier = new Classifier();
         classifier.setName("IrisClassifier");
-        classifier
-                .setFeatures(Arrays.<String> asList(new String[] {
-                        "sepal_length", "sepal_width", "petal_length",
-                        "petal_width" }));
-        classifier.setTargets(Arrays
-                .<String> asList(new String[] { "category" }));
+        classifier.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
+                "petal_width" }));
+        classifier.setTargets(Arrays.<String> asList(new String[] { "category" }));
         classifier.setSchemaHdfsPath("/datascientist1/iris.json");
         classifier.setModelHdfsDir("/datascientist1/result");
         classifier.setPythonScriptHdfsPath("/datascientist1/nn_train.py");
@@ -166,30 +152,23 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         containerProperties.put("PRIORITY", "0");
         containerProperties.put("METADATA", classifier.toString());
 
-        ApplicationId applicationId = jobService.submitYarnJob("pythonClient",
-                appMasterProperties, containerProperties);
-        YarnApplicationState state = waitState(applicationId, 30,
-                TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+        ApplicationId applicationId = jobService
+                .submitYarnJob("pythonClient", appMasterProperties, containerProperties);
+        YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
         assertNotNull(state);
         ApplicationReport app = jobService.getJobReportById(applicationId);
         assertNotNull(app);
-        state = waitState(applicationId, 120, TimeUnit.SECONDS,
-                YarnApplicationState.FINISHED);
+        state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
 
         NumberFormat appIdFormat = getAppIdFormat();
-        String jobId = applicationId.getClusterTimestamp() + "_"
-                + appIdFormat.format(applicationId.getId());
-        String modelFile = HdfsHelper.getFilesForDir(yarnConfiguration,
-                "/datascientist1/result/" + jobId).get(0);
-        String modelContents = HdfsHelper.getHdfsFileContents(
-                yarnConfiguration, modelFile);
+        String jobId = applicationId.getClusterTimestamp() + "_" + appIdFormat.format(applicationId.getId());
+        String modelFile = HdfsHelper.getFilesForDir(yarnConfiguration, "/datascientist1/result/" + jobId).get(0);
+        String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, modelFile);
         assertEquals(modelContents.trim(), "this is the generated model.");
 
-        String contextFileName = containerProperties
-                .getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
-        String metadataFileName = containerProperties
-                .getProperty(PythonContainerProperty.METADATA.name());
+        String contextFileName = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
+        String metadataFileName = containerProperties.getProperty(PythonContainerProperty.METADATA.name());
 
         assertFalse(new File(contextFileName).exists());
         assertFalse(new File(metadataFileName).exists());
@@ -198,8 +177,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = "functional", enabled = false)
     public void testSubmitMRJob() throws Exception {
 
-        Configuration conf = (Configuration) applicationContext
-                .getBean("hadoopConfiguration");
+        Configuration conf = (Configuration) applicationContext.getBean("hadoopConfiguration");
         FileSystem fileSystem = null;
         FSDataOutputStream fileOut = null;
         try {
@@ -218,8 +196,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
             // Create a new file and write data to it.
             fileOut = fileSystem.create(inputFilepath);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                    fileOut));
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fileOut));
             writer.write("Watson is awesome\n");
             writer.flush();
             fileOut.flush();
@@ -234,18 +211,15 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
             }
         }
 
-        ApplicationId applicationId = jobService.submitMRJob("wordCountJob",
-                null);
-        YarnApplicationState state = waitState(applicationId, 120,
-                TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        ApplicationId applicationId = jobService.submitMRJob("wordCountJob", null);
+        YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
 
         state = getState(applicationId);
         assertNotNull(state);
         assertTrue(!state.equals(YarnApplicationState.FAILED));
 
         ApplicationReport app = jobService.getJobReportById(applicationId);
-        String log = HdfsHelper.getApplicationLog(yarnConfiguration,
-                app.getUser(), applicationId.toString());
+        String log = HdfsHelper.getApplicationLog(yarnConfiguration, app.getUser(), applicationId.toString());
         assertTrue(!log.isEmpty());
     }
 
