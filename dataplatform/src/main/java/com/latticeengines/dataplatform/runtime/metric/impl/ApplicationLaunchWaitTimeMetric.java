@@ -24,7 +24,7 @@ public class ApplicationLaunchWaitTimeMetric extends AnalyticJobBaseMetric {
         long waitTime = provider.getApplicationWaitTime();
         
         if (waitTime >= 0) {
-            log.info("Wait time = " + waitTime);
+            log.info("Application launch wait time = " + waitTime);
             for (MetricsRecordBuilder rb : getMetricsBuilders(provider, collector, all)) {
                 rb.addGauge(AMSubmissionToRunningWaitTime, waitTime);
             }

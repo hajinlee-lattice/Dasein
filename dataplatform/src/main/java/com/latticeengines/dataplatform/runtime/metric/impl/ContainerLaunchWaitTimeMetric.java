@@ -24,7 +24,7 @@ public class ContainerLaunchWaitTimeMetric extends AnalyticJobBaseMetric {
         long waitTime = provider.getContainerWaitTime();
         
         if (waitTime >= 0) {
-            log.info("Wait time = " + waitTime);
+            log.info("Container launch wait time = " + waitTime);
             for (MetricsRecordBuilder rb : getMetricsBuilders(provider, collector, all)) {
                 rb.addGauge(AMRunningToContainerLaunchWaitTime, waitTime);
             }
