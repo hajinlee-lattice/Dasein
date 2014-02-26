@@ -159,14 +159,14 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
 
     @Override
     public String useQueue(String assignmentToken, 
-            AssignmentPolicy policy) throws NotImplementedException {
+            AssignmentPolicy policy) {
         return useQueue(assignmentToken, policy, true);
     }
 
     @Override
     public String useQueue(String assignmentToken, 
                                 AssignmentPolicy policy,
-                                Boolean refreshQueueState) throws NotImplementedException {
+                                Boolean refreshQueueState) {
         
         log.debug("assignToQueue: assignmentToken=" + assignmentToken + " policy=" + policy.toString() + " refreshQueueState=" + refreshQueueState);
         if (policy != AssignmentPolicy.STICKYSHORTESTQUEUE) {

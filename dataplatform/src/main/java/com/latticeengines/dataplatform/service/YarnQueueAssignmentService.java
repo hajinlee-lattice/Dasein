@@ -46,8 +46,8 @@ public interface YarnQueueAssignmentService  {
             }
     }
 
-    String useQueue(String assignmentToken, AssignmentPolicy policy) throws UnsupportedEncodingException, NotImplementedException; 
+    String useQueue(String assignmentToken, AssignmentPolicy policy); 
     
-    String useQueue(String assignmentToken, AssignmentPolicy policy, Boolean refreshQueueState) throws UnsupportedEncodingException, NotImplementedException; 
+    String useQueue(String assignmentToken, AssignmentPolicy policy, Boolean refreshQueueState); 
 
 }
