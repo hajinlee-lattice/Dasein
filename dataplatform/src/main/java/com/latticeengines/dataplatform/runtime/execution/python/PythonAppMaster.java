@@ -1,10 +1,5 @@
 package com.latticeengines.dataplatform.runtime.execution.python;
 
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AMElapsedTime;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AMRunningToContainerLaunchWaitTime;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.AMSubmissionToRunningWaitTime;
-import static com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsInfo.NumberOfContainerPreemptions;
-
 import java.util.Map;
 import java.util.Properties;
 
@@ -24,7 +19,7 @@ import org.springframework.yarn.am.container.AbstractLauncher;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.dataplatform.runtime.metric.AnalyticJobMetricsMgr;
+import com.latticeengines.dataplatform.runtime.metric.LedpMetricsMgr;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
@@ -40,7 +35,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     @Autowired
     private YarnService yarnService;
     
-    private AnalyticJobMetricsMgr analyticJobMetricsMgr = null;
+    private LedpMetricsMgr analyticJobMetricsMgr = null;
     
     private String pythonContainerId;
 
@@ -54,7 +49,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         String appAttemptId = getApplicationAttemptId().toString();
         final String appId = getApplicationId(appAttemptId);
                 
-        analyticJobMetricsMgr = AnalyticJobMetricsMgr.getInstance(appAttemptId);
+        analyticJobMetricsMgr = LedpMetricsMgr.getInstance(appAttemptId);
         final long appStartTime = System.currentTimeMillis();
         analyticJobMetricsMgr.setAppStartTime(appStartTime);
         
@@ -67,7 +62,6 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
                 long appSubmissionTime = yarnService.getApplication(appId).getStartTime();
                 log.info("Start app latency = " + (appStartTime - appSubmissionTime));
                 analyticJobMetricsMgr.setAppSubmissionTime(appSubmissionTime);
-                analyticJobMetricsMgr.setChanged(AMSubmissionToRunningWaitTime.name());
             }
             
         }).start();
@@ -93,12 +87,11 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         if (priority == null) {
             throw new LedpException(LedpCode.LEDP_12000);
         }
-        analyticJobMetricsMgr.setPriority(priority);
-        
         String queue = parameters.getProperty(AppMasterProperty.QUEUE.name());
-        analyticJobMetricsMgr.setQueue(queue);
 
-        analyticJobMetricsMgr.initialize();
+        analyticJobMetricsMgr.setPriority(priority);
+        analyticJobMetricsMgr.setQueue(queue);
+        analyticJobMetricsMgr.start();
     }
 
     @Override
@@ -115,7 +108,6 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         log.info("Launching container id = " + containerId  + ".");
         analyticJobMetricsMgr.setContainerId(containerId);
         analyticJobMetricsMgr.setContainerLaunchTime(System.currentTimeMillis());
-        analyticJobMetricsMgr.setChanged(AMRunningToContainerLaunchWaitTime.name());
         super.onContainerLaunched(container);
     }
 
@@ -135,10 +127,6 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         if (status.getExitStatus() == ContainerExitStatus.SUCCESS) {
             log.info("Container id = " + status.getContainerId().toString()  + " completed.");
             analyticJobMetricsMgr.setAppEndTime(System.currentTimeMillis());
-            analyticJobMetricsMgr.setChanged(AMRunningToContainerLaunchWaitTime.name());
-            analyticJobMetricsMgr.setChanged(AMElapsedTime.name());
-            analyticJobMetricsMgr.setChanged(NumberOfContainerPreemptions.name());
-            analyticJobMetricsMgr.setChanged(AMSubmissionToRunningWaitTime.name());
             analyticJobMetricsMgr.finalize();
         }
         
@@ -154,7 +142,6 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         
         if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
             analyticJobMetricsMgr.incrementNumberPreemptions();
-            analyticJobMetricsMgr.setChanged(NumberOfContainerPreemptions.name());
             try {
                 Thread.sleep(5000L);
                 log.info("Container " + containerId + " preempted. Reallocating.");

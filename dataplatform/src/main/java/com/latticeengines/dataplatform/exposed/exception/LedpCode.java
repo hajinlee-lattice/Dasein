@@ -20,7 +20,10 @@ public enum LedpCode {
     // Runtime service: 12000-12999
     LEDP_12000("Parameter PRIORITY undefined for analytics job."),
     LEDP_12001("Unsupported queue assignment policy"),
-    LEDP_12002("No queue available to run job");
+    LEDP_12002("No queue available to run job"), //
+    // Metric system: 13000-13999
+    LEDP_13000("Tag {0} does not have a value.");
+
     
     private String message;
 

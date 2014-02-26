@@ -2,20 +2,16 @@ package com.latticeengines.dataplatform.runtime.metric;
 
 import org.apache.hadoop.metrics2.MetricsInfo;
 
-public enum AnalyticJobMetricsInfo implements MetricsInfo {
+public enum LedpMetricsInfo implements MetricsInfo {
     AnalyticJobMetrics("Analytic job related metrics"), //
     AppId("Application attempt id"), //
     ContainerId("Container id"), //
     Priority("Priority"), //
-    Queue("Queue"), //
-    AMSubmissionToRunningWaitTime("Submission to app master execution wait time"), //
-    AMRunningToContainerLaunchWaitTime("Container launch wait time"), //
-    AMElapsedTime("Application elapsed time"), //
-    NumberOfContainerPreemptions("Number of container preemptions");
+    Queue("Queue");
 
     private final String description;
 
-    AnalyticJobMetricsInfo(String description) {
+    LedpMetricsInfo(String description) {
         this.description = description;
     }
 
