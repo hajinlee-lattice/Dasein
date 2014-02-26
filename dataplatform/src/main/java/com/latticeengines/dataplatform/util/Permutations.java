@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
-import com.latticeengines.dataplatform.service.impl.YarnQueueAssignmentServiceImpl;
 
 public final class Permutations {
 

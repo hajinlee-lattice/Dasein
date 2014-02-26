@@ -32,13 +32,16 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
     private static final Log log = LogFactory.getLog(YarnQueueAssignmentServiceImpl.class);
     
     @Autowired
-    private YarnService yarnService;    
+    private YarnService yarnService;
     
     private static HashMap<Integer, Integer> curQueueDepth = new HashMap<Integer, Integer>();
     private static HashMap<Integer, String> fullyQualifiedQueueNames = new HashMap<Integer, String>();
     private static HashMap<String, String> curQueueAssignment = new HashMap<String, String>();
     private static long queueStateLastUpdated = System.currentTimeMillis();
 
+    public void setYarnService(YarnService yarnServiceToUse) {
+        yarnService = yarnServiceToUse;
+    }
     
     // Get current state of all queues
     private void updateCurrentQueueState() {
@@ -55,7 +58,11 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
             FairSchedulerInfo fairScheduler = (FairSchedulerInfo) field
                     .get(schedulerInfo);
             LinkedList<FairSchedulerQueueInfo> queuesToExplore = new LinkedList<FairSchedulerQueueInfo>();
-            queuesToExplore.add (fairScheduler.getRootQueueInfo());
+            FairSchedulerQueueInfo rootQueue = fairScheduler.getRootQueueInfo();
+            if (rootQueue != null)
+            {
+                queuesToExplore.add (rootQueue);
+            }
             while (!queuesToExplore.isEmpty()) {
                 FairSchedulerQueueInfo curQueue = queuesToExplore.removeFirst();
                 Iterator<FairSchedulerQueueInfo> iter = curQueue.getChildQueues()
@@ -64,15 +71,23 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
                     FairSchedulerQueueInfo queue = (FairSchedulerQueueInfo) iter.next();                    
                     if (queue instanceof FairSchedulerLeafQueueInfo) {
                         String queueName = queue.getQueueName();
-                        String[] queueNodes = queueName.split(".");
-                        Integer leafQueueName = Integer.parseInt(queueNodes[queueNodes.length-1]);
+                        Integer leafQueueName = -1;
+                        try {
+                            String[] queueNodes = queueName.split("\\.");
+                            leafQueueName = Integer.parseInt(queueNodes[queueNodes.length-1]);
+                        }
+                        catch (Exception e) {
+                            log.error("unable to process queueName " + queueName);
+                        }
                         Integer queueDepth = ((FairSchedulerLeafQueueInfo) queue).getNumActiveApplications() +
                                 ((FairSchedulerLeafQueueInfo) queue).getNumPendingApplications();
                         log.debug("Processing queue data: queueName=" + queueName + 
                                   " leafQueueName=" + leafQueueName + 
                                   " queueDepth=" + queueDepth);
-                        curQueueDepth.put(leafQueueName, queueDepth);
-                        fullyQualifiedQueueNames.put(leafQueueName, queueName);
+                        if (leafQueueName != -1) {
+                            curQueueDepth.put(leafQueueName, queueDepth);
+                            fullyQualifiedQueueNames.put(leafQueueName, queueName);
+                        }
                     }
                     else {
                         queuesToExplore.addLast(queue);
@@ -90,7 +105,7 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
         for (AppInfo app : apps.getApps())
         {
             String appName = app.getName();
-            String[]appNameSubstrings = appName.split(".");
+            String[]appNameSubstrings = appName.split("\\.");
             if (!curQueueAssignment.containsKey(appNameSubstrings[0]))
             {
                 curQueueAssignment.put(appNameSubstrings[0], app.getQueue());
@@ -117,7 +132,7 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
         // used to initialize the hash value, use whatever
         // value you want, but always the same
         Integer seed = 0x6741c180; 
-        Integer hash = factory.hash32().hash(data, 0, data.length, seed);
+        Integer hash = Math.abs(factory.hash32().hash(data, 0, data.length, seed));
         Permutations permutations = Permutations.getInstance();
         Integer permutationId = hash % permutations.getNumPermutations();
 
