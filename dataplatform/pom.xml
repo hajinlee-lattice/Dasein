@@ -10,7 +10,7 @@
 
     <properties>
         <component-name>le-dataplatform</component-name>
-        <hadoop.version>2.2.0.2.0.6.0-76</hadoop.version>
+        <hadoop.version>2.2.0.2.0.6.0-101</hadoop.version>
         <spring.data.version>2.0.0.M4-hadoop22</spring.data.version>
         <avro.version>1.7.6</avro.version>
         <sqoop.version>1.4.4</sqoop.version>
@@ -107,6 +107,11 @@
             <version>${avro.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro-tools</artifactId>
+            <version>${avro.version}</version>
+        </dependency>
+        <dependency>
 			<groupId>net.jpountz.lz4</groupId>
 			<artifactId>lz4</artifactId>
 			<version>1.2.0</version>
@@ -123,6 +128,12 @@
             <version>${sqoop.version}</version>
         </dependency>
         -->
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-perf</artifactId>
+            <version>${le.perf.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

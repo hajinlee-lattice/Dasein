@@ -7,7 +7,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.metrics2.MetricsInfo;
 import org.apache.hadoop.metrics2.MetricsSystem;
 import org.apache.hadoop.metrics2.lib.DefaultMetricsSystem;
-import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -22,7 +21,7 @@ public class LedpMetricsUnitTestNG {
     @Test(groups = "unit")
     public void getMetrics() throws Exception {
         MetricsSystem ms = DefaultMetricsSystem.instance();
-        final LedpMetrics lm = Mockito.spy(LedpMetrics.getForTags(ms, Arrays.<MetricsInfo>asList(new MetricsInfo [] { LedpMetricsInfo.Queue })));
+        final LedpMetrics lm = LedpMetrics.getForTags(ms, Arrays.<MetricsInfo>asList(new MetricsInfo [] { LedpMetricsInfo.Queue }));
         lm.setTagValue(LedpMetricsInfo.Queue, "Priority0.A");
         
         lm.start();

@@ -37,14 +37,23 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @Autowired
     private ModelingService modelingService;
 
-    @Autowired
-    private SecureFileTransferAgent secureFileTransferAgent;
+    
 
     @Value("${dataplatform.yarn.resourcemanager.fairscheduler.xml.location}")
     private String remoteFairSchedulerFilePath;
 
     @Value("${dataplatform.yarn.resourcemanager.log.location}")
     private String remoteRMLogPath;
+    
+    @Value("${dataplatform.yarn.resourcemanager.sftp.address}")
+    private String serverAddress;
+
+    @Value("${dataplatform.yarn.resourcemanager.sftp.userid}")
+    private String userId;
+
+    @Value("${dataplatform.yarn.resourcemanager.sftp.password}")
+    private String password;
+    
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -123,6 +132,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         out.println("</allocations>");
         out.close();
 
+        SecureFileTransferAgent secureFileTransferAgent = new SecureFileTransferAgent(serverAddress, userId, password);
         secureFileTransferAgent.fileTranser(
                 tempFairSchedulerFile.getAbsolutePath(),
                 remoteFairSchedulerFilePath, FileTransferOption.UPLOAD);

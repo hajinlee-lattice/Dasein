@@ -31,8 +31,7 @@ import org.testng.annotations.BeforeClass;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
-public class DataPlatformFunctionalTestNGBase extends
-        AbstractTestNGSpringContextTests {
+public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -76,21 +75,17 @@ public class DataPlatformFunctionalTestNGBase extends
         }
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir
-                + "/../../../src/main/python/launcher.py",
+        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/launcher.py",
                 "/app/dataplatform/scripts", false));
-        String dataplatformProps = "file:" + dataplatformPropDir
-                + "/dataplatform.properties";
-        copyEntries.add(new CopyEntry("file:target/*.jar", "/app/dataplatform",
-                false));
-        copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform",
-                false));
+        String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
+        copyEntries.add(new CopyEntry("file:target/*.jar", "/app/dataplatform", false));
+        copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
 
         if (doDependencyLibraryCopy()) {
             fs.delete(new Path("/lib"), true);
             fs.mkdirs(new Path("/lib"));
-            copyEntries.add(new CopyEntry("file:" + dataplatformPropDir
-                    + "/../../../target/dependency/*.jar", "/lib", false));
+            copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/dependency/*.jar", "/lib",
+                    false));
         }
 
         doCopy(fs, copyEntries);
@@ -103,13 +98,11 @@ public class DataPlatformFunctionalTestNGBase extends
         return fmt;
     }
 
-    public void doCopy(FileSystem fs, List<CopyEntry> copyEntries)
-            throws Exception {
+    public void doCopy(FileSystem fs, List<CopyEntry> copyEntries) throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
         for (CopyEntry e : copyEntries) {
-            for (String pattern : StringUtils.commaDelimitedListToStringArray(e
-                    .getSrc())) {
+            for (String pattern : StringUtils.commaDelimitedListToStringArray(e.getSrc())) {
                 for (Resource res : resolver.getResources(pattern)) {
                     Path destinationPath = getDestinationPath(e, res);
                     FSDataOutputStream os = fs.create(destinationPath);
@@ -120,8 +113,7 @@ public class DataPlatformFunctionalTestNGBase extends
 
     }
 
-    protected Path getDestinationPath(CopyEntry entry, Resource res)
-            throws IOException {
+    protected Path getDestinationPath(CopyEntry entry, Resource res) throws IOException {
         Path dest = new Path(entry.getDest(), res.getFilename());
         return dest;
     }
@@ -202,10 +194,8 @@ public class DataPlatformFunctionalTestNGBase extends
      * @see #submitApplicationAndWaitState(long, TimeUnit,
      *      YarnApplicationState...)
      */
-    protected ApplicationInfo submitApplicationAndWait(long timeout,
-            TimeUnit unit) throws Exception {
-        return submitApplicationAndWaitState(timeout, unit,
-                YarnApplicationState.FINISHED, YarnApplicationState.FAILED);
+    protected ApplicationInfo submitApplicationAndWait(long timeout, TimeUnit unit) throws Exception {
+        return submitApplicationAndWaitState(timeout, unit, YarnApplicationState.FINISHED, YarnApplicationState.FAILED);
     }
 
     /**
@@ -225,16 +215,14 @@ public class DataPlatformFunctionalTestNGBase extends
      *             if exception occurred
      * @see ApplicationInfo
      */
-    protected ApplicationInfo submitApplicationAndWaitState(long timeout,
-            TimeUnit unit, YarnApplicationState... applicationStates)
-            throws Exception {
+    protected ApplicationInfo submitApplicationAndWaitState(long timeout, TimeUnit unit,
+            YarnApplicationState... applicationStates) throws Exception {
         Assert.notEmpty(applicationStates, "Need to have at least one state");
         Assert.notNull(yarnClient, "Yarn client must be set");
 
         YarnApplicationState state = null;
         ApplicationId applicationId = submitApplication();
-        Assert.notNull(applicationId,
-                "Failed to get application id from submit");
+        Assert.notNull(applicationId, "Failed to get application id from submit");
 
         long end = System.currentTimeMillis() + unit.toMillis(timeout);
 
@@ -262,8 +250,7 @@ public class DataPlatformFunctionalTestNGBase extends
     protected ApplicationId submitApplication() {
         Assert.notNull(yarnClient, "Yarn client must be set");
         ApplicationId applicationId = yarnClient.submitApplication();
-        Assert.notNull(applicationId,
-                "Failed to get application id from submit");
+        Assert.notNull(applicationId, "Failed to get application id from submit");
         return applicationId;
     }
 
@@ -285,8 +272,7 @@ public class DataPlatformFunctionalTestNGBase extends
      * @throws Exception
      *             if exception occurred
      */
-    protected YarnApplicationState waitState(ApplicationId applicationId,
-            long timeout, TimeUnit unit,
+    protected YarnApplicationState waitState(ApplicationId applicationId, long timeout, TimeUnit unit,
             YarnApplicationState... applicationStates) throws Exception {
         Assert.notNull(yarnClient, "Yarn client must be set");
         Assert.notNull(applicationId, "ApplicationId must not be null");
@@ -344,8 +330,7 @@ public class DataPlatformFunctionalTestNGBase extends
      *            Yarn app application id
      * @return Current application state or <code>NULL</code> if not found
      */
-    private YarnApplicationState findState(YarnClient client,
-            ApplicationId applicationId) {
+    private YarnApplicationState findState(YarnClient client, ApplicationId applicationId) {
         YarnApplicationState state = null;
         for (ApplicationReport report : client.listApplications()) {
             if (report.getApplicationId().equals(applicationId)) {
