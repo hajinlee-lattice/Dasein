@@ -3,6 +3,8 @@ package com.latticeengines.dataplatform.service.impl;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import org.apache.commons.io.FileUtils;
 import org.mockito.Mock;
@@ -26,12 +28,13 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.QueueManager;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairSchedulerConfiguration;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FSSchedulerApp;
 import org.apache.hadoop.yarn.server.resourcemanager.rmapp.RMAppImpl;
-import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
 import org.apache.hadoop.yarn.server.resourcemanager.RMContextImpl;
+import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
+import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationSubmissionContextPBImpl;
 import org.apache.hadoop.yarn.proto.YarnProtos;
 import org.apache.hadoop.yarn.proto.YarnProtos.ApplicationIdProto;
-import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationSubmissionContextPBImpl;
 import org.apache.hadoop.yarn.event.AsyncDispatcher;
 import org.apache.hadoop.conf.Configuration;
 
@@ -147,7 +150,7 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testSingleQueueNoCurrentAssignmentZeroDepth() throws Exception {
+    public void testNoCurrentAssignmentZeroDepth() throws Exception {
         setupFairSchedulerConfig();
         Configuration conf = new Configuration();
         FairScheduler fairScheduler = new FairScheduler();
@@ -168,12 +171,18 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         Assert.assertEquals(queueName, "root.PlayMaker.12");
         queueName = service.useQueue("Charles Schwab", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
         Assert.assertEquals(queueName, "root.PlayMaker.1");
+        queueName = service.useQueue("Dell", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
+        Assert.assertEquals(queueName, "root.PlayMaker.4");
         queueName = service.useQueue("VMWare Inc", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
         Assert.assertEquals(queueName, "root.PlayMaker.3");
+        queueName = service.useQueue("CDW", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
+        Assert.assertEquals(queueName, "root.PlayMaker.1");
+        queueName = service.useQueue("Microsoft", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
+        Assert.assertEquals(queueName, "root.PlayMaker.5");
     }
   
     @Test(groups = "unit")
-    public void testSingleQueueUseCurrentAssignment() throws Exception {
+    public void testUseCurrentAssignment() throws Exception {
         setupFairSchedulerConfig();
         Configuration conf = new Configuration();
         FairScheduler fairScheduler = new FairScheduler();
@@ -215,5 +224,5 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         queueName = service.useQueue("OfficeMax", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
         Assert.assertEquals(queueName, "root.PlayMaker.4");
     }
-  
+    
 }
