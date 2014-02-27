@@ -1,7 +1,6 @@
 package com.latticeengines.perf.exposed.metric.sink;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.apache.commons.configuration.SubsetConfiguration;
 import org.apache.hadoop.metrics2.MetricsRecord;
@@ -18,19 +17,29 @@ public class SwitchableFileSink extends FileSink {
         String watchDirStr = conf.getString(WATCHDIR_KEY); 
         watchDir = new File(watchDirStr);
         if (!watchDir.exists()) {
+            watchDir.mkdir();
             try {
-                watchDir.createNewFile();
-            } catch (IOException e) {
-                throw new IllegalStateException("Cannot create watch directory " + watchDirStr + ".");
+                Process p = Runtime.getRuntime().exec("chmod 777 " + watchDir.getAbsolutePath());
+                p.waitFor();
+            } catch (Exception e) {
+                throw new IllegalStateException("Cannot create directory " + watchDir.getAbsolutePath());
             }
+            
         }
+        super.init(conf);
     }
 
     @Override
     public void putMetrics(MetricsRecord record) {
+        if (writeToFile()) {
+            super.putMetrics(record);
+        }
+        
+    }
+    
+    public boolean writeToFile() {
         String[] files = watchDir.list();
         boolean writeToFile = false;
-        
         for (String file : files) {
             if (file.equals(START_FILENAME)) {
                 writeToFile = true;
@@ -39,11 +48,7 @@ public class SwitchableFileSink extends FileSink {
                 writeToFile = false;
             }
         }
-        
-        if (writeToFile) {
-            super.putMetrics(record);
-        }
-        
+        return writeToFile;
     }
 
 }

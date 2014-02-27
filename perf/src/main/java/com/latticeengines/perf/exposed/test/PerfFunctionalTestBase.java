@@ -18,6 +18,7 @@ public class PerfFunctionalTestBase {
     
     private SecureFileTransferAgent sftp = null;
     private String watchDir = null;
+    private String metricFile = null;
     private boolean startInvoked = false;
     private boolean stopInvoked = false;
     
@@ -25,6 +26,7 @@ public class PerfFunctionalTestBase {
         try {
             Configuration conf = new PropertiesConfiguration("hadoop-metrics2.properties").interpolatedConfiguration();
             watchDir = (String) conf.getProperty("ledpjob.sink.file.watchdir");
+            metricFile = (String) conf.getProperty("ledpjob.sink.file.filename");
             
         } catch (ConfigurationException e) {
             throw new IllegalStateException(e);
@@ -38,6 +40,7 @@ public class PerfFunctionalTestBase {
     
     public void afterClass() {
         stopInvoked = invoke("afterClass", stopInvoked, false);
+        sftp.fileTransfer(new File(metricFile).getName(), metricFile, SecureFileTransferAgent.FileTransferOption.DOWNLOAD);    
     }
     
     private boolean invoke(String methodName, boolean invoked, boolean start) {
@@ -58,7 +61,6 @@ public class PerfFunctionalTestBase {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
-        sftp.fileTranser(file.getName(), watchDir + "/" + file.getName(), SecureFileTransferAgent.FileTransferOption.UPLOAD);
-        
+        sftp.fileTransfer(file.getName(), watchDir + "/" + file.getName(), SecureFileTransferAgent.FileTransferOption.UPLOAD);
     }
 }

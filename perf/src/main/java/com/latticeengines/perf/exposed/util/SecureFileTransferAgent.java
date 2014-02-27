@@ -31,7 +31,7 @@ public class SecureFileTransferAgent {
         UPLOAD, DOWNLOAD
     }
 
-    public boolean fileTranser(String fileToFTP, String remoteFileToReplace, FileTransferOption option) {
+    public boolean fileTransfer(String fileToFTP, String remoteFileToReplace, FileTransferOption option) {
         StandardFileSystemManager manager = new StandardFileSystemManager();
 
         try {
@@ -61,7 +61,7 @@ public class SecureFileTransferAgent {
             FileObject remoteFile = manager.resolveFile(sftpUri, opts);
 
             if (remoteFile.getType() == FileType.FOLDER) {
-                log.error("Cannot copy directories: " + remoteFile.getURL());
+                log.error("Ftp of directories not supported. " + remoteFile.getURL() + " is a directory.");
                 return false;
             }
 
