@@ -18,5 +18,6 @@
         <module>parent</module>
         <module>dataplatform</module>
         <module>api</module>
+        <module>perf</module>
     </modules>
 </project>
