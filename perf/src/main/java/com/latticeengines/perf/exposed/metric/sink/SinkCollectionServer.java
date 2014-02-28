@@ -98,7 +98,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
             String[] tokensWithoutCmd = new String[tokenLen - 1];
             
             System.arraycopy(tokens, 1, tokensWithoutCmd, 0, tokenLen - 1);
-            String param = StringUtils.join(tokensWithoutCmd);
+            String param = StringUtils.join(tokensWithoutCmd, ",");
             return method.invoke(this, new Object[] { param });
         } else {
             return method.invoke(this, new Object[] {});
