@@ -34,8 +34,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
@@ -43,6 +45,7 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.dataplatform.functionalframework.SecureFileTransferAgent;
 import com.latticeengines.dataplatform.functionalframework.SecureFileTransferAgent.FileTransferOption;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.perf.exposed.test.PerfFunctionalTestBase;
 
 /**
  * <?xml version="1.0"?> <allocations> <queue name="Priority0">
@@ -71,8 +74,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private JobService jobService;
 
-    @Autowired
-    private SecureFileTransferAgent secureFileTransferAgent;
+    private SecureFileTransferAgent secureFileTransferAgent = new SecureFileTransferAgent("localhost", "rgonzalez", "s1w4E3ets");
 
     @Value("${dataplatform.yarn.resourcemanager.fairscheduler.xml.location}")
     private String remoteFairSchedulerFilePath;
@@ -84,6 +86,8 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
     private Classifier classifier5Mins;
     private Classifier classifier10Mins;
     private Map<String, List<List<List<ApplicationId>>>> customerJobsToAppIdMap = new HashMap<String, List<List<List<ApplicationId>>>>();
+    
+    private PerfFunctionalTestBase perfTestBase;
 
     @Override
     protected boolean doYarnClusterSetup() {
@@ -98,14 +102,14 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
     @BeforeClass(groups = "perf")
     public void setup() throws Exception {
         new File("/tmp/ledpjob-metrics.out").delete();
+        perfTestBase = new PerfFunctionalTestBase("/tmp/metricfile.txt");
+        perfTestBase.beforeClass();
+        
         classifier1Min = new Classifier();
         classifier1Min.setName("IrisClassifier");
-        classifier1Min
-                .setFeatures(Arrays.<String> asList(new String[] {
-                        "sepal_length", "sepal_width", "petal_length",
-                        "petal_width" }));
-        classifier1Min.setTargets(Arrays
-                .<String> asList(new String[] { "category" }));
+        classifier1Min.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
+                "petal_width" }));
+        classifier1Min.setTargets(Arrays.<String> asList(new String[] { "category" }));
         classifier1Min.setSchemaHdfsPath("/scheduler/iris.json");
         classifier1Min.setModelHdfsDir("/scheduler/result");
         classifier1Min.setPythonScriptHdfsPath("/scheduler/train_1min.py");
@@ -114,12 +118,9 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 
         classifier5Mins = new Classifier();
         classifier5Mins.setName("IrisClassifier");
-        classifier5Mins
-                .setFeatures(Arrays.<String> asList(new String[] {
-                        "sepal_length", "sepal_width", "petal_length",
-                        "petal_width" }));
-        classifier5Mins.setTargets(Arrays
-                .<String> asList(new String[] { "category" }));
+        classifier5Mins.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width",
+                "petal_length", "petal_width" }));
+        classifier5Mins.setTargets(Arrays.<String> asList(new String[] { "category" }));
         classifier5Mins.setSchemaHdfsPath("/scheduler/iris.json");
         classifier5Mins.setModelHdfsDir("/scheduler/result");
         classifier5Mins.setPythonScriptHdfsPath("/scheduler/train_5mins.py");
@@ -128,12 +129,9 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 
         classifier10Mins = new Classifier();
         classifier10Mins.setName("IrisClassifier");
-        classifier10Mins
-                .setFeatures(Arrays.<String> asList(new String[] {
-                        "sepal_length", "sepal_width", "petal_length",
-                        "petal_width" }));
-        classifier10Mins.setTargets(Arrays
-                .<String> asList(new String[] { "category" }));
+        classifier10Mins.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width",
+                "petal_length", "petal_width" }));
+        classifier10Mins.setTargets(Arrays.<String> asList(new String[] { "category" }));
         classifier10Mins.setSchemaHdfsPath("/scheduler/iris.json");
         classifier10Mins.setModelHdfsDir("/scheduler/result");
         classifier10Mins.setPythonScriptHdfsPath("/scheduler/train_10mins.py");
@@ -155,10 +153,8 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
                 .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/train.dat");
         URL testFileUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/test.dat");
-        URL jsonUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
-        URL train1MinUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/fairscheduler/train_1min.py");
+        URL jsonUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
+        URL train1MinUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/fairscheduler/train_1min.py");
         URL train5MinsUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/fairscheduler/train_5mins.py");
         URL train10MinsUrl = ClassLoader
@@ -174,22 +170,33 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
         copyEntries.add(new CopyEntry(testFilePath, "/test", false));
         copyEntries.add(new CopyEntry(jsonFilePath, "/scheduler", false));
-        copyEntries
-                .add(new CopyEntry(train1MinScriptPath, "/scheduler", false));
-        copyEntries
-                .add(new CopyEntry(train5MinsScriptPath, "/scheduler", false));
-        copyEntries.add(new CopyEntry(train10MinsScriptPath, "/scheduler",
-                false));
+        copyEntries.add(new CopyEntry(train1MinScriptPath, "/scheduler", false));
+        copyEntries.add(new CopyEntry(train5MinsScriptPath, "/scheduler", false));
+        copyEntries.add(new CopyEntry(train10MinsScriptPath, "/scheduler", false));
 
         doCopy(fs, copyEntries);
     }
-
-    @AfterMethod
-    private void cleanUp() {
-        customerJobsToAppIdMap.clear();
+    
+    
+    @BeforeMethod(groups = "perf")
+    public void beforeMethod() {
+       perfTestBase.beforeMethod();
     }
 
-    @Test(groups = "perf", enabled = false)
+    @AfterMethod(groups = "perf")
+    public void afterMethod() {
+        customerJobsToAppIdMap.clear();
+        perfTestBase.afterMethod();
+        perfTestBase.flushToFile();
+    }
+    
+    
+    @AfterClass(groups = "perf")
+    public void afterClass() {
+        perfTestBase.afterClass();
+    }
+
+    @Test(groups = "perf", enabled = true)
     public void testSubmit() throws Exception {
         List<List<List<ApplicationId>>> appIdsPerRuns;
         System.out.println("Test 1: ");
@@ -201,14 +208,13 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 
         appIdsPerRuns = longRun("B");
         customerJobsToAppIdMap.put("B", appIdsPerRuns);
-        System.out
-                .println("		Customer B submits Analytic Run 20 seconds later ");
+        System.out.println("		Customer B submits Analytic Run 20 seconds later ");
 
         dumpAppIdsToFile(customerJobsToAppIdMap);
         generateRunReport(customerJobsToAppIdMap);
     }
 
-    @Test(groups = "perf", enabled = true)
+    @Test(groups = "perf", enabled = false)
     public void testSubmit2() throws Exception {
         List<List<List<ApplicationId>>> appIdsPerRuns;
 
@@ -216,16 +222,14 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         // A
         for (int i = 0; i < 9; i++) {
             appIdsPerRuns = shortRun("A");
-            List<List<List<ApplicationId>>> appIdsAllRuns = customerJobsToAppIdMap
-                    .get("A");
+            List<List<List<ApplicationId>>> appIdsAllRuns = customerJobsToAppIdMap.get("A");
             if (appIdsAllRuns == null) {
                 customerJobsToAppIdMap.put("A", appIdsPerRuns);
             } else {
                 appIdsAllRuns.addAll(appIdsPerRuns);
             }
 
-            System.out.println("		Customer A submits Analytic Run Short at "
-                    + i + " second" + (i > 0 ? "s" : ""));
+            System.out.println("		Customer A submits Analytic Run Short at " + i + " second" + (i > 0 ? "s" : ""));
             Thread.sleep(1000L);
         }
         Thread.sleep(7000L);
@@ -256,11 +260,9 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
             appIdsPerRuns = longRun(String.valueOf(customer));
             customerJobsToAppIdMap.put(String.valueOf(customer), appIdsPerRuns);
             if (index == 0) {
-                System.out.println("		Customer " + customer
-                        + " submits Analytic Run ");
+                System.out.println("		Customer " + customer + " submits Analytic Run ");
             } else {
-                System.out.println("		Customer " + customer
-                        + " submits Analytic Run at " + index + " second"
+                System.out.println("		Customer " + customer + " submits Analytic Run at " + index + " second"
                         + (index == 1 ? "" : "s"));
             }
             Thread.sleep(1000L);
@@ -292,8 +294,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         }
     }
 
-    private Map<String, List<List<List<ApplicationId>>>> loadAppIdsFromFile(
-            String filePath) throws IOException {
+    private Map<String, List<List<List<ApplicationId>>>> loadAppIdsFromFile(String filePath) throws IOException {
         Map<String, List<List<List<ApplicationId>>>> appIdsMap = new HashMap<String, List<List<List<ApplicationId>>>>();
 
         BufferedReader br = new BufferedReader(new FileReader(filePath));
@@ -318,8 +319,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
                         queues.add(appIds);
                         for (String appIdStr : appIdsStr.split(",")) {
                             String[] appIdSplit = appIdStr.split("_");
-                            appIds.add(ApplicationId.newInstance(
-                                    Long.valueOf(appIdSplit[1]),
+                            appIds.add(ApplicationId.newInstance(Long.valueOf(appIdSplit[1]),
                                     Integer.valueOf(appIdSplit[2])));
                         }
                     }
@@ -332,9 +332,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         return appIdsMap;
     }
 
-    private void dumpAppIdsToFile(
-            Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap)
-            throws IOException {
+    private void dumpAppIdsToFile(Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap) throws IOException {
 
         File tempRMLogFile = File.createTempFile("application-id", ".log");
 
@@ -342,14 +340,12 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         BufferedWriter bw = new BufferedWriter(fw);
         try {
 
-            Iterator<String> customerIterator = jobsToAppIdMap.keySet()
-                    .iterator();
+            Iterator<String> customerIterator = jobsToAppIdMap.keySet().iterator();
             while (customerIterator.hasNext()) {
                 String customer = customerIterator.next();
                 bw.write(customer + ":");
                 int runIndex = 0;
-                for (List<List<ApplicationId>> run : jobsToAppIdMap
-                        .get(customer)) {
+                for (List<List<ApplicationId>> run : jobsToAppIdMap.get(customer)) {
                     bw.write(runIndex > 0 ? ":" : "");
                     int queueIndex = 0;
                     for (List<ApplicationId> appIdsPerQueue : run) {
@@ -365,8 +361,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
                 }
                 bw.write("\n");
             }
-            System.out.println("Generated submitted AppIds "
-                    + tempRMLogFile.getAbsolutePath());
+            System.out.println("Generated submitted AppIds " + tempRMLogFile.getAbsolutePath());
         } finally {
             bw.close();
         }
@@ -396,22 +391,18 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
     private List<List<List<ApplicationId>>> run(String queue, boolean isLong) {
         List<ApplicationId> appIdsPerQueue = new ArrayList<ApplicationId>();
         List<List<ApplicationId>> appIdsList = new ArrayList<List<ApplicationId>>();
-        Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0."
-                + queue);
+        Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0." + queue);
         appIdsList.add(appIdsPerQueue);
-        appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p0[0],
-                p0[1]));
+        appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
 
         appIdsPerQueue = new ArrayList<ApplicationId>();
         appIdsList.add(appIdsPerQueue);
-        
-        
+
+        /*
         if (isLong) {
             for (int j = 0; j < 2; j++) {
-                Properties[] p1 = getPropertiesPair(classifier5Mins, "Priority1."
-                        + queue);
-                appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p1[0],
-                        p1[1]));
+                Properties[] p1 = getPropertiesPair(classifier5Mins, "Priority1." + queue);
+                appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
             }
         }
 
@@ -419,12 +410,10 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
             appIdsPerQueue = new ArrayList<ApplicationId>();
             appIdsList.add(appIdsPerQueue);
             for (int j = 0; j < 8; j++) {
-                Properties[] p1 = getPropertiesPair(classifier10Mins,
-                        "Priority2." + queue);
-                appIdsPerQueue.add(jobService.submitYarnJob("pythonClient",
-                        p1[0], p1[1]));
+                Properties[] p1 = getPropertiesPair(classifier10Mins, "Priority2." + queue);
+                appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
             }
-        }
+        }*/
 
         List<List<List<ApplicationId>>> appIdsPerRunList = new ArrayList<List<List<ApplicationId>>>();
 
@@ -433,35 +422,31 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     private Map<ApplicationId, ApplicationReport> waitForAllJobToFinsih(
-            Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap)
-            throws Exception {
+            Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap) throws Exception {
 
         List<ApplicationId> appIds = getAllRunningAppIds(jobsToAppIdMap);
 
         Map<ApplicationId, ApplicationReport> jobStatus = new HashMap<ApplicationId, ApplicationReport>();
-        List<ApplicationId> jobStatusToCollect = new ArrayList<ApplicationId>(
-                appIds);
+        List<ApplicationId> jobStatusToCollect = new ArrayList<ApplicationId>(appIds);
 
         long startTime = System.currentTimeMillis();
         long nextReportTime = 60000L;
         while (!jobStatusToCollect.isEmpty()) {
             ApplicationId appId = jobStatusToCollect.get(0);
-            YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS,
-                    YarnApplicationState.FAILED, YarnApplicationState.FINISHED);
+            YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS, YarnApplicationState.FAILED,
+                    YarnApplicationState.FINISHED);
             if (state == null) {
                 System.out.println("ERROR: Invalid State detected");
                 jobStatusToCollect.remove(appId);
                 continue;
             }
-            if (state.equals(YarnApplicationState.FAILED)
-                    || state.equals(YarnApplicationState.FINISHED)) {
+            if (state.equals(YarnApplicationState.FAILED) || state.equals(YarnApplicationState.FINISHED)) {
                 jobStatusToCollect.remove(appId);
                 jobStatus.put(appId, jobService.getJobReportById(appId));
             }
             long runningTime = System.currentTimeMillis() - startTime;
             if (runningTime > nextReportTime) {
-                System.out.println("\nReport status after " + runningTime
-                        / 1000 + " seconds");
+                System.out.println("\nReport status after " + runningTime / 1000 + " seconds");
                 reportAllJobsStatus(null, null, null, jobsToAppIdMap, true);
                 nextReportTime += 60000L;
             }
@@ -469,8 +454,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         return jobStatus;
     }
 
-    private List<ApplicationId> getAllRunningAppIds(
-            Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap) {
+    private List<ApplicationId> getAllRunningAppIds(Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap) {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
 
         Iterator<String> customerIterator = jobsToAppIdMap.keySet().iterator();
@@ -485,12 +469,9 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         return appIds;
     }
 
-    private void reportAllJobsStatus(
-            Map<ApplicationId, ApplicationReport> jobReport,
-            Map<String, Date> jobRunStartTime,
-            Map<String, List<Double>> queueWaitTimes,
-            Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap,
-            boolean showStatusOnly) {
+    private void reportAllJobsStatus(Map<ApplicationId, ApplicationReport> jobReport,
+            Map<String, Date> jobRunStartTime, Map<String, List<Double>> queueWaitTimes,
+            Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap, boolean showStatusOnly) {
 
         Iterator<String> customerIterator = jobsToAppIdMap.keySet().iterator();
         while (customerIterator.hasNext()) {
@@ -504,84 +485,64 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
                     System.out.println("			Priority " + priorityIndex++);
                     if (showStatusOnly) {
                         for (ApplicationId appId : appIdsPerQueue) {
-                            ApplicationReport report = jobService
-                                    .getJobReportById(appId);
+                            ApplicationReport report = jobService.getJobReportById(appId);
                             if (report.getYarnApplicationState() == YarnApplicationState.FINISHED) {
-                                double runTime = (report.getFinishTime() - report
-                                        .getStartTime()) / 1000.0;
-                                System.out.println("				" + appId + " state "
-                                        + report.getYarnApplicationState()
-                                        + " FinalStatus "
-                                        + report.getFinalApplicationStatus()
-                                        + " totalRunTime " + runTime
-                                        + " seconds");
+                                double runTime = (report.getFinishTime() - report.getStartTime()) / 1000.0;
+                                System.out.println("				" + appId + " state " + report.getYarnApplicationState()
+                                        + " FinalStatus " + report.getFinalApplicationStatus() + " totalRunTime "
+                                        + runTime + " seconds");
                             } else {
-                                System.out.println("				" + appId + " state "
-                                        + report.getYarnApplicationState()
-                                        + " FinalStatus "
-                                        + report.getFinalApplicationStatus());
+                                System.out.println("				" + appId + " state " + report.getYarnApplicationState()
+                                        + " FinalStatus " + report.getFinalApplicationStatus());
                             }
                         }
                     } else {
-                        reportRunStatisitic(jobReport, jobRunStartTime,
-                                queueWaitTimes, appIdsPerQueue);
+                        reportRunStatisitic(jobReport, jobRunStartTime, queueWaitTimes, appIdsPerQueue);
                     }
                 }
             }
         }
     }
 
-    private void reportRunStatisitic(
-            Map<ApplicationId, ApplicationReport> jobReport,
-            Map<String, Date> jobRunStartTime,
-            Map<String, List<Double>> queueWaitTimes, List<ApplicationId> appIds) {
-        SimpleDateFormat formatter = new SimpleDateFormat(
-                "yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+    private void reportRunStatisitic(Map<ApplicationId, ApplicationReport> jobReport,
+            Map<String, Date> jobRunStartTime, Map<String, List<Double>> queueWaitTimes, List<ApplicationId> appIds) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
         formatter.setTimeZone(TimeZone.getTimeZone("EST"));
         for (ApplicationId appId : appIds) {
             ApplicationReport report = jobReport.get(appId);
-            double elapsedTime = (report.getFinishTime() - report
-                    .getStartTime()) / 1000.0;
-            String startTime = formatter
-                    .format(new Date(report.getStartTime()));
+            double elapsedTime = (report.getFinishTime() - report.getStartTime()) / 1000.0;
+            String startTime = formatter.format(new Date(report.getStartTime()));
             String endTime = formatter.format(new Date(report.getFinishTime()));
             Date runStartTime = jobRunStartTime.get(appId.toString());
-            double waitTime = runStartTime == null ? -1.0 : (runStartTime
-                    .getTime() - report.getStartTime() - 10800000) / 1000.0;
+            double waitTime = runStartTime == null ? -1.0
+                    : (runStartTime.getTime() - report.getStartTime() - 10800000) / 1000.0;
             List<Double> items = queueWaitTimes.get(report.getQueue());
             if (items == null) {
                 items = new ArrayList<Double>();
                 items.add(waitTime);
                 if (waitTime == -1) {
-                    System.out.println("ERROR: cannot find job " + appId
-                            + " start time");
+                    System.out.println("ERROR: cannot find job " + appId + " start time");
                 }
                 queueWaitTimes.put(report.getQueue(), items);
             } else {
                 items.add(waitTime);
                 if (waitTime == -1) {
-                    System.out.println("ERROR: cannot find job " + appId
-                            + " start time");
+                    System.out.println("ERROR: cannot find job " + appId + " start time");
                 }
             }
-            System.out.println("					" + appId + " - submitTime: " + startTime
-                    + " - finishTime: " + endTime + " - elapsed: "
-                    + elapsedTime + " seconds " + " - waitTime: " + waitTime
-                    + " seconds");
+            System.out.println("					" + appId + " - submitTime: " + startTime + " - finishTime: " + endTime
+                    + " - elapsed: " + elapsedTime + " seconds " + " - waitTime: " + waitTime + " seconds");
         }
     }
 
-    private void generateRunReport(
-            Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap)
-            throws Exception {
+    private void generateRunReport(Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap) throws Exception {
 
         Map<ApplicationId, ApplicationReport> jobReport = waitForAllJobToFinsih(jobsToAppIdMap);
         Map<String, Date> jobRunStartTime = collectStatistics(jobsToAppIdMap);
         Map<String, List<Double>> queueWaitTimes = new HashMap<String, List<Double>>();
 
         System.out.println("Report all job status ");
-        reportAllJobsStatus(jobReport, jobRunStartTime, queueWaitTimes,
-                jobsToAppIdMap, false);
+        reportAllJobsStatus(jobReport, jobRunStartTime, queueWaitTimes, jobsToAppIdMap, false);
 
         System.out.println("\n Qeueue Statistics");
         Iterator<String> iterator = queueWaitTimes.keySet().iterator();
@@ -597,24 +558,20 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
             int mediaIndex = totalJobs / 2;
             System.out.println("	Queue: " + queue);
             System.out.println("		total jobs run: " + totalJobs);
-            System.out.println("		average wait time: " + totalWaitTime
-                    / items.size() + " seconds");
-            System.out.println("		median wait time (" + mediaIndex + "): "
-                    + items.get(mediaIndex) + " seconds");
+            System.out.println("		average wait time: " + totalWaitTime / items.size() + " seconds");
+            System.out.println("		median wait time (" + mediaIndex + "): " + items.get(mediaIndex) + " seconds");
             System.out.println("		min wait time: " + items.get(0) + " seconds");
-            System.out.println("		max wait time: " + items.get(totalJobs - 1)
-                    + " seconds");
+            System.out.println("		max wait time: " + items.get(totalJobs - 1) + " seconds");
         }
     }
 
-    private Map<String, Date> collectStatistics(
-            Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap)
+    private Map<String, Date> collectStatistics(Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap)
             throws IOException, FileNotFoundException, ParseException {
 
         File tempRMLogFile = File.createTempFile("resource-manager", ".log");
 
-        secureFileTransferAgent.fileTranser(tempRMLogFile.getAbsolutePath(),
-                remoteRMLogPath, FileTransferOption.DOWNLOAD);
+        secureFileTransferAgent.fileTranser(tempRMLogFile.getAbsolutePath(), remoteRMLogPath,
+                FileTransferOption.DOWNLOAD);
 
         List<ApplicationId> applicationIds = getAllRunningAppIds(jobsToAppIdMap);
         Map<String, Date> runStartTimestamp = new HashMap<String, Date>();
@@ -625,8 +582,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         BufferedReader br = new BufferedReader(new FileReader(tempRMLogFile));
         try {
             String line = br.readLine();
-            Pattern pattern = Pattern
-                    .compile("application_.+?State change from ACCEPTED to RUNNING");
+            Pattern pattern = Pattern.compile("application_.+?State change from ACCEPTED to RUNNING");
             Matcher matcher = null;
 
             while (line != null) {
@@ -638,9 +594,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
                     appIdStr = appIdStr.substring(0, appIdStr.indexOf(' '));
                     if (runStartTimestamp.containsKey(appIdStr)) {
                         timestampStr = line.substring(0, 23);
-                        Date date = new SimpleDateFormat(
-                                "yyyy-MM-dd HH:mm:ss,SSS", Locale.ENGLISH)
-                                .parse(timestampStr);
+                        Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS", Locale.ENGLISH).parse(timestampStr);
                         runStartTimestamp.put(appIdStr, date);
                     }
                 }

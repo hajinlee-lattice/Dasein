@@ -11,14 +11,34 @@ import org.apache.hadoop.metrics2.MetricsSystem;
 import org.apache.hadoop.metrics2.lib.DefaultMetricsSystem;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.latticeengines.perf.exposed.test.PerfFunctionalTestBase;
 
 public class LedpMetricsMgrUnitTestNG {
 
+    private static final String METRICFILE = "/tmp/ledpjob-metrics.out";
+    private PerfFunctionalTestBase testBase = null;
+
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
-        new File("/tmp/ledpjob-metrics.out").delete();
+        FileUtils.deleteQuietly(new File(METRICFILE));
+        testBase = new PerfFunctionalTestBase(METRICFILE);
+        testBase.beforeClass();
+    }
+    
+    @BeforeMethod(groups = "unit")
+    public void beforeMethod() {
+        testBase.beforeMethod();
+    }
+    
+    @AfterMethod(groups = "unit")
+    public void afterMethod() {
+        testBase.afterMethod();
+        testBase.flushToFile();
     }
 
     @Test(groups = "unit")
@@ -46,20 +66,21 @@ public class LedpMetricsMgrUnitTestNG {
                 mgr.setAppSubmissionTime(200L);
                 mgr.setAppEndTime(11000L);
                 mgr.setContainerLaunchTime(3000L);
+                mgr.incrementNumberPreemptions();
                 
                 Assert.assertEquals(10800, lm1.applicationElapsedTime.value());
             }
         }).start();
 
         Thread.sleep(10000L);
-        
-        String contents = FileUtils.readFileToString(new File("/tmp/ledpjob-metrics.out"));
+        testBase.flushToFile();
+        String contents = FileUtils.readFileToString(new File(METRICFILE));
         Assert.assertTrue(contents.contains("Priority=0"));
         Assert.assertTrue(contents.contains("Queue=Priority0.A"));
         Assert.assertTrue(contents.contains("ContainerWaitTime=2000"));
         Assert.assertTrue(contents.contains("ApplicationWaitTime=800"));
         Assert.assertTrue(contents.contains("ApplicationElapsedTime=10800"));
-        Assert.assertTrue(contents.contains("NumContainerPreemptions=0"));
+        Assert.assertTrue(contents.contains("NumContainerPreemptions=1"));
         
     }
 }
