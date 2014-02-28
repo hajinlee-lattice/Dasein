@@ -29,6 +29,7 @@ public class PerfFunctionalTestBaseUnitTestNG {
     
     @BeforeClass(groups = "unit")
     public void init() throws Exception {
+        FileUtils.deleteQuietly(new File("/tmp/metricfile.txt"));
         Configuration conf = new PropertiesConfiguration("hadoop-metrics2.properties").interpolatedConfiguration();
         SubsetConfiguration subsetConfig = new SubsetConfiguration(conf, "ledpjob.sink.file", ".");
         sink = new SocketSink();
@@ -38,10 +39,16 @@ public class PerfFunctionalTestBaseUnitTestNG {
         when(record.context()).thenReturn("ledpjob");
         when(record.name()).thenReturn("metric1");
         List<MetricsTag> tags = new ArrayList<MetricsTag>();
-        MetricsTag tag = mock(MetricsTag.class);
-        when(tag.name()).thenReturn("Queue=Priority0.A");
-        when(tag.description()).thenReturn("Queue tag");
-        tags.add(tag);
+        MetricsTag tag1 = mock(MetricsTag.class);
+        when(tag1.name()).thenReturn("Queue");
+        when(tag1.value()).thenReturn("Priority0.A");
+        when(tag1.description()).thenReturn("Queue tag");
+        tags.add(tag1);
+        MetricsTag tag2 = mock(MetricsTag.class);
+        when(tag2.name()).thenReturn("Priority");
+        when(tag2.value()).thenReturn("0");
+        when(tag2.description()).thenReturn("Priority tag");
+        tags.add(tag2);
         when(record.tags()).thenReturn(tags);
         List<AbstractMetric> metrics = new ArrayList<AbstractMetric>();
         AbstractMetric metric = mock(AbstractMetric.class);
@@ -50,7 +57,7 @@ public class PerfFunctionalTestBaseUnitTestNG {
         when(metric.value()).thenReturn(1234);
         when(record.metrics()).thenReturn(metrics);
         
-        testBase = new PerfFunctionalTestBase("metricfile.txt");
+        testBase = new PerfFunctionalTestBase("/tmp/metricfile.txt");
         testBase.beforeClass();
     }
     
@@ -65,8 +72,8 @@ public class PerfFunctionalTestBaseUnitTestNG {
         testBase.beforeMethod();
         sink.putMetrics(record);
         testBase.flushToFile();
-        String contents = FileUtils.readFileToString(new File("metricfile.txt"));
-        assertTrue(contents.contains("ledpjob.metric1:,Queue=Priority0.A=null,,ContainerWaitTime=1234"));
+        String contents = FileUtils.readFileToString(new File("/tmp/metricfile.txt"));
+        assertTrue(contents.contains("ledpjob.metric1:Queue=Priority0.A,Priority=0,ContainerWaitTime=1234"));
     }
     
 }

@@ -48,22 +48,22 @@ public class SocketSink implements MetricsSink {
         sb.append(record.context());
         sb.append(".");
         sb.append(record.name());
-        String separator = ": ";
+        String separator = ":";
         for (MetricsTag tag : record.tags()) {
             sb.append(separator);
-            separator = ", ";
+            separator = ",";
             sb.append(tag.name());
             sb.append("=");
             sb.append(tag.value());
         }
         for (AbstractMetric metric : record.metrics()) {
             sb.append(separator);
-            separator = ", ";
+            separator = ",";
             sb.append(metric.name());
             sb.append("=");
             sb.append(metric.value());
         }
-        
+        sb.append("\n");
         return sb;
     }
 

@@ -118,7 +118,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
     public void sendMetric(String metric) {
         System.out.println(metric);
         try {
-            metricsOutputStream.write(metric.getBytes());
+            metricsOutputStream.write((metric + "\n").getBytes());
             
             if (numMetrics % 100 == 0) {
                 metricsOutputStream.flush();

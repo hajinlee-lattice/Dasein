@@ -13,7 +13,6 @@ public class SinkServerSocketUnitTestNG {
 
     @BeforeClass(groups = "unit")
     public void setup() {
-
         sinkServerSocket = spy(new SinkCollectionServer("/tmp/metricfile.txt", 123));
     }
     
