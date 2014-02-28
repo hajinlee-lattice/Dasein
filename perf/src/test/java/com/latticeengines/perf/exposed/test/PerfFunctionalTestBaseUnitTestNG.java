@@ -66,7 +66,7 @@ public class PerfFunctionalTestBaseUnitTestNG {
         sink.putMetrics(record);
         testBase.flushToFile();
         String contents = FileUtils.readFileToString(new File("metricfile.txt"));
-        assertTrue(contents.contains("ledpjob.metric1:Queue=Priority0.A=null,ContainerWaitTime=1234"));
+        assertTrue(contents.contains("ledpjob.metric1:,Queue=Priority0.A=null,,ContainerWaitTime=1234"));
     }
     
 }
