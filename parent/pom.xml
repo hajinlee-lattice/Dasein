@@ -314,6 +314,7 @@
                                     <include>**/*UnitTestNG.java</include>
                                 </includes>
                                 <groups>${unit.groups}</groups>
+                                <forkMode>always</forkMode>
                             </configuration>
                         </execution>
                     </executions>
