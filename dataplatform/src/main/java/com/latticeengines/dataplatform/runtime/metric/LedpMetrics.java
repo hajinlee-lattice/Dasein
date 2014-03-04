@@ -73,7 +73,7 @@ public class LedpMetrics implements MetricsSource {
     
     public void setTagValue(MetricsInfo tagName, String tagValue) {
         if (tagsWithValues.containsKey(tagName)) {
-            tagsWithValues.put(tagName, tagValue);    
+            tagsWithValues.put(tagName, tagValue);
         }
     }
     
@@ -115,6 +115,4 @@ public class LedpMetrics implements MetricsSource {
     public void publishMetrics() {
         ms.publishMetricsNow();
     }
-    
-    
 }

@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.metrics2.MetricsInfo;
 import org.apache.hadoop.metrics2.MetricsSystem;
 import org.apache.hadoop.metrics2.lib.DefaultMetricsSystem;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -67,5 +68,10 @@ public class LedpMetricsUnitTestNG {
         assertTrue(contents.contains("ApplicationElapsedTime=10000"));
         assertTrue(contents.contains("NumContainerPreemptions=1"));
 
+    }
+    
+    @AfterClass(groups = "unit")
+    public void afterClass() {
+        testBase.afterClass();
     }
 }

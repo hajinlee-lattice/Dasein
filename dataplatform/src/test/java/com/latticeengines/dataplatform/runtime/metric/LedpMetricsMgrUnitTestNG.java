@@ -11,6 +11,7 @@ import org.apache.hadoop.metrics2.MetricsSystem;
 import org.apache.hadoop.metrics2.lib.DefaultMetricsSystem;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -67,13 +68,13 @@ public class LedpMetricsMgrUnitTestNG {
                 mgr.setAppEndTime(11000L);
                 mgr.setContainerLaunchTime(3000L);
                 mgr.incrementNumberPreemptions();
-                
-                Assert.assertEquals(10800, lm1.applicationElapsedTime.value());
             }
         }).start();
 
         Thread.sleep(10000L);
+
         testBase.flushToFile();
+        
         String contents = FileUtils.readFileToString(new File(METRICFILE));
         Assert.assertTrue(contents.contains("Priority=0"));
         Assert.assertTrue(contents.contains("Queue=Priority0.A"));
@@ -82,5 +83,11 @@ public class LedpMetricsMgrUnitTestNG {
         Assert.assertTrue(contents.contains("ApplicationElapsedTime=10800"));
         Assert.assertTrue(contents.contains("NumContainerPreemptions=1"));
         
+        
+    }
+    
+    @AfterClass(groups = "unit")
+    public void afterClass() {
+        testBase.afterClass();
     }
 }
