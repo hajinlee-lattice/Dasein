@@ -59,7 +59,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
                 BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
                 DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
                 String command = inFromClient.readLine();
-                System.out.println("Invoking command " + command);
+                log.info("Invoking command " + command);
                 Object retval = null;
                 try {
                     retval = invoke(command);    
@@ -70,7 +70,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
                     retval = "Error";
                 }
                 
-                System.out.println("Writing " + retval);
+                log.info("Writing " + retval);
                 outToClient.writeBytes(retval.toString());
                 connectionSocket.close(); 
             }
@@ -90,7 +90,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
         Method method = methodMap.get(cmd);
         
         if (method == null) {
-            System.out.println("Method " + cmd + " does not exist in SinkOperations interface.");
+            log.info("Method " + cmd + " does not exist in SinkOperations interface.");
             return null;
         }
         int tokenLen = tokens.length;

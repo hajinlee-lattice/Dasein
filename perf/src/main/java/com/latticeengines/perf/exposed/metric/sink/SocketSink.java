@@ -1,6 +1,8 @@
 package com.latticeengines.perf.exposed.metric.sink;
 
 import org.apache.commons.configuration.SubsetConfiguration;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.metrics2.AbstractMetric;
 import org.apache.hadoop.metrics2.MetricsException;
 import org.apache.hadoop.metrics2.MetricsRecord;
@@ -8,6 +10,7 @@ import org.apache.hadoop.metrics2.MetricsSink;
 import org.apache.hadoop.metrics2.MetricsTag;
 
 public class SocketSink implements MetricsSink {
+    private static final Log log = LogFactory.getLog(SocketSink.class);
     private static final String SERVER_KEY = "server";
 
     private SinkServerClient client = null;
@@ -70,7 +73,7 @@ public class SocketSink implements MetricsSink {
     public boolean writeToFile() {
         boolean writeToFile = Boolean.parseBoolean(client.canWrite());
         if (writeToFile) {
-            System.out.println("Can write to file.");
+            log.info("Can write to file.");
         }
         return writeToFile;
     }
