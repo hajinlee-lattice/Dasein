@@ -44,6 +44,7 @@ public class PerfFunctionalTestBase {
     }
     
     public void afterMethod() {
+        collectionServer.flushToFile();
         collectionServer.setCanWrite(false);
     }
     
