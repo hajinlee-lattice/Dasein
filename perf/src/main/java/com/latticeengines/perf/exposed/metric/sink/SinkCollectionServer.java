@@ -116,7 +116,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
 
     @Override
     public void sendMetric(String metric) {
-        System.out.println(metric);
+        log.info(metric);
         try {
             metricsOutputStream.write((metric + "\n").getBytes());
             

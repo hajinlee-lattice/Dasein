@@ -1,5 +1,9 @@
 package com.latticeengines.perf.exposed.test;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -14,7 +18,7 @@ public class PerfFunctionalTestBase {
     private static final Log log = LogFactory.getLog(PerfFunctionalTestBase.class);
     
     private SinkCollectionServer collectionServer = null;
-    private Thread collectionServerThread = null;
+    private ExecutorService exec = null;
     
     public PerfFunctionalTestBase(String metricFileName) {
         String hostPortStr = null;
@@ -34,9 +38,14 @@ public class PerfFunctionalTestBase {
 
     public void beforeClass() {
         collectionServer.setCanWrite(true);
-        collectionServerThread = new Thread(collectionServer);
-        collectionServerThread.setDaemon(true);
-        collectionServerThread.start();
+        exec = Executors.newFixedThreadPool(1, new ThreadFactory() {
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r);
+                t.setDaemon(true);
+                return t;
+            }
+        });
+        exec.submit(collectionServer);
     }
     
     public void beforeMethod() {
@@ -50,6 +59,7 @@ public class PerfFunctionalTestBase {
     
     public void afterClass() {
         collectionServer.setCanWrite(false);
+        exec.shutdownNow();
     }
     
     public void flushToFile() {

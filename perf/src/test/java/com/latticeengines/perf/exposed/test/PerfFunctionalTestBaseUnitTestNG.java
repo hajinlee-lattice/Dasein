@@ -76,4 +76,9 @@ public class PerfFunctionalTestBaseUnitTestNG {
         assertTrue(contents.contains("ledpjob.metric1:Queue=Priority0.A,Priority=0,ContainerWaitTime=1234"));
     }
     
+    @Test(groups = "unit", dependsOnMethods = { "afterMethod" })
+    public void afterClass() throws Exception {
+        testBase.afterClass();
+    }
+    
 }
