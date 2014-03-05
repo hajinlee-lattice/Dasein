@@ -69,6 +69,9 @@ public class Algorithm implements HasName {
 
     private static Properties createPropertiesFromString(String value) {
         Properties props = new Properties();
+        if (value == null) {
+            return props;
+        }
         String[] propertyKeyValues = value.split(" ");
         for (String propertyKeyValue : propertyKeyValues) {
             String[] kv = propertyKeyValue.split("=");

@@ -38,8 +38,7 @@ public class ModelingServiceImpl implements ModelingService {
             classifier.setTargets(model.getTargets());
             classifier.setPythonScriptHdfsPath(algorithm.getScript());
             Properties appMasterProperties = new Properties();
-            appMasterProperties.put("QUEUE", model.getQueue() + ".Priority"
-                    + algorithm.getPriority());
+            appMasterProperties.put("QUEUE", "Priority" + algorithm.getPriority() + ".A");
             Properties containerProperties = algorithm.getContainerProps();
             containerProperties.put("METADATA", classifier.toString());
 
