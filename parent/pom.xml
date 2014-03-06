@@ -73,11 +73,6 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <version>${jetty.version}</version>
-                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -241,6 +236,10 @@
                             <goals>
                                 <goal>stop</goal>
                             </goals>
+                            <configuration>
+                                <stopPort>9001</stopPort>
+                                <stopKey>secret</stopKey>
+                            </configuration>                        
                         </execution>
                     </executions>
                 </plugin>
