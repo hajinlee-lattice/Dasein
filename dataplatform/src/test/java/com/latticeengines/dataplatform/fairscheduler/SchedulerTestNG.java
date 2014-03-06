@@ -1,8 +1,5 @@
 package com.latticeengines.dataplatform.fairscheduler;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,27 +10,18 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.dataplatform.functionalframework.SecureFileTransferAgent;
-import com.latticeengines.dataplatform.functionalframework.SecureFileTransferAgent.FileTransferOption;
 import com.latticeengines.dataplatform.service.JobService;
 
 public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private JobService jobService;
-
-    @Autowired
-    private SecureFileTransferAgent secureFileTransferAgent;
-
-    @Value("${dataplatform.yarn.resourcemanager.fairscheduler.xml.location}")
-    private String remoteFairSchedulerFilePath;
 
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
@@ -43,12 +31,9 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
     public void setup() throws Exception {
         classifier1Min = new Classifier();
         classifier1Min.setName("IrisClassifier");
-        classifier1Min
-                .setFeatures(Arrays.<String> asList(new String[] {
-                        "sepal_length", "sepal_width", "petal_length",
-                        "petal_width" }));
-        classifier1Min.setTargets(Arrays
-                .<String> asList(new String[] { "category" }));
+        classifier1Min.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
+                "petal_width" }));
+        classifier1Min.setTargets(Arrays.<String> asList(new String[] { "category" }));
         classifier1Min.setSchemaHdfsPath("/scheduler/iris.json");
         classifier1Min.setModelHdfsDir("/scheduler/result");
         classifier1Min.setPythonScriptHdfsPath("/scheduler/train_1min.py");
@@ -57,12 +42,9 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         classifier2Mins = new Classifier();
         classifier2Mins.setName("IrisClassifier");
-        classifier2Mins
-                .setFeatures(Arrays.<String> asList(new String[] {
-                        "sepal_length", "sepal_width", "petal_length",
-                        "petal_width" }));
-        classifier2Mins.setTargets(Arrays
-                .<String> asList(new String[] { "category" }));
+        classifier2Mins.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width",
+                "petal_length", "petal_width" }));
+        classifier2Mins.setTargets(Arrays.<String> asList(new String[] { "category" }));
         classifier2Mins.setSchemaHdfsPath("/scheduler/iris.json");
         classifier2Mins.setModelHdfsDir("/scheduler/result");
         classifier2Mins.setPythonScriptHdfsPath("/scheduler/train_2mins.py");
@@ -71,12 +53,9 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         classifier4Mins = new Classifier();
         classifier4Mins.setName("IrisClassifier");
-        classifier4Mins
-                .setFeatures(Arrays.<String> asList(new String[] {
-                        "sepal_length", "sepal_width", "petal_length",
-                        "petal_width" }));
-        classifier4Mins.setTargets(Arrays
-                .<String> asList(new String[] { "category" }));
+        classifier4Mins.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width",
+                "petal_length", "petal_width" }));
+        classifier4Mins.setTargets(Arrays.<String> asList(new String[] { "category" }));
         classifier4Mins.setSchemaHdfsPath("/scheduler/iris.json");
         classifier4Mins.setModelHdfsDir("/scheduler/result");
         classifier4Mins.setPythonScriptHdfsPath("/scheduler/train_4mins.py");
@@ -98,10 +77,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
                 .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/train.dat");
         URL testFileUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/test.dat");
-        URL jsonUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
-        URL train1MinUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/fairscheduler/train_1min.py");
+        URL jsonUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
+        URL train1MinUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/fairscheduler/train_1min.py");
         URL train2MinsUrl = ClassLoader
                 .getSystemResource("com/latticeengines/dataplatform/fairscheduler/train_2mins.py");
         URL train4MinsUrl = ClassLoader
@@ -117,107 +94,44 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
         copyEntries.add(new CopyEntry(testFilePath, "/test", false));
         copyEntries.add(new CopyEntry(jsonFilePath, "/scheduler", false));
-        copyEntries
-                .add(new CopyEntry(train1MinScriptPath, "/scheduler", false));
-        copyEntries
-                .add(new CopyEntry(train2MinsScriptPath, "/scheduler", false));
-        copyEntries
-                .add(new CopyEntry(train4MinsScriptPath, "/scheduler", false));
+        copyEntries.add(new CopyEntry(train1MinScriptPath, "/scheduler", false));
+        copyEntries.add(new CopyEntry(train2MinsScriptPath, "/scheduler", false));
+        copyEntries.add(new CopyEntry(train4MinsScriptPath, "/scheduler", false));
 
         doCopy(fs, copyEntries);
-        setupScheduler();
-    }
-
-    private void setupScheduler() throws Exception {
-        File tempFairSchedulerFile = File.createTempFile("fair-scheduler",
-                ".xml");
-
-        // Fair Scheduler won't remove existing queue after refresh even if that
-        // queue is removed from fair-scheduler.xml
-        PrintWriter out = new PrintWriter(new FileWriter(tempFairSchedulerFile));
-        out.println("<?xml version=\"1.0\"?>");
-        out.println("<allocations>");
-        out.println("	<queue name=\"Priority0\">");
-        out.println("		<weight>1000</weight>");
-        out.println("	    <queue name=\"A\">");
-        out.println("		    <minResources>2048 mb,2 vcores</minResources>");
-        out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("		</queue>");
-        out.println("	    <queue name=\"B\">");
-        out.println("		    <minResources>2048 mb,2 vcores</minResources>");
-        out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("		</queue>");
-        out.println("	    <queue name=\"C\">");
-        out.println("		    <minResources>2048 mb,2 vcores</minResources>");
-        out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("		</queue>");
-        out.println("    </queue>");
-        out.println("	<queue name=\"Priority1\">");
-        out.println("		<weight>10</weight>");
-        out.println("	    <queue name=\"A\">");
-        out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("		</queue>");
-        out.println("	    <queue name=\"B\">");
-        out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("		</queue>");
-        out.println("	    <queue name=\"C\">");
-        out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("		</queue>");
-        out.println("    </queue>");
-        out.println("	<queue name=\"Priority2\">");
-        out.println("		<weight>1</weight>");
-        out.println("	    <queue name=\"A\">");
-        out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("		</queue>");
-        out.println("	    <queue name=\"B\">");
-        out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("		</queue>");
-        out.println("	    <queue name=\"C\">");
-        out.println("		    <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("		</queue>");
-        out.println("    </queue>");
-        out.println("	<defaultMinSharePreemptionTimeout>30</defaultMinSharePreemptionTimeout>");
-        out.println("	<fairSharePreemptionTimeout>30</fairSharePreemptionTimeout>");
-        out.println("</allocations>");
-        out.close();
-
-        secureFileTransferAgent.fileTranser(
-                tempFairSchedulerFile.getAbsolutePath(),
-                remoteFairSchedulerFilePath, FileTransferOption.UPLOAD);
-        Thread.sleep(15000L);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testSubmit() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // P0 job
-        Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.A");
+        Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.A", 0);
         appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
         // P1 job
         for (int i = 0; i < 2; i++) {
-            Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.A");
+            Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.A", 1);
             appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
         }
 
         // P2 job
         for (int i = 0; i < 4; i++) {
-            Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.A");
+            Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.A", 2);
             appIds.add(jobService.submitYarnJob("pythonClient", p2[0], p2[1]));
         }
         Thread.sleep(20000L);
         // 1 P0 job
         // P0 job
-        p0 = getPropertiesPair(classifier1Min, "Priority0.B");
+        p0 = getPropertiesPair(classifier1Min, "Priority0.B", 0);
         appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
         // P1 job
         for (int i = 0; i < 2; i++) {
-            Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.B");
+            Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.B", 1);
             appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
         }
 
         // P2 job
         for (int i = 0; i < 4; i++) {
-            Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.B");
+            Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.B", 2);
             appIds.add(jobService.submitYarnJob("pythonClient", p2[0], p2[1]));
         }
     }
@@ -227,14 +141,12 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
         for (int i = 0; i < 3; i++) {
-            Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.A");
+            Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.A", 0);
             appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
 
             for (int j = 0; j < 2; j++) {
-                Properties[] p1 = getPropertiesPair(classifier2Mins,
-                        "Priority1.A");
-                appIds.add(jobService.submitYarnJob("pythonClient", p1[0],
-                        p1[1]));
+                Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.A", 1);
+                appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
             }
 
             Thread.sleep(5000L);
@@ -242,38 +154,34 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // B
         for (int i = 0; i < 1; i++) {
-            Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.B");
+            Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.B", 0);
             appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
 
             for (int j = 0; j < 2; j++) {
-                Properties[] p1 = getPropertiesPair(classifier2Mins,
-                        "Priority1.B");
-                appIds.add(jobService.submitYarnJob("pythonClient", p1[0],
-                        p1[1]));
+                Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.B", 1);
+                appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
             }
             Thread.sleep(5000L);
         }
 
         // C
         for (int i = 0; i < 1; i++) {
-            Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.C");
+            Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.C", 0);
             appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
 
             for (int j = 0; j < 2; j++) {
-                Properties[] p1 = getPropertiesPair(classifier2Mins,
-                        "Priority1.C");
-                appIds.add(jobService.submitYarnJob("pythonClient", p1[0],
-                        p1[1]));
+                Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.C", 1);
+                appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
             }
             Thread.sleep(5000L);
         }
     }
 
-    private Properties[] getPropertiesPair(Classifier classifier, String queue) {
+    private Properties[] getPropertiesPair(Classifier classifier, String queue, int priority) {
         Properties containerProperties = new Properties();
         containerProperties.put("VIRTUALCORES", "1");
         containerProperties.put("MEMORY", "1024");
-        containerProperties.put("PRIORITY", "0");
+        containerProperties.put("PRIORITY", Integer.toString(priority));
         containerProperties.put("METADATA", classifier.toString());
 
         Properties appMasterProperties = new Properties();

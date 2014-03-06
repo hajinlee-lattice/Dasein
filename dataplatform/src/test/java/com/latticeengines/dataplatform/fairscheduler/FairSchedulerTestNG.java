@@ -62,7 +62,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     private List<ApplicationId> applcationsSubmittedPerTest = new LinkedList<ApplicationId>();
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = "functional", enabled = false)
     public void setup() throws Exception {
 
         FileSystem fileSystem = null;
@@ -111,7 +111,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     }
 
-    @AfterMethod(groups = "functional")
+    @AfterMethod(groups = "functional", enabled = false)
     public void cleanUp() throws Exception {
 
         YarnApplicationState state;
@@ -127,7 +127,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         applcationsSubmittedPerTest.clear();
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testFairSchedulerJobVIP() throws Exception {
 
         File tempFairSchedulerFile = File.createTempFile("fair-scheduler",
@@ -222,7 +222,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testFairSchedulerJobFailure() throws Exception {
 
         File tempFairSchedulerFile = File.createTempFile("fair-scheduler",
@@ -325,7 +325,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         verifyPreemption(applicationId);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testFairSchedulerJob() throws Exception {
 
         File tempFairSchedulerFile = File.createTempFile("fair-scheduler",
@@ -427,7 +427,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testFairSchedulerPreemptingJob() throws Exception {
 
         File tempFairSchedulerFile = File.createTempFile("fair-scheduler",
@@ -564,7 +564,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         assertTrue(isPreemptContainer);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testFairSchedulerDisableQueue() throws Exception {
 
         File tempFairSchedulerFile = File.createTempFile("fair-scheduler",

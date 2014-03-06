@@ -66,7 +66,9 @@ public class LedpMetrics implements MetricsSource {
     
     @Override
     public void getMetrics(MetricsCollector collector, boolean all) {
-        log.info("Taking metric snapshot for instance " + toString());
+        if (log.isDebugEnabled()) {
+            log.info("Taking metric snapshot for instance " + toString());    
+        }
         
         registry.snapshot(collector.addRecord(registry.info()), false);
     }

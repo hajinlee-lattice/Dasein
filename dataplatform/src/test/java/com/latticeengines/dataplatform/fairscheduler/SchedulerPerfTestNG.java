@@ -101,7 +101,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = "perf")
     public void setup() throws Exception {
-        new File("/tmp/ledpjob-metrics.out").delete();
+        new File("/tmp/metricfile.txt").delete();
         perfTestBase = new PerfFunctionalTestBase("/tmp/metricfile.txt");
         perfTestBase.beforeClass();
         
@@ -190,31 +190,41 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         perfTestBase.flushToFile();
     }
     
-    
     @AfterClass(groups = "perf")
     public void afterClass() {
         perfTestBase.afterClass();
     }
 
-    @Test(groups = "perf", enabled = true)
+    @Test(groups = "perf", enabled = false)
     public void testSubmit() throws Exception {
         List<List<List<ApplicationId>>> appIdsPerRuns;
         System.out.println("Test 1: ");
 
         appIdsPerRuns = longRun("A");
         customerJobsToAppIdMap.put("A", appIdsPerRuns);
-        System.out.println("		Customer A submits Analytic Run ");
-        Thread.sleep(20000L);
+        System.out.println("		Customer A submits Analytic Run");
 
         appIdsPerRuns = longRun("B");
         customerJobsToAppIdMap.put("B", appIdsPerRuns);
-        System.out.println("		Customer B submits Analytic Run 20 seconds later ");
+        System.out.println("		Customer B submits Analytic Run");
+
+        appIdsPerRuns = longRun("C");
+        customerJobsToAppIdMap.put("C", appIdsPerRuns);
+        System.out.println("        Customer C submits Analytic Run");
+
+        appIdsPerRuns = longRun("D");
+        customerJobsToAppIdMap.put("D", appIdsPerRuns);
+        System.out.println("        Customer D submits Analytic Run");
+
+        appIdsPerRuns = longRun("E");
+        customerJobsToAppIdMap.put("E", appIdsPerRuns);
+        System.out.println("        Customer E submits Analytic Run");
 
         dumpAppIdsToFile(customerJobsToAppIdMap);
         generateRunReport(customerJobsToAppIdMap);
     }
 
-    @Test(groups = "perf", enabled = false)
+    @Test(groups = "perf", enabled = true)
     public void testSubmit2() throws Exception {
         List<List<List<ApplicationId>>> appIdsPerRuns;
 
