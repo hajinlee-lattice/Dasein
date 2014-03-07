@@ -53,9 +53,10 @@ public class LedpMetricsUnitTestNG {
             @Override
             public void run() {
                 lm.incrementNumContainerPreemptions();
-                lm.setApplicationElapsedTime(10000L);
+                lm.setApplicationCleanupTime(10000L);
                 lm.setApplicationWaitTime(3000L);
                 lm.setContainerWaitTime(4000L);
+                lm.setContainerElapsedTime(5000L);
             }
         }).start();
 
@@ -64,8 +65,9 @@ public class LedpMetricsUnitTestNG {
         String contents = FileUtils.readFileToString(new File(METRICFILE));
         assertTrue(contents.contains("Queue=Priority0.A"));
         assertTrue(contents.contains("ContainerWaitTime=4000"));
+        assertTrue(contents.contains("ContainerElapsedTime=5000"));
         assertTrue(contents.contains("ApplicationWaitTime=3000"));
-        assertTrue(contents.contains("ApplicationElapsedTime=10000"));
+        assertTrue(contents.contains("ApplicationCleanupTime=10000"));
         assertTrue(contents.contains("NumContainerPreemptions=1"));
 
     }

@@ -14,6 +14,7 @@ public class LedpMetricsMgr {
     private long appSubmissionTime;
     private long appStartTime;
     private long containerLaunchTime;
+    private long containerEndTime;
     private MetricsSystem ms;
     
     private static LedpMetricsMgr instance;
@@ -54,7 +55,7 @@ public class LedpMetricsMgr {
         ms.init("ledpjob");
     }
     
-    public void finalize() {
+    public void resetWaitTimesForGanglia() {
         new DoForAllMetrics(ledpMetrics) {
             @Override
             public void execute(LedpMetrics ledpMetric) {
@@ -122,10 +123,24 @@ public class LedpMetricsMgr {
         new DoForAllMetrics(ledpMetrics) {
             @Override
             public void execute(LedpMetrics ledpMetric) {
-                ledpMetric.setApplicationElapsedTime(appEndTime - getAppSubmissionTime());
+                ledpMetric.setApplicationCleanupTime(appEndTime - getContainerEndTime());
             }
         }.execute();
         
+    }
+
+    public void setContainerEndTime(final long containerEndTime) {
+        this.containerEndTime = containerEndTime;
+        new DoForAllMetrics(ledpMetrics) {
+            @Override
+            public void execute(LedpMetrics ledpMetric) {
+                ledpMetric.setContainerElapsedTime(containerEndTime - getContainerLaunchTime());
+            }
+        }.execute();
+    }
+    
+    public long getContainerEndTime() {
+        return containerEndTime;
     }
 
     public long getAppSubmissionTime() {
@@ -157,6 +172,16 @@ public class LedpMetricsMgr {
         }
         
         public abstract void execute(LedpMetrics ledpMetric);
+    }
+
+    public void resetContainerElapsedTimeForGanglia() {
+        new DoForAllMetrics(ledpMetrics) {
+            @Override
+            public void execute(LedpMetrics ledpMetric) {
+                ledpMetric.setContainerElapsedTime(0);
+                ledpMetric.publishMetrics();
+            }
+        }.execute();
     }
 
 }

@@ -25,7 +25,8 @@ public class LedpMetrics implements MetricsSource {
     
     @Metric("Container wait time") MutableGaugeLong containerWaitTime;
     @Metric("Application wait time") MutableGaugeLong applicationWaitTime;
-    @Metric("Application elapsed time") MutableGaugeLong applicationElapsedTime;
+    @Metric("Container elapsed time") MutableGaugeLong containerElapsedTime;
+    @Metric("Application cleanup time") MutableGaugeLong applicationCleanupTime;
     @Metric("Number container preemptions") MutableCounterInt numContainerPreemptions;
 
     private final MetricsRegistry registry;
@@ -79,9 +80,9 @@ public class LedpMetrics implements MetricsSource {
         }
     }
     
-    public void setApplicationElapsedTime(long appElapsedTime) {
-        log.info("Set elapsed time = " + appElapsedTime);
-        applicationElapsedTime.set(appElapsedTime);
+    public void setApplicationCleanupTime(long appCleanupTime) {
+        log.info("Set app cleanup time = " + appCleanupTime);
+        applicationCleanupTime.set(appCleanupTime);
     }
 
     public void setApplicationWaitTime(long appWaitTime) {
@@ -98,6 +99,11 @@ public class LedpMetrics implements MetricsSource {
         numContainerPreemptions.incr();
     }
     
+    public void setContainerElapsedTime(long ctrElapsedTime) {
+        log.info("Set container elapsed time = " + ctrElapsedTime);
+        containerElapsedTime.set(ctrElapsedTime);
+    }
+
     public String getQueue() {
         return queue;
     }

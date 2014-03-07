@@ -65,8 +65,9 @@ public class LedpMetricsMgrUnitTestNG {
             public void run() {
                 mgr.setAppStartTime(1000L);
                 mgr.setAppSubmissionTime(200L);
-                mgr.setAppEndTime(11000L);
                 mgr.setContainerLaunchTime(3000L);
+                mgr.setContainerEndTime(5000L);
+                mgr.setAppEndTime(11000L);
                 mgr.incrementNumberPreemptions();
             }
         }).start();
@@ -80,7 +81,8 @@ public class LedpMetricsMgrUnitTestNG {
         Assert.assertTrue(contents.contains("Queue=Priority0.A"));
         Assert.assertTrue(contents.contains("ContainerWaitTime=2000"));
         Assert.assertTrue(contents.contains("ApplicationWaitTime=800"));
-        Assert.assertTrue(contents.contains("ApplicationElapsedTime=10800"));
+        Assert.assertTrue(contents.contains("ContainerElapsedTime=2000"));
+        Assert.assertTrue(contents.contains("ApplicationCleanupTime=6000"));
         Assert.assertTrue(contents.contains("NumContainerPreemptions=1"));
         
         

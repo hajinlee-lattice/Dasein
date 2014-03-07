@@ -35,7 +35,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     @Autowired
     private YarnService yarnService;
     
-    private LedpMetricsMgr analyticJobMetricsMgr = null;
+    private LedpMetricsMgr ledpMetricsMgr = null;
     
     private String pythonContainerId;
 
@@ -49,9 +49,9 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         String appAttemptId = getApplicationAttemptId().toString();
         final String appId = getApplicationId(appAttemptId);
                 
-        analyticJobMetricsMgr = LedpMetricsMgr.getInstance(appAttemptId);
+        ledpMetricsMgr = LedpMetricsMgr.getInstance(appAttemptId);
         final long appStartTime = System.currentTimeMillis();
-        analyticJobMetricsMgr.setAppStartTime(appStartTime);
+        ledpMetricsMgr.setAppStartTime(appStartTime);
         
         log.info("Application id = " + getApplicationId(appId));
         
@@ -60,8 +60,8 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
             @Override
             public void run() {
                 long appSubmissionTime = yarnService.getApplication(appId).getStartTime();
-                log.info("Start app latency = " + (appStartTime - appSubmissionTime));
-                analyticJobMetricsMgr.setAppSubmissionTime(appSubmissionTime);
+                log.info("App start latency = " + (appStartTime - appSubmissionTime));
+                ledpMetricsMgr.setAppSubmissionTime(appSubmissionTime);
             }
             
         }).start();
@@ -89,9 +89,9 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         }
         String queue = parameters.getProperty(AppMasterProperty.QUEUE.name());
 
-        analyticJobMetricsMgr.setPriority(priority);
-        analyticJobMetricsMgr.setQueue(queue);
-        analyticJobMetricsMgr.start();
+        ledpMetricsMgr.setPriority(priority);
+        ledpMetricsMgr.setQueue(queue);
+        ledpMetricsMgr.start();
     }
 
     @Override
@@ -106,8 +106,8 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     protected void onContainerLaunched(Container container) {
         String containerId = container.getId().toString();
         log.info("Launching container id = " + containerId  + ".");
-        analyticJobMetricsMgr.setContainerId(containerId);
-        analyticJobMetricsMgr.setContainerLaunchTime(System.currentTimeMillis());
+        ledpMetricsMgr.setContainerId(containerId);
+        ledpMetricsMgr.setContainerLaunchTime(System.currentTimeMillis());
         super.onContainerLaunched(container);
     }
 
@@ -126,8 +126,8 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     protected void onContainerCompleted(ContainerStatus status) {
         if (status.getExitStatus() == ContainerExitStatus.SUCCESS) {
             log.info("Container id = " + status.getContainerId().toString()  + " completed.");
-            analyticJobMetricsMgr.setAppEndTime(System.currentTimeMillis());
-            analyticJobMetricsMgr.finalize();
+            ledpMetricsMgr.setContainerEndTime(System.currentTimeMillis());
+            ledpMetricsMgr.resetWaitTimesForGanglia();
         }
         
         if (status.getExitStatus() != ContainerExitStatus.PREEMPTED) {
@@ -141,7 +141,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         String containerId = status.getContainerId().toString();
         
         if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
-            analyticJobMetricsMgr.incrementNumberPreemptions();
+            ledpMetricsMgr.incrementNumberPreemptions();
             try {
                 Thread.sleep(5000L);
                 log.info("Container " + containerId + " preempted. Reallocating.");
@@ -163,6 +163,13 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         }
         
         return false;
+    }
+    
+    @Override
+    protected void doStop() {
+        super.doStop();
+        ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
+        ledpMetricsMgr.resetContainerElapsedTimeForGanglia();
     }
 
 }
