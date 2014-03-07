@@ -3,12 +3,17 @@ package com.latticeengines.dataplatform.fairscheduler;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
@@ -101,23 +106,24 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = true, timeOut = 720000)
     public void testSubmit() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // P0 job
         Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.A", 0);
         appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
         // P1 job
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 1; i++) {
             Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.A", 1);
             appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
         }
 
         // P2 job
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 1; i++) {
             Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.A", 2);
             appIds.add(jobService.submitYarnJob("pythonClient", p2[0], p2[1]));
         }
+        /*
         Thread.sleep(20000L);
         // 1 P0 job
         // P0 job
@@ -130,10 +136,11 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         }
 
         // P2 job
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 2; i++) {
             Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.B", 2);
             appIds.add(jobService.submitYarnJob("pythonClient", p2[0], p2[1]));
-        }
+        }*/
+        waitForAllJobsToFinish(appIds);
     }
 
     @Test(groups = "functional", enabled = false)
@@ -175,6 +182,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
             }
             Thread.sleep(5000L);
         }
+        waitForAllJobsToFinish(appIds);
     }
 
     private Properties[] getPropertiesPair(Classifier classifier, String queue, int priority) {
@@ -190,4 +198,30 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         return new Properties[] { appMasterProperties, containerProperties };
     }
 
+    private Map<ApplicationId, ApplicationReport> waitForAllJobsToFinish(List<ApplicationId> appIds) throws Exception {
+        Map<ApplicationId, ApplicationReport> jobStatus = new HashMap<ApplicationId, ApplicationReport>();
+        List<ApplicationId> jobStatusToCollect = new ArrayList<ApplicationId>(appIds);
+
+        long startTime = System.currentTimeMillis();
+        long nextReportTime = 60000L;
+        while (!jobStatusToCollect.isEmpty()) {
+            ApplicationId appId = jobStatusToCollect.get(0);
+            YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS, YarnApplicationState.FAILED,
+                    YarnApplicationState.FINISHED);
+            if (state == null) {
+                System.out.println("ERROR: Invalid state detected");
+                jobStatusToCollect.remove(appId);
+                continue;
+            }
+            if (state.equals(YarnApplicationState.FAILED) || state.equals(YarnApplicationState.FINISHED)) {
+                jobStatusToCollect.remove(appId);
+                jobStatus.put(appId, jobService.getJobReportById(appId));
+            }
+            long runningTime = System.currentTimeMillis() - startTime;
+            if (runningTime > nextReportTime) {
+                nextReportTime += 60000L;
+            }
+        }
+        return jobStatus;
+    }
 }
