@@ -1,30 +1,28 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.HashMap;
 
 import net.jpountz.xxhash.XXHashFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.FairSchedulerInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.FairSchedulerLeafQueueInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.FairSchedulerQueueInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.service.YarnQueueAssignmentService;
-import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.dataplatform.exposed.service.YarnService;
+import com.latticeengines.dataplatform.service.YarnQueueAssignmentService;
 import com.latticeengines.dataplatform.util.Permutations;
-
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.FairSchedulerInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.FairSchedulerQueueInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.FairSchedulerLeafQueueInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 
 @Component("yarnQueueAssignmentService")
 public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentService {
@@ -68,7 +66,7 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
                 Iterator<FairSchedulerQueueInfo> iter = curQueue.getChildQueues()
                         .iterator();
                 while (iter.hasNext()) {
-                    FairSchedulerQueueInfo queue = (FairSchedulerQueueInfo) iter.next();                    
+                    FairSchedulerQueueInfo queue = (FairSchedulerQueueInfo) iter.next();
                     if (queue instanceof FairSchedulerLeafQueueInfo) {
                         String queueName = queue.getQueueName();
                         Integer leafQueueName = -1;

@@ -177,7 +177,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         out.println("</allocations>");
         out.close();
 
-        assertTrue(secureFileTransferAgent.fileTranser(
+        assertTrue(secureFileTransferAgent.fileTransfer(
                 tempFairSchedulerFile.getAbsolutePath(),
                 remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
@@ -284,7 +284,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         out.println("</allocations>");
         out.close();
 
-        secureFileTransferAgent.fileTranser(
+        secureFileTransferAgent.fileTransfer(
                 tempFairSchedulerFile.getAbsolutePath(),
                 remoteFairSchedulerFilePath, FileTransferOption.UPLOAD);
 
@@ -388,7 +388,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         out.println("</allocations>");
         out.close();
 
-        assertTrue(secureFileTransferAgent.fileTranser(
+        assertTrue(secureFileTransferAgent.fileTransfer(
                 tempFairSchedulerFile.getAbsolutePath(),
                 remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
@@ -474,7 +474,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         out.println("</allocations>");
         out.close();
 
-        assertTrue(secureFileTransferAgent.fileTranser(
+        assertTrue(secureFileTransferAgent.fileTransfer(
                 tempFairSchedulerFile.getAbsolutePath(),
                 remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 
@@ -532,7 +532,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
             throws IOException, FileNotFoundException {
         File tempRMLogFile = File.createTempFile("resource-manager", ".log");
 
-        assertTrue(secureFileTransferAgent.fileTranser(
+        assertTrue(secureFileTransferAgent.fileTransfer(
                 tempRMLogFile.getAbsolutePath(), remoteRMLogPath,
                 FileTransferOption.DOWNLOAD));
 
@@ -591,7 +591,7 @@ public class FairSchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         out.println("</allocations>");
         out.close();
 
-        assertTrue(secureFileTransferAgent.fileTranser(
+        assertTrue(secureFileTransferAgent.fileTransfer(
                 tempFairSchedulerFile.getAbsolutePath(),
                 remoteFairSchedulerFilePath, FileTransferOption.UPLOAD));
 

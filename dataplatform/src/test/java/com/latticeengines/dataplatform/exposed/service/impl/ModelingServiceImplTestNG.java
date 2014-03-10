@@ -107,7 +107,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         for (ApplicationId appId : appIds) {
             YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
             assertNotNull(state);
-            state = waitState(appId, 60, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+            state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
             assertEquals(state, YarnApplicationState.FINISHED);
 
             NumberFormat appIdFormat = getAppIdFormat();

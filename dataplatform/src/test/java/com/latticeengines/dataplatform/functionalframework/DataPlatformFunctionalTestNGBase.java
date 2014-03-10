@@ -1,11 +1,14 @@
 package com.latticeengines.dataplatform.functionalframework;
 
 import java.io.IOException;
+import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -32,6 +35,7 @@ import org.testng.annotations.BeforeClass;
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+    private static final Log log = LogFactory.getLog(DataPlatformFunctionalTestNGBase.class);
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -47,9 +51,13 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     protected boolean doDependencyLibraryCopy() {
         return true;
     }
+    
+    protected String getFileUrlFromResource(String resource) {
+        URL url = ClassLoader.getSystemResource(resource);
+        return "file:" + url.getFile();
+    }
 
     public DataPlatformFunctionalTestNGBase() {
-
     }
 
     public DataPlatformFunctionalTestNGBase(Configuration yarnConfiguration) {
@@ -58,6 +66,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     @BeforeClass(groups = "functional")
     public void setupRunEnvironment() throws Exception {
+        log.info("Test name = " + this.getClass());
         if (!doYarnClusterSetup()) {
             return;
         }
@@ -67,6 +76,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
         // Make directories
         fs.mkdirs(new Path("/app/dataplatform/scripts"));
+        fs.mkdirs(new Path("/app/dataplatform/scripts/leframework"));
 
         // Copy jars from build to hdfs
         String dataplatformPropDir = System.getProperty("DATAPLATFORM_PROPDIR");
@@ -79,6 +89,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
                 "/app/dataplatform/scripts", false));
         String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
         copyEntries.add(new CopyEntry("file:target/*.jar", "/app/dataplatform", false));
+        copyEntries.add(new CopyEntry("file:target/leframework.tar.gz", "/app/dataplatform/scripts", false));
         copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
 
         if (doDependencyLibraryCopy()) {

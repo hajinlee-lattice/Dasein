@@ -26,7 +26,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,7 +37,6 @@ import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
-@ContextConfiguration(locations = { "classpath:com/latticeengines/dataplatform/service/impl/JobServiceImplTestNG-context.xml" })
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
@@ -58,16 +56,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         fs.mkdirs(new Path("/datascientist1"));
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
-        URL trainingFileUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.dat");
-        URL testFileUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_test.dat");
-        URL jsonUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/iris.json");
-        URL pythonScriptUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/nn_train.py");
+
         URL modelUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/service/impl/model.txt");
-        String trainingFilePath = "file:" + trainingFileUrl.getFile();
-        String testFilePath = "file:" + testFileUrl.getFile();
-        String jsonFilePath = "file:" + jsonUrl.getFile();
-        String pythonScriptPath = "file:" + pythonScriptUrl.getFile();
+
+        String trainingFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/nn_train.dat");
+        String testFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/nn_test.dat");
+        String jsonFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/iris.json");
+        String pythonScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/nn_train.py");
         FileUtils.copyFileToDirectory(new File(modelUrl.getFile()), new File("/tmp"));
         copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
         copyEntries.add(new CopyEntry(testFilePath, "/test", false));
@@ -76,15 +71,16 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testGetJobReportsAll() throws Exception {
         List<ApplicationReport> applications = jobService.getJobReportsAll();
         assertNotNull(applications);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testKillApplication() throws Exception {
         Properties appMasterProperties = new Properties();
+        appMasterProperties.put("QUEUE", "Priority0.A");
         Properties containerProperties = new Properties();
         containerProperties.put("VIRTUALCORES", "1");
         containerProperties.put("MEMORY", "64");
@@ -99,9 +95,10 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertTrue(state.equals(YarnApplicationState.KILLED));
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testGetJobReportByUser() throws Exception {
         Properties appMasterProperties = new Properties();
+        appMasterProperties.put("QUEUE", "Priority0.A");
         Properties containerProperties = new Properties();
         containerProperties.put("VIRTUALCORES", "1");
         containerProperties.put("MEMORY", "64");
@@ -127,7 +124,6 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         reports = jobService.getJobReportByUser(app.getUser());
         assertTrue(reports.size() > numJobs);
         jobService.killJob(applicationId);
-
     }
 
     @Test(groups = "functional")

@@ -1,6 +1,5 @@
 package com.latticeengines.dataplatform.fairscheduler;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -78,24 +77,14 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         fs.mkdirs(new Path("/scheduler"));
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
-        URL trainingFileUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/train.dat");
-        URL testFileUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/test.dat");
-        URL jsonUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
-        URL train1MinUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/fairscheduler/train_1min.py");
-        URL train2MinsUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/fairscheduler/train_2mins.py");
-        URL train4MinsUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/fairscheduler/train_4mins.py");
 
-        String trainingFilePath = "file:" + trainingFileUrl.getFile();
-        String testFilePath = "file:" + testFileUrl.getFile();
-        String jsonFilePath = "file:" + jsonUrl.getFile();
-        String train1MinScriptPath = "file:" + train1MinUrl.getFile();
-        String train2MinsScriptPath = "file:" + train2MinsUrl.getFile();
-        String train4MinsScriptPath = "file:" + train4MinsUrl.getFile();
-
+        String trainingFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/train.dat");
+        String testFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/test.dat");
+        String jsonFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
+        String train1MinScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_1min.py");
+        String train2MinsScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_2mins.py");
+        String train4MinsScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_4mins.py");
+        
         copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
         copyEntries.add(new CopyEntry(testFilePath, "/test", false));
         copyEntries.add(new CopyEntry(jsonFilePath, "/scheduler", false));
@@ -110,8 +99,11 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
     public void testSubmit() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // P0 job
-        Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.A", 0);
-        appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
+        for (int i = 0; i < 3; i++) {
+            Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.A", 0);
+            appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
+        }
+        /*
         // P1 job
         for (int i = 0; i < 1; i++) {
             Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.A", 1);
@@ -122,7 +114,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         for (int i = 0; i < 1; i++) {
             Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.A", 2);
             appIds.add(jobService.submitYarnJob("pythonClient", p2[0], p2[1]));
-        }
+        }*/
         /*
         Thread.sleep(20000L);
         // 1 P0 job

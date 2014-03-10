@@ -25,8 +25,7 @@ import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
-    private static final Log log = LogFactory
-            .getLog(PythonClientCustomization.class);
+    private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
 
     public PythonClientCustomization(Configuration configuration) {
         super(configuration);
@@ -45,23 +44,16 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     @Override
     public void beforeCreateLocalLauncherContextFile(Properties properties) {
         try {
-            String metadata = properties
-                    .getProperty(PythonContainerProperty.METADATA.name());
-            Classifier classifier = JsonHelper.deserialize(metadata,
-                    Classifier.class);
-            properties.put(PythonContainerProperty.TRAINING.name(),
-                    classifier.getTrainingDataHdfsPath());
-            properties.put(PythonContainerProperty.TEST.name(),
-                    classifier.getTestDataHdfsPath());
-            properties.put(PythonContainerProperty.PYTHONSCRIPT.name(),
-                    classifier.getPythonScriptHdfsPath());
-            properties.put(PythonContainerProperty.SCHEMA.name(),
-                    classifier.getSchemaHdfsPath());
+            String metadata = properties.getProperty(PythonContainerProperty.METADATA.name());
+            Classifier classifier = JsonHelper.deserialize(metadata, Classifier.class);
+            properties.put(PythonContainerProperty.TRAINING.name(), classifier.getTrainingDataHdfsPath());
+            properties.put(PythonContainerProperty.TEST.name(), classifier.getTestDataHdfsPath());
+            properties.put(PythonContainerProperty.PYTHONSCRIPT.name(), classifier.getPythonScriptHdfsPath());
+            properties.put(PythonContainerProperty.SCHEMA.name(), classifier.getSchemaHdfsPath());
 
             File metadataFile = new File("metadata.json");
             FileUtils.writeStringToFile(metadataFile, metadata);
-            properties.put(PythonContainerProperty.METADATA.name(),
-                    metadataFile.getAbsolutePath());
+            properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -69,23 +61,18 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
     @Override
     public Collection<CopyEntry> getCopyEntries(Properties containerProperties) {
-        Collection<CopyEntry> copyEntries = super
-                .getCopyEntries(containerProperties);
-        String metadataFilePath = containerProperties
-                .getProperty(ContainerProperty.METADATA.name());
-        copyEntries.add(new LocalResourcesFactoryBean.CopyEntry("file:"
-                + metadataFilePath, getJobDir(containerProperties), false));
+        Collection<CopyEntry> copyEntries = super.getCopyEntries(containerProperties);
+        String metadataFilePath = containerProperties.getProperty(ContainerProperty.METADATA.name());
+        copyEntries.add(new LocalResourcesFactoryBean.CopyEntry("file:" + metadataFilePath,
+                getJobDir(containerProperties), false));
         return copyEntries;
 
     }
 
     @Override
-    public void validate(Properties appMasterProperties,
-            Properties containerProperties) {
-        String metadata = containerProperties
-                .getProperty(PythonContainerProperty.METADATA.name());
-        Classifier classifier = JsonHelper.deserialize(metadata,
-                Classifier.class);
+    public void validate(Properties appMasterProperties, Properties containerProperties) {
+        String metadata = containerProperties.getProperty(PythonContainerProperty.METADATA.name());
+        Classifier classifier = JsonHelper.deserialize(metadata, Classifier.class);
         List<String> features = classifier.getFeatures();
         List<String> targets = classifier.getTargets();
         String schemaHdfsPath = classifier.getSchemaHdfsPath();
@@ -103,8 +90,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
         }
         String metadataJson = null;
         try {
-            metadataJson = HdfsHelper.getHdfsFileContents(configuration,
-                    schemaHdfsPath);
+            metadataJson = HdfsHelper.getHdfsFileContents(configuration, schemaHdfsPath);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_10001, e);
         }
@@ -124,19 +110,16 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
         for (String feature : features) {
             if (!fieldNames.contains(feature)) {
-                throw new LedpException(LedpCode.LEDP_10004,
-                        new String[] { feature });
+                throw new LedpException(LedpCode.LEDP_10004, new String[] { feature });
             }
         }
 
     }
 
     @Override
-    public void finalize(Properties appMasterProperties,
-            Properties containerProperties) {
+    public void finalize(Properties appMasterProperties, Properties containerProperties) {
         super.finalize(appMasterProperties, containerProperties);
-        String metadataFileName = containerProperties
-                .getProperty(PythonContainerProperty.METADATA.name());
+        String metadataFileName = containerProperties.getProperty(PythonContainerProperty.METADATA.name());
 
         if (metadataFileName != null) {
             File metadataFile = new File(metadataFileName);

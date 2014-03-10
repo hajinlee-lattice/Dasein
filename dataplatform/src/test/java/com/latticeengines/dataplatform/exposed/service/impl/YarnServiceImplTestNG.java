@@ -1,12 +1,15 @@
 package com.latticeengines.dataplatform.exposed.service.impl;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
@@ -44,7 +47,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     }
     
     @Test(groups = "functional")
-    public void getApp() {
+    public void getApp() throws Exception {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put("QUEUE", "Priority0.A");
         Properties containerProperties = new Properties();
@@ -55,6 +58,9 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
                 containerProperties);
         AppInfo appInfo = yarnService.getApplication(applicationId.toString());
         assertNotNull(appInfo);
+        
+        YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        assertEquals(YarnApplicationState.FINISHED, state);
     }
     
 }

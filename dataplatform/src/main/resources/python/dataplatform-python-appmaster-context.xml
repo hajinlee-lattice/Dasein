@@ -20,6 +20,7 @@
 	<yarn:localresources>
 		<yarn:hdfs path="/app/dataplatform/$$JOBDIR$$/*" />
 		<yarn:hdfs path="/app/dataplatform/scripts/*" />
+		<yarn:hdfs path="/app/dataplatform/scripts/leframework.tar.gz" type="ARCHIVE" />
 		<yarn:hdfs path="$$TRAINING$$" />
 		<yarn:hdfs path="$$TEST$$" />
 		<yarn:hdfs path="$$SCHEMA$$" />
@@ -29,6 +30,7 @@
 	<yarn:environment>
 		<yarn:classpath />
 		SHDP_HD_FSWEB=${dataplatform.fs.web.defaultFS}
+		PYTHONPATH=leframework.tar.gz
 	</yarn:environment>
 
 	<yarn:master class="com.latticeengines.dataplatform.runtime.execution.python.PythonAppMaster">
@@ -46,7 +48,7 @@
                         ]]>
         </yarn:container-command>
 
-<!--          
+<!--
         <yarn:container-command>
                         <![CDATA[
                         cat launch_container.sh 
@@ -55,6 +57,7 @@
                         ]]>
         </yarn:container-command>
 -->
+
 	</yarn:master>
 	
 	<context:component-scan base-package="com.latticeengines.dataplatform.runtime.execution.python"/>

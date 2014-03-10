@@ -31,7 +31,7 @@ public class SecureFileTransferAgent {
         UPLOAD, DOWNLOAD
     }
 
-    public boolean fileTranser(String fileToFTP, String remoteFileToReplace, FileTransferOption option) {
+    public boolean fileTransfer(String fileToFTP, String remoteFileToReplace, FileTransferOption option) {
         StandardFileSystemManager manager = new StandardFileSystemManager();
 
         try {

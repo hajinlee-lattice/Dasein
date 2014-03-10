@@ -17,8 +17,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.ReflectionUtils;
 
 @SuppressWarnings("rawtypes")
-public class ReservoirSamplerInputFormat<K extends Writable, V extends Writable>
-        extends InputFormat {
+public class ReservoirSamplerInputFormat<K extends Writable, V extends Writable> extends InputFormat {
 
     public static final String INPUT_FORMAT_CLASS = "reservoir.inputformat.class";
     public static final String SAMPLES_NUMBER = "reservoir.samples.number";
@@ -37,10 +36,8 @@ public class ReservoirSamplerInputFormat<K extends Writable, V extends Writable>
      * @param inputFormat
      *            the input format which will be wrapped by the sampler
      */
-    public static void setInputFormat(Job job,
-            Class<? extends InputFormat> inputFormat) {
-        job.getConfiguration().setClass(INPUT_FORMAT_CLASS, inputFormat,
-                InputFormat.class);
+    public static void setInputFormat(Job job, Class<? extends InputFormat> inputFormat) {
+        job.getConfiguration().setClass(INPUT_FORMAT_CLASS, inputFormat, InputFormat.class);
         job.setInputFormatClass(ReservoirSamplerInputFormat.class);
     }
 
@@ -52,17 +49,13 @@ public class ReservoirSamplerInputFormat<K extends Writable, V extends Writable>
         job.getConfiguration().setInt(MAXRECORDS_READ, maxRecords);
     }
 
-    public static void setUseSamplesNumberPerInputSplit(Job job,
-            boolean usePerInputSplit) {
-        job.getConfiguration().setBoolean(USE_SAMPLES_NUMBER_PER_INPUT_SPLIT,
-                usePerInputSplit);
+    public static void setUseSamplesNumberPerInputSplit(Job job, boolean usePerInputSplit) {
+        job.getConfiguration().setBoolean(USE_SAMPLES_NUMBER_PER_INPUT_SPLIT, usePerInputSplit);
     }
 
     public static int getNumSamples(Configuration conf) {
         int numSamples = conf.getInt(SAMPLES_NUMBER, DEFAULT_NUM_SAMPLES);
-        boolean usePerSample = conf.getBoolean(
-                USE_SAMPLES_NUMBER_PER_INPUT_SPLIT,
-                DEFAULT_USE_SAMPLES_PER_INPUT_SPLIT);
+        boolean usePerSample = conf.getBoolean(USE_SAMPLES_NUMBER_PER_INPUT_SPLIT, DEFAULT_USE_SAMPLES_PER_INPUT_SPLIT);
         if (usePerSample) {
             return numSamples;
         }
@@ -76,42 +69,35 @@ public class ReservoirSamplerInputFormat<K extends Writable, V extends Writable>
     }
 
     @SuppressWarnings("unchecked")
-    public InputFormat<K, V> getInputFormat(Configuration conf)
-            throws IOException {
+    public InputFormat<K, V> getInputFormat(Configuration conf) throws IOException {
         if (inputFormat == null) {
             Class ifClass = conf.getClass(INPUT_FORMAT_CLASS, null);
 
             if (ifClass == null) {
-                throw new IOException("Job must be configured with "
-                        + INPUT_FORMAT_CLASS);
+                throw new IOException("Job must be configured with " + INPUT_FORMAT_CLASS);
             }
-            inputFormat = (InputFormat<K, V>) ReflectionUtils.newInstance(
-                    ifClass, conf);
+            inputFormat = (InputFormat<K, V>) ReflectionUtils.newInstance(ifClass, conf);
         }
         return inputFormat;
     }
 
     @Override
-    public List<InputSplit> getSplits(JobContext context) throws IOException,
-            InterruptedException {
+    public List<InputSplit> getSplits(JobContext context) throws IOException, InterruptedException {
         return getInputFormat(context.getConfiguration()).getSplits(context);
     }
 
     @Override
     @SuppressWarnings({ "unchecked" })
-    public RecordReader createRecordReader(InputSplit split,
-            TaskAttemptContext context) throws IOException,
+    public RecordReader createRecordReader(InputSplit split, TaskAttemptContext context) throws IOException,
             InterruptedException {
 
         Configuration conf = context.getConfiguration();
 
-        return new ReservoirSamplerRecordReader(context, getInputFormat(conf)
-                .createRecordReader(split, context), getNumSamples(conf),
-                getMaxRecordsToRead(conf));
+        return new ReservoirSamplerRecordReader(context, getInputFormat(conf).createRecordReader(split, context),
+                getNumSamples(conf), getMaxRecordsToRead(conf));
     }
 
-    public static class ReservoirSamplerRecordReader<K extends Writable, V extends Writable>
-            extends RecordReader {
+    public static class ReservoirSamplerRecordReader<K extends Writable, V extends Writable> extends RecordReader {
 
         private final Configuration conf;
         private final RecordReader<K, V> rr;
@@ -123,8 +109,8 @@ public class ReservoirSamplerInputFormat<K extends Writable, V extends Writable>
 
         private int idx = 0;
 
-        public ReservoirSamplerRecordReader(TaskAttemptContext context,
-                RecordReader<K, V> rr, int numSamples, int maxRecords) {
+        public ReservoirSamplerRecordReader(TaskAttemptContext context, RecordReader<K, V> rr, int numSamples,
+                int maxRecords) {
             this.conf = context.getConfiguration();
             this.rr = rr;
             this.numSamples = numSamples;
@@ -134,8 +120,7 @@ public class ReservoirSamplerInputFormat<K extends Writable, V extends Writable>
         }
 
         @Override
-        public void initialize(InputSplit split, TaskAttemptContext context)
-                throws IOException, InterruptedException {
+        public void initialize(InputSplit split, TaskAttemptContext context) throws IOException, InterruptedException {
             rr.initialize(split, context);
 
             Random rand = new Random();
@@ -170,8 +155,7 @@ public class ReservoirSamplerInputFormat<K extends Writable, V extends Writable>
         }
 
         @Override
-        public Object getCurrentValue() throws IOException,
-                InterruptedException {
+        public Object getCurrentValue() throws IOException, InterruptedException {
             return values.get(idx - 1);
         }
 
