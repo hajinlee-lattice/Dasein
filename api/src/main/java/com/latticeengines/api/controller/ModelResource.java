@@ -13,16 +13,14 @@ import com.latticeengines.dataplatform.exposed.service.ModelingService;
 
 @Controller
 public class ModelResource {
-	
-	
-	@Autowired
-	private ModelingService modelingService;
 
-    @RequestMapping(value = "/submit", method = RequestMethod.POST, 
-    				headers="Accept=application/xml, application/json")
+    @Autowired
+    private ModelingService modelingService;
+
+    @RequestMapping(value = "/submit", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
     @ResponseBody
-	public AppSubmission submit(@RequestBody Model model) {
-    	AppSubmission submission = new AppSubmission(modelingService.submitModel(model));
-    	return submission;
+    public AppSubmission submit(@RequestBody Model model) {
+        AppSubmission submission = new AppSubmission(modelingService.submitModel(model));
+        return submission;
     }
 }

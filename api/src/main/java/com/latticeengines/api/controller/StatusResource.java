@@ -10,15 +10,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.latticeengines.api.domain.Status;
 
-
 @Controller
 public class StatusResource {
 
-    @RequestMapping(value = "/status/{op}/{left}/{right}", 
-                    method = RequestMethod.GET)
+    @RequestMapping(value = "/status/{op}/{left}/{right}", method = RequestMethod.GET)
     @ResponseBody
-    public Status calculate(@PathVariable("op") String op, 
-            @PathVariable("left") Integer left,
+    public Status calculate(@PathVariable("op") String op, @PathVariable("left") Integer left,
             @PathVariable("right") Integer right) {
         Assert.notNull(op);
         Assert.notNull(left);
@@ -55,5 +52,5 @@ public class StatusResource {
         }
         return c;
     }
-    
+
 }

@@ -11,31 +11,25 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
-//import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-
-@TestExecutionListeners({
-    DirtiesContextTestExecutionListener.class
-})
-@ContextConfiguration(locations = {
-    "classpath:test-api-context.xml"
-})
+@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
+@ContextConfiguration(locations = { "classpath:test-api-context.xml" })
 public class ApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
-	
-	protected RestTemplate restTemplate = new RestTemplate();
-	
-	@Autowired
-	private Configuration yarnConfiguration;
-	
-	protected boolean doYarnClusterSetup() {
-		return true;
-	}
-	
-	@BeforeClass(groups = "functional")
-	public void setupRunEnvironment() throws Exception {
-		if (!doYarnClusterSetup()) {
-			return;
-		}
-		DataPlatformFunctionalTestNGBase platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
-		platformTestBase.setupRunEnvironment();
-	}
+
+    protected RestTemplate restTemplate = new RestTemplate();
+
+    @Autowired
+    private Configuration yarnConfiguration;
+
+    protected boolean doYarnClusterSetup() {
+        return true;
+    }
+
+    @BeforeClass(groups = "functional")
+    public void setupRunEnvironment() throws Exception {
+        if (!doYarnClusterSetup()) {
+            return;
+        }
+        DataPlatformFunctionalTestNGBase platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
+        platformTestBase.setupRunEnvironment();
+    }
 }
