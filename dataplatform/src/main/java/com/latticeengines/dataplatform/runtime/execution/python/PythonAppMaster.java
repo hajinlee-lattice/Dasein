@@ -169,7 +169,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
     protected void doStop() {
         super.doStop();
         ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
-        ledpMetricsMgr.resetContainerElapsedTimeForGanglia();
+        //ledpMetricsMgr.resetContainerElapsedTimeForGanglia();
     }
 
 }
