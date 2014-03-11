@@ -19,6 +19,8 @@ public class ApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private Configuration yarnConfiguration;
+    
+    protected DataPlatformFunctionalTestNGBase platformTestBase;
 
     protected boolean doYarnClusterSetup() {
         return true;
@@ -29,7 +31,7 @@ public class ApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         if (!doYarnClusterSetup()) {
             return;
         }
-        DataPlatformFunctionalTestNGBase platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
+        platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         platformTestBase.setupRunEnvironment();
     }
 }
