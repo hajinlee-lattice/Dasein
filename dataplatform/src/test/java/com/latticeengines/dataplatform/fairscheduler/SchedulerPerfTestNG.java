@@ -167,7 +167,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         perfTestBase.afterClass();
     }
 
-    @Test(groups = "perf", enabled = false)
+    @Test(groups = "perf", enabled = true)
     public void testSubmit() throws Exception {
         List<List<List<ApplicationId>>> appIdsPerRuns;
         System.out.println("Test 1: ");
@@ -196,7 +196,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         generateRunReport(customerJobsToAppIdMap);
     }
 
-    @Test(groups = "perf", enabled = true)
+    @Test(groups = "perf", enabled = false)
     public void testSubmit2() throws Exception {
         List<List<List<ApplicationId>>> appIdsPerRuns;
 
@@ -374,6 +374,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
         appIdsPerQueue = new ArrayList<ApplicationId>();
         appIdsList.add(appIdsPerQueue);
 
+        /*
         for (int j = 0; j < 2; j++) {
             Properties[] p1 = getPropertiesPair(classifier5Mins, "Priority1." + queue);
             appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
@@ -386,7 +387,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
                 Properties[] p1 = getPropertiesPair(classifier10Mins, "Priority2." + queue);
                 appIdsPerQueue.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
             }
-        }
+        }*/
 
         List<List<List<ApplicationId>>> appIdsPerRunList = new ArrayList<List<List<ApplicationId>>>();
 
