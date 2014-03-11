@@ -12,6 +12,7 @@ import com.latticeengines.dataplatform.exposed.domain.Algorithm;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
+import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.service.JobService;
 
@@ -46,6 +47,10 @@ public class ModelingServiceImpl implements ModelingService {
                     appMasterProperties, containerProperties));
         }
         return applicationIds;
+    }
+
+    @Override
+    public void throttle(ThrottleConfiguration config) {
     }
 
 }

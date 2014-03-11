@@ -52,7 +52,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return true;
     }
     
-    protected String getFileUrlFromResource(String resource) {
+    public String getFileUrlFromResource(String resource) {
         URL url = ClassLoader.getSystemResource(resource);
         return "file:" + url.getFile();
     }
@@ -88,8 +88,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/launcher.py",
                 "/app/dataplatform/scripts", false));
         String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
-        copyEntries.add(new CopyEntry("file:target/*.jar", "/app/dataplatform", false));
-        copyEntries.add(new CopyEntry("file:target/leframework.tar.gz", "/app/dataplatform/scripts", false));
+        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/*.jar", "/app/dataplatform", false));
+        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/leframework.tar.gz", "/app/dataplatform/scripts", false));
         copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
 
         if (doDependencyLibraryCopy()) {
@@ -102,7 +102,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         doCopy(fs, copyEntries);
     }
 
-    protected NumberFormat getAppIdFormat() {
+    public NumberFormat getAppIdFormat() {
         NumberFormat fmt = NumberFormat.getInstance();
         fmt.setGroupingUsed(false);
         fmt.setMinimumIntegerDigits(4);
@@ -283,7 +283,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
      * @throws Exception
      *             if exception occurred
      */
-    protected YarnApplicationState waitState(ApplicationId applicationId, long timeout, TimeUnit unit,
+    public YarnApplicationState waitState(ApplicationId applicationId, long timeout, TimeUnit unit,
             YarnApplicationState... applicationStates) throws Exception {
         Assert.notNull(yarnClient, "Yarn client must be set");
         Assert.notNull(applicationId, "ApplicationId must not be null");

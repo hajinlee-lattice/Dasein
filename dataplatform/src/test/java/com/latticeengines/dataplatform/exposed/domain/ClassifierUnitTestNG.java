@@ -17,24 +17,19 @@ public class ClassifierUnitTestNG {
         classifier.setSchemaHdfsPath("/datascientist1/iris.json");
         Field sepalLength = new Field();
         sepalLength.setName("sepal_length");
-        sepalLength.setType(Arrays.<String> asList(new String[] { "float",
-                "0.0" }));
+        sepalLength.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
         Field sepalWidth = new Field();
         sepalWidth.setName("sepal_width");
-        sepalWidth.setType(Arrays
-                .<String> asList(new String[] { "float", "0.0" }));
+        sepalWidth.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
         Field petalLength = new Field();
         petalLength.setName("petal_length");
-        petalLength.setType(Arrays.<String> asList(new String[] { "float",
-                "0.0" }));
+        petalLength.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
         Field petalWidth = new Field();
         petalWidth.setName("petal_width");
-        petalWidth.setType(Arrays
-                .<String> asList(new String[] { "float", "0.0" }));
+        petalWidth.setType(Arrays.<String> asList(new String[] { "float", "0.0" }));
         Field category = new Field();
         category.setName("category");
-        category.setType(Arrays
-                .<String> asList(new String[] { "string", "null" }));
+        category.setType(Arrays.<String> asList(new String[] { "string", "null" }));
 
         classifier.addFeature(sepalLength.getName());
         classifier.addFeature(sepalWidth.getName());
@@ -48,8 +43,7 @@ public class ClassifierUnitTestNG {
 
         String jsonString = classifier.toString();
         System.out.println(jsonString);
-        Classifier deserializedClassifier = JsonHelper.deserialize(jsonString,
-                Classifier.class);
+        Classifier deserializedClassifier = JsonHelper.deserialize(jsonString, Classifier.class);
         assertEquals(deserializedClassifier.toString(), jsonString);
 
     }
