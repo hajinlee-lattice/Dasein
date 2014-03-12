@@ -71,6 +71,7 @@ public abstract class BaseDaoImpl<T extends HasId<?>> implements BaseDao<T> {
     
     @Override
     public void deleteStoreFile() {
+        clear();
         File f = new File(getFileName());
         f.delete();
     }

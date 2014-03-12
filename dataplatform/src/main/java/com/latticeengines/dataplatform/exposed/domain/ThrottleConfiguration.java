@@ -1,5 +1,6 @@
 package com.latticeengines.dataplatform.exposed.domain;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.latticeengines.dataplatform.util.JsonHelper;
@@ -37,11 +38,13 @@ public class ThrottleConfiguration implements HasId<Long>{
     }
 
     @Override
+    @JsonIgnore
     public Long getId() {
         return id;
     }
 
     @Override
+    @JsonIgnore
     public void setId(Long id) {
         this.id = id;
     }
