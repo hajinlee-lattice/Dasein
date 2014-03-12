@@ -30,6 +30,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private YarnService yarnService;
 
+    @Override
     protected boolean doYarnClusterSetup() {
         return false;
     }

@@ -21,7 +21,7 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Autowired
     private JobService jobService;
-
+    
     @Override
     public List<ApplicationId> submitModel(Model model) {
         List<ApplicationId> applicationIds = new ArrayList<ApplicationId>();

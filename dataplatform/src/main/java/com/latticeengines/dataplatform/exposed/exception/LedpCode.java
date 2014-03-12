@@ -22,7 +22,11 @@ public enum LedpCode {
     LEDP_12001("Unsupported queue assignment policy."),
     LEDP_12002("No queue available to run job."), //
     // Metric system: 13000-13999
-    LEDP_13000("Tag {0} does not have a value.");
+    LEDP_13000("Tag {0} does not have a value."), //
+    // Persistence service: 14000-14999
+    LEDP_14000("Could not create configuration store {0}."), //
+    LEDP_14001("Could not load configuration store {0}."), //
+    LEDP_14002("Could not save configuration store {0}.");
 
     
     private String message;

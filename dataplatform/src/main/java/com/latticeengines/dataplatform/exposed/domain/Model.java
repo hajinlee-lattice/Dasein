@@ -1,13 +1,15 @@
 package com.latticeengines.dataplatform.exposed.domain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.latticeengines.dataplatform.util.JsonHelper;
 
-public class Model implements HasName {
+public class Model implements HasName, HasId<Integer> {
 
+    private Integer id;
     private String name;
     private String trainingDataHdfsPath;
     private String testDataHdfsPath;
@@ -17,6 +19,7 @@ public class Model implements HasName {
     private List<String> features;
     private List<String> targets;
     private ModelDefinition modelDefinition;
+    private List<Job> jobs = new ArrayList<Job>();
 
     @Override
     @JsonProperty("name")
@@ -115,4 +118,21 @@ public class Model implements HasName {
         this.queue = queue;
     }
 
+    @Override
+    public Integer getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public List<Job> getJobs() {
+        return jobs;
+    }
+
+    public void addJob(Job job) {
+        jobs.add(job);
+    }
 }
