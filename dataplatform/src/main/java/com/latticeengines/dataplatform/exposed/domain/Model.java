@@ -7,9 +7,9 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.latticeengines.dataplatform.util.JsonHelper;
 
-public class Model implements HasName, HasId<Integer> {
+public class Model implements HasName, HasId<Long> {
 
-    private Integer id;
+    private Long id;
     private String name;
     private String trainingDataHdfsPath;
     private String testDataHdfsPath;
@@ -119,12 +119,12 @@ public class Model implements HasName, HasId<Integer> {
     }
 
     @Override
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
     @Override
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

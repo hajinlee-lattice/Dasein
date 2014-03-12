@@ -8,8 +8,11 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
+import com.latticeengines.dataplatform.exposed.domain.Job;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
 import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
@@ -21,6 +24,12 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Autowired
     private JobService jobService;
+    
+    @Autowired
+    private ModelEntityMgr modelEntityMgr;
+    
+    @Autowired
+    private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
     
     @Override
     public List<ApplicationId> submitModel(Model model) {
@@ -46,11 +55,23 @@ public class ModelingServiceImpl implements ModelingService {
             applicationIds.add(jobService.submitYarnJob("pythonClient",
                     appMasterProperties, containerProperties));
         }
+        
+        for (ApplicationId appId : applicationIds) {
+            Job job = new Job();
+            job.setId(appId.toString());
+            model.addJob(job);
+        }
+        modelEntityMgr.post(model);
+        modelEntityMgr.save();
+        
         return applicationIds;
     }
 
     @Override
     public void throttle(ThrottleConfiguration config) {
+        config.setTimestamp(System.currentTimeMillis());
+        throttleConfigurationEntityMgr.post(config);
+        throttleConfigurationEntityMgr.save();
     }
 
 }

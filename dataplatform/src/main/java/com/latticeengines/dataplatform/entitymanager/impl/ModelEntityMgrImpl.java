@@ -9,6 +9,7 @@ import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.ModelDao;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.SequenceEntityMgr;
 import com.latticeengines.dataplatform.exposed.domain.Job;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 
@@ -21,6 +22,9 @@ public class ModelEntityMgrImpl extends BaseEntityMgrImpl<Model> implements Mode
     @Autowired
     private JobEntityMgr jobEntityMgr;
     
+    @Autowired
+    private SequenceEntityMgr sequenceEntityMgr;
+    
     public ModelEntityMgrImpl() {
         super();
     }
@@ -32,6 +36,9 @@ public class ModelEntityMgrImpl extends BaseEntityMgrImpl<Model> implements Mode
     
     @Override
     public void post(Model model) {
+        if (model.getId() == null) {
+            model.setId(sequenceEntityMgr.nextVal(ModelDao.class));
+        }
         List<Job> jobs = model.getJobs();
         
         for (Job job : jobs) {

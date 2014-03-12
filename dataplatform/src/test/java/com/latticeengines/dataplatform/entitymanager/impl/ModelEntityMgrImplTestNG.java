@@ -34,12 +34,11 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         job2.setId("application_12345_00002");
         
         model = new Model();
-        model.setId(1234);
         model.addJob(job1);
         model.addJob(job2);
     }
     
-    private void verifyRetrievedModel(Integer id) {
+    private void verifyRetrievedModel(Long id) {
         Model retrievedModel = modelEntityMgr.getById(model.getId());
         assertNotNull(retrievedModel);
         assertEquals(model.getId(), retrievedModel.getId());

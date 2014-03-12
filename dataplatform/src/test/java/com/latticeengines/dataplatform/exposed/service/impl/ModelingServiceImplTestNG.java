@@ -22,6 +22,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
+import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.util.HdfsHelper;
@@ -116,5 +117,17 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
             String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, modelFile);
             assertNotNull(modelContents);
         }
+        
+        
     }
+    
+    @Test(groups = "functional")
+    public void throttle() throws Exception {
+        ThrottleConfiguration config = new ThrottleConfiguration();
+        config.setImmediate(true);
+        config.setJobRankCutoff(5);
+        modelingService.throttle(config);
+    }
+    
+    
 }

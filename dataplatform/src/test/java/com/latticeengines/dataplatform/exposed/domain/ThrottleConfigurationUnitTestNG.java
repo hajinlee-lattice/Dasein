@@ -18,6 +18,6 @@ public class ThrottleConfigurationUnitTestNG {
         String configString = config.toString();
         ThrottleConfiguration deserializedConfig = (ThrottleConfiguration) JsonHelper.deserialize(configString, ThrottleConfiguration.class);
         assertTrue(deserializedConfig.isImmediate());
-        assertEquals(5, deserializedConfig.getJobRankCutoff());
+        assertEquals(Integer.valueOf(5), deserializedConfig.getJobRankCutoff());
     }
 }
