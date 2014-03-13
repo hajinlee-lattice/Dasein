@@ -75,4 +75,9 @@ public abstract class BaseDaoImpl<T extends HasId<?>> implements BaseDao<T> {
         File f = new File(getFileName());
         f.delete();
     }
+
+    @Override
+    public String serialize(T entity) {
+        return entity.toString();
+    }
 }

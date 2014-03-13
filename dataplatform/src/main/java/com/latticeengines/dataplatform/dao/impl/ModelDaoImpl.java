@@ -2,7 +2,6 @@ package com.latticeengines.dataplatform.dao.impl;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +28,8 @@ public class ModelDaoImpl extends BaseDaoImpl<Model> implements ModelDao {
         if (content != null) {
             String[] jobIds = content.split(",");
             for (String jobId : jobIds) {
-                Job job = jobDao.deserialize(jobId, null);
+                Job job = new Job();
+                job.setId(jobId);
                 job.setModel(model);
             }
             return model;
@@ -40,8 +40,18 @@ public class ModelDaoImpl extends BaseDaoImpl<Model> implements ModelDao {
     @Override
     public String serialize(Model entity) {
         List<Job> jobs = entity.getJobs();
-        String value = StringUtils.join(jobs, ",");
-        return value;
+        StringBuilder sb = new StringBuilder();
+        
+        boolean first = true;
+        for (Job job : jobs) {
+            if (!first) {
+                sb.append(","); 
+            } else {
+                first = false;
+            }
+            sb.append(job.getId());
+        }
+        return sb.toString();
     }
     
     @Override

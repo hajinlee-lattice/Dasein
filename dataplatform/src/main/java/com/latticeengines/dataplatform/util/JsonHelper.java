@@ -7,6 +7,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 public class JsonHelper {
 
     public static <T> String serialize(T object) {
+        if (object == null) {
+            return null;
+        }
         ObjectMapper objectMapper = new ObjectMapper();
         StringWriter writer = new StringWriter();
         try {
@@ -18,11 +21,13 @@ public class JsonHelper {
     }
 
     public static <T> T deserialize(String jsonStr, Class<T> clazz) {
+        if (jsonStr == null) {
+            return null;
+        }
         ObjectMapper objectMapper = new ObjectMapper();
         T deserializedSchema;
         try {
-            deserializedSchema = objectMapper.readValue(jsonStr.getBytes(),
-                    clazz);
+            deserializedSchema = objectMapper.readValue(jsonStr.getBytes(), clazz);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
