@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
+import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 
@@ -41,6 +42,9 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Autowired
+    private JobEntityMgr jobEntityMgr;
+
     @Override
     public List<ApplicationReport> getJobReportsAll() {
         return defaultYarnClient.listApplications();
@@ -50,8 +54,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     public ApplicationReport getJobReportById(ApplicationId appId) {
         List<ApplicationReport> reports = getJobReportsAll();
         for (ApplicationReport report : reports) {
-            if (report != null && report.getApplicationId() != null
-                    && report.getApplicationId().equals(appId)) {
+            if (report != null && report.getApplicationId() != null && report.getApplicationId().equals(appId)) {
                 return report;
             }
         }
@@ -63,8 +66,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         List<ApplicationReport> reports = getJobReportsAll();
         List<ApplicationReport> userReports = new ArrayList<ApplicationReport>();
         for (ApplicationReport report : reports) {
-            if (report != null && report.getUser() != null
-                    && report.getUser().equalsIgnoreCase(user)) {
+            if (report != null && report.getUser() != null && report.getUser().equalsIgnoreCase(user)) {
                 userReports.add(report);
             }
         }
@@ -72,20 +74,18 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    public ApplicationId submitYarnJob(String yarnClientName,
-            Properties appMasterProperties, Properties containerProperties) {
+    public ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties,
+            Properties containerProperties) {
         CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
-        yarnClientCustomizationService.validate(client, yarnClientName,
-                appMasterProperties, containerProperties);
-        yarnClientCustomizationService.addCustomizations(client,
-                yarnClientName, appMasterProperties, containerProperties);
+        yarnClientCustomizationService.validate(client, yarnClientName, appMasterProperties, containerProperties);
+        yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties,
+                containerProperties);
 
         try {
             ApplicationId applicationId = client.submitApplication();
             return applicationId;
         } finally {
-            yarnClientCustomizationService.finalize(yarnClientName,
-                    appMasterProperties, containerProperties);
+            yarnClientCustomizationService.finalize(yarnClientName, appMasterProperties, containerProperties);
         }
     }
 
@@ -98,15 +98,12 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         ConfigurableApplicationContext context = null;
         try {
             if (StringUtils.isEmpty(yarnClientName)) {
-                throw new IllegalStateException(
-                        "Yarn client name cannot be empty.");
+                throw new IllegalStateException("Yarn client name cannot be empty.");
             }
-            YarnClient client = (YarnClient) applicationContext
-                    .getBean(yarnClientName);
+            YarnClient client = (YarnClient) applicationContext.getBean(yarnClientName);
             return client;
         } catch (Throwable e) {
-            log.error("Error while getting yarnClient for application "
-                    + yarnClientName, e);
+            log.error("Error while getting yarnClient for application " + yarnClientName, e);
         } finally {
             if (context != null) {
                 context.close();
@@ -116,8 +113,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext)
-            throws BeansException {
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
 
@@ -146,8 +142,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         ConfigurableApplicationContext context = null;
         try {
             if (StringUtils.isEmpty(mrJobName)) {
-                throw new IllegalStateException(
-                        "MapReduce job name cannot be empty");
+                throw new IllegalStateException("MapReduce job name cannot be empty");
             }
             Job job = (Job) applicationContext.getBean(mrJobName);
             // clone the job
@@ -161,6 +156,15 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             }
         }
         return null;
+    }
+
+    @Override
+    public ApplicationId submitJob(com.latticeengines.dataplatform.exposed.domain.Job job) {
+        ApplicationId appId = submitYarnJob(job.getClient(), job.getAppMasterProperties(), job.getContainerProperties());
+        job.setId(appId.toString());
+        jobEntityMgr.post(job);
+        jobEntityMgr.save();
+        return appId;
     }
 
 }

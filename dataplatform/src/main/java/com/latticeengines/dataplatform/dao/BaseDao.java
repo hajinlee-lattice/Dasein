@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.dao;
 
+import java.util.List;
+
 
 public interface BaseDao<T> {
 
@@ -18,4 +20,6 @@ public interface BaseDao<T> {
     String serialize(T entity);
     
     void deleteStoreFile();
+    
+    List<T> getAll();
 }

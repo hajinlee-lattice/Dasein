@@ -13,6 +13,8 @@
                 <entry key="jobService" value-ref="jobService" />
                 <entry key="throttleConfigurationEntityMgr" value-ref="throttleConfigurationEntityMgr" />
                 <entry key="modelEntityMgr" value-ref="modelEntityMgr" />
+                <entry key="yarnService" value-ref="yarnService" />
+                <entry key="jobEntityMgr" value-ref="jobEntityMgr" />
             </map>
         </property>
 

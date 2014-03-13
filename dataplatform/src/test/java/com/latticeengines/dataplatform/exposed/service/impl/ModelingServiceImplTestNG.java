@@ -3,7 +3,6 @@ package com.latticeengines.dataplatform.exposed.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,21 +18,47 @@ import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
+import com.latticeengines.dataplatform.entitymanager.impl.ModelEntityMgrImpl;
+import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
 import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
+import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.service.JobWatchdogService;
+import com.latticeengines.dataplatform.service.impl.JobWatchdogServiceImpl;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 
 public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
+    private JobService jobService;
+
+    @Autowired
+    private YarnService yarnService;
+
+    @Autowired
     private ModelingService modelingService;
+    
+    @Autowired
+    private JobEntityMgrImpl jobEntityMgr;
+
+    @Autowired
+    private ModelEntityMgrImpl modelEntityMgr;
+    
+    @Autowired
+    private ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
+    
+    private Model model = null;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        modelEntityMgr.deleteStoreFile();
+        throttleConfigurationEntityMgr.deleteStoreFile();
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
         fs.delete(new Path("/training"), true);
@@ -45,21 +70,12 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         fs.mkdirs(new Path("/datascientist2"));
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
-        URL trainingFileUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/train.dat");
-        URL testFileUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/test.dat");
-        URL jsonUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
-        URL decisionTreePythonScriptUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/dt_train.py");
-        URL logisticRegressionPythonScriptUrl = ClassLoader
-                .getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/lr_train.py");
 
-        String trainingFilePath = "file:" + trainingFileUrl.getFile();
-        String testFilePath = "file:" + testFileUrl.getFile();
-        String jsonFilePath = "file:" + jsonUrl.getFile();
-        String decisionTreePythonScriptPath = "file:" + decisionTreePythonScriptUrl.getFile();
-        String logisticRegressionPythonScriptPath = "file:" + logisticRegressionPythonScriptUrl.getFile();
+        String trainingFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/train.dat");
+        String testFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/test.dat");
+        String jsonFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
+        String decisionTreePythonScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/dt_train.py");
+        String logisticRegressionPythonScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/lr_train.py");
 
         copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
         copyEntries.add(new CopyEntry(testFilePath, "/test", false));
@@ -69,10 +85,6 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         doCopy(fs, copyEntries);
 
-    }
-
-    @Test(groups = "functional")
-    public void submitModel() throws Exception {
         Algorithm decisionTreeAlgorithm = new Algorithm();
         decisionTreeAlgorithm.setName("DT");
         decisionTreeAlgorithm.setScript("/datascientist2/dt_train.py");
@@ -90,7 +102,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 logisticRegressionAlgorithm }));
 
-        Model model = new Model();
+        model = new Model();
         model.setModelDefinition(modelDef);
         model.setName("Model Submission1");
         model.setSchemaHdfsPath("/datascientist2/iris.json");
@@ -100,9 +112,11 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         model.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
                 "petal_width" }));
         model.setTargets(Arrays.<String> asList(new String[] { "category" }));
+        
+    }
 
-        System.out.println(model.toString());
-
+    @Test(groups = "functional")
+    public void submitModel() throws Exception {
         List<ApplicationId> appIds = modelingService.submitModel(model);
 
         for (ApplicationId appId : appIds) {
@@ -117,16 +131,60 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
             String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, modelFile);
             assertNotNull(modelContents);
         }
-        
-        
     }
     
     @Test(groups = "functional")
-    public void throttle() throws Exception {
+    public void throttleImmediate() throws Exception {
+        model.setId(null);
+        List<ApplicationId> appIds = modelingService.submitModel(model);
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setImmediate(true);
-        config.setJobRankCutoff(5);
+        config.setJobRankCutoff(2);
         modelingService.throttle(config);
+        
+        JobWatchdogService watchDog = getWatchdogService();
+        watchDog.run(null);
+        
+        assertEquals(2, appIds.size());
+        
+        // First job to complete
+        YarnApplicationState state = waitState(appIds.get(0), 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+        assertNotNull(state);
+        state = waitState(appIds.get(0), 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        assertEquals(state, YarnApplicationState.FINISHED);
+        
+        // Second job should have been killed since we throttled
+        state = waitState(appIds.get(1), 10, TimeUnit.SECONDS, YarnApplicationState.KILLED);
+    }
+    
+    @Test(groups = "functional"/*, dependsOnMethods = { "throttleImmediate "}*/)
+    public void throttleNewlySubmittedModels() throws Exception {
+        ThrottleConfiguration config = new ThrottleConfiguration();
+        config.setImmediate(false);
+        config.setJobRankCutoff(2);
+        modelingService.throttle(config);
+
+        model.setId(null);
+        List<ApplicationId> appIds = modelingService.submitModel(model);
+        
+        // Only one job would be submitted since new jobs won't even come in
+        assertEquals(1, appIds.size());
+        
+        YarnApplicationState state = waitState(appIds.get(0), 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+        assertNotNull(state);
+        state = waitState(appIds.get(0), 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        assertEquals(state, YarnApplicationState.FINISHED);
+        
+    }
+
+    private JobWatchdogService getWatchdogService() {
+        JobWatchdogServiceImpl watchDog = new JobWatchdogServiceImpl();
+        watchDog.setJobEntityMgr(jobEntityMgr);
+        watchDog.setModelEntityMgr(modelEntityMgr);
+        watchDog.setYarnService(yarnService);
+        watchDog.setThrottleConfigurationEntityMgr(throttleConfigurationEntityMgr);
+        watchDog.setJobService(jobService);
+        return watchDog;
     }
     
     

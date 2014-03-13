@@ -45,7 +45,9 @@ public class JobUnitTestNG {
         String metadata = classifier.toString();
 
         Job job = new Job();
-        job.setId("application_12345_0001");
+        job.setId("application_1394728035053_0001");
+        assertEquals(job.getId(), job.getAppId().toString());
+        
         Properties appMasterProperties = new Properties();
         appMasterProperties.setProperty("QUEUE", "Priority0.A");
         Properties containerProperties = new Properties();

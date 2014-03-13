@@ -1,6 +1,9 @@
 package com.latticeengines.dataplatform.dao.impl;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -80,4 +83,20 @@ public abstract class BaseDaoImpl<T extends HasId<?>> implements BaseDao<T> {
     public String serialize(T entity) {
         return entity.toString();
     }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<T> getAll() {
+        List<T> values = new ArrayList<T>();
+        for (Iterator<String> it = (Iterator<String>) store.getKeys(); it.hasNext();) {
+            String key = it.next();
+            String value = (String) store.getProperty(key);
+            if (value != null) {
+                values.add(deserialize(key, value));
+            }
+            
+        }
+        return values;
+    }
+    
 }

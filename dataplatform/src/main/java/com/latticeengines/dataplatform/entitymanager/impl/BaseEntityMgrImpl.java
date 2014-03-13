@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.entitymanager.impl;
 
+import java.util.List;
+
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.entitymanager.BaseEntityMgr;
 import com.latticeengines.dataplatform.exposed.domain.HasId;
@@ -11,7 +13,7 @@ public abstract class BaseEntityMgrImpl<T extends HasId<?>> implements BaseEntit
     
     public abstract BaseDao<T> getDao();
     
-    protected void deleteStoreFile() {
+    public void deleteStoreFile() {
         getDao().deleteStoreFile();
     }
     
@@ -38,5 +40,10 @@ public abstract class BaseEntityMgrImpl<T extends HasId<?>> implements BaseEntit
     @Override
     public T getById(Object id) {
         return (T) getDao().getById(id.toString());
+    }
+    
+    @Override
+    public List<T> getAll() {
+        return getDao().getAll();
     }
 }

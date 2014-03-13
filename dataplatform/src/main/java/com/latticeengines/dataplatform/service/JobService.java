@@ -6,6 +6,8 @@ import java.util.Properties;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 
+import com.latticeengines.dataplatform.exposed.domain.Job;
+
 public interface JobService {
 
     List<ApplicationReport> getJobReportsAll();
@@ -20,5 +22,7 @@ public interface JobService {
     ApplicationId submitMRJob(String mrJobName, Properties properties);
 
     void killJob(ApplicationId appId);
+    
+    ApplicationId submitJob(Job job);
 
 }

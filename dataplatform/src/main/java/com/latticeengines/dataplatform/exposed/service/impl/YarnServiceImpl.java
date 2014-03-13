@@ -26,31 +26,23 @@ public class YarnServiceImpl implements YarnService {
     @Override
     public SchedulerTypeInfo getSchedulerInfo() {
         String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-        return rmRestTemplate.getForObject(
-                rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class);
+        return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/scheduler", SchedulerTypeInfo.class);
     }
 
     @Override
     public AppsInfo getApplications(String queryString) {
         String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-        if ((queryString == null) || (queryString.length() == 0))
-        {
-        	return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps",
-                AppsInfo.class);
-        }
-        else
-        {
-        	return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps?queryString",
-                    AppsInfo.class);
+        if (queryString == null || queryString.length() == 0) {
+            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps", AppsInfo.class);
+        } else {
+            return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps?" + queryString, AppsInfo.class);
         }
     }
-    
+
     @Override
     public AppInfo getApplication(String appId) {
         String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
-        return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId,
-                AppInfo.class);
-        
+        return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
     }
 
 }

@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.exposed.domain;
 
 import java.util.Properties;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.latticeengines.dataplatform.util.JsonHelper;
@@ -9,6 +10,7 @@ import com.latticeengines.dataplatform.util.JsonHelper;
 public class Job implements HasId<String> {
 
     private String id;
+    private String client;
     private Model model;
     private Properties appMasterProperties;
     private Properties containerProperties;
@@ -21,6 +23,15 @@ public class Job implements HasId<String> {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+    
+    @JsonIgnore
+    public ApplicationId getAppId() {
+        if (id == null) {
+            return null;
+        }
+        String[] tokens = id.split("_");
+        return ApplicationId.newInstance(Long.parseLong(tokens[1]), Integer.parseInt(tokens[2]));
     }
 
     @JsonIgnore
@@ -52,6 +63,14 @@ public class Job implements HasId<String> {
     @Override
     public String toString() {
         return JsonHelper.serialize(this);
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
     }
 
 }

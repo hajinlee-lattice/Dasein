@@ -7,7 +7,8 @@ import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class ThrottleConfiguration implements HasId<Long>{
 
-    private Boolean immediate = false;
+    private Boolean immediate = Boolean.FALSE;
+    private Boolean enabled = Boolean.TRUE;
     private Integer jobRankCutoff;
     private Long id;
     private Long timestamp;
@@ -55,6 +56,16 @@ public class ThrottleConfiguration implements HasId<Long>{
 
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    @JsonProperty("enabled")
+    public Boolean isEnabled() {
+        return enabled;
+    }
+
+    @JsonProperty("enabled")
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
  

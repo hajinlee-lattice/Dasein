@@ -1,6 +1,8 @@
 package com.latticeengines.dataplatform.exposed.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 
@@ -37,8 +39,22 @@ public class ModelingServiceImpl implements ModelingService {
         ModelDefinition modelDefinition = model.getModelDefinition();
 
         List<Algorithm> algorithms = modelDefinition.getAlgorithms();
+        Collections.sort(algorithms, new Comparator<Algorithm>() {
 
-        for (Algorithm algorithm : algorithms) {
+            @Override
+            public int compare(Algorithm o1, Algorithm o2) {
+                return o1.getPriority() - o2.getPriority();
+            }
+            
+        });
+        ThrottleConfiguration config = throttleConfigurationEntityMgr.getLatestConfig();
+        
+        for (int i = 1; i <= algorithms.size(); i++) {
+            Algorithm algorithm = algorithms.get(i - 1);
+            
+            if (doThrottling(config, algorithm, i)) {
+                continue;
+            }
             Classifier classifier = new Classifier();
             classifier.setSchemaHdfsPath(model.getSchemaHdfsPath());
             classifier.setTrainingDataHdfsPath(model.getTrainingDataHdfsPath());
@@ -51,20 +67,26 @@ public class ModelingServiceImpl implements ModelingService {
             appMasterProperties.put("QUEUE", "Priority" + algorithm.getPriority() + ".A");
             Properties containerProperties = algorithm.getContainerProps();
             containerProperties.put("METADATA", classifier.toString());
-
-            applicationIds.add(jobService.submitYarnJob("pythonClient",
-                    appMasterProperties, containerProperties));
+            Job job = new Job();
+            job.setClient("pythonClient");
+            job.setAppMasterProperties(appMasterProperties);
+            job.setContainerProperties(containerProperties);
+            model.addJob(job);
+            applicationIds.add(jobService.submitJob(job));
         }
         
-        for (ApplicationId appId : applicationIds) {
-            Job job = new Job();
-            job.setId(appId.toString());
-            model.addJob(job);
-        }
         modelEntityMgr.post(model);
         modelEntityMgr.save();
         
         return applicationIds;
+    }
+    
+    boolean doThrottling(ThrottleConfiguration config, Algorithm algorithm, int index) {
+        if (config == null || !config.isEnabled()) {
+            return false;
+        }
+        
+        return index >= config.getJobRankCutoff();
     }
 
     @Override

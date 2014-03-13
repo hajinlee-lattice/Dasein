@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.entitymanager;
 
+import java.util.List;
+
 import com.latticeengines.dataplatform.dao.BaseDao;
 
 public interface BaseEntityMgr<T> {
@@ -15,5 +17,7 @@ public interface BaseEntityMgr<T> {
     void clear();
     
     T getById(Object id);
+
+    List<T> getAll();
 
 }

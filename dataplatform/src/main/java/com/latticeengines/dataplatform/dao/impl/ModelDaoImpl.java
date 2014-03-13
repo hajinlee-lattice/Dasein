@@ -31,6 +31,7 @@ public class ModelDaoImpl extends BaseDaoImpl<Model> implements ModelDao {
                 Job job = new Job();
                 job.setId(jobId);
                 job.setModel(model);
+                model.addJob(job);
             }
             return model;
         }
