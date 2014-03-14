@@ -27,8 +27,7 @@ import com.latticeengines.dataplatform.yarn.client.YarnClientCustomization;
 import com.latticeengines.dataplatform.yarn.client.YarnClientCustomizationRegistry;
 
 @Component("yarnClientCustomizationService")
-public class YarnClientCustomizationServiceImpl implements
-        YarnClientCustomizationService {
+public class YarnClientCustomizationServiceImpl implements YarnClientCustomizationService {
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -37,11 +36,10 @@ public class YarnClientCustomizationServiceImpl implements
     private YarnClientCustomizationRegistry yarnClientCustomizationRegistry;
 
     @Override
-    public void addCustomizations(CommandYarnClient client, String clientName,
-            Properties appMasterProperties, Properties containerProperties) {
+    public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties,
+            Properties containerProperties) {
 
-        YarnClientCustomization customization = yarnClientCustomizationRegistry
-                .getCustomization(clientName);
+        YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
         if (customization == null) {
             return;
         }
@@ -49,19 +47,15 @@ public class YarnClientCustomizationServiceImpl implements
         try {
             HdfsHelper.mkdir(yarnConfiguration, "/app/dataplatform/" + dir);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_00000, e,
-                    new String[] { dir });
+            throw new LedpException(LedpCode.LEDP_00000, e, new String[] { dir });
         }
         containerProperties.put(ContainerProperty.JOBDIR.name(), dir);
         customization.beforeCreateLocalLauncherContextFile(containerProperties);
-        String fileName = createContainerLauncherContextFile(customization,
-                appMasterProperties, containerProperties);
-        containerProperties.put(
-                ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
+        String fileName = createContainerLauncherContextFile(customization, appMasterProperties, containerProperties);
+        containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
         String queuePropName = AppMasterProperty.QUEUE.name();
         containerProperties.setProperty(queuePropName, appMasterProperties.getProperty(queuePropName));
-        ResourceLocalizer resourceLocalizer = customization
-                .getResourceLocalizer(containerProperties);
+        ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer(containerProperties);
         int memory = customization.getMemory(appMasterProperties);
         int virtualCores = customization.getVirtualcores(appMasterProperties);
         int priority = customization.getPriority(appMasterProperties);
@@ -94,23 +88,18 @@ public class YarnClientCustomizationServiceImpl implements
 
     }
 
-    private String createContainerLauncherContextFile(
-            YarnClientCustomization customization,
+    private String createContainerLauncherContextFile(YarnClientCustomization customization,
             Properties appMasterProperties, Properties containerProperties) {
-        String contextFileName = customization
-                .getContainerLauncherContextFile(appMasterProperties);
-        InputStream contextFileUrlFromClasspathAsStream = getClass()
-                .getResourceAsStream(contextFileName);
+        String contextFileName = customization.getContainerLauncherContextFile(appMasterProperties);
+        InputStream contextFileUrlFromClasspathAsStream = getClass().getResourceAsStream(contextFileName);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         try {
             FileCopyUtils.copy(contextFileUrlFromClasspathAsStream, stream);
             String sb = new String(stream.toByteArray());
 
             if (containerProperties != null) {
-                for (Map.Entry<Object, Object> entry : containerProperties
-                        .entrySet()) {
-                    sb = sb.replaceAll("\\$\\$" + entry.getKey().toString()
-                            + "\\$\\$", entry.getValue().toString());
+                for (Map.Entry<Object, Object> entry : containerProperties.entrySet()) {
+                    sb = sb.replaceAll("\\$\\$" + entry.getKey().toString() + "\\$\\$", entry.getValue().toString());
                 }
             }
             contextFileName = contextFileName.substring(1);
@@ -126,10 +115,9 @@ public class YarnClientCustomizationServiceImpl implements
     }
 
     @Override
-    public void validate(CommandYarnClient client, String clientName,
-            Properties appMasterProperties, Properties containerProperties) {
-        YarnClientCustomization customization = yarnClientCustomizationRegistry
-                .getCustomization(clientName);
+    public void validate(CommandYarnClient client, String clientName, Properties appMasterProperties,
+            Properties containerProperties) {
+        YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
         if (customization == null) {
             return;
         }
@@ -137,10 +125,8 @@ public class YarnClientCustomizationServiceImpl implements
     }
 
     @Override
-    public void finalize(String clientName, Properties appMasterProperties,
-            Properties containerProperties) {
-        YarnClientCustomization customization = yarnClientCustomizationRegistry
-                .getCustomization(clientName);
+    public void finalize(String clientName, Properties appMasterProperties, Properties containerProperties) {
+        YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
         customization.finalize(appMasterProperties, containerProperties);
     }
 

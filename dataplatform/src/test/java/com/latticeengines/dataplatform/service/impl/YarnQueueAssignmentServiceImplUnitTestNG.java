@@ -1,55 +1,43 @@
 package com.latticeengines.dataplatform.service.impl;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.LinkedList;
 
-import org.apache.commons.io.FileUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
+import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationSubmissionContextPBImpl;
+import org.apache.hadoop.yarn.event.AsyncDispatcher;
+import org.apache.hadoop.yarn.proto.YarnProtos.ApplicationIdProto;
+import org.apache.hadoop.yarn.server.resourcemanager.RMContextImpl;
+import org.apache.hadoop.yarn.server.resourcemanager.rmapp.RMAppImpl;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.FairSchedulerInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.service.YarnQueueAssignmentService.AssignmentPolicy;
 
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.FairSchedulerInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.FairSchedulerQueueInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.FairSchedulerLeafQueueInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.QueueManager;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairSchedulerConfiguration;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FSSchedulerApp;
-import org.apache.hadoop.yarn.server.resourcemanager.rmapp.RMAppImpl;
-import org.apache.hadoop.yarn.server.resourcemanager.RMContextImpl;
-import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
-import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationSubmissionContextPBImpl;
-import org.apache.hadoop.yarn.proto.YarnProtos;
-import org.apache.hadoop.yarn.proto.YarnProtos.ApplicationIdProto;
-import org.apache.hadoop.yarn.event.AsyncDispatcher;
-import org.apache.hadoop.conf.Configuration;
-
 public class YarnQueueAssignmentServiceImplUnitTestNG {
 
     @Mock
     YarnService yarnService;
-    
+
     @BeforeClass(groups = "unit")
     public void beforeClass() {
         MockitoAnnotations.initMocks(this);
     }
 
-    private void setupFairSchedulerConfig() throws Exception
-    {
+    private void setupFairSchedulerConfig() throws Exception {
         PrintWriter out = new PrintWriter(new FileWriter("target/test-classes/fair-scheduler.xml"));
         out.println("<?xml version=\"1.0\"?>");
         out.println("<allocations>");
@@ -129,7 +117,7 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         out.println("</allocations>");
         out.close();
     }
-    
+
     @Test(groups = "unit")
     public void testNoQueues() {
         FairSchedulerInfo fairSchedulerInfoToReturn = new FairSchedulerInfo();
@@ -141,9 +129,7 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         try {
             String queueName = service.useQueue("Dell", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
             System.out.println(queueName);
-        }
-        catch (LedpException e)
-        {
+        } catch (LedpException e) {
             Assert.assertEquals(e.getMessage(), LedpCode.LEDP_12002.getMessage());
             return;
         }
@@ -180,7 +166,7 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         queueName = service.useQueue("Microsoft", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
         Assert.assertEquals(queueName, "root.PlayMaker.5");
     }
-  
+
     @Test(groups = "unit")
     public void testUseCurrentAssignment() throws Exception {
         setupFairSchedulerConfig();
@@ -190,31 +176,15 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         FairSchedulerInfo fairSchedulerInfoToReturn = new FairSchedulerInfo(fairScheduler);
         Mockito.when(yarnService.getSchedulerInfo()).thenReturn(new SchedulerTypeInfo(fairSchedulerInfoToReturn));
         AppsInfo appsInfoToReturn = new AppsInfo();
-        AppInfo app1 = new AppInfo(new RMAppImpl(new ApplicationIdPBImpl(ApplicationIdProto.getDefaultInstance()), 
-                                                 new RMContextImpl(new AsyncDispatcher(), null, null, null, null, null, null, null, null), 
-                                                 conf, 
-                                                 "Dell.SellPrinters.LogisticRegression.Small", 
-                                                 "John", 
-                                                 "root.PlayMaker.10", 
-                                                 new ApplicationSubmissionContextPBImpl(), 
-                                                 fairScheduler, 
-                                                 null,
-                                                 0, 
-                                                 null ), 
-                                     true);
+        AppInfo app1 = new AppInfo(new RMAppImpl(new ApplicationIdPBImpl(ApplicationIdProto.getDefaultInstance()),
+                new RMContextImpl(new AsyncDispatcher(), null, null, null, null, null, null, null, null), conf,
+                "Dell.SellPrinters.LogisticRegression.Small", "John", "root.PlayMaker.10",
+                new ApplicationSubmissionContextPBImpl(), fairScheduler, null, 0, null), true);
         appsInfoToReturn.add(app1);
-        AppInfo app2 = new AppInfo(new RMAppImpl(new ApplicationIdPBImpl(ApplicationIdProto.getDefaultInstance()), 
-                                                 new RMContextImpl(new AsyncDispatcher(), null, null, null, null, null, null, null, null), 
-                                                 conf, 
-                                                 "OfficeMax.SellPaper.RandomForest.Large", 
-                                                 "Jane", 
-                                                 "root.PlayMaker.4", 
-                                                 new ApplicationSubmissionContextPBImpl(), 
-                                                 fairScheduler, 
-                                                 null,
-                                                 0, 
-                                                 null ), 
-                                     true);
+        AppInfo app2 = new AppInfo(new RMAppImpl(new ApplicationIdPBImpl(ApplicationIdProto.getDefaultInstance()),
+                new RMContextImpl(new AsyncDispatcher(), null, null, null, null, null, null, null, null), conf,
+                "OfficeMax.SellPaper.RandomForest.Large", "Jane", "root.PlayMaker.4",
+                new ApplicationSubmissionContextPBImpl(), fairScheduler, null, 0, null), true);
         appsInfoToReturn.add(app2);
         Mockito.when(yarnService.getApplications("states=running,accepted")).thenReturn(appsInfoToReturn);
         YarnQueueAssignmentServiceImpl service = new YarnQueueAssignmentServiceImpl();
@@ -224,5 +194,5 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         queueName = service.useQueue("OfficeMax", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
         Assert.assertEquals(queueName, "root.PlayMaker.4");
     }
-    
+
 }

@@ -14,18 +14,30 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
+import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
+import com.latticeengines.dataplatform.exposed.domain.Job;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
 
+@ContextConfiguration(locations = { "classpath:dataplatform-quartz-context.xml" })
 public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private JobService jobService;
+    
+    @Autowired
+    private JobEntityMgrImpl jobEntityMgr;
+
+    @Autowired
+    private ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
+    
 
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
@@ -33,6 +45,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        jobEntityMgr.deleteStoreFile();
+        throttleConfigurationEntityMgr.deleteStoreFile();
         classifier1Min = new Classifier();
         classifier1Min.setName("IrisClassifier");
         classifier1Min.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
@@ -95,7 +109,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
     }
 
-    @Test(groups = "functional", enabled = true, timeOut = 720000)
+    @Test(groups = "functional", enabled = false, timeOut = 720000)
     public void testSubmit() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // P0 job
@@ -135,46 +149,55 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         waitForAllJobsToFinish(appIds);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testSubmit2() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
-        for (int i = 0; i < 3; i++) {
-            Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.A", 0);
-            appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
+        for (int i = 0; i < 5; i++) {
+            Job p0 = getJob(classifier1Min, "Priority0.A", 0);
+            appIds.add(jobService.submitJob(p0));
 
             for (int j = 0; j < 2; j++) {
-                Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.A", 1);
-                appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
+                Job p1 = getJob(classifier2Mins, "Priority1.A", 1);
+                appIds.add(jobService.submitJob(p1));
             }
 
-            Thread.sleep(5000L);
+            //Thread.sleep(5000L);
         }
 
         // B
         for (int i = 0; i < 1; i++) {
-            Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.B", 0);
-            appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
+            Job p0 = getJob(classifier1Min, "Priority0.B", 0);
+            appIds.add(jobService.submitJob(p0));
 
             for (int j = 0; j < 2; j++) {
-                Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.B", 1);
-                appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
+                Job p1 = getJob(classifier2Mins, "Priority1.B", 1);
+                appIds.add(jobService.submitJob(p1));
             }
-            Thread.sleep(5000L);
+            //Thread.sleep(5000L);
         }
 
         // C
         for (int i = 0; i < 1; i++) {
-            Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.C", 0);
-            appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
+            Job p0 = getJob(classifier1Min, "Priority0.C", 0);
+            appIds.add(jobService.submitJob(p0));
 
             for (int j = 0; j < 2; j++) {
-                Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.C", 1);
-                appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
+                Job p1 = getJob(classifier2Mins, "Priority1.C", 1);
+                appIds.add(jobService.submitJob(p1));
             }
-            Thread.sleep(5000L);
+            //Thread.sleep(5000L);
         }
         waitForAllJobsToFinish(appIds);
+    }
+    
+    private Job getJob(Classifier classifier, String queue, int priority) {
+        Job job = new Job();
+        job.setClient("pythonClient");
+        Properties[] properties = getPropertiesPair(classifier, queue, priority);
+        job.setAppMasterProperties(properties[0]);
+        job.setContainerProperties(properties[1]);
+        return job;
     }
 
     private Properties[] getPropertiesPair(Classifier classifier, String queue, int priority) {

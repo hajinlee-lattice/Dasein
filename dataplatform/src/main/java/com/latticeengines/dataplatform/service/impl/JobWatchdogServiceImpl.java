@@ -1,14 +1,13 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -23,9 +22,8 @@ import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.JobWatchdogService;
 
-
 public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdogService {
-    
+    private static final Log log = LogFactory.getLog(JobWatchdogServiceImpl.class);
     private JobService jobService;
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
     private ModelEntityMgr modelEntityMgr;
@@ -36,65 +34,58 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         run(context);
     }
-    
+
     @Override
     public void run(JobExecutionContext context) throws JobExecutionException {
         ThrottleConfiguration latestConfig = throttleConfigurationEntityMgr.getLatestConfig();
         List<Job> jobsToKill = getJobsToKill(latestConfig);
-        //resubmitPreemptedJobs(jobsToKill);
+        resubmitPreemptedJobs(jobsToKill);
         throttle(latestConfig, jobsToKill);
     }
-    
+
     private void resubmitPreemptedJobs(List<Job> jobsToExcludeFromResubmission) {
         Set<String> jobIdsToExcludeFromResubmission = new HashSet<String>();
         for (Job job : jobsToExcludeFromResubmission) {
             jobIdsToExcludeFromResubmission.add(job.getId());
         }
-        AppsInfo appsInfo = yarnService.getApplications("states=FAILED");
-        ArrayList<AppInfo> appInfos = appsInfo.getApps();
-        Collections.sort(appInfos, new Comparator<AppInfo>() {
-
-            @Override
-            public int compare(AppInfo o1, AppInfo o2) {
-                if (o1.getStartTime() - o2.getStartTime() <= 0) {
-                    return -1;
-                }
-                return 1;
-            }
-            
-        });
         Set<String> appIds = new HashSet<String>();
-        for (AppInfo appInfo : appInfos) {
-            String diagnostics = appInfo.getNote();
+        for (AppInfo appInfo : yarnService.getPreemptedApps()) {
             String appId = appInfo.getAppId();
-            if (diagnostics.contains("-102") && !jobIdsToExcludeFromResubmission.contains(appId)) {
+            // 1 minute delay from failed timestamp for resubmitting
+            if (System.currentTimeMillis() - appInfo.getFinishTime() > 60000
+                    && !jobIdsToExcludeFromResubmission.contains(appId)) {
                 appIds.add(appId);
             }
         }
         Set<Job> jobsToResubmit = jobEntityMgr.getByIds(appIds);
         for (Job job : jobsToResubmit) {
-            jobService.submitJob(job);
+            jobService.resubmitPreemptedJob(job);
         }
     }
-    
+
     private List<Job> getJobsToKill(ThrottleConfiguration config) {
-        int cutoffIndex = config.getJobRankCutoff();
         List<Job> jobs = new ArrayList<Job>();
-        List<Model> models = modelEntityMgr.getAll();
-        for (Model model : models) {
-            List<Job> ownedJobs = model.getJobs();
-            for (int i = 1; i <= ownedJobs.size(); i++) {
-                if (i >= cutoffIndex) {
-                    jobs.add(ownedJobs.get(i - 1));
+
+        if (config != null) {
+            int cutoffIndex = config.getJobRankCutoff();
+
+            List<Model> models = modelEntityMgr.getAll();
+            for (Model model : models) {
+                List<Job> ownedJobs = model.getJobs();
+                for (int i = 1; i <= ownedJobs.size(); i++) {
+                    if (i >= cutoffIndex) {
+                        jobs.add(ownedJobs.get(i - 1));
+                    }
                 }
+
             }
-            
+
         }
         return jobs;
     }
-    
+
     private void throttle(ThrottleConfiguration config, List<Job> jobs) {
-        if (config.isEnabled() && config.isImmediate()) {
+        if (config != null && config.isEnabled() && config.isImmediate()) {
             for (Job job : jobs) {
                 jobService.killJob(job.getAppId());
             }

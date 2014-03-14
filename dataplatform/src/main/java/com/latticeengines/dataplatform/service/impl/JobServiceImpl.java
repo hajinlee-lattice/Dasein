@@ -23,6 +23,7 @@ import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 
@@ -164,6 +165,26 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         job.setId(appId.toString());
         jobEntityMgr.post(job);
         jobEntityMgr.save();
+        return appId;
+    }
+    
+    @Override
+    public ApplicationId resubmitPreemptedJob(com.latticeengines.dataplatform.exposed.domain.Job job) {
+        if (job.getChildJobIds().size() > 0) {
+            log.info("Did not resubmit preempted job " + job.getId() + ". Already resubmitted.");
+            return null;
+        }
+        String metadata = job.getContainerProperties()
+                .getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
+        job.getContainerProperties().setProperty(PythonContainerProperty.METADATA.name(), metadata);
+        String parentId = job.getId();
+        job.setId(null);
+        job.setParentJobId(parentId);
+        ApplicationId appId = submitJob(job);
+        log.info("Resubmitted " + parentId + " with " + job.getId() + ".");
+        com.latticeengines.dataplatform.exposed.domain.Job parentJob = jobEntityMgr.getById(parentId);
+        parentJob.addChildJobId(job.getId());
+        jobEntityMgr.post(parentJob);
         return appId;
     }
 

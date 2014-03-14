@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.exposed.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -14,6 +16,8 @@ public class Job implements HasId<String> {
     private Model model;
     private Properties appMasterProperties;
     private Properties containerProperties;
+    private String parentJobId;
+    private List<String> childJobIds = new ArrayList<String>();
     
     @Override
     public String getId() {
@@ -71,6 +75,22 @@ public class Job implements HasId<String> {
 
     public void setClient(String client) {
         this.client = client;
+    }
+
+    public String getParentJobId() {
+        return parentJobId;
+    }
+
+    public void setParentJobId(String parentJobId) {
+        this.parentJobId = parentJobId;
+    }
+
+    public List<String> getChildJobIds() {
+        return childJobIds;
+    }
+
+    public void addChildJobId(String jobId) {
+        childJobIds.add(jobId);
     }
 
 }

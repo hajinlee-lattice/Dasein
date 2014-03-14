@@ -25,4 +25,6 @@ public interface JobService {
     
     ApplicationId submitJob(Job job);
 
+    ApplicationId resubmitPreemptedJob(Job job);
+
 }

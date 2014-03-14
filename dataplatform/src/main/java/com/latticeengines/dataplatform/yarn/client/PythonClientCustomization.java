@@ -53,6 +53,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
             File metadataFile = new File("metadata.json");
             FileUtils.writeStringToFile(metadataFile, metadata);
+            properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
         } catch (Exception e) {
             throw new IllegalStateException(e);
