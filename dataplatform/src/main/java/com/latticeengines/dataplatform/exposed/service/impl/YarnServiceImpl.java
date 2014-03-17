@@ -78,8 +78,4 @@ public class YarnServiceImpl implements YarnService {
         return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
     }
     
-    public static void main(String[] args) {
-        System.out.println("root.Priority0.A".indexOf("Priority"));
-    }
-
 }
