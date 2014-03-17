@@ -171,7 +171,10 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Override
     public ApplicationId resubmitPreemptedJob(com.latticeengines.dataplatform.exposed.domain.Job job) {
         if (job.getChildJobIds().size() > 0) {
-            log.info("Did not resubmit preempted job " + job.getId() + ". Already resubmitted.");
+            if (log.isDebugEnabled())  {
+                log.debug("Did not resubmit preempted job " + job.getId() + ". Already resubmitted.");
+            }
+            
             return null;
         }
         String metadata = job.getContainerProperties()

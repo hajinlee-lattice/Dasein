@@ -109,60 +109,21 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
     }
 
-    @Test(groups = "functional", enabled = false, timeOut = 720000)
+    @Test(groups = "functional", enabled = false)
     public void testSubmit() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
-        // P0 job
-        for (int i = 0; i < 3; i++) {
-            Properties[] p0 = getPropertiesPair(classifier1Min, "Priority0.A", 0);
-            appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
-        }
-        /*
-        // P1 job
-        for (int i = 0; i < 1; i++) {
-            Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.A", 1);
-            appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
-        }
-
-        // P2 job
-        for (int i = 0; i < 1; i++) {
-            Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.A", 2);
-            appIds.add(jobService.submitYarnJob("pythonClient", p2[0], p2[1]));
-        }*/
-        /*
-        Thread.sleep(20000L);
-        // 1 P0 job
-        // P0 job
-        p0 = getPropertiesPair(classifier1Min, "Priority0.B", 0);
-        appIds.add(jobService.submitYarnJob("pythonClient", p0[0], p0[1]));
-        // P1 job
-        for (int i = 0; i < 2; i++) {
-            Properties[] p1 = getPropertiesPair(classifier2Mins, "Priority1.B", 1);
-            appIds.add(jobService.submitYarnJob("pythonClient", p1[0], p1[1]));
-        }
-
-        // P2 job
-        for (int i = 0; i < 2; i++) {
-            Properties[] p2 = getPropertiesPair(classifier4Mins, "Priority2.B", 2);
-            appIds.add(jobService.submitYarnJob("pythonClient", p2[0], p2[1]));
-        }*/
-        waitForAllJobsToFinish(appIds);
-    }
-
-    @Test(groups = "functional", enabled = true)
-    public void testSubmit2() throws Exception {
-        List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 1; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.A", 0);
             appIds.add(jobService.submitJob(p0));
 
+            ///*
             for (int j = 0; j < 2; j++) {
                 Job p1 = getJob(classifier2Mins, "Priority1.A", 1);
                 appIds.add(jobService.submitJob(p1));
-            }
+            }//*/
 
-            //Thread.sleep(5000L);
+            Thread.sleep(5000L);
         }
 
         // B
@@ -170,25 +131,100 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
             Job p0 = getJob(classifier1Min, "Priority0.B", 0);
             appIds.add(jobService.submitJob(p0));
 
+            ///*
             for (int j = 0; j < 2; j++) {
                 Job p1 = getJob(classifier2Mins, "Priority1.B", 1);
                 appIds.add(jobService.submitJob(p1));
-            }
-            //Thread.sleep(5000L);
+            }//*/
+            Thread.sleep(5000L);
         }
 
+        
         // C
         for (int i = 0; i < 1; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.C", 0);
             appIds.add(jobService.submitJob(p0));
 
+            ///*
             for (int j = 0; j < 2; j++) {
                 Job p1 = getJob(classifier2Mins, "Priority1.C", 1);
                 appIds.add(jobService.submitJob(p1));
-            }
+            }//*/
+            Thread.sleep(5000L);
+        }
+        // D
+        for (int i = 0; i < 1; i++) {
+            Job p0 = getJob(classifier1Min, "Priority0.D", 0);
+            appIds.add(jobService.submitJob(p0));
+
+            ///*
+            for (int j = 0; j < 2; j++) {
+                Job p1 = getJob(classifier2Mins, "Priority1.D", 1);
+                appIds.add(jobService.submitJob(p1));
+            }//*/
+            Thread.sleep(5000L);
+        }
+        // E
+        for (int i = 0; i < 1; i++) {
+            Job p0 = getJob(classifier1Min, "Priority0.E", 0);
+            appIds.add(jobService.submitJob(p0));
+
+            ///*
+            for (int j = 0; j < 2; j++) {
+                Job p1 = getJob(classifier2Mins, "Priority1.E", 1);
+                appIds.add(jobService.submitJob(p1));
+            }//*/
+            Thread.sleep(5000L);
+        }
+        //waitForAllJobsToFinish(appIds);
+        while (true);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testSubmit2() throws Exception {
+        List<ApplicationId> appIds = new ArrayList<ApplicationId>();
+        // A
+        for (int i = 0; i < 4; i++) {
+            Job p0 = getJob(classifier1Min, "Priority0.A", 0);
+            appIds.add(jobService.submitJob(p0));
+
+            ///*
+            for (int j = 0; j < 2; j++) {
+                Job p1 = getJob(classifier2Mins, "Priority1.A", 1);
+                appIds.add(jobService.submitJob(p1));
+            }//*/
+
+            Thread.sleep(5000L);
+        }
+
+        // B
+        for (int i = 0; i < 1; i++) {
+            Job p0 = getJob(classifier1Min, "Priority0.B", 0);
+            appIds.add(jobService.submitJob(p0));
+
+            ///*
+            for (int j = 0; j < 2; j++) {
+                Job p1 = getJob(classifier2Mins, "Priority1.B", 1);
+                appIds.add(jobService.submitJob(p1));
+            }//*/
+            Thread.sleep(5000L);
+        }
+
+        
+        // C
+        for (int i = 0; i < 1; i++) {
+            Job p0 = getJob(classifier1Min, "Priority0.C", 0);
+            appIds.add(jobService.submitJob(p0));
+
+            ///*
+            for (int j = 0; j < 2; j++) {
+                Job p1 = getJob(classifier2Mins, "Priority1.C", 1);
+                appIds.add(jobService.submitJob(p1));
+            }//*/
             //Thread.sleep(5000L);
         }
-        waitForAllJobsToFinish(appIds);
+        //waitForAllJobsToFinish(appIds);
+        while (true);
     }
     
     private Job getJob(Classifier classifier, String queue, int priority) {

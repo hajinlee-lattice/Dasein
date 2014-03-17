@@ -56,8 +56,8 @@ public class YarnServiceImpl implements YarnService {
             public int compare(AppInfo o1, AppInfo o2) {
                 String q1 = o1.getQueue();
                 String q2 = o2.getQueue();
-                Integer p1 = Integer.parseInt(q1.substring(8, q1.indexOf(".")));
-                Integer p2 = Integer.parseInt(q2.substring(8, q2.indexOf(".")));
+                Integer p1 = Integer.parseInt(q1.substring(q1.indexOf("Priority") + 8, q1.lastIndexOf(".")));
+                Integer p2 = Integer.parseInt(q2.substring(q2.indexOf("Priority") + 8, q2.lastIndexOf(".")));
                 return ComparisonChain.start().compare(p1, p2).compare(o1.getStartTime(), o2.getStartTime()).result();
             }
 
@@ -76,6 +76,10 @@ public class YarnServiceImpl implements YarnService {
     public AppInfo getApplication(String appId) {
         String rmRestEndpointBaseUrl = getResourceManagerEndpoint();
         return rmRestTemplate.getForObject(rmRestEndpointBaseUrl + "/apps/" + appId, AppInfo.class);
+    }
+    
+    public static void main(String[] args) {
+        System.out.println("root.Priority0.A".indexOf("Priority"));
     }
 
 }

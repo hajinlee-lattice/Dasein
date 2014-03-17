@@ -51,9 +51,9 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
         Set<String> appIds = new HashSet<String>();
         for (AppInfo appInfo : yarnService.getPreemptedApps()) {
             String appId = appInfo.getAppId();
-            // 1 minute delay from failed timestamp for resubmitting
-            if (System.currentTimeMillis() - appInfo.getFinishTime() > 60000
-                    && !jobIdsToExcludeFromResubmission.contains(appId)) {
+            // if P0, resubmit immediately with no delay. If any other priorities, delay by some latency
+            if (!jobIdsToExcludeFromResubmission.contains(appId)
+                    && (appInfo.getQueue().contains("Priority0") || System.currentTimeMillis() - appInfo.getFinishTime() > 30000)) {
                 appIds.add(appId);
             }
         }
