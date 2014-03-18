@@ -1,52 +1,25 @@
 package com.latticeengines.dataplatform.service.impl.metadata;
 
-import java.sql.Connection;
+import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
+import org.apache.avro.Schema;
+import org.apache.sqoop.orm.AvroSchemaGenerator;
+
+import com.cloudera.sqoop.SqoopOptions;
+import com.cloudera.sqoop.manager.ConnManager;
+import com.cloudera.sqoop.manager.SQLServerManager;
 import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 
+@SuppressWarnings("deprecation")
 public class SQLServerMetadataProvider implements MetadataProvider {
 
-    private Map<String, String> dbTypeMapping = new HashMap<String, String>();
-
+    private AvroSchemaGenerator avroSchemaGenerator;
+    
     public SQLServerMetadataProvider() {
-        dbTypeMapping.put("bigint", "int");
-        dbTypeMapping.put("binary", "bytes");
-        dbTypeMapping.put("bit", "int");
-        dbTypeMapping.put("char", "string");
-        dbTypeMapping.put("date", "string");
-        dbTypeMapping.put("datetime", "string");
-        dbTypeMapping.put("datetime2", "string");
-        dbTypeMapping.put("datetimeoffset", "string");
-        dbTypeMapping.put("decimal", "float");
-        dbTypeMapping.put("float", "float");
-        dbTypeMapping.put("geography", "string");
-        dbTypeMapping.put("geometry", "string");
-        dbTypeMapping.put("hierarchyid", "string");
-        dbTypeMapping.put("image", "string");
-        dbTypeMapping.put("int", "int");
-        dbTypeMapping.put("money", "float");
-        dbTypeMapping.put("nchar", "string");
-        dbTypeMapping.put("ntext", "string");
-        dbTypeMapping.put("numeric", "string");
-        dbTypeMapping.put("nvarchar", "string");
-        dbTypeMapping.put("real", "float");
-        dbTypeMapping.put("smalldatetime", "string");
-        dbTypeMapping.put("smallint", "int");
-        dbTypeMapping.put("smallmoney", "float");
-        dbTypeMapping.put("text", "string");
-        dbTypeMapping.put("time", "string");
-        dbTypeMapping.put("timestamp", "string");
-        dbTypeMapping.put("tinyint", "int");
-        dbTypeMapping.put("uniqueidentifier", "string");
-        dbTypeMapping.put("varbinary", "bytes");
-        dbTypeMapping.put("varchar", "string");
-        dbTypeMapping.put("xml", "string");
     }
 
     @Override
@@ -55,7 +28,7 @@ public class SQLServerMetadataProvider implements MetadataProvider {
     }
 
     @Override
-    public Connection getConnection(DbCreds creds) {
+    public String getConnectionString(DbCreds creds) {
         String url = "jdbc:sqlserver://$$HOST$$:$$PORT$$;databaseName=$$DB$$;user=$$USER$$;password=$$PASSWD$$";
         String driverClass = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
         try {
@@ -64,7 +37,6 @@ public class SQLServerMetadataProvider implements MetadataProvider {
             throw new LedpException(LedpCode.LEDP_11000, e,
                     new String[] { driverClass });
         }
-        Connection conn = null;
 
         try {
             url = url.replaceFirst("\\$\\$HOST\\$\\$", creds.getHost());
@@ -73,32 +45,24 @@ public class SQLServerMetadataProvider implements MetadataProvider {
             url = url.replaceFirst("\\$\\$DB\\$\\$", creds.getDb());
             url = url.replaceFirst("\\$\\$USER\\$\\$", creds.getUser());
             url = url.replaceFirst("\\$\\$PASSWD\\$\\$", creds.getPassword());
-            conn = DriverManager.getConnection(url);
+            DriverManager.getConnection(url);
         } catch (SQLException e) {
             throw new LedpException(LedpCode.LEDP_11001, e);
         }
-        return conn;
+        return url;
     }
 
     @Override
-    public String getType(String dbType) {
-        return dbTypeMapping.get(dbType);
-    }
-
-    @Override
-    public String getDefaultValue(String dbType) {
-        String type = getType(dbType);
-
-        if (type.equals("int")) {
-            return "0";
-        } else if (type.equals("string")) {
-            return "null";
-        } else if (type.equals("float")) {
-            return "0.0";
-        } else if (type.equals("bytes")) {
-            return "null";
+    public Schema getSchema(DbCreds dbCreds, String tableName) {
+        SqoopOptions options = new SqoopOptions();
+        options.setConnectString(getConnectionString(dbCreds));
+        ConnManager connManager = new SQLServerManager(options);
+        avroSchemaGenerator = new AvroSchemaGenerator(options, connManager, tableName);
+        try {
+            return avroSchemaGenerator.generate();
+        } catch (IOException e) {
+            return null;
         }
-        throw new LedpException(LedpCode.LEDP_11003, new String[] { dbType });
     }
 
 }

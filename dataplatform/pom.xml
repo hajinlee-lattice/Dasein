@@ -13,7 +13,7 @@
         <hadoop.version>2.2.0.2.0.6.0-101</hadoop.version>
         <spring.data.version>2.0.0.M4-hadoop22</spring.data.version>
         <avro.version>1.7.4</avro.version>
-        <sqoop.version>1.4.4</sqoop.version>
+        <sqoop.version>1.4.4.2.0.6.1-101</sqoop.version>
         <le.perf.version>1.0.0-SNAPSHOT</le.perf.version>
     </properties>
 
@@ -141,13 +141,13 @@
             <artifactId>sqljdbc4</artifactId>
             <version>3.0</version>
         </dependency>
-        <!-- 
+ 
         <dependency>
             <groupId>org.apache.sqoop</groupId>
             <artifactId>sqoop</artifactId>
             <version>${sqoop.version}</version>
         </dependency>
-        -->
+
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-perf</artifactId>

@@ -15,50 +15,49 @@ public final class Permutations {
     private static final Log log = LogFactory.getLog(Permutations.class);
 
     private static Permutations instance = null;
-    
+
     private Integer[][] randomPermutations;
-    
+
     private Permutations() {
-            
+
         log.debug("loading list of permutations");
         BufferedReader br = null;
         try {
-            InputStream in = Permutations.class.getClassLoader().
-                    getResourceAsStream("com/latticeengines/dataplatform/util/Permutations/perms.txt");
+            InputStream in = Permutations.class.getClassLoader().getResourceAsStream(
+                    "com/latticeengines/dataplatform/util/permutations/perms.txt");
             br = new BufferedReader(new InputStreamReader(in));
-            Integer numPermutations =Integer.parseInt(br.readLine());
+            Integer numPermutations = Integer.parseInt(br.readLine());
             Integer numElements = Integer.parseInt(br.readLine());
-            log.debug("numPermutations=" + numPermutations + " numElements=" + numElements);
+
+            if (log.isDebugEnabled()) {
+                log.debug("numPermutations=" + numPermutations + " numElements=" + numElements);
+            }
+
             randomPermutations = new Integer[numPermutations][numElements];
             String line = null;
             Integer i = 0;
             while ((line = br.readLine()) != null) {
                 String[] permutation = line.split(" ");
-                for (int k=0; k<permutation.length; k++) {
+                for (int k = 0; k < permutation.length; k++) {
                     randomPermutations[i][k] = Integer.parseInt(permutation[k]);
-                }   
-                i++;    
-            }   
-        }   
-        catch (Exception e) {
-            log.error("unable to read list of permutations ", e);
+                }
+                i++;
+            }
+        } catch (Exception e) {
+            log.error("Unable to read list of permutations.", e);
             throw new LedpException(LedpCode.LEDP_00002);
-        } 
-        finally {       
-            try {       
+        } finally {
+            try {
                 if (br != null) {
                     br.close();
                 }
-            }
-            catch (Exception e) {
-                ;
+            } catch (Exception e) {
             }
         }
     }
-    
+
     public static Permutations getInstance() {
         if (instance == null) {
-            // lazy construction
             synchronized (Permutations.class) {
                 instance = new Permutations();
             }
@@ -73,8 +72,8 @@ public final class Permutations {
     public Integer getPermutationSize() {
         return randomPermutations[0].length;
     }
-    
-    // XXX - another way of enforcing constness? 
+
+    // XXX - another way of enforcing constness?
     public Integer getPermutationElement(Integer id, Integer elementId) {
         return randomPermutations[id][elementId];
     }
