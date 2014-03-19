@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.service.impl;
 
+import static org.testng.Assert.assertEquals;
+
 import org.apache.avro.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
@@ -29,11 +31,8 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         DbCreds creds = new DbCreds(builder);
 
-        //DataSchema schema = metadataService.createDataSchema(creds,
-        //        "all_datatypes");
-        //assertEquals(schema.getFields().size(), 34);
-        
         Schema avroSchema = metadataService.getAvroSchema(creds, "all_datatypes");
+        assertEquals(avroSchema.getFields().size(), 33);
         System.out.println(avroSchema.toString(true));
     }
 }
