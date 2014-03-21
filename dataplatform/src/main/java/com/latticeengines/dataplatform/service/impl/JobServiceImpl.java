@@ -150,7 +150,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             job = Job.getInstance(job.getConfiguration());
             return job;
         } catch (Throwable e) {
-            log.error("Error happend while getting hdp:job " + mrJobName, e);
+            log.error("Error while getting hdp:job " + mrJobName, e);
         } finally {
             if (context != null) {
                 context.close();

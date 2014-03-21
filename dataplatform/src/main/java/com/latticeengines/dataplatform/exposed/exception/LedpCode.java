@@ -4,7 +4,7 @@ public enum LedpCode {
     // Low level errors: 00000-09999
     LEDP_00000("Could not create hdfs dir {0}."), //
     LEDP_00001("Could not collect yarn queue information from ResourceManager."),
-    LEDP_00002("Generic system error"),
+    LEDP_00002("Generic system error."),
     // Validation service: 10000-10999
     LEDP_10000("Metadata schema is null."), //
     LEDP_10001("Metadata schema is not retrievable from hdfs."), //
@@ -21,12 +21,15 @@ public enum LedpCode {
     LEDP_12000("Parameter PRIORITY undefined for analytics job."),
     LEDP_12001("Unsupported queue assignment policy."),
     LEDP_12002("No queue available to run job."), //
+    LEDP_12003("No avro file in specified directory {0}."), //
+    LEDP_12004("Sampling configuration property ledp.sampling.config not specified."), //
     // Metric system: 13000-13999
     LEDP_13000("Tag {0} does not have a value."), //
     // Persistence service: 14000-14999
     LEDP_14000("Could not create configuration store {0}."), //
     LEDP_14001("Could not load configuration store {0}."), //
     LEDP_14002("Could not save configuration store {0}.");
+    // 
 
     
     private String message;

@@ -126,16 +126,18 @@
             <artifactId>avro</artifactId>
             <version>${avro.version}</version>
         </dependency>
+        
         <dependency>
             <groupId>org.apache.avro</groupId>
             <artifactId>avro-mapred</artifactId>
             <version>${avro.version}</version>
+            <classifier>hadoop2</classifier>
         </dependency>
         <dependency>
-			<groupId>net.jpountz.lz4</groupId>
-			<artifactId>lz4</artifactId>
-			<version>1.2.0</version>
-		</dependency>
+            <groupId>net.jpountz.lz4</groupId>
+            <artifactId>lz4</artifactId>
+            <version>1.2.0</version>
+        </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
@@ -147,12 +149,10 @@
             <artifactId>sqoop</artifactId>
             <version>${sqoop.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-perf</artifactId>
             <version>${le.perf.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
