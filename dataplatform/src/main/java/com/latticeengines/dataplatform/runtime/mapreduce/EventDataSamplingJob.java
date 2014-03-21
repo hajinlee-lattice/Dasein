@@ -1,6 +1,5 @@
 package com.latticeengines.dataplatform.runtime.mapreduce;
 
-import java.io.File;
 import java.util.List;
 import java.util.Properties;
 
@@ -17,7 +16,6 @@ import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.avro.mapreduce.AvroKeyOutputFormat;
 import org.apache.avro.mapreduce.AvroMultipleOutputs;
-import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
@@ -60,7 +58,6 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
     }
 
     public static void main(String[] args) throws Exception {
-        FileUtils.deleteDirectory(new File("/tmp/sample"));
         int res = ToolRunner.run(new EventDataSamplingJob(), args);
         System.exit(res);
     }
@@ -90,12 +87,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             SeekableInput input = new FsInput(path, config);
             GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<GenericRecord>();
             FileReader<GenericRecord> reader = DataFileReader.openReader(input, fileReader);
-
-            Schema schema = null;
-            for (GenericRecord datum : reader) {
-                schema = datum.getSchema();
-                break;
-            }
+            Schema schema = reader.getSchema();
 
             AvroJob.setInputKeySchema(job, schema);
             AvroJob.setMapOutputValueSchema(job, schema);
