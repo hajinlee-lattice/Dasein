@@ -1,13 +1,12 @@
 package com.latticeengines.dataplatform.util;
 
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 
 public class PermutationsUnitTestNG {
@@ -18,7 +17,7 @@ public class PermutationsUnitTestNG {
     @BeforeClass(groups = "unit")
     public void beforeClass() throws Exception {
         InputStream in = Permutations.class.getClassLoader().
-                getResourceAsStream("com/latticeengines/dataplatform/util/Permutations/perms.txt");
+                getResourceAsStream("com/latticeengines/dataplatform/util/permutations/perms.txt");
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
         numPermutationsExpected = Integer.parseInt(br.readLine());
         permutationSizeExpected = Integer.parseInt(br.readLine());
