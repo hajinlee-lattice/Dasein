@@ -32,11 +32,17 @@ import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.mapreduce.job.MRJobCustomization;
 import com.latticeengines.dataplatform.util.HdfsHelper;
+import com.latticeengines.dataplatform.util.HdfsHelper.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class EventDataSamplingJob extends Configured implements Tool, MRJobCustomization {
     
-    public static String LEDP_SAMPLE_CONFIG = "ledp.sample.config";
+    public static final String LEDP_SAMPLE_CONFIG = "ledp.sample.config";
+    private static final String SAMPLE_JOB_TYPE = "samplingJob";
+    
+    public EventDataSamplingJob(Configuration config) {
+        setConf(config);
+    }
 
     @SuppressWarnings({ "deprecation" })
     @Override
@@ -58,7 +64,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
     }
 
     public static void main(String[] args) throws Exception {
-        int res = ToolRunner.run(new EventDataSamplingJob(), args);
+        int res = ToolRunner.run(new EventDataSamplingJob(new Configuration()), args);
         System.exit(res);
     }
 
@@ -73,13 +79,16 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             AvroKeyOutputFormat.setOutputPath(job,
                     new Path(properties.getProperty(EventDataSamplingProperty.OUTPUT.name())));
 
-            List<String> files = HdfsHelper.getFilesForDir(job.getConfiguration(), inputDir);
-            String filename = null;
-            for (String file : files) {
-                if (file.endsWith(".avro")) {
-                    filename = file;
-                }
-            }
+            List<String> files = HdfsHelper.getFilesForDir(job.getConfiguration(), inputDir,
+                    new HdfsFilenameFilter() {
+
+                        @Override
+                        public boolean accept(Path filename) {
+                            return filename.toString().endsWith(".avro");
+                        }
+                
+            });
+            String filename = files.size() > 0 ? files.get(0) : null;
             if (filename == null) {
                 throw new LedpException(LedpCode.LEDP_12003, new String[] { inputDir });
             }
@@ -112,6 +121,11 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
+    }
+
+    @Override
+    public String getJobType() {
+        return SAMPLE_JOB_TYPE;
     }
 
 }

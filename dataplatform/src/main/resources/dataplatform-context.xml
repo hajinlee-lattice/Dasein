@@ -22,6 +22,7 @@
     
     <import resource="classpath:dataplatform-yarn-config-context.xml"/>
     <import resource="classpath:dataplatform-yarn-client-context.xml"/>
+    <import resource="classpath:sampling/dataplatform-mr-sampling-context.xml" />
     
     <context:component-scan base-package="com.latticeengines.dataplatform"/>
 

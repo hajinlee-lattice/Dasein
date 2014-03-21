@@ -25,6 +25,7 @@ import org.springframework.yarn.client.YarnClient;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 
 @Component("jobService")
@@ -36,6 +37,9 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Autowired
     private YarnClient defaultYarnClient;
+    
+    @Autowired
+    private MapReduceCustomizationService mapReduceCustomizationService;
 
     @Autowired
     private YarnClientCustomizationService yarnClientCustomizationService;
@@ -121,6 +125,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Override
     public ApplicationId submitMRJob(String mrJobName, Properties properties) {
         Job job = getJob(mrJobName);
+        mapReduceCustomizationService.addCustomizations(job, mrJobName, properties);
         if (properties != null) {
             Configuration config = job.getConfiguration();
             for (Object key : properties.keySet()) {

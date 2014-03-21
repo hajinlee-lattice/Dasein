@@ -15,6 +15,10 @@ import org.apache.hadoop.fs.RemoteIterator;
 import org.springframework.util.StreamUtils;
 
 public class HdfsHelper {
+    
+    public static interface HdfsFilenameFilter {
+        boolean accept(Path filename);
+    }
 
     public static enum LogFileEncodingType {
         NONE, GZ;
@@ -54,11 +58,25 @@ public class HdfsHelper {
 
     public static final List<String> getFilesForDir(
             Configuration configuration, String hdfsDir) throws Exception {
+        return getFilesForDir(configuration, hdfsDir, null);
+    }
+
+    
+    public static final List<String> getFilesForDir(
+            Configuration configuration, String hdfsDir, HdfsFilenameFilter filter) throws Exception {
         FileSystem fs = FileSystem.get(configuration);
         FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
         List<String> filePaths = new ArrayList<String>();
         for (FileStatus status : statuses) {
-            filePaths.add(status.getPath().toString());
+            Path filename = status.getPath();
+            boolean accept = true;
+            
+            if (filter != null) {
+                accept = filter.accept(filename);
+            }
+            if (accept) {
+                filePaths.add(filename.toString());
+            }
         }
 
         return filePaths;

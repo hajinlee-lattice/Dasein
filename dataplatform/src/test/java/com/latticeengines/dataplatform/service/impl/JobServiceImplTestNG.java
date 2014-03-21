@@ -5,10 +5,8 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.FilenameFilter;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -19,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -31,17 +28,72 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
+import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
+import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
+import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.util.HdfsHelper;
+import com.latticeengines.dataplatform.util.HdfsHelper.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private JobService jobService;
+    
+    @Autowired
+    private Configuration hadoopConfiguration;
 
+    private String inputDir = null;
+    private String outputDir = null;
+    private SamplingConfiguration samplingConfig = null;
+    
+    private File[] getAvroFilesForDir(String parentDir) {
+        return new File(parentDir).listFiles(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".avro");
+            }
+            
+        });
+    }
+
+    
+    @BeforeClass(groups = "unit")
+    public void setupSamplingMRJob() throws Exception {
+        FileSystem fs = FileSystem.get(yarnConfiguration);
+
+        fs.delete(new Path("/eventTable"), true);
+
+        inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE_TEST").getPath();
+        outputDir = inputDir + "/samples";
+        FileUtils.deleteDirectory(new File(outputDir));
+        samplingConfig = new SamplingConfiguration();
+        samplingConfig.setTrainingPercentage(80);
+        SamplingElement s1 = new SamplingElement();
+        s1.setName("s1");
+        s1.setPercentage(30);
+        SamplingElement s2 = new SamplingElement();
+        s2.setName("s2");
+        s2.setPercentage(60);
+        samplingConfig.addSamplingElement(s1);
+        samplingConfig.addSamplingElement(s2);
+        
+        List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
+        
+        File[] avroFiles = getAvroFilesForDir(inputDir);
+        for (File avroFile : avroFiles) {
+            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), "/eventTable", false));
+        }
+        
+        inputDir = "/eventTable";
+        outputDir = inputDir + "/samples";
+        doCopy(fs, copyEntries);
+    }
+    
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         new File("/tmp/ledpjob-metrics.out").delete();
@@ -71,13 +123,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testGetJobReportsAll() throws Exception {
         List<ApplicationReport> applications = jobService.getJobReportsAll();
         assertNotNull(applications);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testKillApplication() throws Exception {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put("QUEUE", "Priority0.A");
@@ -95,7 +147,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertTrue(state.equals(YarnApplicationState.KILLED));
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testGetJobReportByUser() throws Exception {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put("QUEUE", "Priority0.A");
@@ -126,7 +178,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         jobService.killJob(applicationId);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testSubmitPythonYarnJob() throws Exception {
         Classifier classifier = new Classifier();
         classifier.setName("IrisClassifier");
@@ -170,53 +222,29 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertFalse(new File(metadataFileName).exists());
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testSubmitMRJob() throws Exception {
-
-        Configuration conf = (Configuration) applicationContext.getBean("hadoopConfiguration");
-        FileSystem fileSystem = null;
-        FSDataOutputStream fileOut = null;
-        try {
-            fileSystem = FileSystem.get(conf);
-            String dir = "/output";
-            Path path = new Path(dir);
-            if (fileSystem.exists(path)) {
-                fileSystem.delete(path, true);
-                System.out.println("Deleted dir " + dir);
-            }
-
-            Path inputFilepath = new Path("/input/file1.txt");
-            if (fileSystem.exists(inputFilepath)) {
-                fileSystem.delete(inputFilepath, true);
-            }
-
-            // Create a new file and write data to it.
-            fileOut = fileSystem.create(inputFilepath);
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fileOut));
-            writer.write("Watson is awesome\n");
-            writer.flush();
-            fileOut.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                fileOut.close();
-                fileSystem.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        ApplicationId applicationId = jobService.submitMRJob("wordCountJob", null);
+        Properties properties = new Properties();
+        properties.setProperty(EventDataSamplingProperty.INPUT.name(), inputDir);
+        properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), outputDir);
+        properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
+        ApplicationId applicationId = jobService.submitMRJob("samplingJob", properties);
         YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
 
         state = getState(applicationId);
         assertNotNull(state);
-        assertTrue(!state.equals(YarnApplicationState.FAILED));
+        assertTrue(state.equals(YarnApplicationState.FINISHED));
+        
+        List<String> files = HdfsHelper.getFilesForDir(hadoopConfiguration, outputDir,
+                new HdfsFilenameFilter() {
 
-        ApplicationReport app = jobService.getJobReportById(applicationId);
-        String log = HdfsHelper.getApplicationLog(yarnConfiguration, app.getUser(), applicationId.toString());
-        assertTrue(!log.isEmpty());
+                    @Override
+                    public boolean accept(Path filename) {
+                        return filename.toString().endsWith(".avro");
+                    }
+            
+        });
+        assertEquals(4, files.size());
     }
 
 }

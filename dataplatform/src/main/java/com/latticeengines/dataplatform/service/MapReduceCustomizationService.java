@@ -6,7 +6,7 @@ import org.apache.hadoop.mapreduce.Job;
 
 public interface MapReduceCustomizationService {
     
-    void addCustomizations(Job mrJob, Properties properties);
+    void addCustomizations(Job mrJob, String mrJobType, Properties properties);
 
     void validate(Job mrJob, Properties properties);
 

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:yarn="http://www.springframework.org/schema/yarn"
+    xmlns:hdp="http://www.springframework.org/schema/hadoop"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+      http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+      http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
+    
+    <hdp:configuration id="hadoopConfiguration">
+        fs.defaultFS=${dataplatform.fs.defaultFS}
+        yarn.resourcemanager.address=${dataplatform.yarn.resourcemanager.address}
+        yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
+        mapred.job.tracker=${dataplatform.mapred.job.tracker}
+        yarn.app.mapreduce.am.resource.cpu-vcores=1
+        mapreduce.map.memory.mb=2048
+        mapreduce.reduce.memory.mb=2048
+        mapreduce.map.cpu.vcores=4
+        mapreduce.reduce.cpu.vcores=1
+    </hdp:configuration>
+
+    <hdp:cache create-symlink="true">
+        <hdp:classpath value="/lib/*.jar" />
+        <hdp:classpath value="/app/dataplatform/*.jar" />
+    </hdp:cache>
+
+    <!-- Configures the word count job. -->
+    <hdp:job id="samplingJob" 
+        number-reducers="1"
+        mapper="com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingMapper"
+        reducer="com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingReducer" />
+
+</beans>

@@ -28,10 +28,10 @@ import com.latticeengines.dataplatform.util.Permutations;
 public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentService {
 
     private static final Log log = LogFactory.getLog(YarnQueueAssignmentServiceImpl.class);
-    
+
     @Autowired
     private YarnService yarnService;
-    
+
     private static HashMap<Integer, Integer> curQueueDepth = new HashMap<Integer, Integer>();
     private static HashMap<Integer, String> fullyQualifiedQueueNames = new HashMap<Integer, String>();
     private static HashMap<String, String> curQueueAssignment = new HashMap<String, String>();
@@ -40,31 +40,29 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
     public void setYarnService(YarnService yarnServiceToUse) {
         yarnService = yarnServiceToUse;
     }
-    
+
     // Get current state of all queues
     private void updateCurrentQueueState() {
         // Get current depth of all leaf queues
         curQueueDepth.clear();
         fullyQualifiedQueueNames.clear();
         // XXX - handle capacity scheduler as well
-        // XXX - remove assumption that leaf queues are uniquely named with integer identifiers
+        // XXX - remove assumption that leaf queues are uniquely named with
+        // integer identifiers
         SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
         Field field;
         try {
             field = SchedulerTypeInfo.class.getDeclaredField("schedulerInfo");
             field.setAccessible(true);
-            FairSchedulerInfo fairScheduler = (FairSchedulerInfo) field
-                    .get(schedulerInfo);
+            FairSchedulerInfo fairScheduler = (FairSchedulerInfo) field.get(schedulerInfo);
             LinkedList<FairSchedulerQueueInfo> queuesToExplore = new LinkedList<FairSchedulerQueueInfo>();
             FairSchedulerQueueInfo rootQueue = fairScheduler.getRootQueueInfo();
-            if (rootQueue != null)
-            {
-                queuesToExplore.add (rootQueue);
+            if (rootQueue != null) {
+                queuesToExplore.add(rootQueue);
             }
             while (!queuesToExplore.isEmpty()) {
                 FairSchedulerQueueInfo curQueue = queuesToExplore.removeFirst();
-                Iterator<FairSchedulerQueueInfo> iter = curQueue.getChildQueues()
-                        .iterator();
+                Iterator<FairSchedulerQueueInfo> iter = curQueue.getChildQueues().iterator();
                 while (iter.hasNext()) {
                     FairSchedulerQueueInfo queue = (FairSchedulerQueueInfo) iter.next();
                     if (queue instanceof FairSchedulerLeafQueueInfo) {
@@ -72,22 +70,19 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
                         Integer leafQueueName = -1;
                         try {
                             String[] queueNodes = queueName.split("\\.");
-                            leafQueueName = Integer.parseInt(queueNodes[queueNodes.length-1]);
-                        }
-                        catch (Exception e) {
+                            leafQueueName = Integer.parseInt(queueNodes[queueNodes.length - 1]);
+                        } catch (Exception e) {
                             log.error("unable to process queueName " + queueName);
                         }
-                        Integer queueDepth = ((FairSchedulerLeafQueueInfo) queue).getNumActiveApplications() +
-                                ((FairSchedulerLeafQueueInfo) queue).getNumPendingApplications();
-                        log.debug("Processing queue data: queueName=" + queueName + 
-                                  " leafQueueName=" + leafQueueName + 
-                                  " queueDepth=" + queueDepth);
+                        Integer queueDepth = ((FairSchedulerLeafQueueInfo) queue).getNumActiveApplications()
+                                + ((FairSchedulerLeafQueueInfo) queue).getNumPendingApplications();
+                        log.debug("Processing queue data: queueName=" + queueName + " leafQueueName=" + leafQueueName
+                                + " queueDepth=" + queueDepth);
                         if (leafQueueName != -1) {
                             curQueueDepth.put(leafQueueName, queueDepth);
                             fullyQualifiedQueueNames.put(leafQueueName, queueName);
                         }
-                    }
-                    else {
+                    } else {
                         queuesToExplore.addLast(queue);
                     }
                 }
@@ -95,84 +90,80 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
         } catch (Exception e) {
             log.error("Unable to process Yarn queue state", e);
             throw new LedpException(LedpCode.LEDP_00001);
-        }        
-        
+        }
+
         // Get current queue assignment for all customers
         curQueueAssignment.clear();
         AppsInfo apps = yarnService.getApplications("states=running,accepted");
-        for (AppInfo app : apps.getApps())
-        {
+        for (AppInfo app : apps.getApps()) {
             String appName = app.getName();
-            String[]appNameSubstrings = appName.split("\\.");
-            if (!curQueueAssignment.containsKey(appNameSubstrings[0]))
-            {
+            String[] appNameSubstrings = appName.split("\\.");
+            if (!curQueueAssignment.containsKey(appNameSubstrings[0])) {
                 curQueueAssignment.put(appNameSubstrings[0], app.getQueue());
             }
         }
-        
+
         queueStateLastUpdated = System.currentTimeMillis();
     }
-    
+
     private String shortestQueueAssignment(String assignmentToken) {
-        
+
         // Use assignment token to identify the permutation to use
-        
+
         XXHashFactory factory = XXHashFactory.fastestInstance();
 
-        byte[] data; 
+        byte[] data;
         try {
             data = assignmentToken.getBytes("UTF-8");
         } catch (Exception e) {
             log.error("Unable to convert assignmentToken to UTF-8 bytes", e);
-            throw new LedpException(LedpCode.LEDP_00002);        
+            throw new LedpException(LedpCode.LEDP_00002);
         }
-        
+
         // used to initialize the hash value, use whatever
         // value you want, but always the same
-        Integer seed = 0x6741c180; 
+        Integer seed = 0x6741c180;
         Integer hash = Math.abs(factory.hash32().hash(data, 0, data.length, seed));
         Permutations permutations = Permutations.getInstance();
         Integer permutationId = hash % permutations.getNumPermutations();
 
-        // Use permutation to identify the queue to use as per the SHORTESTQUEUE policy
-        
+        // Use permutation to identify the queue to use as per the SHORTESTQUEUE
+        // policy
+
         Integer minDepth = Integer.MAX_VALUE;
         Integer minDepthQueueId = -1;
-        for (Integer i=0; i < permutations.getPermutationSize(); i++) {
-            Integer queueId = permutations.getPermutationElement(permutationId,i);
+        for (Integer i = 0; i < permutations.getPermutationSize(); i++) {
+            Integer queueId = permutations.getPermutationElement(permutationId, i);
             if ((curQueueDepth.containsKey(queueId)) && (curQueueDepth.get(queueId) < minDepth)) {
                 minDepth = curQueueDepth.get(queueId);
                 minDepthQueueId = queueId;
                 log.debug("New candidate queue: minDepth=" + minDepth + " minDepthQueueId=" + minDepthQueueId);
             }
         }
-                
+
         if (minDepthQueueId != -1) {
             return fullyQualifiedQueueNames.get(minDepthQueueId);
-        }
-        else {
+        } else {
             throw new LedpException(LedpCode.LEDP_12002);
         }
     }
 
     @Override
-    public String useQueue(String assignmentToken, 
-            AssignmentPolicy policy) {
+    public String useQueue(String assignmentToken, AssignmentPolicy policy) {
         return useQueue(assignmentToken, policy, true);
     }
 
     @Override
-    public String useQueue(String assignmentToken, 
-                                AssignmentPolicy policy,
-                                Boolean refreshQueueState) {
-        
-        log.debug("assignToQueue: assignmentToken=" + assignmentToken + " policy=" + policy.toString() + " refreshQueueState=" + refreshQueueState);
+    public String useQueue(String assignmentToken, AssignmentPolicy policy, Boolean refreshQueueState) {
+
+        log.debug("assignToQueue: assignmentToken=" + assignmentToken + " policy=" + policy.toString()
+                + " refreshQueueState=" + refreshQueueState);
         if (policy != AssignmentPolicy.STICKYSHORTESTQUEUE) {
             throw new LedpException(LedpCode.LEDP_12001);
         }
-        
+
         // XXX - make 60s settable via properties file
-        if (((queueStateLastUpdated + 60*1000) < System.currentTimeMillis()) || (refreshQueueState == true)) {
+        if (((queueStateLastUpdated + 60 * 1000) < System.currentTimeMillis()) || (refreshQueueState == true)) {
             // Update current queue state
             updateCurrentQueueState();
         }
@@ -188,8 +179,8 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
         } else if (policy == AssignmentPolicy.SHORTESTQUEUE) {
             return shortestQueueAssignment(assignmentToken);
         }
-    
+
         throw new LedpException(LedpCode.LEDP_12002);
     }
-    
+
 }
