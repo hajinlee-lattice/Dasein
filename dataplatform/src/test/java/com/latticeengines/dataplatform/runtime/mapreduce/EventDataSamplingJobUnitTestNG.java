@@ -37,7 +37,7 @@ public class EventDataSamplingJobUnitTestNG {
     
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
-        URL inputUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE_TEST");
+        URL inputUrl = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE");
         inputDir = inputUrl.getPath();
         outputDir = inputDir + "/samples";
         FileUtils.deleteDirectory(new File(outputDir));

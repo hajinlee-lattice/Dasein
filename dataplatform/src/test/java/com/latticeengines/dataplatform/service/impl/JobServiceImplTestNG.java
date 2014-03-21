@@ -68,7 +68,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         fs.delete(new Path("/eventTable"), true);
 
-        inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE_TEST").getPath();
+        inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE").getPath();
         outputDir = inputDir + "/samples";
         FileUtils.deleteDirectory(new File(outputDir));
         samplingConfig = new SamplingConfiguration();
