@@ -1,0 +1,39 @@
+{
+  "name": "Model Submission for Demo",
+  "model_definition": {
+    "name": "Model Definition For Demo",
+    "algorithms": [
+      {
+        "name": "DT",
+        "priority": 1,
+        "script": "/demo/dt_train.py",
+        "container_properties": "MEMORY=3048",
+        "algorithm_properties": null
+      },
+      {
+        "name": "LR",
+        "priority": 0,
+        "script": "/demo/lr_train.py",
+        "container_properties": "MEMORY=3048",
+        "algorithm_properties": null
+      }
+    ]
+  },
+  "schema": "metadata.json",
+  "training_data": "s1Training-r-00000.avro",
+  "test_data": "s1Test-r-00000.avro",
+  "model_dir_data": "model",
+  "features": [
+      "Column5",
+      "Column6",
+      "Column7",
+      "Column8",
+      "Column9",
+      "Column10"
+  ],
+  "targets": [
+    "Event_Latitude_Customer"
+  ],
+  "data_format": "avro",
+  "queue": "Dell"
+}

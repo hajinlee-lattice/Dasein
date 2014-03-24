@@ -112,6 +112,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         model.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
                 "petal_width" }));
         model.setTargets(Arrays.<String> asList(new String[] { "category" }));
+        model.setDataFormat("csv");
         
     }
 

@@ -21,6 +21,7 @@ public class Model implements HasName, HasId<Long> {
     private List<String> targets;
     private ModelDefinition modelDefinition;
     private List<Job> jobs = new ArrayList<Job>();
+    private String dataFormat;
 
     @Override
     @JsonProperty("name")
@@ -137,5 +138,15 @@ public class Model implements HasName, HasId<Long> {
 
     public void addJob(Job job) {
         jobs.add(job);
+    }
+
+    @JsonProperty("data_format")
+    public String getDataFormat() {
+        return dataFormat;
+    }
+
+    @JsonProperty("data_format")
+    public void setDataFormat(String dataFormat) {
+        this.dataFormat = dataFormat;
     }
 }

@@ -1,5 +1,6 @@
-import json
 import csv
+import fastavro as avro
+import json
 import logging
 import numpy as np
 
@@ -42,9 +43,6 @@ class ArgumentParser(object):
         '''
           Creates a numpy matrix from the data set in dataFileName. It only creates data in memory for features and targets.
         '''
-        csvfile = open(dataFileName, 'Ur')
-        
-        
         # k is the index of the features/target in the resulting data
         k = 0
         # l is the index in the original data set
@@ -65,19 +63,33 @@ class ArgumentParser(object):
             l = l+1
         
         tmp = []
-        for row in csv.reader(csvfile, delimiter=','):
+
+        reader = None 
+        filedescriptor = open(dataFileName, 'rb')
+        if self.isAvro():
+            reader = avro.reader(filedescriptor)
+        else:
+            reader = csv.reader(filedescriptor)
+            
+        for row in reader:
             rowlist = []
             if len(row) != len(self.fields):
                 msg = "Data-metadata mismatch. Metadata has %s, while data has %s fields." % (len(self.fields), len(row))
                 raise Exception(msg)
             for i in included:
-                try:
-                    rowlist.append(self.convertType(row[i], self.getField(i)["type"][0]))
+                try:  
+                    if self.isAvro():
+                        rowlist.append(row[self.getField(i)["name"]])
+                    else:
+                        rowlist.append(self.convertType(row[i], self.getField(i)["type"][0]))
                 except Exception as e:
                     print("Issue with index " + str(i))
                     print(str(e))
             tmp.append(rowlist)
         return np.array(tmp)
+    
+    def isAvro(self):
+        return self.metadataSchema["data_format"] == "avro"
     
     def getSchema(self):
         return self.metadataSchema

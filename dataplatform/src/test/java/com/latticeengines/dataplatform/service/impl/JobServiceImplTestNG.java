@@ -178,7 +178,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         jobService.killJob(applicationId);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testSubmitPythonYarnJob() throws Exception {
         Classifier classifier = new Classifier();
         classifier.setName("IrisClassifier");
@@ -190,6 +190,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         classifier.setPythonScriptHdfsPath("/datascientist1/nn_train.py");
         classifier.setTrainingDataHdfsPath("/training/nn_train.dat");
         classifier.setTestDataHdfsPath("/test/nn_test.dat");
+        classifier.setDataFormat("csv");
 
         Properties appMasterProperties = new Properties();
         appMasterProperties.put("QUEUE", "Priority0.A");
@@ -222,7 +223,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertFalse(new File(metadataFileName).exists());
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testSubmitMRJob() throws Exception {
         Properties properties = new Properties();
         properties.setProperty(EventDataSamplingProperty.INPUT.name(), inputDir);

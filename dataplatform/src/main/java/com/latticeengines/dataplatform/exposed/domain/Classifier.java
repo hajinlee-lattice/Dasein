@@ -17,6 +17,7 @@ public class Classifier implements HasName {
     private String schemaHdfsPath;
     private List<String> features = new ArrayList<String>();
     private List<String> targets = new ArrayList<String>();
+    private String dataFormat;
 
     @Override
     @JsonProperty("name")
@@ -111,6 +112,16 @@ public class Classifier implements HasName {
     @JsonProperty("schema")
     public void setSchemaHdfsPath(String schemaHdfsPath) {
         this.schemaHdfsPath = schemaHdfsPath;
+    }
+
+    @JsonProperty("data_format")
+    public String getDataFormat() {
+        return dataFormat;
+    }
+
+    @JsonProperty("data_format")
+    public void setDataFormat(String dataFormat) {
+        this.dataFormat = dataFormat;
     }
 
 }
