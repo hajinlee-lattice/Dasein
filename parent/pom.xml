@@ -69,6 +69,7 @@
                                         <exclude>${functional.classes.exclude}</exclude>
                                     </includes>
                                     <groups>${functional.groups}</groups>
+                                    <forkMode>always</forkMode>
                                 </configuration>
                             </execution>
                         </executions>
@@ -229,7 +230,7 @@
                                 <scanIntervalSeconds>10</scanIntervalSeconds>
                                 <daemon>true</daemon>
                             </configuration>
-                        </execution> 
+                        </execution>
                         <execution>
                             <id>stop-jetty</id>
                             <phase>post-integration-test</phase>
@@ -239,7 +240,7 @@
                             <configuration>
                                 <stopPort>9001</stopPort>
                                 <stopKey>secret</stopKey>
-                            </configuration>                        
+                            </configuration>
                         </execution>
                     </executions>
                 </plugin>
@@ -368,6 +369,29 @@
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <configuration>
+                                <executable>python</executable>
+                                <workingDirectory>src/test/python</workingDirectory>
+                                <arguments>
+                                    <argument>unitTests.py</argument>
+                                </arguments>
+                                <environmentVariables>
+                                    <PYTHONPATH>../../main/python:$PYTHONPATH</PYTHONPATH>
+                                </environmentVariables>
+                            </configuration>
+                            <id>python-test</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
