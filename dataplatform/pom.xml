@@ -74,6 +74,7 @@
                 <executions>
                     <execution>
                         <configuration>
+                            <skip>${skipTests}</skip>
                             <executable>/usr/bin/python</executable>
                             <workingDirectory>src/test/python/leframework</workingDirectory>
                             <arguments>
