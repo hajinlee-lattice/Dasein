@@ -130,6 +130,9 @@ public class Model implements HasName, HasId<Long> {
     @JsonIgnore
     public void setId(Long id) {
         this.id = id;
+        if (id == null) {
+            jobs = new ArrayList<Job>();
+        }
     }
 
     public List<Job> getJobs() {

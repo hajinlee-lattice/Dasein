@@ -62,7 +62,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     
-    @BeforeClass(groups = "unit")
+    @BeforeClass(groups = "functional")
     public void setupSamplingMRJob() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
@@ -123,13 +123,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testGetJobReportsAll() throws Exception {
         List<ApplicationReport> applications = jobService.getJobReportsAll();
         assertNotNull(applications);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testKillApplication() throws Exception {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put("QUEUE", "Priority0.A");
@@ -147,7 +147,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertTrue(state.equals(YarnApplicationState.KILLED));
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testGetJobReportByUser() throws Exception {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put("QUEUE", "Priority0.A");
@@ -223,7 +223,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertFalse(new File(metadataFileName).exists());
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testSubmitMRJob() throws Exception {
         Properties properties = new Properties();
         properties.setProperty(EventDataSamplingProperty.INPUT.name(), inputDir);

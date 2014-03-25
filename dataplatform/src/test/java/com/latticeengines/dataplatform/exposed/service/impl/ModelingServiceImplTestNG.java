@@ -16,6 +16,7 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
@@ -32,6 +33,7 @@ import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.JobWatchdogService;
 import com.latticeengines.dataplatform.service.impl.JobWatchdogServiceImpl;
 import com.latticeengines.dataplatform.util.HdfsHelper;
+
 
 public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -54,11 +56,16 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     private ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
     
     private Model model = null;
+    
+    @BeforeMethod(groups = "functional")
+    public void beforeMethod() {
+        throttleConfigurationEntityMgr.deleteStoreFile();
+    }
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         modelEntityMgr.deleteStoreFile();
-        throttleConfigurationEntityMgr.deleteStoreFile();
+        
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
         fs.delete(new Path("/training"), true);
@@ -116,7 +123,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = true)
     public void submitModel() throws Exception {
         List<ApplicationId> appIds = modelingService.submitModel(model);
 
@@ -134,7 +141,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         }
     }
     
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = { "submitModel" })
     public void throttleImmediate() throws Exception {
         model.setId(null);
         List<ApplicationId> appIds = modelingService.submitModel(model);
@@ -158,7 +165,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         state = waitState(appIds.get(1), 10, TimeUnit.SECONDS, YarnApplicationState.KILLED);
     }
     
-    @Test(groups = "functional"/*, dependsOnMethods = { "throttleImmediate "}*/)
+    @Test(groups = "functional", dependsOnMethods = { "throttleImmediate" })
     public void throttleNewlySubmittedModels() throws Exception {
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setImmediate(false);

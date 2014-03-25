@@ -180,7 +180,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         while (true);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testSubmit2() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
@@ -221,10 +221,9 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
                 Job p1 = getJob(classifier2Mins, "Priority1.C", 1);
                 appIds.add(jobService.submitJob(p1));
             }//*/
-            //Thread.sleep(5000L);
+            Thread.sleep(5000L);
         }
-        //waitForAllJobsToFinish(appIds);
-        while (true);
+        waitForAllJobsToFinish(appIds);
     }
     
     private Job getJob(Classifier classifier, String queue, int priority) {

@@ -20,7 +20,10 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
     @Override
     public Job deserialize(String id, String content) {
         Job job = JsonHelper.deserialize(content, Job.class);
-        job.setId(id);
+        if (job != null) {
+            job.setId(id);
+        }
+        
         return job;
     }
 

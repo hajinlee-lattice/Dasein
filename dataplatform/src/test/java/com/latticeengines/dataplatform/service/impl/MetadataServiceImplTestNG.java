@@ -32,7 +32,7 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         DbCreds creds = new DbCreds(builder);
 
         Schema avroSchema = metadataService.getAvroSchema(creds, "DELL_EVENT_TABLE_TEST");
-        assertEquals(avroSchema.getFields().size(), 33);
+        assertEquals(avroSchema.getFields().size(), 257);
         System.out.println(avroSchema.toString(true));
     }
 }

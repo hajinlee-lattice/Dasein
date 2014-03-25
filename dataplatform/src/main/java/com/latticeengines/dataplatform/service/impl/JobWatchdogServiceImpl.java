@@ -74,6 +74,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
                 List<Job> ownedJobs = model.getJobs();
                 for (int i = 1; i <= ownedJobs.size(); i++) {
                     if (i >= cutoffIndex) {
+                        log.info("Adding job " + ownedJobs.get(i - 1).getId() + " for model " + model.getId());
                         jobs.add(ownedJobs.get(i - 1));
                     }
                 }
@@ -87,6 +88,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
     private void throttle(ThrottleConfiguration config, List<Job> jobs) {
         if (config != null && config.isEnabled() && config.isImmediate()) {
             for (Job job : jobs) {
+                log.info("Killing job " + job.getId());
                 jobService.killJob(job.getAppId());
             }
         }
