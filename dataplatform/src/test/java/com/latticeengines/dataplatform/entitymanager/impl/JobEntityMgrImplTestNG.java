@@ -75,9 +75,9 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     private void verifyRetrievedJob(String id) {
-        Job retrievedJob = jobEntityMgr.getById(job.getId());
+        Job retrievedJob = jobEntityMgr.getById(id);
         assertNotNull(retrievedJob);
-        assertEquals(job.getId(), retrievedJob.getId());
+        assertEquals(id, retrievedJob.getId());
         assertEquals(job.getAppMasterProperties().getProperty("QUEUE"), retrievedJob.getAppMasterProperties()
                 .getProperty("QUEUE"));
         assertEquals(job.getContainerProperties().getProperty("METADATA"), retrievedJob.getContainerProperties()

@@ -61,5 +61,9 @@ public class ModelDaoImpl extends BaseDaoImpl<Model> implements ModelDao {
         super.deleteStoreFile();
     }
     
-
+    @Override
+    public void clear() {
+        jobDao.clear();
+        super.clear();
+    }
 }
