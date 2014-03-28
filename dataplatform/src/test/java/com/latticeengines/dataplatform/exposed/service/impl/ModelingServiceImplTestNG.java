@@ -26,6 +26,8 @@ import com.latticeengines.dataplatform.exposed.domain.Algorithm;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
 import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
+import com.latticeengines.dataplatform.exposed.domain.algorithm.DecisionTreeAlgorithm;
+import com.latticeengines.dataplatform.exposed.domain.algorithm.LogisticRegressionAlgorithm;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -68,11 +70,9 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
-        fs.delete(new Path("/training"), true);
-        fs.delete(new Path("/test"), true);
-        fs.delete(new Path("/datascientist2"), true);
+        fs.delete(new Path("/user/le-analytics/customers/DELL"), true);
 
-        fs.mkdirs(new Path("/training"));
+        fs.mkdirs(new Path("/user/le-analytics/customers/DELL/"));
         fs.mkdirs(new Path("/test"));
         fs.mkdirs(new Path("/datascientist2"));
 
@@ -81,26 +81,18 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         String trainingFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/train.dat");
         String testFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/test.dat");
         String jsonFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
-        String decisionTreePythonScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/dt_train.py");
-        String logisticRegressionPythonScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/lr_train.py");
 
         copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
         copyEntries.add(new CopyEntry(testFilePath, "/test", false));
         copyEntries.add(new CopyEntry(jsonFilePath, "/datascientist2", false));
-        copyEntries.add(new CopyEntry(decisionTreePythonScriptPath, "/datascientist2", false));
-        copyEntries.add(new CopyEntry(logisticRegressionPythonScriptPath, "/datascientist2", false));
 
         doCopy(fs, copyEntries);
 
-        Algorithm decisionTreeAlgorithm = new Algorithm();
-        decisionTreeAlgorithm.setName("DT");
-        decisionTreeAlgorithm.setScript("/datascientist2/dt_train.py");
+        DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
         decisionTreeAlgorithm.setPriority(1);
         decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
 
-        Algorithm logisticRegressionAlgorithm = new Algorithm();
-        logisticRegressionAlgorithm.setName("LR");
-        logisticRegressionAlgorithm.setScript("/datascientist2/lr_train.py");
+        LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
         logisticRegressionAlgorithm.setPriority(0);
         logisticRegressionAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
 
@@ -113,8 +105,8 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         model.setModelDefinition(modelDef);
         model.setName("Model Submission1");
         model.setSchemaHdfsPath("/datascientist2/iris.json");
-        model.setTrainingDataHdfsPath("/training/train.dat");
-        model.setTestDataHdfsPath("/test/test.dat");
+        //model.setTrainingDataHdfsPath("/training/train.dat");
+        //model.setTestDataHdfsPath("/test/test.dat");
         model.setModelHdfsDir("/datascientist2/model");
         model.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
                 "petal_width" }));

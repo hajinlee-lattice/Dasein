@@ -8,20 +8,20 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.latticeengines.dataplatform.util.JsonHelper;
 
-public class Model implements HasName, HasId<Long> {
+public class Model implements HasName, HasId<String> {
 
-    private Long id;
+    private String id;
     private String name;
-    private String trainingDataHdfsPath;
-    private String testDataHdfsPath;
+    private String dataHdfsPath;
     private String schemaHdfsPath;
     private String modelHdfsDir;
-    private String queue;
     private List<String> features;
     private List<String> targets;
     private ModelDefinition modelDefinition;
     private List<Job> jobs = new ArrayList<Job>();
     private String dataFormat;
+	private String customer;
+	private String table;
 
     @Override
     @JsonProperty("name")
@@ -65,24 +65,14 @@ public class Model implements HasName, HasId<Long> {
         this.targets = targets;
     }
 
-    @JsonProperty("training_data")
-    public String getTrainingDataHdfsPath() {
-        return trainingDataHdfsPath;
+    @JsonProperty("data")
+    public String getDataHdfsPath() {
+        return dataHdfsPath;
     }
 
-    @JsonProperty("training_data")
-    public void setTrainingDataHdfsPath(String trainingDataHdfsPath) {
-        this.trainingDataHdfsPath = trainingDataHdfsPath;
-    }
-
-    @JsonProperty("test_data")
-    public String getTestDataHdfsPath() {
-        return testDataHdfsPath;
-    }
-
-    @JsonProperty("test_data")
-    public void setTestDataHdfsPath(String testDataHdfsPath) {
-        this.testDataHdfsPath = testDataHdfsPath;
+    @JsonProperty("data")
+    public void setDataHdfsPath(String dataHdfsPath) {
+        this.dataHdfsPath = dataHdfsPath;
     }
 
     @JsonProperty("schema")
@@ -110,25 +100,15 @@ public class Model implements HasName, HasId<Long> {
         return JsonHelper.serialize(this);
     }
 
-    @JsonProperty("queue")
-    public String getQueue() {
-        return queue;
-    }
-
-    @JsonProperty("queue")
-    public void setQueue(String queue) {
-        this.queue = queue;
-    }
-
     @Override
     @JsonIgnore
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
     @Override
     @JsonIgnore
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
         if (id == null) {
             jobs = new ArrayList<Job>();
@@ -152,4 +132,23 @@ public class Model implements HasName, HasId<Long> {
     public void setDataFormat(String dataFormat) {
         this.dataFormat = dataFormat;
     }
+    
+    @JsonProperty("customer")
+    public void setCustomer(String customer) {
+    	this.customer = customer;
+    }
+    
+    public String getCustomer() {
+    	return customer;
+    }
+
+    @JsonProperty("table")
+	public String getTable() {
+		return table;
+	}
+
+    @JsonProperty("table")
+	public void setTable(String table) {
+		this.table = table;
+	}
 }

@@ -8,6 +8,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
 import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
+import com.latticeengines.dataplatform.exposed.domain.algorithm.AlgorithmBase;
 
 public class ModelingServiceImplUnitTestNG {
 
@@ -17,7 +18,7 @@ public class ModelingServiceImplUnitTestNG {
     @BeforeClass(groups = "unit")
     public void setup() {
         modelingService = new ModelingServiceImpl();
-        algorithm = new Algorithm();
+        algorithm = new AlgorithmBase();
     }
     
     @Test(groups = "unit")

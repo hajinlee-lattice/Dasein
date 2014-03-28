@@ -515,7 +515,7 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 
     private void generateRunReport(Map<String, List<List<List<ApplicationId>>>> jobsToAppIdMap) throws Exception {
 
-        Map<ApplicationId, ApplicationReport> jobReport = waitForAllJobsToFinish(jobsToAppIdMap);
+        waitForAllJobsToFinish(jobsToAppIdMap);
     }
 
 }

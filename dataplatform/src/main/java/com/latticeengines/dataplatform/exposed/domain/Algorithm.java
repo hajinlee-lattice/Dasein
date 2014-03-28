@@ -2,97 +2,28 @@ package com.latticeengines.dataplatform.exposed.domain;
 
 import java.util.Properties;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
+public interface Algorithm extends HasName {
 
-import com.latticeengines.dataplatform.util.JsonHelper;
+    String getName();
 
-public class Algorithm implements HasName {
+    String getScript();
 
-    private String name;
-    private String script;
-    private String containerProperties;
-    private String algorithmProperties;
-    private int priority;
+    String getContainerProperties();
 
-    @Override
-    @JsonProperty("name")
-    public String getName() {
-        return name;
-    }
+    void setContainerProperties(String containerProperties);
 
-    @Override
-    @JsonProperty("name")
-    public void setName(String name) {
-        this.name = name;
-    }
+    String getAlgorithmProperties();
+    
+    void setAlgorithmProperties(String algorithmProperties);
 
-    @JsonProperty("script")
-    public String getScript() {
-        return script;
-    }
+    Properties getAlgorithmProps();
 
-    @JsonProperty("script")
-    public void setScript(String script) {
-        this.script = script;
-    }
+    Properties getContainerProps();
 
-    @JsonProperty("container_properties")
-    public String getContainerProperties() {
-        return containerProperties;
-    }
-
-    @JsonProperty("container_properties")
-    public void setContainerProperties(String containerProperties) {
-        this.containerProperties = containerProperties;
-    }
-
-    @JsonProperty("algorithm_properties")
-    public String getAlgorithmProperties() {
-        return algorithmProperties;
-    }
-
-    @JsonProperty("algorithm_properties")
-    public void setAlgorithmProperties(String algorithmProperties) {
-        this.algorithmProperties = algorithmProperties;
-    }
-
-    @JsonIgnore
-    public Properties getAlgorithmProps() {
-        return createPropertiesFromString(getAlgorithmProperties());
-    }
-
-    @JsonIgnore
-    public Properties getContainerProps() {
-        return createPropertiesFromString(getContainerProperties());
-    }
-
-    private static Properties createPropertiesFromString(String value) {
-        Properties props = new Properties();
-        if (value == null) {
-            return props;
-        }
-        String[] propertyKeyValues = value.split(" ");
-        for (String propertyKeyValue : propertyKeyValues) {
-            String[] kv = propertyKeyValue.split("=");
-            props.setProperty(kv[0], kv[1]);
-        }
-        return props;
-    }
-
-    @Override
-    public String toString() {
-        return JsonHelper.serialize(this);
-    }
-
-    @JsonProperty("priority")
-    public int getPriority() {
-        return priority;
-    }
-
-    @JsonProperty("priority")
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
+    int getPriority();
+    
+    String getSampleName();
+    
+    void setSampleName(String sampleName);
 
 }

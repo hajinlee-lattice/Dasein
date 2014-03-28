@@ -38,7 +38,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         model.addJob(job2);
     }
     
-    private void verifyRetrievedModel(Long id) {
+    private void verifyRetrievedModel(String id) {
         Model retrievedModel = modelEntityMgr.getById(model.getId());
         assertNotNull(retrievedModel);
         assertEquals(model.getId(), retrievedModel.getId());

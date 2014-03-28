@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.entitymanager.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,7 +38,7 @@ public class ModelEntityMgrImpl extends BaseEntityMgrImpl<Model> implements Mode
     @Override
     public void post(Model model) {
         if (model.getId() == null) {
-            model.setId(sequenceEntityMgr.nextVal(ModelDao.class));
+            model.setId(UUID.randomUUID().toString());
         }
         List<Job> jobs = model.getJobs();
         

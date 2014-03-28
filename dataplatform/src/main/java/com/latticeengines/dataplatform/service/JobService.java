@@ -26,5 +26,7 @@ public interface JobService {
     ApplicationId submitJob(Job job);
 
     ApplicationId resubmitPreemptedJob(Job job);
+    
+	void createHdfsDirectory(String directory, boolean errorIfExists);
 
 }

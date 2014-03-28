@@ -43,14 +43,14 @@ public class EventDataSamplingJobUnitTestNG {
         FileUtils.deleteDirectory(new File(outputDir));
         samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
+        SamplingElement s0 = new SamplingElement();
+        s0.setName("s0");
+        s0.setPercentage(30);
         SamplingElement s1 = new SamplingElement();
         s1.setName("s1");
-        s1.setPercentage(30);
-        SamplingElement s2 = new SamplingElement();
-        s2.setName("s2");
-        s2.setPercentage(60);
+        s1.setPercentage(60);
+        samplingConfig.addSamplingElement(s0);
         samplingConfig.addSamplingElement(s1);
-        samplingConfig.addSamplingElement(s2);
     }
     
     private File[] getAvroFilesForDir(String parentDir) {

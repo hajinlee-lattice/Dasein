@@ -12,4 +12,6 @@ public interface ModelingService {
     List<ApplicationId> submitModel(Model model);
 
     void throttle(ThrottleConfiguration config);
+
+	void setupCustomer(String customerName);
 }

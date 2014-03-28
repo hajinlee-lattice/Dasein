@@ -23,7 +23,7 @@ public class ModelDaoImpl extends BaseDaoImpl<Model> implements ModelDao {
     @Override
     public Model deserialize(String id, String content) {
         Model model = new Model();
-        model.setId(Long.parseLong(id));
+        model.setId(id);
         
         if (content != null) {
             String[] jobIds = content.split(",");

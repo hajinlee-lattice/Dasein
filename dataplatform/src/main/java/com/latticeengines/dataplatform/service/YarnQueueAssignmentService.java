@@ -1,8 +1,5 @@
 package com.latticeengines.dataplatform.service;
 
-import java.io.UnsupportedEncodingException;
-
-import org.apache.commons.lang.NotImplementedException;
 
 public interface YarnQueueAssignmentService  {
 

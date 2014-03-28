@@ -6,8 +6,6 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
@@ -22,8 +20,6 @@ import com.latticeengines.dataplatform.service.JobService;
 
 public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     
-    private static final Log log = LogFactory.getLog(YarnServiceImplTestNG.class);
-
     @Autowired
     private JobService jobService;
     

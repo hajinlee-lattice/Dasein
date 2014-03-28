@@ -25,7 +25,7 @@ public class LedpException extends RuntimeException {
         super(code.name() + ": " + msg, t);
     }
 
-    private static String buildMessage(LedpCode code, String[] params) {
+    public static String buildMessage(LedpCode code, String[] params) {
         String msg = code.getMessage();
 
         for (int i = 0; i < params.length; i++) {

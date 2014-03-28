@@ -23,10 +23,13 @@ import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.exposed.exception.LedpCode;
+import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
+import com.latticeengines.dataplatform.util.HdfsHelper;
 
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
@@ -195,5 +198,18 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         jobEntityMgr.post(parentJob);
         return appId;
     }
+
+	@Override
+	public void createHdfsDirectory(String directory, boolean errorIfExists) {
+		try {
+			HdfsHelper.mkdir(yarnConfiguration, directory);
+		} catch (Exception e) {
+			if (errorIfExists) {
+				throw new LedpException(LedpCode.LEDP_00000, e, new String[] { directory });	
+			} else {
+				log.warn(LedpException.buildMessage(LedpCode.LEDP_00000, new String[] { directory }));
+			}
+		}
+	}
 
 }
