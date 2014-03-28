@@ -26,6 +26,9 @@ import com.latticeengines.dataplatform.exposed.domain.Field;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
 import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
+import com.latticeengines.dataplatform.exposed.domain.algorithm.AlgorithmBase;
+import com.latticeengines.dataplatform.exposed.domain.algorithm.DecisionTreeAlgorithm;
+import com.latticeengines.dataplatform.exposed.domain.algorithm.LogisticRegressionAlgorithm;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.util.JsonHelper;
 
@@ -65,13 +68,13 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "functional", enabled = true)
     public void submit() throws Exception {
-        Algorithm decisionTreeAlgorithm = new Algorithm();
+        AlgorithmBase decisionTreeAlgorithm = new DecisionTreeAlgorithm();
         decisionTreeAlgorithm.setName("DT");
         decisionTreeAlgorithm.setScript("/apitest/dt_train.py");
         decisionTreeAlgorithm.setPriority(1);
         decisionTreeAlgorithm.setContainerProperties("MEMORY=2048 VIRTUALCORES=1 PRIORITY=0");
 
-        Algorithm logisticRegressionAlgorithm = new Algorithm();
+        AlgorithmBase logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
         logisticRegressionAlgorithm.setName("LR");
         logisticRegressionAlgorithm.setScript("/apitest/lr_train.py");
         logisticRegressionAlgorithm.setPriority(0);
