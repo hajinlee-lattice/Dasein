@@ -89,8 +89,8 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         model.setModelDefinition(modelDef);
         model.setName("Model Submission for Demo");
         model.setSchemaHdfsPath("/apitest/iris.json");
-        model.setTrainingDataHdfsPath("/apitest/train.dat");
-        model.setTestDataHdfsPath("/apitest/test.dat");
+        //model.setTrainingDataHdfsPath("/apitest/train.dat");
+        //model.setTestDataHdfsPath("/apitest/test.dat");
         model.setModelHdfsDir("/apitest/model");
 
         String metadataJson = HdfsHelper.getHdfsFileContents(yarnConfiguration, "/apitest/iris.json");
@@ -109,7 +109,6 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         }
         model.setFeatures(features);
         model.setTargets(Arrays.<String> asList(new String[] { "category" }));
-        model.setQueue("Priority0.A");
 
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/submit", model,
                 AppSubmission.class, new Object[] {});
