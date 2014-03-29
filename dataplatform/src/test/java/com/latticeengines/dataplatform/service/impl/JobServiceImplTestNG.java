@@ -6,7 +6,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -49,17 +48,6 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     private String inputDir = null;
     private String outputDir = null;
     private SamplingConfiguration samplingConfig = null;
-    
-    private File[] getAvroFilesForDir(String parentDir) {
-        return new File(parentDir).listFiles(new FilenameFilter() {
-
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith(".avro");
-            }
-            
-        });
-    }
     
     @BeforeClass(groups = "functional")
     public void setupSamplingMRJob() throws Exception {

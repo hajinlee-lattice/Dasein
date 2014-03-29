@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 
 import net.jpountz.xxhash.XXHashFactory;
 
@@ -32,17 +33,17 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
     @Autowired
     private YarnService yarnService;
 
-    private static HashMap<Integer, Integer> curQueueDepth = new HashMap<Integer, Integer>();
-    private static HashMap<Integer, String> fullyQualifiedQueueNames = new HashMap<Integer, String>();
-    private static HashMap<String, String> curQueueAssignment = new HashMap<String, String>();
-    private static long queueStateLastUpdated = System.currentTimeMillis();
+    private Map<Integer, Integer> curQueueDepth = new HashMap<Integer, Integer>();
+    private Map<Integer, String> fullyQualifiedQueueNames = new HashMap<Integer, String>();
+    private Map<String, String> curQueueAssignment = new HashMap<String, String>();
+    private long queueStateLastUpdated = System.currentTimeMillis();
 
     public void setYarnService(YarnService yarnServiceToUse) {
         yarnService = yarnServiceToUse;
     }
 
     // Get current state of all queues
-    private void updateCurrentQueueState() {
+    void updateCurrentQueueState() {
         // Get current depth of all leaf queues
         curQueueDepth.clear();
         fullyQualifiedQueueNames.clear();
@@ -67,17 +68,23 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
                     FairSchedulerQueueInfo queue = (FairSchedulerQueueInfo) iter.next();
                     if (queue instanceof FairSchedulerLeafQueueInfo) {
                         String queueName = queue.getQueueName();
+                        if (queueName.equals("root.default")) {
+                            continue;
+                        }
                         Integer leafQueueName = -1;
                         try {
                             String[] queueNodes = queueName.split("\\.");
                             leafQueueName = Integer.parseInt(queueNodes[queueNodes.length - 1]);
                         } catch (Exception e) {
-                            log.error("unable to process queueName " + queueName);
+                            log.error("Unable to process queueName " + queueName + ".");
                         }
                         Integer queueDepth = ((FairSchedulerLeafQueueInfo) queue).getNumActiveApplications()
                                 + ((FairSchedulerLeafQueueInfo) queue).getNumPendingApplications();
-                        log.debug("Processing queue data: queueName=" + queueName + " leafQueueName=" + leafQueueName
-                                + " queueDepth=" + queueDepth);
+                        
+                        if (log.isDebugEnabled()) {
+                            log.debug("Processing queue data: queueName = " + queueName + " leafQueueName = " + leafQueueName
+                                    + " queueDepth = " + queueDepth);
+                        }
                         if (leafQueueName != -1) {
                             curQueueDepth.put(leafQueueName, queueDepth);
                             fullyQualifiedQueueNames.put(leafQueueName, queueName);
@@ -88,7 +95,7 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
                 }
             }
         } catch (Exception e) {
-            log.error("Unable to process Yarn queue state", e);
+            log.error("Unable to process yarn queue state.", e);
             throw new LedpException(LedpCode.LEDP_00001);
         }
 
@@ -127,17 +134,19 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
         Permutations permutations = Permutations.getInstance();
         Integer permutationId = hash % permutations.getNumPermutations();
 
-        // Use permutation to identify the queue to use as per the SHORTESTQUEUE
-        // policy
+        // Use permutation to identify the queue to use as per the SHORTESTQUEUE policy
 
         Integer minDepth = Integer.MAX_VALUE;
         Integer minDepthQueueId = -1;
         for (Integer i = 0; i < permutations.getPermutationSize(); i++) {
             Integer queueId = permutations.getPermutationElement(permutationId, i);
-            if ((curQueueDepth.containsKey(queueId)) && (curQueueDepth.get(queueId) < minDepth)) {
+            if (curQueueDepth.containsKey(queueId) && curQueueDepth.get(queueId) < minDepth) {
                 minDepth = curQueueDepth.get(queueId);
                 minDepthQueueId = queueId;
-                log.debug("New candidate queue: minDepth=" + minDepth + " minDepthQueueId=" + minDepthQueueId);
+                
+                if (log.isDebugEnabled()) {
+                    log.debug("New candidate queue: minDepth = " + minDepth + " minDepthQueueId = " + minDepthQueueId);
+                }
             }
         }
 
@@ -156,14 +165,17 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
     @Override
     public String useQueue(String assignmentToken, AssignmentPolicy policy, Boolean refreshQueueState) {
 
-        log.debug("assignToQueue: assignmentToken=" + assignmentToken + " policy=" + policy.toString()
-                + " refreshQueueState=" + refreshQueueState);
+        if (log.isDebugEnabled()) {
+            log.debug("assignToQueue: assignmentToken = " + assignmentToken + " policy = " + policy.toString()
+                    + " refreshQueueState = " + refreshQueueState);
+        }
+
         if (policy != AssignmentPolicy.STICKYSHORTESTQUEUE) {
             throw new LedpException(LedpCode.LEDP_12001);
         }
 
-        // XXX - make 60s settable via properties file
-        if (((queueStateLastUpdated + 60 * 1000) < System.currentTimeMillis()) || (refreshQueueState == true)) {
+        // XXX - make 60 s settable via properties file
+        if (queueStateLastUpdated + 60 * 1000 < System.currentTimeMillis() || refreshQueueState == true) {
             // Update current queue state
             updateCurrentQueueState();
         }
@@ -181,6 +193,10 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
         }
 
         throw new LedpException(LedpCode.LEDP_12002);
+    }
+    
+    public Map<Integer, String> getFullyQualifiedQueueNames() {
+        return fullyQualifiedQueueNames;
     }
 
 }

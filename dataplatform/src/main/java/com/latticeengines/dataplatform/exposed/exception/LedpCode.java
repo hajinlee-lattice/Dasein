@@ -29,9 +29,10 @@ public enum LedpCode {
     // Persistence service: 14000-14999
     LEDP_14000("Could not create configuration store {0}."), //
     LEDP_14001("Could not load configuration store {0}."), //
-    LEDP_14002("Could not save configuration store {0}.");
-    // 
-
+    LEDP_14002("Could not save configuration store {0}."), //
+    // Modeling service: 15000-15999
+    LEDP_15000("Could not create model schema."), //
+    LEDP_15001("Could not find sample file for prefix {0}.");
     
     private String message;
 

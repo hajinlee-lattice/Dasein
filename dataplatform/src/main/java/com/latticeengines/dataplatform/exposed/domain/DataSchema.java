@@ -12,6 +12,8 @@ public class DataSchema implements HasName {
 
     private String name;
     private String type;
+    private String doc;
+    private String tableName;
     private List<Field> fields = new ArrayList<Field>();
     
     public DataSchema() {
@@ -59,6 +61,26 @@ public class DataSchema implements HasName {
     @Override
     public String toString() {
         return JsonHelper.serialize(this);
+    }
+
+    @JsonProperty("doc")
+    public String getDoc() {
+        return doc;
+    }
+
+    @JsonProperty("doc")
+    public void setDoc(String doc) {
+        this.doc = doc;
+    }
+
+    @JsonProperty("tableName")
+    public String getTableName() {
+        return tableName;
+    }
+
+    @JsonProperty("tableName")
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
 }

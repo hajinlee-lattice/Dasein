@@ -151,4 +151,10 @@ public class Model implements HasName, HasId<String> {
 	public void setTable(String table) {
 		this.table = table;
 	}
+    
+    @JsonIgnore
+    public String getSampleHdfsPath() {
+        return getDataHdfsPath() + "/samples";
+    }
+
 }

@@ -5,6 +5,7 @@ public enum AppMasterProperty {
     VIRTUALCORES, //
     MEMORY, //
     QUEUE, //
-    PRIORITY;
+    PRIORITY, //
+    CUSTOMER;
 
 }

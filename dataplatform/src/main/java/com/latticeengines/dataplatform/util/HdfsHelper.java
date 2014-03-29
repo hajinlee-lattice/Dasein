@@ -1,7 +1,9 @@
 package com.latticeengines.dataplatform.util;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -15,7 +17,7 @@ import org.apache.hadoop.fs.RemoteIterator;
 import org.springframework.util.StreamUtils;
 
 public class HdfsHelper {
-    
+
     public static interface HdfsFilenameFilter {
         boolean accept(Path filename);
     }
@@ -29,25 +31,21 @@ public class HdfsHelper {
             } else if (GZ.name().equalsIgnoreCase(s)) {
                 return GZ;
             }
-            throw new IllegalArgumentException(
-                    "No Enum specified for this string");
+            throw new IllegalArgumentException("No Enum specified for this string");
         }
     };
 
-    public static final void mkdir(Configuration configuration, String dir)
-            throws Exception {
+    public static final void mkdir(Configuration configuration, String dir) throws Exception {
         FileSystem fs = FileSystem.get(configuration);
         fs.mkdirs(new Path(dir));
     }
 
-    public static final void rmdir(Configuration configuration, String dir)
-            throws Exception {
+    public static final void rmdir(Configuration configuration, String dir) throws Exception {
         FileSystem fs = FileSystem.get(configuration);
         fs.delete(new Path(dir), true);
     }
 
-    public static final String getHdfsFileContents(Configuration configuration,
-            String hdfsPath) throws Exception {
+    public static final String getHdfsFileContents(Configuration configuration, String hdfsPath) throws Exception {
         FileSystem fs = FileSystem.get(configuration);
         Path schemaPath = new Path(hdfsPath);
         InputStream is = fs.open(schemaPath);
@@ -56,21 +54,31 @@ public class HdfsHelper {
         return new String(os.toByteArray());
     }
 
-    public static final List<String> getFilesForDir(
-            Configuration configuration, String hdfsDir) throws Exception {
+    public static final void writeToFile(Configuration configuration, String hdfsPath, String contents)
+            throws Exception {
+        FileSystem fs = FileSystem.get(configuration);
+        Path schemaPath = new Path(hdfsPath);
+        BufferedWriter br = new BufferedWriter(new OutputStreamWriter(fs.create(schemaPath, true)));
+        try {
+            br.write(contents);
+        } finally {
+            br.close();
+        }
+    }
+
+    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir) throws Exception {
         return getFilesForDir(configuration, hdfsDir, null);
     }
 
-    
-    public static final List<String> getFilesForDir(
-            Configuration configuration, String hdfsDir, HdfsFilenameFilter filter) throws Exception {
+    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir,
+            HdfsFilenameFilter filter) throws Exception {
         FileSystem fs = FileSystem.get(configuration);
         FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
         List<String> filePaths = new ArrayList<String>();
         for (FileStatus status : statuses) {
             Path filename = status.getPath();
             boolean accept = true;
-            
+
             if (filter != null) {
                 accept = filter.accept(filename);
             }
@@ -82,19 +90,14 @@ public class HdfsHelper {
         return filePaths;
     }
 
-    public static final String getApplicationLog(Configuration configuration,
-            String user, String applicationId) throws Exception {
+    public static final String getApplicationLog(Configuration configuration, String user, String applicationId)
+            throws Exception {
         FileSystem fs = FileSystem.get(configuration);
-        String hdfsPath = configuration
-                .get("yarn.nodemanager.remote-app-log-dir")
-                + "/"
-                + user
-                + "/logs/" + applicationId;
-        String encoding = configuration
-                .get("yarn.nodemanager.log-aggregation.compression-type");
+        String hdfsPath = configuration.get("yarn.nodemanager.remote-app-log-dir") + "/" + user + "/logs/"
+                + applicationId;
+        String encoding = configuration.get("yarn.nodemanager.log-aggregation.compression-type");
         Path schemaPath = new Path(hdfsPath);
-        RemoteIterator<LocatedFileStatus> iterator = fs.listFiles(schemaPath,
-                false);
+        RemoteIterator<LocatedFileStatus> iterator = fs.listFiles(schemaPath, false);
         String log = "";
         while (iterator.hasNext()) {
             LocatedFileStatus file = iterator.next();

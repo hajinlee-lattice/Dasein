@@ -3,6 +3,7 @@ package com.latticeengines.dataplatform.exposed.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.io.File;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,8 @@ import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationE
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
+import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
+import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.dataplatform.exposed.domain.algorithm.LogisticRegressionAlgorithm;
@@ -72,29 +75,27 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         fs.delete(new Path("/user/le-analytics/customers/DELL"), true);
 
-        fs.mkdirs(new Path("/user/le-analytics/customers/DELL/"));
-        fs.mkdirs(new Path("/test"));
-        fs.mkdirs(new Path("/datascientist2"));
+        fs.mkdirs(new Path("/user/le-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST"));
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
-        String trainingFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/train.dat");
-        String testFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/test.dat");
-        String jsonFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
-
-        copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
-        copyEntries.add(new CopyEntry(testFilePath, "/test", false));
-        copyEntries.add(new CopyEntry(jsonFilePath, "/datascientist2", false));
+        String inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/DELL_EVENT_TABLE_TEST").getPath();
+        File[] avroFiles = getAvroFilesForDir(inputDir);
+        for (File avroFile : avroFiles) {
+            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), "/user/le-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST", false));
+        }
 
         doCopy(fs, copyEntries);
-
-        DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
-        decisionTreeAlgorithm.setPriority(1);
-        decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
 
         LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
         logisticRegressionAlgorithm.setPriority(0);
         logisticRegressionAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
+        logisticRegressionAlgorithm.setSampleName("s0");
+
+        DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
+        decisionTreeAlgorithm.setPriority(1);
+        decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
+        decisionTreeAlgorithm.setSampleName("s1");
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model1");
@@ -104,18 +105,44 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         model = new Model();
         model.setModelDefinition(modelDef);
         model.setName("Model Submission1");
-        model.setSchemaHdfsPath("/datascientist2/iris.json");
-        //model.setTrainingDataHdfsPath("/training/train.dat");
-        //model.setTestDataHdfsPath("/test/test.dat");
-        model.setModelHdfsDir("/datascientist2/model");
-        model.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
-                "petal_width" }));
-        model.setTargets(Arrays.<String> asList(new String[] { "category" }));
-        model.setDataFormat("csv");
+
+        model.setTable("DELL_EVENT_TABLE_TEST");
+        model.setFeatures(Arrays.<String> asList(new String[] { 
+                "Column5", //
+                "Column6", //
+                "Column7", //
+                "Column8", //
+                "Column9", //
+                "Column10" }));
+        model.setTargets(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
+        model.setCustomer("DELL");
+        model.setDataFormat("avro");
         
     }
 
     @Test(groups = "functional", enabled = true)
+    public void createSamples() throws Exception {
+        SamplingConfiguration samplingConfig = new SamplingConfiguration();
+        samplingConfig.setTrainingPercentage(80);
+        SamplingElement s0 = new SamplingElement();
+        s0.setName("s0");
+        s0.setPercentage(30);
+        SamplingElement s1 = new SamplingElement();
+        s1.setName("s1");
+        s1.setPercentage(60);
+        SamplingElement s2 = new SamplingElement();
+        s2.setName("all");
+        s2.setPercentage(100);
+        samplingConfig.addSamplingElement(s0);
+        samplingConfig.addSamplingElement(s1);
+        samplingConfig.addSamplingElement(s2);
+        
+        ApplicationId appId = modelingService.createSamples(model, samplingConfig);
+        YarnApplicationState state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        assertEquals(state, YarnApplicationState.FINISHED);
+    }
+    
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submitModel() throws Exception {
         List<ApplicationId> appIds = modelingService.submitModel(model);
 
@@ -127,7 +154,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
             NumberFormat appIdFormat = getAppIdFormat();
             String jobId = appId.getClusterTimestamp() + "_" + appIdFormat.format(appId.getId());
-            String modelFile = HdfsHelper.getFilesForDir(yarnConfiguration, "/datascientist2/model/" + jobId).get(0);
+            String modelFile = HdfsHelper.getFilesForDir(yarnConfiguration, model.getModelHdfsDir() + "/" + jobId).get(0);
             String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, modelFile);
             assertNotNull(modelContents);
         }

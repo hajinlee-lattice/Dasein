@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.functionalframework;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
@@ -51,6 +53,19 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     protected boolean doDependencyLibraryCopy() {
         return true;
     }
+
+    public File[] getAvroFilesForDir(String parentDir) {
+        return new File(parentDir).listFiles(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".avro");
+            }
+            
+        });
+    }
+    
+    
     
     public String getFileUrlFromResource(String resource) {
         URL url = ClassLoader.getSystemResource(resource);

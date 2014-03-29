@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.dataplatform.exposed.domain.Model;
+import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 
 public interface ModelingService {
@@ -14,4 +15,6 @@ public interface ModelingService {
     void throttle(ThrottleConfiguration config);
 
 	void setupCustomer(String customerName);
+	
+	ApplicationId createSamples(Model model, SamplingConfiguration config);
 }

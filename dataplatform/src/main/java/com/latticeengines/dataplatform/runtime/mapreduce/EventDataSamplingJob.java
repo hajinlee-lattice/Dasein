@@ -4,14 +4,8 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileReader;
-import org.apache.avro.file.FileReader;
-import org.apache.avro.file.SeekableInput;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapred.AvroValue;
-import org.apache.avro.mapred.FsInput;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.avro.mapreduce.AvroKeyOutputFormat;
@@ -31,6 +25,7 @@ import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.mapreduce.job.MRJobCustomization;
+import com.latticeengines.dataplatform.util.AvroHelper;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.util.HdfsHelper.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.util.JsonHelper;
@@ -93,10 +88,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
                 throw new LedpException(LedpCode.LEDP_12003, new String[] { inputDir });
             }
             Path path = new Path(filename);
-            SeekableInput input = new FsInput(path, config);
-            GenericDatumReader<GenericRecord> fileReader = new GenericDatumReader<GenericRecord>();
-            FileReader<GenericRecord> reader = DataFileReader.openReader(input, fileReader);
-            Schema schema = reader.getSchema();
+            Schema schema = AvroHelper.getSchema(config, path);
 
             AvroJob.setInputKeySchema(job, schema);
             AvroJob.setMapOutputValueSchema(job, schema);
