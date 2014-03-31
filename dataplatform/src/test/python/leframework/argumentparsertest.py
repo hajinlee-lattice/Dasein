@@ -2,6 +2,7 @@ import leframework.argumentparser as ap
 import unittest
 
 class ArgumentParserTest(unittest.TestCase):
+
     def testCreateListForAvro(self):
         parser = ap.ArgumentParser("model.json")
         schema = parser.getSchema()

@@ -28,6 +28,7 @@ public class AlgorithmBase implements Algorithm {
         this.name = name;
     }
 
+    @Override
     @JsonProperty("script")
     public String getScript() {
         return script;
@@ -38,31 +39,37 @@ public class AlgorithmBase implements Algorithm {
         this.script = script;
     }
 
+    @Override
     @JsonProperty("container_properties")
     public String getContainerProperties() {
         return containerProperties;
     }
 
+    @Override
     @JsonProperty("container_properties")
     public void setContainerProperties(String containerProperties) {
         this.containerProperties = containerProperties;
     }
 
+    @Override
     @JsonProperty("algorithm_properties")
     public String getAlgorithmProperties() {
         return algorithmProperties;
     }
 
+    @Override
     @JsonProperty("algorithm_properties")
     public void setAlgorithmProperties(String algorithmProperties) {
         this.algorithmProperties = algorithmProperties;
     }
 
+    @Override
     @JsonIgnore
     public Properties getAlgorithmProps() {
         return createPropertiesFromString(getAlgorithmProperties());
     }
 
+    @Override
     @JsonIgnore
     public Properties getContainerProps() {
         return createPropertiesFromString(getContainerProperties());
@@ -86,11 +93,13 @@ public class AlgorithmBase implements Algorithm {
         return JsonHelper.serialize(this);
     }
 
+    @Override
     @JsonProperty("priority")
     public int getPriority() {
         return priority;
     }
 
+    @Override
     @JsonProperty("priority")
     public void setPriority(int priority) {
         this.priority = priority;

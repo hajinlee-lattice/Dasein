@@ -22,6 +22,8 @@ public interface Algorithm extends HasName {
 
     int getPriority();
     
+    void setPriority(int priority);
+    
     String getSampleName();
     
     void setSampleName(String sampleName);

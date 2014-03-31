@@ -6,7 +6,7 @@ import numpy as np
 
 logging.basicConfig(level = logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(name='argumentparser')
+logger = logging.getLogger(name = 'argumentparser')
 
 
 class ArgumentParser(object):
