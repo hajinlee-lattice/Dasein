@@ -69,6 +69,8 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             Configuration config = job.getConfiguration();
             String samplingConfigStr = properties.getProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name());
             config.set(LEDP_SAMPLE_CONFIG, samplingConfigStr);
+            String queueName = properties.getProperty(EventDataSamplingProperty.QUEUE.name());
+            config.set("mapreduce.job.queuename", queueName);
             String inputDir = properties.getProperty(EventDataSamplingProperty.INPUT.name());
             AvroKeyInputFormat.addInputPath(job, new Path(inputDir));
             AvroKeyOutputFormat.setOutputPath(job,

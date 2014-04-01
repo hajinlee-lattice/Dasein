@@ -14,9 +14,9 @@ import com.latticeengines.dataplatform.exposed.domain.algorithm.RandomForestAlgo
         include = JsonTypeInfo.As.PROPERTY,
         property = "type")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = LogisticRegressionAlgorithm.class, name = "LogisticRegressionAlgorithm"),
-    @JsonSubTypes.Type(value = DecisionTreeAlgorithm.class, name = "DecisionTreeAlgorithm"),
-    @JsonSubTypes.Type(value = RandomForestAlgorithm.class, name = "RandomForestAlgorithm")
+    @JsonSubTypes.Type(value = LogisticRegressionAlgorithm.class, name = "logisticRegressionAlgorithm"),
+    @JsonSubTypes.Type(value = DecisionTreeAlgorithm.class, name = "decisionTreeAlgorithm"),
+    @JsonSubTypes.Type(value = RandomForestAlgorithm.class, name = "randomForestAlgorithm")
 })
 public interface Algorithm extends HasName {
 

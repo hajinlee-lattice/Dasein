@@ -17,10 +17,11 @@
         yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
         mapred.job.tracker=${dataplatform.mapred.job.tracker}
         yarn.app.mapreduce.am.resource.cpu-vcores=1
-        mapreduce.map.memory.mb=2048
-        mapreduce.reduce.memory.mb=2048
+        mapreduce.map.memory.mb=1024
+        mapreduce.reduce.memory.mb=1024
         mapreduce.map.cpu.vcores=4
         mapreduce.reduce.cpu.vcores=1
+        mapreduce.job.queuename=Priority0.MapReduce.A
     </hdp:configuration>
 
     <hdp:cache create-symlink="true">

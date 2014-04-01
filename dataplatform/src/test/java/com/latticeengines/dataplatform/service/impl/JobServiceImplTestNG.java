@@ -213,6 +213,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testSubmitMRJob() throws Exception {
         Properties properties = new Properties();
+        properties.setProperty(EventDataSamplingProperty.QUEUE.name(), "Priority0.MapReduce.A");
         properties.setProperty(EventDataSamplingProperty.INPUT.name(), inputDir);
         properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());

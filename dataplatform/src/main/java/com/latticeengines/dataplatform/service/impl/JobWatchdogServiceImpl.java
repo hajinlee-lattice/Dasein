@@ -29,6 +29,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
     private ModelEntityMgr modelEntityMgr;
     private YarnService yarnService;
     private JobEntityMgr jobEntityMgr;
+    private int retryWaitTime = 30000;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -53,7 +54,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
             String appId = appInfo.getAppId();
             // if P0, resubmit immediately with no delay. If any other priorities, delay by some latency
             if (!jobIdsToExcludeFromResubmission.contains(appId)
-                    && (appInfo.getQueue().contains("Priority0") || System.currentTimeMillis() - appInfo.getFinishTime() > 30000)) {
+                    && (appInfo.getQueue().contains("Priority0") || System.currentTimeMillis() - appInfo.getFinishTime() > retryWaitTime)) {
                 appIds.add(appId);
             }
         }
@@ -132,6 +133,14 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
 
     public void setJobEntityMgr(JobEntityMgr jobEntityMgr) {
         this.jobEntityMgr = jobEntityMgr;
+    }
+
+    public int getRetryWaitTime() {
+        return retryWaitTime;
+    }
+
+    public void setRetryWaitTime(int retryWaitTime) {
+        this.retryWaitTime = retryWaitTime;
     }
 
 }

@@ -15,6 +15,7 @@
                 <entry key="modelEntityMgr" value-ref="modelEntityMgr" />
                 <entry key="yarnService" value-ref="yarnService" />
                 <entry key="jobEntityMgr" value-ref="jobEntityMgr" />
+                <entry key="retryWaitTime" value="${dataplatform.retry.wait.time}" />
             </map>
         </property>
 

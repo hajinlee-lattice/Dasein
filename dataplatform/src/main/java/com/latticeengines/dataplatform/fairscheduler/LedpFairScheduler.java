@@ -68,10 +68,19 @@ public class LedpFairScheduler extends FairScheduler {
     @Override
     protected void preemptResources(Collection<FSLeafQueue> scheds, Resource toPreempt) {
         Resource resToPreempt = Resource.newInstance(toPreempt.getMemory(), toPreempt.getVirtualCores());
-        if (canPreemptUsingNonP0Resources(scheds, resToPreempt)) {
+        Collection<FSLeafQueue> mrScheds = new ArrayList<FSLeafQueue>();
+
+        for (FSLeafQueue sched : scheds) {
+            if (!isMapReduce(sched)) {
+                mrScheds.add(sched);
+            }
+        }
+        
+        
+        if (canPreemptUsingNonP0Resources(mrScheds, resToPreempt)) {
             Collection<FSLeafQueue> noP0Scheds = new ArrayList<FSLeafQueue>();
 
-            for (FSLeafQueue sched : scheds) {
+            for (FSLeafQueue sched : mrScheds) {
                 if (!isP0(sched)) {
                     noP0Scheds.add(sched);
                 }
@@ -79,12 +88,17 @@ public class LedpFairScheduler extends FairScheduler {
             
             super.preemptResources(noP0Scheds, toPreempt);
         } else {
-            super.preemptResources(scheds, toPreempt);
+            super.preemptResources(mrScheds, toPreempt);
         }
     }
     
     private boolean isP0(FSLeafQueue queue) {
         return queue.getQueueName().contains("Priority0");
     }
+    
+    private boolean isMapReduce(FSLeafQueue queue) {
+        return queue.getQueueName().contains("MapReduce");
+    }
+
 
 }
