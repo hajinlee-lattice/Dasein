@@ -11,13 +11,13 @@
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>parent</relativePath>
+        <relativePath>le-parent</relativePath>
     </parent>
 
     <modules>
-        <module>parent</module>
-        <module>dataplatform</module>
-        <module>api</module>
-        <module>perf</module>
+        <module>le-parent</module>
+        <module>le-dataplatform</module>
+        <module>le-api</module>
+        <module>le-perf</module>
     </modules>
 </project>
