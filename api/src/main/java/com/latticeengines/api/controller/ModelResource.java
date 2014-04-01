@@ -1,5 +1,8 @@
 package com.latticeengines.api.controller;
 
+import java.util.Arrays;
+
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +14,7 @@ import com.latticeengines.api.domain.AppSubmission;
 import com.latticeengines.api.domain.SubmissionResult;
 import com.latticeengines.api.domain.ThrottleSubmission;
 import com.latticeengines.dataplatform.exposed.domain.Model;
+import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 
@@ -27,6 +31,13 @@ public class ModelResource {
         return submission;
     }
 
+    @RequestMapping(value = "/createSamples", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
+    @ResponseBody
+    public AppSubmission createSamples(@RequestBody SamplingConfiguration config) {
+        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId>asList(modelingService.createSamples(config)));
+        return submission;
+    }
+
     @RequestMapping(value = "/throttle", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
     @ResponseBody
     public ThrottleSubmission throttle(@RequestBody ThrottleConfiguration config) {
@@ -34,7 +45,7 @@ public class ModelResource {
         return new ThrottleSubmission(config.isImmediate());
     }
 
-    @RequestMapping(value = "/submit", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
+    @RequestMapping(value = "/setupCustomer", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
     @ResponseBody
     public SubmissionResult setupCustomer(@RequestBody String customerName) {
         modelingService.setupCustomer(customerName);
