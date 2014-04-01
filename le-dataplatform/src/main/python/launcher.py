@@ -1,0 +1,78 @@
+import os
+import pwd
+import sys
+from leframework import argumentparser as ap
+from leframework import webhdfs
+from urlparse import urlparse
+
+
+def stripPath(fileName):
+    #return fileName
+    return fileName[fileName.rfind('/')+1:len(fileName)]
+
+def validateEnvVariable(variable):
+    try:
+        os.environ[variable]
+    except KeyError:
+        raise Exception("%s environment variable not set." % (variable))
+
+def validateSchemaParam(schema, param):
+    try:
+        schema[param]
+    except KeyError:
+        raise Exception("%s not set in job metadata." % (param))
+    
+def validateEnvAndParameters(schema):
+    validateEnvVariable('SHDP_HD_FSWEB')
+    validateEnvVariable('CONTAINER_ID')
+    validateSchemaParam(schema, "training_data")
+    validateSchemaParam(schema, "test_data")
+    validateSchemaParam(schema, "python_script")
+    validateSchemaParam(schema, "model_data_dir")
+    
+def getModelDirPath(schema):
+    appIdList = os.environ['CONTAINER_ID'].split("_")[1:3]
+    modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
+    return modelDirPath
+
+if __name__ == "__main__":
+    """
+    Transform the inputs into python objects and invoke user python script.
+    
+    Arguments:
+    sys.argv[1] -- schema json file
+    """
+
+    parser = ap.ArgumentParser(sys.argv[1])
+    schema = parser.getSchema()
+    
+    # Fail fast if required parameters are not set
+    validateEnvAndParameters(schema)
+    
+    training = parser.createList(stripPath(schema["training_data"]))
+    test = parser.createList(stripPath(schema["test_data"]))
+    script = stripPath(schema["python_script"])
+    schema["featureIndex"] = parser.getFeatureTuple();
+    schema["targetIndex"] = parser.getTargetIndex()
+    execfile(script)
+    
+    # Execute the packaged script from the client and get the returned file
+    # that contains the generated model data
+    modelFilePath = os.environ['CONTAINER_ID'] + "_model.txt"
+    modelFile = open(modelFilePath, "w")
+    globals()['train'](training, test, schema, modelFile)
+    modelFile.close()
+    
+    # Create webhdfs instance for writing to hdfs
+    webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
+    hdfs = webhdfs.WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
+    
+    # Create model directory
+    modelDirPath = getModelDirPath(schema)
+    hdfs.mkdir(modelDirPath)
+    
+    # Copy the model data file from local to hdfs
+    hdfsFilePath = stripPath(modelFilePath)
+    hdfs.copyFromLocal(modelFilePath, "%s/%s" % (modelDirPath, hdfsFilePath))
+     
+    
