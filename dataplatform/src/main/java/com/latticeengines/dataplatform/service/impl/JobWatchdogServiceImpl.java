@@ -1,13 +1,8 @@
 package com.latticeengines.dataplatform.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -15,21 +10,20 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
-import com.latticeengines.dataplatform.exposed.domain.Job;
-import com.latticeengines.dataplatform.exposed.domain.Model;
-import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.JobWatchdogService;
+import com.latticeengines.dataplatform.service.impl.watchdog.WatchdogPlugin;
 
 public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdogService {
-    private static final Log log = LogFactory.getLog(JobWatchdogServiceImpl.class);
+
     private JobService jobService;
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
     private ModelEntityMgr modelEntityMgr;
     private YarnService yarnService;
     private JobEntityMgr jobEntityMgr;
     private int retryWaitTime = 30000;
+    private Map<String, WatchdogPlugin> plugins = WatchdogPlugin.getPlugins();
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -38,60 +32,8 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
 
     @Override
     public void run(JobExecutionContext context) throws JobExecutionException {
-        ThrottleConfiguration latestConfig = throttleConfigurationEntityMgr.getLatestConfig();
-        List<Job> jobsToKill = getJobsToKill(latestConfig);
-        resubmitPreemptedJobs(jobsToKill);
-        throttle(latestConfig, jobsToKill);
-    }
-
-    private void resubmitPreemptedJobs(List<Job> jobsToExcludeFromResubmission) {
-        Set<String> jobIdsToExcludeFromResubmission = new HashSet<String>();
-        for (Job job : jobsToExcludeFromResubmission) {
-            jobIdsToExcludeFromResubmission.add(job.getId());
-        }
-        Set<String> appIds = new HashSet<String>();
-        for (AppInfo appInfo : yarnService.getPreemptedApps()) {
-            String appId = appInfo.getAppId();
-            // if P0, resubmit immediately with no delay. If any other priorities, delay by some latency
-            if (!jobIdsToExcludeFromResubmission.contains(appId)
-                    && (appInfo.getQueue().contains("Priority0") || System.currentTimeMillis() - appInfo.getFinishTime() > retryWaitTime)) {
-                appIds.add(appId);
-            }
-        }
-        Set<Job> jobsToResubmit = jobEntityMgr.getByIds(appIds);
-        for (Job job : jobsToResubmit) {
-            jobService.resubmitPreemptedJob(job);
-        }
-    }
-
-    private List<Job> getJobsToKill(ThrottleConfiguration config) {
-        List<Job> jobs = new ArrayList<Job>();
-
-        if (config != null) {
-            int cutoffIndex = config.getJobRankCutoff();
-
-            List<Model> models = modelEntityMgr.getAll();
-            for (Model model : models) {
-                List<Job> ownedJobs = model.getJobs();
-                for (int i = 1; i <= ownedJobs.size(); i++) {
-                    if (i >= cutoffIndex) {
-                        log.info("Adding job " + ownedJobs.get(i - 1).getId() + " for model " + model.getId());
-                        jobs.add(ownedJobs.get(i - 1));
-                    }
-                }
-
-            }
-
-        }
-        return jobs;
-    }
-
-    private void throttle(ThrottleConfiguration config, List<Job> jobs) {
-        if (config != null && config.isEnabled() && config.isImmediate()) {
-            for (Job job : jobs) {
-                log.info("Killing job " + job.getId());
-                jobService.killJob(job.getAppId());
-            }
+        for (WatchdogPlugin plugin : plugins.values()) {
+            plugin.run(context);
         }
     }
 
@@ -99,48 +41,111 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
         return jobService;
     }
 
-    public void setJobService(JobService jobService) {
+    public void setJobService(final JobService jobService) {
         this.jobService = jobService;
+        new DoForAllPlugins(plugins.values()) {
+
+            @Override
+            public void execute(WatchdogPlugin plugin) {
+                plugin.setJobService(jobService);
+            }
+            
+        }.execute();
     }
 
     public ThrottleConfigurationEntityMgr getThrottleConfigurationEntityMgr() {
         return throttleConfigurationEntityMgr;
     }
 
-    public void setThrottleConfigurationEntityMgr(ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr) {
+    public void setThrottleConfigurationEntityMgr(final ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr) {
         this.throttleConfigurationEntityMgr = throttleConfigurationEntityMgr;
+        new DoForAllPlugins(plugins.values()) {
+
+            @Override
+            public void execute(WatchdogPlugin plugin) {
+                plugin.setThrottleConfigurationEntityMgr(throttleConfigurationEntityMgr);
+            }
+            
+        }.execute();
     }
 
     public ModelEntityMgr getModelEntityMgr() {
         return modelEntityMgr;
     }
 
-    public void setModelEntityMgr(ModelEntityMgr modelEntityMgr) {
+    public void setModelEntityMgr(final ModelEntityMgr modelEntityMgr) {
         this.modelEntityMgr = modelEntityMgr;
+        new DoForAllPlugins(plugins.values()) {
+
+            @Override
+            public void execute(WatchdogPlugin plugin) {
+                plugin.setModelEntityMgr(modelEntityMgr);
+            }
+            
+        }.execute();
     }
 
     public YarnService getYarnService() {
         return yarnService;
     }
 
-    public void setYarnService(YarnService yarnService) {
+    public void setYarnService(final YarnService yarnService) {
         this.yarnService = yarnService;
+        new DoForAllPlugins(plugins.values()) {
+
+            @Override
+            public void execute(WatchdogPlugin plugin) {
+                plugin.setYarnService(yarnService);
+            }
+            
+        }.execute();
     }
 
     public JobEntityMgr getJobEntityMgr() {
         return jobEntityMgr;
     }
 
-    public void setJobEntityMgr(JobEntityMgr jobEntityMgr) {
+    public void setJobEntityMgr(final JobEntityMgr jobEntityMgr) {
         this.jobEntityMgr = jobEntityMgr;
+        new DoForAllPlugins(plugins.values()) {
+
+            @Override
+            public void execute(WatchdogPlugin plugin) {
+                plugin.setJobEntityMgr(jobEntityMgr);
+            }
+            
+        }.execute();
     }
 
     public int getRetryWaitTime() {
         return retryWaitTime;
     }
 
-    public void setRetryWaitTime(int retryWaitTime) {
+    public void setRetryWaitTime(final int retryWaitTime) {
         this.retryWaitTime = retryWaitTime;
+        new DoForAllPlugins(plugins.values()) {
+
+            @Override
+            public void execute(WatchdogPlugin plugin) {
+                plugin.setRetryWaitTime(retryWaitTime);
+            }
+            
+        }.execute();
     }
 
+    private abstract class DoForAllPlugins {
+        private Collection<WatchdogPlugin> plugins;
+        
+        DoForAllPlugins(Collection<WatchdogPlugin> plugins) {
+            this.plugins = plugins;
+        }
+        
+        public void execute() {
+            for (WatchdogPlugin plugin : plugins) {
+                execute(plugin);
+            }
+        }
+        
+        public abstract void execute(WatchdogPlugin plugin);
+    }
 }
