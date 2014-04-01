@@ -3,7 +3,6 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -11,9 +10,6 @@ import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
 public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
-    
-    @Autowired
-    private ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
     
     private ThrottleConfiguration config;
     

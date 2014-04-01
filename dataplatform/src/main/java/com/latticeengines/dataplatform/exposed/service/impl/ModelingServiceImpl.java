@@ -200,7 +200,10 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     @Override
-    public ApplicationId createSamples(Model model, SamplingConfiguration config) {
+    public ApplicationId createSamples(SamplingConfiguration config) {
+        Model model = new Model();
+        model.setCustomer(config.getCustomer());
+        model.setTable(config.getTable());
         setupModelProperties(model);
         String inputDir = model.getDataHdfsPath();
         String outputDir = model.getSampleHdfsPath();

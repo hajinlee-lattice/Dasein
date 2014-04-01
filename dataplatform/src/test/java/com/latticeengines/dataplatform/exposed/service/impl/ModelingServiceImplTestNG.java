@@ -107,7 +107,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         model.setName("Model Submission1");
 
         model.setTable("DELL_EVENT_TABLE_TEST");
-        model.setFeatures(Arrays.<String> asList(new String[] { 
+        model.setFeatures(Arrays.<String> asList(new String[] {
                 "Column5", //
                 "Column6", //
                 "Column7", //
@@ -136,8 +136,9 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         samplingConfig.addSamplingElement(s0);
         samplingConfig.addSamplingElement(s1);
         samplingConfig.addSamplingElement(s2);
-        
-        ApplicationId appId = modelingService.createSamples(model, samplingConfig);
+        samplingConfig.setCustomer(model.getCustomer());
+        samplingConfig.setTable(model.getTable());
+        ApplicationId appId = modelingService.createSamples(samplingConfig);
         YarnApplicationState state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
     }

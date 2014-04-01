@@ -10,6 +10,8 @@ import com.latticeengines.dataplatform.util.JsonHelper;
 public class SamplingConfiguration {
 
     private List<SamplingElement> samplingElements = new ArrayList<SamplingElement>();
+    private String customer;
+    private String table;
     private int trainingPercentage;
     private int testPercentage;
     
@@ -54,5 +56,25 @@ public class SamplingConfiguration {
         assert(testPercentage <= 100);
         this.testPercentage = testPercentage;
         
+    }
+
+    @JsonProperty("customer")
+    public String getCustomer() {
+        return customer;
+    }
+
+    @JsonProperty("customer")
+    public void setCustomer(String customer) {
+        this.customer = customer;
+    }
+    
+    @JsonProperty("table")
+    public String getTable() {
+        return table;
+    }
+    
+    @JsonProperty("table")
+    public void setTable(String table) {
+        this.table = table;
     }
 }

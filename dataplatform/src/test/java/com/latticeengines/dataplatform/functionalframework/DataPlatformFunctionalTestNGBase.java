@@ -18,6 +18,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.api.records.impl.pb.TestApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -34,6 +35,10 @@ import org.springframework.yarn.test.context.YarnCluster;
 import org.springframework.yarn.test.junit.ApplicationInfo;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
+import com.latticeengines.dataplatform.entitymanager.impl.ModelEntityMgrImpl;
+import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
+
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
@@ -42,9 +47,25 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     @Autowired
     protected Configuration yarnConfiguration;
 
+    @Autowired
+    private JobEntityMgrImpl jobEntityMgr;
+    
+    @Autowired
+    private ModelEntityMgrImpl modelEntityMgr;
+    
+    @Autowired
+    protected ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
+
     protected YarnCluster yarnCluster;
 
     protected YarnClient yarnClient;
+
+    public DataPlatformFunctionalTestNGBase() {
+    }
+
+    public DataPlatformFunctionalTestNGBase(Configuration yarnConfiguration) {
+        this.yarnConfiguration = yarnConfiguration;
+    }
 
     protected boolean doYarnClusterSetup() {
         return true;
@@ -65,23 +86,41 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         });
     }
     
+    public void deleteAllStores() {
+        if (jobEntityMgr != null) {
+            jobEntityMgr.deleteStoreFile();
+        }
+        if (modelEntityMgr != null) {
+            modelEntityMgr.deleteStoreFile();
+        }
+        if (throttleConfigurationEntityMgr != null) {
+            throttleConfigurationEntityMgr.deleteStoreFile();
+        }
+    }
     
+    public void setJobEntityMgr(JobEntityMgrImpl jobEntityMgr) {
+        this.jobEntityMgr = jobEntityMgr;
+    }
+    
+    public void setModelEntityMgr(ModelEntityMgrImpl modelEntityMgr) {
+        this.modelEntityMgr = modelEntityMgr;
+    }
+    
+    public void setThrottleConfigurationEntityMgr(ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr) {
+        this.throttleConfigurationEntityMgr = throttleConfigurationEntityMgr;
+    }
     
     public String getFileUrlFromResource(String resource) {
         URL url = ClassLoader.getSystemResource(resource);
         return "file:" + url.getFile();
     }
 
-    public DataPlatformFunctionalTestNGBase() {
-    }
-
-    public DataPlatformFunctionalTestNGBase(Configuration yarnConfiguration) {
-        this.yarnConfiguration = yarnConfiguration;
-    }
 
     @BeforeClass(groups = "functional")
     public void setupRunEnvironment() throws Exception {
         log.info("Test name = " + this.getClass());
+        
+        deleteAllStores();
         if (!doYarnClusterSetup()) {
             return;
         }
@@ -119,6 +158,15 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         }
 
         doCopy(fs, copyEntries);
+    }
+    
+    public ApplicationId getApplicationId(String appIdStr) {
+        String[] tokens = appIdStr.split("_");
+        TestApplicationId appId = new TestApplicationId();
+        appId.setClusterTimestamp(Long.parseLong(tokens[1]));
+        appId.setId(Integer.parseInt(tokens[2]));
+        appId.build();
+        return appId;
     }
 
     public NumberFormat getAppIdFormat() {
@@ -363,7 +411,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     private YarnApplicationState findState(YarnClient client, ApplicationId applicationId) {
         YarnApplicationState state = null;
         for (ApplicationReport report : client.listApplications()) {
-            if (report.getApplicationId().equals(applicationId)) {
+            if (report.getApplicationId().toString().equals(applicationId.toString())) {
                 state = report.getYarnApplicationState();
                 break;
             }

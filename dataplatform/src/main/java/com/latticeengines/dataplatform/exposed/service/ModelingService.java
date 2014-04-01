@@ -16,5 +16,5 @@ public interface ModelingService {
 
 	void setupCustomer(String customerName);
 	
-	ApplicationId createSamples(Model model, SamplingConfiguration config);
+	ApplicationId createSamples(SamplingConfiguration config);
 }
