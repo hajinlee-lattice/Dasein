@@ -19,6 +19,7 @@
         <maven.jar.version>2.3.2</maven.jar.version>
         <maven.surefire.version>2.12.3</maven.surefire.version>
         <maven.failsafe.version>2.12.4</maven.failsafe.version>
+        <maven.eclipse.version>2.9</maven.eclipse.version>
         <maven.antrun.version>1.7</maven.antrun.version>
         <jacoco.version>0.6.2.201302030002</jacoco.version>
         <functional.classes.include>**/*TestNG.java</functional.classes.include>
@@ -344,7 +345,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-eclipse-plugin</artifactId>
-                    <version>2.9</version>
+                    <version>${maven.eclipse.version}</version>
                     <configuration>
                         <downloadSources>true</downloadSources>
                         <downloadJavadocs>true</downloadJavadocs>
@@ -378,6 +379,20 @@
         </pluginManagement>
     </build>
 
+    <pluginRepositories>
+        <pluginRepository>
+            <id>scala</id>
+            <name>Scala Tools</name>
+            <url>http://scala-tools.org/repo-releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+    
     <dependencies>
         <dependency>
             <groupId>commons-beanutils</groupId>
