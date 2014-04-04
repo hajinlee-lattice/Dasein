@@ -3,9 +3,10 @@ package com.latticeengines.scoring.exposed.controller;
 import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.bind.JAXBException;
 import javax.xml.transform.Source;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dmg.pmml.PMML;
 import org.jpmml.model.ImportFilter;
 import org.jpmml.model.JAXBUtil;
@@ -17,23 +18,24 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.xml.sax.InputSource;
 
+import com.latticeengines.scoring.exposed.service.ScoringService;
 import com.latticeengines.scoring.registry.PMMLModelRegistry;
 
 @Controller
 public class PMMLScoringResource {
+    private static final Log log = LogFactory.getLog(PMMLScoringResource.class);
 
     @Autowired
     private PMMLModelRegistry pmmlModelRegistry;
     
-    public PMMLScoringResource() {
-        try {
-            JAXBUtil.getContext();
-        } catch (JAXBException e) {
-            throw new IllegalStateException("Issues getting JAXB context.");
-        }
-    }
-
-    @RequestMapping(value = "/pmml/{id}", method = RequestMethod.PUT, headers = "Accept=application/xml, application/json")
+    @Autowired
+    private ScoringService scoringService;
+    
+    @RequestMapping(
+            value = "/pmml/{id}", 
+            method = RequestMethod.PUT, 
+            headers = "Accept=application/xml, application/json",
+            produces = "application/text")
     @ResponseBody
     public String deploy(@PathVariable String id, HttpServletRequest servletRequest) {
         PMML pmml = null;
@@ -48,7 +50,7 @@ public class PMMLScoringResource {
                 is.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e);
         }
         return "Model " + id + " deployed successfully.";
     }
@@ -58,4 +60,6 @@ public class PMMLScoringResource {
     public PMML getRegisteredModel(@PathVariable String id) {
         return pmmlModelRegistry.get(id);
     }
+    
+    
 }
