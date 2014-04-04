@@ -92,9 +92,9 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
-        String trainingFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/train.dat");
-        String testFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/test.dat");
-        String jsonFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
+		String trainingFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/nn_train.dat");
+		String testFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/nn_test.dat");
+		String jsonFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/iris.json");
         String train1MinScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_1min.py");
         String train2MinsScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_2mins.py");
         String train4MinsScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_4mins.py");
@@ -110,7 +110,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", enabled = false)
-    public void testSubmit() throws Exception {
+	public void testSubmit() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
         for (int i = 0; i < 1; i++) {
