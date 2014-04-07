@@ -19,5 +19,6 @@
         <module>le-dataplatform</module>
         <module>le-api</module>
         <module>le-perf</module>
+        <module>le-scoring</module>
     </modules>
 </project>
