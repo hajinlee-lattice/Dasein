@@ -1,11 +1,7 @@
 package com.latticeengines.scoring.exposed.service.impl;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 import javax.xml.transform.Source;
 
@@ -23,7 +19,7 @@ import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBas
 public class ScoringServiceImplTestNG extends ScoringFunctionalTestNGBase {
 
     private PMML pmml;
-    private List<ScoringRequest> requests = new ArrayList<ScoringRequest>();
+    private List<ScoringRequest> requests = createListRequest(150);
     
     @Autowired
     private ScoringServiceImpl scoringService;
@@ -34,16 +30,6 @@ public class ScoringServiceImplTestNG extends ScoringFunctionalTestNGBase {
                 .getSystemResourceAsStream("com/latticeengines/scoring/LogisticRegressionPMML.xml");
         Source source = ImportFilter.apply(new InputSource(pmmlInputStream));
         pmml = JAXBUtil.unmarshalPMML(source); 
-        Random random = new Random();
-        for (int i = 0; i < 150; i++) {
-            ScoringRequest request = new ScoringRequest();
-            Map<String, Object> params = new HashMap<String, Object>();
-            params.put("age", 30.0 + random.nextDouble() * 10.0);
-            params.put("salary", 65000 + random.nextDouble() * 10000.0);
-            params.put("car_location", random.nextInt(2) == 0 ? "street" : "carpark");
-            request.setArguments(params);
-            requests.add(request);
-        }
     }
     
     @Test(groups = "functional")
