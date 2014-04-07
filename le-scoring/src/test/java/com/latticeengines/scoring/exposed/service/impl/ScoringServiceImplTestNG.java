@@ -35,7 +35,7 @@ public class ScoringServiceImplTestNG extends ScoringFunctionalTestNGBase {
         Source source = ImportFilter.apply(new InputSource(pmmlInputStream));
         pmml = JAXBUtil.unmarshalPMML(source); 
         Random random = new Random();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 150; i++) {
             ScoringRequest request = new ScoringRequest();
             Map<String, Object> params = new HashMap<String, Object>();
             params.put("age", 30.0 + random.nextDouble() * 10.0);

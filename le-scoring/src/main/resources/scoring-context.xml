@@ -14,5 +14,8 @@
         <property name="corePoolSize" value="${scoring.core.pool.size}" />
         <property name="maxPoolSize" value="${scoring.max.pool.size}" />
         <property name="queueCapacity" value="${scoring.queue.capacity}" />
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
+        </property>
     </bean>
 </beans>
