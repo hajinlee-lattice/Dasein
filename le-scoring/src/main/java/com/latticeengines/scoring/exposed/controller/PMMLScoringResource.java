@@ -1,6 +1,7 @@
 package com.latticeengines.scoring.exposed.controller;
 
 import java.io.InputStream;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.Source;
@@ -81,17 +82,29 @@ public class PMMLScoringResource {
     @RequestMapping( //
     value = "/pmml/{id}", //
     method = RequestMethod.POST, //
-    headers = "Accept=application/xml, application/json")
+    headers = "Accept=application/json", //
+    produces = "application/json")
     @ResponseBody
     public ScoringResponse score(@PathVariable String id, @RequestBody ScoringRequest request) {
         PMML pmml = pmmlModelRegistry.get(id);
         if (pmml == null) {
             throw new IllegalStateException("PMML model with id " + id + " has not yet been registered.");
         }
-        ScoringResponse response = scoringService.score(request, pmml);
-        response.setId(id);
-        return response;
+        return scoringService.score(request, pmml);
     }
-    
+
+    @RequestMapping( //
+    value = "/pmml/batch/{id}", //
+    method = RequestMethod.POST, //
+    headers = "Accept=application/json", //
+    produces = "application/json")
+    @ResponseBody
+    public List<ScoringResponse> scoreBatch(@PathVariable String id, @RequestBody List<ScoringRequest> requests) {
+        PMML pmml = pmmlModelRegistry.get(id);
+        if (pmml == null) {
+            throw new IllegalStateException("PMML model with id " + id + " has not yet been registered.");
+        }
+        return scoringService.scoreBatch(requests, pmml);
+    }
     
 }

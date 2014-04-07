@@ -7,6 +7,7 @@ import static org.testng.Assert.assertNull;
 import java.io.File;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
@@ -24,13 +25,12 @@ import com.latticeengines.scoring.exposed.domain.ScoringResponse;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 
 public class PMMLScoringResourceTestNG extends ScoringFunctionalTestNGBase {
-    
+
     private String pmml;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        URL lrPmmlUrl = ClassLoader
-                .getSystemResource("com/latticeengines/scoring/LogisticRegressionPMML.xml");
+        URL lrPmmlUrl = ClassLoader.getSystemResource("com/latticeengines/scoring/LogisticRegressionPMML.xml");
         pmml = FileUtils.readFileToString(new File(lrPmmlUrl.getFile()));
     }
 
@@ -57,17 +57,27 @@ public class PMMLScoringResourceTestNG extends ScoringFunctionalTestNGBase {
         params.put("salary", 65000f);
         params.put("car_location", "street");
         request.setArguments(params);
-        ScoringResponse response = restTemplate.postForObject("http://localhost:8080/rest/pmml/abcde", request, ScoringResponse.class, new HashMap<String, Object>());
+        ScoringResponse response = restTemplate.postForObject("http://localhost:8080/rest/pmml/abcde", request,
+                ScoringResponse.class, new HashMap<String, Object>());
         Double value = (Double) response.getResult().get("number_of_claims");
         assertNotNull(value);
         assertEquals(value, Double.valueOf(1320.4));
     }
     
+    @SuppressWarnings("unchecked")
+    @Test(groups = "functional", dependsOnMethods = { "score" })
+    public void scoreBatch() throws Exception {
+        List<ScoringRequest> requests = createListRequest(10);
+        List<Object> responses = restTemplate.postForObject("http://localhost:8080/rest/pmml/batch/abcde", requests,
+                List.class, new HashMap<String, Object>());
+        assertEquals(responses.size(), requests.size());
+    }
+
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
         restTemplate.delete("http://localhost:8080/rest/pmml/abcde", new HashMap<String, Object>());
         ResponseEntity<PMML> response = restTemplate.getForEntity("http://localhost:8080/rest/pmml/abcde", PMML.class);
         assertNull(response.getBody());
     }
-    
+
 }
