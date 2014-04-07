@@ -1,17 +1,23 @@
 package com.latticeengines.scoring.exposed.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.EvaluatorUtil;
 import org.jpmml.evaluator.ModelEvaluatorFactory;
 import org.jpmml.manager.PMMLManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.scoring.exposed.domain.ScoringRequest;
@@ -20,10 +26,41 @@ import com.latticeengines.scoring.exposed.service.ScoringService;
 
 @Component("scoringService")
 public class ScoringServiceImpl implements ScoringService {
+    
+    @Autowired
+    private AsyncTaskExecutor asyncTaskExecutor;
 
     @Override
     public List<ScoringResponse> scoreBatch(List<ScoringRequest> scoringRequests, PMML pmml) {
-        return null;
+        List<Future<ScoringResponse>> futures = new ArrayList<Future<ScoringResponse>>();
+        
+        for (ScoringRequest scoringRequest : scoringRequests) {
+            futures.add(scoreAsync(scoringRequest, pmml));
+        }
+        List<ScoringResponse> responses = new ArrayList<ScoringResponse>();
+        
+        for (Future<ScoringResponse> future : futures) {
+            ScoringResponse scoringResponse = null;
+            try {
+                scoringResponse = future.get();
+                
+            } catch (Exception e) {
+                scoringResponse.setError(ExceptionUtils.getFullStackTrace(e));
+            }
+            responses.add(scoringResponse);
+        }
+        
+        return responses;
+    }
+    
+    private Future<ScoringResponse> scoreAsync(final ScoringRequest scoringRequest, final PMML pmml) {
+        return asyncTaskExecutor.submit(new Callable<ScoringResponse>() {
+            
+            @Override
+            public ScoringResponse call() throws Exception {
+                return score(scoringRequest, pmml);
+            }
+        });
     }
 
     @Override

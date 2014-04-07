@@ -4,6 +4,7 @@ import java.util.Map;
 
 public class ScoringResponse {
     private String id = null;
+    private String error = null;
 
     private Map<String, ?> result = null;
 
@@ -28,6 +29,14 @@ public class ScoringResponse {
 
     public void setResult(Map<String, ?> result) {
         this.result = result;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 
 }
