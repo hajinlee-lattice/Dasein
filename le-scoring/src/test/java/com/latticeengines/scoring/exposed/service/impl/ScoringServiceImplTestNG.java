@@ -19,17 +19,18 @@ import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBas
 public class ScoringServiceImplTestNG extends ScoringFunctionalTestNGBase {
 
     private PMML pmml;
-    private List<ScoringRequest> requests = createListRequest(150);
+    private List<ScoringRequest> requests;
     
     @Autowired
     private ScoringServiceImpl scoringService;
 
-    @BeforeClass(groups = "unit")
+    @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         InputStream pmmlInputStream = ClassLoader
                 .getSystemResourceAsStream("com/latticeengines/scoring/LogisticRegressionPMML.xml");
         Source source = ImportFilter.apply(new InputSource(pmmlInputStream));
-        pmml = JAXBUtil.unmarshalPMML(source); 
+        pmml = JAXBUtil.unmarshalPMML(source);
+        requests = createListRequest(150);
     }
     
     @Test(groups = "functional")
