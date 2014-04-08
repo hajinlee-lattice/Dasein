@@ -55,17 +55,6 @@ public class LedpMetricsMgr {
         ms.init("ledpjob");
     }
     
-    public void resetWaitTimesForGanglia() {
-        new DoForAllMetrics(ledpMetrics) {
-            @Override
-            public void execute(LedpMetrics ledpMetric) {
-                ledpMetric.setContainerWaitTime(0);
-                ledpMetric.setApplicationWaitTime(0);
-                ledpMetric.publishMetrics();
-            }
-        }.execute();
-    }
-    
     public long getAppStartTime() {
         return appStartTime;
     }
@@ -172,16 +161,6 @@ public class LedpMetricsMgr {
         }
         
         public abstract void execute(LedpMetrics ledpMetric);
-    }
-
-    public void resetContainerElapsedTimeForGanglia() {
-        new DoForAllMetrics(ledpMetrics) {
-            @Override
-            public void execute(LedpMetrics ledpMetric) {
-                ledpMetric.setContainerElapsedTime(0);
-                ledpMetric.publishMetrics();
-            }
-        }.execute();
     }
 
 }

@@ -127,7 +127,6 @@ public class PythonAppMaster extends StaticEventingAppmaster implements
         if (status.getExitStatus() == ContainerExitStatus.SUCCESS) {
             log.info("Container id = " + status.getContainerId().toString()  + " completed.");
             ledpMetricsMgr.setContainerEndTime(System.currentTimeMillis());
-            ledpMetricsMgr.resetWaitTimesForGanglia();
         }
         
         if (status.getExitStatus() != ContainerExitStatus.PREEMPTED) {

@@ -55,8 +55,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier1Min.setSchemaHdfsPath("/scheduler/iris.json");
         classifier1Min.setModelHdfsDir("/scheduler/result");
         classifier1Min.setPythonScriptHdfsPath("/scheduler/train_1min.py");
-        classifier1Min.setTrainingDataHdfsPath("/training/train.dat");
-        classifier1Min.setTestDataHdfsPath("/test/test.dat");
+        classifier1Min.setTrainingDataHdfsPath("/training/nn_train.dat");
+        classifier1Min.setTestDataHdfsPath("/test/nn_test.dat");
 
         classifier2Mins = new Classifier();
         classifier2Mins.setName("IrisClassifier");
@@ -66,8 +66,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier2Mins.setSchemaHdfsPath("/scheduler/iris.json");
         classifier2Mins.setModelHdfsDir("/scheduler/result");
         classifier2Mins.setPythonScriptHdfsPath("/scheduler/train_2mins.py");
-        classifier2Mins.setTrainingDataHdfsPath("/training/train.dat");
-        classifier2Mins.setTestDataHdfsPath("/test/test.dat");
+        classifier2Mins.setTrainingDataHdfsPath("/training/nn_train.dat");
+        classifier2Mins.setTestDataHdfsPath("/test/nn_test.dat");
 
         classifier4Mins = new Classifier();
         classifier4Mins.setName("IrisClassifier");
@@ -77,8 +77,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier4Mins.setSchemaHdfsPath("/scheduler/iris.json");
         classifier4Mins.setModelHdfsDir("/scheduler/result");
         classifier4Mins.setPythonScriptHdfsPath("/scheduler/train_4mins.py");
-        classifier4Mins.setTrainingDataHdfsPath("/training/train.dat");
-        classifier4Mins.setTestDataHdfsPath("/test/test.dat");
+        classifier4Mins.setTrainingDataHdfsPath("/training/nn_train.dat");
+        classifier4Mins.setTestDataHdfsPath("/test/nn_test.dat");
 
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
