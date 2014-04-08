@@ -40,7 +40,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Autowired
     private YarnClient defaultYarnClient;
-    
+
     @Autowired
     private MapReduceCustomizationService mapReduceCustomizationService;
 
@@ -175,18 +175,17 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         jobEntityMgr.save();
         return appId;
     }
-    
+
     @Override
     public ApplicationId resubmitPreemptedJob(com.latticeengines.dataplatform.exposed.domain.Job job) {
         if (job.getChildJobIds().size() > 0) {
-            if (log.isDebugEnabled())  {
+            if (log.isDebugEnabled()) {
                 log.debug("Did not resubmit preempted job " + job.getId() + ". Already resubmitted.");
             }
-            
+
             return null;
         }
-        String metadata = job.getContainerProperties()
-                .getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
+        String metadata = job.getContainerProperties().getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
         job.getContainerProperties().setProperty(PythonContainerProperty.METADATA.name(), metadata);
         String parentId = job.getId();
         job.setId(null);
@@ -199,17 +198,17 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         return appId;
     }
 
-	@Override
-	public void createHdfsDirectory(String directory, boolean errorIfExists) {
-		try {
-			HdfsHelper.mkdir(yarnConfiguration, directory);
-		} catch (Exception e) {
-			if (errorIfExists) {
-				throw new LedpException(LedpCode.LEDP_00000, e, new String[] { directory });	
-			} else {
-				log.warn(LedpException.buildMessage(LedpCode.LEDP_00000, new String[] { directory }));
-			}
-		}
-	}
+    @Override
+    public void createHdfsDirectory(String directory, boolean errorIfExists) {
+        try {
+            HdfsHelper.mkdir(yarnConfiguration, directory);
+        } catch (Exception e) {
+            if (errorIfExists) {
+                throw new LedpException(LedpCode.LEDP_00000, e, new String[] { directory });
+            } else {
+                log.warn(LedpException.buildMessage(LedpCode.LEDP_00000, new String[] { directory }));
+            }
+        }
+    }
 
 }

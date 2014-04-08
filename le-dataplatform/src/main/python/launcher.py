@@ -1,3 +1,4 @@
+import logging
 import os
 import pwd
 import sys
@@ -5,6 +6,9 @@ from leframework import argumentparser as ap
 from leframework import webhdfs
 from urlparse import urlparse
 
+logging.basicConfig(level = logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
+                    format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(name='launcher')
 
 def stripPath(fileName):
     #return fileName
@@ -58,10 +62,9 @@ if __name__ == "__main__":
     
     # Execute the packaged script from the client and get the returned file
     # that contains the generated model data
-    modelFilePath = os.environ['CONTAINER_ID'] + "_model.txt"
-    modelFile = open(modelFilePath, "w")
-    globals()['train'](training, test, schema, modelFile)
-    modelFile.close()
+    modelFileDir = os.getcwd() + "/results/"
+    os.mkdir(modelFileDir)
+    globals()['train'](training, test, schema, modelFileDir)
     
     # Create webhdfs instance for writing to hdfs
     webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
@@ -71,8 +74,10 @@ if __name__ == "__main__":
     modelDirPath = getModelDirPath(schema)
     hdfs.mkdir(modelDirPath)
     
-    # Copy the model data file from local to hdfs
-    hdfsFilePath = stripPath(modelFilePath)
-    hdfs.copyFromLocal(modelFilePath, "%s/%s" % (modelDirPath, hdfsFilePath))
+    # Copy the model data files from local to hdfs
+    filenames = []
+    (_, _, filenames) = os.walk(modelFileDir).next()
+    for filename in filenames:
+        hdfs.copyFromLocal(modelFileDir + filename, "%s/%s" % (modelDirPath, filename))
      
     
