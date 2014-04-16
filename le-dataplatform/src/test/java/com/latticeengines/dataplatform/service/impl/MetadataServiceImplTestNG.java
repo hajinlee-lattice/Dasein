@@ -20,7 +20,7 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         return false;
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void createDataSchema() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host("rgonzalez-vbox.lattice.local") //
