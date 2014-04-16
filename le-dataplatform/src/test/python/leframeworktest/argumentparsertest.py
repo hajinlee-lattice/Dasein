@@ -11,6 +11,4 @@ class ArgumentParserTest(unittest.TestCase):
         test = parser.createList(schema["test_data"])
         self.assertEqual(test.shape, (616, 7), "Dimensions of training data should be (616, 7)")
         algorithmProperties = parser.getAlgorithmProperties()
-        self.assertEqual(algorithmProperties["C"], "0.05")
-        self.assertEqual(algorithmProperties["numestimators"], "10")
 
