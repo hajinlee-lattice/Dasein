@@ -31,6 +31,7 @@ import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.dataplatform.exposed.domain.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.dataplatform.exposed.domain.algorithm.RandomForestAlgorithm;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -97,9 +98,15 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
         decisionTreeAlgorithm.setSampleName("s1");
 
+        RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
+        randomForestAlgorithm.setPriority(2);
+        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
+        randomForestAlgorithm.setSampleName("all");
+        randomForestAlgorithm.setAlgorithmProperties("criterion=gini n_estimators=3");
+
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model1");
-        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
+        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm, randomForestAlgorithm,
                 logisticRegressionAlgorithm }));
 
         model = new Model();

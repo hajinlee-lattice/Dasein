@@ -17,7 +17,7 @@ def writeModel(schema, modelDir, clf):
     numClasses = len(classes)
     numInputs = len(coefficients[0])
     
-    fo = open(modelDir + "model.txt", "w")
+    fo = open(modelDir + "lr_model.txt", "w")
     fo.write("LogisticRegression\n")
     fo.write("LEDP Logistic Regression Model\n")
     fo.write("classification\n")

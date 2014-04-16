@@ -15,7 +15,7 @@ def writeModel(schema, modelDir, clf):
     numClasses = len(classes)
     numInputs = len(clf.feature_importances_)
     
-    fo = open(modelDir + "model.txt", "w")
+    fo = open(modelDir + "dt_model.txt", "w")
     fo.write("DecisionTreeClassifier\n")
     fo.write("LEDP Decision Tree Classifier Model\n")
     fo.write("classification\n")
