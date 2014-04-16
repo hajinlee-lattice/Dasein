@@ -27,6 +27,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
+import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -54,6 +55,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
         fs.delete(new Path("/eventTable"), true);
+        fs.delete(new Path("/tmp/import"), true);
 
         inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE").getPath();
         outputDir = inputDir + "/samples";
@@ -236,4 +238,29 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(4, files.size());
     }
 
+    /**
+     * This test needs to have SQOOP_HOME set and the $HADOOP_HOME/etc/hadoop part of the classpath.
+     * src/test/resources/com/latticeengines/dataplatform/service/impl/mysql/create.sql should have been run
+     *   before executing this test.
+     * @throws Exception
+     */
+    @Test(groups = "functional", enabled = true)
+    public void testLoadData() throws Exception {
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome");
+        DbCreds creds = new DbCreds(builder);
+        ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.A");
+        YarnApplicationState state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        assertEquals(state, YarnApplicationState.FINISHED);
+        List<String> files = HdfsHelper.getFilesForDir(hadoopConfiguration, "/tmp/import",
+                new HdfsFilenameFilter() {
+
+                    @Override
+                    public boolean accept(Path filename) {
+                        return filename.toString().endsWith(".avro");
+                    }
+            
+        });
+        assertEquals(4, files.size());
+    }
 }

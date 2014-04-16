@@ -22,6 +22,7 @@ import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntity
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.exposed.domain.Job;
+import com.latticeengines.dataplatform.exposed.domain.LoadConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
 import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
@@ -46,18 +47,12 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
-
-    @Override
-    public void setupCustomer(String customerName) {
-        jobService.createHdfsDirectory(customerBaseDir + "/" + customerName + "/models", false);
-        jobService.createHdfsDirectory(customerBaseDir + "/" + customerName + "/data", false);
-    }
 
     @Override
     public List<ApplicationId> submitModel(Model model) {
@@ -103,7 +98,8 @@ public class ModelingServiceImpl implements ModelingService {
 
     private void setupModelProperties(Model model) {
         model.setId(UUID.randomUUID().toString());
-        model.setModelHdfsDir(customerBaseDir + "/" + model.getCustomer() + "/models/" + model.getTable() + "/" + model.getId());
+        model.setModelHdfsDir(customerBaseDir + "/" + model.getCustomer() + "/models/" + model.getTable() + "/"
+                + model.getId());
         model.setDataHdfsPath(customerBaseDir + "/" + model.getCustomer() + "/data/" + model.getTable());
     }
 
@@ -115,10 +111,11 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setTargets(model.getTargets());
         classifier.setPythonScriptHdfsPath(algorithm.getScript());
         classifier.setDataFormat(model.getDataFormat());
+        classifier.setAlgorithmProperties(algorithm.getAlgorithmProperties());
 
         String samplePrefix = algorithm.getSampleName();
         String trainingPath = getAvroFileHdfsPath(samplePrefix + "Training", model.getSampleHdfsPath());
-        
+
         if (trainingPath == null) {
             throw new LedpException(LedpCode.LEDP_15001, new String[] { samplePrefix + "Training" });
         }
@@ -131,7 +128,7 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setSchemaHdfsPath(createSchemaInHdfs(trainingPath, model));
         return classifier;
     }
-    
+
     private String createSchemaInHdfs(String avroFilePath, Model model) {
         String dataPath = model.getDataHdfsPath();
         try {
@@ -143,25 +140,24 @@ public class ModelingServiceImpl implements ModelingService {
         }
         return dataPath;
     }
-    
+
     private String getAvroFileHdfsPath(final String samplePrefix, String baseDir) {
         List<String> files = new ArrayList<String>();
         try {
-            files = HdfsHelper.getFilesForDir(yarnConfiguration, baseDir,
-                    new HdfsFilenameFilter() {
+            files = HdfsHelper.getFilesForDir(yarnConfiguration, baseDir, new HdfsFilenameFilter() {
 
-                        @Override
-                        public boolean accept(Path filename) {
-                            Pattern p = Pattern.compile(".*" + samplePrefix + ".*.avro");
-                            Matcher matcher = p.matcher(filename.toString());
-                            return matcher.matches();
-                        }
-                
+                @Override
+                public boolean accept(Path filename) {
+                    Pattern p = Pattern.compile(".*" + samplePrefix + ".*.avro");
+                    Matcher matcher = p.matcher(filename.toString());
+                    return matcher.matches();
+                }
+
             });
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
-        
+
         if (files.size() == 1) {
             String path = files.get(0);
             return path.substring(path.indexOf(customerBaseDir));
@@ -212,6 +208,23 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), config.toString());
         return jobService.submitMRJob("samplingJob", properties);
+    }
+
+    @Override
+    public ApplicationId createFeatures(Model model) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ApplicationId loadData(LoadConfiguration config) {
+        Model model = new Model();
+        model.setCustomer(config.getCustomer());
+        model.setTable(config.getTable());
+        setupModelProperties(model);
+
+        return jobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(),
+                "Priority0.MapReduce.A");
     }
 
 }

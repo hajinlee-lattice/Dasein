@@ -4,6 +4,13 @@
     "name": "Model Definition For Demo",
     "algorithms": [
       {
+        "name": "DT",
+        "priority": 1,
+        "script": "/demo/dt_train.py",
+        "container_properties": "MEMORY=3048",
+        "algorithm_properties": null
+      },
+      {
         "name": "LR",
         "priority": 0,
         "script": "/demo/lr_train.py",
@@ -28,5 +35,6 @@
     "Event_Latitude_Customer"
   ],
   "data_format": "avro",
-  "queue": "Dell"
+  "queue": "Dell",
+  "algorithm_properties": "C=0.05 numestimators=10"
 }

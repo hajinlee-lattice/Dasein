@@ -9,10 +9,10 @@
 
     <properties>
         <component-name>le-dataplatform</component-name>
-        <hadoop.version>2.2.0.2.0.6.0-101</hadoop.version>
+        <hadoop.version>2.2.0.2.0.6.0-102</hadoop.version>
         <spring.data.version>2.0.0.M4-hadoop22</spring.data.version>
         <avro.version>1.7.4</avro.version>
-        <sqoop.version>1.4.4.2.0.6.1-101</sqoop.version>
+        <sqoop.version>1.4.4.2.0.6.1-102</sqoop.version>
         <le.perf.version>1.0.0-SNAPSHOT</le.perf.version>
     </properties>
 
@@ -50,6 +50,90 @@
         </repository>
     </repositories>
 
+    <profiles>
+        <profile>
+            <id>cc-python</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>python-unit-test</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skipTests}</skip>
+                                    <executable>/usr/local/bin/coverage</executable>
+                                    <workingDirectory>src/test/python</workingDirectory>
+                                    <arguments>
+                                        <argument>run</argument>
+                                        <argument>-m</argument>
+                                        <argument>unittest</argument>
+                                        <argument>discover</argument>
+                                        <argument>-p</argument>
+                                        <argument>*test.py</argument>
+                                    </arguments>
+                                    <environmentVariables>
+                                        <PYTHONPATH>../../main/python:$PYTHONPATH</PYTHONPATH>
+                                    </environmentVariables>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>python-cc-report</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skipTests}</skip>
+                                    <executable>/usr/local/bin/coverage</executable>
+                                    <workingDirectory>src/test/python</workingDirectory>
+                                    <arguments>
+                                        <argument>html</argument>
+                                        <argument>-d</argument>
+                                        <argument>../../../target/pythonhtmlcov</argument>
+                                    </arguments>
+                                    <environmentVariables>
+                                        <PYTHONPATH>../../main/python:$PYTHONPATH</PYTHONPATH>
+                                    </environmentVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unit-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>functional-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
@@ -73,10 +157,15 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>python-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
                         <configuration>
                             <skip>${skipTests}</skip>
                             <executable>/usr/bin/python</executable>
-                            <workingDirectory>src/test/python/leframework</workingDirectory>
+                            <workingDirectory>src/test/python</workingDirectory>
                             <arguments>
                                 <argument>-m</argument>
                                 <argument>unittest</argument>
@@ -85,14 +174,9 @@
                                 <argument>*test.py</argument>
                             </arguments>
                             <environmentVariables>
-                                <PYTHONPATH>../../../main/python:$PYTHONPATH</PYTHONPATH>
+                                <PYTHONPATH>../../main/python:$PYTHONPATH</PYTHONPATH>
                             </environmentVariables>
                         </configuration>
-                        <id>python-test</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -159,12 +243,6 @@
             <version>1.2.0</version>
         </dependency>
         <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>sqljdbc4</artifactId>
-            <version>3.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.apache.sqoop</groupId>
             <artifactId>sqoop</artifactId>
             <version>${sqoop.version}</version>
@@ -173,6 +251,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-perf</artifactId>
             <version>${le.perf.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.30</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

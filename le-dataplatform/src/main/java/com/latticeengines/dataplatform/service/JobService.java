@@ -6,6 +6,7 @@ import java.util.Properties;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 
+import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 import com.latticeengines.dataplatform.exposed.domain.Job;
 
 public interface JobService {
@@ -28,5 +29,7 @@ public interface JobService {
     ApplicationId resubmitPreemptedJob(Job job);
     
 	void createHdfsDirectory(String directory, boolean errorIfExists);
+
+	ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue);
 
 }

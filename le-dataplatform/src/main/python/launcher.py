@@ -11,7 +11,6 @@ logging.basicConfig(level = logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
 logger = logging.getLogger(name='launcher')
 
 def stripPath(fileName):
-    #return fileName
     return fileName[fileName.rfind('/')+1:len(fileName)]
 
 def validateEnvVariable(variable):
@@ -60,11 +59,13 @@ if __name__ == "__main__":
     schema["targetIndex"] = parser.getTargetIndex()
     execfile(script)
     
+    # Get algorithm properties
+    algorithmProperties = parser.getAlgorithmProperties()
     # Execute the packaged script from the client and get the returned file
     # that contains the generated model data
     modelFileDir = os.getcwd() + "/results/"
     os.mkdir(modelFileDir)
-    globals()['train'](training, test, schema, modelFileDir)
+    globals()['train'](training, test, schema, modelFileDir, algorithmProperties)
     
     # Create webhdfs instance for writing to hdfs
     webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])

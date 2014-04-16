@@ -25,6 +25,12 @@ class ArgumentParser(object):
         self.fields = dataSchema["fields"]
         self.features = set(self.metadataSchema["features"])
         self.targets = set(self.metadataSchema["targets"])
+
+        try:
+            properties = self.metadataSchema["algorithm_properties"]
+            self.algorithmProperties = dict(u.split("=") for u in properties.split(" "))
+        except KeyError:
+            pass
         
     def stripPath(self, fileName):
         return fileName[fileName.rfind('/')+1:len(fileName)]
@@ -99,4 +105,7 @@ class ArgumentParser(object):
     
     def getTargetIndex(self):
         return self.targetIndex
+    
+    def getAlgorithmProperties(self):
+        return self.algorithmProperties
 

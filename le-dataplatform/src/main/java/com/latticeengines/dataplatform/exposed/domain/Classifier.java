@@ -18,6 +18,7 @@ public class Classifier implements HasName {
     private List<String> features = new ArrayList<String>();
     private List<String> targets = new ArrayList<String>();
     private String dataFormat;
+    private String algorithmProperties;
 
     @Override
     @JsonProperty("name")
@@ -122,6 +123,16 @@ public class Classifier implements HasName {
     @JsonProperty("data_format")
     public void setDataFormat(String dataFormat) {
         this.dataFormat = dataFormat;
+    }
+
+    @JsonProperty("algorithm_properties")
+    public String getAlgorithmProperties() {
+        return algorithmProperties;
+    }
+
+    @JsonProperty("algorithm_properties")
+    public void setAlgorithmProperties(String algorithmProperties) {
+        this.algorithmProperties = algorithmProperties;
     }
 
 }

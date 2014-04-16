@@ -10,4 +10,6 @@ public interface MetadataService {
     DataSchema createDataSchema(DbCreds creds, String tableName);
     
     Schema getAvroSchema(DbCreds creds, String tableName);
+
+    String getJdbcConnectionUrl(DbCreds creds);
 }

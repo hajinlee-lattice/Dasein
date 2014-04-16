@@ -1,8 +1,8 @@
 import leframework.argumentparser as ap
 
-class AlgorithmBaseTest(object):
+class AlgorithmTestBase(object):
 
-    def execute(self, algorithmFileName):
+    def execute(self, algorithmFileName, algorithmProperties):
         parser = ap.ArgumentParser("model.json")
         schema = parser.getSchema()
         training = parser.createList(schema["training_data"])
@@ -10,5 +10,5 @@ class AlgorithmBaseTest(object):
         modelDir = "./"
         schema["featureIndex"] = parser.getFeatureTuple()
         schema["targetIndex"] = parser.getTargetIndex()
-        execfile("../../../main/python/algorithm/" + algorithmFileName, globals())
-        globals()['train'](training, test, schema, modelDir)
+        execfile("../../main/python/algorithm/" + algorithmFileName, globals())
+        globals()['train'](training, test, schema, modelDir, algorithmProperties)

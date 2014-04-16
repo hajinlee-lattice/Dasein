@@ -13,7 +13,9 @@ public class MetadataProviderMapping {
     public Map<String, MetadataProvider> metadataProviders() {
         Map<String, MetadataProvider> mappings = new HashMap<String, MetadataProvider>();
         SQLServerMetadataProvider ssMdProvider = new SQLServerMetadataProvider();
+        MySQLServerMetadataProvider mysqlMdProvider = new MySQLServerMetadataProvider();
         mappings.put(ssMdProvider.getName(), ssMdProvider);
+        mappings.put(mysqlMdProvider.getName(), mysqlMdProvider);
         return mappings;
     }
 }

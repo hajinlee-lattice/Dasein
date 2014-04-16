@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class LedpGangliaSink extends GangliaSink31 {
 
-    private static final int DEFAULT_DMAX = 1;
+    private static final int DEFAULT_DMAX = 8;
     
     @Override
     protected void emitMetric(String groupName, String name, String type,

@@ -25,5 +25,15 @@
     <import resource="classpath:sampling/dataplatform-mr-sampling-context.xml" />
     
     <context:component-scan base-package="com.latticeengines.dataplatform"/>
+    
+    <bean id="sqoopJobTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="${dataplatform.sqoopjob.core.pool.size}" />
+        <property name="maxPoolSize" value="${dataplatform.sqoopjob.max.pool.size}" />
+        <property name="queueCapacity" value="${dataplatform.sqoopjob.queue.capacity}" />
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
+        </property>
+    </bean>
+    
 
 </beans>

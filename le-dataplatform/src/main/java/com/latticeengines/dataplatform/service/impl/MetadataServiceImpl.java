@@ -14,6 +14,9 @@ import com.latticeengines.dataplatform.service.impl.metadata.MetadataProvider;
 
 @Component("metadataService")
 public class MetadataServiceImpl implements MetadataService {
+    
+    @Value("${dataplatform.dbtype}")
+    private String activeDbType;
 
     private Map<String, MetadataProvider> metadataProviders;
 
@@ -30,8 +33,13 @@ public class MetadataServiceImpl implements MetadataService {
 
     @Override
     public Schema getAvroSchema(DbCreds creds, String tableName) {
-        MetadataProvider provider = metadataProviders.get("SQLServer");
+        MetadataProvider provider = metadataProviders.get(activeDbType);
         return provider.getSchema(creds, tableName);
     }
 
+    @Override
+    public String getJdbcConnectionUrl(DbCreds creds) {
+        MetadataProvider provider = metadataProviders.get(activeDbType);
+        return provider.getConnectionString(creds);
+    }
 }

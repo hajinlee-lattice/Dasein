@@ -2,24 +2,24 @@ package com.latticeengines.dataplatform.service.impl.metadata;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
-import com.cloudera.sqoop.manager.SQLServerManager;
+import com.cloudera.sqoop.manager.MySQLManager;
 import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 
 @SuppressWarnings("deprecation")
-public class SQLServerMetadataProvider extends MetadataProvider {
+public class MySQLServerMetadataProvider extends MetadataProvider {
 
-    public SQLServerMetadataProvider() {
+    public MySQLServerMetadataProvider() {
     }
 
     public String getName() {
-        return "SQLServer";
+        return "MySQL";
     }
 
     public String getConnectionString(DbCreds creds) {
-        String url = "jdbc:sqlserver://$$HOST$$:$$PORT$$;databaseName=$$DB$$;user=$$USER$$;password=$$PASSWD$$";
-        String driverClass = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+        String url = "jdbc:mysql://$$HOST$$:$$PORT$$/$$DB$$?user=$$USER$$&password=$$PASSWD$$";
+        String driverClass = "com.mysql.jdbc.Driver";
         try {
             Class.forName(driverClass);
         } catch (ClassNotFoundException e) {
@@ -30,7 +30,6 @@ public class SQLServerMetadataProvider extends MetadataProvider {
     }
 
     public ConnManager getConnectionManager(SqoopOptions options) {
-        return new SQLServerManager(options);
+        return new MySQLManager(options);
     }
-
 }

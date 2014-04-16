@@ -7,6 +7,9 @@ public class DbCreds {
     private String host;
     private int port;
     private String db;
+    
+    public DbCreds() {
+    }
 
     public DbCreds(Builder builder) {
         this.user = builder.user;

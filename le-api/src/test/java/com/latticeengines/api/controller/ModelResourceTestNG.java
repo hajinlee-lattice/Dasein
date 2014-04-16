@@ -23,6 +23,8 @@ import com.latticeengines.api.domain.AppSubmission;
 import com.latticeengines.api.domain.ThrottleSubmission;
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
+import com.latticeengines.dataplatform.exposed.domain.DbCreds;
+import com.latticeengines.dataplatform.exposed.domain.LoadConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
 import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
@@ -43,6 +45,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
         fs.delete(new Path("/user/le-analytics/customers/DELL"), true);
+        fs.delete(new Path("/user/le-analytics/customers/INTERNAL"), true);
 
         fs.mkdirs(new Path("/user/le-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST"));
 
@@ -130,4 +133,20 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         assertTrue(submission.isImmediate());
     }
 
+    @Test(groups = "functional")
+    public void load() throws Exception {
+        LoadConfiguration config = new LoadConfiguration();
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome");
+        DbCreds creds = new DbCreds(builder);
+        config.setCreds(creds);
+        config.setCustomer("INTERNAL");
+        config.setTable("iris");
+        AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/load", config,
+                AppSubmission.class, new Object[] {});
+        ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
+        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        assertEquals(state, YarnApplicationState.FINISHED);
+        
+    }
 }
