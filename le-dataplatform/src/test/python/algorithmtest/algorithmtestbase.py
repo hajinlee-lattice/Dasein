@@ -1,4 +1,5 @@
 import leframework.argumentparser as ap
+import numpy
 
 class AlgorithmTestBase(object):
 
@@ -11,4 +12,7 @@ class AlgorithmTestBase(object):
         schema["featureIndex"] = parser.getFeatureTuple()
         schema["targetIndex"] = parser.getTargetIndex()
         execfile("../../main/python/algorithm/" + algorithmFileName, globals())
-        globals()['train'](training, test, schema, modelDir, algorithmProperties)
+        clf = globals()['train'](training, test, schema, modelDir, algorithmProperties)
+        scored = clf.predict_proba(test[:, schema["featureIndex"]])[:,1]
+        numpy.savetxt(modelDir + "scored.txt", scored, delimiter=",")
+        print(scored)

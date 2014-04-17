@@ -1,4 +1,5 @@
 import logging
+import numpy
 import os
 import pwd
 import sys
@@ -33,6 +34,11 @@ def validateEnvAndParameters(schema):
     validateSchemaParam(schema, "python_script")
     validateSchemaParam(schema, "model_data_dir")
     
+def writeScoredTestData(testingData, schema, clf, modelDir):
+    scored = clf.predict_proba(testingData[:, schema["featureIndex"]])[:,1]
+    numpy.savetxt(modelDir + "scored.txt", scored, delimiter=",")
+    
+    
 def getModelDirPath(schema):
     appIdList = os.environ['CONTAINER_ID'].split("_")[1:3]
     modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
@@ -58,14 +64,20 @@ if __name__ == "__main__":
     schema["featureIndex"] = parser.getFeatureTuple();
     schema["targetIndex"] = parser.getTargetIndex()
     execfile(script)
+
+    # Create directory for model result
+    modelFileDir = os.getcwd() + "/results/"
+    os.mkdir(modelFileDir)
     
     # Get algorithm properties
     algorithmProperties = parser.getAlgorithmProperties()
+
     # Execute the packaged script from the client and get the returned file
     # that contains the generated model data
-    modelFileDir = os.getcwd() + "/results/"
-    os.mkdir(modelFileDir)
-    globals()['train'](training, test, schema, modelFileDir, algorithmProperties)
+    clf = globals()['train'](training, test, schema, modelFileDir, algorithmProperties)
+    
+    # Create score file
+    writeScoredTestData(test, schema, clf, modelFileDir)
     
     # Create webhdfs instance for writing to hdfs
     webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])

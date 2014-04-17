@@ -8,6 +8,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties):
     clf.fit(X_train, Y_train)
     
     writeModel(schema, modelDir, clf)
+    return clf
 
 def writeModel(schema, modelDir, clf):
     coefficients = clf.coef_

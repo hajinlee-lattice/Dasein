@@ -180,7 +180,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         JobWatchdogService watchDog = getWatchdogService();
         watchDog.run(null);
         
-        assertEquals(2, appIds.size());
+        assertEquals(3, appIds.size());
         
         // First job to complete
         YarnApplicationState state = waitState(appIds.get(0), 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
