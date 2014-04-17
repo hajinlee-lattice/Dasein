@@ -11,3 +11,17 @@ CREATE TABLE iris (
   CATEGORY INT NOT NULL,
   PRIMARY KEY(ID)
 );
+
+LOAD DATA INFILE '/home/rgonzalez/workspace/ledp/le-dataplatform/src/test/resources/com/latticeengines/dataplatform/service/impl/nn_train.dat'
+INTO TABLE iris 
+FIELDS TERMINATED BY ',' 
+LINES TERMINATED BY '\n' 
+(SEPAL_LENGTH, SEPAL_WIDTH, PETAL_LENGTH, PETAL_LENGTH, PETAL_WIDTH, CATEGORY);
+
+LOAD DATA INFILE '/home/rgonzalez/workspace/ledp/le-dataplatform/src/test/resources/com/latticeengines/dataplatform/service/impl/nn_test.dat'
+INTO TABLE iris 
+FIELDS TERMINATED BY ',' 
+LINES TERMINATED BY '\n' 
+(SEPAL_LENGTH, SEPAL_WIDTH, PETAL_LENGTH, PETAL_LENGTH, PETAL_WIDTH, CATEGORY);
+
+COMMIT;
