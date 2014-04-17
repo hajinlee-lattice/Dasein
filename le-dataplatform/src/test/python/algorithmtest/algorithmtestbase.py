@@ -15,4 +15,3 @@ class AlgorithmTestBase(object):
         clf = globals()['train'](training, test, schema, modelDir, algorithmProperties)
         scored = clf.predict_proba(test[:, schema["featureIndex"]])[:,1]
         numpy.savetxt(modelDir + "scored.txt", scored, delimiter=",")
-        print(scored)
