@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.exposed.domain.Field;
 import com.latticeengines.dataplatform.exposed.domain.Job;
+import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
 public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
@@ -72,6 +73,13 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         job.setAppMasterProperties(appMasterProperties);
         job.setContainerProperties(containerProperties);
+        
+        Model model = new Model();
+        model.setId("model_xyz");
+        model.setCustomer("INTERNAL");
+        model.setTable("iris");
+        
+        job.setModel(model);
     }
 
     private void verifyRetrievedJob(String id) {

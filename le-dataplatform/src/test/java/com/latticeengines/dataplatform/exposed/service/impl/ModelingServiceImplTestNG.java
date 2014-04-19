@@ -4,7 +4,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +23,7 @@ import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
 import com.latticeengines.dataplatform.entitymanager.impl.ModelEntityMgrImpl;
 import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
+import com.latticeengines.dataplatform.exposed.domain.JobStatus;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
 import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
@@ -160,9 +160,8 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
             state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
             assertEquals(state, YarnApplicationState.FINISHED);
 
-            NumberFormat appIdFormat = getAppIdFormat();
-            String jobId = appId.getClusterTimestamp() + "_" + appIdFormat.format(appId.getId());
-            String modelFile = HdfsHelper.getFilesForDir(yarnConfiguration, model.getModelHdfsDir() + "/" + jobId).get(0);
+            JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
+            String modelFile = HdfsHelper.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
             String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, modelFile);
             assertNotNull(modelContents);
         }

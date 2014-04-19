@@ -10,18 +10,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataplatform.dao.JobDao;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.exposed.domain.Job;
+import com.latticeengines.dataplatform.exposed.domain.JobStatus;
 import com.latticeengines.dataplatform.exposed.domain.LoadConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
@@ -30,18 +34,27 @@ import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
+import com.latticeengines.dataplatform.exposed.service.YarnService;
+import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.util.AvroHelper;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.util.HdfsHelper.HdfsFilenameFilter;
+import com.latticeengines.dataplatform.util.JsonHelper;
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {
+    
+    @Autowired
+    private Configuration yarnConfiguration;
+    
+    @Autowired
+    private JobDao jobDao;
 
     @Autowired
     private JobService jobService;
-
+    
     @Autowired
     private ModelEntityMgr modelEntityMgr;
 
@@ -49,7 +62,7 @@ public class ModelingServiceImpl implements ModelingService {
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     @Autowired
-    private Configuration yarnConfiguration;
+    private YarnService yarnService;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
@@ -225,6 +238,39 @@ public class ModelingServiceImpl implements ModelingService {
 
         return jobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(),
                 "Priority0.MapReduce.A");
+    }
+
+    @Override
+    public JobStatus getJobStatus(String applicationId) {
+        Job job = getLeafJob(applicationId);
+        JobStatus jobStatus = new JobStatus();
+        jobStatus.setId(job.getId());
+        AppInfo appInfo = yarnService.getApplication(job.getId());
+        if (appInfo != null) {
+            jobStatus.setState(appInfo.getState());
+        }
+        String classifierStr = (String) job.getContainerProperties().get(
+                PythonContainerProperty.METADATA_CONTENTS.name());
+        if (classifierStr != null) {
+            Classifier classifier = JsonHelper.deserialize(classifierStr, Classifier.class);
+            if (classifier != null) {
+                String[] tokens = StringUtils.split(applicationId, "_");
+                String folder = StringUtils.join(new String[] { tokens[1], tokens[2] }, "_");
+                jobStatus.setResultDirectory(classifier.getModelHdfsDir() + "/" + folder);
+            }
+        }
+
+        return jobStatus;
+    }
+
+    private Job getLeafJob(String applicationId) {
+        Job job = jobDao.getById(applicationId);
+        List<String> childIds = job.getChildJobIds();
+
+        for (String jobId : childIds) {
+            return getLeafJob(jobId);
+        }
+        return job;
     }
 
 }

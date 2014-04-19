@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
+import com.latticeengines.dataplatform.exposed.domain.JobStatus;
 import com.latticeengines.dataplatform.exposed.domain.LoadConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
@@ -20,4 +21,6 @@ public interface ModelingService {
     ApplicationId createFeatures(Model model);
 
     ApplicationId loadData(LoadConfiguration config);
+    
+    JobStatus getJobStatus(String applicationId);
 }
