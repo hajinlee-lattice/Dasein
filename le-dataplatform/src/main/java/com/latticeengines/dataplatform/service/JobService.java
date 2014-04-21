@@ -8,6 +8,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 
 import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 import com.latticeengines.dataplatform.exposed.domain.Job;
+import com.latticeengines.dataplatform.exposed.domain.JobStatus;
 
 public interface JobService {
 
@@ -31,5 +32,7 @@ public interface JobService {
 	void createHdfsDirectory(String directory, boolean errorIfExists);
 
 	ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue);
+
+    JobStatus getJobStatus(String applicationId);
 
 }

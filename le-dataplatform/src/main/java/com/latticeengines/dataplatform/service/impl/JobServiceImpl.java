@@ -14,6 +14,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TypeConverter;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.sqoop.Sqoop;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,15 +28,19 @@ import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.exposed.domain.DbCreds;
+import com.latticeengines.dataplatform.exposed.domain.JobStatus;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.dataplatform.util.HdfsHelper;
+import com.latticeengines.dataplatform.util.JsonHelper;
 
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
@@ -66,6 +71,9 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Autowired
     private AsyncTaskExecutor sqoopJobTaskExecutor;
+
+    @Autowired
+    private YarnService yarnService;
 
     @Override
     public List<ApplicationReport> getJobReportsAll() {
@@ -285,5 +293,46 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
             }
         });
+    }
+
+    @Override
+    public JobStatus getJobStatus(String applicationId) {
+        com.latticeengines.dataplatform.exposed.domain.Job job = getLeafJob(applicationId);
+        JobStatus jobStatus = new JobStatus();
+        jobStatus.setId(applicationId);
+        if (job != null) {
+            applicationId = job.getId();
+            jobStatus.setId(applicationId);
+            String classifierStr = (String) job.getContainerProperties().get(
+                    PythonContainerProperty.METADATA_CONTENTS.name());
+            if (classifierStr != null) {
+                Classifier classifier = JsonHelper.deserialize(classifierStr, Classifier.class);
+                if (classifier != null) {
+                    String[] tokens = StringUtils.split(applicationId, "_");
+                    String folder = StringUtils.join(new String[] { tokens[1], tokens[2] }, "_");
+                    jobStatus.setResultDirectory(classifier.getModelHdfsDir() + "/" + folder);
+                }
+            }
+        }
+
+        AppInfo appInfo = yarnService.getApplication(applicationId);
+        if (appInfo != null) {
+            jobStatus.setState(appInfo.getState());
+        }
+
+        return jobStatus;
+    }
+
+    private com.latticeengines.dataplatform.exposed.domain.Job getLeafJob(String applicationId) {
+        com.latticeengines.dataplatform.exposed.domain.Job job = jobEntityMgr.getById(applicationId);
+        
+        if (job != null) {
+            List<String> childIds = job.getChildJobIds();
+            for (String jobId : childIds) {
+                return getLeafJob(jobId);
+            }
+        }
+        return job;
+
     }
 }

@@ -10,16 +10,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
-import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.dao.JobDao;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
@@ -34,14 +31,11 @@ import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.util.AvroHelper;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.util.HdfsHelper.HdfsFilenameFilter;
-import com.latticeengines.dataplatform.util.JsonHelper;
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {
@@ -50,9 +44,6 @@ public class ModelingServiceImpl implements ModelingService {
     private Configuration yarnConfiguration;
     
     @Autowired
-    private JobDao jobDao;
-
-    @Autowired
     private JobService jobService;
     
     @Autowired
@@ -60,9 +51,6 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
-
-    @Autowired
-    private YarnService yarnService;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
@@ -242,42 +230,6 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Override
     public JobStatus getJobStatus(String applicationId) {
-        Job job = getLeafJob(applicationId);
-        JobStatus jobStatus = new JobStatus();
-        jobStatus.setId(applicationId);
-        if (job != null) {
-            applicationId = job.getId();
-            String classifierStr = (String) job.getContainerProperties().get(
-                    PythonContainerProperty.METADATA_CONTENTS.name());
-            if (classifierStr != null) {
-                Classifier classifier = JsonHelper.deserialize(classifierStr, Classifier.class);
-                if (classifier != null) {
-                    String[] tokens = StringUtils.split(applicationId, "_");
-                    String folder = StringUtils.join(new String[] { tokens[1], tokens[2] }, "_");
-                    jobStatus.setResultDirectory(classifier.getModelHdfsDir() + "/" + folder);
-                }
-            }
-        }
-
-        AppInfo appInfo = yarnService.getApplication(applicationId);
-        if (appInfo != null) {
-            jobStatus.setState(appInfo.getState());
-        }
-
-        return jobStatus;
+        return jobService.getJobStatus(applicationId);
     }
-
-    private Job getLeafJob(String applicationId) {
-        Job job = jobDao.getById(applicationId);
-        
-        if (job != null) {
-            List<String> childIds = job.getChildJobIds();
-            for (String jobId : childIds) {
-                return getLeafJob(jobId);
-            }
-        }
-        return job;
-
-    }
-
 }
