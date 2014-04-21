@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.latticeengines.api.domain.AppSubmission;
 import com.latticeengines.api.domain.ThrottleSubmission;
+import com.latticeengines.dataplatform.exposed.domain.JobStatus;
 import com.latticeengines.dataplatform.exposed.domain.LoadConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
@@ -65,6 +67,12 @@ public class ModelResource {
     public AppSubmission loadData(@RequestBody LoadConfiguration config) {
         AppSubmission submission = new AppSubmission(Arrays.<ApplicationId>asList(modelingService.loadData(config)));
         return submission;
+    }
+    
+    @RequestMapping(value = "/getjobstatus/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/xml, application/json")
+    @ResponseBody
+    public JobStatus getJobStatus(@PathVariable String applicationId) {
+        return modelingService.getJobStatus(applicationId);
     }
     
 }

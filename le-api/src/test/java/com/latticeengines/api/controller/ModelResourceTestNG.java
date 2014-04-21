@@ -1,11 +1,13 @@
 package com.latticeengines.api.controller;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +26,7 @@ import com.latticeengines.api.domain.ThrottleSubmission;
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
 import com.latticeengines.dataplatform.exposed.domain.DbCreds;
+import com.latticeengines.dataplatform.exposed.domain.JobStatus;
 import com.latticeengines.dataplatform.exposed.domain.LoadConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
@@ -113,6 +116,9 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
+        JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getjobstatus/" + appId.toString(), JobStatus.class, new HashMap<String, Object>());
+        assertNotNull(status);
+        assertEquals(status.getId(), appId.toString());
     }
 
 
@@ -121,6 +127,10 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         assertEquals(2, submission.getApplicationIds().size());
+        String appId = submission.getApplicationIds().get(0);
+        JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getjobstatus/" + appId, JobStatus.class, new HashMap<String, Object>());
+        assertNotNull(status);
+        assertEquals(status.getId(), appId);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "submit" })
@@ -147,6 +157,9 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
+        JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getjobstatus/" + appId.toString(), JobStatus.class, new HashMap<String, Object>());
+        assertNotNull(status);
+        assertEquals(status.getId(), appId.toString());
         
     }
 }
