@@ -244,20 +244,24 @@ public class ModelingServiceImpl implements ModelingService {
     public JobStatus getJobStatus(String applicationId) {
         Job job = getLeafJob(applicationId);
         JobStatus jobStatus = new JobStatus();
-        jobStatus.setId(job.getId());
-        AppInfo appInfo = yarnService.getApplication(job.getId());
+        jobStatus.setId(applicationId);
+        if (job != null) {
+            applicationId = job.getId();
+            String classifierStr = (String) job.getContainerProperties().get(
+                    PythonContainerProperty.METADATA_CONTENTS.name());
+            if (classifierStr != null) {
+                Classifier classifier = JsonHelper.deserialize(classifierStr, Classifier.class);
+                if (classifier != null) {
+                    String[] tokens = StringUtils.split(applicationId, "_");
+                    String folder = StringUtils.join(new String[] { tokens[1], tokens[2] }, "_");
+                    jobStatus.setResultDirectory(classifier.getModelHdfsDir() + "/" + folder);
+                }
+            }
+        }
+
+        AppInfo appInfo = yarnService.getApplication(applicationId);
         if (appInfo != null) {
             jobStatus.setState(appInfo.getState());
-        }
-        String classifierStr = (String) job.getContainerProperties().get(
-                PythonContainerProperty.METADATA_CONTENTS.name());
-        if (classifierStr != null) {
-            Classifier classifier = JsonHelper.deserialize(classifierStr, Classifier.class);
-            if (classifier != null) {
-                String[] tokens = StringUtils.split(applicationId, "_");
-                String folder = StringUtils.join(new String[] { tokens[1], tokens[2] }, "_");
-                jobStatus.setResultDirectory(classifier.getModelHdfsDir() + "/" + folder);
-            }
         }
 
         return jobStatus;
@@ -265,12 +269,15 @@ public class ModelingServiceImpl implements ModelingService {
 
     private Job getLeafJob(String applicationId) {
         Job job = jobDao.getById(applicationId);
-        List<String> childIds = job.getChildJobIds();
-
-        for (String jobId : childIds) {
-            return getLeafJob(jobId);
+        
+        if (job != null) {
+            List<String> childIds = job.getChildJobIds();
+            for (String jobId : childIds) {
+                return getLeafJob(jobId);
+            }
         }
         return job;
+
     }
 
 }
