@@ -116,9 +116,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
-        JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getjobstatus/" + appId.toString(), JobStatus.class, new HashMap<String, Object>());
-        assertNotNull(status);
-        assertEquals(status.getId(), appId.toString());
+        validateAppStatus(appId);
     }
 
 
@@ -128,9 +126,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
                 AppSubmission.class, new Object[] {});
         assertEquals(2, submission.getApplicationIds().size());
         String appId = submission.getApplicationIds().get(0);
-        JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getjobstatus/" + appId, JobStatus.class, new HashMap<String, Object>());
-        assertNotNull(status);
-        assertEquals(status.getId(), appId);
+        validateAppStatus(platformTestBase.getApplicationId(appId));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "submit" })
@@ -157,9 +153,12 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
+        validateAppStatus(appId);
+    }
+    
+    private void validateAppStatus(ApplicationId appId) {
         JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getjobstatus/" + appId.toString(), JobStatus.class, new HashMap<String, Object>());
         assertNotNull(status);
         assertEquals(status.getId(), appId.toString());
-        
     }
 }
