@@ -27,6 +27,23 @@ import com.latticeengines.dataplatform.exposed.domain.JobStatus;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
 
+/**
+ * This test working is dependent on the cluster settings. Ensure that:
+ * 
+ * 1. Set in yarn-site.xml
+ *   <property>
+ *       <name>yarn.nodemanager.resource.cpu-vcores</name>
+ *       <value>#cores in system</value>
+ *   </property>
+ * 
+ * 2. Set in fair-scheduler.xml
+ *   <user name="User running resource manager">
+ *       <maxRunningApps>(#cores in system)/2</maxRunningApps>
+ *   </user>
+ *
+ * @author rgonzalez
+ *
+ */
 @ContextConfiguration(locations = { "classpath:dataplatform-quartz-context.xml" })
 public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
