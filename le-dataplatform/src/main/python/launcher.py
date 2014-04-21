@@ -35,8 +35,9 @@ def validateEnvAndParameters(schema):
     validateSchemaParam(schema, "model_data_dir")
     
 def writeScoredTestData(testingData, schema, clf, modelDir):
-    scored = clf.predict_proba(testingData[:, schema["featureIndex"]])[:,1]
-    numpy.savetxt(modelDir + "scored.txt", scored, delimiter=",")
+    if clf != None:
+        scored = clf.predict_proba(testingData[:, schema["featureIndex"]])[:,1]
+        numpy.savetxt(modelDir + "scored.txt", scored, delimiter=",")
     
     
 def getModelDirPath(schema):
