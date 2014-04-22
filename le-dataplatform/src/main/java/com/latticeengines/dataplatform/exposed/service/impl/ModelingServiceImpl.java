@@ -33,9 +33,12 @@ import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.service.YarnQueueAssignmentService;
 import com.latticeengines.dataplatform.util.AvroHelper;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.util.HdfsHelper.HdfsFilenameFilter;
+import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
+import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {
@@ -52,6 +55,9 @@ public class ModelingServiceImpl implements ModelingService {
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
+    @Autowired
+    private YarnQueueAssignmentService yarnQueueAssignmentService;
+    
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
@@ -170,11 +176,12 @@ public class ModelingServiceImpl implements ModelingService {
         Job job = new Job();
         Classifier classifier = createClassifier(model, algorithm);
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put("CUSTOMER", model.getCustomer());
-        appMasterProperties.put("TABLE", model.getTable());
-        appMasterProperties.put("QUEUE", "Priority" + algorithm.getPriority() + ".A");
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), model.getCustomer());
+        appMasterProperties.put(AppMasterProperty.TABLE.name(), model.getTable());
+        String assignedQueue = yarnQueueAssignmentService.getAssignedQueue(model.getCustomer(), "Priority" + algorithm.getPriority());
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
         Properties containerProperties = algorithm.getContainerProps();
-        containerProperties.put("METADATA", classifier.toString());
+        containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
         job.setClient("pythonClient");
         job.setAppMasterProperties(appMasterProperties);
         job.setContainerProperties(containerProperties);
@@ -208,6 +215,9 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(EventDataSamplingProperty.INPUT.name(), inputDir);
         properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), config.toString());
+        properties.setProperty(EventDataSamplingProperty.CUSTOMER.name(), model.getCustomer());
+        String assignedQueue = yarnQueueAssignmentService.getAssignedQueue(model.getCustomer(), "MapReduce");
+        properties.setProperty(EventDataSamplingProperty.QUEUE.name(), assignedQueue);
         return jobService.submitMRJob("samplingJob", properties);
     }
 
@@ -223,9 +233,8 @@ public class ModelingServiceImpl implements ModelingService {
         model.setCustomer(config.getCustomer());
         model.setTable(config.getTable());
         setupModelProperties(model);
-
-        return jobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(),
-                "Priority0.MapReduce.A");
+        String assignedQueue = yarnQueueAssignmentService.getAssignedQueue(model.getCustomer(), "MapReduce");
+        return jobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue, model.getCustomer());
     }
 
     @Override

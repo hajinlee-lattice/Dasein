@@ -1,29 +1,17 @@
 package com.latticeengines.dataplatform.service;
 
+public interface YarnQueueAssignmentService {
 
-public interface YarnQueueAssignmentService  {
-
-    public enum AssignmentPolicy { 
-        DEFAULT, 
-        // by active + pending
-        SHORTESTQUEUE, 
-        // round robin
-        ROUNDROBIN, 
-        // random
-        RANDOM, 
-        // by pending
-        SHORTESTPENDINGQUEUE,
-        // by total active + pending resources (memory)
-        SHORTESTQUEUEBYRESOURCES,
-        // sticky to minimize data movement
-        DATALOCALITY,
-        // sticky shortest queue
-        STICKYSHORTESTQUEUE;
-
-    }
-
-    String useQueue(String assignmentToken, AssignmentPolicy policy); 
-    
-    String useQueue(String assignmentToken, AssignmentPolicy policy, Boolean refreshQueueState); 
+    /**
+     * The assignment policy is sticky or least utilized. If a customer has an
+     * existing live application associated to a leaf queue, then that queue is
+     * returned. Otherwise, the least utilized leaf queue is returned if at
+     * least one is available.
+     * 
+     * @param customer
+     * @param parentQueue
+     * @return
+     */
+    String getAssignedQueue(String customer, String parentQueue);
 
 }

@@ -50,6 +50,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
         properties.setProperty(EventDataSamplingProperty.INPUT.name(), args[0]);
         properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), args[1]);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), args[2]);
+        properties.setProperty(EventDataSamplingProperty.QUEUE.name(), args[3]);
 
         customize(job, properties);
         if (job.waitForCompletion(true)) {
@@ -70,7 +71,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             String samplingConfigStr = properties.getProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name());
             config.set(LEDP_SAMPLE_CONFIG, samplingConfigStr);
             String queueName = properties.getProperty(EventDataSamplingProperty.QUEUE.name());
-			// config.set("mapreduce.job.queuename", queueName);
+	    config.set("mapreduce.job.queuename", queueName);
             String inputDir = properties.getProperty(EventDataSamplingProperty.INPUT.name());
             AvroKeyInputFormat.addInputPath(job, new Path(inputDir));
             AvroKeyOutputFormat.setOutputPath(job,

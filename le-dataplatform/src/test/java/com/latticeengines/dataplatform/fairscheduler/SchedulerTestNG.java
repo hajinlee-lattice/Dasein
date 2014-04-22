@@ -26,6 +26,8 @@ import com.latticeengines.dataplatform.exposed.domain.Job;
 import com.latticeengines.dataplatform.exposed.domain.JobStatus;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
+import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
 /**
  * This test working is dependent on the cluster settings. Ensure that:
@@ -251,13 +253,14 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     private Properties[] getPropertiesPair(Classifier classifier, String queue, int priority) {
         Properties containerProperties = new Properties();
-        containerProperties.put("VIRTUALCORES", "1");
-        containerProperties.put("MEMORY", "1024");
-        containerProperties.put("PRIORITY", Integer.toString(priority));
-        containerProperties.put("METADATA", classifier.toString());
-
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "1024");
+        containerProperties.put(ContainerProperty.PRIORITY.name(), Integer.toString(priority));
+        containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());       
+        
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put("QUEUE", queue);
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), queue);
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
 
         return new Properties[] { appMasterProperties, containerProperties };
     }

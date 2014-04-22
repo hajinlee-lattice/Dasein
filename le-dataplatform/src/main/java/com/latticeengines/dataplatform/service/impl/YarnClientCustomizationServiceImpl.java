@@ -19,6 +19,7 @@ import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
@@ -35,6 +36,9 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     @Autowired
     private YarnClientCustomizationRegistry yarnClientCustomizationRegistry;
 
+    @Autowired
+    private JobNameService jobNameService;
+    
     @Override
     public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties,
             Properties containerProperties) {
@@ -53,15 +57,15 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         customization.beforeCreateLocalLauncherContextFile(containerProperties);
         String fileName = createContainerLauncherContextFile(customization, appMasterProperties, containerProperties);
         containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
-        String queuePropName = AppMasterProperty.QUEUE.name();
-        containerProperties.setProperty(queuePropName, appMasterProperties.getProperty(queuePropName));
+        containerProperties.setProperty(AppMasterProperty.QUEUE.name(), appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()));
         ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer(containerProperties);
         int memory = customization.getMemory(appMasterProperties);
         int virtualCores = customization.getVirtualcores(appMasterProperties);
         int priority = customization.getPriority(appMasterProperties);
         String queue = customization.getQueue(appMasterProperties);
         List<String> commands = customization.getCommands(containerProperties);
-
+      
+        client.setAppName(jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()), clientName));
         if (resourceLocalizer != null) {
             client.setResourceLocalizer(resourceLocalizer);
         }

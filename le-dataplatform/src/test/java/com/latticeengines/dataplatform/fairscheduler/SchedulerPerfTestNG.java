@@ -37,6 +37,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
+import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 import com.latticeengines.perf.exposed.test.PerfFunctionalTestBase;
 
 /**
@@ -349,13 +351,14 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 
     private Properties[] getPropertiesPair(Classifier classifier, String queue) {
         Properties containerProperties = new Properties();
-        containerProperties.put("VIRTUALCORES", "1");
-        containerProperties.put("MEMORY", "1024");
-        containerProperties.put("PRIORITY", "0");
-        containerProperties.put("METADATA", classifier.toString());
-
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "1024");
+        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
+        containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
+        
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put("QUEUE", queue);
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), queue);
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
 
         return new Properties[] { appMasterProperties, containerProperties };
     }

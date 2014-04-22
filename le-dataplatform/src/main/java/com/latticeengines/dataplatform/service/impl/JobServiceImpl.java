@@ -35,6 +35,7 @@ import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
+import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 import com.latticeengines.dataplatform.service.MetadataService;
@@ -74,7 +75,10 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Autowired
     private YarnService yarnService;
-
+    
+    @Autowired
+    private JobNameService jobNameService;
+    
     @Override
     public List<ApplicationReport> getJobReportsAll() {
         return defaultYarnClient.listApplications();
@@ -104,7 +108,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    public ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties,
+    public synchronized ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties,
             Properties containerProperties) {
         CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
         yarnClientCustomizationService.validate(client, yarnClientName, appMasterProperties, containerProperties);
@@ -148,7 +152,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    public ApplicationId submitMRJob(String mrJobName, Properties properties) {
+    public synchronized ApplicationId submitMRJob(String mrJobName, Properties properties) {
         Job job = getJob(mrJobName);
         mapReduceCustomizationService.addCustomizations(job, mrJobName, properties);
         if (properties != null) {
@@ -190,7 +194,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    public ApplicationId submitJob(com.latticeengines.dataplatform.exposed.domain.Job job) {
+    public synchronized ApplicationId submitJob(com.latticeengines.dataplatform.exposed.domain.Job job) {
         ApplicationId appId = submitYarnJob(job.getClient(), job.getAppMasterProperties(), job.getContainerProperties());
         job.setId(appId.toString());
         jobEntityMgr.post(job);
@@ -243,13 +247,13 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue) {
-        final String jobName = "data-load-" + System.currentTimeMillis();
+    public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer) {
+        final String jobName = jobNameService.createJobName(customer, "data-load-");;
         Future<Integer> future = loadAsync(table, targetDir, creds, queue, jobName);
 
         int tries = 0;
         ApplicationId appId = null;
-        while (tries < MAX_TRIES) {
+        while (tries <= MAX_TRIES) {
             try {
                 Thread.sleep(APP_WAIT_TIME);
             } catch (InterruptedException e) {

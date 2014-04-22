@@ -17,6 +17,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
+import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
 public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     
@@ -46,11 +48,12 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = "functional")
     public void getApp() throws Exception {
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put("QUEUE", "Priority0.A");
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), "Priority0.A");
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
         Properties containerProperties = new Properties();
-        containerProperties.put("VIRTUALCORES", "1");
-        containerProperties.put("MEMORY", "64");
-        containerProperties.put("PRIORITY", "0");
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "64");
+        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
         ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         AppInfo appInfo = yarnService.getApplication(applicationId.toString());

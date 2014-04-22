@@ -33,9 +33,11 @@ import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
+import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.util.HdfsHelper;
 import com.latticeengines.dataplatform.util.HdfsHelper.HdfsFilenameFilter;
+import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
@@ -45,6 +47,9 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     
     @Autowired
     private Configuration hadoopConfiguration;
+    
+    @Autowired
+    private JobNameService jobNameService;
 
     private String inputDir = null;
     private String outputDir = null;
@@ -112,6 +117,21 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
     }
 
+    private Properties createAppMasterPropertiesForYarnJob() {
+        Properties appMasterProperties = new Properties();
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), "Priority0.A");
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
+        return appMasterProperties;
+    }
+    
+    private Properties createContainerPropertiesForYarnJob() {
+        Properties containerProperties = new Properties();
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "64");
+        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
+        return containerProperties;
+    }
+    
     @Test(groups = "functional", enabled = true)
     public void testGetJobReportsAll() throws Exception {
         List<ApplicationReport> applications = jobService.getJobReportsAll();
@@ -119,13 +139,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", enabled = true)
-    public void testKillApplication() throws Exception {
-        Properties appMasterProperties = new Properties();
-        appMasterProperties.put("QUEUE", "Priority0.A");
-        Properties containerProperties = new Properties();
-        containerProperties.put("VIRTUALCORES", "1");
-        containerProperties.put("MEMORY", "64");
-        containerProperties.put("PRIORITY", "0");
+    public void testKillApplication() throws Exception {        
+        Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
+
+        Properties containerProperties = createContainerPropertiesForYarnJob();     
+        
         ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
@@ -137,13 +155,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", enabled = true)
-    public void testGetJobReportByUser() throws Exception {
-        Properties appMasterProperties = new Properties();
-        appMasterProperties.put("QUEUE", "Priority0.A");
-        Properties containerProperties = new Properties();
-        containerProperties.put("VIRTUALCORES", "1");
-        containerProperties.put("MEMORY", "64");
-        containerProperties.put("PRIORITY", "0");
+    public void testGetJobReportByUser() throws Exception {        
+        Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
+
+        Properties containerProperties = createContainerPropertiesForYarnJob();
+        
         ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
@@ -154,7 +170,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertTrue(state.equals(YarnApplicationState.KILLED));
 
         ApplicationReport app = jobService.getJobReportById(applicationId);
-
+        
         List<ApplicationReport> reports = jobService.getJobReportByUser(app.getUser());
         int numJobs = reports.size();
         assertTrue(numJobs > 0);
@@ -166,7 +182,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertTrue(reports.size() > numJobs);
         jobService.killJob(applicationId);
     }
-
+    
     @Test(groups = "functional", enabled = true)
     public void testSubmitPythonYarnJob() throws Exception {
         Classifier classifier = new Classifier();
@@ -181,14 +197,10 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         classifier.setTestDataHdfsPath("/test/nn_test.dat");
         classifier.setDataFormat("csv");
 
-        Properties appMasterProperties = new Properties();
-        appMasterProperties.put("QUEUE", "Priority0.A");
+        Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 
-        Properties containerProperties = new Properties();
-        containerProperties.put("VIRTUALCORES", "1");
-        containerProperties.put("MEMORY", "64");
-        containerProperties.put("PRIORITY", "0");
-        containerProperties.put("METADATA", classifier.toString());
+        Properties containerProperties = createContainerPropertiesForYarnJob();
+        containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
 
         ApplicationId applicationId = jobService
                 .submitYarnJob("pythonClient", appMasterProperties, containerProperties);
@@ -219,6 +231,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(EventDataSamplingProperty.INPUT.name(), inputDir);
         properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
+        properties.setProperty(EventDataSamplingProperty.CUSTOMER.name(), "Dell");
         ApplicationId applicationId = jobService.submitMRJob("samplingJob", properties);
         YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
 
@@ -249,7 +262,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome");
         DbCreds creds = new DbCreds(builder);
-        ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.A");
+        ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.A", "Dell");
         YarnApplicationState state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
         List<String> files = HdfsHelper.getFilesForDir(hadoopConfiguration, "/tmp/import",

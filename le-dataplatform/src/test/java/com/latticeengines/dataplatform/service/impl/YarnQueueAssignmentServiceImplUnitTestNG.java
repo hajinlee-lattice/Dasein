@@ -1,198 +1,145 @@
 package com.latticeengines.dataplatform.service.impl;
 
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.Assert.assertEquals;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationIdPBImpl;
-import org.apache.hadoop.yarn.api.records.impl.pb.ApplicationSubmissionContextPBImpl;
-import org.apache.hadoop.yarn.event.AsyncDispatcher;
-import org.apache.hadoop.yarn.proto.YarnProtos.ApplicationIdProto;
-import org.apache.hadoop.yarn.server.resourcemanager.RMContextImpl;
-import org.apache.hadoop.yarn.server.resourcemanager.rmapp.RMAppImpl;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
+import java.io.File;
+import java.io.StringReader;
+import java.net.URI;
+import java.net.URL;
+
+import javax.xml.bind.JAXBContext;
+
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.FairSchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.dataplatform.service.YarnQueueAssignmentService.AssignmentPolicy;
+import com.latticeengines.dataplatform.service.YarnQueueAssignmentService;
 
 public class YarnQueueAssignmentServiceImplUnitTestNG {
 
     @Mock
-    YarnService yarnService;
+    private YarnService yarnService;
+    
+    private YarnQueueAssignmentService yarnQueueAssignmentService;
 
     @BeforeClass(groups = "unit")
-    public void beforeClass() {
-        MockitoAnnotations.initMocks(this);
+    public void beforeClass() throws Exception {
+        initMocks(this);
+        yarnQueueAssignmentService = setupAssignmentService();
     }
-
-    private void setupFairSchedulerConfig() throws Exception {
-        PrintWriter out = new PrintWriter(new FileWriter("target/test-classes/fair-scheduler.xml"));
-        out.println("<?xml version=\"1.0\"?>");
-        out.println("<allocations>");
-        out.println("   <queue name=\"PlayMaker\">");
-        out.println("       <weight>5</weight>");
-        out.println("       <minResources>2048 mb,2 vcores</minResources>");
-        out.println("       <schedulingPolicy>fair</schedulingPolicy>");
-        out.println("       <minSharePreemptionTimeout>3</minSharePreemptionTimeout>");
-        out.println("       <queue name=\"1\">");
-        out.println("           <weight>5</weight>");
-        out.println("           <minResources>4096 mb,4 vcores</minResources>");
-        out.println("           <fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-        out.println("           <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("       </queue>");
-        out.println("       <queue name=\"2\">");
-        out.println("           <weight>5</weight>");
-        out.println("           <minResources>4096 mb,4 vcores</minResources>");
-        out.println("           <fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-        out.println("           <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("       </queue>");
-        out.println("       <queue name=\"3\">");
-        out.println("           <weight>20</weight>");
-        out.println("           <minResources>8096 mb,8 vcores</minResources>");
-        out.println("           <fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-        out.println("           <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("       </queue>");
-        out.println("       <queue name=\"4\">");
-        out.println("           <weight>20</weight>");
-        out.println("           <minResources>8096 mb,8 vcores</minResources>");
-        out.println("           <fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-        out.println("           <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("       </queue>");
-        out.println("       <queue name=\"5\">");
-        out.println("           <weight>20</weight>");
-        out.println("           <minResources>8096 mb,8 vcores</minResources>");
-        out.println("           <fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-        out.println("           <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("       </queue>");
-        out.println("       <queue name=\"6\">");
-        out.println("           <weight>20</weight>");
-        out.println("           <minResources>8096 mb,8 vcores</minResources>");
-        out.println("           <fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-        out.println("           <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("       </queue>");
-        out.println("       <queue name=\"7\">");
-        out.println("           <weight>20</weight>");
-        out.println("           <minResources>8096 mb,8 vcores</minResources>");
-        out.println("           <fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-        out.println("           <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("       </queue>");
-        out.println("       <queue name=\"8\">");
-        out.println("           <weight>20</weight>");
-        out.println("           <minResources>8096 mb,8 vcores</minResources>");
-        out.println("           <fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-        out.println("           <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("       </queue>");
-        out.println("       <queue name=\"12\">");
-        out.println("           <weight>20</weight>");
-        out.println("           <minResources>8096 mb,8 vcores</minResources>");
-        out.println("           <fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-        out.println("           <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("       </queue>");
-        out.println("       <queue name=\"15\">");
-        out.println("           <weight>20</weight>");
-        out.println("           <minResources>8096 mb,8 vcores</minResources>");
-        out.println("           <fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-        out.println("           <schedulingPolicy>fifo</schedulingPolicy>");
-        out.println("       </queue>");
-        out.println("   </queue>");
-        out.println("   <queue name=\"FastLane\">");
-        out.println("       <minResources>2048 mb,2 vcores</minResources>");
-        out.println("       <schedulingPolicy>fair</schedulingPolicy>");
-        out.println("       <minSharePreemptionTimeout>3</minSharePreemptionTimeout>");
-        out.println("   </queue>");
-        out.println("   <defaultMinSharePreemptionTimeout>3</defaultMinSharePreemptionTimeout>");
-        out.println("   <fairSharePreemptionTimeout>3</fairSharePreemptionTimeout>");
-        out.println("</allocations>");
-        out.close();
+    
+    private YarnQueueAssignmentService setupAssignmentService() throws Exception {
+        SchedulerTypeInfo schedulerInfo = unmarshalSchedulerTypeInfo();
+        AppsInfo appsInfo = unmarshalAppsInfo();
+        
+        when(yarnService.getSchedulerInfo()).thenReturn(schedulerInfo);
+        when(yarnService.getApplications(YarnQueueAssignmentServiceImpl.APP_STATES_ACCEPTED_RUNNING)).thenReturn(appsInfo);
+        YarnQueueAssignmentServiceImpl assignmentService = new YarnQueueAssignmentServiceImpl();
+        assignmentService.setYarnService(yarnService);
+        
+        return assignmentService;
     }
-
+    
+    private static String getStringFromFile(String path) throws Exception {
+        URL url = ClassLoader.getSystemResource(path);
+        String filePath = "file:" + url.getFile();   
+        return Files.toString(new File(new URI(filePath)), Charsets.UTF_8);
+    }
+    
+    private static SchedulerTypeInfo unmarshalSchedulerTypeInfo() throws Exception {
+        String mockFilePath = "com/latticeengines/dataplatform/service/impl/yqasMockSchedulerInfo.xml";
+                
+        return (SchedulerTypeInfo) JAXBContext.newInstance(SchedulerTypeInfo.class)
+                                 .createUnmarshaller()
+                                 .unmarshal(new StringReader(getStringFromFile(mockFilePath)));
+    }    
+    
+    private static AppsInfo unmarshalAppsInfo() throws Exception {
+        String mockFilePath = "com/latticeengines/dataplatform/service/impl/yqasMockAppsInfo.xml";
+        
+        return (AppsInfo) JAXBContext.newInstance(AppsInfo.class)
+                                 .createUnmarshaller()
+                                 .unmarshal(new StringReader(getStringFromFile(mockFilePath)));
+    }   
+      
     @Test(groups = "unit")
-    public void testNoQueues() {
-        FairSchedulerInfo fairSchedulerInfoToReturn = new FairSchedulerInfo();
-        Mockito.when(yarnService.getSchedulerInfo()).thenReturn(new SchedulerTypeInfo(fairSchedulerInfoToReturn));
-        AppsInfo appsInfoToReturn = new AppsInfo();
-        Mockito.when(yarnService.getApplications("states=running,accepted")).thenReturn(appsInfoToReturn);
-        YarnQueueAssignmentServiceImpl service = new YarnQueueAssignmentServiceImpl();
-        service.setYarnService(yarnService);
-        try {
-            String queueName = service.useQueue("Dell", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-            System.out.println(queueName);
+    public void testStickyP0NonMRQueue() throws Exception {       
+        final String customer = "Dell";
+        final String requestedParentQueue = "Priority0";
+        
+        assertEquals("root.Priority0.C", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+    }    
+    
+    @Test(groups = "unit")
+    public void testStickyP1NonMRQueue() throws Exception {       
+        final String customer = "Dell";
+        final String requestedParentQueue = "Priority1";
+        
+        assertEquals("root.Priority1.B", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+    }   
+    
+    @Test(groups = "unit")
+    public void testStickyP0MRQueue() throws Exception {       
+        final String customer = "Dell";
+        final String requestedParentQueue = "MapReduce";
+        
+        assertEquals("root.Priority0.MapReduce.A", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+    }     
+   
+    @Test(groups = "unit")
+    public void testNewlyAssignedGetLeastUtilizedMRQueue() throws Exception {       
+        final String customer = "Nobody";
+        final String requestedParentQueue = "MapReduce";
+        
+        assertEquals("root.Priority0.MapReduce.B", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+    }        
+    
+    @Test(groups = "unit")
+    public void testNewlyAssignedGetLeastUtilizedNonMRQueue() throws Exception {       
+        final String customer = "Nobody";
+        final String requestedParentQueue = "Priority0";
+        
+        assertEquals("root.Priority0.D", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+    }     
+    
+    @Test(groups = "unit")
+    public void testNewlyAssignedAllEqualUtilizedNonMRQueue() throws Exception {       
+        final String customer = "Nobody";
+        final String requestedParentQueue = "Priority1";
+        
+        assertEquals("root.Priority1.A", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+    }    
+    
+    @Test(groups = "unit")
+    public void testNewlyAssignedRequestedParentQueueDoesNotExist() throws Exception {       
+        final String customer = "Nobody";
+        final String requestedParentQueue = "ThisParentQueueDoesNotExist";
+        
+        try {            
+            yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue);
         } catch (LedpException e) {
-            Assert.assertEquals(e.getMessage(), LedpCode.LEDP_12002.getMessage());
-            return;
+            assertEquals(LedpException.buildMessage(LedpCode.LEDP_12001, new String[] { requestedParentQueue }), e.getMessage());           
         }
     }
-
+     
     @Test(groups = "unit")
-    public void testNoCurrentAssignmentZeroDepth() throws Exception {
-        setupFairSchedulerConfig();
-        Configuration conf = new Configuration();
-        FairScheduler fairScheduler = new FairScheduler();
-        fairScheduler.reinitialize(conf, null);
-        FairSchedulerInfo fairSchedulerInfoToReturn = new FairSchedulerInfo(fairScheduler);
-        Mockito.when(yarnService.getSchedulerInfo()).thenReturn(new SchedulerTypeInfo(fairSchedulerInfoToReturn));
-        AppsInfo appsInfoToReturn = new AppsInfo();
-        Mockito.when(yarnService.getApplications("states=running,accepted")).thenReturn(appsInfoToReturn);
-        YarnQueueAssignmentServiceImpl service = new YarnQueueAssignmentServiceImpl();
-        service.setYarnService(yarnService);
-        String queueName = service.useQueue("Dell", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-        Assert.assertEquals(queueName, "root.PlayMaker.4");
-        queueName = service.useQueue("Microsoft", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-        Assert.assertEquals(queueName, "root.PlayMaker.5");
-        queueName = service.useQueue("CDW", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-        Assert.assertEquals(queueName, "root.PlayMaker.1");
-        queueName = service.useQueue("OfficeMax", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-        Assert.assertEquals(queueName, "root.PlayMaker.12");
-        queueName = service.useQueue("Charles Schwab", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-        Assert.assertEquals(queueName, "root.PlayMaker.1");
-        queueName = service.useQueue("Dell", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-        Assert.assertEquals(queueName, "root.PlayMaker.4");
-        queueName = service.useQueue("VMWare Inc", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-        Assert.assertEquals(queueName, "root.PlayMaker.3");
-        queueName = service.useQueue("CDW", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-        Assert.assertEquals(queueName, "root.PlayMaker.1");
-        queueName = service.useQueue("Microsoft", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-        Assert.assertEquals(queueName, "root.PlayMaker.5");
-    }
-
-    @Test(groups = "unit")
-    public void testUseCurrentAssignment() throws Exception {
-        setupFairSchedulerConfig();
-        Configuration conf = new Configuration();
-        FairScheduler fairScheduler = new FairScheduler();
-        fairScheduler.reinitialize(conf, null);
-        FairSchedulerInfo fairSchedulerInfoToReturn = new FairSchedulerInfo(fairScheduler);
-        Mockito.when(yarnService.getSchedulerInfo()).thenReturn(new SchedulerTypeInfo(fairSchedulerInfoToReturn));
-        AppsInfo appsInfoToReturn = new AppsInfo();
-        AppInfo app1 = new AppInfo(new RMAppImpl(new ApplicationIdPBImpl(ApplicationIdProto.getDefaultInstance()),
-                new RMContextImpl(new AsyncDispatcher(), null, null, null, null, null, null, null, null), conf,
-                "Dell.SellPrinters.LogisticRegression.Small", "John", "root.PlayMaker.10",
-                new ApplicationSubmissionContextPBImpl(), fairScheduler, null, 0, null), true);
-        appsInfoToReturn.add(app1);
-        AppInfo app2 = new AppInfo(new RMAppImpl(new ApplicationIdPBImpl(ApplicationIdProto.getDefaultInstance()),
-                new RMContextImpl(new AsyncDispatcher(), null, null, null, null, null, null, null, null), conf,
-                "OfficeMax.SellPaper.RandomForest.Large", "Jane", "root.PlayMaker.4",
-                new ApplicationSubmissionContextPBImpl(), fairScheduler, null, 0, null), true);
-        appsInfoToReturn.add(app2);
-        Mockito.when(yarnService.getApplications("states=running,accepted")).thenReturn(appsInfoToReturn);
-        YarnQueueAssignmentServiceImpl service = new YarnQueueAssignmentServiceImpl();
-        service.setYarnService(yarnService);
-        String queueName = service.useQueue("Dell", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-        Assert.assertEquals(queueName, "root.PlayMaker.10");
-        queueName = service.useQueue("OfficeMax", AssignmentPolicy.STICKYSHORTESTQUEUE, true);
-        Assert.assertEquals(queueName, "root.PlayMaker.4");
-    }
-
+    public void testNewlyAssignedNoLeafQueueForParentQueue() throws Exception {       
+        final String customer = "Nobody";
+        final String requestedParentQueue = "PriorityNoLeaves";
+        
+        try {            
+            yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue);
+        } catch (LedpException e) {
+            assertEquals(LedpException.buildMessage(LedpCode.LEDP_12002, new String[] { requestedParentQueue }), e.getMessage());           
+        }
+    }        
 }

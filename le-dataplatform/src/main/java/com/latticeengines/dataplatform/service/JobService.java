@@ -29,9 +29,9 @@ public interface JobService {
 
     ApplicationId resubmitPreemptedJob(Job job);
     
-	void createHdfsDirectory(String directory, boolean errorIfExists);
+    void createHdfsDirectory(String directory, boolean errorIfExists);
 
-	ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue);
+    ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer);
 
     JobStatus getJobStatus(String applicationId);
 

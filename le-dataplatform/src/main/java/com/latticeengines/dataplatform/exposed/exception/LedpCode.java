@@ -19,8 +19,8 @@ public enum LedpCode {
     LEDP_11003("Unsupported type {0} for determining default value."), //
     // Runtime service: 12000-12999
     LEDP_12000("Parameter PRIORITY undefined for analytics job."),
-    LEDP_12001("Unsupported queue assignment policy."),
-    LEDP_12002("No queue available to run job."), //
+    LEDP_12001("Requested queue {0} does not exist for analytics job."),
+    LEDP_12002("No queue available to run job in {0}."), //
     LEDP_12003("No avro file in specified directory {0}."), //
     LEDP_12004("Sampling configuration property ledp.sampling.config not specified."), //
     LEDP_12005("Model definition must not be null."), //

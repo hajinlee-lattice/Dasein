@@ -1,12 +1,8 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
-
-import net.jpountz.xxhash.XXHashFactory;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,78 +15,136 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInf
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Splitter;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.service.YarnQueueAssignmentService;
-import com.latticeengines.dataplatform.util.Permutations;
 
 @Component("yarnQueueAssignmentService")
 public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentService {
+
+    private static final String QUEUE_NAME_DELIMITER = ".";
+
+    // Note: "finishing" is not an accepted state when querying for apps
+    static final String APP_STATES_ACCEPTED_RUNNING = "states=accepted,running";
 
     private static final Log log = LogFactory.getLog(YarnQueueAssignmentServiceImpl.class);
 
     @Autowired
     private YarnService yarnService;
 
-    private Map<Integer, Integer> curQueueDepth = new HashMap<Integer, Integer>();
-    private Map<Integer, String> fullyQualifiedQueueNames = new HashMap<Integer, String>();
-    private Map<String, String> curQueueAssignment = new HashMap<String, String>();
-    private long queueStateLastUpdated = System.currentTimeMillis();
-
+    private Splitter queueNameSplitter = Splitter.on(QUEUE_NAME_DELIMITER);
+    
     public void setYarnService(YarnService yarnServiceToUse) {
         yarnService = yarnServiceToUse;
     }
 
-    // Get current state of all queues
-    void updateCurrentQueueState() {
-        // Get current depth of all leaf queues
-        curQueueDepth.clear();
-        fullyQualifiedQueueNames.clear();
-        // XXX - handle capacity scheduler as well
-        // XXX - remove assumption that leaf queues are uniquely named with
-        // integer identifiers
+    @Override
+    public String getAssignedQueue(String customer, String requestedParentQueue) {
+        if (log.isDebugEnabled()) {
+            log.debug("getAssignedQueue: customer = " + customer + " parentQueue = " + requestedParentQueue);
+        }
+
+        String assignedQueue = null;
+        assignedQueue = getStickyQueue(customer, requestedParentQueue);
+
+        if (assignedQueue == null) {
+            assignedQueue = getNewAssignedQueue(requestedParentQueue);
+        }
+
+        if (assignedQueue == null) {
+            throw new LedpException(LedpCode.LEDP_12002, new String[] { requestedParentQueue });
+        }
+        return assignedQueue;
+    }
+
+    private String getStickyQueue(String customer, String requestedParentQueue) {
+        String stickyQueue = null;
+
+        AppsInfo apps = yarnService.getApplications(APP_STATES_ACCEPTED_RUNNING);
+
+        // Ordering is not assumed in getApps response, therefore evaluate ALL apps
+        for (AppInfo app : apps.getApps()) {
+            if (app.getName().startsWith(customer)) {            
+                List<String> queueNameSplits = queueNameSplitter.splitToList(app.getQueue());
+                // Size-2 == location of parentQueue split
+                if (queueNameSplits.get(queueNameSplits.size() - 2).equals(requestedParentQueue)) {
+                    stickyQueue = app.getQueue();
+                    break;
+                }                                                     
+            }
+        }
+        return stickyQueue;
+    }
+
+    private String getNewAssignedQueue(String requestedParentQueue) {
+        FairSchedulerQueueInfo parentQueue = getParentQueue(requestedParentQueue); 
+        if (parentQueue == null) {
+            throw new LedpException(LedpCode.LEDP_12001, new String[] { requestedParentQueue});
+        }
+        if (parentQueue.getChildQueues() == null) {
+            throw new LedpException(LedpCode.LEDP_12002, new String[] { requestedParentQueue });
+        }        
+        
+        return getAssignedQueue(parentQueue);
+    }
+
+    private String getAssignedQueue(FairSchedulerQueueInfo parentQueue) {
+        int minQueueUtilization = Integer.MAX_VALUE;
+        String leastUtilizedQueue = null;
+       
+  
+        for (FairSchedulerQueueInfo childQueue : parentQueue.getChildQueues()) {
+            if (!(childQueue instanceof FairSchedulerLeafQueueInfo)) {
+                continue;
+            }
+            FairSchedulerLeafQueueInfo leafQueue = (FairSchedulerLeafQueueInfo) childQueue;
+            int queueUtilization = leafQueue.getNumActiveApplications() + leafQueue.getNumPendingApplications();
+
+            // shortcircuit if base case 0 reached
+            if (queueUtilization == 0) {
+                leastUtilizedQueue = childQueue.getQueueName();
+                break;
+            }
+
+            if (queueUtilization < minQueueUtilization) {
+                minQueueUtilization = queueUtilization;
+                leastUtilizedQueue = childQueue.getQueueName();
+            }
+        }
+        
+        return leastUtilizedQueue;
+    }
+
+    /**
+     * @param requestedParentQueue This parameter should be unique among any queue (parent or leaf)
+     */
+    private FairSchedulerQueueInfo getParentQueue(String requestedParentQueue) {
         SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
         Field field;
+        FairSchedulerQueueInfo parentQueue = null;
         try {
             field = SchedulerTypeInfo.class.getDeclaredField("schedulerInfo");
             field.setAccessible(true);
-            FairSchedulerInfo fairScheduler = (FairSchedulerInfo) field.get(schedulerInfo);
+            FairSchedulerInfo fairSchedulerInfo = (FairSchedulerInfo) field.get(schedulerInfo);
             LinkedList<FairSchedulerQueueInfo> queuesToExplore = new LinkedList<FairSchedulerQueueInfo>();
-            FairSchedulerQueueInfo rootQueue = fairScheduler.getRootQueueInfo();
+            FairSchedulerQueueInfo rootQueue = fairSchedulerInfo.getRootQueueInfo();
             if (rootQueue != null) {
                 queuesToExplore.add(rootQueue);
             }
-            while (!queuesToExplore.isEmpty()) {
+
+            outer: while (!queuesToExplore.isEmpty()) {
                 FairSchedulerQueueInfo curQueue = queuesToExplore.removeFirst();
-                Iterator<FairSchedulerQueueInfo> iter = curQueue.getChildQueues().iterator();
-                while (iter.hasNext()) {
-                    FairSchedulerQueueInfo queue = (FairSchedulerQueueInfo) iter.next();
-                    if (queue instanceof FairSchedulerLeafQueueInfo) {
-                        String queueName = queue.getQueueName();
-                        if (queueName.equals("root.default")) {
-                            continue;
-                        }
-                        Integer leafQueueName = -1;
-                        try {
-                            String[] queueNodes = queueName.split("\\.");
-                            leafQueueName = Integer.parseInt(queueNodes[queueNodes.length - 1]);
-                        } catch (Exception e) {
-                            log.error("Unable to process queueName " + queueName + ".");
-                        }
-                        Integer queueDepth = ((FairSchedulerLeafQueueInfo) queue).getNumActiveApplications()
-                                + ((FairSchedulerLeafQueueInfo) queue).getNumPendingApplications();
-                        
-                        if (log.isDebugEnabled()) {
-                            log.debug("Processing queue data: queueName = " + queueName + " leafQueueName = " + leafQueueName
-                                    + " queueDepth = " + queueDepth);
-                        }
-                        if (leafQueueName != -1) {
-                            curQueueDepth.put(leafQueueName, queueDepth);
-                            fullyQualifiedQueueNames.put(leafQueueName, queueName);
-                        }
+
+                for (FairSchedulerQueueInfo childQueue : curQueue.getChildQueues()) {
+                    if (childQueue.getQueueName().endsWith(requestedParentQueue)) {
+                        parentQueue = childQueue;
+                        break outer;
                     } else {
-                        queuesToExplore.addLast(queue);
+                        if (childQueue.getChildQueues() != null) {
+                            queuesToExplore.addLast(childQueue);
+                        }
                     }
                 }
             }
@@ -99,104 +153,6 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
             throw new LedpException(LedpCode.LEDP_00001);
         }
 
-        // Get current queue assignment for all customers
-        curQueueAssignment.clear();
-        AppsInfo apps = yarnService.getApplications("states=running,accepted");
-        for (AppInfo app : apps.getApps()) {
-            String appName = app.getName();
-            String[] appNameSubstrings = appName.split("\\.");
-            if (!curQueueAssignment.containsKey(appNameSubstrings[0])) {
-                curQueueAssignment.put(appNameSubstrings[0], app.getQueue());
-            }
-        }
-
-        queueStateLastUpdated = System.currentTimeMillis();
+        return parentQueue;
     }
-
-    private String shortestQueueAssignment(String assignmentToken) {
-
-        // Use assignment token to identify the permutation to use
-
-        XXHashFactory factory = XXHashFactory.fastestInstance();
-
-        byte[] data;
-        try {
-            data = assignmentToken.getBytes("UTF-8");
-        } catch (Exception e) {
-            log.error("Unable to convert assignmentToken to UTF-8 bytes", e);
-            throw new LedpException(LedpCode.LEDP_00002);
-        }
-
-        // used to initialize the hash value, use whatever
-        // value you want, but always the same
-        Integer seed = 0x6741c180;
-        Integer hash = Math.abs(factory.hash32().hash(data, 0, data.length, seed));
-        Permutations permutations = Permutations.getInstance();
-        Integer permutationId = hash % permutations.getNumPermutations();
-
-        // Use permutation to identify the queue to use as per the SHORTESTQUEUE policy
-
-        Integer minDepth = Integer.MAX_VALUE;
-        Integer minDepthQueueId = -1;
-        for (Integer i = 0; i < permutations.getPermutationSize(); i++) {
-            Integer queueId = permutations.getPermutationElement(permutationId, i);
-            if (curQueueDepth.containsKey(queueId) && curQueueDepth.get(queueId) < minDepth) {
-                minDepth = curQueueDepth.get(queueId);
-                minDepthQueueId = queueId;
-                
-                if (log.isDebugEnabled()) {
-                    log.debug("New candidate queue: minDepth = " + minDepth + " minDepthQueueId = " + minDepthQueueId);
-                }
-            }
-        }
-
-        if (minDepthQueueId != -1) {
-            return fullyQualifiedQueueNames.get(minDepthQueueId);
-        } else {
-            throw new LedpException(LedpCode.LEDP_12002);
-        }
-    }
-
-    @Override
-    public String useQueue(String assignmentToken, AssignmentPolicy policy) {
-        return useQueue(assignmentToken, policy, true);
-    }
-
-    @Override
-    public String useQueue(String assignmentToken, AssignmentPolicy policy, Boolean refreshQueueState) {
-
-        if (log.isDebugEnabled()) {
-            log.debug("assignToQueue: assignmentToken = " + assignmentToken + " policy = " + policy.toString()
-                    + " refreshQueueState = " + refreshQueueState);
-        }
-
-        if (policy != AssignmentPolicy.STICKYSHORTESTQUEUE) {
-            throw new LedpException(LedpCode.LEDP_12001);
-        }
-
-        // XXX - make 60 s settable via properties file
-        if (queueStateLastUpdated + 60 * 1000 < System.currentTimeMillis() || refreshQueueState == true) {
-            // Update current queue state
-            updateCurrentQueueState();
-        }
-
-        if (policy == AssignmentPolicy.STICKYSHORTESTQUEUE) {
-            // Check for a current queue assignment
-            if (curQueueAssignment.containsKey(assignmentToken)) {
-                return curQueueAssignment.get(assignmentToken);
-            } else {
-                // Use a new queue
-                return shortestQueueAssignment(assignmentToken);
-            }
-        } else if (policy == AssignmentPolicy.SHORTESTQUEUE) {
-            return shortestQueueAssignment(assignmentToken);
-        }
-
-        throw new LedpException(LedpCode.LEDP_12002);
-    }
-    
-    public Map<Integer, String> getFullyQualifiedQueueNames() {
-        return fullyQualifiedQueueNames;
-    }
-
 }
