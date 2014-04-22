@@ -11,7 +11,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 public class EventDataSamplingReducer extends
-        Reducer<Text, AvroValue<Record>, NullWritable, AvroKey<Record>> {
+ Reducer<Text, AvroValue<Record>, AvroKey<Record>, NullWritable> {
     private AvroMultipleOutputs outputs = null;
     private static final NullWritable nullWritable = NullWritable.get();
 
