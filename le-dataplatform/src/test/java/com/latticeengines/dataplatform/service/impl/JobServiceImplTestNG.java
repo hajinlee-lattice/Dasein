@@ -182,6 +182,22 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertTrue(reports.size() > numJobs);
         jobService.killJob(applicationId);
     }
+
+    @Test(groups = "functional", enabled = true)
+    public void testCheckJobName() throws Exception {        
+        Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
+        Properties containerProperties = createContainerPropertiesForYarnJob();
+        
+        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+                containerProperties);
+        waitState(applicationId, 10, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+        jobService.killJob(applicationId);
+
+        ApplicationReport app = jobService.getJobReportById(applicationId);
+        assertEquals(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()), 
+                jobNameService.getCustomerFromJobName(app.getName()));
+        assertTrue(jobNameService.getDateTimeFromJobName(app.getName()).isBeforeNow());
+    }    
     
     @Test(groups = "functional", enabled = true)
     public void testSubmitPythonYarnJob() throws Exception {
