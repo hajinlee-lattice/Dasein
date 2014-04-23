@@ -247,13 +247,14 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer) {
-        final String jobName = jobNameService.createJobName(customer, "data-load-");;
+    public synchronized ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer) {
+        final String jobName = jobNameService.createJobName(customer, "data-load");
+
         Future<Integer> future = loadAsync(table, targetDir, creds, queue, jobName);
 
         int tries = 0;
         ApplicationId appId = null;
-        while (tries <= MAX_TRIES) {
+        while (tries < MAX_TRIES) {
             try {
                 Thread.sleep(APP_WAIT_TIME);
             } catch (InterruptedException e) {
