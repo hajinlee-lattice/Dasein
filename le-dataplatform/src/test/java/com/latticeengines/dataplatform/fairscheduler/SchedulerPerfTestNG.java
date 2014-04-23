@@ -139,9 +139,9 @@ public class SchedulerPerfTestNG extends DataPlatformFunctionalTestNGBase {
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
-        String trainingFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/train.dat");
-        String testFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/test.dat");
-        String jsonFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/exposed/service/impl/iris.json");
+        String trainingFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/nn_train.dat");
+        String testFilePath = getFileUrlFromResource("com/latticeengines/dataplatform//service/impl/nn_test.dat");
+        String jsonFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/iris.json");
         String train1MinScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_1min.py");
         String train5MinsScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_5mins.py");
         String train10MinsScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_10mins.py");
