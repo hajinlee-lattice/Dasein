@@ -26,7 +26,7 @@ public class SQLServerMetadataProvider extends MetadataProvider {
             throw new LedpException(LedpCode.LEDP_11000, e,
                     new String[] { driverClass });
         }
-        return replaceUrlWithParams(url, creds);
+        return replaceUrlWithParamsAndTestConnection(url, creds);
     }
 
     public ConnManager getConnectionManager(SqoopOptions options) {

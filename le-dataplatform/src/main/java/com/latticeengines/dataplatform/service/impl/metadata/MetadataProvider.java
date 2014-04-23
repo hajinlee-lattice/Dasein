@@ -37,7 +37,7 @@ public abstract class MetadataProvider {
         }
     }
     
-    protected String replaceUrlWithParams(String url, DbCreds creds) {
+    protected String replaceUrlWithParamsAndTestConnection(String url, DbCreds creds) {
         try {
             url = url.replaceFirst("\\$\\$HOST\\$\\$", creds.getHost());
             url = url.replaceFirst("\\$\\$PORT\\$\\$",
