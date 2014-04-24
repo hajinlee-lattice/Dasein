@@ -16,7 +16,7 @@ public enum LedpCode {
     LEDP_11000("Could not load driver class {0}."), //
     LEDP_11001("Failed connecting to db."), //
     LEDP_11002("Issue running query {0}."), //
-    LEDP_11003("Unsupported type {0} for determining default value."), //
+    LEDP_11003("Could not retrieve keys for table {0}."), //
     // Runtime service: 12000-12999
     LEDP_12000("Parameter PRIORITY undefined for analytics job."),
     LEDP_12001("Requested queue {0} does not exist for analytics job."),

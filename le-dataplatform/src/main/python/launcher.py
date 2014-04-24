@@ -36,7 +36,9 @@ def validateEnvAndParameters(schema):
     
 def writeScoredTestData(testingData, schema, clf, modelDir):
     if clf != None:
-        scored = clf.predict_proba(testingData[:, schema["featureIndex"]])[:,1]
+        scored = clf.predict_proba(testingData[:, schema["featureIndex"]])
+        keyData = testingData[:, schema["keyColIndex"]]
+        scored = numpy.concatenate((keyData, scored), axis=1)
         numpy.savetxt(modelDir + "scored.txt", scored, delimiter=",")
     
     
@@ -44,6 +46,11 @@ def getModelDirPath(schema):
     appIdList = os.environ['CONTAINER_ID'].split("_")[1:3]
     modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
     return modelDirPath
+
+def populateSchemaWithMetadata(schema, parser):
+    schema["featureIndex"] = parser.getFeatureTuple();
+    schema["targetIndex"] = parser.getTargetIndex()
+    schema["keyColIndex"] = parser.getKeyColumns()
 
 if __name__ == "__main__":
     """
@@ -62,8 +69,7 @@ if __name__ == "__main__":
     training = parser.createList(stripPath(schema["training_data"]))
     test = parser.createList(stripPath(schema["test_data"]))
     script = stripPath(schema["python_script"])
-    schema["featureIndex"] = parser.getFeatureTuple();
-    schema["targetIndex"] = parser.getTargetIndex()
+    populateSchemaWithMetadata(schema, parser)
     execfile(script)
 
     # Create directory for model result
@@ -72,7 +78,7 @@ if __name__ == "__main__":
     
     # Get algorithm properties
     algorithmProperties = parser.getAlgorithmProperties()
-
+    
     # Execute the packaged script from the client and get the returned file
     # that contains the generated model data
     clf = globals()['train'](training, test, schema, modelFileDir, algorithmProperties)

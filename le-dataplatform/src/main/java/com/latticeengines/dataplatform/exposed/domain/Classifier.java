@@ -15,6 +15,7 @@ public class Classifier implements HasName {
     private String pythonScriptHdfsPath;
     private String modelHdfsDir;
     private String schemaHdfsPath;
+    private List<String> keyCols = new ArrayList<String>();
     private List<String> features = new ArrayList<String>();
     private List<String> targets = new ArrayList<String>();
     private String dataFormat;
@@ -134,5 +135,15 @@ public class Classifier implements HasName {
     public void setAlgorithmProperties(String algorithmProperties) {
         this.algorithmProperties = algorithmProperties;
     }
+
+    @JsonProperty("key_columns")
+	public List<String> getKeyCols() {
+		return keyCols;
+	}
+
+    @JsonProperty("key_columns")
+	public void setKeyCols(List<String> keyCols) {
+		this.keyCols = keyCols;
+	}
 
 }

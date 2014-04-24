@@ -31,7 +31,7 @@ public interface JobService {
     
     void createHdfsDirectory(String directory, boolean errorIfExists);
 
-    ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer);
+    ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer, List<String> splitCols);
 
     JobStatus getJobStatus(String applicationId);
 

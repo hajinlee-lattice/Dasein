@@ -122,6 +122,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
                 "Column9", //
                 "Column10" }));
         model.setTargets(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
+        model.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
         model.setCustomer("DELL");
         model.setDataFormat("avro");
         

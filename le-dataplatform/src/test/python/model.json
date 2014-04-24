@@ -34,6 +34,9 @@
   "targets": [
     "Event_Latitude_Customer"
   ],
+  "key_columns": [
+    "IDX"
+  ],
   "data_format": "avro",
   "queue": "Dell",
   "algorithm_properties": "C=0.05 numestimators=10"

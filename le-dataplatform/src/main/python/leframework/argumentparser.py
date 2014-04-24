@@ -25,6 +25,7 @@ class ArgumentParser(object):
         self.fields = dataSchema["fields"]
         self.features = set(self.metadataSchema["features"])
         self.targets = set(self.metadataSchema["targets"])
+        self.keyCols = set(self.metadataSchema["key_columns"])
         self.algorithmProperties = {}
         try:
             properties = self.metadataSchema["algorithm_properties"]
@@ -55,16 +56,19 @@ class ArgumentParser(object):
         l = 0
         included = set()
         self.featureIndex = set()
+        self.keyColIndex = set()
         for f in self.fields:
             fType = f["type"][0]
             fName = f["name"]
-            if fType != 'string' and (fName in self.features or fName in self.targets):
+            if fType != 'string' and (fName in self.features or fName in self.targets or fName in self.keyCols):
                 included.add(l)
                 print("Adding " + fName)
                 if fName in self.targets:
                     self.targetIndex = k
                 if fName in self.features:
                     self.featureIndex.add(k)
+                if fName in self.keyCols:
+                    self.keyColIndex.add(k)
                 k = k+1
             l = l+1
         
@@ -108,3 +112,6 @@ class ArgumentParser(object):
     
     def getAlgorithmProperties(self):
         return self.algorithmProperties
+
+    def getKeyColumns(self):
+        return tuple(self.keyColIndex)

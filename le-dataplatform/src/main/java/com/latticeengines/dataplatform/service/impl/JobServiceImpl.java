@@ -246,11 +246,12 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         return null;
     }
 
-    @Override
-    public synchronized ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer) {
+	@Override
+	public synchronized ApplicationId loadData(String table, String targetDir,
+			DbCreds creds, String queue, String customer, List<String> splitCols) {
         final String jobName = jobNameService.createJobName(customer, "data-load");
 
-        Future<Integer> future = loadAsync(table, targetDir, creds, queue, jobName);
+        Future<Integer> future = loadAsync(table, targetDir, creds, queue, jobName, splitCols);
 
         int tries = 0;
         ApplicationId appId = null;
@@ -259,6 +260,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
                 Thread.sleep(APP_WAIT_TIME);
             } catch (InterruptedException e) {
                 // do nothing
+            	log.warn("Thread.sleep interrupted.", e);
             }
             appId = getAppIdFromName(jobName);
             if (appId != null) {
@@ -276,7 +278,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     private Future<Integer> loadAsync(final String table, final String targetDir, final DbCreds creds,
-            final String queue, final String jobName) {
+            final String queue, final String jobName, final List<String> splitCols) {
         return sqoopJobTaskExecutor.submit(new Callable<Integer>() {
 
             @Override
@@ -293,8 +295,10 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
                         "--compress", //
                         "--mapreduce-job-name", //
                         jobName, //
+                        "--split-by", //
+                        StringUtils.join(splitCols, ","), //
                         "--target-dir", //
-                        targetDir });
+                        targetDir }, yarnConfiguration);
 
             }
         });

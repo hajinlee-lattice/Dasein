@@ -17,6 +17,7 @@ public class Model implements HasName, HasId<String> {
     private String modelHdfsDir;
     private List<String> features;
     private List<String> targets;
+    private List<String> keyCols;
     private ModelDefinition modelDefinition;
     private List<Job> jobs = new ArrayList<Job>();
     private String dataFormat;
@@ -156,5 +157,15 @@ public class Model implements HasName, HasId<String> {
     public String getSampleHdfsPath() {
         return getDataHdfsPath() + "/samples";
     }
+
+    @JsonProperty("key_columns")
+	public List<String> getKeyCols() {
+		return keyCols;
+	}
+
+    @JsonProperty("key_columns")
+	public void setKeyCols(List<String> keyCols) {
+		this.keyCols = keyCols;
+	}
 
 }

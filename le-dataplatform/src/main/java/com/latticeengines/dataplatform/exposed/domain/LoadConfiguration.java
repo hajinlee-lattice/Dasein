@@ -1,5 +1,10 @@
 package com.latticeengines.dataplatform.exposed.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class LoadConfiguration {
@@ -7,6 +12,7 @@ public class LoadConfiguration {
     private String table;
     private String customer;
     private DbCreds creds;
+    private List<String> keyCols = new ArrayList<String>();
     
     public String getTable() {
         return table;
@@ -36,5 +42,15 @@ public class LoadConfiguration {
     public String toString() {
         return JsonHelper.serialize(this);
     }
+
+    @JsonProperty("key_columns")
+	public List<String> getKeyCols() {
+		return keyCols;
+	}
+
+    @JsonProperty("key_columns")
+	public void setKeyCols(List<String> keyCols) {
+		this.keyCols = keyCols;
+	}
 
 }
