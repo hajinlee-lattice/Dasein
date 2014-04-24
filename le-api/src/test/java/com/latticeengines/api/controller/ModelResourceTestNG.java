@@ -148,6 +148,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         config.setCreds(creds);
         config.setCustomer("INTERNAL");
         config.setTable("iris");
+        config.setKeyCols(Arrays.<String>asList(new String[] { "ID" }));
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
