@@ -141,5 +141,7 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         } catch (LedpException e) {
             assertEquals(LedpException.buildMessage(LedpCode.LEDP_12002, new String[] { requestedParentQueue }), e.getMessage());           
         }
+        
+        assertEquals(1, 2);
     }        
 }
