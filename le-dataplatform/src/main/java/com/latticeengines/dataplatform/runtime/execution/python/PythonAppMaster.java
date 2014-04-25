@@ -38,8 +38,6 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 
     private String pythonContainerId;
 
-    private String appId;
-
     @Override
     protected void onInit() throws Exception {
         log.info("Initializing application.");
@@ -48,7 +46,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
             ((AbstractLauncher) getLauncher()).addInterceptor(this);
         }
         String appAttemptId = getApplicationAttemptId().toString();
-        appId = getApplicationId(appAttemptId);
+        final String appId = getApplicationId(appAttemptId);
 
         ledpMetricsMgr = LedpMetricsMgr.getInstance(appAttemptId);
         final long appStartTime = System.currentTimeMillis();
@@ -88,8 +86,14 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
             throw new LedpException(LedpCode.LEDP_12000);
         }
         String queue = parameters.getProperty(AppMasterProperty.QUEUE.name());
-        String appName = yarnService.getApplication(appId).getName();
-        String customer = appName.split("~")[0];
+        if (queue == null) {
+            throw new LedpException(LedpCode.LEDP_12006);
+        }
+
+        String customer = parameters.getProperty(AppMasterProperty.CUSTOMER.name());
+        if (customer == null) {
+            throw new LedpException(LedpCode.LEDP_12007);
+        }
         ledpMetricsMgr.setPriority(priority);
         ledpMetricsMgr.setQueue(queue);
         ledpMetricsMgr.setCustomer(customer);
