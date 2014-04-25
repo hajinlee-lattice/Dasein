@@ -35,6 +35,7 @@ public class LedpMetrics implements MetricsSource {
 
     private String queue;
     private String priority;
+	private String customer;
     
     protected LedpMetrics(MetricsSystem ms, List<MetricsInfo> tags) {
         this.registry = new MetricsRegistry(LedpMetricsInfo.AnalyticJobMetrics);
@@ -120,6 +121,14 @@ public class LedpMetrics implements MetricsSource {
         this.priority = priority;
     }
     
+	public String getCustomer() {
+		return customer;
+	}
+
+	public void setCustomer(String customer) {
+		this.customer = customer;
+	}
+
     public void publishMetrics() {
         ms.publishMetricsNow();
     }

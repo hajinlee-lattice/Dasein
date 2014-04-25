@@ -24,6 +24,7 @@ public enum LedpCode {
     LEDP_12003("No avro file in specified directory {0}."), //
     LEDP_12004("Sampling configuration property ledp.sampling.config not specified."), //
     LEDP_12005("Model definition must not be null."), //
+    LEDP_12006("Customer name must not be null."), //
     // Metric system: 13000-13999
     LEDP_13000("Tag {0} does not have a value."), //
     // Persistence service: 14000-14999

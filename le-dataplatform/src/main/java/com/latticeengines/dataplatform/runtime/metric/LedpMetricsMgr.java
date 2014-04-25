@@ -16,23 +16,28 @@ public class LedpMetricsMgr {
     private long containerLaunchTime;
     private long containerEndTime;
     private MetricsSystem ms;
-    
+
     private static LedpMetricsMgr instance;
-    
+
     public LedpMetricsMgr() {
         this.ms = DefaultMetricsSystem.instance();
     }
-    
+
     /**
      * Create as many instances of LedpMetrics as the number of dimensions
+     * 
      * @param appAttemptId
      */
     private LedpMetricsMgr(String appAttemptId) {
         this.ms = DefaultMetricsSystem.instance();
-        ledpMetrics.add(LedpMetrics.getForTags(ms, Arrays.<MetricsInfo>asList(new MetricsInfo [] { LedpMetricsInfo.Priority })));
-        ledpMetrics.add(LedpMetrics.getForTags(ms, Arrays.<MetricsInfo>asList(new MetricsInfo [] { LedpMetricsInfo.Queue })));
+        ledpMetrics.add(LedpMetrics.getForTags(ms,
+                Arrays.<MetricsInfo> asList(new MetricsInfo[] { LedpMetricsInfo.Priority })));
+        ledpMetrics.add(LedpMetrics.getForTags(ms,
+                Arrays.<MetricsInfo> asList(new MetricsInfo[] { LedpMetricsInfo.Queue })));
+        ledpMetrics.add(LedpMetrics.getForTags(ms,
+                Arrays.<MetricsInfo> asList(new MetricsInfo[] { LedpMetricsInfo.Customer })));
     }
-    
+
     public static LedpMetricsMgr getInstance(String appAttemptId) {
         if (instance == null) {
             synchronized (LedpMetricsMgr.class) {
@@ -44,7 +49,7 @@ public class LedpMetricsMgr {
 
         return instance;
     }
-    
+
     public void start() {
         new DoForAllMetrics(ledpMetrics) {
             @Override
@@ -54,7 +59,7 @@ public class LedpMetricsMgr {
         }.execute();
         ms.init("ledpjob");
     }
-    
+
     public long getAppStartTime() {
         return appStartTime;
     }
@@ -96,7 +101,7 @@ public class LedpMetricsMgr {
                 ledpMetric.incrementNumContainerPreemptions();
             }
         }.execute();
-        
+
     }
 
     public void setQueue(final String queue) {
@@ -108,6 +113,15 @@ public class LedpMetricsMgr {
         }.execute();
     }
 
+    public void setCustomer(final String customer) {
+        new DoForAllMetrics(ledpMetrics) {
+            @Override
+            public void execute(LedpMetrics ledpMetric) {
+                ledpMetric.setTagValue(LedpMetricsInfo.Customer, customer);
+            }
+        }.execute();
+    }
+
     public void setAppEndTime(final long appEndTime) {
         new DoForAllMetrics(ledpMetrics) {
             @Override
@@ -115,7 +129,7 @@ public class LedpMetricsMgr {
                 ledpMetric.setApplicationCleanupTime(appEndTime - getContainerEndTime());
             }
         }.execute();
-        
+
     }
 
     public void setContainerEndTime(final long containerEndTime) {
@@ -127,7 +141,7 @@ public class LedpMetricsMgr {
             }
         }.execute();
     }
-    
+
     public long getContainerEndTime() {
         return containerEndTime;
     }
@@ -149,17 +163,17 @@ public class LedpMetricsMgr {
 
     private abstract class DoForAllMetrics {
         private List<LedpMetrics> ledpMetrics;
-        
+
         DoForAllMetrics(List<LedpMetrics> ledpMetrics) {
             this.ledpMetrics = ledpMetrics;
         }
-        
+
         public void execute() {
             for (LedpMetrics lm : ledpMetrics) {
                 execute(lm);
             }
         }
-        
+
         public abstract void execute(LedpMetrics ledpMetric);
     }
 

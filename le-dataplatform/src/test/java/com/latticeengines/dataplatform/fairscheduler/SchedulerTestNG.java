@@ -32,19 +32,15 @@ import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 /**
  * This test working is dependent on the cluster settings. Ensure that:
  * 
- * 1. Set in yarn-site.xml
- *   <property>
- *       <name>yarn.nodemanager.resource.cpu-vcores</name>
- *       <value>#cores in system</value>
- *   </property>
+ * 1. Set in yarn-site.xml <property>
+ * <name>yarn.nodemanager.resource.cpu-vcores</name> <value>#cores in
+ * system</value> </property>
  * 
- * 2. Set in fair-scheduler.xml
- *   <user name="User running resource manager">
- *       <maxRunningApps>(#cores in system)/2</maxRunningApps>
- *   </user>
- *
+ * 2. Set in fair-scheduler.xml <user name="User running resource manager">
+ * <maxRunningApps>(#cores in system)/2</maxRunningApps> </user>
+ * 
  * @author rgonzalez
- *
+ * 
  */
 @ContextConfiguration(locations = { "classpath:dataplatform-quartz-context.xml" })
 public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
@@ -133,26 +129,27 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.A", 0);
+            Job p0 = getJob(classifier1Min, "Priority0.A", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.A", 1);
+                Job p1 = getJob(classifier2Mins, "Priority1.A", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
-            }// */
+            }
+            // */
 
             Thread.sleep(5000L);
         }
 
         // B
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.B", 0);
+            Job p0 = getJob(classifier1Min, "Priority0.B", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.B", 1);
+                Job p1 = getJob(classifier2Mins, "Priority1.B", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -160,36 +157,36 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // C
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.C", 0);
+            Job p0 = getJob(classifier1Min, "Priority0.C", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.C", 1);
+                Job p1 = getJob(classifier2Mins, "Priority1.C", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
         }
         // D
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.D", 0);
+            Job p0 = getJob(classifier1Min, "Priority0.D", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.D", 1);
+                Job p1 = getJob(classifier2Mins, "Priority1.D", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
         }
         // E
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.E", 0);
+            Job p0 = getJob(classifier1Min, "Priority0.E", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.E", 1);
+                Job p1 = getJob(classifier2Mins, "Priority1.E", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -202,12 +199,12 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
         for (int i = 0; i < 4; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.A", 0);
+            Job p0 = getJob(classifier1Min, "Priority0.A", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.A", 1);
+                Job p1 = getJob(classifier2Mins, "Priority1.A", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
 
@@ -216,12 +213,12 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // B
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.B", 0);
+            Job p0 = getJob(classifier1Min, "Priority0.B", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.B", 1);
+                Job p1 = getJob(classifier2Mins, "Priority1.B", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -229,12 +226,12 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // C
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.C", 0);
+            Job p0 = getJob(classifier1Min, "Priority0.C", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.C", 1);
+                Job p1 = getJob(classifier2Mins, "Priority1.C", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -242,25 +239,25 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         waitForAllJobsToFinish(appIds);
     }
 
-    private Job getJob(Classifier classifier, String queue, int priority) {
+    private Job getJob(Classifier classifier, String queue, int priority, String customer) {
         Job job = new Job();
         job.setClient("pythonClient");
-        Properties[] properties = getPropertiesPair(classifier, queue, priority);
+        Properties[] properties = getPropertiesPair(classifier, queue, priority, customer);
         job.setAppMasterProperties(properties[0]);
         job.setContainerProperties(properties[1]);
         return job;
     }
 
-    private Properties[] getPropertiesPair(Classifier classifier, String queue, int priority) {
+    private Properties[] getPropertiesPair(Classifier classifier, String queue, int priority, String customer) {
         Properties containerProperties = new Properties();
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "1024");
         containerProperties.put(ContainerProperty.PRIORITY.name(), Integer.toString(priority));
-        containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());       
-        
+        containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
+
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), queue);
-        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customer);
 
         return new Properties[] { appMasterProperties, containerProperties };
     }
