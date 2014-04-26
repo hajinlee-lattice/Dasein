@@ -164,7 +164,7 @@
                         </goals>
                         <configuration>
                             <skip>${skipTests}</skip>
-                            <executable>/usr/bin/python</executable>
+                            <executable>/usr/local/bin/python2.7</executable>
                             <workingDirectory>src/test/python</workingDirectory>
                             <arguments>
                                 <argument>-m</argument>
