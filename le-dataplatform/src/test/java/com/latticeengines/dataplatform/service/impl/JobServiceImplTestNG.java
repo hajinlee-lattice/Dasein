@@ -279,7 +279,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome");
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.A", "Dell", 
-        		Arrays.<String>asList(new String[]  { "ID" }));
+        		Arrays.<String>asList(new String[] { "ID" }));
         YarnApplicationState state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
         List<String> files = HdfsHelper.getFilesForDir(hadoopConfiguration, "/tmp/import",

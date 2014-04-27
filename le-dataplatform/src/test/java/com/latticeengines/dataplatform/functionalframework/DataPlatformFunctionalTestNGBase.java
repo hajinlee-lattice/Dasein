@@ -139,6 +139,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         }
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
+        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/hadoop-metrics2.properties",
+                "/app/dataplatform", false));
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/launcher.py",
                 "/app/dataplatform/scripts", false));
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/lr_train.py",
