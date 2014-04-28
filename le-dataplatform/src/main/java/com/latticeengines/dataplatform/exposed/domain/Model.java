@@ -116,6 +116,7 @@ public class Model implements HasName, HasId<String> {
         }
     }
 
+    @JsonIgnore
     public List<Job> getJobs() {
         return jobs;
     }
