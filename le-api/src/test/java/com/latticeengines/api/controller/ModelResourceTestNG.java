@@ -17,6 +17,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,24 +41,27 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
-    
+
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
+
     private Model model;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
-        fs.delete(new Path("/user/le-analytics/customers/DELL"), true);
-        fs.delete(new Path("/user/le-analytics/customers/INTERNAL"), true);
+        fs.delete(new Path(customerBaseDir + "/DELL"), true);
+        fs.delete(new Path(customerBaseDir + "/INTERNAL"), true);
 
-        fs.mkdirs(new Path("/user/le-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST"));
+        fs.mkdirs(new Path(customerBaseDir + "/DELL/data/DELL_EVENT_TABLE_TEST"));
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
         String inputDir = ClassLoader.getSystemResource("com/latticeengines/api/controller/DELL_EVENT_TABLE_TEST").getPath();
         File[] avroFiles = platformTestBase.getAvroFilesForDir(inputDir);
         for (File avroFile : avroFiles) {
-            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), "/user/le-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST", false));
+            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), customerBaseDir + "/DELL/data/DELL_EVENT_TABLE_TEST", false));
         }
 
         LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
@@ -89,6 +93,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
                 "Column10" }));
         model.setTargets(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
         model.setCustomer("DELL");
+        model.setKeyCols(Arrays.<String>asList(new String[] { "IDX" }));
         model.setDataFormat("avro");
     }
 

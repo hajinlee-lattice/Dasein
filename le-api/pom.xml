@@ -11,6 +11,7 @@
     <properties>
         <component-name>le-api</component-name>
         <le.dataplatform.version>1.0.0-SNAPSHOT</le.dataplatform.version>
+        <sqoop.version>1.4.4.2.0.6.1-102</sqoop.version>
     </properties>
 
     <parent>
@@ -128,7 +129,7 @@
         <dependency>
             <groupId>org.apache.sqoop</groupId>
             <artifactId>sqoop</artifactId>
-            <version>1.4.4.2.0.6.1-101</version>
+            <version>${sqoop.version}</version>
         </dependency>
     </dependencies>
 
