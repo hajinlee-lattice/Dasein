@@ -74,16 +74,16 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
-        fs.delete(new Path("/user/le-analytics/customers/DELL"), true);
+        fs.delete(new Path("/user/s-analytics/customers/DELL"), true);
 
-        fs.mkdirs(new Path("/user/le-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST"));
+        fs.mkdirs(new Path("/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST"));
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
         String inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/DELL_EVENT_TABLE_TEST").getPath();
         File[] avroFiles = getAvroFilesForDir(inputDir);
         for (File avroFile : avroFiles) {
-            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), "/user/le-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST", false));
+            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), "/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST", false));
         }
 
         doCopy(fs, copyEntries);
