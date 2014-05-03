@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.lang.StringUtils;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.exposed.domain.HasId;
@@ -24,9 +23,9 @@ public abstract class BaseDaoImpl<T extends HasId<?>> implements BaseDao<T> {
         
         try {
             f.createNewFile();
-            store = new PropertiesConfiguration(fileName);
+            store = new PropertiesConfiguration();
             store.setDelimiterParsingDisabled(true);
-            store.setListDelimiter((char) 0);
+            store.load(f);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_14000, e, new String[] { fileName });
         } 
@@ -92,10 +91,7 @@ public abstract class BaseDaoImpl<T extends HasId<?>> implements BaseDao<T> {
         List<T> values = new ArrayList<T>();
         for (Iterator<String> it = (Iterator<String>) store.getKeys(); it.hasNext();) {
             String key = it.next();
-            Object value = store.getProperty(key);
-            if (value instanceof List) {
-                value = (String) StringUtils.join((List<String>) value, ",");
-            }
+            String value = (String) store.getProperty(key);
             if (value != null) {
                 values.add(deserialize(key, (String) value));
             }
