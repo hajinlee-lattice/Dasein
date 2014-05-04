@@ -25,7 +25,8 @@ public abstract class BaseDaoImpl<T extends HasId<?>> implements BaseDao<T> {
             f.createNewFile();
             store = new PropertiesConfiguration();
             store.setDelimiterParsingDisabled(true);
-            store.load(f);
+            store.setFile(f);
+            store.load();
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_14000, e, new String[] { fileName });
         } 
