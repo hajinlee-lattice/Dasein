@@ -35,7 +35,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
-    
+
     @Value("${api.rest.endpoint.host}")
     private String restEndpointHost;
 
@@ -74,17 +74,16 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         model.setModelDefinition(modelDef);
         model.setName("Model Submission for Demo");
         model.setTable("iris");
-        model.setFeatures(Arrays.<String> asList(new String[] {
-                "SEPAL_LENGTH", //
+        model.setFeatures(Arrays.<String> asList(new String[] { "SEPAL_LENGTH", //
                 "SEPAL_WIDTH", //
                 "PETAL_LENGTH", //
                 "PETAL_WIDTH" }));
         model.setTargets(Arrays.<String> asList(new String[] { "CATEGORY" }));
         model.setCustomer("INTERNAL");
-        model.setKeyCols(Arrays.<String>asList(new String[] { "ID" }));
+        model.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         model.setDataFormat("avro");
     }
-    
+
     @Test(groups = "deployment")
     public void load() throws Exception {
         LoadConfiguration config = new LoadConfiguration();
@@ -94,14 +93,15 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setCreds(creds);
         config.setCustomer("INTERNAL");
         config.setTable("iris");
-        config.setKeyCols(Arrays.<String>asList(new String[] { "ID" }));
+        config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + ":8080/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
+                YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
     }
-    
+
     @Test(groups = "deployment", dependsOnMethods = { "load" })
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
@@ -120,20 +120,28 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.addSamplingElement(all);
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + ":8080/rest/createSamples", samplingConfig,
-                AppSubmission.class, new Object[] {});
+        AppSubmission submission = restTemplate.postForObject(
+                "http://" + restEndpointHost + ":8080/rest/createSamples", samplingConfig, AppSubmission.class,
+                new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
+                YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
     }
 
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submit() throws Exception {
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + ":8080/rest/submit", model,
-                AppSubmission.class, new Object[] {});
+        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + ":8080/rest/submit",
+                model, AppSubmission.class, new Object[] {});
         assertEquals(3, submission.getApplicationIds().size());
-        String appId = submission.getApplicationIds().get(0);
+
+        for (String appIdStr : submission.getApplicationIds()) {
+            ApplicationId appId = platformTestBase.getApplicationId(appIdStr);
+            YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
+                    YarnApplicationState.FINISHED);
+            assertEquals(state, YarnApplicationState.FINISHED);
+        }
     }
 
 }
