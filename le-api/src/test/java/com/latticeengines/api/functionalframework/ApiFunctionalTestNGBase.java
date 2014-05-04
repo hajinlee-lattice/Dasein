@@ -42,7 +42,7 @@ public class ApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         return true;
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional, deployment")
     public void setupRunEnvironment() throws Exception {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         

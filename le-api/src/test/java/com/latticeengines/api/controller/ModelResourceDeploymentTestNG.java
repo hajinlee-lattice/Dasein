@@ -130,7 +130,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         assertEquals(state, YarnApplicationState.FINISHED);
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "createSamples" })
     public void submit() throws Exception {
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + ":8080/rest/submit",
                 model, AppSubmission.class, new Object[] {});
