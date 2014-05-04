@@ -44,15 +44,15 @@ public class ApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @BeforeClass(groups = "functional")
     public void setupRunEnvironment() throws Exception {
-        if (!doYarnClusterSetup()) {
-            return;
-        }
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
         
         platformTestBase.setYarnClient(defaultYarnClient);
         platformTestBase.setJobEntityMgr(jobEntityMgr);
         platformTestBase.setModelEntityMgr(modelEntityMgr);
         platformTestBase.setThrottleConfigurationEntityMgr(throttleConfigurationEntityMgr);
+        if (!doYarnClusterSetup()) {
+            return;
+        }
         platformTestBase.setupRunEnvironment();
     }
 }
