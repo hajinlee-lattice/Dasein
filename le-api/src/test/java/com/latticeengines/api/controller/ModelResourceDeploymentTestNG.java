@@ -36,7 +36,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
-    @Value("${api.rest.endpoint.host}")
+    @Value("${api.rest.endpoint.hostport}")
     private String restEndpointHost;
 
     private Model model;
@@ -94,7 +94,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setCustomer("INTERNAL");
         config.setTable("iris");
         config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + ":8080/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
@@ -121,7 +121,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
         AppSubmission submission = restTemplate.postForObject(
-                "http://" + restEndpointHost + ":8080/rest/createSamples", samplingConfig, AppSubmission.class,
+                "http://" + restEndpointHost + "/rest/createSamples", samplingConfig, AppSubmission.class,
                 new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -132,7 +132,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "createSamples" })
     public void submit() throws Exception {
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + ":8080/rest/submit",
+        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/submit",
                 model, AppSubmission.class, new Object[] {});
         assertEquals(3, submission.getApplicationIds().size());
 
