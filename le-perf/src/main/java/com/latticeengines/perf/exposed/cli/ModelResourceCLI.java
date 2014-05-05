@@ -176,7 +176,7 @@ public class ModelResourceCLI {
         config.setTable(table);
         config.setKeyCols(Arrays.<String> asList(keyCol.split(DELIMETER)));
         config.setCreds(dc);
-        AppSubmission submission = restTemplate.postForObject("http://" + restHost + "8080/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject("http://" + restHost + ":8080/rest/load", config,
                 AppSubmission.class, new Object[] {});
         optionMap.clear();
         System.out.println(submission.getApplicationIds());
