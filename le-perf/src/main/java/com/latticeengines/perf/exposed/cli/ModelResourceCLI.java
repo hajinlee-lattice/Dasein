@@ -28,7 +28,7 @@ public class ModelResourceCLI {
     private static HashMap<String, String> optionMap = new HashMap<String, String>();
     private static List<List<String>> algList = new ArrayList<List<String>>();
     private static RestTemplate restTemplate = new RestTemplate();
-    private static String DELEMETER = ",";
+    private static String DELIMETER = ",";
 
     public static void main(String[] args) throws IOException, Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -99,11 +99,11 @@ public class ModelResourceCLI {
         model.setModelDefinition(modelDef);
         model.setName(modelName);
         model.setTable(table);
-        model.setFeatures(Arrays.<String> asList(features.split(DELEMETER)));
-        model.setTargets(Arrays.<String> asList(targets.split(DELEMETER)));
+        model.setFeatures(Arrays.<String> asList(features.split(DELIMETER)));
+        model.setTargets(Arrays.<String> asList(targets.split(DELIMETER)));
         model.setCustomer(customer);
         model.setDataFormat("avro");
-        model.setKeyCols(Arrays.<String> asList(keyColumns.split(DELEMETER)));
+        model.setKeyCols(Arrays.<String> asList(keyColumns.split(DELIMETER)));
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         optionMap.clear();
@@ -170,7 +170,7 @@ public class ModelResourceCLI {
         DbCreds dc = new DbCreds(builder);
         config.setCustomer(customer);
         config.setTable(table);
-        config.setKeyCols(Arrays.<String> asList(keyCol.split(DELEMETER)));
+        config.setKeyCols(Arrays.<String> asList(keyCol.split(DELIMETER)));
         config.setCreds(dc);
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/load", config,
                 AppSubmission.class, new Object[] {});
