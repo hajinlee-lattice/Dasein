@@ -228,17 +228,17 @@ public class ModelingServiceImpl implements ModelingService {
         return null;
     }
 
-	@Override
-	public ApplicationId loadData(LoadConfiguration config) {
-		Model model = new Model();
-		model.setCustomer(config.getCustomer());
-		model.setTable(config.getTable());
-		setupModelProperties(model);
-		String assignedQueue = yarnQueueAssignmentService.getAssignedQueue(
-				model.getCustomer(), "MapReduce");
-		return jobService.loadData(model.getTable(), model.getDataHdfsPath(),
-				config.getCreds(), assignedQueue, model.getCustomer(), config.getKeyCols());
-	}
+    @Override
+    public ApplicationId loadData(LoadConfiguration config) {
+        Model model = new Model();
+        model.setCustomer(config.getCustomer());
+        model.setTable(config.getTable());
+        setupModelProperties(model);
+        String assignedQueue = yarnQueueAssignmentService.getAssignedQueue(
+                model.getCustomer(), "MapReduce");
+        return jobService.loadData(model.getTable(), model.getDataHdfsPath(),
+                config.getCreds(), assignedQueue, model.getCustomer(), config.getKeyCols());
+    }
 
     @Override
     public JobStatus getJobStatus(String applicationId) {
