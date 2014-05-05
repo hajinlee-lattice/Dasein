@@ -29,6 +29,7 @@ public class ModelResourceCLI {
     private static List<List<String>> algList = new ArrayList<List<String>>();
     private static RestTemplate restTemplate = new RestTemplate();
     private static String DELIMETER = ",";
+    private static String restHost = "localhost";
 
     public static void main(String[] args) throws IOException, Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -48,7 +49,7 @@ public class ModelResourceCLI {
     }
 
     private static void submitJob(String[] command) throws Exception {
-        if (command.length < 5) {
+        if (command.length < 7) {
             throw new Exception("Too few arguments for the legal command");
         }
         if (!command[0].equalsIgnoreCase("ledp")) {
@@ -57,10 +58,13 @@ public class ModelResourceCLI {
         preProcessOptions(command);
         if (command[1].equalsIgnoreCase("load")) {
             loadData();
+            restHost = command[2];
         } else if (command[1].equalsIgnoreCase("createsamples")) {
             createSamples();
+            restHost = command[2];
         } else if (command[1].equalsIgnoreCase("submitmodel")) {
             submitModel(command[2]);
+            restHost = command[3];
         } else {
             throw new Exception("Unsupported command. Please check the user doc.");
         }
@@ -104,7 +108,7 @@ public class ModelResourceCLI {
         model.setCustomer(customer);
         model.setDataFormat("avro");
         model.setKeyCols(Arrays.<String> asList(keyColumns.split(DELIMETER)));
-        AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/submit", model,
+        AppSubmission submission = restTemplate.postForObject("http://" + restHost + ":8080/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         optionMap.clear();
         algList.clear();
@@ -145,7 +149,7 @@ public class ModelResourceCLI {
         se.setName("all");
         se.setPercentage(100);
         samplingConfig.addSamplingElement(se);
-        AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/createSamples",
+        AppSubmission submission = restTemplate.postForObject("http://" + restHost + ":8080/rest/createSamples",
                 samplingConfig, AppSubmission.class, new Object[] {});
         optionMap.clear();
         System.out.println(submission.getApplicationIds());
@@ -172,7 +176,7 @@ public class ModelResourceCLI {
         config.setTable(table);
         config.setKeyCols(Arrays.<String> asList(keyCol.split(DELIMETER)));
         config.setCreds(dc);
-        AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject("http://" + restHost + "8080/rest/load", config,
                 AppSubmission.class, new Object[] {});
         optionMap.clear();
         System.out.println(submission.getApplicationIds());
