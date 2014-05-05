@@ -32,18 +32,22 @@ public class ModelResourceCLI {
     private static String restHost = "localhost";
 
     public static void main(String[] args) throws IOException, Exception {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String line = null;
-        try {
-            while ((line = br.readLine()) != null) {
-                String[] command = line.split(" ");
-                submitJob(command);
-            }
-        } finally {
+        if (args.length > 0)
+            submitJob(args);
+        else {
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            String line = null;
             try {
-                br.close();
-            } catch (IOException e) {
-                throw e;
+                while ((line = br.readLine()) != null) {
+                    String[] command = line.split(" ");
+                    submitJob(command);
+                }
+            } finally {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    throw e;
+                }
             }
         }
     }
