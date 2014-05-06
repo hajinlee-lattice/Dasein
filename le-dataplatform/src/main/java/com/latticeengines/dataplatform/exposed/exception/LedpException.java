@@ -3,6 +3,7 @@ package com.latticeengines.dataplatform.exposed.exception;
 public class LedpException extends RuntimeException {
 
     private static final long serialVersionUID = 4758154339163073679L;
+    private LedpCode code;
 
     public LedpException(LedpCode code) {
         this(code, null, new String[] {});
@@ -18,7 +19,11 @@ public class LedpException extends RuntimeException {
 
     public LedpException(LedpCode code, Throwable t, String[] params) {
         super(buildMessage(code, params), t);
-
+        this.code = code;
+    }
+    
+    public LedpCode getCode() {
+        return code;
     }
 
     public LedpException(LedpCode code, String msg, Throwable t) {

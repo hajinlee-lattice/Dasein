@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.commons.lang.StringUtils;
@@ -270,9 +271,14 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         }
         try {
             future.get();
-        } catch (Exception e) {
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
+                log.error(e);
+            }
+        } catch (InterruptedException e) {
             log.error(e);
-            return null;
         }
         return getAppIdFromName(jobName);
     }

@@ -3,7 +3,8 @@ package com.latticeengines.dataplatform.exposed.exception;
 public enum LedpCode {
     // Low level errors: 00000-09999
     LEDP_00000("Could not create hdfs dir {0}."), //
-    LEDP_00001("Could not collect yarn queue information from ResourceManager."), LEDP_00002("Generic system error."),
+    LEDP_00001("Could not collect yarn queue information from ResourceManager."), //
+    LEDP_00002("Generic system error."), //
     // Validation service: 10000-10999
     LEDP_10000("Metadata schema is null."), //
     LEDP_10001("Metadata schema is not retrievable from hdfs."), //
