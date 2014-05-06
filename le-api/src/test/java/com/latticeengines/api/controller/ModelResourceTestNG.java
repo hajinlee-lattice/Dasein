@@ -5,10 +5,12 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
@@ -18,6 +20,9 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -58,10 +63,12 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
-        String inputDir = ClassLoader.getSystemResource("com/latticeengines/api/controller/DELL_EVENT_TABLE_TEST").getPath();
+        String inputDir = ClassLoader.getSystemResource("com/latticeengines/api/controller/DELL_EVENT_TABLE_TEST")
+                .getPath();
         File[] avroFiles = platformTestBase.getAvroFilesForDir(inputDir);
         for (File avroFile : avroFiles) {
-            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), customerBaseDir + "/DELL/data/DELL_EVENT_TABLE_TEST", false));
+            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), customerBaseDir
+                    + "/DELL/data/DELL_EVENT_TABLE_TEST", false));
         }
 
         LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
@@ -84,8 +91,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         model.setModelDefinition(modelDef);
         model.setName("Model Submission for Demo");
         model.setTable("DELL_EVENT_TABLE_TEST");
-        model.setFeatures(Arrays.<String> asList(new String[] {
-                "Column5", //
+        model.setFeatures(Arrays.<String> asList(new String[] { "Column5", //
                 "Column6", //
                 "Column7", //
                 "Column8", //
@@ -93,7 +99,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
                 "Column10" }));
         model.setTargets(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
         model.setCustomer("DELL");
-        model.setKeyCols(Arrays.<String>asList(new String[] { "IDX" }));
+        model.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
         model.setDataFormat("avro");
     }
 
@@ -115,15 +121,15 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.addSamplingElement(s2);
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
-        AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/createSamples", samplingConfig,
-                AppSubmission.class, new Object[] {});
+        AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/createSamples",
+                samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
+                YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
         validateAppStatus(appId);
     }
-
 
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submit() throws Exception {
@@ -153,18 +159,55 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         config.setCreds(creds);
         config.setCustomer("INTERNAL");
         config.setTable("iris");
-        config.setKeyCols(Arrays.<String>asList(new String[] { "ID" }));
+        config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
+                YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
         validateAppStatus(appId);
     }
-    
+
+    @SuppressWarnings("unchecked")
+    @Test(groups = "functional", dependsOnMethods = { "load" })
+    public void loadAgain() throws Exception {
+        LoadConfiguration config = new LoadConfiguration();
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome");
+        DbCreds creds = new DbCreds(builder);
+        config.setCreds(creds);
+        config.setCustomer("INTERNAL");
+        config.setTable("iris");
+        config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
+        ResponseErrorHandler handler = new DefaultResponseErrorHandler();
+        restTemplate.setErrorHandler(handler);
+        Map<String, String> errorResult = restTemplate.postForObject("http://localhost:8080/rest/load", config, HashMap.class,
+                new Object[] {});
+        assertEquals(errorResult.get("errorCode"), "LEDP_00002");
+        assertTrue(errorResult.get("errorMsg").contains("FileAlreadyExistsException: Output directory hdfs://localhost:9000/user/s-analytics/customers/INTERNAL/data/iris already exists"));
+    }
+
     private void validateAppStatus(ApplicationId appId) {
-        JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getjobstatus/" + appId.toString(), JobStatus.class, new HashMap<String, Object>());
+        JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getjobstatus/" + appId.toString(),
+                JobStatus.class, new HashMap<String, Object>());
         assertNotNull(status);
         assertEquals(status.getId(), appId.toString());
+    }
+
+    class DefaultResponseErrorHandler implements ResponseErrorHandler {
+
+        @Override
+        public boolean hasError(ClientHttpResponse response) throws IOException {
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public void handleError(ClientHttpResponse response) throws IOException {
+        }
+
     }
 }
