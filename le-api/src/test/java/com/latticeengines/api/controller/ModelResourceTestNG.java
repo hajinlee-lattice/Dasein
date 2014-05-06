@@ -5,12 +5,10 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
@@ -20,9 +18,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -169,24 +164,6 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         validateAppStatus(appId);
     }
 
-    @SuppressWarnings("unchecked")
-    @Test(groups = "functional", dependsOnMethods = { "load" })
-    public void loadAgain() throws Exception {
-        LoadConfiguration config = new LoadConfiguration();
-        DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome");
-        DbCreds creds = new DbCreds(builder);
-        config.setCreds(creds);
-        config.setCustomer("INTERNAL");
-        config.setTable("iris");
-        config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
-        ResponseErrorHandler handler = new DefaultResponseErrorHandler();
-        restTemplate.setErrorHandler(handler);
-        Map<String, String> errorResult = restTemplate.postForObject("http://localhost:8080/rest/load", config, HashMap.class,
-                new Object[] {});
-        assertEquals(errorResult.get("errorCode"), "LEDP_00002");
-        assertTrue(errorResult.get("errorMsg").contains("FileAlreadyExistsException: Output directory hdfs://localhost:9000/user/s-analytics/customers/INTERNAL/data/iris already exists"));
-    }
 
     private void validateAppStatus(ApplicationId appId) {
         JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getjobstatus/" + appId.toString(),
@@ -195,19 +172,4 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         assertEquals(status.getId(), appId.toString());
     }
 
-    class DefaultResponseErrorHandler implements ResponseErrorHandler {
-
-        @Override
-        public boolean hasError(ClientHttpResponse response) throws IOException {
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public void handleError(ClientHttpResponse response) throws IOException {
-        }
-
-    }
 }
