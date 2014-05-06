@@ -128,10 +128,10 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         ResponseErrorHandler handler = new DefaultResponseErrorHandler();
         restTemplate.setErrorHandler(handler);
-        Map<String, String> errorResult = restTemplate.postForObject("http://localhost:8080/rest/load", config, HashMap.class,
+        Map<String, String> errorResult = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config, HashMap.class,
                 new Object[] {});
         assertEquals(errorResult.get("errorCode"), "LEDP_00002");
-        assertTrue(errorResult.get("errorMsg").contains("FileAlreadyExistsException: Output directory hdfs://localhost:9000/user/s-analytics/customers/INTERNAL/data/iris already exists"));
+        assertTrue(errorResult.get("errorMsg").contains("FileAlreadyExistsException"));
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "load" })
