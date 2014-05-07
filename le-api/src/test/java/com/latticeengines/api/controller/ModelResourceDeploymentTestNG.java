@@ -99,14 +99,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment")
     public void load() throws Exception {
-        LoadConfiguration config = new LoadConfiguration();
-        DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dataSourceHost).port(dataSourcePort).db("dataplatformtest").user("root").password("welcome");
-        DbCreds creds = new DbCreds(builder);
-        config.setCreds(creds);
-        config.setCustomer("INTERNAL");
-        config.setTable("iris");
-        config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
+        LoadConfiguration config = getLoadConfig();
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -118,6 +111,16 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "load" })
     public void loadAgain() throws Exception {
+        LoadConfiguration config = getLoadConfig();
+        ResponseErrorHandler handler = new DefaultResponseErrorHandler();
+        restTemplate.setErrorHandler(handler);
+        Map<String, String> errorResult = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config, HashMap.class,
+                new Object[] {});
+        assertEquals(errorResult.get("errorCode"), "LEDP_00002");
+        assertTrue(errorResult.get("errorMsg").contains("FileAlreadyExistsException"));
+    }
+    
+    private LoadConfiguration getLoadConfig() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db("dataplatformtest").user("root").password("welcome");
@@ -126,12 +129,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setCustomer("INTERNAL");
         config.setTable("iris");
         config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
-        ResponseErrorHandler handler = new DefaultResponseErrorHandler();
-        restTemplate.setErrorHandler(handler);
-        Map<String, String> errorResult = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config, HashMap.class,
-                new Object[] {});
-        assertEquals(errorResult.get("errorCode"), "LEDP_00002");
-        assertTrue(errorResult.get("errorMsg").contains("FileAlreadyExistsException"));
+        return config;
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "load" })
