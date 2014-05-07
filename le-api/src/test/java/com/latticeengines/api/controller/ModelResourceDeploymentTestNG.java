@@ -120,7 +120,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
     public void loadAgain() throws Exception {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome");
+        builder.host(dataSourceHost).port(dataSourcePort).db("dataplatformtest").user("root").password("welcome");
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("INTERNAL");
