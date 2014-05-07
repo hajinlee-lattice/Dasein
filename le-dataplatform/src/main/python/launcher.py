@@ -5,6 +5,8 @@ import pwd
 import sys
 from leframework import argumentparser as ap
 from leframework import webhdfs
+import pickle
+from sklearn.externals import joblib
 from urlparse import urlparse
 
 logging.basicConfig(level = logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -35,11 +37,10 @@ def validateEnvAndParameters(schema):
     validateSchemaParam(schema, "model_data_dir")
     
 def writeScoredTestData(testingData, schema, clf, modelDir):
-    if clf != None:
-        scored = clf.predict_proba(testingData[:, schema["featureIndex"]])
-        keyData = testingData[:, schema["keyColIndex"]]
-        scored = numpy.concatenate((keyData, scored), axis=1)
-        numpy.savetxt(modelDir + "scored.txt", scored, delimiter=",")
+    scored = clf.predict_proba(testingData[:, schema["featureIndex"]])
+    keyData = testingData[:, schema["keyColIndex"]]
+    scored = numpy.concatenate((keyData, scored), axis=1)
+    numpy.savetxt(modelDir + "scored.txt", scored, delimiter=",")
     
     
 def getModelDirPath(schema):
@@ -82,9 +83,13 @@ if __name__ == "__main__":
     # Execute the packaged script from the client and get the returned file
     # that contains the generated model data
     clf = globals()['train'](training, test, schema, modelFileDir, algorithmProperties)
-    
-    # Create score file
-    writeScoredTestData(test, schema, clf, modelFileDir)
+    # Pickle the generated model and store in model.pkl file
+    # and create the score file from the hold out set
+    if clf != None:
+        joblib.dump(clf, modelFileDir + '/model.pkl', compress = 9)
+        writeScoredTestData(test, schema, clf, modelFileDir)
+    else:
+        logger.error("Generated classifier is null!")
     
     # Create webhdfs instance for writing to hdfs
     webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])

@@ -142,7 +142,9 @@ public class ModelingServiceImpl implements ModelingService {
         try {
             Schema avroSchema = AvroHelper.getSchema(yarnConfiguration, new Path(avroFilePath));
             dataPath += "/" + model.getTable() + ".avsc";
-            HdfsHelper.writeToFile(yarnConfiguration, dataPath, avroSchema.toString(true));
+            if (!HdfsHelper.fileExists(yarnConfiguration, dataPath)) {
+                HdfsHelper.writeToFile(yarnConfiguration, dataPath, avroSchema.toString(true));
+            }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_15000, e);
         }

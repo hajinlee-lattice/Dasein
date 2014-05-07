@@ -57,13 +57,20 @@ public class HdfsHelper {
     public static final void writeToFile(Configuration configuration, String hdfsPath, String contents)
             throws Exception {
         FileSystem fs = FileSystem.get(configuration);
-        Path schemaPath = new Path(hdfsPath);
-        BufferedWriter br = new BufferedWriter(new OutputStreamWriter(fs.create(schemaPath, true)));
+        Path filePath = new Path(hdfsPath);
+        BufferedWriter br = new BufferedWriter(new OutputStreamWriter(fs.create(filePath, true)));
         try {
             br.write(contents);
         } finally {
             br.close();
         }
+    }
+    
+    public static final boolean fileExists(Configuration configuration, String hdfsPath)
+        throws Exception {
+        FileSystem fs = FileSystem.get(configuration);
+        return fs.exists(new Path(hdfsPath)); 
+        
     }
 
     public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir) throws Exception {
