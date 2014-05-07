@@ -56,8 +56,11 @@ public class YarnServiceImpl implements YarnService {
             public int compare(AppInfo o1, AppInfo o2) {
                 String q1 = o1.getQueue();
                 String q2 = o2.getQueue();
-                Integer p1 = Integer.parseInt(q1.substring(q1.indexOf("Priority") + 8, q1.lastIndexOf(".")));
-                Integer p2 = Integer.parseInt(q2.substring(q2.indexOf("Priority") + 8, q2.lastIndexOf(".")));
+                int priorityIndex = q1.indexOf("Priority") + 8;
+                int priorityNextIndex = priorityIndex + 1;
+                Integer p1 = Integer.parseInt(q1.substring(priorityIndex, priorityNextIndex));
+                Integer p2 = Integer.parseInt(q2.substring(priorityIndex, priorityNextIndex));
+                
                 return ComparisonChain.start().compare(p1, p2).compare(o1.getStartTime(), o2.getStartTime()).result();
             }
 
