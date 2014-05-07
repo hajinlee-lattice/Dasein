@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
@@ -23,16 +24,18 @@ public class YarnQueueAssignmentServiceImplTestNG extends DataPlatformFunctional
     public void testNewlyAssignedAllEqualUtilizedMRQueue() throws Exception {       
         final String customer = "Nobody";
         final String requestedParentQueue = "MapReduce";
-        
-        assertEquals("root.Priority0.MapReduce.A", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+        String assignedQueueName = yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue);
+        assertTrue(assignedQueueName.equals("root.Priority0.MapReduce.0") || 
+                assignedQueueName.equals("root.Priority0.MapReduce.A"));
     }     
     
     @Test(groups = "functional")
     public void testNewlyAssignedAllEqualUtilizedNonMRQueue() throws Exception {       
         final String customer = "Nobody";
         final String requestedParentQueue = "Priority0";
-        
-        assertEquals("root.Priority0.A", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+        String assignedQueueName = yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue);
+        assertTrue(assignedQueueName.equals("root.Priority0.0") || 
+                assignedQueueName.equals("root.Priority0.A"));
     }       
     
     @Test(groups = "functional")
