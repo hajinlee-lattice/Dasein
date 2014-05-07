@@ -61,14 +61,14 @@ public class ModelResourceCLI {
         }
         preProcessOptions(command);
         if (command[1].equalsIgnoreCase("load")) {
+            restHost = command[2];
             loadData();
-            restHost = command[2];
         } else if (command[1].equalsIgnoreCase("createsamples")) {
-            createSamples();
             restHost = command[2];
+            createSamples();
         } else if (command[1].equalsIgnoreCase("submitmodel")) {
-            submitModel(command[2]);
             restHost = command[3];
+            submitModel(command[2]);
         } else {
             throw new Exception("Unsupported command. Please check the user doc.");
         }
@@ -201,7 +201,6 @@ public class ModelResourceCLI {
             } else if (prevStr != null) {
                 if (!subOption) {
                     optionMap.put(prevStr.substring(1), s);
-                    // System.out.println(prevStr.substring(1) + s);
                 } else {
                     if (prevStr.equalsIgnoreCase("-n")) {
                         opList.add(0, s);
