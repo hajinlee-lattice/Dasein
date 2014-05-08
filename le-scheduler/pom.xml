@@ -9,7 +9,7 @@
 
     <properties>
         <component-name>le-scheduler</component-name>
-        <hadoop.version>2.3.0</hadoop.version>
+        <hadoop.version>2.4.0</hadoop.version>
     </properties>
 
     <parent>
