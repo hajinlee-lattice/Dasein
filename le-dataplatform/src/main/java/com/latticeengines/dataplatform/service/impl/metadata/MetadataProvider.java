@@ -1,11 +1,13 @@
 package com.latticeengines.dataplatform.service.impl.metadata;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.apache.avro.Schema;
 import org.apache.sqoop.orm.AvroSchemaGenerator;
+import org.springframework.jdbc.support.JdbcUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
@@ -38,6 +40,7 @@ public abstract class MetadataProvider {
     }
     
     protected String replaceUrlWithParamsAndTestConnection(String url, DbCreds creds) {
+        Connection conn = null;
         try {
             url = url.replaceFirst("\\$\\$HOST\\$\\$", creds.getHost());
             url = url.replaceFirst("\\$\\$PORT\\$\\$",
@@ -45,9 +48,13 @@ public abstract class MetadataProvider {
             url = url.replaceFirst("\\$\\$DB\\$\\$", creds.getDb());
             url = url.replaceFirst("\\$\\$USER\\$\\$", creds.getUser());
             url = url.replaceFirst("\\$\\$PASSWD\\$\\$", creds.getPassword());
-            DriverManager.getConnection(url);
+            conn = DriverManager.getConnection(url);
         } catch (SQLException e) {
             throw new LedpException(LedpCode.LEDP_11001, e);
+        } finally {
+            if (conn != null) {
+                JdbcUtils.closeConnection(conn);
+            }
         }
         return url;
         
