@@ -109,7 +109,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    public synchronized ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties,
+    public ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties,
             Properties containerProperties) {
         CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
         yarnClientCustomizationService.validate(client, yarnClientName, appMasterProperties, containerProperties);
@@ -153,7 +153,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    public synchronized ApplicationId submitMRJob(String mrJobName, Properties properties) {
+    public ApplicationId submitMRJob(String mrJobName, Properties properties) {
         Job job = getJob(mrJobName);
         mapReduceCustomizationService.addCustomizations(job, mrJobName, properties);
         if (properties != null) {
@@ -195,7 +195,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    public synchronized ApplicationId submitJob(com.latticeengines.dataplatform.exposed.domain.Job job) {
+    public ApplicationId submitJob(com.latticeengines.dataplatform.exposed.domain.Job job) {
         ApplicationId appId = submitYarnJob(job.getClient(), job.getAppMasterProperties(), job.getContainerProperties());
         job.setId(appId.toString());
         jobEntityMgr.post(job);
@@ -248,7 +248,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
 	@Override
-	public synchronized ApplicationId loadData(String table, String targetDir,
+	public ApplicationId loadData(String table, String targetDir,
 			DbCreds creds, String queue, String customer, List<String> splitCols) {
         final String jobName = jobNameService.createJobName(customer, "data-load");
 
