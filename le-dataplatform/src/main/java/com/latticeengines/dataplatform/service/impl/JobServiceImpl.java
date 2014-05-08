@@ -48,8 +48,8 @@ import com.latticeengines.dataplatform.util.JsonHelper;
 public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(JobServiceImpl.class);
-    private static final int MAX_TRIES = 3;
-    private static final long APP_WAIT_TIME = 5000L;
+    private static final int MAX_TRIES = 15;
+    private static final long APP_WAIT_TIME = 1000L;
 
     private ApplicationContext applicationContext;
 
