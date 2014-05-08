@@ -1,4 +1,5 @@
 from sklearn import linear_model
+import time
 
 def train(trainingData, testData, schema, modelDir, algorithmProperties):
     X_train = trainingData[:, schema["featureIndex"]]
@@ -8,6 +9,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties):
     clf.fit(X_train, Y_train)
     
     writeModel(schema, modelDir, clf)
+    time.sleep(60)
     return clf
 
 def writeModel(schema, modelDir, clf):

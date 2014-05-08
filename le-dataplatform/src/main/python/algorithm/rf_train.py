@@ -1,5 +1,6 @@
 from sklearn import ensemble
 from sklearn import tree
+import time
 
 def train(trainingData, testData, schema, modelDir, algorithmProperties):
     X_train = trainingData[:, schema["featureIndex"]]
@@ -12,6 +13,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties):
 
     writeModel(schema, modelDir, clf)
     
+    time.sleep(60)
     return clf
 
 def writeModel(schema, modelDir, clf):
