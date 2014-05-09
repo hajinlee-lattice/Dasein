@@ -26,20 +26,23 @@ public class LedpFairScheduler extends FairScheduler {
     @Override
     protected Resource resToPreempt(FSLeafQueue sched, long curTime) {
         if (isP0(sched)) {
-            Resource targetForMinShare = Resources.min(resourceCalculator, clusterCapacity,
-                    sched.getMinShare(), sched.getDemand());
-            Resource targetForFairShare = Resources.min(resourceCalculator, clusterCapacity,
-                    sched.getFairShare(), sched.getDemand());
-            Resource resDueToMinShare = Resources.max(resourceCalculator, clusterCapacity,
-                    Resources.none(), Resources.subtract(targetForMinShare, sched.getResourceUsage()));
-            Resource resDueToFairShare = Resources.max(resourceCalculator, clusterCapacity,
-                    Resources.none(), Resources.subtract(targetForFairShare, sched.getResourceUsage()));
-            
-            String msg = "demand = " + sched.getDemand() + "resUsage = " + sched.getResourceUsage() 
-                    + " targetForMinShare = " + targetForMinShare + " resDueToMinShare = " + resDueToMinShare
-                    + " targetForFairShare = " + targetForFairShare + " resDueToFairShare = " + resDueToFairShare;
-            log.info(msg);
-            return super.resToPreempt(sched, curTime);
+            Resource resToPreempt = super.resToPreempt(sched, curTime);
+            if (Resources.greaterThan(resourceCalculator, clusterCapacity, resToPreempt, Resources.none())) {
+                Resource targetForMinShare = Resources.min(resourceCalculator, clusterCapacity,
+                        sched.getMinShare(), sched.getDemand());
+                Resource targetForFairShare = Resources.min(resourceCalculator, clusterCapacity,
+                        sched.getFairShare(), sched.getDemand());
+                Resource resDueToMinShare = Resources.max(resourceCalculator, clusterCapacity,
+                        Resources.none(), Resources.subtract(targetForMinShare, sched.getResourceUsage()));
+                Resource resDueToFairShare = Resources.max(resourceCalculator, clusterCapacity,
+                        Resources.none(), Resources.subtract(targetForFairShare, sched.getResourceUsage()));
+                
+                String msg = "demand = " + sched.getDemand() + "resUsage = " + sched.getResourceUsage() 
+                        + " targetForMinShare = " + targetForMinShare + " resDueToMinShare = " + resDueToMinShare
+                        + " targetForFairShare = " + targetForFairShare + " resDueToFairShare = " + resDueToFairShare;
+                log.info(msg);
+            }
+            return resToPreempt;
         }
         return Resources.none();
     }
