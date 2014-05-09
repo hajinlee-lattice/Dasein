@@ -25,8 +25,7 @@ public class YarnQueueAssignmentServiceImplTestNG extends DataPlatformFunctional
         final String customer = "Nobody";
         final String requestedParentQueue = "MapReduce";
         String assignedQueueName = yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue);
-        assertTrue(assignedQueueName.equals("root.Priority0.MapReduce.0") || 
-                assignedQueueName.equals("root.Priority0.MapReduce.A"));
+        assertTrue(assignedQueueName.contains("root.Priority0.MapReduce.0"));                 
     }     
     
     @Test(groups = "functional")
@@ -34,8 +33,7 @@ public class YarnQueueAssignmentServiceImplTestNG extends DataPlatformFunctional
         final String customer = "Nobody";
         final String requestedParentQueue = "Priority0";
         String assignedQueueName = yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue);
-        assertTrue(assignedQueueName.equals("root.Priority0.0") || 
-                assignedQueueName.equals("root.Priority0.A"));
+        assertTrue(assignedQueueName.contains("root.Priority0.0"));               
     }       
     
     @Test(groups = "functional")
