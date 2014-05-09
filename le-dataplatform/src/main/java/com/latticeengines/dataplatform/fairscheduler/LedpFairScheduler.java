@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.factory.providers.RecordFactoryProvider;
 import org.apache.hadoop.yarn.server.resourcemanager.rmcontainer.RMContainer;
@@ -17,12 +19,25 @@ import org.apache.hadoop.yarn.util.resource.ResourceCalculator;
 import org.apache.hadoop.yarn.util.resource.Resources;
 
 public class LedpFairScheduler extends FairScheduler {
+    private static final Log log = LogFactory.getLog(LedpFairScheduler.class);
     private static final ResourceCalculator resourceCalculator = new DefaultResourceCalculator();
     private static final Resource clusterCapacity = RecordFactoryProvider.getRecordFactory(null).newRecordInstance(Resource.class);
 
     @Override
     protected Resource resToPreempt(FSLeafQueue sched, long curTime) {
         if (isP0(sched)) {
+            Resource targetForMinShare = Resources.min(resourceCalculator, clusterCapacity,
+                    sched.getMinShare(), sched.getDemand());
+            Resource targetForFairShare = Resources.min(resourceCalculator, clusterCapacity,
+                    sched.getFairShare(), sched.getDemand());
+            Resource resDueToMinShare = Resources.max(resourceCalculator, clusterCapacity,
+                    Resources.none(), Resources.subtract(targetForMinShare, sched.getResourceUsage()));
+            Resource resDueToFairShare = Resources.max(resourceCalculator, clusterCapacity,
+                    Resources.none(), Resources.subtract(targetForFairShare, sched.getResourceUsage()));
+            
+            String msg = "demand = " + sched.getDemand() + " targetForMinShare = " + targetForMinShare + " resDueToMinShare = " + resDueToMinShare
+                    + " targetForFairShare = " + targetForFairShare + " resDueToFairShare = " + resDueToFairShare;
+            log.info(msg);
             return super.resToPreempt(sched, curTime);
         }
         return Resources.none();
