@@ -35,7 +35,8 @@ public class LedpFairScheduler extends FairScheduler {
             Resource resDueToFairShare = Resources.max(resourceCalculator, clusterCapacity,
                     Resources.none(), Resources.subtract(targetForFairShare, sched.getResourceUsage()));
             
-            String msg = "demand = " + sched.getDemand() + " targetForMinShare = " + targetForMinShare + " resDueToMinShare = " + resDueToMinShare
+            String msg = "demand = " + sched.getDemand() + "resUsage = " + sched.getResourceUsage() 
+                    + " targetForMinShare = " + targetForMinShare + " resDueToMinShare = " + resDueToMinShare
                     + " targetForFairShare = " + targetForFairShare + " resDueToFairShare = " + resDueToFairShare;
             log.info(msg);
             return super.resToPreempt(sched, curTime);
