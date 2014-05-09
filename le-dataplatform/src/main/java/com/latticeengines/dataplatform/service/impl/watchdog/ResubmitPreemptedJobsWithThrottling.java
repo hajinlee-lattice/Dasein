@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -73,10 +74,24 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     }
 
     private void throttle(ThrottleConfiguration config, List<Job> jobs) {
+        AppsInfo appsInfo = yarnService.getApplications("states=RUNNING");
+        ArrayList<AppInfo> appInfos = appsInfo.getApps();
+        Set<String> runningJobIds = new HashSet<String>();
+        
+        for (AppInfo appInfo : appInfos) {
+            runningJobIds.add(appInfo.getAppId());
+        }
         if (config != null && config.isEnabled() && config.isImmediate()) {
             for (Job job : jobs) {
-                log.info("Killing job " + job.getId());
-                jobService.killJob(job.getAppId());
+                String jobId = job.getId();
+                if (runningJobIds.contains(jobId)) {
+                    log.info("Killing job " + job.getId());
+                    try {
+                        jobService.killJob(job.getAppId());
+                    } catch (Exception e) {
+                        log.warn("Cannot kill job " + jobId, e);
+                    }
+                }
             }
         }
     }
