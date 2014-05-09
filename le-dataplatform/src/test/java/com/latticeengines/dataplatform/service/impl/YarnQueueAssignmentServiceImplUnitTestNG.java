@@ -3,6 +3,7 @@ package com.latticeengines.dataplatform.service.impl;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.StringReader;
@@ -116,7 +117,8 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         final String customer = "Nobody";
         final String requestedParentQueue = "Priority1";
         
-        assertEquals("root.Priority1.A", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+        String assignedQueue = yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue);
+        assertTrue(assignedQueue.contains("Priority1.A") || assignedQueue.contains("Priority1.B") || assignedQueue.contains("Priority1.C"));
     }    
     
     @Test(groups = "unit")

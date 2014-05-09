@@ -1,8 +1,12 @@
 package com.latticeengines.dataplatform.service.impl;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,30 +95,48 @@ public class YarnQueueAssignmentServiceImpl implements YarnQueueAssignmentServic
     }
 
     private String getAssignedQueue(FairSchedulerQueueInfo parentQueue) {
+        // First determine the minQueueUtlilization
         int minQueueUtilization = Integer.MAX_VALUE;
-        String leastUtilizedQueue = null;
-       
-  
+        final int LEAST_POSSIBLE_UTILIZATION = 0;
         for (FairSchedulerQueueInfo childQueue : parentQueue.getChildQueues()) {
-            if (!(childQueue instanceof FairSchedulerLeafQueueInfo)) {
+            // Defensive; this condition should never be true since all queues beneath the parent should be leaves
+            if (!(childQueue instanceof FairSchedulerLeafQueueInfo)) {                
                 continue;
             }
+            
             FairSchedulerLeafQueueInfo leafQueue = (FairSchedulerLeafQueueInfo) childQueue;
-            int queueUtilization = leafQueue.getNumActiveApplications() + leafQueue.getNumPendingApplications();
-
-            // shortcircuit if base case 0 reached
-            if (queueUtilization == 0) {
-                leastUtilizedQueue = childQueue.getQueueName();
+            int queueUtilization = leafQueue.getNumActiveApplications() + leafQueue.getNumPendingApplications();           
+            
+            // shortcircuit
+            if (queueUtilization == LEAST_POSSIBLE_UTILIZATION) {
+                minQueueUtilization = LEAST_POSSIBLE_UTILIZATION;
                 break;
             }
 
             if (queueUtilization < minQueueUtilization) {
                 minQueueUtilization = queueUtilization;
-                leastUtilizedQueue = childQueue.getQueueName();
-            }
+            }            
         }
         
-        return leastUtilizedQueue;
+        // Next get the list of queues at minQueueUtilization
+        List<String> leastUtilizedQueues = new ArrayList<String>();
+        for (FairSchedulerQueueInfo childQueue : parentQueue.getChildQueues()) {
+            // Defensive; this condition should never be true since all queues beneath the parent should be leaves
+            if (!(childQueue instanceof FairSchedulerLeafQueueInfo)) {                
+                continue;
+            }
+    
+            FairSchedulerLeafQueueInfo leafQueue = (FairSchedulerLeafQueueInfo) childQueue;
+            int queueUtilization = leafQueue.getNumActiveApplications() + leafQueue.getNumPendingApplications();     
+            
+            if (queueUtilization == minQueueUtilization) {
+                leastUtilizedQueues.add(childQueue.getQueueName());
+            }        
+        }
+        
+        int randomLeafQueueIndex = ThreadLocalRandom.current().nextInt(0, leastUtilizedQueues.size());
+        
+        return leastUtilizedQueues.get(randomLeafQueueIndex);
     }
 
     /**
