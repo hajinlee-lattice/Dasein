@@ -37,7 +37,7 @@ public class LedpFairScheduler extends FairScheduler {
                 Resource resDueToFairShare = Resources.max(resourceCalculator, clusterCapacity,
                         Resources.none(), Resources.subtract(targetForFairShare, sched.getResourceUsage()));
                 
-                String msg = "demand = " + sched.getDemand() + "resUsage = " + sched.getResourceUsage() 
+                String msg = "demand = " + sched.getDemand() + " resUsage = " + sched.getResourceUsage() 
                         + " targetForMinShare = " + targetForMinShare + " resDueToMinShare = " + resDueToMinShare
                         + " targetForFairShare = " + targetForFairShare + " resDueToFairShare = " + resDueToFairShare;
                 log.info(msg);
@@ -84,32 +84,32 @@ public class LedpFairScheduler extends FairScheduler {
         return true;
     }
 
-//    @Override
-//    protected void preemptResources(Collection<FSLeafQueue> scheds, Resource toPreempt) {
-//        Resource resToPreempt = Resource.newInstance(toPreempt.getMemory(), toPreempt.getVirtualCores());
-//        Collection<FSLeafQueue> mrScheds = new ArrayList<FSLeafQueue>();
-//
-//        for (FSLeafQueue sched : scheds) {
-//            if (!isMapReduce(sched)) {
-//                mrScheds.add(sched);
-//            }
-//        }
-//        
-//        
-//        if (canPreemptUsingNonP0Resources(mrScheds, resToPreempt)) {
-//            Collection<FSLeafQueue> noP0Scheds = new ArrayList<FSLeafQueue>();
-//
-//            for (FSLeafQueue sched : mrScheds) {
-//                if (!isP0(sched)) {
-//                    noP0Scheds.add(sched);
-//                }
-//            }
-//            
-//            super.preemptResources(noP0Scheds, toPreempt);
-//        } else {
-//            super.preemptResources(mrScheds, toPreempt);
-//        }
-//    }
+    @Override
+    protected void preemptResources(Collection<FSLeafQueue> scheds, Resource toPreempt) {
+        Resource resToPreempt = Resource.newInstance(toPreempt.getMemory(), toPreempt.getVirtualCores());
+        Collection<FSLeafQueue> mrScheds = new ArrayList<FSLeafQueue>();
+
+        for (FSLeafQueue sched : scheds) {
+            if (!isMapReduce(sched)) {
+                mrScheds.add(sched);
+            }
+        }
+        
+        
+        if (canPreemptUsingNonP0Resources(mrScheds, resToPreempt)) {
+            Collection<FSLeafQueue> noP0Scheds = new ArrayList<FSLeafQueue>();
+
+            for (FSLeafQueue sched : mrScheds) {
+                if (!isP0(sched)) {
+                    noP0Scheds.add(sched);
+                }
+            }
+            
+            super.preemptResources(noP0Scheds, toPreempt);
+        } else {
+            super.preemptResources(mrScheds, toPreempt);
+        }
+    }
     
     private boolean isP0(FSLeafQueue queue) {
         return queue.getQueueName().contains("Priority0");

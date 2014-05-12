@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.yarn.client;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -44,6 +45,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     @Override
     public void beforeCreateLocalLauncherContextFile(Properties properties) {
         try {
+            String dir = properties.getProperty(ContainerProperty.JOBDIR.name());
             String metadata = properties.getProperty(PythonContainerProperty.METADATA.name());
             Classifier classifier = JsonHelper.deserialize(metadata, Classifier.class);
             properties.put(PythonContainerProperty.TRAINING.name(), classifier.getTrainingDataHdfsPath());
@@ -51,7 +53,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.PYTHONSCRIPT.name(), classifier.getPythonScriptHdfsPath());
             properties.put(PythonContainerProperty.SCHEMA.name(), classifier.getSchemaHdfsPath());
 
-            File metadataFile = new File("metadata.json");
+            File metadataFile = new File(dir  + "/metadata.json");
             FileUtils.writeStringToFile(metadataFile, metadata);
             properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
@@ -120,13 +122,11 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     @Override
     public void finalize(Properties appMasterProperties, Properties containerProperties) {
         super.finalize(appMasterProperties, containerProperties);
-        String metadataFileName = containerProperties.getProperty(PythonContainerProperty.METADATA.name());
-
-        if (metadataFileName != null) {
-            File metadataFile = new File(metadataFileName);
-            if (!metadataFile.delete()) {
-                log.warn("Could not delete metadata file " + metadataFileName);
-            }
+        String dir = containerProperties.getProperty(ContainerProperty.JOBDIR.name());
+        try {
+            FileUtils.deleteDirectory(new File(dir));
+        } catch (IOException e) {
+            log.warn("Could not delete local job directory.", e);
         }
     }
 

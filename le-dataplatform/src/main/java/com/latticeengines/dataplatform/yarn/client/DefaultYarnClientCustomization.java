@@ -115,8 +115,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 
     @Override
     public List<String> getCommands(Properties containerProperties) {
-        String containerLaunchContextFile = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE
-                .name());
+        String containerLaunchContextFile = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
         if (containerLaunchContextFile == null) {
             throw new IllegalStateException("Property " + ContainerProperty.APPMASTER_CONTEXT_FILE + " does not exist.");
         }

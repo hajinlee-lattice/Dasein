@@ -7,6 +7,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -109,23 +113,28 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm, randomForestAlgorithm,
                 logisticRegressionAlgorithm }));
 
-        model = new Model();
-        model.setModelDefinition(modelDef);
-        model.setName("Model Submission1");
+        model = createModel(modelDef);
+    }
+    
+    private Model createModel(ModelDefinition modelDef) {
+        Model m = new Model();
+        m.setModelDefinition(modelDef);
+        m.setName("Model Submission1");
 
-        model.setTable("DELL_EVENT_TABLE_TEST");
-        model.setFeatures(Arrays.<String> asList(new String[] {
+        m.setTable("DELL_EVENT_TABLE_TEST");
+        m.setFeatures(Arrays.<String> asList(new String[] {
                 "Column5", //
                 "Column6", //
                 "Column7", //
                 "Column8", //
                 "Column9", //
                 "Column10" }));
-        model.setTargets(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
-        model.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
-        model.setCustomer("DELL");
-        model.setDataFormat("avro");
+        m.setTargets(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
+        m.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
+        m.setCustomer("DELL");
+        m.setDataFormat("avro");
         
+        return m;
     }
 
     @Test(groups = "functional", enabled = true)
@@ -154,6 +163,47 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submitModel() throws Exception {
         List<ApplicationId> appIds = modelingService.submitModel(model);
+
+        for (ApplicationId appId : appIds) {
+            YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+            assertNotNull(state);
+            state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+            assertEquals(state, YarnApplicationState.FINISHED);
+
+            JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
+            String modelFile = HdfsHelper.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
+            String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, modelFile);
+            assertNotNull(modelContents);
+        }
+    }
+    
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "submitModel" })
+    public void submitModelMultithreaded() throws Exception {
+        
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        
+        final Model[] models = new Model[3];
+        models[0] = createModel(model.getModelDefinition());
+        models[1] = createModel(model.getModelDefinition());
+        models[2] = createModel(model.getModelDefinition());
+        
+        List<Future<List<ApplicationId>>> futures = new ArrayList<Future<List<ApplicationId>>>();
+        for (int i = 0; i < 3; i++) {
+            final Model m = models[i];
+            futures.add(executor.submit(new Callable<List<ApplicationId>>() {
+
+                @Override
+                public List<ApplicationId> call() throws Exception {
+                    return modelingService.submitModel(m);
+                }
+                
+            }));
+        }
+        List<ApplicationId> appIds = new ArrayList<ApplicationId>();
+        
+        for (Future<List<ApplicationId>> future : futures) {
+            appIds.addAll(future.get());
+        }
 
         for (ApplicationId appId : appIds) {
             YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);

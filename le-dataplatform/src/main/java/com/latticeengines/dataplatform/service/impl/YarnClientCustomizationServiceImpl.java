@@ -50,6 +50,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         String dir = UUID.randomUUID().toString();
         try {
             HdfsHelper.mkdir(yarnConfiguration, "/app/dataplatform/" + dir);
+            new File("./" + dir).mkdir();
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00000, e, new String[] { dir });
         }
@@ -112,8 +113,8 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             }
             contextFileName = contextFileName.substring(1);
             contextFileName = contextFileName.replaceFirst("/", "-");
-
-            File contextFile = new File(contextFileName);
+            String dir = containerProperties.getProperty(ContainerProperty.JOBDIR.name());
+            File contextFile = new File(dir + "/" + contextFileName);
             FileUtils.write(contextFile, sb);
             return contextFile.getAbsolutePath();
 
