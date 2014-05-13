@@ -7,13 +7,15 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties):
     Y_train = trainingData[:, schema["targetIndex"]]
     
     clf = ensemble.RandomForestClassifier(criterion=algorithmProperties["criterion"],
-                                          n_estimators=int(algorithmProperties["n_estimators"]))
+                                          n_estimators=int(algorithmProperties["n_estimators"]),
+                                          min_samples_split=int(algorithmProperties["min_samples_split"]),
+                                          min_samples_leaf=int(algorithmProperties["min_samples_leaf"]),
+                                          bootstrap=bool(algorithmProperties["bootstrap"]))
     
     clf.fit(X_train, Y_train)
 
     writeModel(schema, modelDir, clf)
     
-    time.sleep(60)
     return clf
 
 def writeModel(schema, modelDir, clf):
