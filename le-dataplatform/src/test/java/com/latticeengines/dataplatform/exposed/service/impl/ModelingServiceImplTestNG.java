@@ -235,7 +235,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         // First job to complete
         YarnApplicationState state = waitState(appIds.get(0), 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
         assertNotNull(state);
-        state = waitState(appIds.get(0), 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        state = waitState(appIds.get(0), 300, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
         
         // Second job should have been killed since we throttled
