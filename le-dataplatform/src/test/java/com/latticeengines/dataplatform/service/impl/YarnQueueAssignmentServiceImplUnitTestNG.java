@@ -77,7 +77,7 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         final String customer = "Dell";
         final String requestedParentQueue = "Priority0";
         
-        assertEquals("root.Priority0.C", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+        assertEquals("root.Priority0.2", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
     }    
     
     @Test(groups = "unit")
@@ -85,7 +85,7 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         final String customer = "Dell";
         final String requestedParentQueue = "Priority1";
         
-        assertEquals("root.Priority1.B", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+        assertEquals("root.Priority1.1", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
     }   
     
     @Test(groups = "unit")
@@ -93,7 +93,7 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         final String customer = "Dell";
         final String requestedParentQueue = "MapReduce";
         
-        assertEquals("root.Priority0.MapReduce.A", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+        assertEquals("root.Priority0.MapReduce.0", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
     }     
    
     @Test(groups = "unit")
@@ -101,7 +101,7 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         final String customer = "Nobody";
         final String requestedParentQueue = "MapReduce";
         
-        assertEquals("root.Priority0.MapReduce.B", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+        assertEquals("root.Priority0.MapReduce.1", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
     }        
     
     @Test(groups = "unit")
@@ -109,7 +109,7 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         final String customer = "Nobody";
         final String requestedParentQueue = "Priority0";
         
-        assertEquals("root.Priority0.D", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
+        assertEquals("root.Priority0.3", yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue));
     }     
     
     @Test(groups = "unit")
@@ -118,7 +118,7 @@ public class YarnQueueAssignmentServiceImplUnitTestNG {
         final String requestedParentQueue = "Priority1";
         
         String assignedQueue = yarnQueueAssignmentService.getAssignedQueue(customer, requestedParentQueue);
-        assertTrue(assignedQueue.contains("Priority1.A") || assignedQueue.contains("Priority1.B") || assignedQueue.contains("Priority1.C"));
+        assertTrue(assignedQueue.contains("Priority1.0") || assignedQueue.contains("Priority1.1") || assignedQueue.contains("Priority1.2"));
     }    
     
     @Test(groups = "unit")

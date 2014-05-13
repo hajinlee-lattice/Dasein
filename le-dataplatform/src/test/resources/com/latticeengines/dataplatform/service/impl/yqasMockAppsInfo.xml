@@ -4,7 +4,7 @@
         <id>application_1397599645193_0017</id>
         <user>bnguyen</user>
         <name>Dell.sampleJob.52355252</name>
-        <queue>root.Priority0.MapReduce.A</queue>
+        <queue>root.Priority0.MapReduce.0</queue>
         <state>ACCEPTED</state>
         <finalStatus>UNDEFINED</finalStatus>
         <progress>0.0</progress>
@@ -20,7 +20,7 @@
 		<id>application_1397599645193_0017</id>
 		<user>bnguyen</user>
 		<name>Dell.python.52355252</name>
-		<queue>root.Priority1.B</queue>
+		<queue>root.Priority1.1</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -36,7 +36,7 @@
 		<id>application_1397599645193_0013</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority1.A</queue>
+		<queue>root.Priority1.0</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -52,7 +52,7 @@
 		<id>application_1397599645193_0018</id>
 		<user>bnguyen</user>
 		<name>Dell.python.52355252</name>
-		<queue>root.Priority0.C</queue>
+		<queue>root.Priority0.2</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -68,7 +68,7 @@
 		<id>application_1397599645193_0007</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority1.A</queue>
+		<queue>root.Priority1.0</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -84,7 +84,7 @@
 		<id>application_1397599645193_0006</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority0.A</queue>
+		<queue>root.Priority0.0</queue>
 		<state>RUNNING</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -103,7 +103,7 @@
 		<id>application_1397599645193_0001</id>
 		<user>bnguyen</user>
 		<name>default</name>
-		<queue>root.Priority0.A</queue>
+		<queue>root.Priority0.0</queue>
 		<state>FINISHED</state>
 		<finalStatus>SUCCEEDED</finalStatus>
 		<progress>100.0</progress>
@@ -122,7 +122,7 @@
 		<id>application_1397599645193_0008</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority1.A</queue>
+		<queue>root.Priority1.0</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -138,7 +138,7 @@
 		<id>application_1397599645193_0009</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority0.A</queue>
+		<queue>root.Priority0.0</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -154,7 +154,7 @@
 		<id>application_1397599645193_0010</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority1.A</queue>
+		<queue>root.Priority1.0</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -170,7 +170,7 @@
 		<id>application_1397599645193_0003</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority0.A</queue>
+		<queue>root.Priority0.0</queue>
 		<state>RUNNING</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -189,7 +189,7 @@
 		<id>application_1397599645193_0014</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority1.A</queue>
+		<queue>root.Priority1.0</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -205,7 +205,7 @@
 		<id>application_1397599645193_0020</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority1.C</queue>
+		<queue>root.Priority1.2</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -221,7 +221,7 @@
 		<id>application_1397599645193_0011</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority1.A</queue>
+		<queue>root.Priority1.0</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -237,7 +237,7 @@
 		<id>application_1397599645193_0002</id>
 		<user>bnguyen</user>
 		<name>default</name>
-		<queue>root.Priority0.A</queue>
+		<queue>root.Priority0.0</queue>
 		<state>FINISHED</state>
 		<finalStatus>SUCCEEDED</finalStatus>
 		<progress>100.0</progress>
@@ -256,7 +256,7 @@
 		<id>application_1397599645193_0015</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority0.B</queue>
+		<queue>root.Priority0.1</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -272,7 +272,7 @@
 		<id>application_1397599645193_0019</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority1.C</queue>
+		<queue>root.Priority1.2</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -288,7 +288,7 @@
 		<id>application_1397599645193_0012</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority0.A</queue>
+		<queue>root.Priority0.0</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -304,7 +304,7 @@
 		<id>application_1397599645193_0016</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority1.B</queue>
+		<queue>root.Priority1.1</queue>
 		<state>ACCEPTED</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -320,7 +320,7 @@
 		<id>application_1397599645193_0005</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority1.A</queue>
+		<queue>root.Priority1.0</queue>
 		<state>RUNNING</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>
@@ -339,7 +339,7 @@
 		<id>application_1397599645193_0004</id>
 		<user>bnguyen</user>
 		<name>python</name>
-		<queue>root.Priority1.A</queue>
+		<queue>root.Priority1.0</queue>
 		<state>RUNNING</state>
 		<finalStatus>UNDEFINED</finalStatus>
 		<progress>0.0</progress>

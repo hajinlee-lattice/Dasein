@@ -75,7 +75,7 @@ public class EventDataSamplingJobUnitTestNG {
         }
         
         
-        int res = ToolRunner.run(new EventDataSamplingJob(new Configuration()), new String[] { inputDir, outputDir, samplingConfig.toString(), "Priority0.MapReduce.A" });
+        int res = ToolRunner.run(new EventDataSamplingJob(new Configuration()), new String[] { inputDir, outputDir, samplingConfig.toString(), "Priority0.MapReduce.0" });
         assertEquals(0, res);
 
         File[] avroFiles = getAvroFilesForDir(outputDir);

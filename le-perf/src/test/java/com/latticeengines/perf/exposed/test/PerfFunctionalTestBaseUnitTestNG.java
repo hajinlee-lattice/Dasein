@@ -41,7 +41,7 @@ public class PerfFunctionalTestBaseUnitTestNG {
         List<MetricsTag> tags = new ArrayList<MetricsTag>();
         MetricsTag tag1 = mock(MetricsTag.class);
         when(tag1.name()).thenReturn("Queue");
-        when(tag1.value()).thenReturn("Priority0.A");
+        when(tag1.value()).thenReturn("Priority0.0");
         when(tag1.description()).thenReturn("Queue tag");
         tags.add(tag1);
         MetricsTag tag2 = mock(MetricsTag.class);
@@ -73,7 +73,7 @@ public class PerfFunctionalTestBaseUnitTestNG {
         sink.putMetrics(record);
         testBase.flushToFile();
         String contents = FileUtils.readFileToString(new File("/tmp/metricfile.txt"));
-        assertTrue(contents.contains("ledpjob.metric1:Queue=Priority0.A,Priority=0,ContainerWaitTime=1234"));
+        assertTrue(contents.contains("ledpjob.metric1:Queue=Priority0.0,Priority=0,ContainerWaitTime=1234"));
     }
     
     @Test(groups = "unit", dependsOnMethods = { "afterMethod" })

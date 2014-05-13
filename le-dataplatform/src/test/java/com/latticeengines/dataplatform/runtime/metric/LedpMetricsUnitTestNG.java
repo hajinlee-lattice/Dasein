@@ -45,7 +45,7 @@ public class LedpMetricsUnitTestNG {
         MetricsSystem ms = DefaultMetricsSystem.instance();
         final LedpMetrics lm = LedpMetrics.getForTags(ms,
                 Arrays.<MetricsInfo> asList(new MetricsInfo[] { LedpMetricsInfo.Queue }));
-        lm.setTagValue(LedpMetricsInfo.Queue, "Priority0.A");
+        lm.setTagValue(LedpMetricsInfo.Queue, "Priority0.0");
         lm.buildTags();
         lm.start();
 
@@ -63,7 +63,7 @@ public class LedpMetricsUnitTestNG {
         Thread.sleep(10000L);
         testBase.flushToFile();
         String contents = FileUtils.readFileToString(new File(METRICFILE));
-        assertTrue(contents.contains("Queue=Priority0.A"));
+        assertTrue(contents.contains("Queue=Priority0.0"));
         assertTrue(contents.contains("ContainerWaitTime=4000"));
         assertTrue(contents.contains("ContainerElapsedTime=5000"));
         assertTrue(contents.contains("ApplicationWaitTime=3000"));

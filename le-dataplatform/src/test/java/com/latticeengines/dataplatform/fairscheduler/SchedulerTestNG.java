@@ -129,12 +129,12 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.A", 0, "DELL");
+            Job p0 = getJob(classifier1Min, "Priority0.0", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.A", 1, "DELL");
+                Job p1 = getJob(classifier2Mins, "Priority1.0", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }
             // */
@@ -144,12 +144,12 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // B
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.B", 0, "DELL");
+            Job p0 = getJob(classifier1Min, "Priority0.1", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.B", 1, "DELL");
+                Job p1 = getJob(classifier2Mins, "Priority1.1", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -157,36 +157,36 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // C
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.C", 0, "DELL");
+            Job p0 = getJob(classifier1Min, "Priority0.2", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.C", 1, "DELL");
+                Job p1 = getJob(classifier2Mins, "Priority1.2", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
         }
         // D
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.D", 0, "DELL");
+            Job p0 = getJob(classifier1Min, "Priority0.3", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.D", 1, "DELL");
+                Job p1 = getJob(classifier2Mins, "Priority1.3", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
         }
         // E
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.E", 0, "DELL");
+            Job p0 = getJob(classifier1Min, "Priority0.4", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.E", 1, "DELL");
+                Job p1 = getJob(classifier2Mins, "Priority1.4", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -199,12 +199,12 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
         for (int i = 0; i < 4; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.A", 0, "DELL");
+            Job p0 = getJob(classifier1Min, "Priority0.0", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.A", 1, "DELL");
+                Job p1 = getJob(classifier2Mins, "Priority1.0", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
 
@@ -213,12 +213,12 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // B
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.B", 0, "DELL");
+            Job p0 = getJob(classifier1Min, "Priority0.1", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.B", 1, "DELL");
+                Job p1 = getJob(classifier2Mins, "Priority1.1", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -226,12 +226,12 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // C
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.C", 0, "DELL");
+            Job p0 = getJob(classifier1Min, "Priority0.2", 0, "DELL");
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.C", 1, "DELL");
+                Job p1 = getJob(classifier2Mins, "Priority1.2", 1, "DELL");
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);

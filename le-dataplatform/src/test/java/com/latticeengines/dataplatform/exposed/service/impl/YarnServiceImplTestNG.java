@@ -48,7 +48,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = "functional")
     public void getApp() throws Exception {
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), "Priority0.A");
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), "Priority0.0");
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
         Properties containerProperties = new Properties();
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");

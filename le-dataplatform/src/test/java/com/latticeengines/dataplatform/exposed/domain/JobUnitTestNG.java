@@ -49,7 +49,7 @@ public class JobUnitTestNG {
         assertEquals(job.getId(), job.getAppId().toString());
         
         Properties appMasterProperties = new Properties();
-        appMasterProperties.setProperty("QUEUE", "Priority0.A");
+        appMasterProperties.setProperty("QUEUE", "Priority0.0");
         Properties containerProperties = new Properties();
         containerProperties.setProperty("METADATA", metadata);
         
@@ -60,6 +60,6 @@ public class JobUnitTestNG {
 
         Job deserializedJob = JsonHelper.deserialize(jsonString, Job.class);
         assertEquals(metadata, deserializedJob.getContainerProperties().getProperty("METADATA"));
-        assertEquals("Priority0.A", deserializedJob.getAppMasterProperties().getProperty("QUEUE"));
+        assertEquals("Priority0.0", deserializedJob.getAppMasterProperties().getProperty("QUEUE"));
     }
 }

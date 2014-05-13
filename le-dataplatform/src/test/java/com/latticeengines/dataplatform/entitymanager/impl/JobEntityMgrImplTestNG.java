@@ -67,7 +67,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         job = new Job();
         job.setId("application_12345_00001");
         Properties appMasterProperties = new Properties();
-        appMasterProperties.setProperty("QUEUE", "Priority0.A");
+        appMasterProperties.setProperty("QUEUE", "Priority0.0");
         Properties containerProperties = new Properties();
         containerProperties.setProperty("METADATA", metadata);
 

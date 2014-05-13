@@ -119,7 +119,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private Properties createAppMasterPropertiesForYarnJob() {
         Properties appMasterProperties = new Properties();
-        appMasterProperties.put(AppMasterProperty.QUEUE.name(), "Priority0.A");
+        appMasterProperties.put(AppMasterProperty.QUEUE.name(), "Priority0.0");
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
         return appMasterProperties;
     }
@@ -243,7 +243,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testSubmitMRJob() throws Exception {
         Properties properties = new Properties();
-        properties.setProperty(EventDataSamplingProperty.QUEUE.name(), "Priority0.MapReduce.A");
+        properties.setProperty(EventDataSamplingProperty.QUEUE.name(), "Priority0.MapReduce.0");
         properties.setProperty(EventDataSamplingProperty.INPUT.name(), inputDir);
         properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
@@ -278,7 +278,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome");
         DbCreds creds = new DbCreds(builder);
-        ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.A", "Dell", 
+        ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0", "Dell", 
         		Arrays.<String>asList(new String[] { "ID" }));
         YarnApplicationState state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);

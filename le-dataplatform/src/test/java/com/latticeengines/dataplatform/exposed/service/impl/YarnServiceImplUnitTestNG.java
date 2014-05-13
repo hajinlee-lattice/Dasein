@@ -36,10 +36,10 @@ public class YarnServiceImplUnitTestNG {
         when(app3.getStartTime()).thenReturn(3L);
         when(app4.getStartTime()).thenReturn(4L);
 
-        when(app1.getQueue()).thenReturn("root.Priority0.A");
-        when(app2.getQueue()).thenReturn("root.Priority1.A");
-        when(app3.getQueue()).thenReturn("root.Priority0.B");
-        when(app4.getQueue()).thenReturn("root.Priority1.B");
+        when(app1.getQueue()).thenReturn("root.Priority0.0");
+        when(app2.getQueue()).thenReturn("root.Priority1.0");
+        when(app3.getQueue()).thenReturn("root.Priority0.1");
+        when(app4.getQueue()).thenReturn("root.Priority1.1");
 
         when(app1.getNote()).thenReturn("-102 Container preempted by scheduler");
         when(app2.getNote()).thenReturn("-102 Container preempted by scheduler");
