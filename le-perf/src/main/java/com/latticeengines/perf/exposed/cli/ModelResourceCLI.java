@@ -198,8 +198,8 @@ public class ModelResourceCLI {
         return getAppsInfo(status).getApps().size();
     }
 
-    private static AppsInfo getAppsInfo(String status) {
-        return restTemplate.getForObject("http://" + restHost + ":8088/ws/v1/cluster/apps?state=" + status,
+    private static AppsInfo getAppsInfo(String states) {
+        return restTemplate.getForObject("http://" + restHost + ":8088/ws/v1/cluster/apps?states=" + states,
                 AppsInfo.class);
     }
 
