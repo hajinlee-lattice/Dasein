@@ -7,7 +7,7 @@ import java.util.Properties;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
-import com.latticeengines.dataplatform.util.JsonHelper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class Job implements HasId<String> {
 
@@ -66,7 +66,7 @@ public class Job implements HasId<String> {
     
     @Override
     public String toString() {
-        return JsonHelper.serialize(this);
+        return JsonUtils.serialize(this);
     }
 
     public String getClient() {

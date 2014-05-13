@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.yarn.client;
+package com.latticeengines.dataplatform.client.yarn;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,14 +15,15 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.exposed.domain.DataSchema;
 import com.latticeengines.dataplatform.exposed.domain.Field;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
-import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
-import com.latticeengines.dataplatform.util.HdfsHelper;
-import com.latticeengines.dataplatform.util.JsonHelper;
+import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
+
 
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
@@ -47,7 +48,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
         try {
             String dir = properties.getProperty(ContainerProperty.JOBDIR.name());
             String metadata = properties.getProperty(PythonContainerProperty.METADATA.name());
-            Classifier classifier = JsonHelper.deserialize(metadata, Classifier.class);
+            Classifier classifier = JsonUtils.deserialize(metadata, Classifier.class);
             properties.put(PythonContainerProperty.TRAINING.name(), classifier.getTrainingDataHdfsPath());
             properties.put(PythonContainerProperty.TEST.name(), classifier.getTestDataHdfsPath());
             properties.put(PythonContainerProperty.PYTHONSCRIPT.name(), classifier.getPythonScriptHdfsPath());
@@ -75,7 +76,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     @Override
     public void validate(Properties appMasterProperties, Properties containerProperties) {
         String metadata = containerProperties.getProperty(PythonContainerProperty.METADATA.name());
-        Classifier classifier = JsonHelper.deserialize(metadata, Classifier.class);
+        Classifier classifier = JsonUtils.deserialize(metadata, Classifier.class);
         List<String> features = classifier.getFeatures();
         List<String> targets = classifier.getTargets();
         String schemaHdfsPath = classifier.getSchemaHdfsPath();
@@ -93,14 +94,14 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
         }
         String metadataJson = null;
         try {
-            metadataJson = HdfsHelper.getHdfsFileContents(configuration, schemaHdfsPath);
+            metadataJson = HdfsUtils.getHdfsFileContents(configuration, schemaHdfsPath);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_10001, e);
         }
 
         DataSchema schema = null;
         try {
-            schema = JsonHelper.deserialize(metadataJson, DataSchema.class);
+            schema = JsonUtils.deserialize(metadataJson, DataSchema.class);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_10005, e);
         }

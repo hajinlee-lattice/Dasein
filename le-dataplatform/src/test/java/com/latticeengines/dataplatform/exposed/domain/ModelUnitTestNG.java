@@ -6,9 +6,9 @@ import java.util.Arrays;
 
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.domain.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.dataplatform.exposed.domain.algorithm.LogisticRegressionAlgorithm;
-import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class ModelUnitTestNG {
     
@@ -46,7 +46,7 @@ public class ModelUnitTestNG {
         
         String modelStr = model.toString();
         
-        Model deserializedModel = JsonHelper.deserialize(modelStr, Model.class);
+        Model deserializedModel = JsonUtils.deserialize(modelStr, Model.class);
         assertEquals(deserializedModel.getModelDefinition().getAlgorithms().size(), 2);
         assertEquals(deserializedModel.getModelDefinition().getAlgorithms().get(0).getPriority(), decisionTreeAlgorithm.getPriority());
         assertEquals(deserializedModel.getModelDefinition().getAlgorithms().get(1).getPriority(), logisticRegressionAlgorithm.getPriority());

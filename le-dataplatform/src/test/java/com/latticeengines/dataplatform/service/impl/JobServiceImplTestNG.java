@@ -26,19 +26,19 @@ import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
+import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
+import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.JobService;
-import com.latticeengines.dataplatform.util.HdfsHelper;
-import com.latticeengines.dataplatform.util.HdfsHelper.HdfsFilenameFilter;
-import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -229,8 +229,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         NumberFormat appIdFormat = getAppIdFormat();
         String jobId = applicationId.getClusterTimestamp() + "_" + appIdFormat.format(applicationId.getId());
-        String modelFile = HdfsHelper.getFilesForDir(yarnConfiguration, "/datascientist1/result/" + jobId).get(0);
-        String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, modelFile);
+        String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, "/datascientist1/result/" + jobId).get(0);
+        String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
         assertEquals(modelContents.trim(), "this is the generated model.");
 
         String contextFileName = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
@@ -255,7 +255,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertNotNull(state);
         assertTrue(state.equals(YarnApplicationState.FINISHED));
         
-        List<String> files = HdfsHelper.getFilesForDir(hadoopConfiguration, outputDir,
+        List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, outputDir,
                 new HdfsFilenameFilter() {
 
                     @Override
@@ -282,7 +282,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         		Arrays.<String>asList(new String[] { "ID" }));
         YarnApplicationState state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
-        List<String> files = HdfsHelper.getFilesForDir(hadoopConfiguration, "/tmp/import",
+        List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, "/tmp/import",
                 new HdfsFilenameFilter() {
 
                     @Override

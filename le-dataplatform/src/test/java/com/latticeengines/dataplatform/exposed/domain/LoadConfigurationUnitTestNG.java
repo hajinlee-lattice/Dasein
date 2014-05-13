@@ -4,7 +4,7 @@ import static org.testng.Assert.assertEquals;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.util.JsonHelper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class LoadConfigurationUnitTestNG {
     
@@ -19,7 +19,7 @@ public class LoadConfigurationUnitTestNG {
         config.setTable("DELL_EVENT_TABLE_TEST");
         String serializedStr = config.toString();
         System.out.println(serializedStr);
-        LoadConfiguration deserializedConfig = JsonHelper.deserialize(serializedStr, LoadConfiguration.class);
+        LoadConfiguration deserializedConfig = JsonUtils.deserialize(serializedStr, LoadConfiguration.class);
         assertEquals(deserializedConfig.getTable(), config.getTable());
         assertEquals(deserializedConfig.getCustomer(), config.getCustomer());
         assertEquals(deserializedConfig.getCreds().getDb(), config.getCreds().getDb());

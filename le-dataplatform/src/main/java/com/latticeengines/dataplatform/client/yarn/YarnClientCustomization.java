@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.yarn.client;
+package com.latticeengines.dataplatform.client.yarn;
 
 import java.util.Collection;
 import java.util.List;

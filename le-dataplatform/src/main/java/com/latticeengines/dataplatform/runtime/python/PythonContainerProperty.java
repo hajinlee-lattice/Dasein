@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.runtime.execution.python;
+package com.latticeengines.dataplatform.runtime.python;
 
 public enum PythonContainerProperty {
 

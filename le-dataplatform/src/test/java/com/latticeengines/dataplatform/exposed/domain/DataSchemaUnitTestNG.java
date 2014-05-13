@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.util.JsonHelper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class DataSchemaUnitTestNG {
 
@@ -38,7 +38,7 @@ public class DataSchemaUnitTestNG {
         schema.addField(category);
 
         String jsonString = schema.toString();
-        DataSchema deserializedSchema = JsonHelper.deserialize(jsonString, DataSchema.class);
+        DataSchema deserializedSchema = JsonUtils.deserialize(jsonString, DataSchema.class);
         assertEquals(deserializedSchema.toString(), jsonString);
     }
 }

@@ -6,8 +6,8 @@ import java.util.Properties;
 
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.domain.algorithm.DecisionTreeAlgorithm;
-import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class AlgorithmUnitTestNG {
 
@@ -17,7 +17,7 @@ public class AlgorithmUnitTestNG {
         algorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=128 QUEUE=default");
         algorithm.setAlgorithmProperties("SAMPLESIZE=1000 NUMITERS=100");
         String jsonString = algorithm.toString();
-        Algorithm deserializedAlgorithm = JsonHelper.deserialize(jsonString, DecisionTreeAlgorithm.class);
+        Algorithm deserializedAlgorithm = JsonUtils.deserialize(jsonString, DecisionTreeAlgorithm.class);
         assertEquals(deserializedAlgorithm.toString(), jsonString);
         Properties containerProps = deserializedAlgorithm.getContainerProps();
         assertEquals(containerProps.getProperty("VIRTUALCORES"), "1");

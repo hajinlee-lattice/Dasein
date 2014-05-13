@@ -17,6 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
+import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
@@ -34,11 +39,6 @@ import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.YarnQueueAssignmentService;
-import com.latticeengines.dataplatform.util.AvroHelper;
-import com.latticeengines.dataplatform.util.HdfsHelper;
-import com.latticeengines.dataplatform.util.HdfsHelper.HdfsFilenameFilter;
-import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {
@@ -140,10 +140,10 @@ public class ModelingServiceImpl implements ModelingService {
     private String createSchemaInHdfs(String avroFilePath, Model model) {
         String dataPath = model.getDataHdfsPath();
         try {
-            Schema avroSchema = AvroHelper.getSchema(yarnConfiguration, new Path(avroFilePath));
+            Schema avroSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFilePath));
             dataPath += "/" + model.getTable() + ".avsc";
-            if (!HdfsHelper.fileExists(yarnConfiguration, dataPath)) {
-                HdfsHelper.writeToFile(yarnConfiguration, dataPath, avroSchema.toString(true));
+            if (!HdfsUtils.fileExists(yarnConfiguration, dataPath)) {
+                HdfsUtils.writeToFile(yarnConfiguration, dataPath, avroSchema.toString(true));
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_15000, e);
@@ -154,7 +154,7 @@ public class ModelingServiceImpl implements ModelingService {
     private String getAvroFileHdfsPath(final String samplePrefix, String baseDir) {
         List<String> files = new ArrayList<String>();
         try {
-            files = HdfsHelper.getFilesForDir(yarnConfiguration, baseDir, new HdfsFilenameFilter() {
+            files = HdfsUtils.getFilesForDir(yarnConfiguration, baseDir, new HdfsFilenameFilter() {
 
                 @Override
                 public boolean accept(Path filename) {

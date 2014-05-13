@@ -17,15 +17,15 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
+import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
+import com.latticeengines.dataplatform.client.yarn.YarnClientCustomization;
+import com.latticeengines.dataplatform.client.yarn.YarnClientCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
-import com.latticeengines.dataplatform.util.HdfsHelper;
-import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
-import com.latticeengines.dataplatform.yarn.client.YarnClientCustomization;
-import com.latticeengines.dataplatform.yarn.client.YarnClientCustomizationRegistry;
 
 @Component("yarnClientCustomizationService")
 public class YarnClientCustomizationServiceImpl implements YarnClientCustomizationService {
@@ -49,7 +49,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         }
         String dir = UUID.randomUUID().toString();
         try {
-            HdfsHelper.mkdir(yarnConfiguration, "/app/dataplatform/" + dir);
+            HdfsUtils.mkdir(yarnConfiguration, "/app/dataplatform/" + dir);
             new File("./" + dir).mkdir();
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00000, e, new String[] { dir });

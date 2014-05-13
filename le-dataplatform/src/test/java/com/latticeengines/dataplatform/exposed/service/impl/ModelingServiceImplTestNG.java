@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
 import com.latticeengines.dataplatform.entitymanager.impl.ModelEntityMgrImpl;
 import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
@@ -42,7 +43,6 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.JobWatchdogService;
 import com.latticeengines.dataplatform.service.impl.JobWatchdogServiceImpl;
-import com.latticeengines.dataplatform.util.HdfsHelper;
 
 
 public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
@@ -171,8 +171,8 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
             assertEquals(state, YarnApplicationState.FINISHED);
 
             JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
-            String modelFile = HdfsHelper.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
-            String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, modelFile);
+            String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
+            String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
             assertNotNull(modelContents);
         }
     }
@@ -212,8 +212,8 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
             assertEquals(state, YarnApplicationState.FINISHED);
 
             JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
-            String modelFile = HdfsHelper.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
-            String modelContents = HdfsHelper.getHdfsFileContents(yarnConfiguration, modelFile);
+            String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
+            String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
             assertNotNull(modelContents);
         }
     }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import com.latticeengines.dataplatform.util.JsonHelper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class Classifier implements HasName {
 
@@ -93,7 +93,7 @@ public class Classifier implements HasName {
 
     @Override
     public String toString() {
-        return JsonHelper.serialize(this);
+        return JsonUtils.serialize(this);
     }
 
     @JsonProperty("model_data_dir")

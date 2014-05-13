@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.mapreduce.job;
+package com.latticeengines.dataplatform.client.mapreduce;
 
 import java.util.HashMap;
 import java.util.Map;

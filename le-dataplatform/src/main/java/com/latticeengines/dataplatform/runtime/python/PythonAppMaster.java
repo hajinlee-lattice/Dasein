@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.runtime.execution.python;
+package com.latticeengines.dataplatform.runtime.python;
 
 import java.util.Map;
 import java.util.Properties;
@@ -16,13 +16,13 @@ import org.springframework.yarn.am.ContainerLauncherInterceptor;
 import org.springframework.yarn.am.StaticEventingAppmaster;
 import org.springframework.yarn.am.container.AbstractLauncher;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
+import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.runtime.metric.LedpMetricsMgr;
-import com.latticeengines.dataplatform.util.HdfsHelper;
-import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 
 public class PythonAppMaster extends StaticEventingAppmaster implements ContainerLauncherInterceptor {
 
@@ -119,7 +119,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
     private void cleanupJobDir() {
         String dir = "/app/dataplatform/" + getParameters().getProperty(ContainerProperty.JOBDIR.name());
         try {
-            HdfsHelper.rmdir(yarnConfiguration, dir);
+            HdfsUtils.rmdir(yarnConfiguration, dir);
         } catch (Exception e) {
             log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
         }

@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.util.JsonHelper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class ClassifierUnitTestNG {
 
@@ -43,7 +43,7 @@ public class ClassifierUnitTestNG {
 
         String jsonString = classifier.toString();
         System.out.println(jsonString);
-        Classifier deserializedClassifier = JsonHelper.deserialize(jsonString, Classifier.class);
+        Classifier deserializedClassifier = JsonUtils.deserialize(jsonString, Classifier.class);
         assertEquals(deserializedClassifier.toString(), jsonString);
 
     }

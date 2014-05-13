@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.util.JsonHelper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class JobUnitTestNG {
 
@@ -58,7 +58,7 @@ public class JobUnitTestNG {
         
         String jsonString = job.toString();
 
-        Job deserializedJob = JsonHelper.deserialize(jsonString, Job.class);
+        Job deserializedJob = JsonUtils.deserialize(jsonString, Job.class);
         assertEquals(metadata, deserializedJob.getContainerProperties().getProperty("METADATA"));
         assertEquals("Priority0.0", deserializedJob.getAppMasterProperties().getProperty("QUEUE"));
     }

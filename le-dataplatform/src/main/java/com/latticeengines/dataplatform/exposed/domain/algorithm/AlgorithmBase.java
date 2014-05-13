@@ -5,8 +5,8 @@ import java.util.Properties;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.domain.Algorithm;
-import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class AlgorithmBase implements Algorithm {
     private String name;
@@ -90,7 +90,7 @@ public class AlgorithmBase implements Algorithm {
 
     @Override
     public String toString() {
-        return JsonHelper.serialize(this);
+        return JsonUtils.serialize(this);
     }
 
     @Override

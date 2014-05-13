@@ -6,8 +6,8 @@ import org.apache.hadoop.mapreduce.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.mapreduce.job.MRJobCustomization;
-import com.latticeengines.dataplatform.mapreduce.job.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.client.mapreduce.MRJobCustomization;
+import com.latticeengines.dataplatform.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;

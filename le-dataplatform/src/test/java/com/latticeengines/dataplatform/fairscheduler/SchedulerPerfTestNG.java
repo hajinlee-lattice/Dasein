@@ -34,11 +34,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
+import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
-import com.latticeengines.dataplatform.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.yarn.client.ContainerProperty;
 import com.latticeengines.perf.exposed.test.PerfFunctionalTestBase;
 
 /**

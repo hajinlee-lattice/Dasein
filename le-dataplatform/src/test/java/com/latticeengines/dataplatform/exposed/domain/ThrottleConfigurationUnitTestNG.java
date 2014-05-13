@@ -5,7 +5,7 @@ import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.util.JsonHelper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class ThrottleConfigurationUnitTestNG {
     
@@ -16,7 +16,7 @@ public class ThrottleConfigurationUnitTestNG {
         config.setJobRankCutoff(5);
         
         String configString = config.toString();
-        ThrottleConfiguration deserializedConfig = (ThrottleConfiguration) JsonHelper.deserialize(configString, ThrottleConfiguration.class);
+        ThrottleConfiguration deserializedConfig = (ThrottleConfiguration) JsonUtils.deserialize(configString, ThrottleConfiguration.class);
         assertTrue(deserializedConfig.isImmediate());
         assertEquals(Integer.valueOf(5), deserializedConfig.getJobRankCutoff());
     }

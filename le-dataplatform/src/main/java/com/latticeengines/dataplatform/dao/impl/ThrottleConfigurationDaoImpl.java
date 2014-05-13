@@ -2,16 +2,16 @@ package com.latticeengines.dataplatform.dao.impl;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.dao.ThrottleConfigurationDao;
 import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
-import com.latticeengines.dataplatform.util.JsonHelper;
 
 @Component("throttleConfigurationDao")
 public class ThrottleConfigurationDaoImpl extends BaseDaoImpl<ThrottleConfiguration> implements ThrottleConfigurationDao {
 
     @Override
     public ThrottleConfiguration deserialize(String id, String content) {
-        return JsonHelper.deserialize(content, ThrottleConfiguration.class);
+        return JsonUtils.deserialize(content, ThrottleConfiguration.class);
     }
 
     @Override

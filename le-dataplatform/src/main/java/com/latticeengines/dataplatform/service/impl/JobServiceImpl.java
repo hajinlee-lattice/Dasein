@@ -28,6 +28,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.exposed.domain.DbCreds;
@@ -35,14 +37,12 @@ import com.latticeengines.dataplatform.exposed.domain.JobStatus;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.dataplatform.runtime.execution.python.PythonContainerProperty;
+import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
-import com.latticeengines.dataplatform.util.HdfsHelper;
-import com.latticeengines.dataplatform.util.JsonHelper;
 
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
@@ -227,7 +227,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Override
     public void createHdfsDirectory(String directory, boolean errorIfExists) {
         try {
-            HdfsHelper.mkdir(yarnConfiguration, directory);
+            HdfsUtils.mkdir(yarnConfiguration, directory);
         } catch (Exception e) {
             if (errorIfExists) {
                 throw new LedpException(LedpCode.LEDP_00000, e, new String[] { directory });
@@ -321,7 +321,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             String classifierStr = (String) job.getContainerProperties().get(
                     PythonContainerProperty.METADATA_CONTENTS.name());
             if (classifierStr != null) {
-                Classifier classifier = JsonHelper.deserialize(classifierStr, Classifier.class);
+                Classifier classifier = JsonUtils.deserialize(classifierStr, Classifier.class);
                 if (classifier != null) {
                     String[] tokens = StringUtils.split(applicationId, "_");
                     String folder = StringUtils.join(new String[] { tokens[1], tokens[2] }, "_");

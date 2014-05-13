@@ -12,11 +12,11 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
-import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class EventDataSamplingMapper extends Mapper<AvroKey<Record>, NullWritable, Text, AvroValue<Record>> {
 
@@ -29,7 +29,7 @@ public class EventDataSamplingMapper extends Mapper<AvroKey<Record>, NullWritabl
         if (sampleConfigStr == null) {
             throw new LedpException(LedpCode.LEDP_12004);
         }
-        sampleConfig = JsonHelper.deserialize(sampleConfigStr, SamplingConfiguration.class);
+        sampleConfig = JsonUtils.deserialize(sampleConfigStr, SamplingConfiguration.class);
     }
 
     @Override

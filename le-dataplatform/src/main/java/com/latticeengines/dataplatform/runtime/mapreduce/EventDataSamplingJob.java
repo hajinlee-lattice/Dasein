@@ -20,15 +20,15 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.dataplatform.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
 import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
-import com.latticeengines.dataplatform.mapreduce.job.MRJobCustomization;
-import com.latticeengines.dataplatform.util.AvroHelper;
-import com.latticeengines.dataplatform.util.HdfsHelper;
-import com.latticeengines.dataplatform.util.HdfsHelper.HdfsFilenameFilter;
-import com.latticeengines.dataplatform.util.JsonHelper;
 
 public class EventDataSamplingJob extends Configured implements Tool, MRJobCustomization {
     
@@ -77,7 +77,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             AvroKeyOutputFormat.setOutputPath(job,
                     new Path(properties.getProperty(EventDataSamplingProperty.OUTPUT.name())));
 
-            List<String> files = HdfsHelper.getFilesForDir(job.getConfiguration(), inputDir,
+            List<String> files = HdfsUtils.getFilesForDir(job.getConfiguration(), inputDir,
                     new HdfsFilenameFilter() {
 
                         @Override
@@ -91,7 +91,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
                 throw new LedpException(LedpCode.LEDP_12003, new String[] { inputDir });
             }
             Path path = new Path(filename);
-            Schema schema = AvroHelper.getSchema(config, path);
+            Schema schema = AvroUtils.getSchema(config, path);
 
             AvroJob.setInputKeySchema(job, schema);
             AvroJob.setMapOutputValueSchema(job, schema);
@@ -99,7 +99,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             AvroKeyOutputFormat.setCompressOutput(job,
                     Boolean.valueOf(properties.getProperty(EventDataSamplingProperty.COMPRESS_SAMPLE.name(), "true")));
 
-            SamplingConfiguration samplingConfig = JsonHelper.deserialize(samplingConfigStr, SamplingConfiguration.class);
+            SamplingConfiguration samplingConfig = JsonUtils.deserialize(samplingConfigStr, SamplingConfiguration.class);
             
             for (SamplingElement samplingElement : samplingConfig.getSamplingElements()) {
                 AvroMultipleOutputs.addNamedOutput(job, samplingElement.getName() + "Training", AvroKeyOutputFormat.class, schema);
