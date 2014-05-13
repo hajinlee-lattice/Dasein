@@ -8,8 +8,9 @@ import javax.xml.bind.Marshaller;
 
 public class AllocationsGenerator {
 
-    private static final int NUM_MR_LEAF_QUEUES = 30;
-    private static final int NUM_NON_MR_LEAF_QUEUES = 90;
+    private static final String MAX_RUNNING_APPS = "75";
+    private static final int NUM_MR_LEAF_QUEUES = 25;
+    private static final int NUM_NON_MR_LEAF_QUEUES = 75;
     private static final String FIFO = "fifo";
 
     public static void main(String[] args) throws Exception {
@@ -24,7 +25,7 @@ public class AllocationsGenerator {
         for (int i = 0; i < NUM_MR_LEAF_QUEUES; i++) {
             Queue leaf = factory.createQueue();
             leaf.setName(Integer.toString(i));
-            leaf.setMinResources("21504 mb, 6 vcores");
+            leaf.setMinResources("24576 mb, 6 vcores");
             leaf.setSchedulingPolicy(FIFO);
             p0MRQ.getQueue().add(leaf);
         }
@@ -52,8 +53,8 @@ public class AllocationsGenerator {
         allocations.setFairSharePreemptionTimeout(new BigInteger("30"));
         
         User user = factory.createUser();
-        user.setName("s-analytics");
-        user.setMaxRunningApps(new BigInteger("90"));
+        user.setName("yarn");
+        user.setMaxRunningApps(new BigInteger(MAX_RUNNING_APPS));
 
         allocations.setUser(user);
         
@@ -67,7 +68,7 @@ public class AllocationsGenerator {
             Queue leaf = factory.createQueue();
             leaf.setName(Integer.toString(i));
             if (minResources) {
-                leaf.setMinResources("7168 mb, 2 vcores");
+                leaf.setMinResources("8192 mb, 2 vcores");
             }
             leaf.setSchedulingPolicy(FIFO);
             q.getQueue().add(leaf);
