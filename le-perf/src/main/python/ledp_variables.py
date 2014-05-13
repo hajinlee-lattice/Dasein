@@ -7,7 +7,7 @@ from dbcreds import DBCreds
 
 customers = []
 for i in range(0, 75):
-    customers.append("f"+str(i))
+    customers.append("c"+str(i))
 jetty_host = "bodcprodvutl158.prod.lattice.local"
 yarn_host = "bodcprodvhdp196.prod.lattice.local"
 table = "iris"
