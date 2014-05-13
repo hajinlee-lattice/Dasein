@@ -71,7 +71,7 @@ public class ModelResourceCLI {
         } else if (command[1].equalsIgnoreCase("submitmodel")) {
             restHost = command[3];
             submitModel(command[2]);
-        } else if (command[1].equalsIgnoreCase("getfinishedappnum")) {
+        } else if (command[1].equalsIgnoreCase("getfinishedappsnum")) {
             restHost = command[2];
             System.out.println(getAppsNum());
         } else {
