@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.perf.domain.Algorithm;
@@ -53,7 +55,7 @@ public class ModelResourceCLI {
     }
 
     private static void submitJob(String[] command) throws Exception {
-        if (command.length < 7) {
+        if (command.length < 5) {
             throw new Exception("Too few arguments for the legal command");
         }
         if (!command[0].equalsIgnoreCase("ledp")) {
@@ -69,6 +71,9 @@ public class ModelResourceCLI {
         } else if (command[1].equalsIgnoreCase("submitmodel")) {
             restHost = command[3];
             submitModel(command[2]);
+        } else if (command[1].equalsIgnoreCase("getfinishedappnum")) {
+            restHost = command[2];
+            System.out.println(getAppsNum());
         } else {
             throw new Exception("Unsupported command. Please check the user doc.");
         }
@@ -186,6 +191,36 @@ public class ModelResourceCLI {
         System.out.println(submission.getApplicationIds());
     }
 
+    private static int getAppsNum() throws Exception {
+        String status = optionMap.get("s");
+        if (status == null)
+            throw new Exception();
+        return getAppsInfo(status).getApps().size();
+    }
+
+    private static AppsInfo getAppsInfo(String status) {
+        return restTemplate.getForObject("http://" + restHost + ":8088/ws/v1/cluster/apps?state=" + status,
+                AppsInfo.class);
+    }
+
+    /*
+     * private static long getAppStartTime(String appId) { AppInfo appInfo =
+     * restTemplate.getForObject("http://" + restHost +
+     * ":8088/ws/v1/cluster/apps/" + appId, AppInfo.class); return
+     * appInfo.getStartTime(); }
+     * 
+     * private static long getAppFinishTime(String appId) { AppInfo appInfo =
+     * restTemplate.getForObject("http://" + restHost +
+     * ":8088/ws/v1/cluster/apps/" + appId, AppInfo.class); return
+     * appInfo.getFinishTime(); }
+     * 
+     * private static long getLastJobFinishTime(int lastNumOfAppsRun, int
+     * currNumOfAppsFinished) { AppsInfo appsInfo = getAppsInfo("Finished"); if
+     * (getAppsNum("Finished") - lastNumOfAppsRun == currNumOfAppsFinished) {
+     * AppInfo lastFinishedJob =
+     * appsInfo.getApps().get(appsInfo.getApps().size() - 1); return
+     * lastFinishedJob.getFinishTime(); } return -1; }
+     */
     private static void preProcessOptions(String[] args) {
         int count = 0;
         String prevStr = null;
