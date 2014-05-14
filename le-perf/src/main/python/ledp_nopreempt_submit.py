@@ -36,6 +36,7 @@ def main():
     time_list = [elapsed_time]
     with open('nopreemption_elapsed_time.csv', 'wb') as f:
         writer = csv.writer(f)
+        writer.writerow(["value"])
         writer.writerow(time_list)
         
 
