@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import com.latticeengines.perf.util.JsonHelper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class LoadConfiguration {
 
@@ -40,7 +40,7 @@ public class LoadConfiguration {
 
     @Override
     public String toString() {
-        return JsonHelper.serialize(this);
+        return JsonUtils.serialize(this);
     }
 
     @JsonProperty("key_columns")

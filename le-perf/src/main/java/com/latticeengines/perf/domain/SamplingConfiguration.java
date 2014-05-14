@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import com.latticeengines.perf.util.JsonHelper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class SamplingConfiguration {
 
@@ -31,7 +31,7 @@ public class SamplingConfiguration {
     
     @Override
     public String toString() {
-        return JsonHelper.serialize(this);
+        return JsonUtils.serialize(this);
     }
 
     @JsonProperty("training_percentage")

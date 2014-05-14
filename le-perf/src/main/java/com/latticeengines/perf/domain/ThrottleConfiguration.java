@@ -3,7 +3,7 @@ package com.latticeengines.perf.domain;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import com.latticeengines.perf.util.JsonHelper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class ThrottleConfiguration implements HasId<Long>{
 
@@ -35,7 +35,7 @@ public class ThrottleConfiguration implements HasId<Long>{
     
     @Override
     public String toString() {
-        return JsonHelper.serialize(this);
+        return JsonUtils.serialize(this);
     }
 
     @Override
