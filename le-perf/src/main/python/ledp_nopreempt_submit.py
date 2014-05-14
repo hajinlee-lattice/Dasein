@@ -34,9 +34,12 @@ def main():
     elapsed_time = time.time() * 1000 - start
     print elapsed_time
     time_list = [elapsed_time]
-    with open('nopreemption_elapsed_time.csv', 'wb') as f:
+    directory = "ledp_nopreemption_submit"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    with open(directory + '/nopreemption_elapsed_time.csv', 'wb') as f:
         writer = csv.writer(f)
-        writer.writerow(["value"])
+        writer.writerow(["nopreemption_elapsed_time"])
         writer.writerow(time_list)
         
 

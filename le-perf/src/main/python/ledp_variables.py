@@ -6,7 +6,7 @@ Created on May 7, 2014
 from dbcreds import DBCreds
 
 customers = []
-for i in range(0, 2):
+for i in range(0, 75):
     customers.append("c"+str(i))
 jetty_host = "bodcprodvutl158.prod.lattice.local"
 yarn_host = "bodcprodvhdp196.prod.lattice.local"
