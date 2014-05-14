@@ -9,8 +9,7 @@ from ledp_pylib import submit_model
 from ledp_pylib import get_num_apps
 from ledp_variables import *
 from ledp_parallel import parallel_run
-import csv
-import time, os
+import time, os, csv
 
 
 def main():   

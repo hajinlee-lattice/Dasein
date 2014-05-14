@@ -4,9 +4,8 @@ Created on May 13, 2014
 @author: hliu
 '''
 from ledp_variables import *
-import threading
 from threading import Thread
-import time
+import time, threading
 
 def parallel_run(job_type, argslist):
     threadlist = []

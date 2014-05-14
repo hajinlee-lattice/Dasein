@@ -7,8 +7,7 @@ Created on May 6, 2014
 from ledp_pylib import load, create_samples
 from ledp_parallel import parallel_run
 from ledp_variables import *
-import argparse
-import time
+import argparse, time
 
 
 def main():

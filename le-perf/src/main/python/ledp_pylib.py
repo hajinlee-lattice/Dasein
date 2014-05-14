@@ -5,8 +5,7 @@ Created on May 6, 2014
 '''
 from dbcreds import DBCreds
 from algorithm import Algorithm
-import os
-import subprocess
+import os, subprocess
         
 def load(jetty_host, db_creds, table, key_cols, customer):
     os.system("java -cp '../../../target/dependency/*:../../../target/classes' com/latticeengines/perf/exposed/cli/ModelResourceCLI " 
