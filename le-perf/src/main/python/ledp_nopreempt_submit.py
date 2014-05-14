@@ -8,8 +8,10 @@ from algorithm import Algorithm
 from ledp_pylib import submit_model
 from ledp_pylib import get_num_apps
 from ledp_variables import *
-import time
 from ledp_parallel import parallel_run
+import csv
+import time, os
+
 
 def main():   
     
@@ -29,8 +31,16 @@ def main():
     while(get_num_apps(yarn_host, "finished") - start_num_finished_apps - len(customers) != 0):
         time.sleep(1)
         
-    print time.time() * 1000 - start
-
+    elapsed_time = time.time() * 1000 - start
+    print elapsed_time
+    time_list = [elapsed_time]
+    directory = "ledp_nopreemption_submit"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    with open(directory + '/elapsed_time.csv', 'wb') as f:
+        writer = csv.writer(f)
+        writer.writerow(time_list)
+        
 
 if __name__ == '__main__':
     main()
