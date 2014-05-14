@@ -26,7 +26,7 @@ def main():
     argslist = [jetty_host, "ModelSubmission", table, features, target, key_cols, algorithms]
     parallel_run(submit_model, argslist)
     
-    time.sleep(3)
+    time.sleep(1)
     
     rf = Algorithm("rf", 1, 64, 0)
     algorithms = []
