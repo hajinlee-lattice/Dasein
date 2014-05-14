@@ -106,7 +106,6 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         randomForestAlgorithm.setPriority(2);
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
         randomForestAlgorithm.setSampleName("all");
-        randomForestAlgorithm.setAlgorithmProperties("criterion=gini n_estimators=3");
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model1");
