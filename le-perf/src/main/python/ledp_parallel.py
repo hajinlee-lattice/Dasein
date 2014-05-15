@@ -24,5 +24,5 @@ def parallel_run(job_type, argslist):
                 time.sleep(0.3)
         argslist.remove(customer)
      #   time.sleep(0.6)
-    for t in threadlist:
-        t.join()
+#    for t in threadlist:
+#        t.join()
