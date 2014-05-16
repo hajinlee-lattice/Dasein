@@ -7,9 +7,16 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
-public class WatchdogPluginUnitTestNG {
+import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+
+public class WatchdogPluginTestNG extends DataPlatformFunctionalTestNGBase {
     
-    @Test(groups = "unit")
+    @Override
+    protected boolean doYarnClusterSetup() {
+        return false;
+    }
+    
+    @Test(groups = "functional")
     public void register() {
         Map<String, WatchdogPlugin> registry = WatchdogPlugin.getPlugins();
         assertEquals(registry.size(), 2);
