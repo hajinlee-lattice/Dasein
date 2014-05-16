@@ -10,7 +10,7 @@ import time, threading
 def parallel_run(job_type, argslist):
     threadlist = []
     num_apps = len(customers)
-    MAX_THREADS = (num_apps + 1)*2
+    MAX_THREADS = num_apps + 1
     print "Num of threads running now is " + str(threading.activeCount())
     for customer in customers:
         argslist.append(customer)
