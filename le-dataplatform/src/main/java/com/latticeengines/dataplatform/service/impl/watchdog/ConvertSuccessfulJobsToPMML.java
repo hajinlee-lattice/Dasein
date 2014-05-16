@@ -1,8 +1,16 @@
 package com.latticeengines.dataplatform.service.impl.watchdog;
 
+import java.util.List;
+
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataplatform.exposed.domain.JobStatus;
+
+@Component("convertSuccessfulJobsToPMML")
 public class ConvertSuccessfulJobsToPMML extends WatchdogPlugin {
 
     public ConvertSuccessfulJobsToPMML() {
@@ -11,5 +19,16 @@ public class ConvertSuccessfulJobsToPMML extends WatchdogPlugin {
 
     @Override
     public void run(JobExecutionContext context) throws JobExecutionException {
+        AppsInfo appsInfo = getYarnService().getApplications("states=FINISHED");
+        
+        List<AppInfo> apps = appsInfo.getApps();
+        
+        for (AppInfo app : apps) {
+            if (!app.getApplicationType().equals("YARN")) {
+                continue;
+            }
+            JobStatus status = getJobService().getJobStatus(app.getAppId());
+            String path = status.getResultDirectory();
+        }
     }
 }

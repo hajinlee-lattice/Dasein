@@ -11,11 +11,13 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.exposed.domain.Job;
 import com.latticeengines.dataplatform.exposed.domain.Model;
 import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 
+@Component("resubmitPreemptedJobsWithThrottling")
 public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     private static final Log log = LogFactory.getLog(ResubmitPreemptedJobsWithThrottling.class);
 

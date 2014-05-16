@@ -21,13 +21,7 @@ public abstract class WatchdogPlugin {
     protected JobEntityMgr jobEntityMgr;
     protected int retryWaitTime = 30000;
     
-    private static Map<String, WatchdogPlugin> plugins;
-    static {
-        plugins = new HashMap<String, WatchdogPlugin>();
-        
-        new ResubmitPreemptedJobsWithThrottling();
-        new ConvertSuccessfulJobsToPMML();
-    }
+    private static Map<String, WatchdogPlugin> plugins = new HashMap<String, WatchdogPlugin>();
     
     protected static void register(WatchdogPlugin plugin) {
         plugins.put(plugin.getName(), plugin);
