@@ -18,7 +18,7 @@ def main():
     while(get_num_apps(yarn_host, "accepted,running") != 0):
         time.sleep(5)
     start_num_finished_apps = get_num_apps(yarn_host, "finished")
-    print start_num_finished_apps
+    print "The num of already started jobs is " + str(start_num_finished_apps)
     start = time.time() * 1000
     
     rf = Algorithm("rf", 1, 64, 0)
@@ -31,7 +31,7 @@ def main():
         time.sleep(1)
         
     elapsed_time = time.time() * 1000 - start
-    print elapsed_time
+    print "Elapsed time is " + str(elapsed_time)
     time_list = [elapsed_time]
     directory = "ledp_nopreemption_submit"
     if not os.path.exists(directory):
