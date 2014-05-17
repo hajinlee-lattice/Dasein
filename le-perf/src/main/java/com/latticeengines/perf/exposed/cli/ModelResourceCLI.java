@@ -8,22 +8,21 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.perf.domain.Algorithm;
-import com.latticeengines.perf.domain.AppSubmission;
-import com.latticeengines.perf.domain.DbCreds;
-import com.latticeengines.perf.domain.LoadConfiguration;
-import com.latticeengines.perf.domain.Model;
-import com.latticeengines.perf.domain.ModelDefinition;
-import com.latticeengines.perf.domain.SamplingConfiguration;
-import com.latticeengines.perf.domain.SamplingElement;
-import com.latticeengines.perf.domain.algorithm.AlgorithmBase;
-import com.latticeengines.perf.domain.algorithm.DecisionTreeAlgorithm;
-import com.latticeengines.perf.domain.algorithm.LogisticRegressionAlgorithm;
-import com.latticeengines.perf.domain.algorithm.RandomForestAlgorithm;
+import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.dataplatform.Algorithm;
+import com.latticeengines.domain.exposed.dataplatform.DbCreds;
+import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.Model;
+import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
+import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.AlgorithmBase;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
 
 public class ModelResourceCLI {
 

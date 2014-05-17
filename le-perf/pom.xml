@@ -12,6 +12,7 @@
         <component-name>le-perf</component-name>
         <hadoop.version>2.2.0.2.0.6.0-102</hadoop.version>
         <le.common.version>1.0.0-SNAPSHOT</le.common.version>
+        <le.domain.version>1.0.0-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
@@ -28,19 +29,14 @@
             <version>${hadoop.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-            <version>${hadoop.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-yarn-server-resourcemanager</artifactId>
-            <version>${hadoop.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
             <version>${le.common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
         </dependency>
     </dependencies>
 </project>
