@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.entitymanager.BaseEntityMgr;
-import com.latticeengines.dataplatform.exposed.domain.HasId;
+import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public abstract class BaseEntityMgrImpl<T extends HasId<?>> implements BaseEntityMgr<T> {
 

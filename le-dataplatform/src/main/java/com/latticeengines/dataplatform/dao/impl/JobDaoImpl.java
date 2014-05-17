@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.dao.JobDao;
-import com.latticeengines.dataplatform.exposed.domain.Job;
+import com.latticeengines.domain.exposed.dataplatform.Job;
 
 @Component("jobDao")
 public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {

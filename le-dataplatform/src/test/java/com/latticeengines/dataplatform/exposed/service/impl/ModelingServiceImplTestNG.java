@@ -27,22 +27,22 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
 import com.latticeengines.dataplatform.entitymanager.impl.ModelEntityMgrImpl;
 import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
-import com.latticeengines.dataplatform.exposed.domain.Algorithm;
-import com.latticeengines.dataplatform.exposed.domain.JobStatus;
-import com.latticeengines.dataplatform.exposed.domain.Model;
-import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
-import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
-import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.algorithm.DecisionTreeAlgorithm;
-import com.latticeengines.dataplatform.exposed.domain.algorithm.LogisticRegressionAlgorithm;
-import com.latticeengines.dataplatform.exposed.domain.algorithm.RandomForestAlgorithm;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.JobWatchdogService;
 import com.latticeengines.dataplatform.service.impl.JobWatchdogServiceImpl;
+import com.latticeengines.domain.exposed.dataplatform.Algorithm;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.dataplatform.Model;
+import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
+import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
+import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
 
 
 public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase {

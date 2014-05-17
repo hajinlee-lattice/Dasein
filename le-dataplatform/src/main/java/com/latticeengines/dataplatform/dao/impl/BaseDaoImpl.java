@@ -9,9 +9,9 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
-import com.latticeengines.dataplatform.exposed.domain.HasId;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public abstract class BaseDaoImpl<T extends HasId<?>> implements BaseDao<T> {
 

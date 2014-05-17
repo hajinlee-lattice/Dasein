@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.dao.ThrottleConfigurationDao;
-import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 @Component("throttleConfigurationDao")
 public class ThrottleConfigurationDaoImpl extends BaseDaoImpl<ThrottleConfiguration> implements ThrottleConfigurationDao {

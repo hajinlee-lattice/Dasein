@@ -3,9 +3,9 @@ package com.latticeengines.dataplatform.service.impl.metadata;
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.SQLServerManager;
-import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 
 @SuppressWarnings("deprecation")
 public class SQLServerMetadataProvider extends MetadataProvider {

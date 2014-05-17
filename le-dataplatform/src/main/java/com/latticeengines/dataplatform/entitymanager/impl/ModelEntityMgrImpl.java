@@ -11,8 +11,8 @@ import com.latticeengines.dataplatform.dao.ModelDao;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.SequenceEntityMgr;
-import com.latticeengines.dataplatform.exposed.domain.Job;
-import com.latticeengines.dataplatform.exposed.domain.Model;
+import com.latticeengines.domain.exposed.dataplatform.Job;
+import com.latticeengines.domain.exposed.dataplatform.Model;
 
 @Component("modelEntityMgr")
 public class ModelEntityMgrImpl extends BaseEntityMgrImpl<Model> implements ModelEntityMgr {

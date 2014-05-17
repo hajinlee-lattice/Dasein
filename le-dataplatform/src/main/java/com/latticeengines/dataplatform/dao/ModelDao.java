@@ -1,6 +1,6 @@
 package com.latticeengines.dataplatform.dao;
 
-import com.latticeengines.dataplatform.exposed.domain.Model;
+import com.latticeengines.domain.exposed.dataplatform.Model;
 
 public interface ModelDao extends BaseDao<Model> {
 

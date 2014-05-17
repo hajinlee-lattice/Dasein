@@ -24,21 +24,21 @@ import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
-import com.latticeengines.dataplatform.exposed.domain.Algorithm;
-import com.latticeengines.dataplatform.exposed.domain.Classifier;
-import com.latticeengines.dataplatform.exposed.domain.Job;
-import com.latticeengines.dataplatform.exposed.domain.JobStatus;
-import com.latticeengines.dataplatform.exposed.domain.LoadConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.Model;
-import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
-import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.YarnQueueAssignmentService;
+import com.latticeengines.domain.exposed.dataplatform.Algorithm;
+import com.latticeengines.domain.exposed.dataplatform.Classifier;
+import com.latticeengines.domain.exposed.dataplatform.Job;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.Model;
+import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
+import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {

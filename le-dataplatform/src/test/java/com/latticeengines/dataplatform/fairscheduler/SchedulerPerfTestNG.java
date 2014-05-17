@@ -36,9 +36,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
-import com.latticeengines.dataplatform.exposed.domain.Classifier;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.domain.exposed.dataplatform.Classifier;
 import com.latticeengines.perf.exposed.test.PerfFunctionalTestBase;
 
 /**

@@ -17,12 +17,12 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dataplatform.exposed.domain.Classifier;
-import com.latticeengines.dataplatform.exposed.domain.DataSchema;
-import com.latticeengines.dataplatform.exposed.domain.Field;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
+import com.latticeengines.domain.exposed.dataplatform.Classifier;
+import com.latticeengines.domain.exposed.dataplatform.DataSchema;
+import com.latticeengines.domain.exposed.dataplatform.Field;
 
 
 public class PythonClientCustomization extends DefaultYarnClientCustomization {

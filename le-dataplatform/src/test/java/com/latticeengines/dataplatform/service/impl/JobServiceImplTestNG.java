@@ -30,15 +30,15 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
-import com.latticeengines.dataplatform.exposed.domain.Classifier;
-import com.latticeengines.dataplatform.exposed.domain.DbCreds;
-import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.domain.exposed.dataplatform.Classifier;
+import com.latticeengines.domain.exposed.dataplatform.DbCreds;
+import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 

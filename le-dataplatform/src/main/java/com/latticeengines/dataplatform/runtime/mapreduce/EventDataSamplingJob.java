@@ -25,10 +25,10 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.client.mapreduce.MRJobCustomization;
-import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 
 public class EventDataSamplingJob extends Configured implements Tool, MRJobCustomization {
     

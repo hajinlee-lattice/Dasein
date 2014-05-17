@@ -13,9 +13,9 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.domain.Job;
-import com.latticeengines.dataplatform.exposed.domain.Model;
-import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.Job;
+import com.latticeengines.domain.exposed.dataplatform.Model;
+import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 @Component("resubmitPreemptedJobsWithThrottling")
 public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {

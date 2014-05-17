@@ -6,8 +6,8 @@ import static org.testng.Assert.assertTrue;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     

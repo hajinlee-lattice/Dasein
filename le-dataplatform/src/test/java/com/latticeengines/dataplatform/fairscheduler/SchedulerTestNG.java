@@ -23,11 +23,11 @@ import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
 import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
-import com.latticeengines.dataplatform.exposed.domain.Classifier;
-import com.latticeengines.dataplatform.exposed.domain.Job;
-import com.latticeengines.dataplatform.exposed.domain.JobStatus;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.domain.exposed.dataplatform.Classifier;
+import com.latticeengines.domain.exposed.dataplatform.Job;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 
 /**
  * This test working is dependent on the cluster settings. Ensure that:
@@ -123,8 +123,20 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         doCopy(fs, copyEntries);
     }
-
+    
     @Test(groups = "functional", enabled = true)
+    public void testSubmit0() throws Exception {
+        List<ApplicationId> appIds = new ArrayList<ApplicationId>();
+        
+        for (char customer = 'A'; customer <= 'P'; customer++) {
+            Job p0 = getJob(classifier1Min, "Priority0." + customer, 0, "DELL");
+            appIds.add(jobService.submitJob(p0));
+        }
+        waitForAllJobsToFinish(appIds);
+    }
+    
+
+    @Test(groups = "functional", enabled = false)
     public void testSubmit() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
@@ -191,10 +203,11 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
             }// */
             Thread.sleep(5000L);
         }
+        
         waitForAllJobsToFinish(appIds);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testSubmit2() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
@@ -250,8 +263,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     private Properties[] getPropertiesPair(Classifier classifier, String queue, int priority, String customer) {
         Properties containerProperties = new Properties();
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "1024");
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "7");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "1792");
         containerProperties.put(ContainerProperty.PRIORITY.name(), Integer.toString(priority));
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
 

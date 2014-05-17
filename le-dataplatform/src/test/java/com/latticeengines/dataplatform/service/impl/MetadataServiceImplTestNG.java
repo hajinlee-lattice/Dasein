@@ -6,9 +6,9 @@ import org.apache.avro.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.MetadataService;
+import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 
 public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -23,15 +23,16 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @Test(groups = "functional", enabled = false)
     public void createDataSchema() {
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host("rgonzalez-vbox.lattice.local") //
-                .db("ledp") //
+        builder.host("10.41.1.240") //
+                .db("MuleSoft") //
                 .port(1433) //
-                .user("sa") //
-                .password("Welcome123");
+                .user("DataLoader_Dep") //
+                .password("L@ttice1");
 
         DbCreds creds = new DbCreds(builder);
 
-        Schema avroSchema = metadataService.getAvroSchema(creds, "DELL_EVENT_TABLE_TEST");
+        Schema avroSchema = metadataService.getAvroSchema(creds, "mulesoft");
+        System.out.println(avroSchema.toString(true));
         assertEquals(avroSchema.getFields().size(), 257);
         System.out.println(avroSchema.toString(true));
     }

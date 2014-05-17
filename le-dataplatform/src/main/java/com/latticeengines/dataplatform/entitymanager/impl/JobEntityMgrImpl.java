@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.JobDao;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.exposed.domain.Job;
+import com.latticeengines.domain.exposed.dataplatform.Job;
 
 @Component("jobEntityMgr")
 public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntityMgr {

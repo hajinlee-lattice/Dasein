@@ -1,6 +1,6 @@
 package com.latticeengines.dataplatform.dao.impl;
 
-import com.latticeengines.dataplatform.exposed.domain.HasId;
+import com.latticeengines.domain.exposed.dataplatform.HasId;
 
 public class Sequence implements HasId<Long> {
     

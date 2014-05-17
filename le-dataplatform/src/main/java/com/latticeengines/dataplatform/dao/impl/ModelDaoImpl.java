@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.dao.JobDao;
 import com.latticeengines.dataplatform.dao.ModelDao;
-import com.latticeengines.dataplatform.exposed.domain.Job;
-import com.latticeengines.dataplatform.exposed.domain.Model;
+import com.latticeengines.domain.exposed.dataplatform.Job;
+import com.latticeengines.domain.exposed.dataplatform.Model;
 
 @Component("modelDao")
 public class ModelDaoImpl extends BaseDaoImpl<Model> implements ModelDao {

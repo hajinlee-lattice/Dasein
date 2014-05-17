@@ -11,9 +11,9 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
-import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 
 @SuppressWarnings("deprecation")
 public abstract class MetadataProvider {

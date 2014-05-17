@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
-import com.latticeengines.dataplatform.exposed.domain.JobStatus;
-import com.latticeengines.dataplatform.exposed.domain.LoadConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.Model;
-import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.Model;
+import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 public interface ModelingService {
 

@@ -6,9 +6,9 @@ import java.util.Properties;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 
-import com.latticeengines.dataplatform.exposed.domain.DbCreds;
-import com.latticeengines.dataplatform.exposed.domain.Job;
-import com.latticeengines.dataplatform.exposed.domain.JobStatus;
+import com.latticeengines.domain.exposed.dataplatform.DbCreds;
+import com.latticeengines.domain.exposed.dataplatform.Job;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 
 public interface JobService {
 

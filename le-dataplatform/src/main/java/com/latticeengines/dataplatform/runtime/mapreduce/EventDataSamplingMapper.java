@@ -13,10 +13,10 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 
 public class EventDataSamplingMapper extends Mapper<AvroKey<Record>, NullWritable, Text, AvroValue<Record>> {
 

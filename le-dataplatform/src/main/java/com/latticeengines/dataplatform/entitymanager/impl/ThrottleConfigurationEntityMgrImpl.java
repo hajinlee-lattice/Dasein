@@ -11,7 +11,7 @@ import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.ThrottleConfigurationDao;
 import com.latticeengines.dataplatform.entitymanager.SequenceEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
-import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 @Component("throttleConfigurationEntityMgr")
 public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<ThrottleConfiguration> implements ThrottleConfigurationEntityMgr {

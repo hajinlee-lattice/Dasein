@@ -2,8 +2,8 @@ package com.latticeengines.dataplatform.service;
 
 import org.apache.avro.Schema;
 
-import com.latticeengines.dataplatform.exposed.domain.DataSchema;
-import com.latticeengines.dataplatform.exposed.domain.DbCreds;
+import com.latticeengines.domain.exposed.dataplatform.DataSchema;
+import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 
 public interface MetadataService {
 

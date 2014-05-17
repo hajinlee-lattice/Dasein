@@ -8,7 +8,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.domain.JobStatus;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 
 @Component("convertSuccessfulJobsToPMML")
 public class ConvertSuccessfulJobsToPMML extends WatchdogPlugin {

@@ -1,6 +1,6 @@
 package com.latticeengines.dataplatform.dao;
 
-import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 public interface ThrottleConfigurationDao extends BaseDao<ThrottleConfiguration> {
 

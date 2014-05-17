@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.domain.DataSchema;
-import com.latticeengines.dataplatform.exposed.domain.DbCreds;
 import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.metadata.MetadataProvider;
+import com.latticeengines.domain.exposed.dataplatform.DataSchema;
+import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 
 @Component("metadataService")
 public class MetadataServiceImpl implements MetadataService {
