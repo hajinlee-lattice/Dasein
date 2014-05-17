@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.latticeengines.api.domain.Status;
+import com.latticeengines.domain.exposed.api.Status;
 
 @Controller
 public class StatusResource {

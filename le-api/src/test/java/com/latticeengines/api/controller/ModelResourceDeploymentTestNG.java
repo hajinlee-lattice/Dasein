@@ -22,18 +22,18 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.api.domain.AppSubmission;
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
-import com.latticeengines.dataplatform.exposed.domain.Algorithm;
-import com.latticeengines.dataplatform.exposed.domain.DbCreds;
-import com.latticeengines.dataplatform.exposed.domain.LoadConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.Model;
-import com.latticeengines.dataplatform.exposed.domain.ModelDefinition;
-import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.SamplingElement;
-import com.latticeengines.dataplatform.exposed.domain.algorithm.DecisionTreeAlgorithm;
-import com.latticeengines.dataplatform.exposed.domain.algorithm.LogisticRegressionAlgorithm;
-import com.latticeengines.dataplatform.exposed.domain.algorithm.RandomForestAlgorithm;
+import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.dataplatform.Algorithm;
+import com.latticeengines.domain.exposed.dataplatform.DbCreds;
+import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.Model;
+import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
+import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
 
 public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 

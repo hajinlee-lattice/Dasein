@@ -13,14 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.latticeengines.api.domain.AppSubmission;
-import com.latticeengines.api.domain.ThrottleSubmission;
-import com.latticeengines.dataplatform.exposed.domain.JobStatus;
-import com.latticeengines.dataplatform.exposed.domain.LoadConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.Model;
-import com.latticeengines.dataplatform.exposed.domain.SamplingConfiguration;
-import com.latticeengines.dataplatform.exposed.domain.ThrottleConfiguration;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
+import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.api.ThrottleSubmission;
+import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.Model;
+import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 @Controller
 public class ModelResource {

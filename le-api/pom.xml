@@ -12,6 +12,7 @@
     <properties>
         <component-name>le-api</component-name>
         <le.dataplatform.version>1.0.0-SNAPSHOT</le.dataplatform.version>
+        <le.domain.version>1.0.0-SNAPSHOT</le.domain.version>
         <sqoop.version>1.4.4.2.0.6.1-102</sqoop.version>
     </properties>
 
@@ -82,6 +83,11 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
             <version>${le.dataplatform.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
