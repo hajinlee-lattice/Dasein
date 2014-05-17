@@ -244,11 +244,12 @@
             <version>5.1.30</version>
             <scope>test</scope>
         </dependency>
+        <!-- 
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
             <version>4.0</version>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>org.jpmml</groupId>
             <artifactId>pmml-model</artifactId>
