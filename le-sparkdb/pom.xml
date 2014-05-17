@@ -9,9 +9,9 @@
 
     <properties>
         <component-name>le-sparkdb</component-name>
-        <hadoop.version>2.2.0.2.0.6.0-101</hadoop.version>
+        <hadoop.version>2.2.0.2.0.6.0-102</hadoop.version>
         <scala.version>2.10.4</scala.version>
-        <spark.version>0.9.0-incubating</spark.version>
+        <spark.version>0.9.1</spark.version>
     </properties>
 
     <parent>
@@ -20,8 +20,6 @@
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
-
-    
 
     <build>
         <plugins>
@@ -52,7 +50,7 @@
                         <buildcommand>org.scala-ide.sdt.core.scalabuilder</buildcommand>
                     </buildcommands>
                     <classpathContainers>
-                        <classpathContainer>org.scala-ide.sdt.launching.SCALA_CONTAINER"</classpathContainer>
+                        <classpathContainer>org.scala-ide.sdt.launching.SCALA_CONTAINER</classpathContainer>
                         <classpathContainer>org.eclipse.jdt.launching.JRE_CONTAINER</classpathContainer>
                     </classpathContainers>
                     <excludes>
