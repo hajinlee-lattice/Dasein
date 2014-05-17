@@ -16,6 +16,7 @@
 
     <modules>
         <module>le-common</module>
+        <module>le-domain</module>
         <module>le-parent</module>
         <module>le-dataplatform</module>
         <module>le-api</module>
