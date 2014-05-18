@@ -251,8 +251,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     private Properties[] getPropertiesPair(Classifier classifier, String queue, int priority, String customer) {
         Properties containerProperties = new Properties();
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "7");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "1792");
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "1024");
         containerProperties.put(ContainerProperty.PRIORITY.name(), Integer.toString(priority));
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
 
