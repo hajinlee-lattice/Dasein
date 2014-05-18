@@ -58,7 +58,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
     private Classifier classifier2Mins;
     private Classifier classifier4Mins;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional.scheduler")
     public void setup() throws Exception {
         jobEntityMgr.deleteStoreFile();
         throttleConfigurationEntityMgr.deleteStoreFile();
@@ -124,19 +124,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
     }
     
-    @Test(groups = "functional", enabled = true)
-    public void testSubmit0() throws Exception {
-        List<ApplicationId> appIds = new ArrayList<ApplicationId>();
-        
-        for (char customer = 'A'; customer <= 'P'; customer++) {
-            Job p0 = getJob(classifier1Min, "Priority0." + customer, 0, "DELL");
-            appIds.add(jobService.submitJob(p0));
-        }
-        waitForAllJobsToFinish(appIds);
-    }
-    
-
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional.scheduler", enabled = true)
     public void testSubmit() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
@@ -207,7 +195,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         waitForAllJobsToFinish(appIds);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional.scheduler", enabled = true)
     public void testSubmit2() throws Exception {
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A

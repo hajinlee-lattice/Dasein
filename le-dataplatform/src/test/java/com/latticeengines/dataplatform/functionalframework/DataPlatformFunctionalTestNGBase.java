@@ -116,7 +116,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     }
 
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = { "functional", "functional.scheduler" })
     public void setupRunEnvironment() throws Exception {
         log.info("Test name = " + this.getClass());
         
