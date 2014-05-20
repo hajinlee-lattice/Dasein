@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.fairscheduler;
+package org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,19 +10,23 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.Resource;
 import org.apache.hadoop.yarn.factory.providers.RecordFactoryProvider;
+import org.apache.hadoop.yarn.server.resourcemanager.rmapp.RMApp;
 import org.apache.hadoop.yarn.server.resourcemanager.rmcontainer.RMContainer;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.AppSchedulable;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FSLeafQueue;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FairScheduler;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.AppRemovedSchedulerEvent;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.event.SchedulerEvent;
 import org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator;
 import org.apache.hadoop.yarn.util.resource.ResourceCalculator;
 import org.apache.hadoop.yarn.util.resource.Resources;
+
+import com.latticeengines.dataplatform.fairscheduler.LedpQueueAssigner;
 
 public class LedpFairScheduler extends FairScheduler {
     private static final Log log = LogFactory.getLog(LedpFairScheduler.class);
     private static final ResourceCalculator resourceCalculator = new DefaultResourceCalculator();
     private static final Resource clusterCapacity = RecordFactoryProvider.getRecordFactory(null).newRecordInstance(Resource.class);
 
+    private LedpQueueAssigner queueAssigner = new LedpQueueAssigner();
+    
     @Override
     protected Resource resToPreempt(FSLeafQueue sched, long curTime) {
         if (isP0(sched)) {
@@ -119,5 +123,25 @@ public class LedpFairScheduler extends FairScheduler {
         return queue.getQueueName().contains("MapReduce");
     }
 
+    @SuppressWarnings("incomplete-switch")
+    @Override
+    public void handle(SchedulerEvent event) {
+        switch (event.getType()) {
+        case APP_REMOVED:
+            if (!(event instanceof AppRemovedSchedulerEvent)) {
+              throw new RuntimeException("Unexpected event type: " + event);
+            }
+            AppRemovedSchedulerEvent appRemovedEvent = (AppRemovedSchedulerEvent)event;
+            queueAssigner.removeApplication(appRemovedEvent.getApplicationAttemptID());
+            break;
+        }
+        super.handle(event);
+    }
+
+    @Override
+    FSLeafQueue assignToQueue(RMApp rmApp, String queueName, String user) {
+        String assignedQueueName = queueAssigner.getAssignedQueue(queueName, rmApp, getQueueManager());
+        return super.assignToQueue(rmApp, assignedQueueName, user);
+    }
 
 }

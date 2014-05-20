@@ -27,9 +27,9 @@ import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntity
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
+import com.latticeengines.dataplatform.fairscheduler.LedpQueueAssigner;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.JobService;
-import com.latticeengines.dataplatform.service.YarnQueueAssignmentService;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.Classifier;
 import com.latticeengines.domain.exposed.dataplatform.Job;
@@ -55,9 +55,6 @@ public class ModelingServiceImpl implements ModelingService {
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
-    @Autowired
-    private YarnQueueAssignmentService yarnQueueAssignmentService;
-    
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
@@ -181,7 +178,7 @@ public class ModelingServiceImpl implements ModelingService {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), model.getCustomer());
         appMasterProperties.put(AppMasterProperty.TABLE.name(), model.getTable());
-        String assignedQueue = yarnQueueAssignmentService.getAssignedQueue(model.getCustomer(), "Priority" + algorithm.getPriority());
+        String assignedQueue = LedpQueueAssigner.getNonMRQueueNameForSubmission(algorithm.getPriority());
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
@@ -219,7 +216,7 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), config.toString());
         properties.setProperty(EventDataSamplingProperty.CUSTOMER.name(), model.getCustomer());
-        String assignedQueue = yarnQueueAssignmentService.getAssignedQueue(model.getCustomer(), "MapReduce");
+        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         properties.setProperty(EventDataSamplingProperty.QUEUE.name(), assignedQueue);
         return jobService.submitMRJob("samplingJob", properties);
     }
@@ -236,8 +233,7 @@ public class ModelingServiceImpl implements ModelingService {
         model.setCustomer(config.getCustomer());
         model.setTable(config.getTable());
         setupModelProperties(model);
-        String assignedQueue = yarnQueueAssignmentService.getAssignedQueue(
-                model.getCustomer(), "MapReduce");
+        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         return jobService.loadData(model.getTable(), model.getDataHdfsPath(),
                 config.getCreds(), assignedQueue, model.getCustomer(), config.getKeyCols());
     }
