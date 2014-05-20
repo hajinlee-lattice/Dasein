@@ -30,6 +30,7 @@ import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
@@ -217,7 +218,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         job.setId(null);
         job.setParentJobId(parentId);
         ApplicationId appId = submitJob(job);
-        log.info("Resubmitted " + parentId + " with " + job.getId() + ".");
+        log.info("Resubmitted " + parentId + " with " + job.getId() + "to queue " + job.getAppMasterProperties().getProperty(AppMasterProperty.QUEUE.name()) + ".");
         com.latticeengines.domain.exposed.dataplatform.Job parentJob = jobEntityMgr.getById(parentId);
         parentJob.addChildJobId(job.getId());
         jobEntityMgr.post(parentJob);
