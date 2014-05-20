@@ -12,7 +12,7 @@ public class LoadConfigurationUnitTestNG {
     public void testSerDe() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome");
+        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome").type("MySQL");
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("DELL");
@@ -27,5 +27,6 @@ public class LoadConfigurationUnitTestNG {
         assertEquals(deserializedConfig.getCreds().getHost(), config.getCreds().getHost());
         assertEquals(deserializedConfig.getCreds().getUser(), config.getCreds().getUser());
         assertEquals(deserializedConfig.getCreds().getPassword(), config.getCreds().getPassword());
+        assertEquals(deserializedConfig.getCreds().getType(), config.getCreds().getType());
     }
 }

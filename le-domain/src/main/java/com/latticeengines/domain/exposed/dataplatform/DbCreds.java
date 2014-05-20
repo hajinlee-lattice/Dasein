@@ -7,6 +7,7 @@ public class DbCreds {
     private String host;
     private int port;
     private String db;
+    private String type;
     
     public DbCreds() {
     }
@@ -17,6 +18,7 @@ public class DbCreds {
         this.host = builder.host;
         this.port = builder.port;
         this.db = builder.db;
+        this.setType(builder.type);
     }
 
     public String getUser() {
@@ -59,6 +61,14 @@ public class DbCreds {
         this.db = db;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public static class Builder {
 
         private String user;
@@ -66,6 +76,7 @@ public class DbCreds {
         private String host;
         private int port;
         private String db;
+        private String type = "SQLServer";
 
         public Builder() {
         }
@@ -94,6 +105,11 @@ public class DbCreds {
             this.db = db;
             return this;
         }
-    }
+
+        public Builder type(String type) {
+            this.type = type;
+            return this;
+        }
+}
 
 }
