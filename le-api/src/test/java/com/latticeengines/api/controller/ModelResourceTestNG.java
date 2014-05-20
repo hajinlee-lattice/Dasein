@@ -149,7 +149,12 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
     public void load() throws Exception {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome");
+        builder.host("localhost") //
+                .port(3306) //
+                .db("dataplatformtest") //
+                .user("root") //
+                .password("welcome") //
+                .type("MySQL");
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("INTERNAL");
@@ -163,7 +168,6 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         assertEquals(state, YarnApplicationState.FINISHED);
         validateAppStatus(appId);
     }
-
 
     private void validateAppStatus(ApplicationId appId) {
         JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getjobstatus/" + appId.toString(),

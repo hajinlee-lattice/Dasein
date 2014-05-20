@@ -123,7 +123,12 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
     private LoadConfiguration getLoadConfig() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dataSourceHost).port(dataSourcePort).db("dataplatformtest").user("root").password("welcome");
+        builder.host(dataSourceHost) //
+            .port(dataSourcePort) //
+            .db("dataplatformtest") //
+            .user("root") //
+            .password("welcome") //
+            .type("MySQL");
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("INTERNAL");
