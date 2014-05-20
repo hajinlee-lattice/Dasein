@@ -5,7 +5,6 @@ import pwd
 import sys
 from leframework import argumentparser as ap
 from leframework import webhdfs
-import pickle
 from sklearn.externals import joblib
 from urlparse import urlparse
 
