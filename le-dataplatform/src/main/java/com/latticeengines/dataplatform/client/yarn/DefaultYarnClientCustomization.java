@@ -144,19 +144,10 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 
     @Override
     public void validate(Properties appMasterProperties, Properties containerProperties) {
-
     }
 
     @Override
     public void finalize(Properties appMasterProperties, Properties containerProperties) {
-        String contextFileName = containerProperties.getProperty(ContainerProperty.APPMASTER_CONTEXT_FILE.name());
-
-        if (contextFileName != null) {
-            File contextFile = new File(contextFileName);
-            if (!contextFile.delete()) {
-                log.warn("Could not delete launch context file " + contextFileName);
-            }
-        }
     }
 
 }

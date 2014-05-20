@@ -276,7 +276,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testLoadData() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome");
+        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome").type("MySQL");
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0", "Dell", 
         		Arrays.<String>asList(new String[] { "ID" }));
@@ -289,7 +289,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
                     public boolean accept(Path filename) {
                         return filename.toString().endsWith(".avro");
                     }
-            
+
         });
         assertEquals(4, files.size());
     }

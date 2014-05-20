@@ -10,6 +10,8 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,8 @@ import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 
 @Component("yarnClientCustomizationService")
 public class YarnClientCustomizationServiceImpl implements YarnClientCustomizationService {
+    
+    private static final Log log = LogFactory.getLog(YarnClientCustomizationServiceImpl.class);
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -135,6 +139,12 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
 
     @Override
     public void finalize(String clientName, Properties appMasterProperties, Properties containerProperties) {
+        String dir = containerProperties.getProperty(ContainerProperty.JOBDIR.name());
+        try {
+            FileUtils.deleteDirectory(new File(dir));
+        } catch (IOException e) {
+            log.warn("Could not delete local job directory.", e);
+        }
         YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
         customization.finalize(appMasterProperties, containerProperties);
     }

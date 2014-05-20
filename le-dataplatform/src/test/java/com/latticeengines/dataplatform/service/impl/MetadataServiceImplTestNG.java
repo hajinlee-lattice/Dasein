@@ -20,7 +20,7 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         return false;
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void createDataSchema() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host("10.41.1.240") //
@@ -33,7 +33,7 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         Schema avroSchema = metadataService.getAvroSchema(creds, "mulesoft");
         System.out.println(avroSchema.toString(true));
-        assertEquals(avroSchema.getFields().size(), 257);
+        assertEquals(avroSchema.getFields().size(), 203);
         System.out.println(avroSchema.toString(true));
     }
 }

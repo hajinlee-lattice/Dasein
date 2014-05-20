@@ -1,7 +1,6 @@
 package com.latticeengines.dataplatform.client.yarn;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -116,18 +115,6 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             if (!fieldNames.contains(feature)) {
                 throw new LedpException(LedpCode.LEDP_10004, new String[] { feature });
             }
-        }
-
-    }
-
-    @Override
-    public void finalize(Properties appMasterProperties, Properties containerProperties) {
-        super.finalize(appMasterProperties, containerProperties);
-        String dir = containerProperties.getProperty(ContainerProperty.JOBDIR.name());
-        try {
-            FileUtils.deleteDirectory(new File(dir));
-        } catch (IOException e) {
-            log.warn("Could not delete local job directory.", e);
         }
     }
 
