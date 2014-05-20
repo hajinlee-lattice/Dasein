@@ -19,7 +19,7 @@ public abstract class WatchdogPlugin {
     protected ModelEntityMgr modelEntityMgr;
     protected YarnService yarnService;
     protected JobEntityMgr jobEntityMgr;
-    protected int retryWaitTime = 30000;
+    protected int retryWaitTime = 60000;
     
     private static Map<String, WatchdogPlugin> plugins = new HashMap<String, WatchdogPlugin>();
     
