@@ -49,7 +49,7 @@ def getModelDirPath(schema):
     return modelDirPath
 
 def populateSchemaWithMetadata(schema, parser):
-    schema["featureIndex"] = parser.getFeatureTuple();
+    schema["featureIndex"] = parser.getFeatureTuple()
     schema["targetIndex"] = parser.getTargetIndex()
     schema["keyColIndex"] = parser.getKeyColumns()
 
