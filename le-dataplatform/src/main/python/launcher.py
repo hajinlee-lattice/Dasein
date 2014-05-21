@@ -37,6 +37,7 @@ def validateEnvAndParameters(schema):
     
 def writeScoredTestData(testingData, schema, clf, modelDir):
     scored = clf.predict_proba(testingData[:, schema["featureIndex"]])
+    scored = numpy.apply_along_axis(lambda x: [x[1]], 1, scored)
     keyData = testingData[:, schema["keyColIndex"]]
     scored = numpy.concatenate((keyData, scored), axis=1)
     numpy.savetxt(modelDir + "scored.txt", scored, delimiter=",")
