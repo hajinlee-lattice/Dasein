@@ -133,7 +133,9 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         }
 
         if (status.getExitStatus() != ContainerExitStatus.PREEMPTED) {
-            cleanupJobDir();
+
+        } else {
+            log.info("Printing out the status to find the reason: " + status.getExitStatus());
         }
         super.onContainerCompleted(status);
     }
@@ -170,6 +172,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
     @Override
     protected void doStop() {
         super.doStop();
+        cleanupJobDir();
         ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
         // ledpMetricsMgr.resetContainerElapsedTimeForGanglia();
     }
