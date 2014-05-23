@@ -1,9 +1,12 @@
 import algorithmtestbase as at
-import leframework.argumentparser as ap
-import os
+import shutil
 import unittest
 
 class LogisticRegressionTest(unittest.TestCase, at.AlgorithmTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        shutil.rmtree("./results")
 
     def testTrain(self):
         algorithmProperties = { "C":"1.0" }

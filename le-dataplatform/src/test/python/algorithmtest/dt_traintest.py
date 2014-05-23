@@ -1,7 +1,12 @@
 import algorithmtestbase as at
+import shutil
 import unittest
 
 class LogisticRegressionTest(unittest.TestCase, at.AlgorithmTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        shutil.rmtree("./results")
 
     def testTrain(self):
         algorithmProperties = { "criterion":"entropy" }

@@ -1,20 +1,16 @@
 import leframework.argumentparser as ap
 import launcher as l
 import os
-import shutil
+
 
 class AlgorithmTestBase(object):
     
-    @classmethod
-    def setUpClass(cls):
-        shutil.rmtree("results")
-
     def execute(self, algorithmFileName, algorithmProperties):
         parser = ap.ArgumentParser("model.json")
         schema = parser.getSchema()
         training = parser.createList(schema["training_data"])
         test = parser.createList(schema["test_data"])
-        modelDir = "./results"
+        modelDir = "./results/"
         os.mkdir(modelDir)
         launcher = l.Launcher("model.json")
         launcher.populateSchemaWithMetadata(schema, parser)
