@@ -128,11 +128,11 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
             .db("dataplatformtest") //
             .user("root") //
             .password("welcome") //
-            .type("MySQL");
+            .type("SQLServer");
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("INTERNAL");
-        config.setTable("iris");
+        config.setTable("MuleSoft_EventTable");
         config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         return config;
     }
