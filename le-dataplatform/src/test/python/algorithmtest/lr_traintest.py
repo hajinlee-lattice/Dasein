@@ -7,5 +7,6 @@ class LogisticRegressionTest(unittest.TestCase, at.AlgorithmTestBase):
 
     def testTrain(self):
         algorithmProperties = { "C":"1.0" }
-        self.execute("lr_train.py", algorithmProperties)
+        clf = self.execute("lr_train.py", algorithmProperties)
+        self.assertTrue(clf != None)
 

@@ -9,7 +9,7 @@
             <directory>src/main/python/leframework</directory>
             <outputDirectory>leframework</outputDirectory>
             <includes>
-                <include>*.py</include>
+                <include>**/*.py</include>
             </includes>
         </fileSet>
     </fileSets>

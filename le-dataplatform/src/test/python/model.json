@@ -19,10 +19,11 @@
       }
     ]
   },
+  "python_script": "lr_train.py",
   "schema": "metadata.json",
   "training_data": "s1Training-r-00000.avro",
   "test_data": "s1Test-r-00000.avro",
-  "model_dir_data": "model",
+  "model_data_dir": "model",
   "features": [
       "Column5",
       "Column6",

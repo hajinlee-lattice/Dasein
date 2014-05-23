@@ -4,9 +4,9 @@ import json
 import logging
 import numpy as np
 
-logging.basicConfig(level = logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
-                    format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(name = 'argumentparser')
+logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(name='argumentparser')
 
 
 class ArgumentParser(object):
@@ -15,11 +15,11 @@ class ArgumentParser(object):
     LE data platform.
     """
     def __init__(self, metadataFile):
-        metadataJson = open(self.stripPath(metadataFile)).read()
+        metadataJson = open(self.__stripPath(metadataFile)).read()
         logger.debug("JSON metadata %s" % metadataJson)
         self.metadataSchema = json.loads(metadataJson)
-        logger.debug("JSON data schema file name %s" % self.stripPath(self.metadataSchema["schema"]))
-        dataSchemaJsonData = open(self.stripPath(self.metadataSchema["schema"])).read()
+        logger.debug("JSON data schema file name %s" % self.__stripPath(self.metadataSchema["schema"]))
+        dataSchemaJsonData = open(self.__stripPath(self.metadataSchema["schema"])).read()
         logger.debug("JSON data schema %s" % dataSchemaJsonData)
         dataSchema = json.loads(dataSchemaJsonData)
         self.fields = dataSchema["fields"]
@@ -33,13 +33,13 @@ class ArgumentParser(object):
         except Exception:
             pass
         
-    def stripPath(self, fileName):
+    def __stripPath(self, fileName):
         return fileName[fileName.rfind('/')+1:len(fileName)]
     
-    def getField(self, index):
+    def __getField(self, index):
         return self.fields[index]
     
-    def convertType(self, cell, fieldType):
+    def __convertType(self, cell, fieldType):
         if (fieldType == "int"):
             return int(cell)
         elif (fieldType == "float"):
@@ -89,9 +89,9 @@ class ArgumentParser(object):
             for i in included:
                 try:  
                     if self.isAvro():
-                        rowlist.append(row[self.getField(i)["name"]])
+                        rowlist.append(row[self.__getField(i)["name"]])
                     else:
-                        rowlist.append(self.convertType(row[i], self.getField(i)["type"][0]))
+                        rowlist.append(self.__convertType(row[i], self.__getField(i)["type"][0]))
                 except Exception as e:
                     print("Issue with index " + str(i))
                     print(str(e))
