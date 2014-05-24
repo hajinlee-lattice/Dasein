@@ -7,7 +7,9 @@ class LauncherTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        shutil.rmtree("results")
+        if os.path.exists("./results"):
+            shutil.rmtree("./results")
+
 
     def testExecute(self):
         # These properties won't really be used since these are just unit tests.
