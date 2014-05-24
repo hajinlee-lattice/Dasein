@@ -3,12 +3,17 @@ package com.latticeengines.api.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -37,6 +42,8 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 
 public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
+    private static final Log log = LogFactory.getLog(ModelResourceDeploymentTestNG.class); 
+    
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -100,6 +107,8 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
     @Test(groups = "deployment")
     public void load() throws Exception {
         LoadConfiguration config = getLoadConfig();
+        ResponseErrorHandler handler = new DefaultResponseErrorHandler();
+        restTemplate.setErrorHandler(handler);
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -128,11 +137,11 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
             .db("dataplatformtest") //
             .user("root") //
             .password("welcome") //
-            .type("SQLServer");
+            .type("MySQL");
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("INTERNAL");
-        config.setTable("MuleSoft_EventTable");
+        config.setTable("iris");
         config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         return config;
     }
@@ -155,9 +164,8 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.addSamplingElement(all);
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
-        AppSubmission submission = restTemplate.postForObject(
-                "http://" + restEndpointHost + "/rest/createSamples", samplingConfig, AppSubmission.class,
-                new Object[] {});
+        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/createSamples",
+                samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
@@ -167,8 +175,8 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "createSamples" })
     public void submit() throws Exception {
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/submit",
-                model, AppSubmission.class, new Object[] {});
+        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/submit", model,
+                AppSubmission.class, new Object[] {});
         assertEquals(3, submission.getApplicationIds().size());
 
         for (String appIdStr : submission.getApplicationIds()) {
@@ -191,8 +199,13 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         @Override
         public void handleError(ClientHttpResponse response) throws IOException {
+            InputStream is = response.getBody();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                log.info(line);
+            }
         }
-
     }
 
 }
