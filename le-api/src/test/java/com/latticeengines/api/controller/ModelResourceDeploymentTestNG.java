@@ -2,16 +2,13 @@ package com.latticeengines.api.controller;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -26,7 +23,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
@@ -42,8 +38,8 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 
 public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(ModelResourceDeploymentTestNG.class); 
-    
+    private static final Log log = LogFactory.getLog(ModelResourceDeploymentTestNG.class);
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -123,26 +119,27 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         LoadConfiguration config = getLoadConfig();
         ResponseErrorHandler handler = new DefaultResponseErrorHandler();
         restTemplate.setErrorHandler(handler);
-        Map<String, String> errorResult = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config, HashMap.class,
-                new Object[] {});
+        Map<String, String> errorResult = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load",
+                config, HashMap.class, new Object[] {});
         assertEquals(errorResult.get("errorCode"), "LEDP_00002");
         assertTrue(errorResult.get("errorMsg").contains("FileAlreadyExistsException"));
     }
-    
+
     private LoadConfiguration getLoadConfig() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost) //
-            .port(dataSourcePort) //
-            .db("dataplatformtest") //
-            .user("root") //
-            .password("welcome") //
-            .type("MySQL");
+                .port(dataSourcePort) //
+                .db("dataplatformtest") //
+                .user("root") //
+                .password("welcome") //
+                .type("MySQL");
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("INTERNAL");
         config.setTable("iris");
         config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
+        config.setMetadataTable("METADATA_TABLE");
         return config;
     }
 
@@ -199,12 +196,10 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         @Override
         public void handleError(ClientHttpResponse response) throws IOException {
-            InputStream is = response.getBody();
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                log.info(line);
-            }
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(response.getBody(), writer, "UTF-8");
+            String message = writer.toString();
+            log.info(message);
         }
     }
 
