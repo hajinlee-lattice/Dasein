@@ -1,5 +1,4 @@
 from sklearn import linear_model
-import time
 
 def train(trainingData, testData, schema, modelDir, algorithmProperties):
     X_train = trainingData[:, schema["featureIndex"]]

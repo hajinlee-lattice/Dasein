@@ -1,9 +1,11 @@
-import launcher as l
 import os
 import shutil
-import unittest
+from unittest import TestCase
 
-class LauncherTest(unittest.TestCase):
+from launcher import Launcher
+
+
+class LauncherTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -16,6 +18,6 @@ class LauncherTest(unittest.TestCase):
         # Functional and end-to-end tests should be done from java
         os.environ["CONTAINER_ID"] = "xyz"
         os.environ["SHDP_HD_FSWEB"] = "localhost:50070"
-        launcher = l.Launcher("model.json")
+        launcher = Launcher("model.json")
         launcher.execute(False)
         

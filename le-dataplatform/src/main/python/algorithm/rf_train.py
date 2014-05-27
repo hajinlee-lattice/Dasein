@@ -1,6 +1,5 @@
 from sklearn import ensemble
 from sklearn import tree
-import time
 
 def train(trainingData, testData, schema, modelDir, algorithmProperties):
     X_train = trainingData[:, schema["featureIndex"]]

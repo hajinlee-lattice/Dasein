@@ -1,22 +1,22 @@
-from leframework.model import jsongenbase as jb
-from leframework.model import state
-from leframework import codestyle as cs
+from leframework.codestyle import overrides
+from leframework.model.jsongenbase import JsonGenBase
+from leframework.model.state import State
 
-class SummaryGenerator(state.State, jb.JsonGenBase):
+class SummaryGenerator(State, JsonGenBase):
     
     def __init__(self):
-        state.State.__init__(self, "SummaryGenerator")
+        State.__init__(self, "SummaryGenerator")
     
-    @cs.overrides(state.State)
+    @overrides(State)
     def execute(self):
         summary = dict()
         predictors = []
         summary["Predictors"] = predictors
     
-    @cs.overrides(jb.JsonGenBase)
+    @overrides(JsonGenBase)
     def getKey(self):
         return "Summary"
     
-    @cs.overrides(jb.JsonGenBase)
+    @overrides(JsonGenBase)
     def getJsonProperty(self):
         return self.summmary

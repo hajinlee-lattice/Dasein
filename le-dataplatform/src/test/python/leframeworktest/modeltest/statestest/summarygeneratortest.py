@@ -1,9 +1,10 @@
-import unittest
-import leframework.model.states.summarygenerator as summarygen
+from unittest import TestCase
 
-class SummaryGeneratorTest(unittest.TestCase):
+from leframework.model.states.summarygenerator import SummaryGenerator
+
+class SummaryGeneratorTest(TestCase):
 
     def testExecute(self):
-        summaryGenerator = summarygen.SummaryGenerator()
+        summaryGenerator = SummaryGenerator()
         self.assertEquals(summaryGenerator.getName(), "SummaryGenerator")
         self.assertEquals(summaryGenerator.getKey(), "Summary")

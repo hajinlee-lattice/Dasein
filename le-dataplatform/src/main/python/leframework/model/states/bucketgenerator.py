@@ -1,20 +1,21 @@
-from leframework.model import state
-from leframework.model import jsongenbase as jb
-from leframework import codestyle as cs
+from leframework.codestyle import overrides
+from leframework.model.jsongenbase import JsonGenBase
+from leframework.model.state import State
 
-class BucketGenerator(state.State, jb.JsonGenBase):
+
+class BucketGenerator(State, JsonGenBase):
 
     def __init__(self):
-        state.State.__init__(self, "BucketGenerator")
+        State.__init__(self, "BucketGenerator")
     
-    @cs.overrides(state.State)
+    @overrides(State)
     def execute(self):
         self.buckets = []
     
-    @cs.overrides(jb.JsonGenBase)
+    @overrides(JsonGenBase)
     def getKey(self):
         return "Buckets"
     
-    @cs.overrides(jb.JsonGenBase)
+    @overrides(JsonGenBase)
     def getJsonProperty(self):
         return self.buckets

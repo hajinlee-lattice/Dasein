@@ -1,12 +1,12 @@
-from leframework.model import state
-from leframework import codestyle as cs
+from leframework.codestyle import overrides
+from leframework.model.state import State
 
-class Initialize(state.State):
+class Initialize(State):
     
     def __init__(self):
-        state.State.__init__(self, "Initialize")
+        State.__init__(self, "Initialize")
     
-    @cs.overrides(state.State)
+    @overrides(State)
     def execute(self):
         mediator = self.getMediator()
         scored = mediator.clf.predict_proba(mediator.data[:, mediator.schema["featureIndex"]])

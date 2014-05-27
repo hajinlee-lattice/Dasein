@@ -2,15 +2,15 @@ import logging
 import os
 import pwd
 import sys
-from leframework import argumentparser as ap
-from leframework.model import statemachine as sm
-from leframework.model.states import bucketgenerator as bg
-from leframework.model.states import calibrationgenerator as cg
-from leframework.model.states import finalize as final
-from leframework.model.states import initialize as init
-from leframework.model.states import modelgenerator as mg
-from leframework.model.states import summarygenerator as sg
-from leframework import webhdfs
+from leframework.argumentparser import ArgumentParser
+from leframework.model.statemachine import StateMachine
+from leframework.model.states.bucketgenerator import BucketGenerator
+from leframework.model.states.calibrationgenerator import CalibrationGenerator
+from leframework.model.states.finalize import Finalize
+from leframework.model.states.initialize import Initialize
+from leframework.model.states.modelgenerator import ModelGenerator
+from leframework.model.states.summarygenerator import SummaryGenerator
+from leframework.webhdfs import WebHDFS
 from urlparse import urlparse
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -20,7 +20,7 @@ logger = logging.getLogger(name='launcher')
 class Launcher(object):
     
     def __init__(self, modelFileName):
-        self.parser = ap.ArgumentParser(modelFileName)
+        self.parser = ArgumentParser(modelFileName)
     
     def __stripPath(self, fileName):
         return fileName[fileName.rfind('/')+1:len(fileName)]
@@ -51,13 +51,13 @@ class Launcher(object):
         return modelDirPath
 
     def __setupJsonGenerationStateMachine(self):
-        stateMachine = sm.StateMachine()
-        stateMachine.addState(init.Initialize())
-        stateMachine.addState(cg.CalibrationGenerator())
-        stateMachine.addState(bg.BucketGenerator())
-        stateMachine.addState(mg.ModelGenerator())
-        stateMachine.addState(sg.SummaryGenerator())
-        stateMachine.addState(final.Finalize())
+        stateMachine = StateMachine()
+        stateMachine.addState(Initialize())
+        stateMachine.addState(CalibrationGenerator())
+        stateMachine.addState(BucketGenerator())
+        stateMachine.addState(ModelGenerator())
+        stateMachine.addState(SummaryGenerator())
+        stateMachine.addState(Finalize())
         return stateMachine
 
     def populateSchemaWithMetadata(self, schema, parser):
@@ -107,7 +107,7 @@ class Launcher(object):
         if writeToHdfs:
             # Create webhdfs instance for writing to hdfs
             webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
-            hdfs  = webhdfs.WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
+            hdfs = WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
             hdfs.mkdir(modelHdfsDir)
 
             # Copy the model data files from local to hdfs

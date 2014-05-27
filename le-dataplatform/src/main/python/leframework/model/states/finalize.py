@@ -1,13 +1,13 @@
 import numpy
-from leframework.model import state
-from leframework import codestyle as cs
+from leframework.codestyle import overrides
+from leframework.model.state import State
 
-class Finalize(state.State):
+class Finalize(State):
 
     def __init__(self):
-        state.State.__init__(self, "Finalize")
+        State.__init__(self, "Finalize")
     
-    @cs.overrides(state.State)
+    @overrides(State)
     def execute(self):
         mediator = self.getMediator()
         scored = mediator.scored

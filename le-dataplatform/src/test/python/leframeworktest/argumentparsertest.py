@@ -1,10 +1,12 @@
-import leframework.argumentparser as ap
-import unittest
+from unittest import TestCase
 
-class ArgumentParserTest(unittest.TestCase):
+from leframework.argumentparser import ArgumentParser
+
+
+class ArgumentParserTest(TestCase):
 
     def testCreateListForAvro(self):
-        parser = ap.ArgumentParser("model.json")
+        parser = ArgumentParser("model.json")
         schema = parser.getSchema()
         training = parser.createList(schema["training_data"])
         self.assertEqual(training.shape, (2387, 8), "Dimensions of training data should be (2387, 7), but is " + str(training.shape))

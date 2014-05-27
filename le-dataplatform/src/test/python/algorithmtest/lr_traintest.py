@@ -1,9 +1,11 @@
-import algorithmtestbase as at
 import os
 import shutil
-import unittest
+from unittest import TestCase
 
-class LogisticRegressionTest(unittest.TestCase, at.AlgorithmTestBase):
+from algorithmtestbase import AlgorithmTestBase
+
+
+class LogisticRegressionTest(TestCase, AlgorithmTestBase):
 
     @classmethod
     def setUpClass(cls):
