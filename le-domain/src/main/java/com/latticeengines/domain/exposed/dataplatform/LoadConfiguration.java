@@ -10,6 +10,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 public class LoadConfiguration {
 
     private String table;
+    private String metadataTable;
     private String customer;
     private DbCreds creds;
     private List<String> keyCols = new ArrayList<String>();
@@ -20,6 +21,16 @@ public class LoadConfiguration {
     
     public void setTable(String table) {
         this.table = table;
+    }
+
+    @JsonProperty("metadata_table")
+    public String getMetadataTable() {
+        return metadataTable;
+    }
+    
+    @JsonProperty("metadata_table")
+    public void setMetadataTable(String metadataTable) {
+        this.metadataTable = metadataTable;
     }
 
     public String getCustomer() {

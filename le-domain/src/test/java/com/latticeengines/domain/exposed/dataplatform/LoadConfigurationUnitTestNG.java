@@ -17,10 +17,12 @@ public class LoadConfigurationUnitTestNG {
         config.setCreds(creds);
         config.setCustomer("DELL");
         config.setTable("DELL_EVENT_TABLE_TEST");
+        config.setMetadataTable("METADATA_TABLE");
         String serializedStr = config.toString();
         System.out.println(serializedStr);
         LoadConfiguration deserializedConfig = JsonUtils.deserialize(serializedStr, LoadConfiguration.class);
         assertEquals(deserializedConfig.getTable(), config.getTable());
+        assertEquals(deserializedConfig.getMetadataTable(), config.getMetadataTable());
         assertEquals(deserializedConfig.getCustomer(), config.getCustomer());
         assertEquals(deserializedConfig.getCreds().getDb(), config.getCreds().getDb());
         assertEquals(deserializedConfig.getCreds().getPort(), config.getCreds().getPort());
