@@ -55,8 +55,8 @@ class Launcher(object):
     def __setupJsonGenerationStateMachine(self):
         stateMachine = StateMachine()
         stateMachine.addState(Initialize())
-        stateMachine.addState(CalibrationGenerator())
         stateMachine.addState(BucketGenerator())
+        stateMachine.addState(CalibrationGenerator())
         stateMachine.addState(ModelGenerator())
         stateMachine.addState(SummaryGenerator())
         stateMachine.addState(Finalize())

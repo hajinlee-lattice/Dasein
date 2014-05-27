@@ -17,4 +17,10 @@ class State(object):
     
     def getMediator(self):
         return self.mediator
+
+    def setStateMachine(self, stateMachine):
+        self.stateMachine = stateMachine
+    
+    def getStateMachine(self):
+        return self.stateMachine
     

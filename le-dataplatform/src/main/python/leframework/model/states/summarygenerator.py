@@ -9,9 +9,9 @@ class SummaryGenerator(State, JsonGenBase):
     
     @overrides(State)
     def execute(self):
-        summary = dict()
+        self.summary = dict()
         predictors = []
-        summary["Predictors"] = predictors
+        self.summary["Predictors"] = predictors
     
     @overrides(JsonGenBase)
     def getKey(self):
@@ -19,4 +19,4 @@ class SummaryGenerator(State, JsonGenBase):
     
     @overrides(JsonGenBase)
     def getJsonProperty(self):
-        return self.summmary
+        return dict()

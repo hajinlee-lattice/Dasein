@@ -8,6 +8,7 @@ class StateMachine(object):
         
     def addState(self, state):
         state.setMediator(self.mediator)
+        state.setStateMachine(self)
         self.states.append(state)
         
     def getStates(self):

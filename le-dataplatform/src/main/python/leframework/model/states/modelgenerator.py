@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from sklearn.externals import joblib
 
 from leframework.codestyle import overrides
@@ -12,9 +13,17 @@ class ModelGenerator(State, JsonGenBase):
     
     @overrides(State)
     def execute(self):
-        joblib.dump(self.mediator.clf, self.mediator.modelLocalDir + '/model.pkl', compress = 9)
-        self.model = dict()
-        self.model["__type"] = "PythonScriptModel:#LatticeEngines.DataBroker.ServiceInterface"
+        filename = self.mediator.modelLocalDir + '/model.pkl'
+        joblib.dump(self.mediator.clf, filename, compress = 9)
+        model = OrderedDict()
+        model["__type"] = "PythonScriptModel:#LatticeEngines.DataBroker.ServiceInterface"
+        model["AdjustmentFactor"] = 1
+        model["ColumnMetadata"] = None
+        model["InitialTransforms"] = None
+        model["Target"] = 1
+        pklByteArray = map(lambda x: int(x), bytearray(open(filename, "rb").read()))
+        model["SupportFiles"] = [{"Value": pklByteArray, "Key": "model.pkl" }]
+        self.model = model
     
     @overrides(JsonGenBase)
     def getKey(self):
