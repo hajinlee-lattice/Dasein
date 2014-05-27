@@ -1,6 +1,5 @@
-from leframework.argumentparser import ArgumentParser
-from launcher import Launcher 
 import os
+from leframework.argumentparser import ArgumentParser
 
 
 class AlgorithmTestBase(object):
@@ -12,8 +11,6 @@ class AlgorithmTestBase(object):
         test = parser.createList(schema["test_data"])
         modelDir = "./results/"
         os.mkdir(modelDir)
-        launcher = Launcher("model.json")
-        launcher.populateSchemaWithMetadata(schema, parser)
         execfile("../../main/python/algorithm/" + algorithmFileName, globals())
         return globals()['train'](training, test, schema, modelDir, algorithmProperties)
         

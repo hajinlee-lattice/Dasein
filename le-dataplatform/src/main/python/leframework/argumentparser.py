@@ -1,8 +1,10 @@
 import csv
-import fastavro as avro
 import json
 import logging
+
+import fastavro as avro
 import numpy as np
+
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -93,11 +95,17 @@ class ArgumentParser(object):
                     else:
                         rowlist.append(self.__convertType(row[i], self.__getField(i)["type"][0]))
                 except Exception as e:
-                    print("Issue with index " + str(i))
-                    print(str(e))
+                    logger.error("Issue with index " + str(i))
+                    logger.error(str(e))
             tmp.append(rowlist)
+        self.__populateSchemaWithMetadata(self.getSchema(), self)
         return np.array(tmp)
-    
+
+    def __populateSchemaWithMetadata(self, schema, parser):
+        schema["featureIndex"] = parser.getFeatureTuple()
+        schema["targetIndex"] = parser.getTargetIndex()
+        schema["keyColIndex"] = parser.getKeyColumns()
+     
     def isAvro(self):
         return self.metadataSchema["data_format"] == "avro"
     

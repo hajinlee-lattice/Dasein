@@ -2,6 +2,8 @@ import logging
 import os
 import pwd
 import sys
+from urlparse import urlparse
+
 from leframework.argumentparser import ArgumentParser
 from leframework.model.statemachine import StateMachine
 from leframework.model.states.bucketgenerator import BucketGenerator
@@ -11,7 +13,7 @@ from leframework.model.states.initialize import Initialize
 from leframework.model.states.modelgenerator import ModelGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
 from leframework.webhdfs import WebHDFS
-from urlparse import urlparse
+
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -60,11 +62,6 @@ class Launcher(object):
         stateMachine.addState(Finalize())
         return stateMachine
 
-    def populateSchemaWithMetadata(self, schema, parser):
-        schema["featureIndex"] = parser.getFeatureTuple()
-        schema["targetIndex"] = parser.getTargetIndex()
-        schema["keyColIndex"] = parser.getKeyColumns()
-        
     def execute(self, writeToHdfs):
         parser = self.parser
         schema = parser.getSchema()
@@ -76,7 +73,6 @@ class Launcher(object):
         training = parser.createList(self.__stripPath(schema["training_data"]))
         test = parser.createList(self.__stripPath(schema["test_data"]))
         script = self.__stripPath(schema["python_script"])
-        self.populateSchemaWithMetadata(schema, parser)
 
         # Create directory for model result
         modelLocalDir = os.getcwd() + "/results/"
