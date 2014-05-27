@@ -57,7 +57,7 @@ public class LedpQueueAssignerUnitTestNG {
         FSQueue emptyQ = generateQueueWithEmptyLeaves();
         
         when(queueManager.getQueue("Priority0")).thenReturn(p0Q);
-        when(queueManager.getQueue("MapReduce")).thenReturn(p0MRQ);
+        when(queueManager.getQueue("Priority0.MapReduce")).thenReturn(p0MRQ);
         when(queueManager.getQueue("Priority1")).thenReturn(p1Q);
         when(queueManager.getQueue(PRIORITY_NO_LEAVES)).thenReturn(emptyQ);
         
@@ -223,14 +223,14 @@ public class LedpQueueAssignerUnitTestNG {
     
     @Test(groups = "unit")
     public void testStickyP0MRQueue() throws Exception {       
-        final String requestedQueue = "MapReduce.0";
+        final String requestedQueue = "Priority0.MapReduce.0";
         
         assertEquals(queueAssigner.getAssignedQueue(requestedQueue, rmAppDell, queueManager), "root.Priority0.MapReduce.0");
     }     
    
     @Test(groups = "unit")
     public void testNewlyAssignedGetLeastUtilizedMRQueue() throws Exception {       
-        final String requestedQueue = "MapReduce.0";
+        final String requestedQueue = "Priority0.MapReduce.0";
         
         assertEquals(queueAssigner.getAssignedQueue(requestedQueue, rmAppNobody, queueManager), "root.Priority0.MapReduce.1");
     }        
@@ -264,11 +264,17 @@ public class LedpQueueAssignerUnitTestNG {
     }        
     
     @Test(groups = "unit")
+    public void testGetParentQueueFromFullQueueName() throws Exception {       
+        assertEquals(queueAssigner.getParentQueueFromFullQueueName("Priority0.2"), "Priority0");
+        assertEquals(queueAssigner.getParentQueueFromFullQueueName("root.Priority0.2"), "root.Priority0");
+        assertEquals(queueAssigner.getParentQueueFromFullQueueName("Priority0.MapReduce.2"), "Priority0.MapReduce");
+        assertEquals(queueAssigner.getParentQueueFromFullQueueName("root.Priority0.MapReduce.2"), "root.Priority0.MapReduce");
+        assertEquals(queueAssigner.getParentQueueFromFullQueueName("noDelimiter"), "noDelimiter");
+    }  
+    
+    @Test(groups = "unit")
     public void testGetQueueNameMethods() throws Exception {       
-        assertEquals(queueAssigner.getParentQueueFromFullQueueName("root.Priority0.2"), "Priority0");
-        
         assertEquals(LedpQueueAssigner.getMRQueueNameForSubmission(), "Priority0.MapReduce.0");
-        
         assertEquals(LedpQueueAssigner.getNonMRQueueNameForSubmission(1), "Priority1.0");
     }  
 }

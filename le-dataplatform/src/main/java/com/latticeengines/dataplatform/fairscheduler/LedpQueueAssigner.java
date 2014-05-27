@@ -23,7 +23,7 @@ public class LedpQueueAssigner {
 
     private static final Log log = LogFactory.getLog(LedpQueueAssigner.class);
     private static final String JOBNAME_DELIMITER = "~";
-    private static final String QUEUE_NAME_DELIMITER = "\\.";
+    private static final String QUEUE_NAME_DELIMITER = ".";
     private static final int ABSOLUTE_MINIMUM_UTILIZATION = 0;
     private Map<String, String> appIdToCustomer = new HashMap<String, String>();
     
@@ -133,14 +133,13 @@ public class LedpQueueAssigner {
     
     @VisibleForTesting
     String getParentQueueFromFullQueueName(String fullQueueName) {
-        String[] queueNameSplits = fullQueueName.split(QUEUE_NAME_DELIMITER);
+        int leafIndex = fullQueueName.lastIndexOf(QUEUE_NAME_DELIMITER);
         
         // Defensive check
-        if (queueNameSplits.length <= 1) {
+        if (leafIndex <= 0) {
             return fullQueueName;
         } else {
-            // Size-2 == location of parentQueue split
-            return queueNameSplits[queueNameSplits.length - 2];
+            return fullQueueName.substring(0, leafIndex);
         }
     }
     
