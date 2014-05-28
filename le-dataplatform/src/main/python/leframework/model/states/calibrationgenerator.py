@@ -11,9 +11,6 @@ class CalibrationGenerator(State, JsonGenBase):
     @overrides(State)
     def execute(self):
         calibration = dict()
-        mediator = self.getMediator()
-        
-        
         self.calibration = calibration
     
     @overrides(JsonGenBase)

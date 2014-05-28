@@ -103,6 +103,7 @@ class ArgumentParser(object):
 
     def __populateSchemaWithMetadata(self, schema, parser):
         schema["featureIndex"] = parser.getFeatureTuple()
+        schema["features"] = self.metadataSchema["features"]
         schema["targetIndex"] = parser.getTargetIndex()
         schema["keyColIndex"] = parser.getKeyColumns()
      

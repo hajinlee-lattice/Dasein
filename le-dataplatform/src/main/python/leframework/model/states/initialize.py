@@ -11,3 +11,6 @@ class Initialize(State):
         mediator = self.getMediator()
         scored = mediator.clf.predict_proba(mediator.data[:, mediator.schema["featureIndex"]])
         mediator.scored = scored
+
+    def computeBands(self):
+        pass 
