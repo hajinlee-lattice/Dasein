@@ -1,6 +1,6 @@
 import os
 from unittest import TestCase
-from leframework import scoringengine as se
+#from leframework import scoringengine as se
 
 class ScoringEngineTest(TestCase):
     
