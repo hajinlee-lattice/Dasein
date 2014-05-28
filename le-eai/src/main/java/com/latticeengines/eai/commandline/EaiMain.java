@@ -7,6 +7,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class EaiMain extends Main {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(EaiMain.class);
     
     public EaiMain() {
