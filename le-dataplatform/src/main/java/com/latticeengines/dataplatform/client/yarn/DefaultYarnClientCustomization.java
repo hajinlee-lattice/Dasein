@@ -20,6 +20,7 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
 public class DefaultYarnClientCustomization implements YarnClientCustomization {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DefaultYarnClientCustomization.class);
 
     protected Configuration configuration;

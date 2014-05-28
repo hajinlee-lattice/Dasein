@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.dataplatform.Field;
 
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
 
     public PythonClientCustomization(Configuration configuration) {

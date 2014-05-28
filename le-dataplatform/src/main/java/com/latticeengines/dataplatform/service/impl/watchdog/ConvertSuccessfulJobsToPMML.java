@@ -8,8 +8,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-
 @Component("convertSuccessfulJobsToPMML")
 public class ConvertSuccessfulJobsToPMML extends WatchdogPlugin {
 
@@ -27,8 +25,6 @@ public class ConvertSuccessfulJobsToPMML extends WatchdogPlugin {
             if (!app.getApplicationType().equals("YARN")) {
                 continue;
             }
-            JobStatus status = getJobService().getJobStatus(app.getAppId());
-            String path = status.getResultDirectory();
         }
     }
 }
