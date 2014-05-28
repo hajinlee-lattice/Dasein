@@ -52,8 +52,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
     
     @Override
     public void run() {
-        try {
-            ServerSocket listener = new ServerSocket(port);
+        try (ServerSocket listener = new ServerSocket(port)) {
             while (true) {
                 Socket connectionSocket = listener.accept();
                 BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
@@ -74,7 +73,6 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
                 outToClient.writeBytes(retval.toString());
                 connectionSocket.close(); 
             }
-            
         } catch (Exception e) {
             throw new MetricsException(e);
         }

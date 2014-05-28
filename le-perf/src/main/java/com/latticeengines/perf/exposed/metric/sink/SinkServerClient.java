@@ -26,8 +26,7 @@ class SinkServerClient implements SinkOperations {
     }
     
     private String writeThenRead(String output) {
-        try {
-            Socket clientSocket = new Socket(host, port);
+        try (Socket clientSocket = new Socket(host, port)) {
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
             BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             outToServer.writeBytes(output + "\n");
@@ -39,7 +38,6 @@ class SinkServerClient implements SinkOperations {
         } catch (IOException e) {
             throw new MetricsException(e);
         }
-        
     }
 
     @Override

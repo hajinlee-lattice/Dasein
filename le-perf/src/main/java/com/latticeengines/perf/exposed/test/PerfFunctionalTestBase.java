@@ -15,6 +15,7 @@ import com.latticeengines.perf.exposed.metric.sink.SocketSink;
 
 
 public class PerfFunctionalTestBase {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PerfFunctionalTestBase.class);
     
     private SinkCollectionServer collectionServer = null;
