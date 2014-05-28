@@ -22,6 +22,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -44,17 +45,20 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private JobService jobService;
-    
+
     @Autowired
     private Configuration hadoopConfiguration;
-    
+
     @Autowired
     private JobNameService jobNameService;
+
+    @Value("${dataplatform.datasource.host}")
+    private String dbHost;
 
     private String inputDir = null;
     private String outputDir = null;
     private SamplingConfiguration samplingConfig = null;
-    
+
     @BeforeClass(groups = "functional")
     public void setupSamplingMRJob() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
@@ -62,7 +66,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         fs.delete(new Path("/eventTable"), true);
         fs.delete(new Path("/tmp/import"), true);
 
-        inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE").getPath();
+        inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE")
+                .getPath();
         outputDir = inputDir + "/samples";
         FileUtils.deleteDirectory(new File(outputDir));
         samplingConfig = new SamplingConfiguration();
@@ -75,19 +80,19 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         s1.setPercentage(60);
         samplingConfig.addSamplingElement(s0);
         samplingConfig.addSamplingElement(s1);
-        
+
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
-        
+
         File[] avroFiles = getAvroFilesForDir(inputDir);
         for (File avroFile : avroFiles) {
             copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), "/eventTable", false));
         }
-        
+
         inputDir = "/eventTable";
         outputDir = inputDir + "/samples";
         doCopy(fs, copyEntries);
     }
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         new File("/tmp/ledpjob-metrics.out").delete();
@@ -123,7 +128,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
         return appMasterProperties;
     }
-    
+
     private Properties createContainerPropertiesForYarnJob() {
         Properties containerProperties = new Properties();
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
@@ -131,7 +136,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
         return containerProperties;
     }
-    
+
     @Test(groups = "functional", enabled = true)
     public void testGetJobReportsAll() throws Exception {
         List<ApplicationReport> applications = jobService.getJobReportsAll();
@@ -139,11 +144,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", enabled = true)
-    public void testKillApplication() throws Exception {        
+    public void testKillApplication() throws Exception {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 
-        Properties containerProperties = createContainerPropertiesForYarnJob();     
-        
+        Properties containerProperties = createContainerPropertiesForYarnJob();
+
         ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
@@ -155,11 +160,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", enabled = true)
-    public void testGetJobReportByUser() throws Exception {        
+    public void testGetJobReportByUser() throws Exception {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 
         Properties containerProperties = createContainerPropertiesForYarnJob();
-        
+
         ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
@@ -170,7 +175,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertTrue(state.equals(YarnApplicationState.KILLED));
 
         ApplicationReport app = jobService.getJobReportById(applicationId);
-        
+
         List<ApplicationReport> reports = jobService.getJobReportByUser(app.getUser());
         int numJobs = reports.size();
         assertTrue(numJobs > 0);
@@ -184,21 +189,21 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", enabled = true)
-    public void testCheckJobName() throws Exception {        
+    public void testCheckJobName() throws Exception {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
         Properties containerProperties = createContainerPropertiesForYarnJob();
-        
+
         ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         waitState(applicationId, 10, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
         jobService.killJob(applicationId);
 
         ApplicationReport app = jobService.getJobReportById(applicationId);
-        assertEquals(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()), 
+        assertEquals(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
                 jobNameService.getCustomerFromJobName(app.getName()));
         assertTrue(jobNameService.getDateTimeFromJobName(app.getName()).isBeforeNow());
-    }    
-    
+    }
+
     @Test(groups = "functional", enabled = true)
     public void testSubmitPythonYarnJob() throws Exception {
         Classifier classifier = new Classifier();
@@ -254,41 +259,42 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         state = getState(applicationId);
         assertNotNull(state);
         assertTrue(state.equals(YarnApplicationState.FINISHED));
-        
-        List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, outputDir,
-                new HdfsFilenameFilter() {
 
-                    @Override
-                    public boolean accept(Path filename) {
-                        return filename.toString().endsWith(".avro");
-                    }
-            
+        List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, outputDir, new HdfsFilenameFilter() {
+
+            @Override
+            public boolean accept(Path filename) {
+                return filename.toString().endsWith(".avro");
+            }
+
         });
         assertEquals(4, files.size());
     }
 
     /**
-     * This test needs to have SQOOP_HOME set and the $HADOOP_HOME/etc/hadoop part of the classpath.
-     * src/test/resources/com/latticeengines/dataplatform/service/impl/mysql/create.sql should have been run
-     *   before executing this test.
+     * This test needs to have SQOOP_HOME set and the $HADOOP_HOME/etc/hadoop
+     * part of the classpath.
+     * src/test/resources/com/latticeengines/dataplatform/
+     * service/impl/mysql/create.sql should have been run before executing this
+     * test.
+     * 
      * @throws Exception
      */
     @Test(groups = "functional", enabled = true)
     public void testLoadData() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host("localhost").port(3306).db("dataplatformtest").user("root").password("welcome").type("MySQL");
+        builder.host(dbHost).port(3306).db("dataplatformtest").user("root").password("welcome").type("MySQL");
         DbCreds creds = new DbCreds(builder);
-        ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0", "Dell", 
-        		Arrays.<String>asList(new String[] { "ID" }));
+        ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0", "Dell",
+                Arrays.<String> asList(new String[] { "ID" }));
         YarnApplicationState state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
-        List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, "/tmp/import",
-                new HdfsFilenameFilter() {
+        List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, "/tmp/import", new HdfsFilenameFilter() {
 
-                    @Override
-                    public boolean accept(Path filename) {
-                        return filename.toString().endsWith(".avro");
-                    }
+            @Override
+            public boolean accept(Path filename) {
+                return filename.toString().endsWith(".avro");
+            }
 
         });
         assertEquals(4, files.size());
