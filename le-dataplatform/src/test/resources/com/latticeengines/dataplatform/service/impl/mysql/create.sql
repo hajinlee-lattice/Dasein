@@ -12,6 +12,18 @@ CREATE TABLE iris (
   PRIMARY KEY(ID)
 );
 
+CREATE TABLE iris_metadata (
+  `QueryForMacro` INT NOT NULL,
+  barecolumnname nvarchar(510),
+  barecolumnvalue nvarchar(510),
+  `Dtype` nvarchar(6),
+  `maxV` FLOAT,
+  `minV` FLOAT,
+  `EventTableName` nvarchar(11),
+  `TargetEventTableName` nvarchar(11)
+);
+
+
 LOAD DATA INFILE '/home/rgonzalez/workspace/ledp/le-dataplatform/src/test/resources/com/latticeengines/dataplatform/service/impl/nn_train.dat'
 INTO TABLE iris 
 FIELDS TERMINATED BY ',' 
