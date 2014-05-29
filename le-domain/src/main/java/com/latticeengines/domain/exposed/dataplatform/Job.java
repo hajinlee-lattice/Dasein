@@ -8,6 +8,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.YarnUtils;
 
 public class Job implements HasId<String> {
 
@@ -31,11 +32,7 @@ public class Job implements HasId<String> {
     
     @JsonIgnore
     public ApplicationId getAppId() {
-        if (id == null) {
-            return null;
-        }
-        String[] tokens = id.split("_");
-        return ApplicationId.newInstance(Long.parseLong(tokens[1]), Integer.parseInt(tokens[2]));
+        return YarnUtils.getApplicationIdFromString(id);
     }
 
     @JsonIgnore

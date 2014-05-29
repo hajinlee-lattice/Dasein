@@ -1,10 +1,12 @@
 package com.latticeengines.domain.exposed.dataplatform;
 
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+
 
 public class JobStatus implements HasId<String> {
 
     private String id;
-    private String state;
+    private FinalApplicationStatus state;
     private String resultDirectory;
 
     @Override
@@ -17,11 +19,11 @@ public class JobStatus implements HasId<String> {
         this.id = id;
     }
 
-    public String getState() {
+    public FinalApplicationStatus getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(FinalApplicationStatus state) {
         this.state = state;
     }
 
