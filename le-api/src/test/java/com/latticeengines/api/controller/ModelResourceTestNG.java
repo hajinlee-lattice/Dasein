@@ -44,6 +44,9 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
+    
+    @Value("${api.datasource.host}")
+    private String dbHost;
 
     private Model model;
 
@@ -149,7 +152,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
     public void load() throws Exception {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host("localhost") //
+        builder.host(dbHost) //
                 .port(3306) //
                 .db("dataplatformtest") //
                 .user("root") //
