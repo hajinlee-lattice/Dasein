@@ -13,6 +13,7 @@ public class Model implements HasName, HasId<String> {
     private String id;
     private String name;
     private String dataHdfsPath;
+    private String metadataHdfsPath;
     private String schemaHdfsPath;
     private String modelHdfsDir;
     private List<String> features;
@@ -21,8 +22,9 @@ public class Model implements HasName, HasId<String> {
     private ModelDefinition modelDefinition;
     private List<Job> jobs = new ArrayList<Job>();
     private String dataFormat;
-	private String customer;
-	private String table;
+    private String customer;
+    private String table;
+    private String metadataTable;
 
     @Override
     @JsonProperty("name")
@@ -64,6 +66,16 @@ public class Model implements HasName, HasId<String> {
     @JsonProperty("targets")
     public void setTargets(List<String> targets) {
         this.targets = targets;
+    }
+
+    @JsonProperty("metadata")
+    public String getMetadataHdfsPath() {
+        return metadataHdfsPath;
+    }
+
+    @JsonProperty("metadata")
+    public void setMetadataHdfsPath(String metadataHdfsPath) {
+        this.metadataHdfsPath = metadataHdfsPath;
     }
 
     @JsonProperty("data")
@@ -134,39 +146,49 @@ public class Model implements HasName, HasId<String> {
     public void setDataFormat(String dataFormat) {
         this.dataFormat = dataFormat;
     }
-    
+
     @JsonProperty("customer")
     public void setCustomer(String customer) {
-    	this.customer = customer;
+        this.customer = customer;
     }
-    
+
     public String getCustomer() {
-    	return customer;
+        return customer;
     }
 
     @JsonProperty("table")
-	public String getTable() {
-		return table;
-	}
+    public String getTable() {
+        return table;
+    }
 
     @JsonProperty("table")
-	public void setTable(String table) {
-		this.table = table;
-	}
-    
+    public void setTable(String table) {
+        this.table = table;
+    }
+
+    @JsonProperty("metadata_table")
+    public String getMetadataTable() {
+        return metadataTable;
+    }
+
+    @JsonProperty("metadata_table")
+    public void setMetadataTable(String metadataTable) {
+        this.metadataTable = metadataTable;
+    }
+
     @JsonIgnore
     public String getSampleHdfsPath() {
         return getDataHdfsPath() + "/samples";
     }
 
     @JsonProperty("key_columns")
-	public List<String> getKeyCols() {
-		return keyCols;
-	}
+    public List<String> getKeyCols() {
+        return keyCols;
+    }
 
     @JsonProperty("key_columns")
-	public void setKeyCols(List<String> keyCols) {
-		this.keyCols = keyCols;
-	}
+    public void setKeyCols(List<String> keyCols) {
+        this.keyCols = keyCols;
+    }
 
 }
