@@ -11,6 +11,7 @@ import org.apache.hadoop.yarn.api.records.Container;
 import org.apache.hadoop.yarn.api.records.ContainerExitStatus;
 import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
+import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.yarn.am.ContainerLauncherInterceptor;
 import org.springframework.yarn.am.StaticEventingAppmaster;
@@ -58,7 +59,16 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 
             @Override
             public void run() {
-                long appSubmissionTime = yarnService.getApplication(appId).getStartTime();
+            	AppInfo appInfo = yarnService.getApplication(appId);
+                String queue = appInfo.getQueue();
+                if (queue == null) {
+                    throw new LedpException(LedpCode.LEDP_12006);
+                }
+
+                ledpMetricsMgr.setQueue(queue);
+                ledpMetricsMgr.start();
+                
+                long appSubmissionTime = appInfo.getStartTime();
                 log.info("App start latency = " + (appStartTime - appSubmissionTime));
                 ledpMetricsMgr.setAppSubmissionTime(appSubmissionTime);
             }
@@ -75,29 +85,22 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
     public void setParameters(Properties parameters) {
         if (parameters == null) {
             return;
-        }
+        }            
         for (Map.Entry<Object, Object> parameter : parameters.entrySet()) {
             log.info("Key = " + parameter.getKey().toString() + " Value = " + parameter.getValue().toString());
         }
         super.setParameters(parameters);
-
+        
         String priority = parameters.getProperty(ContainerProperty.PRIORITY.name());
         if (priority == null) {
             throw new LedpException(LedpCode.LEDP_12000);
         }
-        String queue = parameters.getProperty(AppMasterProperty.QUEUE.name());
-        if (queue == null) {
-            throw new LedpException(LedpCode.LEDP_12006);
-        }
-
         String customer = parameters.getProperty(AppMasterProperty.CUSTOMER.name());
         if (customer == null) {
             throw new LedpException(LedpCode.LEDP_12007);
         }
         ledpMetricsMgr.setPriority(priority);
-        ledpMetricsMgr.setQueue(queue);
-        ledpMetricsMgr.setCustomer(customer);
-        ledpMetricsMgr.start();
+        ledpMetricsMgr.setCustomer(customer);;
     }
 
     @Override
@@ -126,17 +129,19 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
     }
 
     @Override
-    protected void onContainerCompleted(ContainerStatus status) {
+    protected void onContainerCompleted(ContainerStatus status) { 	
         if (status.getExitStatus() == ContainerExitStatus.SUCCESS) {
             log.info("Container id = " + status.getContainerId().toString() + " completed.");
             ledpMetricsMgr.setContainerEndTime(System.currentTimeMillis());
+            // immediately publish 
+            ledpMetricsMgr.publishMetricsNow();
         }
 
         if (status.getExitStatus() != ContainerExitStatus.PREEMPTED) {
 
         } else {
             log.info("Printing out the status to find the reason: " + status.getExitStatus());
-        }
+        }     
         super.onContainerCompleted(status);
     }
 
@@ -146,12 +151,15 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 
         if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
             ledpMetricsMgr.incrementNumberPreemptions();
+            // immediately publish 
+            ledpMetricsMgr.publishMetricsNow();
             try {
                 Thread.sleep(5000L);
                 log.info("Container " + containerId + " preempted. Reallocating.");
             } catch (InterruptedException e) {
                 log.error(e);
             }
+            
             getAllocator().allocateContainers(1);
             return true;
         }
@@ -174,7 +182,8 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         super.doStop();
         cleanupJobDir();
         ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
-        // ledpMetricsMgr.resetContainerElapsedTimeForGanglia();
+        // immediately publish 
+        ledpMetricsMgr.publishMetricsNow();
     }
 
 }

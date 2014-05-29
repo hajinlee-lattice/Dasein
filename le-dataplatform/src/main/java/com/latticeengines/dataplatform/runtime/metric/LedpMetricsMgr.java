@@ -160,6 +160,10 @@ public class LedpMetricsMgr {
         }.execute();
 
     }
+    
+    public void publishMetricsNow() {
+        ms.publishMetricsNow();
+    }
 
     private abstract class DoForAllMetrics {
         private List<LedpMetrics> ledpMetrics;
