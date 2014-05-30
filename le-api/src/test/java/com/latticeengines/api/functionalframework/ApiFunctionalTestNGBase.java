@@ -74,8 +74,6 @@ public class ApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
         @Override
         public void handleError(ClientHttpResponse response) throws IOException {
-            //String exceptionStack = StreamUtils.copyToString(response.getBody(), Charset.defaultCharset());
-            //System.out.println(exceptionStack);
         }
 
     }
