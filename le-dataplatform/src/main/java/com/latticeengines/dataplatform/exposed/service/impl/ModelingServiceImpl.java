@@ -1,15 +1,20 @@
 package com.latticeengines.dataplatform.exposed.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -105,6 +110,7 @@ public class ModelingServiceImpl implements ModelingService {
         model.setModelHdfsDir(customerBaseDir + "/" + model.getCustomer() + "/models/" + model.getTable() + "/"
                 + model.getId());
         model.setDataHdfsPath(customerBaseDir + "/" + model.getCustomer() + "/data/" + model.getTable());
+        model.setMetadataHdfsPath(model.getDataHdfsPath() + "/" + model.getMetadataTable());
     }
 
     private Classifier createClassifier(Model model, Algorithm algorithm) {
@@ -226,16 +232,91 @@ public class ModelingServiceImpl implements ModelingService {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    public List<String> getFeatures(Model model) {
+        if (model.getCustomer() == null) {
+            throw new LedpException(LedpCode.LEDP_15002);
+        }
+        setupModelProperties(model);
+        String dataSchemaPath = model.getDataHdfsPath();
+        String metadataPath = model.getMetadataHdfsPath();
+        Schema dataSchema = null;
+        List<GenericRecord> data = new ArrayList<GenericRecord>();
+        List<String> features = new ArrayList<String>();
+        try {
+            HdfsFilenameFilter filter = new HdfsFilenameFilter() {
+
+                @Override
+                public boolean accept(Path path) {
+                    return path.toString().endsWith(".avro");
+                }
+                
+            };
+            List<String> avroDataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dataSchemaPath, filter);
+            
+            if (avroDataFiles.size() == 0) {
+                throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
+            }
+            
+            dataSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDataFiles.get(0)));
+
+            List<String> avroMetadataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, metadataPath, filter);
+            
+            if (avroMetadataFiles.size() == 0) {
+                throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
+            }
+            
+            for (String avroMetadataFile : avroMetadataFiles) {
+                data.addAll(AvroUtils.getData(yarnConfiguration, new Path(avroMetadataFile)));
+            }
+            
+            Set<String> columnSet = new HashSet<String>();
+            Set<String> featureSet = new HashSet<String>();
+            for (Field field : dataSchema.getFields()) {
+                columnSet.add(field.getProp("columnName"));
+            }
+            for (GenericRecord datum : data) {
+                String name = datum.get("barecolumnname").toString();
+                String value = datum.get("columnvalue").toString();
+                String datatype = datum.get("Dtype").toString();
+                String featureName = name;
+                
+                if (featureName.equals("P1_Event")) {
+                    continue;
+                }
+                
+                if (datatype.equals("BND")) {
+                    featureName += "_Continuous";
+                } else {
+                    featureName += "_" + value;
+                }
+                if (columnSet.contains(featureName) && !featureSet.contains(featureName)) {
+                    features.add(featureName);
+                    featureSet.add(featureName);
+                }
+            }
+            
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_00002, e);
+        }
+        
+        return new ArrayList<String>(features);
+    }
 
     @Override
-    public ApplicationId loadData(LoadConfiguration config) {
+    public List<ApplicationId> loadData(LoadConfiguration config) {
         Model model = new Model();
         model.setCustomer(config.getCustomer());
         model.setTable(config.getTable());
+        model.setMetadataTable(config.getMetadataTable());
         setupModelProperties(model);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        return jobService.loadData(model.getTable(), model.getDataHdfsPath(),
+        ApplicationId dataLoadId = jobService.loadData(model.getTable(), model.getDataHdfsPath(),
                 config.getCreds(), assignedQueue, model.getCustomer(), config.getKeyCols());
+        ApplicationId metadataLoadId = jobService.loadData(model.getMetadataTable(), model.getMetadataHdfsPath(),
+                config.getCreds(), assignedQueue, model.getCustomer(), Arrays.<String>asList(new String[] { "QueryForMacro" }), 1);
+        return Arrays.<ApplicationId>asList(new ApplicationId[] { metadataLoadId, dataLoadId });
     }
 
     @Override

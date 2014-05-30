@@ -20,7 +20,9 @@ public interface ModelingService {
 
     ApplicationId createFeatures(Model model);
 
-    ApplicationId loadData(LoadConfiguration config);
+    List<ApplicationId> loadData(LoadConfiguration config);
     
     JobStatus getJobStatus(String applicationId);
+
+    List<String> getFeatures(Model model);
 }

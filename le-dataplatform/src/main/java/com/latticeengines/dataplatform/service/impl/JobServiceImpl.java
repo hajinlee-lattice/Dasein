@@ -65,6 +65,9 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Autowired
     private Configuration yarnConfiguration;
+    
+    @Autowired
+    private Configuration hadoopConfiguration;
 
     @Autowired
     private JobEntityMgr jobEntityMgr;
@@ -248,12 +251,20 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         return null;
     }
 
-	@Override
-	public ApplicationId loadData(String table, String targetDir,
-			DbCreds creds, String queue, String customer, List<String> splitCols) {
+    @Override
+    public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
+            List<String> splitCols) {
+        int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 4);
+        return loadData(table, targetDir, creds, queue, customer, splitCols, numDefaultMappers);
+    }
+
+    @Override
+    public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
+            List<String> splitCols, int numMappers) {
+        
         final String jobName = jobNameService.createJobName(customer, "data-load");
 
-        Future<Integer> future = loadAsync(table, targetDir, creds, queue, jobName, splitCols);
+        Future<Integer> future = loadAsync(table, targetDir, creds, queue, jobName, splitCols, numMappers);
 
         int tries = 0;
         ApplicationId appId = null;
@@ -285,7 +296,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     private Future<Integer> loadAsync(final String table, final String targetDir, final DbCreds creds,
-            final String queue, final String jobName, final List<String> splitCols) {
+            final String queue, final String jobName, final List<String> splitCols, final int numMappers) {
         return sqoopJobTaskExecutor.submit(new Callable<Integer>() {
 
             @Override
@@ -293,6 +304,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
                 return Sqoop.runTool(new String[] { //
                         "import", //
+                        "-Dmapreduce.map.cpu.vcores=" + numMappers , //
                         "-Dmapred.job.queue.name=" + queue, //
                         "--connect", //
                         metadataService.getJdbcConnectionUrl(creds), //

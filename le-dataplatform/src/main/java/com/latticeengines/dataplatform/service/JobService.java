@@ -18,21 +18,24 @@ public interface JobService {
 
     List<ApplicationReport> getJobReportByUser(String user);
 
-    ApplicationId submitYarnJob(String yarnClientName,
-            Properties appMasterProperties, Properties containerProperties);
+    ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties, Properties containerProperties);
 
     ApplicationId submitMRJob(String mrJobName, Properties properties);
 
     void killJob(ApplicationId appId);
-    
+
     ApplicationId submitJob(Job job);
 
     ApplicationId resubmitPreemptedJob(Job job);
-    
+
     void createHdfsDirectory(String directory, boolean errorIfExists);
 
-    ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer, List<String> splitCols);
+    ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
+            List<String> splitCols);
 
     JobStatus getJobStatus(String applicationId);
+
+    ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
+            List<String> splitCols, int numMappers);
 
 }

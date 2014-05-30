@@ -1,5 +1,6 @@
 package com.latticeengines.dataplatform.runtime.mapreduce;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
@@ -12,18 +13,21 @@ import org.apache.avro.mapreduce.AvroKeyOutputFormat;
 import org.apache.avro.mapreduce.AvroMultipleOutputs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
@@ -73,6 +77,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             String queueName = properties.getProperty(EventDataSamplingProperty.QUEUE.name());
             config.set("mapreduce.job.queuename", queueName);
             String inputDir = properties.getProperty(EventDataSamplingProperty.INPUT.name());
+            AvroKeyInputFormat.setInputPathFilter(job, IgnoreDirectoriesAndSupportOnlyAvroFilesFilter.class);
             AvroKeyInputFormat.addInputPath(job, new Path(inputDir));
             AvroKeyOutputFormat.setOutputPath(job,
                     new Path(properties.getProperty(EventDataSamplingProperty.OUTPUT.name())));
@@ -121,6 +126,47 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
     @Override
     public String getJobType() {
         return SAMPLE_JOB_TYPE;
+    }
+    
+    static class IgnoreDirectoriesAndSupportOnlyAvroFilesFilter extends Configured implements PathFilter {
+        private FileSystem fs;
+        
+        public IgnoreDirectoriesAndSupportOnlyAvroFilesFilter() {
+            super();
+        }
+
+        public IgnoreDirectoriesAndSupportOnlyAvroFilesFilter(Configuration config) {
+            super(config);
+        }
+
+        @Override
+        public boolean accept(Path path) {
+            try {
+                
+                if (this.getConf().get(FileInputFormat.INPUT_DIR).contains(path.toString())) {
+                    return true;
+                }
+                if (!fs.isDirectory(path) && path.toString().endsWith(".avro")) {
+                    return true;
+                }
+            } catch (IOException e) {
+                throw new LedpException(LedpCode.LEDP_00002, e);
+            }
+            return false;
+        }
+        
+        @Override
+        public void setConf(Configuration config) {
+            try {
+                if (config != null) {
+                    fs = FileSystem.get(config);
+                    super.setConf(config);
+                }
+                
+            } catch (IOException e) {
+                throw new LedpException(LedpCode.LEDP_00002, e);
+            }
+        }
     }
 
 }

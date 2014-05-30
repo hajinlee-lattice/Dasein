@@ -32,7 +32,9 @@ public enum LedpCode {
     LEDP_14002("Could not save configuration store {0}."), //
     // Modeling service: 15000-15999
     LEDP_15000("Could not create model schema."), //
-    LEDP_15001("Could not find sample file for prefix {0}.");
+    LEDP_15001("Could not find sample file for prefix {0}."), //
+    LEDP_15002("Customer must be set for a model."), //
+    LEDP_15003("There should at least be one file of type {0}.");
 
     private String message;
 
