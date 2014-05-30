@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.api.ThrottleSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
@@ -65,7 +66,7 @@ public class ModelResource {
     @RequestMapping(value = "/load", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
     @ResponseBody
     public AppSubmission loadData(@RequestBody LoadConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId>asList(modelingService.loadData(config)));
+        AppSubmission submission = new AppSubmission(modelingService.loadData(config));
         return submission;
     }
     
@@ -75,4 +76,9 @@ public class ModelResource {
         return modelingService.getJobStatus(applicationId);
     }
     
+    @RequestMapping(value = "/features", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
+    @ResponseBody
+    public StringList getFeatures(@RequestBody Model model) {
+        return new StringList(modelingService.getFeatures(model));
+    }
 }

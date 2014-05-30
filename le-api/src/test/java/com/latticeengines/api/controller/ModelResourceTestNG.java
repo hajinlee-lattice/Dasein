@@ -24,6 +24,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.api.ThrottleSubmission;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
@@ -162,14 +163,32 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         config.setCreds(creds);
         config.setCustomer("INTERNAL");
         config.setTable("iris");
+        config.setMetadataTable("iris_metadata");
         config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/load", config,
                 AppSubmission.class, new Object[] {});
-        ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
+        ApplicationId metadataLoadAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
+        YarnApplicationState state = platformTestBase.waitState(metadataLoadAppId, 120, TimeUnit.SECONDS,
                 YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
-        validateAppStatus(appId);
+        validateAppStatus(metadataLoadAppId);
+        ApplicationId dataLoadAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(1));
+        state = platformTestBase.waitState(dataLoadAppId, 120, TimeUnit.SECONDS,
+                YarnApplicationState.FINISHED);
+        assertEquals(state, YarnApplicationState.FINISHED);
+        validateAppStatus(dataLoadAppId);
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = { "load" })
+    public void getFeatures() {
+        Model modelForIris = new Model();
+        modelForIris.setCustomer("INTERNAL");
+        modelForIris.setTable("iris");
+        modelForIris.setMetadataTable("iris_metadata");
+        StringList list = restTemplate.postForObject("http://localhost:8080/rest/features", modelForIris,
+                StringList.class, new Object[] {});
+        // iris_metadata table is empty so no features will be returned from here
+        assertEquals(list.getElements().size(), 0);
     }
 
     private void validateAppStatus(ApplicationId appId) {
