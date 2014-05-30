@@ -1,7 +1,6 @@
 package com.latticeengines.api.functionalframework;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.YarnClient;
@@ -76,8 +74,8 @@ public class ApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
         @Override
         public void handleError(ClientHttpResponse response) throws IOException {
-            String exceptionStack = StreamUtils.copyToString(response.getBody(), Charset.defaultCharset());
-            System.out.println(exceptionStack);
+            //String exceptionStack = StreamUtils.copyToString(response.getBody(), Charset.defaultCharset());
+            //System.out.println(exceptionStack);
         }
 
     }

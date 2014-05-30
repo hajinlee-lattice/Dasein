@@ -2,13 +2,12 @@ package com.latticeengines.api.controller;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-import java.io.IOException;
-import java.io.StringWriter;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.io.IOUtils;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -18,11 +17,9 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.web.client.ResponseErrorHandler;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
@@ -38,6 +35,7 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 
 public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ModelResourceDeploymentTestNG.class);
 
     @Autowired
@@ -90,6 +88,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         model.setModelDefinition(modelDef);
         model.setName("Model Submission for Demo");
         model.setTable("iris");
+        model.setMetadataTable("iris_metadata");
         model.setFeatures(Arrays.<String> asList(new String[] { "SEPAL_LENGTH", //
                 "SEPAL_WIDTH", //
                 "PETAL_LENGTH", //
@@ -103,8 +102,6 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
     @Test(groups = "deployment")
     public void load() throws Exception {
         LoadConfiguration config = getLoadConfig();
-        ResponseErrorHandler handler = new DefaultResponseErrorHandler();
-        restTemplate.setErrorHandler(handler);
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -117,8 +114,6 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = { "load" })
     public void loadAgain() throws Exception {
         LoadConfiguration config = getLoadConfig();
-        ResponseErrorHandler handler = new DefaultResponseErrorHandler();
-        restTemplate.setErrorHandler(handler);
         Map<String, String> errorResult = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load",
                 config, HashMap.class, new Object[] {});
         assertEquals(errorResult.get("errorCode"), "LEDP_00002");
@@ -139,7 +134,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setCustomer("INTERNAL");
         config.setTable("iris");
         config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
-        config.setMetadataTable("METADATA_TABLE");
+        config.setMetadataTable("iris_metadata");
         return config;
     }
 
@@ -181,25 +176,6 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
             YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
                     YarnApplicationState.FINISHED);
             assertEquals(state, YarnApplicationState.FINISHED);
-        }
-    }
-
-    class DefaultResponseErrorHandler implements ResponseErrorHandler {
-
-        @Override
-        public boolean hasError(ClientHttpResponse response) throws IOException {
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public void handleError(ClientHttpResponse response) throws IOException {
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(response.getBody(), writer, "UTF-8");
-            String message = writer.toString();
-            log.info(message);
         }
     }
 
