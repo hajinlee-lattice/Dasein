@@ -20,6 +20,7 @@ public class Classifier implements HasName {
     private List<String> targets = new ArrayList<String>();
     private String dataFormat;
     private String algorithmProperties;
+    private String metadataHdfsPath;
 
     @Override
     @JsonProperty("name")
@@ -137,13 +138,25 @@ public class Classifier implements HasName {
     }
 
     @JsonProperty("key_columns")
-	public List<String> getKeyCols() {
-		return keyCols;
-	}
+    public List<String> getKeyCols() {
+        return keyCols;
+    }
 
     @JsonProperty("key_columns")
-	public void setKeyCols(List<String> keyCols) {
-		this.keyCols = keyCols;
-	}
+    public void setKeyCols(List<String> keyCols) {
+        this.keyCols = keyCols;
+    }
+
+    @JsonProperty("metadata")
+    public String getMetadataHdfsPath() {
+        return metadataHdfsPath;
+    }
+
+    @JsonProperty("metadata")
+    public void setMetadataHdfsPath(String dataProfileHdfsPath) {
+        this.metadataHdfsPath = dataProfileHdfsPath;
+    }
+    
+    
 
 }
