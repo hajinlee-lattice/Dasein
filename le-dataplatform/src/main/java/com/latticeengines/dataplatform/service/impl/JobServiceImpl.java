@@ -304,10 +304,11 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
                 return Sqoop.runTool(new String[] { //
                         "import", //
-                        "-Dmapreduce.map.cpu.vcores=" + numMappers , //
                         "-Dmapred.job.queue.name=" + queue, //
                         "--connect", //
                         metadataService.getJdbcConnectionUrl(creds), //
+                        "--m", //
+                        Integer.toString(numMappers), // 
                         "--table", //
                         table, //
                         "--as-avrodatafile",

@@ -81,6 +81,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         fs.delete(new Path("/user/s-analytics/customers/DELL"), true);
 
         fs.mkdirs(new Path("/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST"));
+        fs.mkdirs(new Path("/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST/EventMetadata"));
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
@@ -88,6 +89,14 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         File[] avroFiles = getAvroFilesForDir(inputDir);
         for (File avroFile : avroFiles) {
             copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), "/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST", false));
+        }
+
+        doCopy(fs, copyEntries);
+
+        inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/DELL_EVENT_TABLE_TEST/EventMetadata").getPath();
+        avroFiles = getAvroFilesForDir(inputDir);
+        for (File avroFile : avroFiles) {
+            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), "/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST/EventMetadata", false));
         }
 
         doCopy(fs, copyEntries);
@@ -119,8 +128,8 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         Model m = new Model();
         m.setModelDefinition(modelDef);
         m.setName("Model Submission1");
-
         m.setTable("DELL_EVENT_TABLE_TEST");
+        m.setMetadataTable("EventMetadata");
         m.setFeatures(Arrays.<String> asList(new String[] {
                 "Column5", //
                 "Column6", //

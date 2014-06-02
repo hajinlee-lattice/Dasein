@@ -17,6 +17,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.api.records.impl.pb.TestApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -378,6 +379,30 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return state;
     }
 
+    public FinalApplicationStatus waitForStatus(ApplicationId applicationId, long timeout, TimeUnit unit,
+            FinalApplicationStatus... applicationStatuses) throws Exception {
+        Assert.notNull(yarnClient, "Yarn client must be set");
+        Assert.notNull(applicationId, "ApplicationId must not be null");
+
+        FinalApplicationStatus status = null;
+        long end = System.currentTimeMillis() + unit.toMillis(timeout);
+
+        // break label for inner loop
+        done: do {
+            status = findStatus(yarnClient, applicationId);
+            if (status == null) {
+                break;
+            }
+            for (FinalApplicationStatus statusCheck : applicationStatuses) {
+                if (status.equals(statusCheck)) {
+                    break done;
+                }
+            }
+            Thread.sleep(1000);
+        } while (System.currentTimeMillis() < end);
+        return status;
+    }
+
     /**
      * Kill the application.
      * 
@@ -421,5 +446,16 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
             }
         }
         return state;
+    }
+
+    private FinalApplicationStatus findStatus(YarnClient client, ApplicationId applicationId) {
+        FinalApplicationStatus status = null;
+        for (ApplicationReport report : client.listApplications()) {
+            if (report.getApplicationId().toString().equals(applicationId.toString())) {
+                status = report.getFinalApplicationStatus();
+                break;
+            }
+        }
+        return status;
     }
 }

@@ -217,6 +217,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         classifier.setTrainingDataHdfsPath("/training/nn_train.dat");
         classifier.setTestDataHdfsPath("/test/nn_test.dat");
         classifier.setDataFormat("csv");
+        classifier.setMetadataHdfsPath("/datascientist1/EventMetadata");
 
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 

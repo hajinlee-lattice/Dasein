@@ -15,6 +15,8 @@ import java.util.regex.Pattern;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -47,6 +49,8 @@ import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {
+    
+    private static final Log log = LogFactory.getLog(ModelingServiceImpl.class);
     
     @Autowired
     private Configuration yarnConfiguration;
@@ -123,6 +127,7 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setPythonScriptHdfsPath(algorithm.getScript());
         classifier.setDataFormat(model.getDataFormat());
         classifier.setAlgorithmProperties(algorithm.getAlgorithmProperties());
+        classifier.setMetadataHdfsPath(getAvroMetadataPathInHdfs(model.getMetadataHdfsPath()));
 
         String samplePrefix = algorithm.getSampleName();
         String trainingPath = getAvroFileHdfsPath(samplePrefix + "Training", model.getSampleHdfsPath());
@@ -138,6 +143,29 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setTestDataHdfsPath(testPath);
         classifier.setSchemaHdfsPath(createSchemaInHdfs(trainingPath, model));
         return classifier;
+    }
+    
+    private String getAvroMetadataPathInHdfs(String path) {
+        List<String> files = new ArrayList<String>();
+        try {
+            files = HdfsUtils.getFilesForDir(yarnConfiguration, path, new HdfsFilenameFilter() {
+
+                @Override
+                public boolean accept(Path filename) {
+                    return filename.toString().endsWith(".avro");
+                }
+
+            });
+        } catch (Exception e) {
+            log.warn(e);
+        }
+        
+        if (files.size() != 1) {
+            log.warn("No metadata file found.");
+            return path;
+        }
+        String p = files.get(0);
+        return p.substring(p.indexOf(customerBaseDir));
     }
 
     private String createSchemaInHdfs(String avroFilePath, Model model) {

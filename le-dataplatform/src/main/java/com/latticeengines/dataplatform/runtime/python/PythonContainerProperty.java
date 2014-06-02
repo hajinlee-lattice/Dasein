@@ -7,6 +7,7 @@ public enum PythonContainerProperty {
     TEST, //
     SCHEMA, //
     METADATA, //
-    METADATA_CONTENTS
+    METADATA_CONTENTS, //
+    DATAPROFILE
 
 }

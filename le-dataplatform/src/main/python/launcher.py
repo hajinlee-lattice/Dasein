@@ -8,6 +8,7 @@ from leframework.argumentparser import ArgumentParser
 from leframework.model.statemachine import StateMachine
 from leframework.model.states.bucketgenerator import BucketGenerator
 from leframework.model.states.calibrationgenerator import CalibrationGenerator
+from leframework.model.states.columnmetadatagenerator import ColumnMetadataGenerator
 from leframework.model.states.finalize import Finalize
 from leframework.model.states.initialize import Initialize
 from leframework.model.states.modelgenerator import ModelGenerator
@@ -24,7 +25,7 @@ class Launcher(object):
     def __init__(self, modelFileName):
         self.parser = ArgumentParser(modelFileName)
     
-    def __stripPath(self, fileName):
+    def stripPath(self, fileName):
         return fileName[fileName.rfind('/')+1:len(fileName)]
 
     def __validateEnvVariable(self, variable):
@@ -55,6 +56,7 @@ class Launcher(object):
     def __setupJsonGenerationStateMachine(self):
         stateMachine = StateMachine()
         stateMachine.addState(Initialize())
+        stateMachine.addState(ColumnMetadataGenerator())
         stateMachine.addState(BucketGenerator())
         stateMachine.addState(CalibrationGenerator())
         stateMachine.addState(ModelGenerator())
@@ -70,9 +72,9 @@ class Launcher(object):
         self.__validateEnvAndParameters(schema)
     
         # Extract data and scripts for execution
-        training = parser.createList(self.__stripPath(schema["training_data"]))
-        test = parser.createList(self.__stripPath(schema["test_data"]))
-        script = self.__stripPath(schema["python_script"])
+        training = parser.createList(self.stripPath(schema["training_data"]))
+        test = parser.createList(self.stripPath(schema["test_data"]))
+        script = self.stripPath(schema["python_script"])
 
         # Create directory for model result
         modelLocalDir = os.getcwd() + "/results/"

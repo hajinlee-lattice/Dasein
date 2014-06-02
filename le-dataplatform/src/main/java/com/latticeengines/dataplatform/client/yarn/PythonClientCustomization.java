@@ -53,6 +53,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.TEST.name(), classifier.getTestDataHdfsPath());
             properties.put(PythonContainerProperty.PYTHONSCRIPT.name(), classifier.getPythonScriptHdfsPath());
             properties.put(PythonContainerProperty.SCHEMA.name(), classifier.getSchemaHdfsPath());
+            properties.put(PythonContainerProperty.DATAPROFILE.name(), classifier.getMetadataHdfsPath());
 
             File metadataFile = new File(dir  + "/metadata.json");
             FileUtils.writeStringToFile(metadataFile, metadata);

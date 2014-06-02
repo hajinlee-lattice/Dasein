@@ -1,44 +1,51 @@
 {
-  "name": "Model Submission for Demo",
-  "model_definition": {
-    "name": "Model Definition For Demo",
-    "algorithms": [
-      {
-        "name": "DT",
-        "priority": 1,
-        "script": "/demo/dt_train.py",
-        "container_properties": "MEMORY=3048",
-        "algorithm_properties": null
-      },
-      {
-        "name": "LR",
-        "priority": 0,
-        "script": "/demo/lr_train.py",
-        "container_properties": "MEMORY=3048",
-        "algorithm_properties": null
-      }
-    ]
-  },
-  "python_script": "lr_train.py",
-  "schema": "metadata.json",
-  "training_data": "s1Training-r-00000.avro",
-  "test_data": "s1Test-r-00000.avro",
-  "model_data_dir": "model",
+  "name": null,
   "features": [
-      "Column5",
-      "Column6",
-      "Column7",
-      "Column8",
-      "Column9",
-      "Column10"
+    "Activity_OpenEmail_cnt_Continuous",
+    "Alexa_MonthsSinceOnline_Continuous",
+    "AnnualRevenue_Continuous",
+    "BusinessAnnualSalesAbs_Continuous",
+    "BusinessVCFunded_False",
+    "BW_feeds_Continuous",
+    "BW_mapping_Continuous",
+    "BW_mx_Continuous",
+    "BW_ns_Continuous",
+    "CloudTechnologies_CommTech_One_Continuous",
+    "CloudTechnologies_EnterpriseContent_One_Continuous",
+    "Industry_Federal_Government",
+    "Industry_Financial_Services",
+    "Industry_Government_Federal",
+    "Industry_Government",
+    "Industry_Healthcare_Providers__Hospital",
+    "Industry_Manufacturing",
+    "Industry_Pharmaceuticals",
+    "Industry_Professional_Services",
+    "Industry_Retail",
+    "Industry_Shipping",
+    "Industry_Technology___Other",
+    "Industry_Technology___Software",
+    "JobsTrendString_Moderately_Hiring",
+    "LeadSource_3rd_Party_Database",
+    "LeadSource_Other",
+    "LeadSource_Referral",
+    "LeadSource_Tradeshow",
+    "LeadSource_Web",
+    "PD_DA_AwardCategory_INC5000",
+    "PD_DA_JobTitle__Technical",
+    "PD_DA_PrimarySIC1_3"
+  ],
+  "metadata": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/EventMetadata/part-m-00000.avro",
+  "schema": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/Q_EventTableDepivot.avsc",
+  "model_data_dir": "/user/s-analytics/customers/Nutanix/models/Q_EventTableDepivot/2ea40cb5-622e-4a86-b471-0cfc505962da",
+  "data_format": "avro",
+  "key_columns": [
+    "Nutanix_EventTable_Clean"
   ],
   "targets": [
-    "Event_Latitude_Customer"
+    "P1_Event_1"
   ],
-  "key_columns": [
-    "IDX"
-  ],
-  "data_format": "avro",
-  "queue": "Dell",
-  "algorithm_properties": "C=0.05 numestimators=10"
+  "algorithm_properties": "C=0.05 numestimators=10",
+  "training_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/samples/s0Training-r-00000.avro",
+  "test_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/samples/s0Test-r-00000.avro",
+  "python_script": "/app/dataplatform/scripts/algorithm/lr_train.py"
 }

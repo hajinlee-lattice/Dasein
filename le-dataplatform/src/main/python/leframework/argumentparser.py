@@ -17,11 +17,11 @@ class ArgumentParser(object):
     LE data platform.
     """
     def __init__(self, metadataFile):
-        metadataJson = open(self.__stripPath(metadataFile)).read()
+        metadataJson = open(self.stripPath(metadataFile)).read()
         logger.debug("JSON metadata %s" % metadataJson)
         self.metadataSchema = json.loads(metadataJson)
-        logger.debug("JSON data schema file name %s" % self.__stripPath(self.metadataSchema["schema"]))
-        dataSchemaJsonData = open(self.__stripPath(self.metadataSchema["schema"])).read()
+        logger.debug("JSON data schema file name %s" % self.stripPath(self.metadataSchema["schema"]))
+        dataSchemaJsonData = open(self.stripPath(self.metadataSchema["schema"])).read()
         logger.debug("JSON data schema %s" % dataSchemaJsonData)
         dataSchema = json.loads(dataSchemaJsonData)
         self.fields = dataSchema["fields"]
@@ -35,7 +35,7 @@ class ArgumentParser(object):
         except Exception:
             pass
         
-    def __stripPath(self, fileName):
+    def stripPath(self, fileName):
         return fileName[fileName.rfind('/')+1:len(fileName)]
     
     def __getField(self, index):
@@ -106,6 +106,7 @@ class ArgumentParser(object):
         schema["features"] = self.metadataSchema["features"]
         schema["targetIndex"] = parser.getTargetIndex()
         schema["keyColIndex"] = parser.getKeyColumns()
+        schema["metadata"] = self.stripPath(self.metadataSchema["metadata"])
      
     def isAvro(self):
         return self.metadataSchema["data_format"] == "avro"
