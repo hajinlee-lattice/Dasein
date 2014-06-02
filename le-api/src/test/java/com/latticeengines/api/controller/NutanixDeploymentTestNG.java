@@ -10,7 +10,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
@@ -86,9 +86,9 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(appId, 300, TimeUnit.SECONDS,
-                YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
+        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, 300, TimeUnit.SECONDS,
+                FinalApplicationStatus.SUCCEEDED);
+        assertEquals(state, FinalApplicationStatus.SUCCEEDED);
     }
 
     private LoadConfiguration getLoadConfig() {
@@ -128,9 +128,9 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
                 new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
-                YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
+        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, 120, TimeUnit.SECONDS,
+                FinalApplicationStatus.SUCCEEDED);
+        assertEquals(state, FinalApplicationStatus.SUCCEEDED);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "createSamples" })
@@ -144,9 +144,9 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         for (String appIdStr : submission.getApplicationIds()) {
             ApplicationId appId = platformTestBase.getApplicationId(appIdStr);
-            YarnApplicationState state = platformTestBase.waitState(appId, 240, TimeUnit.SECONDS,
-                    YarnApplicationState.FINISHED);
-            assertEquals(state, YarnApplicationState.FINISHED);
+            FinalApplicationStatus state = platformTestBase.waitForStatus(appId, 240, TimeUnit.SECONDS,
+                    FinalApplicationStatus.SUCCEEDED);
+            assertEquals(state, FinalApplicationStatus.SUCCEEDED);
         }
     }
 
