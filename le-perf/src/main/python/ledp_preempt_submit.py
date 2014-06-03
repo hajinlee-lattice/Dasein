@@ -25,7 +25,7 @@ def main():
     algorithms.append(rf)
     argslist = [jetty_host, "ModelSubmission", table, target, key_cols, algorithms, metadata_table]
     num_apps = len(customers)
-    MAX_THREADS = (num_apps + 1) * 2
+    MAX_THREADS = num_apps + 1
     
     parallel_run(submit_model, argslist, MAX_THREADS, False)
     
