@@ -24,6 +24,7 @@ class SummaryGenerator(State, JsonGenBase):
                 continue
             predictors.append(self.generatePredictors(key, value, eventData))
         
+        predictors = sorted(predictors, key = lambda x: [x["Name"]])
         self.summary["Predictors"] = predictors
     
     @overrides(JsonGenBase)
