@@ -23,13 +23,21 @@ class Initialize(State):
     
     def retrieveMetadata(self, mediator):
         metadata = dict()
+        realColNameToRecord = dict()
         with open(mediator.schema["metadata"]) as fp:
             reader = avro.reader(fp)
             for record in reader:
                 colname = record["barecolumnname"]
+                sqlcolname = ""
+                if record["Dtype"] == "BND":
+                    sqlcolname = colname + "_Continuous"
+                else:
+                    sqlcolname = colname + "_" + record["columnvalue"]
                 
                 if colname in metadata:
                     metadata[colname].append(record)
                 else:
                     metadata[colname] = [record]
-        return metadata
+                
+                realColNameToRecord[sqlcolname] = [record]
+        return (metadata, realColNameToRecord)

@@ -18,7 +18,7 @@ def debugWrite(logString):
     logger.info(logString)
 
 def decodeDataValue(serializedValueAndType):
-    serializedType, sep, serializedValue = serializedValueAndType.partition('|')
+    serializedValue = serializedValueAndType.partition('|')[2]
     if len(serializedValue) > 0:
         serializedValue = serializedValue[1:-1]
     else:

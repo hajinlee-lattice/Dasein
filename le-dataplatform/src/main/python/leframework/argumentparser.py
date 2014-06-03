@@ -58,6 +58,7 @@ class ArgumentParser(object):
         l = 0
         included = set()
         self.featureIndex = set()
+        self.nameToFeatureIndex = dict()
         self.keyColIndex = set()
         for f in self.fields:
             fType = f["type"][0]
@@ -69,6 +70,7 @@ class ArgumentParser(object):
                     self.targetIndex = k
                 if fName in self.features:
                     self.featureIndex.add(k)
+                    self.nameToFeatureIndex[fName] = k
                 if fName in self.keyCols:
                     self.keyColIndex.add(k)
                 k = k+1
@@ -106,10 +108,15 @@ class ArgumentParser(object):
         schema["features"] = self.metadataSchema["features"]
         schema["targetIndex"] = parser.getTargetIndex()
         schema["keyColIndex"] = parser.getKeyColumns()
+        schema["nameToFeatureIndex"] = parser.getNameToFeatureIndex()
         schema["metadata"] = self.stripPath(self.metadataSchema["metadata"])
+        schema["targets"] = self.targets
      
     def isAvro(self):
         return self.metadataSchema["data_format"] == "avro"
+    
+    def getNameToFeatureIndex(self):
+        return self.nameToFeatureIndex
     
     def getSchema(self):
         return self.metadataSchema

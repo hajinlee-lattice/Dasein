@@ -1,4 +1,6 @@
 from collections import OrderedDict
+from sklearn import metrics
+from sklearn.metrics.cluster.supervised import entropy
 import uuid
 
 from leframework.codestyle import overrides
@@ -16,11 +18,11 @@ class SummaryGenerator(State, JsonGenBase):
         mediator = self.mediator
         self.summary = dict()
         predictors = []
-        
-        for key, value in mediator.metadata.iteritems():
-            if key == "P1_Event":
+        eventData = mediator.data[:, mediator.schema["targetIndex"]]
+        for key, value in mediator.metadata[0].iteritems():
+            if key + "_1" in mediator.schema["targets"]:
                 continue
-            predictors.append(self.generatePredictors(key, value))
+            predictors.append(self.generatePredictors(key, value, eventData))
         
         self.summary["Predictors"] = predictors
     
@@ -32,17 +34,29 @@ class SummaryGenerator(State, JsonGenBase):
     def getJsonProperty(self):
         return self.summary
     
-    def generatePredictors(self, colname, metadata):
+    def __getCountWhereEventIsOne(self, predictorData, eventData):
+        counter = lambda x,y: 1 if x == 1 and y == 1 else 0
+        return sum(map(counter, predictorData, eventData))
+    
+    def generatePredictors(self, colname, metadata, eventData):
         elements = []
-        
+
+        attrLevelUncertaintyCoeff = 0
         for record in metadata:
+            predictorData = self.__getPredictorVector(colname, record)
             element = OrderedDict()
-            element["CorrelationSign"] = 1
-            element["Count"] = 0
+            
+            countForBandValue = sum(predictorData)
+            countForBandValueAndEventIsOne = self.__getCountWhereEventIsOne(predictorData, eventData)
+            lift = float(countForBandValueAndEventIsOne)/float(countForBandValue)
+            avgLift = float(sum(eventData))/float(len(eventData))
+            element["CorrelationSign"] = 1 if lift > avgLift else -1
+            element["Count"] = countForBandValue
             if record["Dtype"] == "BND":
                 element["LowerInclusive"] = record["minV"]
             element["Name"] = str(uuid.uuid4())
-            element["UncertaintyCoefficient"] = 0
+            element["UncertaintyCoefficient"] = self.__uncertaintyCoefficientXgivenY(eventData, predictorData)
+            attrLevelUncertaintyCoeff += element["UncertaintyCoefficient"]
             if record["Dtype"] == "BND":
                 element["UpperExclusive"] = record["maxV"]
             if record["Dtype"] == "BND":
@@ -54,5 +68,28 @@ class SummaryGenerator(State, JsonGenBase):
         predictor = OrderedDict()
         predictor["Elements"] = elements
         predictor["Name"] = colname
-        predictor["UncertaintyCoefficient"] = 0
+        predictor["UncertaintyCoefficient"] = attrLevelUncertaintyCoeff
         return predictor
+    
+    def __getPredictorVector(self, colname, record):
+        converter = None
+        try:            
+            if record["Dtype"] == "BND":
+                columnData = self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][colname + "_Continuous"]]
+                minV = record["minV"]
+                maxV = record["maxV"]
+                converter = lambda x: 1 if x >= minV and x < maxV else 0
+                return map(converter, columnData)
+            else:
+                return self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][colname + "_" + record["columnvalue"]]]
+        except:
+            return self.mediator.data[:, 1]
+        
+        
+    def __uncertaintyCoefficientXgivenY(self, x, y):
+        '''
+          Given y, what parts of x can we predict.
+          In this case, x should be the event column, while y should be the predictor column-value
+        '''
+        return metrics.mutual_info_score(x, y)/entropy(x) 
+
