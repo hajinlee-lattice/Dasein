@@ -7,15 +7,13 @@ from ledp_variables import *
 from threading import Thread
 import time, threading
 
-def parallel_run(job_type, argslist):
+def parallel_run(job_type, argslist, max_threads, join):
     threadlist = []
-    num_apps = len(customers)
-    MAX_THREADS = num_apps + 1
     print "Num of threads running now is " + str(threading.activeCount())
     for customer in customers:
         argslist.append(customer)
         while True:
-            if threading.activeCount() < MAX_THREADS:
+            if threading.activeCount() < max_threads:
                 t = Thread(target=job_type, args=tuple(argslist))
                 t.setDaemon(True)
                 t.start()
@@ -26,5 +24,6 @@ def parallel_run(job_type, argslist):
         argslist.remove(customer)
      #   time.sleep(0.6)
     print "Num of threads running now is " + str(threading.activeCount())
-#    for t in threadlist:
-#        t.join()
+    if join:
+        for t in threadlist:
+            t.join()

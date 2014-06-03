@@ -23,17 +23,23 @@ def main():
     rf = Algorithm("rf", 1, 64, 1)
     algorithms = []
     algorithms.append(rf)
-    argslist = [jetty_host, "ModelSubmission", table, features, target, key_cols, algorithms]
-    parallel_run(submit_model, argslist)
+    argslist = [jetty_host, "ModelSubmission", table, target, key_cols, algorithms, metadata_table]
+    num_apps = len(customers)
+    MAX_THREADS = (num_apps + 1) * 2
+    
+    parallel_run(submit_model, argslist, MAX_THREADS, False)
     
     rf = Algorithm("rf", 1, 64, 0)
     algorithms = []
     algorithms.append(rf)
-    argslist = [jetty_host, "ModelSubmission", table, features, target, key_cols, algorithms]
-    parallel_run(submit_model, argslist)
-
-    while(get_num_apps(yarn_host, "finished") - start_num_finished_apps - len(customers) * 2 != 0):
+    argslist = [jetty_host, "ModelSubmission", table, target, key_cols, algorithms, metadata_table]
+    parallel_run(submit_model, argslist, MAX_THREADS, True)
+    
+    apps_running = 1
+    while(apps_running != 0):
         time.sleep(1)
+        apps_running = get_num_apps(yarn_host, "finished") - start_num_finished_apps - len(customers) * 2
+        print "Still waiting for " + str(apps_running) + " number of jobs to complete!"
         
     elapsed_time = time.time() * 1000 - start
     print "Elapsed time is " + str(elapsed_time)

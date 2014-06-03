@@ -16,8 +16,11 @@ def main():
     rf = Algorithm("rf", 1, 64, 0)
     algorithms = [lr, dt, rf]
     
-    argslist = [jetty_host, "ModelSubmission", table, features, target, key_cols, algorithms]
-    parallel_run(submit_model, argslist)
+    argslist = [jetty_host, "ModelSubmission", table, target, key_cols, algorithms, metadata_table]
+    num_apps = len(customers)
+    MAX_THREADS = (num_apps + 1) * 2
+    
+    parallel_run(submit_model, argslist, MAX_THREADS, True)
 
 if __name__ == '__main__':
     main()

@@ -3,15 +3,19 @@ package com.latticeengines.perf.exposed.cli;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
-
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
@@ -30,7 +34,7 @@ public class ModelResourceCLI {
     private static List<List<String>> algList = new ArrayList<List<String>>();
     private static RestTemplate restTemplate = new RestTemplate();
     private static String DELIMETER = ",";
-    private static String restHost = "localhost";
+    private static String restEndpointHost = "localhost";
 
     public static void main(String[] args) throws IOException, Exception {
         if (args.length > 0)
@@ -62,16 +66,16 @@ public class ModelResourceCLI {
         }
         preProcessOptions(command);
         if (command[1].equalsIgnoreCase("load")) {
-            restHost = command[2];
+            restEndpointHost = command[2];
             loadData();
         } else if (command[1].equalsIgnoreCase("createsamples")) {
-            restHost = command[2];
+            restEndpointHost = command[2];
             createSamples();
         } else if (command[1].equalsIgnoreCase("submitmodel")) {
-            restHost = command[3];
+            restEndpointHost = command[3];
             submitModel(command[2]);
         } else if (command[1].equalsIgnoreCase("getfinishedappsnum")) {
-            restHost = command[2];
+            restEndpointHost = command[2];
             System.out.println(getAppsNum());
         } else {
             throw new Exception("Unsupported command. Please check the user doc.");
@@ -83,9 +87,9 @@ public class ModelResourceCLI {
         ModelDefinition modelDef = new ModelDefinition();
         String customer = optionMap.get("c");
         String table = optionMap.get("t");
-        String features = optionMap.get("f");
         String targets = optionMap.get("T");
         String keyColumns = optionMap.get("kc");
+        String metadataTable = optionMap.get("mt");
         modelDef.setName("Model Definition");
         List<Algorithm> algorithms = new ArrayList<Algorithm>();
         for (List<String> opList : algList) {
@@ -104,6 +108,7 @@ public class ModelResourceCLI {
             } else if (name.equalsIgnoreCase("rf")) {
                 RandomForestAlgorithm rfa = new RandomForestAlgorithm();
                 configAlgorithm(rfa, virtualCores, memory, priority);
+                rfa.setAlgorithmProperties("criterion=gini n_estimators=10 n_jobs=4 min_samples_split=25 min_samples_leaf=10 bootstrap=True");
                 algorithms.add(rfa);
             }
         }
@@ -111,16 +116,24 @@ public class ModelResourceCLI {
         model.setModelDefinition(modelDef);
         model.setName(modelName);
         model.setTable(table);
-        model.setFeatures(Arrays.<String> asList(features.split(DELIMETER)));
-        model.setTargets(Arrays.<String> asList(targets.split(DELIMETER)));
+        model.setMetadataTable(metadataTable);
+        // Currently we only need one target
         model.setCustomer(customer);
         model.setDataFormat("avro");
         model.setKeyCols(Arrays.<String> asList(keyColumns.split(DELIMETER)));
-        AppSubmission submission = restTemplate.postForObject("http://" + restHost + ":8080/rest/submit", model,
-                AppSubmission.class, new Object[] {});
+        model.setTargets(Arrays.<String> asList(targets.split(DELIMETER)));
+        model.setFeatures(getFeatures(model, targets.split(DELIMETER)[0]));
+        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + ":8080/rest/submit",
+                model, AppSubmission.class, new Object[] {});
         optionMap.clear();
         algList.clear();
         System.out.println(submission.getApplicationIds());
+    }
+
+    private static List<String> getFeatures(Model model, String target) {
+        StringList features = restTemplate.postForObject("http://" + restEndpointHost + ":8080/rest/features", model,
+                StringList.class, new Object[] {});
+        return features.getElements();
     }
 
     private static void configAlgorithm(AlgorithmBase alg, String virtualCores, String memory, String priority) {
@@ -157,13 +170,15 @@ public class ModelResourceCLI {
         se.setName("all");
         se.setPercentage(100);
         samplingConfig.addSamplingElement(se);
-        AppSubmission submission = restTemplate.postForObject("http://" + restHost + ":8080/rest/createSamples",
-                samplingConfig, AppSubmission.class, new Object[] {});
+        AppSubmission submission = restTemplate.postForObject(
+                "http://" + restEndpointHost + ":8080/rest/createSamples", samplingConfig, AppSubmission.class,
+                new Object[] {});
         optionMap.clear();
         System.out.println(submission.getApplicationIds());
     }
 
     private static void loadData() throws Exception {
+        restTemplate.setErrorHandler(new DefaultResponseErrorHandler());
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
         String host = optionMap.get("H");
@@ -174,6 +189,7 @@ public class ModelResourceCLI {
         String customer = optionMap.get("c");
         String table = optionMap.get("t");
         String keyCol = optionMap.get("kc");
+        String metadataTable = optionMap.get("mt");
         if (host == null || port == null || db == null || user == null || passwd == null || customer == null
                 || table == null || keyCol == null) {
             throw new Exception("Missing argument!");
@@ -182,9 +198,11 @@ public class ModelResourceCLI {
         DbCreds dc = new DbCreds(builder);
         config.setCustomer(customer);
         config.setTable(table);
+        config.setMetadataTable(metadataTable);
+
         config.setKeyCols(Arrays.<String> asList(keyCol.split(DELIMETER)));
         config.setCreds(dc);
-        AppSubmission submission = restTemplate.postForObject("http://" + restHost + ":8080/rest/load", config,
+        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + ":8080/rest/load", config,
                 AppSubmission.class, new Object[] {});
         optionMap.clear();
         System.out.println(submission.getApplicationIds());
@@ -198,7 +216,7 @@ public class ModelResourceCLI {
     }
 
     private static AppsInfo getAppsInfo(String states) {
-        return restTemplate.getForObject("http://" + restHost + ":8088/ws/v1/cluster/apps?states=" + states,
+        return restTemplate.getForObject("http://" + restEndpointHost + ":8088/ws/v1/cluster/apps?states=" + states,
                 AppsInfo.class);
     }
 
@@ -254,5 +272,23 @@ public class ModelResourceCLI {
                 }
             }
         }
+    }
+
+    static class DefaultResponseErrorHandler implements ResponseErrorHandler {
+
+        @Override
+        public boolean hasError(ClientHttpResponse response) throws IOException {
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public void handleError(ClientHttpResponse response) throws IOException {
+            String exceptionStack = StreamUtils.copyToString(response.getBody(), Charset.defaultCharset());
+            System.out.println(exceptionStack);
+        }
+
     }
 }

@@ -7,12 +7,12 @@ from dbcreds import DBCreds
 
 customers = []
 for i in range(0, 75):
-    customers.append("c"+str(i))
+    customers.append("c" + str(i))
 jetty_host = "bodcprodvutl158.prod.lattice.local"
 yarn_host = "bodcprodvhdp196.prod.lattice.local"
-table = "iris"
-db_creds = DBCreds("bodcprodhdp210.prod.lattice.local", 3306, "dataplatformtest", "root", "welcome")
+table = "Q_EventTableDepivot"
+db_creds = DBCreds("10.41.1.250", 1433, "dataplatformtest", "root", "welcome")
+metadata_table = "EventMetadata"
 training_percentage = 80
-key_cols = "ID"
-features = "SEPAL_LENGTH,SEPAL_WIDTH,PETAL_LENGTH,PETAL_WIDTH"
-target = "CATEGORY"
+key_cols = "Nutanix_EventTable_Clean"
+target = "P1_Event_1"
