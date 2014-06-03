@@ -86,7 +86,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, 300, TimeUnit.SECONDS,
+        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, 360, TimeUnit.SECONDS,
                 FinalApplicationStatus.SUCCEEDED);
         assertEquals(state, FinalApplicationStatus.SUCCEEDED);
     }
