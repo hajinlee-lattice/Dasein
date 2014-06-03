@@ -19,15 +19,16 @@ import com.latticeengines.dataplatform.exposed.exception.LedpException;
 @ControllerAdvice
 public class LedpApiExceptionHandler {
     private static final Log log = LogFactory.getLog(LedpApiExceptionHandler.class);
+
     public LedpApiExceptionHandler() {
     }
-    
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(LedpException e) {
         MappingJacksonJsonView jsonView = new MappingJacksonJsonView();
         String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : "";
-        log.error(stackTrace);
+        log.error(e.getStackTrace().toString());
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", e.getCode().name(), //
                 "errorMsg", e.getMessage() + "\n" + stackTrace));
 
@@ -38,7 +39,7 @@ public class LedpApiExceptionHandler {
     public ModelAndView handleException(Exception e) {
         MappingJacksonJsonView jsonView = new MappingJacksonJsonView();
         String stackTrace = ExceptionUtils.getFullStackTrace(e);
-        log.error(stackTrace);
+        log.error(e.getStackTrace().toString());
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_00002.name(), //
                 "errorMsg", stackTrace));
     }
