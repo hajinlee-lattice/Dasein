@@ -48,6 +48,10 @@ class SummaryGenerator(State, JsonGenBase):
             element = OrderedDict()
             
             countForBandValue = sum(predictorData)
+            
+            # If a band value is not found, skip that predictor value
+            if countForBandValue == 0:
+                continue
             countForBandValueAndEventIsOne = self.__getCountWhereEventIsOne(predictorData, eventData)
             lift = float(countForBandValueAndEventIsOne)/float(countForBandValue)
             avgLift = float(sum(eventData))/float(len(eventData))
