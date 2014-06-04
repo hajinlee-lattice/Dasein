@@ -128,7 +128,7 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
         LoadConfiguration loadConfig = getLoadConfig();
         List<ApplicationId> loadIds = modelingService.loadData(loadConfig);
         ApplicationId appId = loadIds.get(0);
-        FinalApplicationStatus status = waitForStatus(appId, 300, TimeUnit.SECONDS,
+        FinalApplicationStatus status = waitForStatus(appId, 360, TimeUnit.SECONDS,
                 FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
@@ -152,7 +152,7 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
         ApplicationId appId = modelingService.createSamples(samplingConfig);
-        FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS,
+        FinalApplicationStatus status = waitForStatus(appId, 360, TimeUnit.SECONDS,
                 FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }

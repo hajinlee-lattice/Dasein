@@ -124,7 +124,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
+        YarnApplicationState state = platformTestBase.waitState(appId, 300, TimeUnit.SECONDS,
                 YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
         validateAppStatus(appId);

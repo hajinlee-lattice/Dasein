@@ -164,7 +164,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
         ApplicationId appId = modelingService.createSamples(samplingConfig);
-        YarnApplicationState state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        YarnApplicationState state = waitState(appId, 360, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
     }
     

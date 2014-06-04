@@ -59,7 +59,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         AppInfo appInfo = yarnService.getApplication(applicationId.toString());
         assertNotNull(appInfo);
         
-        YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        YarnApplicationState state = waitState(applicationId, 90, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
         assertEquals(YarnApplicationState.FINISHED, state);
     }
     
