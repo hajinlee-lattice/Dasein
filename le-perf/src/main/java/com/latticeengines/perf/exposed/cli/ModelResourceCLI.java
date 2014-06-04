@@ -108,7 +108,7 @@ public class ModelResourceCLI {
             } else if (name.equalsIgnoreCase("rf")) {
                 RandomForestAlgorithm rfa = new RandomForestAlgorithm();
                 configAlgorithm(rfa, virtualCores, memory, priority);
-                rfa.setAlgorithmProperties("criterion=gini n_estimators=10 n_jobs=4 min_samples_split=25 min_samples_leaf=10 bootstrap=True");
+                rfa.setAlgorithmProperties("criterion=gini n_estimators=100 n_jobs=4 min_samples_split=25 min_samples_leaf=10 bootstrap=True");
                 algorithms.add(rfa);
             }
         }

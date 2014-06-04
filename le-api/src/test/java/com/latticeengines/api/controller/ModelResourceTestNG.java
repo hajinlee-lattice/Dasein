@@ -90,6 +90,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         model.setModelDefinition(modelDef);
         model.setName("Model Submission for Demo");
         model.setTable("DELL_EVENT_TABLE_TEST");
+        model.setMetadataTable("EventMetadata");
         model.setFeatures(Arrays.<String> asList(new String[] { "Column5", //
                 "Column6", //
                 "Column7", //
