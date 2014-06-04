@@ -152,7 +152,7 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
         ApplicationId appId = modelingService.createSamples(samplingConfig);
-        FinalApplicationStatus status = waitForStatus(appId, 360, TimeUnit.SECONDS,
+        FinalApplicationStatus status = waitForStatus(appId, 240, TimeUnit.SECONDS,
                 FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }

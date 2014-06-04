@@ -22,22 +22,22 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-api-context.xml" })
-public class ApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
 
     protected RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
     private Configuration yarnConfiguration;
-    
-    @Autowired 
+
+    @Autowired
     private YarnClient defaultYarnClient;
-    
+
     @Autowired
     private JobEntityMgrImpl jobEntityMgr;
-    
+
     @Autowired
     private ModelEntityMgrImpl modelEntityMgr;
-    
+
     @Autowired
     protected ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
 
@@ -50,7 +50,7 @@ public class ApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
-        
+
         platformTestBase.setYarnClient(defaultYarnClient);
         platformTestBase.setJobEntityMgr(jobEntityMgr);
         platformTestBase.setModelEntityMgr(modelEntityMgr);
@@ -61,7 +61,7 @@ public class ApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
         platformTestBase.setupRunEnvironment();
     }
-    
+
     static class DefaultResponseErrorHandler implements ResponseErrorHandler {
 
         @Override

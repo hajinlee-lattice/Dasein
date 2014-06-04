@@ -14,6 +14,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -105,9 +106,9 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
-                YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
+        FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS,
+                FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
     @SuppressWarnings("unchecked")
@@ -160,9 +161,9 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
-                YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
+        FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS,
+                FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "createSamples" })
@@ -173,9 +174,9 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         for (String appIdStr : submission.getApplicationIds()) {
             ApplicationId appId = platformTestBase.getApplicationId(appIdStr);
-            YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
-                    YarnApplicationState.FINISHED);
-            assertEquals(state, YarnApplicationState.FINISHED);
+            FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS,
+                    FinalApplicationStatus.SUCCEEDED);
+            assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         }
     }
 

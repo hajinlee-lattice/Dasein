@@ -128,7 +128,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
                 new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, 360, TimeUnit.SECONDS,
+        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, 240, TimeUnit.SECONDS,
                 FinalApplicationStatus.SUCCEEDED);
         assertEquals(state, FinalApplicationStatus.SUCCEEDED);
     }

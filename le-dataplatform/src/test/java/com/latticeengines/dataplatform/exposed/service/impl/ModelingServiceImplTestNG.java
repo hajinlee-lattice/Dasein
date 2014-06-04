@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
@@ -44,7 +45,6 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgo
 import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
 
-
 public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
@@ -55,18 +55,18 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     @Autowired
     private ModelingService modelingService;
-    
+
     @Autowired
     private JobEntityMgrImpl jobEntityMgr;
 
     @Autowired
     private ModelEntityMgrImpl modelEntityMgr;
-    
+
     @Autowired
     private ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
-    
+
     private Model model = null;
-    
+
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
         throttleConfigurationEntityMgr.deleteStoreFile();
@@ -75,7 +75,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         modelEntityMgr.deleteStoreFile();
-        
+
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
         fs.delete(new Path("/user/s-analytics/customers/DELL"), true);
@@ -85,18 +85,22 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
-        String inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/DELL_EVENT_TABLE_TEST").getPath();
+        String inputDir = ClassLoader.getSystemResource(
+                "com/latticeengines/dataplatform/exposed/service/impl/DELL_EVENT_TABLE_TEST").getPath();
         File[] avroFiles = getAvroFilesForDir(inputDir);
         for (File avroFile : avroFiles) {
-            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), "/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST", false));
+            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(),
+                    "/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST", false));
         }
 
         doCopy(fs, copyEntries);
 
-        inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/exposed/service/impl/DELL_EVENT_TABLE_TEST/EventMetadata").getPath();
+        inputDir = ClassLoader.getSystemResource(
+                "com/latticeengines/dataplatform/exposed/service/impl/DELL_EVENT_TABLE_TEST/EventMetadata").getPath();
         avroFiles = getAvroFilesForDir(inputDir);
         for (File avroFile : avroFiles) {
-            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), "/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST/EventMetadata", false));
+            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(),
+                    "/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST/EventMetadata", false));
         }
 
         doCopy(fs, copyEntries);
@@ -118,20 +122,19 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model1");
-        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm, randomForestAlgorithm,
-                logisticRegressionAlgorithm }));
+        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
+                randomForestAlgorithm, logisticRegressionAlgorithm }));
 
         model = createModel(modelDef);
     }
-    
+
     private Model createModel(ModelDefinition modelDef) {
         Model m = new Model();
         m.setModelDefinition(modelDef);
         m.setName("Model Submission1");
         m.setTable("DELL_EVENT_TABLE_TEST");
         m.setMetadataTable("EventMetadata");
-        m.setFeatures(Arrays.<String> asList(new String[] {
-                "Column5", //
+        m.setFeatures(Arrays.<String> asList(new String[] { "Column5", //
                 "Column6", //
                 "Column7", //
                 "Column8", //
@@ -141,7 +144,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         m.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
         m.setCustomer("DELL");
         m.setDataFormat("avro");
-        
+
         return m;
     }
 
@@ -164,10 +167,10 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
         ApplicationId appId = modelingService.createSamples(samplingConfig);
-        YarnApplicationState state = waitState(appId, 360, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
+        FinalApplicationStatus status = waitForStatus(appId, 240, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
-    
+
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submitModel() throws Exception {
         List<ApplicationId> appIds = modelingService.submitModel(model);
@@ -175,8 +178,9 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         for (ApplicationId appId : appIds) {
             YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
             assertNotNull(state);
-            state = waitState(appId, 420, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
-            assertEquals(state, YarnApplicationState.FINISHED);
+            FinalApplicationStatus status = waitForStatus(appId, 480, TimeUnit.SECONDS,
+                    FinalApplicationStatus.SUCCEEDED);
+            assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
             JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
             String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
@@ -184,17 +188,17 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
             assertNotNull(modelContents);
         }
     }
-    
+
     @Test(groups = "functional", enabled = false, dependsOnMethods = { "submitModel" })
     public void submitModelMultithreaded() throws Exception {
-        
+
         ExecutorService executor = Executors.newFixedThreadPool(3);
-        
+
         final Model[] models = new Model[3];
         models[0] = createModel(model.getModelDefinition());
         models[1] = createModel(model.getModelDefinition());
         models[2] = createModel(model.getModelDefinition());
-        
+
         List<Future<List<ApplicationId>>> futures = new ArrayList<Future<List<ApplicationId>>>();
         for (int i = 0; i < 3; i++) {
             final Model m = models[i];
@@ -204,11 +208,11 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
                 public List<ApplicationId> call() throws Exception {
                     return modelingService.submitModel(m);
                 }
-                
+
             }));
         }
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
-        
+
         for (Future<List<ApplicationId>> future : futures) {
             appIds.addAll(future.get());
         }
@@ -216,8 +220,9 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         for (ApplicationId appId : appIds) {
             YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
             assertNotNull(state);
-            state = waitState(appId, 300, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
-            assertEquals(state, YarnApplicationState.FINISHED);
+            FinalApplicationStatus status = waitForStatus(appId, 300, TimeUnit.SECONDS,
+                    FinalApplicationStatus.SUCCEEDED);
+            assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
             JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
             String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory()).get(0);
@@ -225,7 +230,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
             assertNotNull(modelContents);
         }
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = { "submitModel" })
     public void throttleImmediate() throws Exception {
         model.setId(null);
@@ -234,22 +239,24 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         config.setImmediate(true);
         config.setJobRankCutoff(2);
         modelingService.throttle(config);
-        
+
         JobWatchdogService watchDog = getWatchdogService();
         watchDog.run(null);
-        
+
         assertEquals(3, appIds.size());
-        
+
         // First job to complete
         YarnApplicationState state = waitState(appIds.get(0), 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
         assertNotNull(state);
-        state = waitState(appIds.get(0), 300, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
-        
+        FinalApplicationStatus status = waitForStatus(appIds.get(0), 300, TimeUnit.SECONDS,
+                FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
         // Second job should have been killed since we throttled
-        state = waitState(appIds.get(1), 10, TimeUnit.SECONDS, YarnApplicationState.KILLED);
+        status = waitForStatus(appIds.get(1), 10, TimeUnit.SECONDS,
+                FinalApplicationStatus.KILLED);
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = { "throttleImmediate" })
     public void throttleNewlySubmittedModels() throws Exception {
         ThrottleConfiguration config = new ThrottleConfiguration();
@@ -259,15 +266,16 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         model.setId(null);
         List<ApplicationId> appIds = modelingService.submitModel(model);
-        
+
         // Only one job would be submitted since new jobs won't even come in
         assertEquals(1, appIds.size());
-        
+
         YarnApplicationState state = waitState(appIds.get(0), 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
         assertNotNull(state);
-        state = waitState(appIds.get(0), 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
-        
+        FinalApplicationStatus status = waitForStatus(appIds.get(0), 120, TimeUnit.SECONDS,
+                FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+
     }
 
     private JobWatchdogService getWatchdogService() {
@@ -279,6 +287,5 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         watchDog.setJobService(jobService);
         return watchDog;
     }
-    
-    
+
 }

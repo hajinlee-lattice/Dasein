@@ -20,6 +20,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -230,8 +231,9 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertNotNull(state);
         ApplicationReport app = jobService.getJobReportById(applicationId);
         assertNotNull(app);
-        state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
+        FinalApplicationStatus status = waitForStatus(applicationId, 120, TimeUnit.SECONDS,
+                FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         NumberFormat appIdFormat = getAppIdFormat();
         String jobId = applicationId.getClusterTimestamp() + "_" + appIdFormat.format(applicationId.getId());
@@ -259,7 +261,9 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         state = getState(applicationId);
         assertNotNull(state);
-        assertTrue(state.equals(YarnApplicationState.FINISHED));
+        FinalApplicationStatus status = waitForStatus(applicationId, 300, TimeUnit.SECONDS,
+                FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, outputDir, new HdfsFilenameFilter() {
 
@@ -288,8 +292,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0", "Dell",
                 Arrays.<String> asList(new String[] { "ID" }));
-        YarnApplicationState state = waitState(appId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
+        FinalApplicationStatus status = waitForStatus(appId, 240, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, "/tmp/import", new HdfsFilenameFilter() {
 
             @Override
