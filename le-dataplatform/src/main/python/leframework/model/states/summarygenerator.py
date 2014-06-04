@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import logging
 from sklearn import metrics
 from sklearn.metrics.cluster.supervised import entropy
 import uuid
@@ -7,11 +8,11 @@ from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
 
-
 class SummaryGenerator(State, JsonGenBase):
     
     def __init__(self):
         State.__init__(self, "SummaryGenerator")
+        self.logger = logging.getLogger(name='summarygenerator')
     
     @overrides(State)
     def execute(self):
@@ -22,6 +23,7 @@ class SummaryGenerator(State, JsonGenBase):
         for key, value in mediator.metadata[0].iteritems():
             if key + "_1" in mediator.schema["targets"]:
                 continue
+            self.logger.info("Generating predictors for " + key)
             predictors.append(self.generatePredictors(key, value, eventData))
         
         predictors = sorted(predictors, key = lambda x: [x["Name"]])
@@ -44,6 +46,7 @@ class SummaryGenerator(State, JsonGenBase):
 
         attrLevelUncertaintyCoeff = 0
         for record in metadata:
+            self.logger.info(record)
             predictorData = self.__getPredictorVector(colname, record)
             element = OrderedDict()
             
@@ -51,7 +54,9 @@ class SummaryGenerator(State, JsonGenBase):
             
             # If a band value is not found, skip that predictor value
             if countForBandValue == 0:
+                self.logger.critical("No data found in the test set for this band or value.")
                 continue
+            
             countForBandValueAndEventIsOne = self.__getCountWhereEventIsOne(predictorData, eventData)
             lift = float(countForBandValueAndEventIsOne)/float(countForBandValue)
             avgLift = float(sum(eventData))/float(len(eventData))

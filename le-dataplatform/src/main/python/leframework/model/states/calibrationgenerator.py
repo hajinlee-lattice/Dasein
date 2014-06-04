@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import logging
 
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
@@ -9,6 +10,7 @@ class CalibrationGenerator(State, JsonGenBase):
 
     def __init__(self):
         State.__init__(self, "CalibrationGenerator")
+        self.logger = logging.getLogger(name='calibrationgenerator')
     
     @overrides(State)
     def execute(self):

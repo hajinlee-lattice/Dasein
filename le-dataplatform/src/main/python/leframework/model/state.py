@@ -1,10 +1,14 @@
 from abc import ABCMeta, abstractmethod
+import logging
 
 class State(object):
     __metaclass__ = ABCMeta
     
     def __init__(self, name):
         self.name = name
+        logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
     
     @abstractmethod
     def execute(self): pass

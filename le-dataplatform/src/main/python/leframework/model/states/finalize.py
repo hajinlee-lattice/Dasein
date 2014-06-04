@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import json
+import logging
 import numpy
 
 from leframework.codestyle import overrides
@@ -11,6 +12,7 @@ class Finalize(State):
 
     def __init__(self):
         State.__init__(self, "Finalize")
+        self.logger = logging.getLogger(name='finalize')
     
     @overrides(State)
     def execute(self):

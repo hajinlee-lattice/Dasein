@@ -1,5 +1,6 @@
-import fastavro as avro
+import logging
 
+import fastavro as avro
 from leframework.codestyle import overrides
 from leframework.model.state import State
 
@@ -8,6 +9,7 @@ class Initialize(State):
     
     def __init__(self):
         State.__init__(self, "Initialize")
+        self.logger = logging.getLogger(name='initialize')
     
     @overrides(State)
     def execute(self):

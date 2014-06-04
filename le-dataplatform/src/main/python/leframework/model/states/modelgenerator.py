@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import logging
 import pickle
 from sklearn.externals import joblib
 
@@ -13,6 +14,8 @@ class ModelGenerator(State, JsonGenBase):
     
     def __init__(self):
         State.__init__(self, "ModelGenerator")
+        self.logger = logging.getLogger(name='modelgenerator')
+        
     
     @overrides(State)
     def execute(self):
