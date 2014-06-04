@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
@@ -10,7 +12,14 @@ class CalibrationGenerator(State, JsonGenBase):
     
     @overrides(State)
     def execute(self):
-        calibration = dict()
+        calibration = []
+        mediator = self.mediator
+        scored = mediator.scored
+        
+        element = OrderedDict()
+        element["MaximumScore"] = None
+        
+        calibration.append(element)
         self.calibration = calibration
     
     @overrides(JsonGenBase)
