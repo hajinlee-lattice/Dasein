@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
@@ -21,10 +22,10 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.dataplatform.service.JobService;
 
 public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
-    
+
     @Autowired
     private JobService jobService;
-    
+
     @Autowired
     private YarnService yarnService;
 
@@ -44,7 +45,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         AppsInfo appsInfo = yarnService.getApplications(null);
         assertNotNull(appsInfo);
     }
-    
+
     @Test(groups = "functional")
     public void getApp() throws Exception {
         Properties appMasterProperties = new Properties();
@@ -58,9 +59,10 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
                 containerProperties);
         AppInfo appInfo = yarnService.getApplication(applicationId.toString());
         assertNotNull(appInfo);
-        
-        YarnApplicationState state = waitState(applicationId, 90, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
-        assertEquals(YarnApplicationState.FINISHED, state);
+
+        FinalApplicationStatus status = waitForStatus(applicationId, 120, TimeUnit.SECONDS,
+                FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
-    
+
 }
