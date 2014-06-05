@@ -10,7 +10,7 @@ import pandas as pd
 
 logging.basicConfig(filename="scoringengine.log", level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(name='argumentparser')
+logger = logging.getLogger(name='scoringengine')
 
 
 

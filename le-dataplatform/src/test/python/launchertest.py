@@ -1,12 +1,13 @@
+import filecmp
 import json
 import os
 import pickle
 import shutil
-
 from sklearn.linear_model import LogisticRegression
 from unittest import TestCase
 
 from launcher import Launcher
+
 
 class LauncherTest(TestCase):
 
@@ -25,6 +26,7 @@ class LauncherTest(TestCase):
         os.makedirs(fwkdir + "/leframework")
         enginedir = "/leframework/scoringengine.py"
         shutil.copyfile("../../main/python" + enginedir, fwkdir + enginedir)
+        shutil.copyfile("../../main/python/pipeline.py", fwkdir + "/pipeline.py")
 
     def testExecute(self):
         # These properties won't really be used since these are just unit tests.
@@ -36,15 +38,23 @@ class LauncherTest(TestCase):
         
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open("./results/model.json").read())
-        pklByteArray = bytearray(jsonDict["Model"]["SupportFiles"][0]["Value"])
-        # Write to the file system
-        filename = "./results/STPipelineBinary.p"
-        with open(filename, "wb") as output:
-            output.write(pklByteArray)
         
+        payload = "./results/STPipelineBinary.p"
+        self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][1]["Value"], payload)
         # Load from the file system and deserialize into the model
-        pipeline = pickle.load(open(filename, "r"))
+        pipeline = pickle.load(open(payload, "r"))
         self.assertTrue(isinstance(pipeline.getPipeline()[0].getModel(), LogisticRegression), "clf not instance of sklearn LogisticRegression.")
         
+        pipelineScript = "./results/pipeline.py"
+        self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][0]["Value"], pipelineScript)
+        self.assertTrue(filecmp.cmp(pipelineScript, './leframework.tar.gz/pipeline.py'))
+        
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
+        
+    def __writeToFileFromBinary(self, data, filename):
+        pklByteArray = bytearray(data)
+        # Write to the file system
+        
+        with open(filename, "wb") as output:
+            output.write(pklByteArray)
         

@@ -6,8 +6,8 @@ from sklearn.externals import joblib
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
-from leframework.pipeline import ModelStep
-from leframework.pipeline import Pipeline
+from pipeline import ModelStep
+from pipeline import Pipeline
 
 
 class ModelGenerator(State, JsonGenBase):
@@ -33,9 +33,13 @@ class ModelGenerator(State, JsonGenBase):
         pipeline = Pipeline(modelSteps)
         pickle.dump(pipeline, open(filename, "w"))
         
-        pklByteArray = map(lambda x: int(x), bytearray(open(filename, "rb").read()))
-        model["SupportFiles"] = [{"Value": pklByteArray, "Key": "STPipelineBinary.p" }]
+        pipelineBinaryPkl = self.__getSerializedFile(filename)
+        pipelinePkl = self.__getSerializedFile("leframework.tar.gz/pipeline.py")
+        model["SupportFiles"] = [{"Value": pipelinePkl, "Key": "pipeline.py" }, {"Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" }]
         self.model = model
+        
+    def __getSerializedFile(self,filename):
+        return map(lambda x: int(x), bytearray(open(filename, "rb").read()))
     
     @overrides(JsonGenBase)
     def getKey(self):
