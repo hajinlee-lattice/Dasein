@@ -6,6 +6,7 @@ from urlparse import urlparse
 
 from leframework.argumentparser import ArgumentParser
 from leframework.model.statemachine import StateMachine
+from leframework.model.states.averageprobabilitygenerator import AverageProbabilityGenerator
 from leframework.model.states.bucketgenerator import BucketGenerator
 from leframework.model.states.calibrationgenerator import CalibrationGenerator
 from leframework.model.states.columnmetadatagenerator import ColumnMetadataGenerator
@@ -55,13 +56,14 @@ class Launcher(object):
 
     def __setupJsonGenerationStateMachine(self):
         stateMachine = StateMachine()
-        stateMachine.addState(Initialize())
-        stateMachine.addState(BucketGenerator())
-        stateMachine.addState(CalibrationGenerator())
-        stateMachine.addState(ColumnMetadataGenerator())
-        stateMachine.addState(ModelGenerator())
-        stateMachine.addState(SummaryGenerator())
-        stateMachine.addState(Finalize())
+        stateMachine.addState(Initialize(), 1)  
+        stateMachine.addState(CalibrationGenerator(), 4)
+        stateMachine.addState(AverageProbabilityGenerator(), 2)
+        stateMachine.addState(BucketGenerator(), 3)
+        stateMachine.addState(ColumnMetadataGenerator(), 5)
+        stateMachine.addState(ModelGenerator(), 6)
+        stateMachine.addState(SummaryGenerator(), 7)
+        stateMachine.addState(Finalize(), 8)
         return stateMachine
 
     def execute(self, writeToHdfs):
@@ -98,6 +100,7 @@ class Launcher(object):
             mediator.modelHdfsDir = modelHdfsDir
             mediator.data = test
             mediator.schema = schema
+            mediator.target = mediator.data[:, mediator.schema["targetIndex"]]
             stateMachine.run()
         else:
             logger.error("Generated classifier is null!")

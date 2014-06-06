@@ -6,13 +6,14 @@ class StateMachine(object):
         self.mediator = mdtr.Mediator()
         self.states = []
         
-    def addState(self, state):
+    def addState(self, state,jsonOrder):
         state.setMediator(self.mediator)
         state.setStateMachine(self)
+        state.setJsonOrder(jsonOrder)
         self.states.append(state)
         
     def getStates(self):
-        return self.states
+        return sorted(self.states, key=lambda state: state.jsonOrder)
         
     def run(self):
         for state in self.states:
