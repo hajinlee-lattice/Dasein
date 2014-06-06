@@ -13,8 +13,8 @@ class ArgumentParserTest(TestCase):
         test = parser.createList(parser.stripPath(schema["test_data"]))
         self.assertEqual(test.shape, (4392, 34), "Dimensions of training data should be (4392, 34), but is " + str(test.shape))
         algorithmProperties = parser.getAlgorithmProperties()
-        self.assertTrue(algorithmProperties["C"] == "0.05")
-        self.assertTrue(algorithmProperties["numestimators"] == "10")
+        self.assertTrue(algorithmProperties["criterion"] == "gini")
+        self.assertTrue(algorithmProperties["n_estimators"] == "200")
         keyCols = parser.getKeyColumns()
         self.assertEquals(keyCols, (0,))
 
