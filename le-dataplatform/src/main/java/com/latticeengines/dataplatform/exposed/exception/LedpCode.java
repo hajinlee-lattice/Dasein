@@ -34,7 +34,10 @@ public enum LedpCode {
     LEDP_15000("Could not create model schema."), //
     LEDP_15001("Could not find sample file for prefix {0}."), //
     LEDP_15002("Customer must be set for a model."), //
-    LEDP_15003("There should at least be one file of type {0}.");
+    LEDP_15003("There should at least be one file of type {0}."), //
+    // DLOrchestration service: 16000-16999
+    LEDP_16000("Missing model command parameter(s) {0}."), //
+    LEDP_16001("Problem deleting path {0} before load.");
 
     private String message;
 

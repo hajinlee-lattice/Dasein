@@ -1,0 +1,26 @@
+package com.latticeengines.dataplatform.entitymanager.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.latticeengines.dataplatform.dao.BaseDao;
+import com.latticeengines.dataplatform.dao.ModelCommandLogDao;
+import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
+
+@Component("modelCommandLogEntityMgr")
+public class ModelCommandLogEntityMgrImpl extends BaseEntityMgrImpl<ModelCommandLog> implements ModelCommandLogEntityMgr {
+
+    @Autowired
+    private ModelCommandLogDao modelCommandLogDao;
+    
+    public ModelCommandLogEntityMgrImpl() {
+        super();
+    }
+
+    @Override
+    public BaseDao<ModelCommandLog> getDao() {
+        return modelCommandLogDao;
+    }  
+
+}

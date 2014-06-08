@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
@@ -38,6 +37,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void getSchedulerInfo() {
         SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
         assertNotNull(schedulerInfo);
+      
     }
 
     @Test(groups = "functional")

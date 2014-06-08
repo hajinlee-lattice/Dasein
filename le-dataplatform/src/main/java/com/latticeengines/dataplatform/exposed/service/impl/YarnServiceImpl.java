@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.common.collect.ComparisonChain;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 
 @Component("yarnService")
@@ -70,7 +71,7 @@ public class YarnServiceImpl implements YarnService {
 
         for (AppInfo appInfo : appInfos) {
             String diagnostics = appInfo.getNote();
-            if (diagnostics.contains("-102") && diagnostics.contains("Container preempted by scheduler")) {
+            if (YarnUtils.isPrempted(diagnostics)) {
                 preemptedApps.add(appInfo);
             }
         }

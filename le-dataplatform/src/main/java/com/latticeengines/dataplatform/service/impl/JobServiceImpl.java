@@ -50,7 +50,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(JobServiceImpl.class);
     private static final int MAX_TRIES = 60;
-    private static final long APP_WAIT_TIME = 250L;
+    private static final long APP_WAIT_TIME = 1000L;
 
     private ApplicationContext applicationContext;
 
@@ -347,6 +347,11 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         ApplicationReport appReport = defaultYarnClient.getApplicationReport(YarnUtils.getApplicationIdFromString(applicationId));
         if (appReport != null) {
             jobStatus.setState(appReport.getFinalApplicationStatus());
+            jobStatus.setDiagnostics(appReport.getDiagnostics());
+            jobStatus.setFinishTime(appReport.getFinishTime());
+            jobStatus.setProgress(appReport.getProgress());
+            jobStatus.setStartTime(appReport.getStartTime());
+            jobStatus.setTrackingUrl(appReport.getTrackingUrl());
         }
 
         return jobStatus;

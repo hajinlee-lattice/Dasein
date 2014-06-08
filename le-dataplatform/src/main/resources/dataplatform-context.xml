@@ -35,5 +35,13 @@
         </property>
     </bean>
     
+    <bean id="dlOrchestrationJobTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="${dataplatform.dlorchestrationjob.core.pool.size}" />
+        <property name="maxPoolSize" value="${dataplatform.dlorchestrationjob.max.pool.size}" />
+        <property name="queueCapacity" value="${dataplatform.dlorchestrationjob.queue.capacity}" />
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
+        </property>
+    </bean>
 
 </beans>

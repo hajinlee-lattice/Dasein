@@ -9,7 +9,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.YarnClient;
