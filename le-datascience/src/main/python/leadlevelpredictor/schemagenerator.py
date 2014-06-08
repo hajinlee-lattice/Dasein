@@ -33,14 +33,23 @@ class SchemaGenerator(object):
         columnMetadata = {}
     
         for columnMetadataElement in columnMetadataList:
-            columnMetadata[columnMetadataElement['Name']] = columnMetadataElement
+            columnMetadata[columnMetadataElement['Description']] = columnMetadataElement
         
         predictorList = summaryElementList["Predictors"]
     
         metadata = []
         for predictor in predictorList:
             name = predictor["Name"]
-            interpretation = columnMetadata[name]["Interpretation"]
+            
+            interpretation = 1
+            colname = ""
+            if name not in columnMetadata:
+                print("Column \"" + name + "\" not in metadata! Using interpretation = 1")
+                continue
+            else:
+                interpretation = columnMetadata[name]["Interpretation"]
+                colname = columnMetadata[name]["Name"]
+                
             elements = predictor["Elements"]
             
             for el in elements:
@@ -57,9 +66,9 @@ class SchemaGenerator(object):
                     row[2] = "STR"
                     
                     if row[1] == "null":
-                        whereClause = "%s IS NULL"%(name)
+                        whereClause = "%s IS NULL"%(colname)
                     else:
-                        whereClause = "%s = '%s'"%(name, row[1])
+                        whereClause = "%s = '%s'"%(colname, row[1])
                 else:
                     row[2] = "BND"
                     row[3] = el["UpperExclusive"]
@@ -68,9 +77,9 @@ class SchemaGenerator(object):
                         row[4] = 0
                     
                     if row[3] != None:
-                        whereClause = "%s >= %s AND %s < %s"%(name, row[4], name, row[3])
+                        whereClause = "%s >= %s AND %s < %s"%(colname, row[4], colname, row[3])
                     else:
-                        whereClause = "%s >= %s"%(name, row[4])
+                        whereClause = "%s >= %s"%(colname, row[4])
 
                 
                 lift = self.getLift(eventColumnName, tableName, whereClause)
