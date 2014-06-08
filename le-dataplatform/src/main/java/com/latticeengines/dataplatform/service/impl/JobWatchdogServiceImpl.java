@@ -3,6 +3,7 @@ package com.latticeengines.dataplatform.service.impl;
 import java.util.Collection;
 import java.util.Map;
 
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
@@ -15,6 +16,7 @@ import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.JobWatchdogService;
 import com.latticeengines.dataplatform.service.impl.watchdog.WatchdogPlugin;
 
+@DisallowConcurrentExecution
 public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdogService {
 
     private JobService jobService;
