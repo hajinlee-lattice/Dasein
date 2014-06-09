@@ -9,7 +9,7 @@ class BucketGenerator(State, JsonGenBase):
     ''' Define magic numbers that need to be passed in as parameter   '''
     loThres = 0.8
     medThres = 1.2
-    highThres = float(1/3)     # one-third of remaining width as highest
+    highThres = float(1)/3    # one-third of remaining width as highest
     type = 0    # 0 - probability, 1 - lift
     def __init__(self):
         State.__init__(self, "BucketGenerator")
