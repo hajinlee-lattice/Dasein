@@ -45,7 +45,7 @@
     "P1_Event_1"
   ],
   "algorithm_properties": "C=0.05 numestimators=10",
-  "training_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/samples/allTraining-r-00000.avro",
-  "test_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/samples/allTest-r-00000.avro",
+  "training_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/samples/s0Training-r-00000.avro",
+  "test_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/samples/s0Test-r-00000.avro",
   "python_script": "/app/dataplatform/scripts/algorithm/lr_train.py"
 }

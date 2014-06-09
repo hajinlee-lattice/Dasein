@@ -8,7 +8,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties):
     np.savetxt('traindata.txt', X_train, delimiter=' ')
     np.savetxt('traintarget.txt', Y_train, delimiter=' ')
     
-    clf = linear_model.LogisticRegression( C = float(algorithmProperties["C"]), penalty='l1')
+    clf = linear_model.LogisticRegression( C = float(algorithmProperties["C"]))
     clf.fit(X_train, Y_train)
     
     writeModel(schema, modelDir, clf)
