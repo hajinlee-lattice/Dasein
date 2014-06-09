@@ -15,7 +15,7 @@ class CalibrationGeneratorTest(TestCase):
         mediator.target = []
         for i in range(test_size):
             prob = random.random()
-            mediator.scored.append( (1-prob, prob) )
+            mediator.scored.append(prob)
             if prob > 0.7:
                 mediator.target.append(1 if random.random() > 0.1 else 0)
             elif prob > 0.5:

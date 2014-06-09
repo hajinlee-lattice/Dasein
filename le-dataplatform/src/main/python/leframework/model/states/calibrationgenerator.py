@@ -14,22 +14,15 @@ class CalibrationGenerator(State, JsonGenBase):
         self.logger = logging.getLogger(name='calibrationgenerator')
     
     @overrides(State)
-    def execute(self):  
-        self.calibration = []   
-        scored = self.mediator.scored
-        target = self.mediator.target
-
+    def execute(self):    
         # reconstruct the array into a list of (prob, target)
-        orderedScore = []
-        for i in range(len(scored)):
-            orderedScore.append((scored[i][1], int(target[i])))
-        orderedScore.sort(key=lambda score: (score[0], score[1]), reverse=True)
-        open('test.txt', 'w').write('\n'.join('%s %s' % x for x in orderedScore))  
+        orderedScore = zip(self.mediator.scored,self.mediator.target)
+        orderedScore.sort(key=lambda score: (score[0], score[1]), reverse=True) 
             
         # get test size and range width 
         numTest = len(orderedScore)                 
         defaultRangeWidth = int(math.ceil(float(numTest) / 100))
-        print "test size: "+str(numTest)
+        self.logger.info("test size: "+str(numTest)+" range width: "+str(defaultRangeWidth))
         
         # calculate cumulative target count, sum of targets from 0 to i 
         cumulativeCount = [0] * (numTest + 1)  # add a sentinel at index 0
@@ -90,20 +83,23 @@ class CalibrationGenerator(State, JsonGenBase):
                 else:
                     idx += 1
 
-        # calculate probability for each range
+        # calculate probability and width for each range
         probRange = self.__getProbRange(indexRange, cumulativeCount)
+        widthRange = self.__getWidthRange(indexRange)
         # prepare calibration with specified format
+        self.calibration = []
+        self.logger.info("number of calibration ranges generated: "+str(len(probRange))) 
         for i in range(len(calibrationRange)):
             element = OrderedDict()
             element["MaximumScore"] = calibrationRange[i][0]
             element["MinimumScore"] = calibrationRange[i][1]
             element["Probability"] = probRange[i]
-            element["Width"] = indexRange[i][1] - indexRange[i][0] + 1
+            element["Width"] = widthRange[i]
             self.calibration.append(element)
             
         # pass parameters to mediator
         self.mediator.probRange = probRange
-        self.mediator.indexRange = indexRange
+        self.mediator.widthRange = widthRange
         self.mediator.averageProbability = self.averageProbability
         
     @overrides(JsonGenBase)
@@ -139,10 +135,16 @@ class CalibrationGenerator(State, JsonGenBase):
     def __getProb(self, lo, hi, cumulateCount):
         return (cumulateCount[hi] - cumulateCount[lo - 1]) / float(hi - lo + 1) 
 
-
     def __getProbRange(self, indexRange, cumulateCount):
         probRange = []
         for i in range(len(indexRange)):
             probRange.append(self.__getProb(indexRange[i][0], indexRange[i][1], cumulateCount))
     
         return probRange
+    
+    def __getWidthRange(self,indexRange):   
+        widthRange = [] 
+        for i in range(len(indexRange)):
+            widthRange.append(indexRange[i][1]-indexRange[i][0]+1)
+    
+        return widthRange

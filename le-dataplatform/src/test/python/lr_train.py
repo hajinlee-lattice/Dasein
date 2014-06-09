@@ -1,10 +1,14 @@
 from sklearn import linear_model
+import numpy as np
 
 def train(trainingData, testData, schema, modelDir, algorithmProperties):
     X_train = trainingData[:, schema["featureIndex"]]
     Y_train = trainingData[:, schema["targetIndex"]]
+
+    np.savetxt('traindata.txt', X_train, delimiter=' ')
+    np.savetxt('traintarget.txt', Y_train, delimiter=' ')
     
-    clf = linear_model.LogisticRegression(C = float(algorithmProperties["C"]))
+    clf = linear_model.LogisticRegression( C = float(algorithmProperties["C"]), penalty='l1')
     clf.fit(X_train, Y_train)
     
     writeModel(schema, modelDir, clf)

@@ -17,7 +17,7 @@ class SummaryGenerator(State, JsonGenBase):
     @overrides(State)
     def execute(self):
         mediator = self.mediator
-        self.summary = dict()
+        self.summary = OrderedDict()
         predictors = []
         eventData = mediator.data[:, mediator.schema["targetIndex"]]
         for key, value in mediator.metadata[0].iteritems():
@@ -28,6 +28,8 @@ class SummaryGenerator(State, JsonGenBase):
         
         predictors = sorted(predictors, key = lambda x: [x["Name"]])
         self.summary["Predictors"] = predictors
+        self.summary["RocScore"] = self.__getRocScore(zip(self.mediator.scored,self.mediator.target))
+        self.summary["SegmentChart"] = self.__getSegmentChart(mediator.probRange,mediator.widthRange,mediator.buckets,mediator.averageProbability)
     
     @overrides(JsonGenBase)
     def getKey(self):
@@ -103,3 +105,67 @@ class SummaryGenerator(State, JsonGenBase):
         '''
         return metrics.mutual_info_score(x, y)/entropy(x) 
 
+    def __getSegmentChart(self,probRange,widthRange,buckets,averageProbability):
+     
+        # Generate inclusive (min,max) with highest max = null and lowest min = 0
+        inclusive = [((probRange[0]+probRange[1])/2,None)]         
+        for i in range (1,len(probRange)-1):
+            inclusive.append(((probRange[i]+probRange[i+1])/2,inclusive[i-1][0]))
+        inclusive.append((0,inclusive[i][0]))
+                  
+        # Generate name for each segment
+        names = []
+        for i in range(len(probRange)):
+            for j in range(len(buckets)):
+                if self.mediator.type == 0:
+                    # Probability buckets 
+                    if probRange[i] >= buckets[j]["Minimum"]:
+                        if buckets[j]["Maximum"] is None or probRange[i] < buckets[j]["Maximum"]:
+                            names.append(buckets[j]["Name"])
+                            break
+                else:
+                    # Lift buckets
+                    lift = probRange[i]/averageProbability
+                    if lift >= buckets[j]["Minimum"]:
+                        if buckets[j]["Maximum"] is None or lift < buckets[j]["Maximum"]:
+                            names.append(buckets[j]["Name"])
+                            break
+        # Generate segments
+        segments = []
+        for i in range(len(probRange)):
+            element = OrderedDict()
+            element["AverageProbability"] = probRange[i]
+            element["LowerInclusive"] = inclusive[i][0]
+            element["Name"] = names[i]
+            element["UpperExclusive"] = inclusive[i][1]
+            element["Width"] = widthRange[i]
+            segments.append(element)
+     
+        # Generate segment chart
+        segmentChart = OrderedDict()
+        segmentChart["AverageProbability"] = averageProbability
+        segmentChart["Segments"] = segments
+        
+        return segmentChart
+
+    def __getRocScore(self,score):
+        # Sort by target
+        score.sort(key=lambda rowScore: (rowScore[1], rowScore[0]), reverse=True)
+        theoreticalBestCounter = 0
+        theoreticalBestArea = 0
+        for i in range(len(score)):
+            theoreticalBestCounter += score[i][1]
+            theoreticalBestArea += theoreticalBestCounter
+        
+        # Sort by score
+        score.sort(key=lambda rowScore: (rowScore[0], rowScore[1]), reverse=True)
+        actualBestCounter = 0
+        actualBestArea = 0
+        for i in range(len(score)):
+            actualBestCounter += score[i][1]
+            actualBestArea += actualBestCounter
+        
+        return actualBestArea/float(theoreticalBestArea)
+        
+        
+        

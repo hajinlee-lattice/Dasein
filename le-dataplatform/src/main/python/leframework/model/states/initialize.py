@@ -1,6 +1,7 @@
 import logging
 
 import fastavro as avro
+import numpy
 from leframework.codestyle import overrides
 from leframework.model.state import State
 
@@ -21,6 +22,7 @@ class Initialize(State):
         
     def score(self, mediator):
         scored = mediator.clf.predict_proba(mediator.data[:, mediator.schema["featureIndex"]])
+        scored = [row[1] for row in scored]
         return scored
     
     def retrieveMetadata(self, mediator):

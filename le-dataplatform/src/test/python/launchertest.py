@@ -3,7 +3,7 @@ import json
 import os
 import pickle
 import shutil
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from unittest import TestCase
 
 from launcher import Launcher
@@ -43,7 +43,7 @@ class LauncherTest(TestCase):
         self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][1]["Value"], payload)
         # Load from the file system and deserialize into the model
         pipeline = pickle.load(open(payload, "r"))
-        self.assertTrue(isinstance(pipeline.getPipeline()[0].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
+        self.assertTrue(isinstance(pipeline.getPipeline()[0].getModel(), LogisticRegression), "clf not instance of sklearn LogisticRegression.")
         
         pipelineScript = "./results/pipeline.py"
         self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][0]["Value"], pipelineScript)

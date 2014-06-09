@@ -22,9 +22,8 @@ class Finalize(State):
     def writeScoredText(self, mediator):
         scored = mediator.scored
         # add the key data and append the scored data
-        scored = numpy.apply_along_axis(lambda x: [x[1]], 1, scored)
         keyData = mediator.data[:, mediator.schema["keyColIndex"]]
-        scored = numpy.concatenate((keyData, scored), axis=1)
+        scored = zip(keyData, scored)
         # write the scored data to file
         numpy.savetxt(mediator.modelLocalDir + "scored.txt", scored, delimiter=",")
         

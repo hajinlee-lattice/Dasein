@@ -10,7 +10,7 @@ class BucketGenerator(State, JsonGenBase):
     loThres = 0.8
     medThres = 1.2
     highThres = float(1/3)     # one-third of remaining width as highest
-    type = 0    # 0 - prpbability, 1 - lift
+    type = 0    # 0 - probability, 1 - lift
     def __init__(self):
         State.__init__(self, "BucketGenerator")
         self.logger = logging.getLogger(name='bucketgenerator')
@@ -22,10 +22,10 @@ class BucketGenerator(State, JsonGenBase):
         buckets = []
         labels = ["Low", "Medium", "High", "Highest"]       
         probRange = self.mediator.probRange   
-        indexRange = self.mediator.indexRange
+        widthRange = self.mediator.widthRange
 
         averageProbability = self.mediator.averageProbability
-        
+        self.logger.info("data type with 0 as Probability, 1 as Lift: "+str(self.type))
         if self.type == 0: 
             buckets.append((None, self.loThres*averageProbability))
             buckets.append((buckets[0][1], self.medThres*averageProbability))
@@ -45,25 +45,26 @@ class BucketGenerator(State, JsonGenBase):
             # split one-third into highest
             remainWidth = 0
             for i in range(highSize):
-                remainWidth += self.__getWidth(indexRange, i)
+                remainWidth += widthRange[i]
             
             curWidth = 0
             for i in range(highSize):
-                tmpWidth = self.__getWidth(indexRange, i)
+                tmpWidth = widthRange[i]
                 if (curWidth + tmpWidth) > self.highThres*remainWidth: 
                     if i != 0:
-                        buckets.append((buckets[1][1],probRange[i]))
-                        buckets.append((probRange[i-1],None))
+                        buckets.append((buckets[1][1],probRange[i-1]))
+                        buckets.append((probRange[i-1], None))
                     else:
-                        buckets.append((buckets[1][1],probRange[i+1]))
-                        buckets.append((probRange[i],None))
+                        buckets.append((buckets[1][1],probRange[i]))
+                        buckets.append((probRange[i], None))
                     break
                 else:         
                     curWidth += tmpWidth
         else:
-            buckets.append((buckets.pop()[0],None))    # medium is the highest label, change its max to None
+            # medium is the highest label, change its max to None
+            buckets.append((buckets.pop()[0], None))   
             for i in range(len(labels)-2):
-                buckets.append((None,None))
+                buckets.append((None, None))
                     
         
         # generate buckets
@@ -78,6 +79,10 @@ class BucketGenerator(State, JsonGenBase):
             element["Type"] = self.type        
             self.buckets.append(element)          
         
+        # Pass buckets,highest to low, to segmentChart with bucket type 
+        self.mediator.buckets = self.buckets 
+        self.mediator.type = self.type
+        
     @overrides(JsonGenBase)
     def getKey(self):
         return "Buckets"
@@ -86,5 +91,3 @@ class BucketGenerator(State, JsonGenBase):
     def getJsonProperty(self):
         return self.buckets
     
-    def __getWidth(self,indexRange,idx):    
-        return indexRange[idx][1]-indexRange[idx][0]+1

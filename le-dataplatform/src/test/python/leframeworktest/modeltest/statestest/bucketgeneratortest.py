@@ -16,7 +16,7 @@ class BucketGeneratorTest(TestCase):
         mediator.target = []
         for i in range(test_size):
             prob = random.random()
-            mediator.scored.append( (1-prob, prob) )
+            mediator.scored.append(prob)
             if prob > 0.7:
                 mediator.target.append(1 if random.random() > 0.1 else 0)
             elif prob > 0.5:
@@ -35,7 +35,7 @@ class BucketGeneratorTest(TestCase):
         bucketGenerator.execute()
         buckets = bucketGenerator.buckets
         probRange = bucketGenerator.mediator.probRange
-        indexRange = bucketGenerator.mediator.indexRange
+        widthRange = bucketGenerator.mediator.widthRange
         
         # Assert that highest has no more than one-half of the leads of high
         highest = buckets[0]["Minimum"]
@@ -48,12 +48,12 @@ class BucketGeneratorTest(TestCase):
                 if probRange[i]<high:
                     highIndex = i-1 
            
-            self.assertTrue(self.__getCumulativeWidth(indexRange,highestIndex) < 0.5*self.__getCumulativeWidth(indexRange,highIndex),"Invalid bucket size for highest!" )
+            self.assertTrue(self.__getCumulativeWidth(widthRange,highestIndex) < 0.5*self.__getCumulativeWidth(widthRange,highIndex),"Invalid bucket size for highest!" )
             
         
-    def __getCumulativeWidth(self,indexRange,idx):   
+    def __getCumulativeWidth(self,widthRange,idx):   
         cumWidth = 0
         for i in range(idx+1):
-            cumWidth += indexRange[i][1]-indexRange[i][0]+1
+            cumWidth += widthRange[i]
             
         return cumWidth
