@@ -25,7 +25,7 @@ class BucketGenerator(State, JsonGenBase):
         widthRange = self.mediator.widthRange
 
         averageProbability = self.mediator.averageProbability
-        self.logger.info("data type with 0 as Probability, 1 as Lift: "+str(self.type))
+        self.logger.info("0 - Probability, 1 - Lift input data type is: "+str(self.type))
         if self.type == 0: 
             buckets.append((None, self.loThres*averageProbability))
             buckets.append((buckets[0][1], self.medThres*averageProbability))
@@ -62,6 +62,7 @@ class BucketGenerator(State, JsonGenBase):
                     curWidth += tmpWidth
         else:
             # medium is the highest label, change its max to None
+            self.logger.info("None of the calibrations are above medium range")
             buckets.append((buckets.pop()[0], None))   
             for i in range(len(labels)-2):
                 buckets.append((None, None))

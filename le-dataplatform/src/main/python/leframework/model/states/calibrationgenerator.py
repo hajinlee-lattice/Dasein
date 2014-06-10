@@ -22,7 +22,7 @@ class CalibrationGenerator(State, JsonGenBase):
         # get test size and range width 
         numTest = len(orderedScore)                 
         defaultRangeWidth = int(math.ceil(float(numTest) / 100))
-        self.logger.info("test size: "+str(numTest)+" range width: "+str(defaultRangeWidth))
+        self.logger.info("Generating calibration with test size: "+str(numTest)+" range width: "+str(defaultRangeWidth))
         
         # calculate cumulative target count, sum of targets from 0 to i 
         cumulativeCount = [0] * (numTest + 1)  # add a sentinel at index 0
@@ -69,7 +69,7 @@ class CalibrationGenerator(State, JsonGenBase):
         # set last range's min to null 
         oldRange = calibrationRange.pop(len(calibrationRange) - 1) 
         calibrationRange.append((oldRange[0], None))
-        
+        self.logger.info("number of calibration ranges before: "+str(len(calibrationRange)))
         # merge calibration ranges
         hasConflict = True 
         while (hasConflict):
@@ -118,7 +118,7 @@ class CalibrationGenerator(State, JsonGenBase):
 
     def __merge(self, calibrationRange, indexRange, idx):
         if idx < 0 or idx >= len(indexRange) - 1:
-            print "Invalid index to merge!"
+            self.logger.error("Index out of bound to merge: "+str(idx)) 
             return
         # merge index range
         newRange = (indexRange[idx][0], indexRange[idx + 1][1])
