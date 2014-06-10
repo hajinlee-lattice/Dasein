@@ -159,7 +159,7 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
 
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submitModel() throws Exception {
-        List<String> features = modelingService.getFeatures(model);
+        List<String> features = modelingService.getFeatures(model, true);
         model.setFeatures(features);
         
         List<ApplicationId> appIds = modelingService.submitModel(model);

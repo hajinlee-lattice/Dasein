@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -262,7 +263,7 @@ public class ModelingServiceImpl implements ModelingService {
     }
     
     @Override
-    public List<String> getFeatures(Model model) {
+    public List<String> getFeatures(Model model, boolean depivoted) {
         if (model.getCustomer() == null) {
             throw new LedpException(LedpCode.LEDP_15002);
         }
@@ -272,6 +273,8 @@ public class ModelingServiceImpl implements ModelingService {
         Schema dataSchema = null;
         List<GenericRecord> data = new ArrayList<GenericRecord>();
         List<String> features = new ArrayList<String>();
+        Set<String> pivotedFeatures = new LinkedHashSet<>();
+        
         try {
             HdfsFilenameFilter filter = new HdfsFilenameFilter() {
 
@@ -303,9 +306,15 @@ public class ModelingServiceImpl implements ModelingService {
             Set<String> featureSet = new HashSet<String>();
             for (Field field : dataSchema.getFields()) {
                 columnSet.add(field.getProp("columnName"));
-            }
+            }            
+            
             for (GenericRecord datum : data) {
                 String name = datum.get("barecolumnname").toString();
+                if (!depivoted) {
+                    pivotedFeatures.add(name);
+                    continue;
+                }
+                               
                 String value = datum.get("columnvalue").toString();
                 String datatype = datum.get("Dtype").toString();
                 String featureName = name;
@@ -329,7 +338,11 @@ public class ModelingServiceImpl implements ModelingService {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
         
-        return new ArrayList<String>(features);
+        if (depivoted) {
+            return new ArrayList<String>(features);    
+        } else {
+            return new ArrayList<String>(pivotedFeatures);
+        }        
     }
 
     @Override

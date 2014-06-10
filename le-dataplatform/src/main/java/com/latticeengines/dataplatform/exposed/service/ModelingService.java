@@ -24,5 +24,5 @@ public interface ModelingService {
     
     JobStatus getJobStatus(String applicationId);
 
-    List<String> getFeatures(Model model);
+    List<String> getFeatures(Model model, boolean depivoted);
 }
