@@ -36,7 +36,7 @@ class EnumeratedColumnTransformStep2:
                 df = pd.DataFrame(encoder.transform(dictfreq(d) for d in outputFrame[column]).todense(),columns=(column+'_'+p for p in encoder.feature_names_) )
                 outputFrame=outputFrame.join(df)
                 outputFrame=outputFrame.drop(column,axis=1)
-        elif self._enumMappings['method']==2:      
+        elif self._enumMappings['method']==2:
             for column, encoder in self._enumMappings['list'].iteritems():
                 outputFrame[column] = outputFrame[column].map(lambda s: '__<unknown>__' if s not in encoder.classes_.tolist() else s)
                 encoder.classes_ = np.append(encoder.classes_, '__<unknown>__')
@@ -51,7 +51,7 @@ class ColumnReductionStep:
     
     def transform(self, dataFrame):
         outputFrame = dataFrame[self.outputColumns_]
-        return outputFrame    
+        return outputFrame
 
 class ColumnTypeConversionStep:
     def transform(self, dataFrame):
@@ -71,6 +71,9 @@ class ModelStep:
     
     def getModel(self):
         return self.model_
+    
+    def getModelInputColumns(self):
+        return self.modelInputColumns_
     
     def __init__(self, model, modelInputColumns, outputColumns = [], scoreColumnName = "Score"):
         self.model_ = model
@@ -100,7 +103,7 @@ class BucketingStep:
     def __init__(self, scoreColumn, bucketColumn, bucketRanges, defaultBucket):
         self.bucketRanges_ = bucketRanges
         self.scoreColumn_ = scoreColumn
-        self.bucketColumn_ = bucketColumn        
+        self.bucketColumn_ = bucketColumn
         self.defaultBucket_ = defaultBucket
         
     def transform(self, dataFrame):

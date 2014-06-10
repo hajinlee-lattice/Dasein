@@ -39,40 +39,10 @@ def main(argv):
     
     while 1:
         line = sys.stdin.readline()
-        debugWrite(line)
-           
-        dataRow = None
-        decoder = json.decoder.JSONDecoder(encoding='Latin1')
-        dataRow = decoder.decode(line)
-        
-        debugWrite(str(dataRow))
+        rowDict = getRowToScore(line)
         
         try:
-            decoder = json.decoder.JSONDecoder(encoding='Latin1')
-            dataRow = decoder.decode(line)
-        except Exception as e:
-            debugWrite(str(e))
-            raise 
-        
-        debugWrite('past decoder\r\n')
-        rowDict = {}
-        
-        try:
-            for i in dataRow:
-                serializedValue = decodeDataValue(i['Value']['SerializedValueAndType'])
-                rowDict[i['Key']] = serializedValue
-        except Exception as e:
-            debugWrite(str(e))
-            raise
-      
-        debugWrite('past rowDict \r\n')
-        
-        try:
-            rowsList = [rowDict]
-            dataFrame = pd.DataFrame(rowsList)
-            
-            resultFrame = pipeline.predict(dataFrame)
-
+            resultFrame = predict(pipeline, rowDict)
             debugWrite('writing score \r\n')
             debugWrite(str(resultFrame['Score'][0]))
             
@@ -81,6 +51,35 @@ def main(argv):
             traceback.print_exc(file=open('exception.log', 'w'))
             debugWrite(str(e) + '\r\n')
             raise
+
+def getRowToScore(line):
+    debugWrite(line)
+    try:
+        decoder = json.decoder.JSONDecoder(encoding='Latin1')
+        dataRow = decoder.decode(line)
+        debugWrite(str(dataRow))
+    except Exception as e:
+        debugWrite(str(e))
+        raise 
+        
+    debugWrite('past decoder\r\n')
+    rowDict = {}
+        
+    try:
+        for i in dataRow:
+            serializedValue = decodeDataValue(i['Value']['SerializedValueAndType'])
+            rowDict[i['Key']] = serializedValue
+    except Exception as e:
+        debugWrite(str(e))
+        raise
+      
+    debugWrite('past rowDict \r\n')
+    return rowDict
+        
+def predict(pipeline, rowDict):
+    rowsList = [rowDict]
+    dataFrame = pd.DataFrame(rowsList)
+    return pipeline.predict(dataFrame)
 
 def writeLine(output):
     print str(output).rstrip('\n')

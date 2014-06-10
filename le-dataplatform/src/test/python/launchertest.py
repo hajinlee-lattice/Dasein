@@ -2,11 +2,14 @@ import filecmp
 import json
 import os
 import pickle
+from random import random
+from random import shuffle
 import shutil
 from sklearn.ensemble import RandomForestClassifier
 from unittest import TestCase
 
 from launcher import Launcher
+from leframework import scoringengine as se
 
 
 class LauncherTest(TestCase):
@@ -48,9 +51,52 @@ class LauncherTest(TestCase):
         pipelineScript = "./results/pipeline.py"
         self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][0]["Value"], pipelineScript)
         self.assertTrue(filecmp.cmp(pipelineScript, './leframework.tar.gz/pipeline.py'))
-        
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
         
+        # Test the scoring engine using the generated pipeline that was deserialized
+        lines = self.__getLineToScore(pipeline)
+        rowDict1 = se.getRowToScore(lines[0])
+        resultFrame1 = se.predict(pipeline, rowDict1)
+        
+        rowDict2 = se.getRowToScore(lines[1])
+        resultFrame2 = se.predict(pipeline, rowDict2)
+        print(lines[0])
+        print(lines[1])
+        print("Score = " + str(resultFrame1['Score'][0]))
+        self.assertEquals(resultFrame1['Score'][0], resultFrame2['Score'][0])
+    
+    def __getLineToScore(self, pipeline):
+        '''
+         This tests whether or not the order of input matters. It shuffles the columns so that
+         to simulate VisiDB passing in data in a different order.
+        '''
+        inputColumns1 = pipeline.getPipeline()[0].getModelInputColumns()
+        inputColumns2 = list(pipeline.getPipeline()[0].getModelInputColumns())
+        shuffle(inputColumns2)
+        valueMap = dict()
+        line1 = self.__getLine(inputColumns1, valueMap, True)
+        line2 = self.__getLine(inputColumns2, valueMap, False)
+        return (line1, line2)
+    
+    def __getLine(self, inputColumns, valueMap, generateValue):
+        line = "["
+        first = True
+        for inputColumn in inputColumns:
+            if first:
+                first = False
+            else:
+                line += ","
+            
+            if generateValue:
+                value = random()
+            else:
+                value = valueMap[inputColumn]
+            line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (inputColumn, value)
+            
+            valueMap[inputColumn] = value
+        line += "]"
+        return line
+    
     def __writeToFileFromBinary(self, data, filename):
         pklByteArray = bytearray(data)
         # Write to the file system
