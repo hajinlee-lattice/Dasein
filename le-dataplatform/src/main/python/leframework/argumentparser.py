@@ -2,8 +2,10 @@ import csv
 import json
 import logging
 
+from encoder import HashEncoder
 import fastavro as avro
-import numpy as np
+import pandas as pd
+from pipeline import EnumeratedColumnTransformStep
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -12,6 +14,8 @@ logger = logging.getLogger(name='argumentparser')
 
 
 class ArgumentParser(object):
+    
+    
     """
     This class is responsible for parsing the json file as understood by the 
     LE data platform.
@@ -29,6 +33,7 @@ class ArgumentParser(object):
         self.targets = set(self.metadataSchema["targets"])
         self.keyCols = set(self.metadataSchema["key_columns"])
         self.algorithmProperties = {}
+        self.transformer = None
         try:
             properties = self.metadataSchema["algorithm_properties"]
             self.algorithmProperties = dict(u.split("=") for u in properties.split(" "))
@@ -56,16 +61,22 @@ class ArgumentParser(object):
         k = 0
         # l is the index in the original data set
         l = 0
+        includedNames = []
         included = set()
         self.featureIndex = set()
         self.nameToFeatureIndex = dict()
         self.keyColIndex = set()
+        stringColNames = dict()
+        encoder = HashEncoder()
         for f in self.fields:
             fType = f["type"][0]
             fName = f["name"]
-            if fType != 'string' and (fName in self.features or fName in self.targets or fName in self.keyCols):
+            if fName in self.features or fName in self.targets or fName in self.keyCols:
+                
+                logger.info("Adding %s with index %d" % (fName, l))
+                includedNames.append(fName)
                 included.add(l)
-                print("Adding " + fName)
+                
                 if fName in self.targets:
                     self.targetIndex = k
                 if fName in self.features:
@@ -73,6 +84,8 @@ class ArgumentParser(object):
                     self.nameToFeatureIndex[fName] = k
                 if fName in self.keyCols:
                     self.keyColIndex.add(k)
+                if fType == 'string':
+                    stringColNames[fName] = encoder
                 k = k+1
             l = l+1
         
@@ -93,7 +106,14 @@ class ArgumentParser(object):
             for i in included:
                 try:  
                     if self.isAvro():
-                        rowlist.append(row[self.__getField(i)["name"]])
+                        value = row[self.__getField(i)["name"]]
+                        fType = self.__getField(i)["type"][0]
+                        
+                        if fType != 'string' and value is None:
+                            value = 0.0
+                        
+                        rowlist.append(value)
+                            
                     else:
                         rowlist.append(self.__convertType(row[i], self.__getField(i)["type"][0]))
                 except Exception as e:
@@ -101,7 +121,13 @@ class ArgumentParser(object):
                     logger.error(str(e))
             tmp.append(rowlist)
         self.__populateSchemaWithMetadata(self.getSchema(), self)
-        return np.array(tmp)
+        df = pd.DataFrame(tmp, columns=includedNames)
+        df = self.__convertStringsToInt(df, stringColNames)
+        return df.as_matrix()
+    
+    def __convertStringsToInt(self, dataFrame, stringColNames):
+        self.transformer = EnumeratedColumnTransformStep(stringColNames)
+        return self.transformer.transform(dataFrame)
 
     def __populateSchemaWithMetadata(self, schema, parser):
         schema["featureIndex"] = parser.getFeatureTuple()
@@ -132,3 +158,6 @@ class ArgumentParser(object):
 
     def getKeyColumns(self):
         return tuple(self.keyColIndex)
+    
+    def getDataTransformer(self):
+        return self.transformer

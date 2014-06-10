@@ -1,0 +1,657 @@
+{
+  "type" : "record",
+  "name" : "Q_EventTable_Nutanix",
+  "doc" : "Sqoop import of Q_EventTable_Nutanix",
+  "fields" : [ {
+    "name" : "Nutanix_EventTable_Clean",
+    "type" : [ "int", "null" ],
+    "columnName" : "Nutanix_EventTable_Clean",
+    "sqlType" : "4"
+  }, {
+    "name" : "LeadID",
+    "type" : [ "string", "null" ],
+    "columnName" : "LeadID",
+    "sqlType" : "-9"
+  }, {
+    "name" : "CustomerID",
+    "type" : [ "string", "null" ],
+    "columnName" : "CustomerID",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PeriodID",
+    "type" : [ "int", "null" ],
+    "columnName" : "PeriodID",
+    "sqlType" : "4"
+  }, {
+    "name" : "P1_Target",
+    "type" : [ "int", "null" ],
+    "columnName" : "P1_Target",
+    "sqlType" : "4"
+  }, {
+    "name" : "P1_TargetTraining",
+    "type" : [ "int", "null" ],
+    "columnName" : "P1_TargetTraining",
+    "sqlType" : "4"
+  }, {
+    "name" : "P1_Event",
+    "type" : [ "string", "null" ],
+    "columnName" : "P1_Event",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Company",
+    "type" : [ "string", "null" ],
+    "columnName" : "Company",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Email",
+    "type" : [ "string", "null" ],
+    "columnName" : "Email",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Domain",
+    "type" : [ "string", "null" ],
+    "columnName" : "Domain",
+    "sqlType" : "-9"
+  }, {
+    "name" : "AwardYear",
+    "type" : [ "long", "null" ],
+    "columnName" : "AwardYear",
+    "sqlType" : "-5"
+  }, {
+    "name" : "BankruptcyFiled",
+    "type" : [ "string", "null" ],
+    "columnName" : "BankruptcyFiled",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessAnnualSalesAbs",
+    "type" : [ "double", "null" ],
+    "columnName" : "BusinessAnnualSalesAbs",
+    "sqlType" : "8"
+  }, {
+    "name" : "BusinessAssets",
+    "type" : [ "string", "null" ],
+    "columnName" : "BusinessAssets",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessECommerceSite",
+    "type" : [ "string", "null" ],
+    "columnName" : "BusinessECommerceSite",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessEntityType",
+    "type" : [ "string", "null" ],
+    "columnName" : "BusinessEntityType",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessEstablishedYear",
+    "type" : [ "double", "null" ],
+    "columnName" : "BusinessEstablishedYear",
+    "sqlType" : "8"
+  }, {
+    "name" : "BusinessEstimatedAnnualSales_k",
+    "type" : [ "double", "null" ],
+    "columnName" : "BusinessEstimatedAnnualSales_k",
+    "sqlType" : "8"
+  }, {
+    "name" : "BusinessEstimatedEmployees",
+    "type" : [ "double", "null" ],
+    "columnName" : "BusinessEstimatedEmployees",
+    "sqlType" : "8"
+  }, {
+    "name" : "BusinessFirmographicsParentEmployees",
+    "type" : [ "double", "null" ],
+    "columnName" : "BusinessFirmographicsParentEmployees",
+    "sqlType" : "8"
+  }, {
+    "name" : "BusinessFirmographicsParentRevenue",
+    "type" : [ "double", "null" ],
+    "columnName" : "BusinessFirmographicsParentRevenue",
+    "sqlType" : "8"
+  }, {
+    "name" : "BusinessIndustrySector",
+    "type" : [ "string", "null" ],
+    "columnName" : "BusinessIndustrySector",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessRetirementParticipants",
+    "type" : [ "double", "null" ],
+    "columnName" : "BusinessRetirementParticipants",
+    "sqlType" : "8"
+  }, {
+    "name" : "BusinessSocialPresence",
+    "type" : [ "string", "null" ],
+    "columnName" : "BusinessSocialPresence",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessUrlNumPages",
+    "type" : [ "double", "null" ],
+    "columnName" : "BusinessUrlNumPages",
+    "sqlType" : "8"
+  }, {
+    "name" : "BusinessType",
+    "type" : [ "string", "null" ],
+    "columnName" : "BusinessType",
+    "sqlType" : "-9"
+  }, {
+    "name" : "BusinessVCFunded",
+    "type" : [ "string", "null" ],
+    "columnName" : "BusinessVCFunded",
+    "sqlType" : "-9"
+  }, {
+    "name" : "DerogatoryIndicator",
+    "type" : [ "string", "null" ],
+    "columnName" : "DerogatoryIndicator",
+    "sqlType" : "-9"
+  }, {
+    "name" : "ExperianCreditRating",
+    "type" : [ "string", "null" ],
+    "columnName" : "ExperianCreditRating",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingAgency",
+    "type" : [ "string", "null" ],
+    "columnName" : "FundingAgency",
+    "sqlType" : "-9"
+  }, {
+    "name" : "FundingAmount",
+    "type" : [ "double", "null" ],
+    "columnName" : "FundingAmount",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingAwardAmount",
+    "type" : [ "double", "null" ],
+    "columnName" : "FundingAwardAmount",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingFinanceRound",
+    "type" : [ "double", "null" ],
+    "columnName" : "FundingFinanceRound",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingFiscalQuarter",
+    "type" : [ "double", "null" ],
+    "columnName" : "FundingFiscalQuarter",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingFiscalYear",
+    "type" : [ "double", "null" ],
+    "columnName" : "FundingFiscalYear",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingReceived",
+    "type" : [ "double", "null" ],
+    "columnName" : "FundingReceived",
+    "sqlType" : "8"
+  }, {
+    "name" : "FundingStage",
+    "type" : [ "string", "null" ],
+    "columnName" : "FundingStage",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Intelliscore",
+    "type" : [ "double", "null" ],
+    "columnName" : "Intelliscore",
+    "sqlType" : "8"
+  }, {
+    "name" : "JobsRecentJobs",
+    "type" : [ "double", "null" ],
+    "columnName" : "JobsRecentJobs",
+    "sqlType" : "8"
+  }, {
+    "name" : "JobsTrendString",
+    "type" : [ "string", "null" ],
+    "columnName" : "JobsTrendString",
+    "sqlType" : "-9"
+  }, {
+    "name" : "ModelAction",
+    "type" : [ "string", "null" ],
+    "columnName" : "ModelAction",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PercentileModel",
+    "type" : [ "double", "null" ],
+    "columnName" : "PercentileModel",
+    "sqlType" : "8"
+  }, {
+    "name" : "RetirementAssetsEOY",
+    "type" : [ "double", "null" ],
+    "columnName" : "RetirementAssetsEOY",
+    "sqlType" : "8"
+  }, {
+    "name" : "RetirementAssetsYOY",
+    "type" : [ "double", "null" ],
+    "columnName" : "RetirementAssetsYOY",
+    "sqlType" : "8"
+  }, {
+    "name" : "TotalParticipantsSOY",
+    "type" : [ "double", "null" ],
+    "columnName" : "TotalParticipantsSOY",
+    "sqlType" : "8"
+  }, {
+    "name" : "UCCFilings",
+    "type" : [ "double", "null" ],
+    "columnName" : "UCCFilings",
+    "sqlType" : "8"
+  }, {
+    "name" : "UCCFilingsPresent",
+    "type" : [ "string", "null" ],
+    "columnName" : "UCCFilingsPresent",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Years_in_Business_Code",
+    "type" : [ "string", "null" ],
+    "columnName" : "Years_in_Business_Code",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Non_Profit_Indicator",
+    "type" : [ "string", "null" ],
+    "columnName" : "Non_Profit_Indicator",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_DA_AwardCategory",
+    "type" : [ "string", "null" ],
+    "columnName" : "PD_DA_AwardCategory",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_DA_JobTitle",
+    "type" : [ "string", "null" ],
+    "columnName" : "PD_DA_JobTitle",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_DA_LastSocialActivity_Units",
+    "type" : [ "string", "null" ],
+    "columnName" : "PD_DA_LastSocialActivity_Units",
+    "sqlType" : "-9"
+  }, {
+    "name" : "PD_DA_MonthsPatentGranted",
+    "type" : [ "double", "null" ],
+    "columnName" : "PD_DA_MonthsPatentGranted",
+    "sqlType" : "8"
+  }, {
+    "name" : "PD_DA_MonthsSinceFundAwardDate",
+    "type" : [ "double", "null" ],
+    "columnName" : "PD_DA_MonthsSinceFundAwardDate",
+    "sqlType" : "8"
+  }, {
+    "name" : "PD_DA_PrimarySIC1",
+    "type" : [ "string", "null" ],
+    "columnName" : "PD_DA_PrimarySIC1",
+    "sqlType" : "-9"
+  }, {
+    "name" : "Industry",
+    "type" : [ "string", "null" ],
+    "columnName" : "Industry",
+    "sqlType" : "-9"
+  }, {
+    "name" : "LeadSource",
+    "type" : [ "string", "null" ],
+    "columnName" : "LeadSource",
+    "sqlType" : "-9"
+  }, {
+    "name" : "AnnualRevenue",
+    "type" : [ "double", "null" ],
+    "columnName" : "AnnualRevenue",
+    "sqlType" : "8"
+  }, {
+    "name" : "NumberOfEmployees",
+    "type" : [ "double", "null" ],
+    "columnName" : "NumberOfEmployees",
+    "sqlType" : "8"
+  }, {
+    "name" : "Alexa_MonthsSinceOnline",
+    "type" : [ "double", "null" ],
+    "columnName" : "Alexa_MonthsSinceOnline",
+    "sqlType" : "8"
+  }, {
+    "name" : "Alexa_Rank",
+    "type" : [ "double", "null" ],
+    "columnName" : "Alexa_Rank",
+    "sqlType" : "8"
+  }, {
+    "name" : "Alexa_ReachPerMillion",
+    "type" : [ "double", "null" ],
+    "columnName" : "Alexa_ReachPerMillion",
+    "sqlType" : "8"
+  }, {
+    "name" : "Alexa_ViewsPerMillion",
+    "type" : [ "double", "null" ],
+    "columnName" : "Alexa_ViewsPerMillion",
+    "sqlType" : "8"
+  }, {
+    "name" : "Alexa_ViewsPerUser",
+    "type" : [ "double", "null" ],
+    "columnName" : "Alexa_ViewsPerUser",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_TechTags_Cnt",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_TechTags_Cnt",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_TotalTech_Cnt",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_TotalTech_Cnt",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_ads",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_ads",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_analytics",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_analytics",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_cdn",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_cdn",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_cdns",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_cdns",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_cms",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_cms",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_docinfo",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_docinfo",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_encoding",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_encoding",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_feeds",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_feeds",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_framework",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_framework",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_hosting",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_hosting",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_javascript",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_javascript",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_mapping",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_mapping",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_media",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_media",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_mx",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_mx",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_ns",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_ns",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_parked",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_parked",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_payment",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_payment",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_seo_headers",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_seo_headers",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_seo_meta",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_seo_meta",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_seo_title",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_seo_title",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_Server",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_Server",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_shop",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_shop",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_ssl",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_ssl",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_Web_Master",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_Web_Master",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_Web_Server",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_Web_Server",
+    "sqlType" : "8"
+  }, {
+    "name" : "BW_widgets",
+    "type" : [ "double", "null" ],
+    "columnName" : "BW_widgets",
+    "sqlType" : "8"
+  }, {
+    "name" : "Activity_ClickLink_cnt",
+    "type" : [ "double", "null" ],
+    "columnName" : "Activity_ClickLink_cnt",
+    "sqlType" : "8"
+  }, {
+    "name" : "Activity_VisitWeb_cnt",
+    "type" : [ "double", "null" ],
+    "columnName" : "Activity_VisitWeb_cnt",
+    "sqlType" : "8"
+  }, {
+    "name" : "Activity_InterestingMoment_cnt",
+    "type" : [ "double", "null" ],
+    "columnName" : "Activity_InterestingMoment_cnt",
+    "sqlType" : "8"
+  }, {
+    "name" : "Activity_OpenEmail_cnt",
+    "type" : [ "double", "null" ],
+    "columnName" : "Activity_OpenEmail_cnt",
+    "sqlType" : "8"
+  }, {
+    "name" : "Activity_EmailBncedSft_cnt",
+    "type" : [ "double", "null" ],
+    "columnName" : "Activity_EmailBncedSft_cnt",
+    "sqlType" : "8"
+  }, {
+    "name" : "Activity_FillOutForm_cnt",
+    "type" : [ "double", "null" ],
+    "columnName" : "Activity_FillOutForm_cnt",
+    "sqlType" : "8"
+  }, {
+    "name" : "Activity_UnsubscrbEmail_cnt",
+    "type" : [ "double", "null" ],
+    "columnName" : "Activity_UnsubscrbEmail_cnt",
+    "sqlType" : "8"
+  }, {
+    "name" : "Activity_ClickEmail_cnt",
+    "type" : [ "double", "null" ],
+    "columnName" : "Activity_ClickEmail_cnt",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_CloudService_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_CloudService_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_CloudService_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_CloudService_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_CommTech_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_CommTech_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_CommTech_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_CommTech_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_CRM_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_CRM_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_CRM_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_CRM_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_DataCenterSolutions_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_DataCenterSolutions_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_DataCenterSolutions_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_DataCenterSolutions_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_EnterpriseApplications_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_EnterpriseApplications_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_EnterpriseApplications_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_EnterpriseApplications_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_EnterpriseContent_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_EnterpriseContent_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_EnterpriseContent_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_EnterpriseContent_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_HardwareBasic_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_HardwareBasic_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_HardwareBasic_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_HardwareBasic_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_ITGovernance_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_ITGovernance_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_ITGovernance_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_ITGovernance_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_MarketingPerfMgmt_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_MarketingPerfMgmt_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_MarketingPerfMgmt_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_MarketingPerfMgmt_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_NetworkComputing_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_NetworkComputing_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_NetworkComputing_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_NetworkComputing_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_ProductivitySltns_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_ProductivitySltns_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_ProductivitySltns_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_ProductivitySltns_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_ProjectMgnt_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_ProjectMgnt_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_ProjectMgnt_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_ProjectMgnt_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_SoftwareBasic_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_SoftwareBasic_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_SoftwareBasic_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_SoftwareBasic_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_VerticalMarkets_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_VerticalMarkets_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_VerticalMarkets_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_VerticalMarkets_Two",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_WebOrntdArch_One",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_WebOrntdArch_One",
+    "sqlType" : "8"
+  }, {
+    "name" : "CloudTechnologies_WebOrntdArch_Two",
+    "type" : [ "double", "null" ],
+    "columnName" : "CloudTechnologies_WebOrntdArch_Two",
+    "sqlType" : "8"
+  } ],
+  "tableName" : "Q_EventTable_Nutanix"
+}

@@ -19,5 +19,12 @@
                 <include>pipeline.py</include>
             </includes>
         </fileSet>
+        <fileSet>
+            <directory>src/main/python</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>encoder.py</include>
+            </includes>
+        </fileSet>
     </fileSets>
 </assembly>

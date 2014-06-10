@@ -30,6 +30,7 @@ class LauncherTest(TestCase):
         enginedir = "/leframework/scoringengine.py"
         shutil.copyfile("../../main/python" + enginedir, fwkdir + enginedir)
         shutil.copyfile("../../main/python/pipeline.py", fwkdir + "/pipeline.py")
+        shutil.copyfile("../../main/python/encoder.py", fwkdir + "/encoder.py")
 
     def testExecute(self):
         # These properties won't really be used since these are just unit tests.
@@ -43,14 +44,19 @@ class LauncherTest(TestCase):
         jsonDict = json.loads(open("./results/model.json").read())
         
         payload = "./results/STPipelineBinary.p"
-        self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][1]["Value"], payload)
+        self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][2]["Value"], payload)
         # Load from the file system and deserialize into the model
         pipeline = pickle.load(open(payload, "r"))
-        self.assertTrue(isinstance(pipeline.getPipeline()[0].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
+        self.assertTrue(isinstance(pipeline.getPipeline()[1].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
         
         pipelineScript = "./results/pipeline.py"
-        self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][0]["Value"], pipelineScript)
+        self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][1]["Value"], pipelineScript)
         self.assertTrue(filecmp.cmp(pipelineScript, './leframework.tar.gz/pipeline.py'))
+        
+        encoderScript = "./results/encoder.py"
+        self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][0]["Value"], encoderScript)
+        self.assertTrue(filecmp.cmp(encoderScript, './leframework.tar.gz/encoder.py'))
+
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
         
         # Test the scoring engine using the generated pipeline that was deserialized
@@ -70,8 +76,8 @@ class LauncherTest(TestCase):
          This tests whether or not the order of input matters. It shuffles the columns so that
          to simulate VisiDB passing in data in a different order.
         '''
-        inputColumns1 = pipeline.getPipeline()[0].getModelInputColumns()
-        inputColumns2 = list(pipeline.getPipeline()[0].getModelInputColumns())
+        inputColumns1 = pipeline.getPipeline()[1].getModelInputColumns()
+        inputColumns2 = list(pipeline.getPipeline()[1].getModelInputColumns())
         shuffle(inputColumns2)
         valueMap = dict()
         line1 = self.__getLine(inputColumns1, valueMap, True)

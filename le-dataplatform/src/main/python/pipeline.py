@@ -3,6 +3,11 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 
+def dictfreq(doc):
+    freq = defaultdict(int)
+    freq[doc] += 1
+    return freq
+
 class EnumeratedColumnTransformStep:
     _enumMappings = {}
     def __init__(self, enumMappings):
@@ -11,18 +16,16 @@ class EnumeratedColumnTransformStep:
     def transform(self, dataFrame):
         outputFrame = dataFrame
         for column, encoder in self._enumMappings.iteritems():
-            classSet = set(encoder.classes_.flat)
-            outputFrame[column] = outputFrame[column].map(lambda s: '__<unknown>__' if s not in classSet else s)
-            encoder.classes_ = np.append(encoder.classes_, '__<unknown>__')
-            outputFrame[column] = encoder.transform(outputFrame[column])
+            if hasattr(encoder, 'classes_'):
+                classSet = set(encoder.classes_.flat)
+                outputFrame[column] = outputFrame[column].map(lambda s: '__<unknown>__' if s not in classSet else s)
+                encoder.classes_ = np.append(encoder.classes_, '__<unknown>__')
+            
+            if column in outputFrame:
+                outputFrame[column] = encoder.transform(outputFrame[column])
      
         return outputFrame
 
-def dictfreq(doc):
-    freq=defaultdict(int)
-    freq[doc]+=1
-    return freq
- 
 class EnumeratedColumnTransformStep2:
     _enumMappings = {}
     def __init__(self, enumMappings):

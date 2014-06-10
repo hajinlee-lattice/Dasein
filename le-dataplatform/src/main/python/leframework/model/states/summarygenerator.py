@@ -28,8 +28,8 @@ class SummaryGenerator(State, JsonGenBase):
         
         predictors = sorted(predictors, key = lambda x: [x["Name"]])
         self.summary["Predictors"] = predictors
-        self.summary["RocScore"] = self.__getRocScore(zip(self.mediator.scored,self.mediator.target))
-        self.summary["SegmentChart"] = self.__getSegmentChart(mediator.probRange,mediator.widthRange,mediator.buckets,mediator.averageProbability)
+        self.summary["RocScore"] = self.__getRocScore(zip(self.mediator.scored, self.mediator.target))
+        self.summary["SegmentChart"] = self.__getSegmentChart(mediator.probRange, mediator.widthRange, mediator.buckets, mediator.averageProbability)
     
     @overrides(JsonGenBase)
     def getKey(self):
@@ -85,7 +85,7 @@ class SummaryGenerator(State, JsonGenBase):
     
     def __getPredictorVector(self, colname, record):
         converter = None
-        try:            
+        try:
             if record["Dtype"] == "BND":
                 columnData = self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][colname + "_Continuous"]]
                 minV = record["minV"]

@@ -1,7 +1,6 @@
 from collections import OrderedDict
 import logging
 import pickle
-from sklearn.externals import joblib
 
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
@@ -19,8 +18,9 @@ class ModelGenerator(State, JsonGenBase):
     
     @overrides(State)
     def execute(self):
-        filename = self.mediator.modelLocalDir + '/STPipelineBinary.p'
-        pickle.dump(self.mediator.clf, open(filename, "w"), pickle.HIGHEST_PROTOCOL)
+        mediator = self.mediator
+        filename = mediator.modelLocalDir + '/STPipelineBinary.p'
+        pickle.dump(mediator.clf, open(filename, "w"), pickle.HIGHEST_PROTOCOL)
         model = OrderedDict()
         model["__type"] = "PythonScriptModel:#LatticeEngines.DataBroker.ServiceInterface"
         model["AdjustmentFactor"] = 1
@@ -29,13 +29,19 @@ class ModelGenerator(State, JsonGenBase):
         model["Target"] = 1
         with open("leframework.tar.gz/leframework/scoringengine.py", "r") as pythonFile:
             model["Script"] = "".join(pythonFile.readlines())
-        modelSteps = [ ModelStep(self.mediator.clf, self.mediator.schema["features"]) ]
+
+        modelSteps = []
+        if mediator.transformer is not None:
+            modelSteps.append(mediator.transformer)
+        modelSteps.append(ModelStep(self.mediator.clf, self.mediator.schema["features"]))
+
         pipeline = Pipeline(modelSteps)
         pickle.dump(pipeline, open(filename, "w"), pickle.HIGHEST_PROTOCOL)
         
         pipelineBinaryPkl = self.__getSerializedFile(filename)
         pipelinePkl = self.__getSerializedFile("leframework.tar.gz/pipeline.py")
-        model["SupportFiles"] = [{"Value": pipelinePkl, "Key": "pipeline.py" }, {"Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" }]
+        encoderPkl = self.__getSerializedFile("leframework.tar.gz/encoder.py")
+        model["SupportFiles"] = [{"Value": encoderPkl, "Key": "encoder.py" }, {"Value": pipelinePkl, "Key": "pipeline.py" }, {"Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" }]
         self.model = model
         
     def __getSerializedFile(self,filename):
