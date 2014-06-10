@@ -111,7 +111,7 @@ class SummaryGenerator(State, JsonGenBase):
         inclusive = [((probRange[0]+probRange[1])/2,None)]         
         for i in range (1,len(probRange)-1):
             inclusive.append(((probRange[i]+probRange[i+1])/2,inclusive[i-1][0]))
-        inclusive.append((0,inclusive[i][0]))
+        inclusive.append((0,inclusive[len(probRange)-2][0]))
                   
         # Generate name for each segment
         names = []
