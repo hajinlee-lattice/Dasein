@@ -3,6 +3,8 @@ package com.latticeengines.dataplatform.service.impl;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -26,7 +28,8 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
     private JobEntityMgr jobEntityMgr;
     private int retryWaitTime = 30000;
     private Map<String, WatchdogPlugin> plugins = WatchdogPlugin.getPlugins();
-
+    private static final Log log = LogFactory.getLog(JobWatchdogServiceImpl.class);
+    
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         run(context);
@@ -34,6 +37,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
 
     @Override
     public void run(JobExecutionContext context) throws JobExecutionException {
+    	log.info("Watchdog service is running");
         for (WatchdogPlugin plugin : plugins.values()) {
             plugin.run(context);
         }
