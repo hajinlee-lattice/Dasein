@@ -50,8 +50,8 @@ public class ModelCommandLogServiceImpl implements ModelCommandLogService {
         modelCommandLog.setMessage(message);
 
         // Insert new row for each message
-        modelCommandLogEntityMgr.post(modelCommandLog);
-        modelCommandLogEntityMgr.save();
+        ///modelCommandLogEntityMgr.post(modelCommandLog);
+        ///modelCommandLogEntityMgr.save();
     }
 
     @Override

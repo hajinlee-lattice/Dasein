@@ -6,7 +6,8 @@ import com.latticeengines.domain.exposed.dataplatform.Job;
 
 public interface JobDao extends BaseDao<Job> {
 
-    Set<Job> getByJobIds(Set<String> jobIds);
+    // Set<Job> getByJobIds(Set<String> jobIds);
+    Job findByObjectId(String id);
 
-
+    Set<Job> findAllByObjectIds(Set<String> jobIds);
 }

@@ -12,6 +12,8 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.Model;
@@ -26,10 +28,13 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void run(JobExecutionContext context) throws JobExecutionException {
         ThrottleConfiguration latestConfig = throttleConfigurationEntityMgr.getLatestConfig();
         List<Job> jobsToKill = getJobsToKill(latestConfig);
+        // resubmit preempted jobs excluding jobsToKill
         resubmitPreemptedJobs(jobsToKill);
+        // kill jobs
         throttle(latestConfig, jobsToKill);
     }
 
@@ -47,7 +52,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
                 appIds.add(appId);
             }
         }
-        Set<Job> jobsToResubmit = jobEntityMgr.getByIds(appIds);
+        Set<Job> jobsToResubmit = jobEntityMgr.findAllByObjectIds(appIds); /// getByIds(appIds);
         for (Job job : jobsToResubmit) {
             jobService.resubmitPreemptedJob(job);
         }
@@ -59,9 +64,9 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
         if (config != null) {
             int cutoffIndex = config.getJobRankCutoff();
 
-            List<Model> models = modelEntityMgr.getAll();
+            List<Model> models = modelEntityMgr.findAll();  // getAll();
             for (Model model : models) {
-                List<Job> ownedJobs = model.getJobs();
+                List<Job> ownedJobs = model.getJobs();                
                 for (int i = 1; i <= ownedJobs.size(); i++) {
                     if (i >= cutoffIndex) {
                         log.info("Adding job " + ownedJobs.get(i - 1).getId() + " for model " + model.getId());
@@ -75,6 +80,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
         return jobs;
     }
 
+    // kill jobs specified
     private void throttle(ThrottleConfiguration config, List<Job> jobs) {
         AppsInfo appsInfo = yarnService.getApplications("states=RUNNING");
         ArrayList<AppInfo> appInfos = appsInfo.getApps();

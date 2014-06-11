@@ -18,4 +18,9 @@ public class EventOutgoingDaoImpl extends BaseDaoImpl<EventOutgoing> implements 
         return null;
     }
 
+    @Override
+    protected Class<EventOutgoing> getEntityClass() {
+        return EventOutgoing.class;
+    }
+
 }

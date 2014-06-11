@@ -19,7 +19,7 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
     @Autowired
     private ThrottleConfigurationDao throttleConfigurationDao;
     
-    @Autowired
+   ///     @Autowired
     private SequenceEntityMgr sequenceEntityMgr;
     
     public ThrottleConfigurationEntityMgrImpl() {
@@ -31,17 +31,19 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
         return throttleConfigurationDao;
     }
 
-    @Override
-    public void post(ThrottleConfiguration config) {
-        if (config.getId() == null) {
-            config.setId(sequenceEntityMgr.nextVal(ThrottleConfigurationDao.class));
+    //@Override
+  /*  public void post(ThrottleConfiguration config) {
+        if (config.getPid() == null) {
+            config.setPid(sequenceEntityMgr.nextVal(ThrottleConfigurationDao.class));
         }
-        super.post(config);
-    }
+      //  super.post(config);
+    }*/
+       
+    
     
     @Override
     public List<ThrottleConfiguration> getConfigsSortedBySubmissionTime() {
-        List<ThrottleConfiguration> configs = throttleConfigurationDao.getAll();
+        List<ThrottleConfiguration> configs = throttleConfigurationDao.findAll();  ///getAll();
         
         Collections.sort(configs, new Comparator<ThrottleConfiguration>() {
 

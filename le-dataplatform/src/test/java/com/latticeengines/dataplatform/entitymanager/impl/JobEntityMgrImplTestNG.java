@@ -2,26 +2,27 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.Classifier;
 import com.latticeengines.domain.exposed.dataplatform.Field;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.Model;
+import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
 
 public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
-
-    @Autowired
-    private JobEntityMgrImpl jobEntityMgr;
-
+ 
     private Job job;
 
     @Override
@@ -31,8 +32,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        jobEntityMgr.deleteStoreFile();
-
+        // / jobEntityMgr.deleteStoreFile();
         Classifier classifier = new Classifier();
         classifier.setName("NeuralNetworkClassifier");
         classifier.setSchemaHdfsPath("/datascientist1/iris.json");
@@ -61,53 +61,125 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         classifier.setTestDataHdfsPath("/test/nn_test.dat");
         classifier.setPythonScriptHdfsPath("/datascientist1/nn_train.py");
         classifier.setModelHdfsDir("/datascientist1/result");
-
-        String metadata = classifier.toString();
-
+        
+        //
+        // job
         job = new Job();
         job.setId("application_12345_00001");
+        job.setClient("CLIENT");
         Properties appMasterProperties = new Properties();
         appMasterProperties.setProperty("QUEUE", "Priority0.0");
         Properties containerProperties = new Properties();
+        // setting container metadata
+        String metadata = classifier.toString();
         containerProperties.setProperty("METADATA", metadata);
 
-        job.setAppMasterProperties(appMasterProperties);
-        job.setContainerProperties(containerProperties);
+        job.setAppMasterPropertiesObject(appMasterProperties);
+        job.setContainerPropertiesObject(containerProperties);
+
+        //
+        // model
+        LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
+        logisticRegressionAlgorithm.setPriority(0);
+        logisticRegressionAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
+        logisticRegressionAlgorithm.setSampleName("s0");
+
+        DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
+        decisionTreeAlgorithm.setPriority(1);
+        decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
+        decisionTreeAlgorithm.setSampleName("s1");
         
-        Model model = new Model();
-        model.setId("model_xyz");
-        model.setCustomer("INTERNAL");
-        model.setTable("iris");
-        
+        ModelDefinition modelDef = new ModelDefinition();
+        modelDef.setName("Model Definition For Demo");
+        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
+                logisticRegressionAlgorithm }));
+        // 
+        // in the application, it is assumed that the model definition is defined in the metadata db
+        // also, modelDef 'name' should be unique
+        modelDefinitionEntityMgr.createOrUpdate(modelDef);
+        // 
+        // setup and persist a test model first
+        Model model = new Model();                
+        model.setId("model_"+this.getClass().getSimpleName()+"_0001");
+        model.setName("MODEL TEST NAME");
+        model.setModelDefinition(modelDef);
+        modelEntityMgr.create(model);         
+        // link model--job
         job.setModel(model);
     }
 
-    private void verifyRetrievedJob(String id) {
-        Job retrievedJob = jobEntityMgr.getById(id);
-        assertNotNull(retrievedJob);
-        assertEquals(id, retrievedJob.getId());
-        assertEquals(job.getAppMasterProperties().getProperty("QUEUE"), retrievedJob.getAppMasterProperties()
-                .getProperty("QUEUE"));
-        assertEquals(job.getContainerProperties().getProperty("METADATA"), retrievedJob.getContainerProperties()
-                .getProperty("METADATA"));
+    @AfterClass(groups = "functional")
+    public void cleanup() {
+        
+    }
+    
+    private void assertJobsEqual(Job originalJob,         Job retrievedJob) {
+        assertEquals(retrievedJob.getId(), retrievedJob.getId());
+        assertEquals(retrievedJob.getAppId(), retrievedJob.getAppId());
+        assertEquals(retrievedJob.getAppMasterPropertiesObject(), retrievedJob.getAppMasterPropertiesObject());
+        assertEquals(retrievedJob.getChildJobIds(), retrievedJob.getChildJobIds());
+        assertEquals(retrievedJob.getClient(), retrievedJob.getClient());
+        assertEquals(retrievedJob.getContainerPropertiesObject(), retrievedJob.getContainerPropertiesObject());
+        assertEquals(retrievedJob.getModel(), retrievedJob.getModel());
+        assertEquals(retrievedJob.getParentJobId(), retrievedJob.getParentJobId());
+
+        /*
+         * assertEquals(job.getAppMasterPropertiesObject().getProperty("QUEUE"),
+         * retrievedJob.getAppMasterPropertiesObject() .getProperty("QUEUE"));
+         * assertEquals
+         * (job.getContainerPropertiesObject().getProperty("METADATA"),
+         * retrievedJob.getContainerPropertiesObject()
+         * .getProperty("METADATA"));
+         */
     }
 
+    @Transactional
     @Test(groups = "functional")
-    public void postThenSave() {
-        jobEntityMgr.post(job);
-        verifyRetrievedJob(job.getId());
-        jobEntityMgr.save();
+    public void testPersist() {
+        jobEntityMgr.create(job);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "postThenSave" })
-    public void clear() {
-        jobEntityMgr.clear();
-        assertNull(jobEntityMgr.getById(job.getId()));
+    @Transactional
+    @Test(groups = "functional", dependsOnMethods = { "testPersist" })
+    public void testRetrieval() {
+        Job retrievedJob = new Job();        
+        retrievedJob.setPid(job.getPid());
+        retrievedJob = jobEntityMgr.findByKey(retrievedJob); /// getByKey(retrievedJob);
+        // assert for correctness
+        assertJobsEqual(job, retrievedJob);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "clear" })
-    public void load() {
-        jobEntityMgr.load();
-        verifyRetrievedJob(job.getId());
+    @Transactional
+    @Test(groups = "functional", dependsOnMethods = { "testPersist" })
+    public void testUpdate() {
+        assertNotNull(job.getPid());
+        Properties appMasterProp = job.getAppMasterPropertiesObject();
+        appMasterProp.setProperty("QUEUE", "Priority1.0");
+        job.setAppMasterPropertiesObject(appMasterProp);
+        job.setClient("NEW CLIENT");
+        jobEntityMgr.update(job);
+
+        testRetrieval();
     }
+
+    @Transactional
+    @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
+    public void testDelete() {
+        jobEntityMgr.delete(job);
+    }
+
+    /*
+     * @Test(groups = "functional") public void postThenSave() {
+     * jobEntityMgr.post(job); verifyRetrievedJob(job.getId());
+     * jobEntityMgr.save(); }
+     */
+
+    /*
+     * @Test(groups = "functional", dependsOnMethods = { "postThenSave" })
+     * public void clear() { jobEntityMgr.clear();
+     * assertNull(jobEntityMgr.getById(job.getId())); }
+     * 
+     * @Test(groups = "functional", dependsOnMethods = { "clear" }) public void
+     * load() { jobEntityMgr.load(); verifyRetrievedJob(job.getId()); }
+     */
 }

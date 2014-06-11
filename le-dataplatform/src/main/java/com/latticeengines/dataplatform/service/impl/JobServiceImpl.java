@@ -24,6 +24,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.hadoop.mapreduce.JobRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
@@ -32,6 +34,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
@@ -44,6 +48,8 @@ import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.dataplatform.Classifier;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.dataplatform.Model;
+import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
@@ -70,8 +76,14 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     private Configuration hadoopConfiguration;
 
     @Autowired
+    private ModelEntityMgr modelEntityMgr;
+    
+    @Autowired
+    private ModelDefinitionEntityMgr modelDefinitionEntityMgr;    
+    
+    @Autowired
     private JobEntityMgr jobEntityMgr;
-
+    
     @Autowired
     private MetadataService metadataService;
 
@@ -199,32 +211,54 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public ApplicationId submitJob(com.latticeengines.domain.exposed.dataplatform.Job job) {
-        ApplicationId appId = submitYarnJob(job.getClient(), job.getAppMasterProperties(), job.getContainerProperties());
+        ApplicationId appId = submitYarnJob(job.getClient(), job.getAppMasterPropertiesObject(), job.getContainerPropertiesObject());
         job.setId(appId.toString());
-        jobEntityMgr.post(job);
-        jobEntityMgr.save();
+        Model model = job.getModel();
+                 
+        ModelDefinition modelDefinition = model.getModelDefinition();
+        // find the model def. already setup;  model def is expected to be pre-setup by user
+        ModelDefinition predefinedModelDef = modelDefinitionEntityMgr.findByName(modelDefinition.getName());        
+        if(predefinedModelDef != null)  {
+            // associate persisted model def with model.
+            model.setModelDefinition(predefinedModelDef);
+        } else {
+            // TODO:  this should not be needed; since the way how it works is that model def is already created in persistence
+            modelDefinitionEntityMgr.create(modelDefinition);
+            model.setModelDefinition(modelDefinition);
+        }  
+        // create the model given the associated definition
+        modelEntityMgr.createOrUpdate(model);
+        
         return appId;
     }
 
     @Override
-    public ApplicationId resubmitPreemptedJob(com.latticeengines.domain.exposed.dataplatform.Job job) {
-        if (job.getChildJobIds().size() > 0) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ApplicationId resubmitPreemptedJob(com.latticeengines.domain.exposed.dataplatform.Job resubmitJob) {
+        if (resubmitJob.getChildJobIdList().size() > 0) {
             if (log.isDebugEnabled()) {
-                log.debug("Did not resubmit preempted job " + job.getId() + ". Already resubmitted.");
+                log.debug("Did not resubmit preempted job " + resubmitJob.getId() + ". Already resubmitted.");
             }
             return null;
         }
-        String metadata = job.getContainerProperties().getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
-        job.getContainerProperties().setProperty(PythonContainerProperty.METADATA.name(), metadata);
-        String parentId = job.getId();
-        job.setId(null);
-        job.setParentJobId(parentId);
-        ApplicationId appId = submitJob(job);
-        log.info("Resubmitted " + parentId + " with " + job.getId() + "to queue " + job.getAppMasterProperties().getProperty(AppMasterProperty.QUEUE.name()) + ".");
-        com.latticeengines.domain.exposed.dataplatform.Job parentJob = jobEntityMgr.getById(parentId);
-        parentJob.addChildJobId(job.getId());
-        jobEntityMgr.post(parentJob);
+        String metadata = resubmitJob.getContainerPropertiesObject().getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
+        resubmitJob.getContainerPropertiesObject().setProperty(PythonContainerProperty.METADATA.name(), metadata);
+        ///String parentId = job.getId();
+        Long parentId = resubmitJob.getPid();
+        resubmitJob.setId(null);        
+        resubmitJob.setParentJobId(parentId); 
+        ApplicationId appId = submitJob(resubmitJob);
+        log.info("Resubmitted " + parentId + " with " + resubmitJob.getId() + "to queue " + resubmitJob.getAppMasterPropertiesObject().getProperty(AppMasterProperty.QUEUE.name()) + ".");
+        //
+        // find the parent job 
+        com.latticeengines.domain.exposed.dataplatform.Job parentJob = new com.latticeengines.domain.exposed.dataplatform.Job();
+        parentJob.setPid(parentId);
+        parentJob = jobEntityMgr.findByKey(parentJob); /// jobEntityMgr.getById(parentId);
+        parentJob.addChildJobId(resubmitJob.getId());
+        jobEntityMgr.update(parentJob);
+        ///jobEntityMgr.post(parentJob);
         return appId;
     }
 
@@ -277,7 +311,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             }
             appId = getAppIdFromName(jobName);
             if (appId != null) {
-                return appId;
+                return appId; 
             }
             tries++;
         }
@@ -326,13 +360,13 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Override
     public JobStatus getJobStatus(String applicationId) {
-        com.latticeengines.domain.exposed.dataplatform.Job job = getLeafJob(applicationId);
+        com.latticeengines.domain.exposed.dataplatform.Job leafJob = getLeafJob(applicationId);
         JobStatus jobStatus = new JobStatus();
         jobStatus.setId(applicationId);
-        if (job != null) {
-            applicationId = job.getId();
+        if (leafJob != null) {
+            applicationId = leafJob.getId();
             jobStatus.setId(applicationId);
-            String classifierStr = (String) job.getContainerProperties().get(
+            String classifierStr = (String) leafJob.getContainerPropertiesObject().get(
                     PythonContainerProperty.METADATA_CONTENTS.name());
             if (classifierStr != null) {
                 Classifier classifier = JsonUtils.deserialize(classifierStr, Classifier.class);
@@ -358,10 +392,10 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     private com.latticeengines.domain.exposed.dataplatform.Job getLeafJob(String applicationId) {
-        com.latticeengines.domain.exposed.dataplatform.Job job = jobEntityMgr.getById(applicationId);
+        com.latticeengines.domain.exposed.dataplatform.Job job = jobEntityMgr.findByObjectId(applicationId); /// jobEntityMgr.getById(applicationId);
         
         if (job != null) {
-            List<String> childIds = job.getChildJobIds();
+            List<String> childIds = job.getChildJobIdList();
             for (String jobId : childIds) {
                 return getLeafJob(jobId);
             }

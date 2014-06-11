@@ -75,7 +75,7 @@ public class ModelCommandCallable implements Callable<Integer> {
     private void executeWorkflow() {             
         if (modelCommand.isNew()) {                          
             modelCommand.setCommandStatus(ModelCommandStatus.IN_PROGRESS);
-            modelCommandEntityMgr.post(modelCommand);            
+            //modelCommandEntityMgr.post(modelCommand);            
                         
             executeYarnStep(ModelCommandStep.LOAD_DATA);            
         } else { // modelCommand IN_PROGRESS
@@ -118,14 +118,15 @@ public class ModelCommandCallable implements Callable<Integer> {
             executeYarnStep(nextStep); 
         }                         
 
-        modelCommandEntityMgr.post(modelCommand);      
+        //modelCommandEntityMgr.post(modelCommand);     
+        
     }
    
     private void handleJobFailed() {     
         modelCommandLogService.logCompleteStep(modelCommand.getCommandId(), modelCommand.getModelCommandStep(), ModelCommandStatus.FAIL);
         
         modelCommand.setCommandStatus(ModelCommandStatus.FAIL);                
-        modelCommandEntityMgr.post(modelCommand);        
+        ///modelCommandEntityMgr.post(modelCommand);        
     }
     
     private void executeYarnStep(ModelCommandStep step) {
@@ -150,7 +151,7 @@ public class ModelCommandCallable implements Callable<Integer> {
         ModelCommandState commandState = new ModelCommandState();                   
         commandState.setCommandId(modelCommand.getCommandId());
         commandState.setModelCommandStep(ModelCommandStep.SEND_JSON);                                                                               
-        modelCommandStateEntityMgr.post(commandState);        
+        ///modelCommandStateEntityMgr.post(commandState);        
              
         modelStepProcessor.executeJsonStep(modelCommand.getDeploymentExternalId(), modelCommand.getCommandId(), modelCommand.getCommandParameters());
         
@@ -163,6 +164,6 @@ public class ModelCommandCallable implements Callable<Integer> {
         commandState.setDiagnostics(jobStatus.getDiagnostics());
         commandState.setTrackingUrl(jobStatus.getTrackingUrl());
         commandState.setElapsedTimeInMillis(System.currentTimeMillis()-jobStatus.getStartTime());                
-        modelCommandStateEntityMgr.post(commandState);
+        ///modelCommandStateEntityMgr.post(commandState);
     }
 }       

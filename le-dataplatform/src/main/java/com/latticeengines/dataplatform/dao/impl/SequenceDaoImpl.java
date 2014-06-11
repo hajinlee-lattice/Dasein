@@ -1,25 +1,25 @@
 package com.latticeengines.dataplatform.dao.impl;
 
+ 
 import java.util.NoSuchElementException;
-
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.dao.SequenceDao;
 
-@Component("sequenceDao")
-public class SequenceDaoImpl extends BaseDaoImpl<Sequence> implements SequenceDao {
+/// @Component("sequenceDao")
+
+public class SequenceDaoImpl extends BaseDaoImpl implements SequenceDao {
     
     public SequenceDaoImpl() {
         super();
         getStore().setAutoSave(true);
     }
 
-    @Override
+    
     public Sequence deserialize(String id, String content) {
         return new Sequence(Long.parseLong(content));
     }
 
-    @Override
+    
     public String serialize(Sequence sequence) {
         return Long.toString(sequence.getId());
     }
@@ -35,6 +35,16 @@ public class SequenceDaoImpl extends BaseDaoImpl<Sequence> implements SequenceDa
         value = value + 1;
         getStore().setProperty(key, value);
         return value;
+    }
+
+
+   
+
+
+    @Override
+    protected Class getEntityClass() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

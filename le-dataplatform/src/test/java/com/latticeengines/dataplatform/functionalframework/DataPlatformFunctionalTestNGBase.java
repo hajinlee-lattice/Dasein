@@ -37,9 +37,10 @@ import org.springframework.yarn.test.context.YarnCluster;
 import org.springframework.yarn.test.junit.ApplicationInfo;
 import org.testng.annotations.BeforeClass;
 
-import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
-import com.latticeengines.dataplatform.entitymanager.impl.ModelEntityMgrImpl;
-import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
+import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
@@ -50,13 +51,16 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     protected Configuration yarnConfiguration;
 
     @Autowired
-    private JobEntityMgrImpl jobEntityMgr;
+    protected JobEntityMgr jobEntityMgr;
     
     @Autowired
-    private ModelEntityMgrImpl modelEntityMgr;
+    protected ModelEntityMgr modelEntityMgr;
     
     @Autowired
-    protected ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
+    protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
+     
+    @Autowired
+    protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     @Value("${dataplatform.datasource.host}")
     protected String dbHost;
@@ -111,28 +115,16 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
             
         });
     }
-    
-    public void deleteAllStores() {
-        if (jobEntityMgr != null) {
-            jobEntityMgr.deleteStoreFile();
-        }
-        if (modelEntityMgr != null) {
-            modelEntityMgr.deleteStoreFile();
-        }
-        if (throttleConfigurationEntityMgr != null) {
-            throttleConfigurationEntityMgr.deleteStoreFile();
-        }
-    }
-    
-    public void setJobEntityMgr(JobEntityMgrImpl jobEntityMgr) {
+        
+    public void setJobEntityMgr(JobEntityMgr jobEntityMgr) {
         this.jobEntityMgr = jobEntityMgr;
     }
     
-    public void setModelEntityMgr(ModelEntityMgrImpl modelEntityMgr) {
+    public void setModelEntityMgr(ModelEntityMgr modelEntityMgr) {
         this.modelEntityMgr = modelEntityMgr;
     }
     
-    public void setThrottleConfigurationEntityMgr(ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr) {
+    public void setThrottleConfigurationEntityMgr(ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr) {
         this.throttleConfigurationEntityMgr = throttleConfigurationEntityMgr;
     }
     
@@ -146,7 +138,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     public void setupRunEnvironment() throws Exception {
         log.info("Test name = " + this.getClass());
         
-        deleteAllStores();
+        //deleteAllStores();
         if (!doYarnClusterSetup()) {
             return;
         }

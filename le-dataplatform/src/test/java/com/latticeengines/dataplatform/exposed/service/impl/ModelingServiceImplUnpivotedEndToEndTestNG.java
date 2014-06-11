@@ -18,8 +18,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
-import com.latticeengines.dataplatform.entitymanager.impl.ModelEntityMgrImpl;
+import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -54,10 +54,10 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     private ModelingService modelingService;
     
     @Autowired
-    private JobEntityMgrImpl jobEntityMgr;
+    private JobEntityMgr jobEntityMgr;
 
     @Autowired
-    private ModelEntityMgrImpl modelEntityMgr;
+    private ModelEntityMgr modelEntityMgr;
     
     private Model model = null;
     
@@ -70,9 +70,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @BeforeClass(groups = "functional")
-    public void setup() throws Exception {
-        modelEntityMgr.deleteStoreFile();
-        
+    public void setup() throws Exception {                
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
         fs.delete(new Path("/user/s-analytics/customers/Nutanix"), true);
@@ -101,7 +99,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         m.setName("Model Submission1");
         m.setTable("Q_EventTable_Nutanix");
         m.setMetadataTable("EventMetadata_Nutanix");
-        m.setTargets(Arrays.<String> asList(new String[] { "P1_Event" }));
+        m.setTargetsList(Arrays.<String> asList(new String[] { "P1_Event" }));
         m.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         m.setCustomer("Nutanix");
         m.setDataFormat("avro");
@@ -159,7 +157,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
-        model.setFeatures(features);
+        model.setFeaturesList(features);
         
         List<ApplicationId> appIds = modelingService.submitModel(model);
 

@@ -8,19 +8,19 @@ import com.latticeengines.dataplatform.dao.SequenceDao;
 import com.latticeengines.dataplatform.dao.impl.Sequence;
 import com.latticeengines.dataplatform.entitymanager.SequenceEntityMgr;
 
-@Component("sequenceEntityMgr")
-public class SequenceEntityMgrImpl extends BaseEntityMgrImpl<Sequence> implements SequenceEntityMgr {
+/// @Component("sequenceEntityMgr")
+public class SequenceEntityMgrImpl extends BaseEntityMgrImpl  implements SequenceEntityMgr {
 
-    @Autowired
+    /// @Autowired
     private SequenceDao sequenceDao;
     
     public SequenceEntityMgrImpl() {
         super();
     }
 
-    @Override
+  @Override
     public BaseDao<Sequence> getDao() {
-        return sequenceDao;
+        return null;
     }
 
     @Override

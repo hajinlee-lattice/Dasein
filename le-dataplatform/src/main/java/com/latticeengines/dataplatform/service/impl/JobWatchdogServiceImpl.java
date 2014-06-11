@@ -7,6 +7,8 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
@@ -33,6 +35,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void run(JobExecutionContext context) throws JobExecutionException {
         for (WatchdogPlugin plugin : plugins.values()) {
             plugin.run(context);

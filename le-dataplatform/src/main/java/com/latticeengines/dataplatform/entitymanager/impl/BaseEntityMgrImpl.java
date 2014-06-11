@@ -2,48 +2,79 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 
 import java.util.List;
 
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.entitymanager.BaseEntityMgr;
-import com.latticeengines.domain.exposed.dataplatform.HasId;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-public abstract class BaseEntityMgrImpl<T extends HasId<?>> implements BaseEntityMgr<T> {
+public abstract class BaseEntityMgrImpl<T extends HasPid> implements BaseEntityMgr<T> {
 
     public BaseEntityMgrImpl() {
     }
-    
-    public abstract BaseDao<T> getDao();
-    
-    public void deleteStoreFile() {
-        getDao().deleteStoreFile();
-    }
-    
+
+    public abstract BaseDao<T> getDao(); 
+
+    @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void save() {
-        getDao().save();
+    public void create(T entity) {
+        getDao().create(entity);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void createOrUpdate(T entity) {
+        getDao().createOrUpdate(entity);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void update(T entity) {
+        getDao().update(entity);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void delete(T entity) {
+        getDao().delete(entity);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public boolean containInSession(T entity) {
+        return getDao().containInSession(entity);
+    }
+
+    /*
+     * public void deleteStoreFile() { getDao().deleteStoreFile(); }
+     * 
+     * @Override public void save() { getDao().save(); }
+     * 
+     * @Override public void load() { getDao().load(); }
+     * 
+     * @Override public void post(T entity) { getDao().post(entity); }
+     * 
+     * @Override public void clear() { getDao().clear(); }
+     */
+    /**
+     * get object by key. entity.getPid() must NOT be empty.
+     */
+    @Override
+    public T findByKey(T entity) {
+        return getDao().findByKey(entity);
     }
 
     @Override
-    public void load() {
-        getDao().load();
+    public List<T> findAll() {
+        return getDao().findAll();
     }
-    
-    @Override
-    public void post(T entity) {
-        getDao().post(entity);
-    }
-    
-    @Override
-    public void clear() {
-        getDao().clear();
-    }
-    
-    @Override
-    public T getById(Object id) {
-        return (T) getDao().getById(id.toString());
-    }
-    
-    @Override
-    public List<T> getAll() {
-        return getDao().getAll();
-    }
+
+    /*
+     * @Override public T getById(Object id) { return (T)
+     * getDao().getById(id.toString()); }
+     * 
+     * @Override public List<T> getAll() { return getDao().getAll(); }
+     */
 }

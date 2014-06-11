@@ -16,6 +16,12 @@ public class ModelCommandDaoImpl extends BaseDaoImpl<ModelCommand> implements Mo
     }
 
     @Override
+    protected Class<ModelCommand> getEntityClass() {
+        return ModelCommand.class;
+    }
+
+    
+    @Override
     public ModelCommand deserialize(String id, String content) {
         // TODO Auto-generated method stub
         return null;
@@ -26,5 +32,6 @@ public class ModelCommandDaoImpl extends BaseDaoImpl<ModelCommand> implements Mo
         // TODO select where CommandStatus = 0 OR CommandStatus = 1
         return Collections.emptyList();
     }
+
 
 }

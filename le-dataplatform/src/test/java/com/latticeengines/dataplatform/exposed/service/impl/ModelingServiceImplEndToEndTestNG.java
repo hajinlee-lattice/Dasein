@@ -54,14 +54,6 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
     @Autowired
     private ModelingService modelingService;
     
-    @Autowired
-    private JobEntityMgrImpl jobEntityMgr;
-
-    @Autowired
-    private ModelEntityMgrImpl modelEntityMgr;
-    
-    @Autowired
-    private ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
     
     private Model model = null;
   
@@ -71,12 +63,12 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
     
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
-        throttleConfigurationEntityMgr.deleteStoreFile();
+        //throttleConfigurationEntityMgr.deleteStoreFile();
     }
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        modelEntityMgr.deleteStoreFile();
+        ///modelEntityMgr.deleteStoreFile();
         
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
@@ -96,6 +88,10 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
         modelDef.setName("Model1");
         modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 logisticRegressionAlgorithm }));
+        // 
+        // in the application, it is assumed that the model definition is defined in the metadata db
+        // also, modelDef 'name' should be unique
+        modelDefinitionEntityMgr.createOrUpdate(modelDef);
 
         model = createModel(modelDef);
     }
@@ -106,7 +102,7 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
         m.setName("Model Submission1");
         m.setTable("Q_EventTableDepivot_FunctionalTest");
         m.setMetadataTable("EventMetadata_FunctionalTest");
-        m.setTargets(Arrays.<String> asList(new String[] { "P1_Event_1" }));
+        m.setTargetsList(Arrays.<String> asList(new String[] { "P1_Event_1" }));
         m.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         m.setCustomer("Nutanix");
         m.setDataFormat("avro");
@@ -164,7 +160,7 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, true);
-        model.setFeatures(features);
+        model.setFeaturesList(features);
         
         List<ApplicationId> appIds = modelingService.submitModel(model);
 

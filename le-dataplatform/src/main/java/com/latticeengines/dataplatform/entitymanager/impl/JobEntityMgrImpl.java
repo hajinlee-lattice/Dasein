@@ -1,21 +1,25 @@
 package com.latticeengines.dataplatform.entitymanager.impl;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import org.mortbay.jetty.servlet.HashSessionIdManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.JobDao;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.Job;
+import com.latticeengines.domain.exposed.dataplatform.Model;
 
 @Component("jobEntityMgr")
 public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntityMgr {
 
     @Autowired
     private JobDao jobDao;
-    
+
     public JobEntityMgrImpl() {
         super();
     }
@@ -26,8 +30,27 @@ public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntit
     }
 
     @Override
-    public Set<Job> getByIds(Set<String> jobIds) {
-        return jobDao.getByJobIds(jobIds);
+    public Job findByObjectId(String id) {
+        return jobDao.findByObjectId(id);
     }
 
+    @Override
+    /**
+     * find all Jobs by its object id (JobId)
+     * 
+     * @param <a> jobIds - job ids to find by.   If argument is empty or null, a empty set is returned.
+     * @return - jobs satisfying the jobids querying condition;  empty Set if nothing is found.
+     * 
+     *  
+     */
+    public Set<Job> findAllByObjectIds(Set<String> jobIds) {
+        if(jobIds == null || jobIds.isEmpty())
+            return new HashSet<Job>();
+                    
+        return jobDao.findAllByObjectIds(jobIds);
+    }
+    /*
+     * @Override public Set<Job> getByIds(Set<String> jobIds) { return
+     * jobDao.getByJobIds(jobIds); }
+     */
 }

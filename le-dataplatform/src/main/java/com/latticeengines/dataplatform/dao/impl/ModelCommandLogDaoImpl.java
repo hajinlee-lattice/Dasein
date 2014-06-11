@@ -18,4 +18,9 @@ public class ModelCommandLogDaoImpl extends BaseDaoImpl<ModelCommandLog> impleme
         return null;
     }
 
+    @Override
+    protected Class<ModelCommandLog> getEntityClass() {
+        return ModelCommandLog.class;
+    }
+
 }

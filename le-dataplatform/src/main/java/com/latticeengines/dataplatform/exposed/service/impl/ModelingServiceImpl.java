@@ -24,6 +24,8 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -69,6 +71,11 @@ public class ModelingServiceImpl implements ModelingService {
     private String customerBaseDir;
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    /**
+     * @param model
+     * required attributes: job, modeldefinition - it should be something predefined.
+     */
     public List<ApplicationId> submitModel(Model model) {
         setupModelProperties(model);
         List<ApplicationId> applicationIds = new ArrayList<ApplicationId>();
@@ -83,7 +90,6 @@ public class ModelingServiceImpl implements ModelingService {
         }
 
         Collections.sort(algorithms, new Comparator<Algorithm>() {
-
             @Override
             public int compare(Algorithm o1, Algorithm o2) {
                 return o1.getPriority() - o2.getPriority();
@@ -99,14 +105,12 @@ public class ModelingServiceImpl implements ModelingService {
                 continue;
             }
 
-            Job job = createJob(model, algorithm);
+            Job job = createJob(model, algorithm);              
             model.addJob(job);
+            /** jobservice is responsible for persistence during submitjob() **/
             applicationIds.add(jobService.submitJob(job));
         }
-
-        modelEntityMgr.post(model);
-        modelEntityMgr.save();
-
+        
         return applicationIds;
     }
 
@@ -122,9 +126,9 @@ public class ModelingServiceImpl implements ModelingService {
         Classifier classifier = new Classifier();
 
         classifier.setModelHdfsDir(model.getModelHdfsDir());
-        classifier.setFeatures(model.getFeatures());
-        classifier.setTargets(model.getTargets());
-        classifier.setKeyCols(model.getKeyCols());
+        classifier.setFeatures(model.getFeaturesList());
+        classifier.setTargets(model.getTargetsList());
+        classifier.setKeyCols(model.getKeyColsList());
         classifier.setPythonScriptHdfsPath(algorithm.getScript());
         classifier.setDataFormat(model.getDataFormat());
         classifier.setAlgorithmProperties(algorithm.getAlgorithmProperties());
@@ -218,8 +222,8 @@ public class ModelingServiceImpl implements ModelingService {
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
         job.setClient("pythonClient");
-        job.setAppMasterProperties(appMasterProperties);
-        job.setContainerProperties(containerProperties);
+        job.setAppMasterPropertiesObject(appMasterProperties);
+        job.setContainerPropertiesObject(containerProperties);
         return job;
     }
 
@@ -232,13 +236,14 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void throttle(ThrottleConfiguration config) {
-        config.setTimestamp(System.currentTimeMillis());
-        throttleConfigurationEntityMgr.post(config);
-        throttleConfigurationEntityMgr.save();
+        config.setTimestampLong(System.currentTimeMillis());
+        throttleConfigurationEntityMgr.create(config);        
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public ApplicationId createSamples(SamplingConfiguration config) {
         Model model = new Model();
         model.setCustomer(config.getCustomer());

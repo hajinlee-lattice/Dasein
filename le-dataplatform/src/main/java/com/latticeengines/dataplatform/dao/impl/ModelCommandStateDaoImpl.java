@@ -18,5 +18,10 @@ public class ModelCommandStateDaoImpl extends BaseDaoImpl<ModelCommandState> imp
         return null;
     }
 
+    @Override
+    protected Class<ModelCommandState> getEntityClass() {        
+        return ModelCommandState.class;
+    }
+
 
 }

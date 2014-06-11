@@ -16,6 +16,8 @@
         <le.perf.version>1.0.0-SNAPSHOT</le.perf.version>
         <le.common.version>1.0.0-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.0-SNAPSHOT</le.domain.version>
+        <spring.version>3.2.3.RELEASE</spring.version>
+        <hibernate.version>4.1.9.Final</hibernate.version>
     </properties>
 
     <parent>
@@ -243,11 +245,42 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.30</version>
             <scope>test</scope>
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
             <version>4.0</version>
+        </dependency>
+
+<!--         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+        </dependency> -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+<!--         <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0</version>
+        </dependency>
+ -->        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
         </dependency>
     </dependencies>
 

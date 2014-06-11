@@ -60,8 +60,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional.scheduler")
     public void setup() throws Exception {
-        jobEntityMgr.deleteStoreFile();
-        throttleConfigurationEntityMgr.deleteStoreFile();
+        ///jobEntityMgr.deleteStoreFile();
+        ///throttleConfigurationEntityMgr.deleteStoreFile();
         classifier1Min = new Classifier();
         classifier1Min.setName("IrisClassifier");
         classifier1Min.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
@@ -247,8 +247,8 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         Job job = new Job();
         job.setClient("pythonClient");
         Properties[] properties = getPropertiesPair(classifier, queue, priority, customer);
-        job.setAppMasterProperties(properties[0]);
-        job.setContainerProperties(properties[1]);
+        job.setAppMasterPropertiesObject(properties[0]);
+        job.setContainerPropertiesObject(properties[1]);
         return job;
     }
 

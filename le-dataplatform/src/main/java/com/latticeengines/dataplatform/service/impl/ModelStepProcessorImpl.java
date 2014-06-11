@@ -338,13 +338,13 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
             model.setTable(commandParameters.getEventTable());
         }
         model.setMetadataTable(commandParameters.getMetadataTable());
-        model.setTargets(commandParameters.getModelTargets());
+        model.setTargetsList(commandParameters.getModelTargets());
         model.setKeyCols(commandParameters.getKeyCols());
         model.setCustomer(customer);
         model.setDataFormat(AVRO);
                
         List<String> features = modelingService.getFeatures(model, false);
-        model.setFeatures(features);
+        model.setFeaturesList(features);
         
         return model;
     }
