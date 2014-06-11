@@ -53,13 +53,13 @@ public class JobUnitTestNG {
         Properties containerProperties = new Properties();
         containerProperties.setProperty("METADATA", metadata);
         
-        job.setAppMasterProperties(appMasterProperties);
-        job.setContainerProperties(containerProperties);
+        job.setAppMasterPropertiesObject(appMasterProperties);
+        job.setContainerPropertiesObject(containerProperties);
         
         String jsonString = job.toString();
 
         Job deserializedJob = JsonUtils.deserialize(jsonString, Job.class);
-        assertEquals(metadata, deserializedJob.getContainerProperties().getProperty("METADATA"));
-        assertEquals("Priority0.0", deserializedJob.getAppMasterProperties().getProperty("QUEUE"));
+        assertEquals(metadata, deserializedJob.getContainerPropertiesObject().getProperty("METADATA"));
+        assertEquals("Priority0.0", deserializedJob.getAppMasterPropertiesObject().getProperty("QUEUE"));
     }
 }

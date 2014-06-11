@@ -3,16 +3,27 @@ package com.latticeengines.domain.exposed.dataplatform.dlorchestration;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.dataplatform.HasId;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
+public class ModelCommand implements HasPid, HasId<Integer> {
 
-public class ModelCommand implements HasId<Integer> {
-
+    private Long pid;
     private int commandId;
     private String deploymentExternalId;
     private ModelCommandStatus commandStatus;
     private List<ModelCommandParameter> commandParameters;
     private ModelCommandStep modelCommandStep;
-    
+
+    @Override
+    public Long getPid() {
+        return this.pid;
+    }
+
+    @Override
+    public void setPid(Long id) {
+        this.pid = id;
+    }
+
     @Override
     public Integer getId() {
         return commandId;
@@ -46,13 +57,13 @@ public class ModelCommand implements HasId<Integer> {
     public void setCommandParameters(List<ModelCommandParameter> commandParameters) {
         this.commandParameters = commandParameters;
     }
-    
+
     public boolean isNew() {
-        return commandStatus.equals(ModelCommandStatus.NEW); 
+        return commandStatus.equals(ModelCommandStatus.NEW);
     }
-    
+
     public boolean isInProgress() {
-        return commandStatus.equals(ModelCommandStatus.IN_PROGRESS); 
+        return commandStatus.equals(ModelCommandStatus.IN_PROGRESS);
     }
 
     public Integer getCommandId() {
@@ -70,4 +81,5 @@ public class ModelCommand implements HasId<Integer> {
     public void setModelCommandStep(ModelCommandStep modelCommandStep) {
         this.modelCommandStep = modelCommandStep;
     }
+
 }

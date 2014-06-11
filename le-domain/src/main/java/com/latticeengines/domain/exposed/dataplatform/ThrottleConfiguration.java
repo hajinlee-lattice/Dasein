@@ -1,72 +1,114 @@
 package com.latticeengines.domain.exposed.dataplatform;
 
+import java.sql.Timestamp;
+
+import javax.persistence.Basic;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 
-public class ThrottleConfiguration implements HasId<Long>{
+@Entity
+@Table(name = "THROTTLE_CONFIGURATION")
+public class ThrottleConfiguration implements HasPid {
 
-    private Boolean immediate = Boolean.FALSE;
-    private Boolean enabled = Boolean.TRUE;
-    private Integer jobRankCutoff;
-    private Long id;
-    private Long timestamp;
+	private Boolean immediate = Boolean.FALSE;
+	private Boolean enabled = Boolean.TRUE;
+	private Integer jobRankCutoff;
+	private Long pid;
+	private Timestamp timestamp;
 
-    @JsonProperty("immediate")
-    public boolean isImmediate() {
-        return immediate;
-    }
+	public ThrottleConfiguration() {
+	    
+	}
+	
+	public ThrottleConfiguration(Long pid) {
+	    this.pid = pid;	    
+	}
+	
+	@Override
+	@JsonIgnore
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Basic(optional = false)
+	@Column(name = "PID", unique = true, nullable = false)
+	public Long getPid() {
+		return pid;
+	}
 
-    @JsonProperty("immediate")
-    public void setImmediate(Boolean immediate) {
-        this.immediate = immediate;
-    }
+	@Override
+	@JsonIgnore
+	public void setPid(Long id) {
+		this.pid = id;
+	}
 
-    @JsonProperty("jobrank_cutoff")
-    public Integer getJobRankCutoff() {
-        return jobRankCutoff;
-    }
+	@JsonProperty("immediate")
+	@Column(name = "IMMEDIATE")
+	public boolean isImmediate() {
+		return immediate;
+	}
 
-    @JsonProperty("jobrank_cutoff")
-    public void setJobRankCutoff(Integer jobRankCutoff) {
-        this.jobRankCutoff = jobRankCutoff;
-    }
-    
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
-    }
+	@JsonProperty("immediate")
+	public void setImmediate(Boolean immediate) {
+		this.immediate = immediate;
+	}
 
-    @Override
-    @JsonIgnore
-    public Long getId() {
-        return id;
-    }
+	@JsonProperty("jobrank_cutoff")
+	@Column(name = "JOB_RANK_CUTOFF")
+	public Integer getJobRankCutoff() {
+		return jobRankCutoff;
+	}
 
-    @Override
-    @JsonIgnore
-    public void setId(Long id) {
-        this.id = id;
-    }
+	@JsonProperty("jobrank_cutoff")
+	public void setJobRankCutoff(Integer jobRankCutoff) {
+		this.jobRankCutoff = jobRankCutoff;
+	}
 
-    public Long getTimestamp() {
-        return timestamp;
-    }
+	@Column(name = "TIMESTAMP")
+	public Timestamp getTimestamp() {
+		return timestamp;
+	}
 
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
-    }
+	public void setTimestamp(Timestamp ts) {
+		this.timestamp = ts;
+	}
 
-    @JsonProperty("enabled")
-    public Boolean isEnabled() {
-        return enabled;
-    }
+	@Transient
+	public Long getTimestampLong() {
+	    if(this.timestamp==null)
+	        return null;
+	    
+		return this.timestamp.getTime();
+	}
 
-    @JsonProperty("enabled")
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
+	public void setTimestampLong(Long timestamp) {
+	    if(timestamp!=null) {
+	        this.timestamp = new Timestamp(timestamp);
+	    }
+	}
 
- 
+	@JsonProperty("enabled")
+	@Column(name = "ENABLED")
+	public Boolean isEnabled() {
+		return enabled;
+	}
+
+	@JsonProperty("enabled")
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	@Override
+	public String toString() {
+		return JsonUtils.serialize(this);
+	}
+
 }

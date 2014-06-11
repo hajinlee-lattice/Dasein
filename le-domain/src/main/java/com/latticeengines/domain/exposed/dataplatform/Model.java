@@ -3,13 +3,34 @@ package com.latticeengines.domain.exposed.dataplatform;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.apache.commons.lang.builder.EqualsBuilder;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.StringTokenUtils;
 
-public class Model implements HasName, HasId<String> {
+@Entity
+@Table(name = "MODEL")
+public class Model implements HasName, HasPid, HasId<String> {
 
+    private Long pid;
     private String id;
     private String name;
     private String dataHdfsPath;
@@ -26,8 +47,25 @@ public class Model implements HasName, HasId<String> {
     private String table;
     private String metadataTable;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    @Basic(optional = false)
+    @Column(name = "PID", unique = true, nullable = false)
+    @Override
+    public Long getPid() {
+        return pid;
+    }
+
+    @JsonIgnore
+    @Override
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
+
     @Override
     @JsonProperty("name")
+    @Column(name = "NAME")
     public String getName() {
         return name;
     }
@@ -39,6 +77,9 @@ public class Model implements HasName, HasId<String> {
     }
 
     @JsonProperty("model_definition")
+    @ManyToOne(cascade = { CascadeType.DETACH }, fetch = FetchType.LAZY)
+    // TODO
+    @JoinColumn(name = "FK_MODEL_DEF_ID")
     public ModelDefinition getModelDefinition() {
         return modelDefinition;
     }
@@ -46,29 +87,60 @@ public class Model implements HasName, HasId<String> {
     @JsonProperty("model_definition")
     public void setModelDefinition(ModelDefinition modelDefinition) {
         this.modelDefinition = modelDefinition;
+        if (this.modelDefinition != null)
+            this.modelDefinition.addModel(this);
     }
 
+    @Column(name = "FEATURES")
+    @JsonIgnore
+    public String getFeatures() {
+        return StringTokenUtils.listToString(this.features);
+    }
+
+    /**
+     * @param featuresString
+     *            - string of comma-separated features
+     **/
+    @JsonIgnore
+    public void setFeatures(String featuresString) {
+        this.features = StringTokenUtils.stringToList(featuresString);
+    }
+
+    @Transient
     @JsonProperty("features")
-    public List<String> getFeatures() {
+    public List<String> getFeaturesList() {
         return features;
     }
 
     @JsonProperty("features")
-    public void setFeatures(List<String> features) {
+    public void setFeaturesList(List<String> features) {
         this.features = features;
     }
 
+    @Transient
     @JsonProperty("targets")
-    public List<String> getTargets() {
+    public List<String> getTargetsList() {
         return targets;
     }
 
+    @JsonIgnore
+    @Column(name = "TARGETS")
+    public String getTargets() {
+        return StringTokenUtils.listToString(this.targets);
+    }
+
     @JsonProperty("targets")
-    public void setTargets(List<String> targets) {
+    public void setTargetsList(List<String> targets) {
         this.targets = targets;
     }
 
+    @JsonIgnore
+    public void setTargets(String targets) {
+        this.targets = StringTokenUtils.stringToList(targets);
+    }
+
     @JsonProperty("metadata")
+    @Column(name = "METADATA_HDFS_PATH")
     public String getMetadataHdfsPath() {
         return metadataHdfsPath;
     }
@@ -79,6 +151,7 @@ public class Model implements HasName, HasId<String> {
     }
 
     @JsonProperty("data")
+    @Column(name = "DATA_HDFS_PATH")
     public String getDataHdfsPath() {
         return dataHdfsPath;
     }
@@ -89,6 +162,7 @@ public class Model implements HasName, HasId<String> {
     }
 
     @JsonProperty("schema")
+    @Column(name = "SCHEMA_HDFS_PATH")
     public String getSchemaHdfsPath() {
         return schemaHdfsPath;
     }
@@ -99,6 +173,7 @@ public class Model implements HasName, HasId<String> {
     }
 
     @JsonProperty("model_dir_data")
+    @Column(name = "MODEL_HDFS_DIR")
     public String getModelHdfsDir() {
         return modelHdfsDir;
     }
@@ -115,6 +190,7 @@ public class Model implements HasName, HasId<String> {
 
     @Override
     @JsonIgnore
+    @Column(name = "MODEL_ID")
     public String getId() {
         return id;
     }
@@ -129,15 +205,38 @@ public class Model implements HasName, HasId<String> {
     }
 
     @JsonIgnore
+    @OneToMany(mappedBy = "model", fetch = FetchType.EAGER, cascade = CascadeType.ALL /*
+                                                                                       * {
+                                                                                       * CascadeType
+                                                                                       * .
+                                                                                       * PERSIST
+                                                                                       * ,
+                                                                                       * CascadeType
+                                                                                       * .
+                                                                                       * MERGE
+                                                                                       * ,
+                                                                                       * CascadeType
+                                                                                       * .
+                                                                                       * REMOVE
+                                                                                       * }
+                                                                                       */)
+    @LazyCollection(LazyCollectionOption.FALSE)
     public List<Job> getJobs() {
-        return jobs;
+        return this.jobs;
+    }
+
+    @JsonIgnore
+    public void setJobs(List<Job> jobs) {
+        this.jobs = jobs;
     }
 
     public void addJob(Job job) {
+        job.setModel(this);
         jobs.add(job);
     }
 
     @JsonProperty("data_format")
+    @Column(name = "DATA_FORMAT")
     public String getDataFormat() {
         return dataFormat;
     }
@@ -152,11 +251,13 @@ public class Model implements HasName, HasId<String> {
         this.customer = customer;
     }
 
+    @Column(name = "CUSTOMER")
     public String getCustomer() {
         return customer;
     }
 
     @JsonProperty("table")
+    @Column(name = "TABLE_NAME")
     public String getTable() {
         return table;
     }
@@ -167,6 +268,7 @@ public class Model implements HasName, HasId<String> {
     }
 
     @JsonProperty("metadata_table")
+    @Column(name = "METADATA_TABLE")
     public String getMetadataTable() {
         return metadataTable;
     }
@@ -177,13 +279,20 @@ public class Model implements HasName, HasId<String> {
     }
 
     @JsonIgnore
+    @Transient
     public String getSampleHdfsPath() {
         return getDataHdfsPath() + "/samples";
     }
 
+    @Transient
     @JsonProperty("key_columns")
-    public List<String> getKeyCols() {
+    public List<String> getKeyColsList() {
         return keyCols;
+    }
+
+    @Column(name = "KEYCOLS")
+    public String getKeyCols() {
+        return StringTokenUtils.listToString(this.keyCols);
     }
 
     @JsonProperty("key_columns")
@@ -191,4 +300,51 @@ public class Model implements HasName, HasId<String> {
         this.keyCols = keyCols;
     }
 
+    public void setKeyCols(String keyCols) {
+        this.keyCols = StringTokenUtils.stringToList(keyCols);
+    }
+
+    /**
+     * http://docs.jboss.org/hibernate/core/4.0/manual/en-US/html/persistent-
+     * classes.html#persistent-classes-equalshashcode
+     */
+    @Override
+    public int hashCode() {
+        int result;
+        result = getId().hashCode();
+        result = 29 * result + getName().hashCode();
+        return result;
+    }
+
+    /**
+     * http://docs.jboss.org/hibernate/core/4.0/manual/en-US/html/persistent-
+     * classes.html#persistent-classes-equalshashcode
+     * 
+     * right now, it only perform a partially shallow comparison due to
+     * efficiency reason. Collection object is compared, but composite domain
+     * object is not compared. If composite domain object needs to be compared,
+     * its equals() method has to be explicitly called.
+     */
+    @Override
+    public boolean equals(Object obj) {
+
+        if (obj == null)
+            return false;
+        if (obj == this)
+            return true;
+        if (!obj.getClass().equals(this.getClass()))
+            return false;
+
+        Model model = (Model) obj;
+
+        return new EqualsBuilder().append(pid, model.getPid()).append(id, model.getId()).append(name, model.getName())
+                .append(dataHdfsPath, model.getDataHdfsPath()).append(metadataHdfsPath, model.getMetadataHdfsPath())
+                .append(schemaHdfsPath, model.getSchemaHdfsPath()).append(modelHdfsDir, model.getModelHdfsDir())
+                .append(features, model.getFeaturesList()).append(targets, model.getTargetsList())
+                .append(keyCols, model.getKeyColsList())
+                // .append(modelDefinition, model.getModelDefinition())
+                .append(dataFormat, model.getDataFormat()).append(customer, model.getCustomer())
+                .append(table, model.getTable()).append(metadataTable, model.getMetadataTable()).isEquals();
+
+    }
 }

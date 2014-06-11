@@ -2,6 +2,12 @@ package com.latticeengines.domain.exposed.dataplatform;
 
 import java.util.Properties;
 
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.MappedSuperclass;
+
 import org.codehaus.jackson.annotate.JsonSubTypes;
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 
@@ -18,7 +24,10 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
     @JsonSubTypes.Type(value = DecisionTreeAlgorithm.class, name = "decisionTreeAlgorithm"),
     @JsonSubTypes.Type(value = RandomForestAlgorithm.class, name = "randomForestAlgorithm")
 })
-public interface Algorithm extends HasName {
+//@Entity
+//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Embeddable
+public interface Algorithm extends HasName, HasPid {
 
     String getName();
 

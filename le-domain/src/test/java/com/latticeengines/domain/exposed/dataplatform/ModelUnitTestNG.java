@@ -33,14 +33,14 @@ public class ModelUnitTestNG {
         model.setModelDefinition(modelDef);
         model.setName("Model Submission for Demo");
         model.setTable("DELL_EVENT_TABLE_TEST");
-        model.setFeatures(Arrays.<String> asList(new String[] {
+        model.setFeaturesList(Arrays.<String> asList(new String[] {
                 "Column5", //
                 "Column6", //
                 "Column7", //
                 "Column8", //
                 "Column9", //
                 "Column10" }));
-        model.setTargets(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
+        model.setTargetsList(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
         model.setCustomer("DELL");
         model.setDataFormat("avro");
         

@@ -11,6 +11,7 @@
         <component-name>le-domain</component-name>
         <hadoop.version>2.2.0.2.0.6.0-102</hadoop.version>
         <le.common.version>1.0.0-SNAPSHOT</le.common.version>
+        <hibernate.version>4.1.9.Final</hibernate.version>
     </properties>
 
     <parent>
@@ -30,6 +31,19 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
             <version>${le.common.version}</version>
+        </dependency>
+        <!-- use this instead of <artifactId>persistence-api</artifactId> 1.0 due to a problem with "NoSuchMethodError: 
+            javax.persistence.OneToMany.orphanRemoval()Z" -->
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.0-api</artifactId>
+            <version>1.0.1.Final</version>
+        </dependency>
+        <!-- for the use of hibernate annotation -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
         </dependency>
     </dependencies>
 

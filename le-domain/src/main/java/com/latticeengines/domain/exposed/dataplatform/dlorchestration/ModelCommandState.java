@@ -1,10 +1,11 @@
 package com.latticeengines.domain.exposed.dataplatform.dlorchestration;
 
 import com.latticeengines.domain.exposed.dataplatform.HasId;
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
+public class ModelCommandState implements HasPid, HasId<Integer> {
 
-public class ModelCommandState implements HasId<Integer> {
-
+    private Long pid;
     private int id;
     private int commandId;
     private ModelCommandStep modelCommandStep;
@@ -13,7 +14,17 @@ public class ModelCommandState implements HasId<Integer> {
     private String diagnostics;
     private String trackingUrl;
     private long elapsedTimeInMillis;
-    
+
+    @Override
+    public Long getPid() {
+        return this.pid;
+    }
+
+    @Override
+    public void setPid(Long id) {
+        this.pid = id;
+    }
+
     @Override
     public Integer getId() {
         return id;
@@ -79,4 +90,5 @@ public class ModelCommandState implements HasId<Integer> {
     public void setElapsedTimeInMillis(long elapsedTimeInMillis) {
         this.elapsedTimeInMillis = elapsedTimeInMillis;
     }
+
 }
