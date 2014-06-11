@@ -31,6 +31,10 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         
     private ModelCommandCallable modelCommandCallable;
  
+    protected boolean doYarnClusterSetup() {
+        return false;
+    }
+    
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         ModelCommand modelCommand = new ModelCommand();
