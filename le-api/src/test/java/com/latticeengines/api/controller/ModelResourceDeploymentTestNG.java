@@ -89,11 +89,11 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         model.setName("Model Submission for Demo");
         model.setTable("iris");
         model.setMetadataTable("iris_metadata");
-        model.setFeatures(Arrays.<String> asList(new String[] { "SEPAL_LENGTH", //
+        model.setFeaturesList(Arrays.<String> asList(new String[] { "SEPAL_LENGTH", //
                 "SEPAL_WIDTH", //
                 "PETAL_LENGTH", //
                 "PETAL_WIDTH" }));
-        model.setTargets(Arrays.<String> asList(new String[] { "CATEGORY" }));
+        model.setTargetsList(Arrays.<String> asList(new String[] { "CATEGORY" }));
         model.setCustomer("INTERNAL");
         model.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         model.setDataFormat("avro");

@@ -136,8 +136,8 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "createSamples" })
     public void submit() throws Exception {
         Pair<String, List<String>> targetAndFeatures = getTargetAndFeatures();
-        model.setFeatures(targetAndFeatures.getValue());
-        model.setTargets(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
+        model.setFeaturesList(targetAndFeatures.getValue());
+        model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/submit",
                 model, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());

@@ -14,9 +14,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
 
-import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
-import com.latticeengines.dataplatform.entitymanager.impl.ModelEntityMgrImpl;
-import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
+import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -32,13 +32,13 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
     private YarnClient defaultYarnClient;
 
     @Autowired
-    private JobEntityMgrImpl jobEntityMgr;
+    private JobEntityMgr jobEntityMgr;
 
     @Autowired
-    private ModelEntityMgrImpl modelEntityMgr;
+    private ModelEntityMgr modelEntityMgr;
 
     @Autowired
-    protected ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
+    protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 

@@ -23,6 +23,6 @@
     
     <import resource="classpath:api-context.xml"/>
     <import resource="classpath:api-properties-context.xml"/>
-    <context:component-scan base-package="com.latticeengines.api.functionalframework"/>
+    <!-- <context:component-scan base-package="com.latticeengines"/> -->
 
 </beans>

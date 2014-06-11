@@ -46,6 +46,8 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
     
+    //
+    // datasource host property for load data
     @Value("${api.datasource.host}")
     private String dbHost;
 
@@ -91,13 +93,13 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         model.setName("Model Submission for Demo");
         model.setTable("DELL_EVENT_TABLE_TEST");
         model.setMetadataTable("EventMetadata");
-        model.setFeatures(Arrays.<String> asList(new String[] { "Column5", //
+        model.setFeaturesList(Arrays.<String> asList(new String[] { "Column5", //        
                 "Column6", //
                 "Column7", //
                 "Column8", //
                 "Column9", //
                 "Column10" }));
-        model.setTargets(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
+        model.setTargetsList(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
         model.setCustomer("DELL");
         model.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
         model.setDataFormat("avro");
