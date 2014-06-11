@@ -20,7 +20,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
 import com.latticeengines.dataplatform.entitymanager.impl.ModelEntityMgrImpl;
-import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -43,7 +42,7 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressi
  * @author rgonzalez
  *
  */
-public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTestNGBase {
+public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private JobService jobService;
@@ -60,18 +59,14 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
     @Autowired
     private ModelEntityMgrImpl modelEntityMgr;
     
-    @Autowired
-    private ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
-    
     private Model model = null;
-  
+    
     protected boolean doYarnClusterSetup() {
         return false;
     }
     
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
-        throttleConfigurationEntityMgr.deleteStoreFile();
     }
 
     @BeforeClass(groups = "functional")
@@ -104,9 +99,9 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
         Model m = new Model();
         m.setModelDefinition(modelDef);
         m.setName("Model Submission1");
-        m.setTable("Q_EventTableDepivot");
-        m.setMetadataTable("EventMetadata");
-        m.setTargets(Arrays.<String> asList(new String[] { "P1_Event_1" }));
+        m.setTable("Q_EventTable_Nutanix");
+        m.setMetadataTable("EventMetadata_Nutanix");
+        m.setTargets(Arrays.<String> asList(new String[] { "P1_Event" }));
         m.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         m.setCustomer("Nutanix");
         m.setDataFormat("avro");
@@ -121,8 +116,8 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("Nutanix");
-        config.setTable("Q_EventTableDepivot");
-        config.setMetadataTable("EventMetadata");
+        config.setTable("Q_EventTable_Nutanix");
+        config.setMetadataTable("EventMetadata_Nutanix");
         config.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         return config;
     }
@@ -163,7 +158,7 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
 
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submitModel() throws Exception {
-        List<String> features = modelingService.getFeatures(model, true);
+        List<String> features = modelingService.getFeatures(model, false);
         model.setFeatures(features);
         
         List<ApplicationId> appIds = modelingService.submitModel(model);
@@ -183,3 +178,4 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
     }
 
 }
+

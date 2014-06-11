@@ -21,6 +21,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.api.records.impl.pb.TestApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
@@ -57,6 +58,30 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     @Autowired
     protected ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
 
+    @Value("${dataplatform.datasource.host}")
+    protected String dbHost;
+    
+    @Value("${dataplatform.datasource.port}")
+    protected int dbPort;
+    
+    @Value("${dataplatform.datasource.dbname}")
+    protected String dbName;
+    
+    @Value("${dataplatform.datasource.user}")
+    protected String dbUser;
+    
+    @Value("${dataplatform.datasource.password}")
+    protected String dbPassword;
+   
+    @Value("${dataplatform.datasource.type}")
+    protected String dbType;
+    
+    @Value("${dataplatform.container.virtualcores}")
+    protected int virtualCores;
+    
+    @Value("${dataplatform.container.memory}")
+    protected int memory;
+    
     protected YarnCluster yarnCluster;
 
     protected YarnClient yarnClient;

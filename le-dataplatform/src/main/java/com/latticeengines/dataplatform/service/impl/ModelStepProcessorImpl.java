@@ -86,7 +86,7 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
     private int memory;
     
     @Override
-    public void executeJsonStep(String deploymentExternalId, int modelCommandId, List<ModelCommandParameter> commandParameters) {
+    public void executeJsonStep(String deploymentExternalId, int modelCommandId, List<ModelCommandParameter> commandParameters) {        
         // TODO drop and create the new EvntTable schema.  write out HDFS paths
         // send compressed JSON to BARD, add some new LedpCode JSON error messages here
         // ex: /user/s-analytics/customers/Nutanix/models/Q_EventTableDepivot/dc93e0d7-ef30-43c5-8e7c-c8adab587f9f/1401731761443_1074/model.json
@@ -194,11 +194,12 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
         }
                        
         List<ApplicationId> appIds = new ArrayList<>();
-        List<ApplicationId> pivotedAppIds = modelingService.loadData(generateLoadConfiguration(RF_SAMPLENAME_PREFIX, customer, commandParameters));                       
-        List<ApplicationId> depivotedAppIds = modelingService.loadData(generateLoadConfiguration(LR_SAMPLENAME_PREFIX, customer, commandParameters));
+        List<ApplicationId> pivotedAppIds = modelingService.loadData(generateLoadConfiguration(RF_SAMPLENAME_PREFIX, customer, commandParameters));
+        // No LR for now.
+//        List<ApplicationId> depivotedAppIds = modelingService.loadData(generateLoadConfiguration(LR_SAMPLENAME_PREFIX, customer, commandParameters));
         
         appIds.addAll(pivotedAppIds);
-        appIds.addAll(depivotedAppIds);
+//        appIds.addAll(depivotedAppIds);
         
         return appIds;
     }
@@ -238,11 +239,12 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
         return list;
     }
     
-    private List<ApplicationId> generateSamples(String customer, ModelCommandParameters commandParameters) {        
-        ApplicationId lrAppId = modelingService.createSamples(generateSamplingConfiguration(LR_SAMPLENAME_PREFIX, customer, commandParameters));
+    private List<ApplicationId> generateSamples(String customer, ModelCommandParameters commandParameters) {
+        // No LR for now.
+//        ApplicationId lrAppId = modelingService.createSamples(generateSamplingConfiguration(LR_SAMPLENAME_PREFIX, customer, commandParameters));
         ApplicationId rfAppId = modelingService.createSamples(generateSamplingConfiguration(RF_SAMPLENAME_PREFIX, customer, commandParameters));
-        Arrays.asList(lrAppId, rfAppId);
-        return Arrays.asList(lrAppId, rfAppId);
+
+        return Arrays.asList(/*lrAppId, */rfAppId);
     }
   
     private String constructSampleName(String prefix, int percentage) {
@@ -275,10 +277,11 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
     private List<ApplicationId> submitModel(String customer, ModelCommandParameters commandParameters) {
         List<ApplicationId> appIds = new ArrayList<>();
         List<ApplicationId> rfAppIds = modelingService.submitModel(generateModel(RF_SAMPLENAME_PREFIX, customer, commandParameters));
-        List<ApplicationId> lrAppIds = modelingService.submitModel(generateModel(LR_SAMPLENAME_PREFIX, customer, commandParameters));
+        // No LR for now.
+//        List<ApplicationId> lrAppIds = modelingService.submitModel(generateModel(LR_SAMPLENAME_PREFIX, customer, commandParameters));
         
         appIds.addAll(rfAppIds);
-        appIds.addAll(lrAppIds);
+//        appIds.addAll(lrAppIds);
    
         return appIds;
     }
@@ -339,13 +342,9 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
         model.setKeyCols(commandParameters.getKeyCols());
         model.setCustomer(customer);
         model.setDataFormat(AVRO);
-        
- // TODO temporarily overriden for iris dataset testing       List<String> features = modelingService.getFeatures(model);
-//        model.setFeatures(features);
-        model.setFeatures(Arrays.<String> asList(new String[] { "SEPAL_LENGTH", //
-                "SEPAL_WIDTH", //
-                "PETAL_LENGTH", //
-                "PETAL_WIDTH" }));
+               
+        List<String> features = modelingService.getFeatures(model, false);
+        model.setFeatures(features);
         
         return model;
     }
