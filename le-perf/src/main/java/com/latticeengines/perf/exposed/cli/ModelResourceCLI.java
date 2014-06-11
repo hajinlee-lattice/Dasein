@@ -121,8 +121,8 @@ public class ModelResourceCLI {
         model.setCustomer(customer);
         model.setDataFormat("avro");
         model.setKeyCols(Arrays.<String> asList(keyColumns.split(DELIMETER)));
-        model.setTargets(Arrays.<String> asList(targets.split(DELIMETER)));
-        model.setFeatures(getFeatures(model, targets.split(DELIMETER)[0]));
+        model.setTargetsList(Arrays.<String> asList(targets.split(DELIMETER)));
+        model.setFeaturesList(getFeatures(model, targets.split(DELIMETER)[0]));                        
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + ":8080/rest/submit",
                 model, AppSubmission.class, new Object[] {});
         optionMap.clear();
