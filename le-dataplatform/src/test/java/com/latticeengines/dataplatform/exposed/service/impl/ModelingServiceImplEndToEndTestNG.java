@@ -104,8 +104,8 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
         Model m = new Model();
         m.setModelDefinition(modelDef);
         m.setName("Model Submission1");
-        m.setTable("Q_EventTableDepivot");
-        m.setMetadataTable("EventMetadata");
+        m.setTable("Q_EventTableDepivot_FunctionalTest");
+        m.setMetadataTable("EventMetadata_FunctionalTest");
         m.setTargets(Arrays.<String> asList(new String[] { "P1_Event_1" }));
         m.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         m.setCustomer("Nutanix");
@@ -121,8 +121,8 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("Nutanix");
-        config.setTable("Q_EventTableDepivot");
-        config.setMetadataTable("EventMetadata");
+        config.setTable("Q_EventTableDepivot_FunctionalTest");
+        config.setMetadataTable("EventMetadata_FunctionalTest");
         config.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         return config;
     }
