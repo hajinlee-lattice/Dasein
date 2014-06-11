@@ -59,8 +59,8 @@ class SummaryGenerator(State, JsonGenBase):
                 self.logger.critical("No data found in the test set for this band or value.")
                 continue
             
-            countForBandValueAndEventIsOne = self.__getCountWhereEventIsOne(predictorData, eventData)
-            lift = float(countForBandValueAndEventIsOne)/float(countForBandValue)
+            countForBandValueAndEventIsOne = self.__getCountWhereEventIsOne(predictorData, eventData) #TODO
+            lift = float(countForBandValueAndEventIsOne)/float(countForBandValue) # TODO
             avgLift = float(sum(eventData))/float(len(eventData))
             element["CorrelationSign"] = 1 if lift > avgLift else -1
             element["Count"] = countForBandValue
@@ -87,13 +87,18 @@ class SummaryGenerator(State, JsonGenBase):
         converter = None
         try:
             if record["Dtype"] == "BND":
-                columnData = self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][colname + "_Continuous"]]
+                newColName = colname + "_Continuous" if self.mediator.depivoted else colname
+                columnData = self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][newColName]]
                 minV = record["minV"]
                 maxV = record["maxV"]
                 converter = lambda x: 1 if x >= minV and x < maxV else 0
                 return map(converter, columnData)
-            else:
+            elif self.mediator.depivoted:                
                 return self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][colname + "_" + record["columnvalue"]]]
+            else:
+                columnData = self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][colname]]
+                converter = lambda x: 1 if x == record["hashValue"] else 0
+                return map(converter, columnData)
         except:
             return self.mediator.data[:, 1]
         
@@ -105,7 +110,7 @@ class SummaryGenerator(State, JsonGenBase):
         '''
         return metrics.mutual_info_score(x, y)/entropy(x) 
 
-    def __getSegmentChart(self,probRange,widthRange,buckets,averageProbability):
+    def __getSegmentChart(self, probRange, widthRange, buckets, averageProbability):
      
         # Generate inclusive (min,max) with highest max = null and lowest min = 0
         inclusive = [((probRange[0]+probRange[1])/2,None)]         
@@ -116,20 +121,19 @@ class SummaryGenerator(State, JsonGenBase):
         # Generate name for each segment
         names = []
         for i in range(len(probRange)):
-            for j in range(len(buckets)):
-                if self.mediator.type == 0:
-                    # Probability buckets 
-                    if probRange[i] >= buckets[j]["Minimum"]:
-                        if buckets[j]["Maximum"] is None or probRange[i] < buckets[j]["Maximum"]:
-                            names.append(buckets[j]["Name"])
-                            break
-                else:
-                    # Lift buckets
-                    lift = probRange[i]/averageProbability
-                    if lift >= buckets[j]["Minimum"]:
-                        if buckets[j]["Maximum"] is None or lift < buckets[j]["Maximum"]:
-                            names.append(buckets[j]["Name"])
-                            break
+            curProb = probRange[i] if self.mediator.type == 0 else probRange[i]/averageProbability
+            for j in range(len(buckets)): 
+                if buckets[j]["Minimum"] is not None and buckets[j]["Maximum"] is not None:
+                    if curProb >= buckets[j]["Minimum"] and curProb < buckets[j]["Maximum"]:
+                        names.append(buckets[j]["Name"])
+                        break
+                elif buckets[j]["Minimum"] is not None and curProb >= buckets[j]["Minimum"]:
+                        names.append(buckets[j]["Name"])
+                        break
+                elif buckets[j]["Maximum"] is not None and curProb < buckets[j]["Maximum"]:    
+                        names.append(buckets[j]["Name"])
+                        break
+                            
         # Generate segments
         segments = []
         for i in range(len(probRange)):

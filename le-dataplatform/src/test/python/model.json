@@ -28,6 +28,7 @@
   "schema": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/Q_EventTable_Nutanix.avsc",
   "model_data_dir": "/user/s-analytics/customers/Nutanix/models/Q_EventTable_Nutanix/7a8f09e5-f88f-4a6c-8bd9-be2dc1ee46fb",
   "data_format": "avro",
+  "depivoted": "False",
   "key_columns": [
     "Nutanix_EventTable_Clean"
   ],

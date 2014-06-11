@@ -102,6 +102,7 @@ class Launcher(object):
             mediator.schema = schema
             mediator.target = mediator.data[:, mediator.schema["targetIndex"]]
             mediator.transformer = parser.getDataTransformer()
+            mediator.depivoted = parser.isDepivoted()
             stateMachine.run()
         else:
             logger.error("Generated classifier is null!")

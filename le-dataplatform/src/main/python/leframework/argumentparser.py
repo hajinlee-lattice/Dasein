@@ -32,6 +32,9 @@ class ArgumentParser(object):
         self.features = set(self.metadataSchema["features"])
         self.targets = set(self.metadataSchema["targets"])
         self.keyCols = set(self.metadataSchema["key_columns"])
+        self.depivoted = False
+        if "depivoted" in self.metadataSchema:
+            self.depivoted = self.metadataSchema["depivoted"] == "True"       
         self.algorithmProperties = {}
         self.transformer = None
         try:
@@ -62,7 +65,7 @@ class ArgumentParser(object):
         # l is the index in the original data set
         l = 0
         includedNames = []
-        included = set()
+        included = []
         self.featureIndex = set()
         self.nameToFeatureIndex = dict()
         self.keyColIndex = set()
@@ -75,7 +78,7 @@ class ArgumentParser(object):
                 
                 logger.info("Adding %s with index %d" % (fName, l))
                 includedNames.append(fName)
-                included.add(l)
+                included.append(l)
                 
                 if fName in self.targets:
                     self.targetIndex = k
@@ -84,7 +87,7 @@ class ArgumentParser(object):
                     self.nameToFeatureIndex[fName] = k
                 if fName in self.keyCols:
                     self.keyColIndex.add(k)
-                if fType == 'string':
+                if fType == 'string' and fName not in self.targets:
                     stringColNames[fName] = encoder
                 k = k+1
             l = l+1
@@ -112,6 +115,9 @@ class ArgumentParser(object):
                         if fType != 'string' and value is None:
                             value = 0.0
                         
+                        if i == included[self.targetIndex]:
+                            value = float(value)
+                            
                         rowlist.append(value)
                             
                     else:
@@ -140,6 +146,9 @@ class ArgumentParser(object):
      
     def isAvro(self):
         return self.metadataSchema["data_format"] == "avro"
+    
+    def isDepivoted(self):
+        return self.depivoted
     
     def getNameToFeatureIndex(self):
         return self.nameToFeatureIndex

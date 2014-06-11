@@ -1,10 +1,9 @@
 import logging
 
 import fastavro as avro
-import numpy
 from leframework.codestyle import overrides
 from leframework.model.state import State
-
+import encoder
 
 class Initialize(State):
     
@@ -33,13 +32,17 @@ class Initialize(State):
             for record in reader:
                 colname = record["barecolumnname"]
                 sqlcolname = ""
+                record["hashValue"] = None
                 if record["Dtype"] == "BND":
-                    sqlcolname = colname + "_Continuous"
-                else:
+                    sqlcolname = colname + "_Continuous"  if self.mediator.depivoted else colname
+                elif self.mediator.depivoted:
                     sqlcolname = colname + "_" + record["columnvalue"]
+                else:
+                    sqlcolname = colname
+                    record["hashValue"] = encoder.transform(record["columnvalue"])
                 
                 if colname in metadata:
-                    metadata[colname].append(record)
+                    metadata[colname].append(record)                  
                 else:
                     metadata[colname] = [record]
                 
