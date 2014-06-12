@@ -2,6 +2,7 @@ import filecmp
 import json
 import os
 import pickle
+import csv
 from random import random
 from random import shuffle
 import shutil
@@ -60,7 +61,9 @@ class LauncherTest(TestCase):
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
         
         # Test the scoring engine using the generated pipeline that was deserialized
-        lines = self.__getLineToScore(pipeline)
+        inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
+        value = [ random() for j in range(len(inputColumns))]
+        lines = self.__getLineToScore(inputColumns, value)
         rowDict1 = se.getRowToScore(lines[0])
         resultFrame1 = se.predict(pipeline, rowDict1)
         
@@ -70,39 +73,65 @@ class LauncherTest(TestCase):
         print(lines[1])
         print("Score = " + str(resultFrame1['Score'][0]))
         self.assertEquals(resultFrame1['Score'][0], resultFrame2['Score'][0])
-    
-    def __getLineToScore(self, pipeline):
+        print("===========================================")
+        # Generate the csv files
+        testcase = 2       
+        values = []
+        values.append(value)
+        for i in range(testcase-1):
+            values.append([random() for j in range(len(inputColumns))])
+        
+        scores = self.__getPredictScore(pipeline, values) 
+        for i in range(len(scores)):
+            print str(i+1)+", "+str(scores[i])
+        self.__createCSV(inputColumns, values)
+        
+            
+    def __getLineToScore(self, inputColumns, value):
         '''
          This tests whether or not the order of input matters. It shuffles the columns so that
          to simulate VisiDB passing in data in a different order.
         '''
-        inputColumns1 = pipeline.getPipeline()[2].getModelInputColumns()
-        inputColumns2 = list(pipeline.getPipeline()[2].getModelInputColumns())
-        shuffle(inputColumns2)
-        valueMap = dict()
-        line1 = self.__getLine(inputColumns1, valueMap, True)
-        line2 = self.__getLine(inputColumns2, valueMap, False)
+        columnWithValue = zip(inputColumns, value)
+        line1 = self.__getLine(columnWithValue)
+        
+        shuffle(columnWithValue)
+        line2 = self.__getLine(columnWithValue)
+        
         return (line1, line2)
     
-    def __getLine(self, inputColumns, valueMap, generateValue):
+    def __getLine(self, columnsWithValue):
         line = "["
         first = True
-        for inputColumn in inputColumns:
+        for i in range(len(columnsWithValue)):
             if first:
                 first = False
             else:
                 line += ","
             
-            if generateValue:
-                value = random()
-            else:
-                value = valueMap[inputColumn]
-            line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (inputColumn, value)
-            
-            valueMap[inputColumn] = value
+            line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (columnsWithValue[i][0], columnsWithValue[i][1])
+
         line += "]"
         return line
     
+    def __createCSV(self,inputColumns, values):
+        with open('./results/test.csv', 'wb') as csvfile:
+            csvWriter = csv.writer(csvfile)
+            csvWriter.writerow(['id']+inputColumns)
+            for i in range(len(values)):
+                csvWriter.writerow([i+1]+values[i])
+        
+    def __getPredictScore(self,pipeline, values):
+        scores = []
+        inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
+        for value in values:
+            row = self.__getLine(zip(inputColumns, value))
+            rowDict = se.getRowToScore(row)
+            resultFrame = se.predict(pipeline, rowDict)
+            scores.append(resultFrame['Score'][0])
+        return scores
+        
+        
     def __writeToFileFromBinary(self, data, filename):
         pklByteArray = bytearray(data)
         # Write to the file system
