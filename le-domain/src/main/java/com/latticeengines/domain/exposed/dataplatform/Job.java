@@ -20,6 +20,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
@@ -31,6 +33,8 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 @Table(name = "JOB")
 public class Job implements HasPid, HasId<String> {
     
+    private static final Log log = LogFactory.getLog(Job.class);
+    
     private Long pid;
     private String id;
     private String client;
@@ -39,7 +43,7 @@ public class Job implements HasPid, HasId<String> {
     private Properties containerProperties = new Properties();
     private Long parentJobId;
     private List<String> childJobIds = new ArrayList<String>();
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -125,8 +129,7 @@ public class Job implements HasPid, HasId<String> {
             }
             propstr = strWriter.toString();
         } catch (IOException e) {
-            // TODO log this message
-            e.printStackTrace();
+            log.error("Error serializing the properties value", e);
         }
 
         return propstr;
