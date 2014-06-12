@@ -32,6 +32,8 @@
         <jacoco.destfile>jacoco.exec</jacoco.destfile>
         <jacoco.coverage.dir>${project.build.directory}</jacoco.coverage.dir>
         <jetty.version>9.1.1.v20140108</jetty.version>
+        <!-- <spring.version>3.2.3.RELEASE</spring.version> -->
+        <hibernate.version>4.1.9.Final</hibernate.version>        
     </properties>
 
     <!--  set up to use LE local Nexus Repository for dependencies -->
@@ -632,6 +634,12 @@
             <version>4.0.0.RELEASE</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
