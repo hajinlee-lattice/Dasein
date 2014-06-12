@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +42,11 @@ import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
+import com.latticeengines.domain.exposed.dataplatform.Algorithm;
+import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
@@ -138,7 +144,6 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     public void setupRunEnvironment() throws Exception {
         log.info("Test name = " + this.getClass());
         
-        //deleteAllStores();
         if (!doYarnClusterSetup()) {
             return;
         }
@@ -180,6 +185,30 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         }
 
         doCopy(fs, copyEntries);
+    }
+    
+    protected ModelDefinition produceModelDefinition() {
+        LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
+        logisticRegressionAlgorithm.setPriority(0);
+        logisticRegressionAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
+        logisticRegressionAlgorithm.setSampleName("s0");
+
+        DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
+        decisionTreeAlgorithm.setPriority(1);
+        decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
+        decisionTreeAlgorithm.setSampleName("s1");
+
+        RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
+        randomForestAlgorithm.setPriority(2);
+        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
+        randomForestAlgorithm.setSampleName("all");
+
+        ModelDefinition modelDef = new ModelDefinition();
+        modelDef.setName("Model-"+System.currentTimeMillis());
+        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
+                randomForestAlgorithm, logisticRegressionAlgorithm }));
+        
+        return modelDef;
     }
     
     public ApplicationId getApplicationId(String appIdStr) {

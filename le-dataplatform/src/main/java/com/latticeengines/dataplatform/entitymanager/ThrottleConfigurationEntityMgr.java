@@ -9,5 +9,7 @@ public interface ThrottleConfigurationEntityMgr extends BaseEntityMgr<ThrottleCo
     List<ThrottleConfiguration> getConfigsSortedBySubmissionTime();
 
     ThrottleConfiguration getLatestConfig();
+    
+    void cleanUpAllConfiguration();
 
 }

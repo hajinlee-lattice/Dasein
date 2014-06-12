@@ -91,37 +91,21 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         doCopy(fs, copyEntries);
 
-        LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
-        logisticRegressionAlgorithm.setPriority(0);
-        logisticRegressionAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
-        logisticRegressionAlgorithm.setSampleName("s0");
-
-        DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
-        decisionTreeAlgorithm.setPriority(1);
-        decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
-        decisionTreeAlgorithm.setSampleName("s1");
-
-        RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
-        randomForestAlgorithm.setPriority(2);
-        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
-        randomForestAlgorithm.setSampleName("all");
-
-        ModelDefinition modelDef = new ModelDefinition();
-        modelDef.setName("Model1");
-        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
-                randomForestAlgorithm, logisticRegressionAlgorithm }));
+        ModelDefinition modelDef = produceModelDefinition();
         // 
         // in the application, it is assumed that the model definition is defined in the metadata db
         // also, modelDef 'name' should be unique
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
         //
         model = createModel(modelDef);
+        // cleanup ThrottleConfiguration
+        throttleConfigurationEntityMgr.cleanUpAllConfiguration();
     }
 
     private Model createModel(ModelDefinition modelDef) {
         Model m = new Model();
         m.setModelDefinition(modelDef);
-        m.setName("Model Submission1");
+        m.setName("Model Submission-"+System.currentTimeMillis());
         m.setTable("DELL_EVENT_TABLE_TEST");
         m.setMetadataTable("EventMetadata");
         m.setFeaturesList(Arrays.<String> asList(new String[] {     
@@ -182,7 +166,6 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     @Test(groups = "functional", enabled = false, dependsOnMethods = { "submitModel" })
     public void submitModelMultithreaded() throws Exception {
-
         ExecutorService executor = Executors.newFixedThreadPool(3);
 
         final Model[] models = new Model[3];
@@ -224,8 +207,10 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     @Test(groups = "functional", dependsOnMethods = { "submitModel" })
     @Transactional(propagation = Propagation.REQUIRED)
-    public void throttleImmediate() throws Exception {
+    public void throttleImmediate() throws Exception {        
+        ModelDefinition modelDef = produceModelDefinition();
         model.setPid(null);
+        model.setModelDefinition(modelDef);
         List<ApplicationId> appIds = modelingService.submitModel(model);
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setImmediate(true);
@@ -236,10 +221,9 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         JobWatchdogService watchDog = getWatchdogService();
         watchDog.run(null);
 
-        /// assertEquals(appIds.size(), 3);
+        assertEquals(appIds.size(), 3);
 
         // First job to complete  
-        /*
         YarnApplicationState state = waitState(appIds.get(0), 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
         assertNotNull(state);
         FinalApplicationStatus status = waitForStatus(appIds.get(0), 300, TimeUnit.SECONDS,
@@ -248,8 +232,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         // Second job should have been killed since we throttled
         status = waitForStatus(appIds.get(1), 10, TimeUnit.SECONDS,
-                FinalApplicationStatus.KILLED);
-                */
+                FinalApplicationStatus.KILLED);               
     }
 
     @Test(groups = "functional", dependsOnMethods = { "throttleImmediate" })
@@ -259,19 +242,19 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         config.setJobRankCutoff(2);
         modelingService.throttle(config);
 
+        ModelDefinition modelDef = produceModelDefinition();
         model.setPid(null);
+        model.setModelDefinition(modelDef);
         List<ApplicationId> appIds = modelingService.submitModel(model);
 
         // Only one job would be submitted since new jobs won't even come in
-        ///  assertEquals(appIds.size(), 1);
-        /*
+        assertEquals(appIds.size(), 1);
+        
         YarnApplicationState state = waitState(appIds.get(0), 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
         assertNotNull(state);
         FinalApplicationStatus status = waitForStatus(appIds.get(0), 120, TimeUnit.SECONDS,
                 FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        */
-
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);        
     }
 
     private JobWatchdogService getWatchdogService() {

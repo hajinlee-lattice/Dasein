@@ -26,7 +26,7 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
     public BaseDao<ThrottleConfiguration> getDao() {
         return throttleConfigurationDao;
     }
-
+ 
     @Override
     public List<ThrottleConfiguration> getConfigsSortedBySubmissionTime() {
         List<ThrottleConfiguration> configs = throttleConfigurationDao.findAll();
@@ -42,7 +42,9 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
         });
         return configs;
     }
-
+ 
+    
+    
     @Override
     public ThrottleConfiguration getLatestConfig() {
         List<ThrottleConfiguration> configs = getConfigsSortedBySubmissionTime();
@@ -52,5 +54,9 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
         return configs.get(0);
     }
     
+    @Override
+    public void cleanUpAllConfiguration() {
+        throttleConfigurationDao.deleteAll();        
+    }
 
 }
