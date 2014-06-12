@@ -11,7 +11,7 @@
         <component-name>le-sparkdb</component-name>
         <hadoop.version>2.2.0.2.0.6.0-102</hadoop.version>
         <scala.version>2.10.4</scala.version>
-        <spark.version>0.9.1</spark.version>
+        <spark.version>1.0.0</spark.version>
     </properties>
 
     <parent>
@@ -86,7 +86,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-assembly_2.10</artifactId>
+            <artifactId>spark-assembly</artifactId>
             <version>${spark.version}</version>
             <classifier>hadoop2.2.0</classifier>
         </dependency>
