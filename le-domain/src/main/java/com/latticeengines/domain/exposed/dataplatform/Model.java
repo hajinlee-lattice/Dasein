@@ -87,11 +87,12 @@ public class Model implements HasName, HasPid, HasId<String> {
     @JsonProperty("model_definition")
     public void setModelDefinition(ModelDefinition modelDefinition) {
         this.modelDefinition = modelDefinition;
-        if (this.modelDefinition != null)
+        if (this.modelDefinition != null) {
             this.modelDefinition.addModel(this);
+        }
     }
 
-    @Column(name = "FEATURES")
+    @Column(name = "FEATURES", length = 65535)
     @JsonIgnore
     public String getFeatures() {
         return StringTokenUtils.listToString(this.features);
