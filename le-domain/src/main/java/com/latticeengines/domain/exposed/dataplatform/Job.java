@@ -92,13 +92,7 @@ public class Job implements HasPid, HasId<String> {
                 .toString();
         return propstr;
     }
-
-    @JsonIgnore
-    @Transient
-    public Properties getAppMasterPropertiesObject() {
-        return appMasterProperties;
-    }
-
+    
     @JsonIgnore
     /** data store has string / varchar as persistence type **/
     public void setAppMasterProperties(String appMasterPropertiesStr) throws IOException {
@@ -106,13 +100,18 @@ public class Job implements HasPid, HasId<String> {
         if (appMasterPropertiesStr != null && !appMasterPropertiesStr.equalsIgnoreCase(""))
             this.appMasterProperties.load(new StringReader(appMasterPropertiesStr));
     }
-    @JsonIgnore
+    
+    @Transient
+    public Properties getAppMasterPropertiesObject() {
+        return appMasterProperties;
+    }
+
     public void setAppMasterPropertiesObject(Properties appMasterPropertiesObject) {
         this.appMasterProperties = appMasterPropertiesObject;
         if (this.appMasterProperties == null)
             this.appMasterProperties = new Properties();
     }
-
+      
     @JsonIgnore
     @Column(name = "CONTAINER_PROPERTIES")
     public String getContainerProperties() {
@@ -130,10 +129,10 @@ public class Job implements HasPid, HasId<String> {
         return propstr;
     }
 
+    @JsonIgnore
     public void setContainerProperties(String containerPropertiesStr) throws IOException {
         this.containerProperties = new Properties();
         if (containerPropertiesStr != null && !containerPropertiesStr.equalsIgnoreCase(""))
-
             this.containerProperties.load(new StringReader(containerPropertiesStr));
     }
 
