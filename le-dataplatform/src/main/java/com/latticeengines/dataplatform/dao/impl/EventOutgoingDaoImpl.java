@@ -13,12 +13,6 @@ public class EventOutgoingDaoImpl extends BaseDaoImpl<EventOutgoing> implements 
     }
 
     @Override
-    public EventOutgoing deserialize(String id, String content) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     protected Class<EventOutgoing> getEntityClass() {
         return EventOutgoing.class;
     }

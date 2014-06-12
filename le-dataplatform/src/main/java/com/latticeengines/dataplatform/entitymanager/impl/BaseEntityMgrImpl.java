@@ -2,7 +2,6 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 
 import java.util.List;
 
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,17 +46,6 @@ public abstract class BaseEntityMgrImpl<T extends HasPid> implements BaseEntityM
         return getDao().containInSession(entity);
     }
 
-    /*
-     * public void deleteStoreFile() { getDao().deleteStoreFile(); }
-     * 
-     * @Override public void save() { getDao().save(); }
-     * 
-     * @Override public void load() { getDao().load(); }
-     * 
-     * @Override public void post(T entity) { getDao().post(entity); }
-     * 
-     * @Override public void clear() { getDao().clear(); }
-     */
     /**
      * get object by key. entity.getPid() must NOT be empty.
      */
@@ -71,10 +59,4 @@ public abstract class BaseEntityMgrImpl<T extends HasPid> implements BaseEntityM
         return getDao().findAll();
     }
 
-    /*
-     * @Override public T getById(Object id) { return (T)
-     * getDao().getById(id.toString()); }
-     * 
-     * @Override public List<T> getAll() { return getDao().getAll(); }
-     */
 }

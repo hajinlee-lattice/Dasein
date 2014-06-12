@@ -20,13 +20,6 @@ public class ModelCommandDaoImpl extends BaseDaoImpl<ModelCommand> implements Mo
         return ModelCommand.class;
     }
 
-    
-    @Override
-    public ModelCommand deserialize(String id, String content) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     @Override
     public List<ModelCommand> getNewAndInProgress() {
         // TODO select where CommandStatus = 0 OR CommandStatus = 1

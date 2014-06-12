@@ -257,7 +257,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
         properties.setProperty(EventDataSamplingProperty.CUSTOMER.name(), "Dell");
         ApplicationId applicationId = jobService.submitMRJob("samplingJob", properties);
-        YarnApplicationState state = waitState(applicationId, 120, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
+        YarnApplicationState state = waitState(applicationId, 240, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
 
         state = getState(applicationId);
         assertNotNull(state);

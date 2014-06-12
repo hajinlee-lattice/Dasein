@@ -21,12 +21,6 @@ public class ModelDefinitionDaoImpl extends BaseDaoImpl<ModelDefinition> impleme
     }
 
     @Override
-    public ModelDefinition deserialize(String id, String content) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     /**
      * return 'null' if model definition is not found by name
      */
@@ -37,7 +31,7 @@ public class ModelDefinitionDaoImpl extends BaseDaoImpl<ModelDefinition> impleme
         
         ModelDefinition modelDef = null;
         List list = query.list(); // uniqueResult();
-        if(!list.isEmpty()) {
+        if (!list.isEmpty()) {
             modelDef = (ModelDefinition) list.get(0);
         }        
              

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.ThrottleConfigurationDao;
-import com.latticeengines.dataplatform.entitymanager.SequenceEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
@@ -18,9 +17,6 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
 
     @Autowired
     private ThrottleConfigurationDao throttleConfigurationDao;
-    
-   ///     @Autowired
-    private SequenceEntityMgr sequenceEntityMgr;
     
     public ThrottleConfigurationEntityMgrImpl() {
         super();
@@ -31,19 +27,9 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
         return throttleConfigurationDao;
     }
 
-    //@Override
-  /*  public void post(ThrottleConfiguration config) {
-        if (config.getPid() == null) {
-            config.setPid(sequenceEntityMgr.nextVal(ThrottleConfigurationDao.class));
-        }
-      //  super.post(config);
-    }*/
-       
-    
-    
     @Override
     public List<ThrottleConfiguration> getConfigsSortedBySubmissionTime() {
-        List<ThrottleConfiguration> configs = throttleConfigurationDao.findAll();  ///getAll();
+        List<ThrottleConfiguration> configs = throttleConfigurationDao.findAll();
         
         Collections.sort(configs, new Comparator<ThrottleConfiguration>() {
 

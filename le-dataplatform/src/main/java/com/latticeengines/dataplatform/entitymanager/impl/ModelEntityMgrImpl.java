@@ -29,25 +29,4 @@ public class ModelEntityMgrImpl extends BaseEntityMgrImpl<Model> implements Mode
     }
     
     
-  /*  @Override
-    public void post(Model model) {
-        if (model.getId() == null) {
-            model.setId(UUID.randomUUID().toString());
-        }
-        List<Job> jobs = model.getJobs();
-        
-        for (Job job : jobs) {
-            jobEntityMgr.post(job);
-        }
-        
-        super.post(model);
-    }*/
-    
-/*    @Override
-    public void save() {
-        jobEntityMgr.save();
-        super.save();
-    }*/
-    
-    
 }

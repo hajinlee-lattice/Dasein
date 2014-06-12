@@ -13,12 +13,6 @@ public class ModelCommandLogDaoImpl extends BaseDaoImpl<ModelCommandLog> impleme
     }
 
     @Override
-    public ModelCommandLog deserialize(String id, String content) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     protected Class<ModelCommandLog> getEntityClass() {
         return ModelCommandLog.class;
     }

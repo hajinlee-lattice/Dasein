@@ -13,12 +13,6 @@ public class ModelCommandStateDaoImpl extends BaseDaoImpl<ModelCommandState> imp
     }
 
     @Override
-    public ModelCommandState deserialize(String id, String content) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
     protected Class<ModelCommandState> getEntityClass() {        
         return ModelCommandState.class;
     }
