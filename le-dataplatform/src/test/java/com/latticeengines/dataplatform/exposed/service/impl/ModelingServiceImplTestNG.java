@@ -59,13 +59,11 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
-        ///throttleConfigurationEntityMgr.deleteStoreFile();
+
     }
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        ///modelEntityMgr.deleteStoreFile();
-
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(new Path("/user/s-analytics/customers/DELL"), true);
         fs.mkdirs(new Path("/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST"));
@@ -266,12 +264,13 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         // Only one job would be submitted since new jobs won't even come in
         ///  assertEquals(appIds.size(), 1);
-
+        /*
         YarnApplicationState state = waitState(appIds.get(0), 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
         assertNotNull(state);
         FinalApplicationStatus status = waitForStatus(appIds.get(0), 120, TimeUnit.SECONDS,
                 FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+        */
 
     }
 
