@@ -224,7 +224,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             // associate persisted model def with model.
             model.setModelDefinition(predefinedModelDef);
         } else {
-            // TODO:  this should not be needed; since the way how it works is that model def is already created in persistence
+            // TODO:  this should not be needed; since the way how it works is that model def should already been setup & persisted.
             modelDefinitionEntityMgr.create(modelDefinition);
             model.setModelDefinition(modelDefinition);
         }  
@@ -258,7 +258,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         parentJob = jobEntityMgr.findByKey(parentJob); /// jobEntityMgr.getById(parentId);
         parentJob.addChildJobId(resubmitJob.getId());
         jobEntityMgr.update(parentJob);
-        ///jobEntityMgr.post(parentJob);
+
         return appId;
     }
 

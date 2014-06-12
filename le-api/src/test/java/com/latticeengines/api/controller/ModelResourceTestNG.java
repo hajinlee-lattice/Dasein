@@ -103,6 +103,8 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         model.setCustomer("DELL");
         model.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
         model.setDataFormat("avro");
+        // reset throttle       
+        throttleConfigurationEntityMgr.cleanUpAllConfiguration();
     }
 
     @Test(groups = "functional", enabled = true)
@@ -141,7 +143,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         String appId = submission.getApplicationIds().get(0);
         validateAppStatus(platformTestBase.getApplicationId(appId));
     }
-
+    
     @Test(groups = "functional", dependsOnMethods = { "submit" })
     public void throttle() throws Exception {
         ThrottleConfiguration config = new ThrottleConfiguration();
