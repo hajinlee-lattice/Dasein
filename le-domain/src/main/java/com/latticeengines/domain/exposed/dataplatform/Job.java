@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.dataplatform;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;

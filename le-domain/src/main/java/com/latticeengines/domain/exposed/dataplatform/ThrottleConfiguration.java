@@ -20,95 +20,95 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @Table(name = "THROTTLE_CONFIGURATION")
 public class ThrottleConfiguration implements HasPid {
 
-	private Boolean immediate = Boolean.FALSE;
-	private Boolean enabled = Boolean.TRUE;
-	private Integer jobRankCutoff;
-	private Long pid;
-	private Timestamp timestamp;
+    private Boolean immediate = Boolean.FALSE;
+    private Boolean enabled = Boolean.TRUE;
+    private Integer jobRankCutoff;
+    private Long pid;
+    private Timestamp timestamp;
 
-	public ThrottleConfiguration() {
-	    
-	}
-	
-	public ThrottleConfiguration(Long pid) {
-	    this.pid = pid;	    
-	}
-	
-	@Override
-	@JsonIgnore
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Basic(optional = false)
-	@Column(name = "PID", unique = true, nullable = false)
-	public Long getPid() {
-		return pid;
-	}
+    public ThrottleConfiguration() {
 
-	@Override
-	@JsonIgnore
-	public void setPid(Long id) {
-		this.pid = id;
-	}
+    }
 
-	@JsonProperty("immediate")
-	@Column(name = "IMMEDIATE")
-	public boolean isImmediate() {
-		return immediate;
-	}
+    public ThrottleConfiguration(Long pid) {
+        this.pid = pid;
+    }
 
-	@JsonProperty("immediate")
-	public void setImmediate(Boolean immediate) {
-		this.immediate = immediate;
-	}
+    @Override
+    @JsonIgnore
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "PID", unique = true, nullable = false)
+    public Long getPid() {
+        return pid;
+    }
 
-	@JsonProperty("jobrank_cutoff")
-	@Column(name = "JOB_RANK_CUTOFF")
-	public Integer getJobRankCutoff() {
-		return jobRankCutoff;
-	}
+    @Override
+    @JsonIgnore
+    public void setPid(Long id) {
+        this.pid = id;
+    }
 
-	@JsonProperty("jobrank_cutoff")
-	public void setJobRankCutoff(Integer jobRankCutoff) {
-		this.jobRankCutoff = jobRankCutoff;
-	}
+    @JsonProperty("immediate")
+    @Column(name = "IMMEDIATE")
+    public boolean isImmediate() {
+        return immediate;
+    }
 
-	@Column(name = "TIMESTAMP")
-	public Timestamp getTimestamp() {
-		return timestamp;
-	}
+    @JsonProperty("immediate")
+    public void setImmediate(Boolean immediate) {
+        this.immediate = immediate;
+    }
 
-	public void setTimestamp(Timestamp ts) {
-		this.timestamp = ts;
-	}
+    @JsonProperty("jobrank_cutoff")
+    @Column(name = "JOB_RANK_CUTOFF")
+    public Integer getJobRankCutoff() {
+        return jobRankCutoff;
+    }
 
-	@Transient
-	public Long getTimestampLong() {
-	    if(this.timestamp==null)
-	        return null;
-	    
-		return this.timestamp.getTime();
-	}
+    @JsonProperty("jobrank_cutoff")
+    public void setJobRankCutoff(Integer jobRankCutoff) {
+        this.jobRankCutoff = jobRankCutoff;
+    }
 
-	public void setTimestampLong(Long timestamp) {
-	    if(timestamp!=null) {
-	        this.timestamp = new Timestamp(timestamp);
-	    }
-	}
+    @Column(name = "TIMESTAMP")
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
 
-	@JsonProperty("enabled")
-	@Column(name = "ENABLED")
-	public Boolean isEnabled() {
-		return enabled;
-	}
+    public void setTimestamp(Timestamp ts) {
+        this.timestamp = ts;
+    }
 
-	@JsonProperty("enabled")
-	public void setEnabled(Boolean enabled) {
-		this.enabled = enabled;
-	}
+    @Transient
+    public Long getTimestampLong() {
+        if (this.timestamp == null)
+            return null;
 
-	@Override
-	public String toString() {
-		return JsonUtils.serialize(this);
-	}
+        return this.timestamp.getTime();
+    }
+
+    public void setTimestampLong(Long timestamp) {
+        if (timestamp != null) {
+            this.timestamp = new Timestamp(timestamp);
+        }
+    }
+
+    @JsonProperty("enabled")
+    @Column(name = "ENABLED")
+    public Boolean isEnabled() {
+        return enabled;
+    }
+
+    @JsonProperty("enabled")
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 
 }

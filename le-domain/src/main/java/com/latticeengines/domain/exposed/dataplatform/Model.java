@@ -205,21 +205,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     }
 
     @JsonIgnore
-    @OneToMany(mappedBy = "model", fetch = FetchType.EAGER, cascade = CascadeType.ALL /*
-                                                                                       * {
-                                                                                       * CascadeType
-                                                                                       * .
-                                                                                       * PERSIST
-                                                                                       * ,
-                                                                                       * CascadeType
-                                                                                       * .
-                                                                                       * MERGE
-                                                                                       * ,
-                                                                                       * CascadeType
-                                                                                       * .
-                                                                                       * REMOVE
-                                                                                       * }
-                                                                                       */)
+    @OneToMany(mappedBy = "model", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @LazyCollection(LazyCollectionOption.FALSE)
     public List<Job> getJobs() {
         return this.jobs;
@@ -342,7 +328,6 @@ public class Model implements HasName, HasPid, HasId<String> {
                 .append(schemaHdfsPath, model.getSchemaHdfsPath()).append(modelHdfsDir, model.getModelHdfsDir())
                 .append(features, model.getFeaturesList()).append(targets, model.getTargetsList())
                 .append(keyCols, model.getKeyColsList())
-                // .append(modelDefinition, model.getModelDefinition())
                 .append(dataFormat, model.getDataFormat()).append(customer, model.getCustomer())
                 .append(table, model.getTable()).append(metadataTable, model.getMetadataTable()).isEquals();
 
