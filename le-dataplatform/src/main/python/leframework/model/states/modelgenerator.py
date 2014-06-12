@@ -6,8 +6,6 @@ from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
 from pipeline import ModelStep
-from pipeline import Pipeline
-
 
 class ModelGenerator(State, JsonGenBase):
     
@@ -30,12 +28,9 @@ class ModelGenerator(State, JsonGenBase):
         with open("leframework.tar.gz/leframework/scoringengine.py", "r") as pythonFile:
             model["Script"] = "".join(pythonFile.readlines())
 
-        modelSteps = []
-        if mediator.transformer is not None:
-            modelSteps.append(mediator.transformer)
-        modelSteps.append(ModelStep(self.mediator.clf, self.mediator.schema["features"]))
+        mediator.pipeline.getPipeline().append(ModelStep(self.mediator.clf, self.mediator.schema["features"]))
 
-        pipeline = Pipeline(modelSteps)
+        pipeline = mediator.pipeline
         pickle.dump(pipeline, open(filename, "w"), pickle.HIGHEST_PROTOCOL)
         
         pipelineBinaryPkl = self.__getSerializedFile(filename)

@@ -101,7 +101,7 @@ class Launcher(object):
             mediator.data = test
             mediator.schema = schema
             mediator.target = mediator.data[:, mediator.schema["targetIndex"]]
-            mediator.transformer = parser.getDataTransformer()
+            mediator.pipeline = parser.getPipeline()
             mediator.depivoted = parser.isDepivoted()
             stateMachine.run()
         else:

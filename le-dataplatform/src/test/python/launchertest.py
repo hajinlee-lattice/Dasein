@@ -47,7 +47,7 @@ class LauncherTest(TestCase):
         self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][2]["Value"], payload)
         # Load from the file system and deserialize into the model
         pipeline = pickle.load(open(payload, "r"))
-        self.assertTrue(isinstance(pipeline.getPipeline()[1].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
+        self.assertTrue(isinstance(pipeline.getPipeline()[2].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
         
         pipelineScript = "./results/pipeline.py"
         self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][1]["Value"], pipelineScript)
@@ -76,8 +76,8 @@ class LauncherTest(TestCase):
          This tests whether or not the order of input matters. It shuffles the columns so that
          to simulate VisiDB passing in data in a different order.
         '''
-        inputColumns1 = pipeline.getPipeline()[1].getModelInputColumns()
-        inputColumns2 = list(pipeline.getPipeline()[1].getModelInputColumns())
+        inputColumns1 = pipeline.getPipeline()[2].getModelInputColumns()
+        inputColumns2 = list(pipeline.getPipeline()[2].getModelInputColumns())
         shuffle(inputColumns2)
         valueMap = dict()
         line1 = self.__getLine(inputColumns1, valueMap, True)

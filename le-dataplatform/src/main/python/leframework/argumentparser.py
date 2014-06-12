@@ -6,6 +6,8 @@ from encoder import HashEncoder
 import fastavro as avro
 import pandas as pd
 from pipeline import EnumeratedColumnTransformStep
+from pipeline import ImputationStep
+from pipeline import Pipeline
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -34,7 +36,7 @@ class ArgumentParser(object):
         self.keyCols = set(self.metadataSchema["key_columns"])
         self.depivoted = False
         if "depivoted" in self.metadataSchema:
-            self.depivoted = self.metadataSchema["depivoted"] == "True"       
+            self.depivoted = self.metadataSchema["depivoted"] == "True"
         self.algorithmProperties = {}
         self.transformer = None
         try:
@@ -112,9 +114,6 @@ class ArgumentParser(object):
                         value = row[self.__getField(i)["name"]]
                         fType = self.__getField(i)["type"][0]
                         
-                        if fType != 'string' and value is None:
-                            value = 0.0
-                        
                         if i == included[self.targetIndex]:
                             value = float(value)
                             
@@ -128,12 +127,14 @@ class ArgumentParser(object):
             tmp.append(rowlist)
         self.__populateSchemaWithMetadata(self.getSchema(), self)
         df = pd.DataFrame(tmp, columns=includedNames)
-        df = self.__convertStringsToInt(df, stringColNames)
+        df = self.__prepareDataForModeling(df, stringColNames)
         return df.as_matrix()
     
-    def __convertStringsToInt(self, dataFrame, stringColNames):
-        self.transformer = EnumeratedColumnTransformStep(stringColNames)
-        return self.transformer.transform(dataFrame)
+    def __prepareDataForModeling(self, dataFrame, stringColNames):
+        steps = [EnumeratedColumnTransformStep(stringColNames), ImputationStep()]
+        self.pipeline = Pipeline(steps)
+        
+        return self.pipeline.predict(dataFrame)
 
     def __populateSchemaWithMetadata(self, schema, parser):
         schema["featureIndex"] = parser.getFeatureTuple()
@@ -168,5 +169,5 @@ class ArgumentParser(object):
     def getKeyColumns(self):
         return tuple(self.keyColIndex)
     
-    def getDataTransformer(self):
-        return self.transformer
+    def getPipeline(self):
+        return self.pipeline
