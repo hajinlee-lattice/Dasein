@@ -86,7 +86,7 @@ public class Job implements HasPid, HasId<String> {
     }
 
     @JsonIgnore
-    @Column(name = "APPMASTER_PROPERTIES")
+    @Column(name = "APPMASTER_PROPERTIES", length = 65535)
     public String getAppMasterProperties() {
         String propstr = (appMasterProperties == null || appMasterProperties.isEmpty()) ? "" : appMasterProperties
                 .toString();
@@ -97,8 +97,9 @@ public class Job implements HasPid, HasId<String> {
     /** data store has string / varchar as persistence type **/
     public void setAppMasterProperties(String appMasterPropertiesStr) throws IOException {
         this.appMasterProperties = new Properties();
-        if (appMasterPropertiesStr != null && !appMasterPropertiesStr.equalsIgnoreCase(""))
+        if (appMasterPropertiesStr != null && !appMasterPropertiesStr.equalsIgnoreCase("")) {
             this.appMasterProperties.load(new StringReader(appMasterPropertiesStr));
+        }
     }
     
     @Transient
@@ -108,18 +109,20 @@ public class Job implements HasPid, HasId<String> {
 
     public void setAppMasterPropertiesObject(Properties appMasterPropertiesObject) {
         this.appMasterProperties = appMasterPropertiesObject;
-        if (this.appMasterProperties == null)
+        if (this.appMasterProperties == null) {
             this.appMasterProperties = new Properties();
+        }
     }
       
     @JsonIgnore
-    @Column(name = "CONTAINER_PROPERTIES")
+    @Column(name = "CONTAINER_PROPERTIES", length = 65535)
     public String getContainerProperties() {
         String propstr = "";
         try {
             StringWriter strWriter = new StringWriter();
-            if (containerProperties != null && !containerProperties.isEmpty())
+            if (containerProperties != null && !containerProperties.isEmpty()) {
                 containerProperties.store(strWriter, null);
+            }
             propstr = strWriter.toString();
         } catch (IOException e) {
             // TODO log this message
@@ -132,8 +135,9 @@ public class Job implements HasPid, HasId<String> {
     @JsonIgnore
     public void setContainerProperties(String containerPropertiesStr) throws IOException {
         this.containerProperties = new Properties();
-        if (containerPropertiesStr != null && !containerPropertiesStr.equalsIgnoreCase(""))
+        if (containerPropertiesStr != null && !containerPropertiesStr.equalsIgnoreCase("")) {
             this.containerProperties.load(new StringReader(containerPropertiesStr));
+        }
     }
 
     @Transient
@@ -143,8 +147,9 @@ public class Job implements HasPid, HasId<String> {
 
     public void setContainerPropertiesObject(Properties containerPropertiesObject) {
         this.containerProperties = containerPropertiesObject;
-        if (this.containerProperties == null)
+        if (this.containerProperties == null) {
             this.containerProperties = new Properties();
+        }
     }
 
     /** data store has string / varchar as persistence type **/
@@ -220,18 +225,21 @@ public class Job implements HasPid, HasId<String> {
     @Override
     public boolean equals(Object obj) {
 
-        if (obj == null)
+        if (obj == null) {
             return false;
-        if (obj == this)
+        }
+        if (obj == this) {
             return true;
-        if (!obj.getClass().equals(this.getClass()))
+        }
+        if (!obj.getClass().equals(this.getClass())) {
             return false;
+        }
 
         Job job = (Job) obj;
 
-        return new EqualsBuilder().append(pid, job.getPid()).append(id, job.getId()).append(client, job.getClient())
-                .append(model, job.getModel()).append(appMasterProperties, job.getAppMasterPropertiesObject())
-                .append(containerProperties, job.getContainerPropertiesObject())
+        return new EqualsBuilder().append(pid, job.getPid()).append(id, job.getId()).append(client, job.getClient()) //
+                .append(model, job.getModel()).append(appMasterProperties, job.getAppMasterPropertiesObject()) //
+                .append(containerProperties, job.getContainerPropertiesObject()) //
                 .append(parentJobId, job.getParentJobId()).append(childJobIds, job.getChildJobIdList()).isEquals();
     }
 
