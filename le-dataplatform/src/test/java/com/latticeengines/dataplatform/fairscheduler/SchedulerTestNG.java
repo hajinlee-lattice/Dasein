@@ -48,11 +48,6 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private JobService jobService;
 
-    @Autowired
-    private JobEntityMgrImpl jobEntityMgr;
-
-    @Autowired
-    private ThrottleConfigurationEntityMgrImpl throttleConfigurationEntityMgr;
 
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
