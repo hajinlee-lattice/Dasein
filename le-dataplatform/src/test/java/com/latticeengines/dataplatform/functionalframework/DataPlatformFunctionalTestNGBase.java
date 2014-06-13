@@ -152,7 +152,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
      * @see https://jira.spring.io/browse/SPR-4072
      * 
      */
-    @BeforeSuite
+    
     public void setupBeforeSuite() {
         cleanupDatabase();   
     }
