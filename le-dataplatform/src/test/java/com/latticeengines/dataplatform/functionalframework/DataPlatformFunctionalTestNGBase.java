@@ -8,6 +8,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -38,11 +39,13 @@ import org.springframework.yarn.test.context.YarnCluster;
 import org.springframework.yarn.test.junit.ApplicationInfo;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.dataplatform.entitymanager.AlgorithmEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
+import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
@@ -58,40 +61,43 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     @Autowired
     protected JobEntityMgr jobEntityMgr;
-    
+
     @Autowired
     protected ModelEntityMgr modelEntityMgr;
-    
+
     @Autowired
     protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
-     
+
+    @Autowired
+    protected AlgorithmEntityMgr algorithmEntityMgr;
+
     @Autowired
     protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     @Value("${dataplatform.datasource.host}")
     protected String dbHost;
-    
+
     @Value("${dataplatform.datasource.port}")
     protected int dbPort;
-    
+
     @Value("${dataplatform.datasource.dbname}")
     protected String dbName;
-    
+
     @Value("${dataplatform.datasource.user}")
     protected String dbUser;
-    
+
     @Value("${dataplatform.datasource.password}")
     protected String dbPassword;
-   
+
     @Value("${dataplatform.datasource.type}")
     protected String dbType;
-    
+
     @Value("${dataplatform.container.virtualcores}")
     protected int virtualCores;
-    
+
     @Value("${dataplatform.container.memory}")
     protected int memory;
-    
+
     protected YarnCluster yarnCluster;
 
     protected YarnClient yarnClient;
@@ -118,35 +124,37 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
             public boolean accept(File dir, String name) {
                 return name.endsWith(".avro");
             }
-            
+
         });
     }
-        
+
     public void setJobEntityMgr(JobEntityMgr jobEntityMgr) {
         this.jobEntityMgr = jobEntityMgr;
     }
-    
+
     public void setModelEntityMgr(ModelEntityMgr modelEntityMgr) {
         this.modelEntityMgr = modelEntityMgr;
     }
-    
+
     public void setThrottleConfigurationEntityMgr(ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr) {
         this.throttleConfigurationEntityMgr = throttleConfigurationEntityMgr;
     }
-    
+
     public String getFileUrlFromResource(String resource) {
         URL url = ClassLoader.getSystemResource(resource);
         return "file:" + url.getFile();
     }
 
-
     @BeforeClass(groups = { "functional", "functional.scheduler" })
     public void setupRunEnvironment() throws Exception {
         log.info("Test name = " + this.getClass());
-        
+
+        cleanupDatabase();
+
         if (!doYarnClusterSetup()) {
             return;
         }
+
         FileSystem fs = FileSystem.get(yarnConfiguration);
         // Delete directories
         fs.delete(new Path("/app"), true);
@@ -166,15 +174,20 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
                 "/app/dataplatform", false));
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/launcher.py",
                 "/app/dataplatform/scripts", false));
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/lr_train.py",
+        copyEntries.add(new CopyEntry(
+                "file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/lr_train.py",
                 "/app/dataplatform/scripts/algorithm", false));
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/dt_train.py",
+        copyEntries.add(new CopyEntry(
+                "file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/dt_train.py",
                 "/app/dataplatform/scripts/algorithm", false));
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/rf_train.py",
+        copyEntries.add(new CopyEntry(
+                "file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/rf_train.py",
                 "/app/dataplatform/scripts/algorithm", false));
         String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/*.jar", "/app/dataplatform", false));
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/leframework.tar.gz", "/app/dataplatform/scripts", false));
+        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/*.jar", "/app/dataplatform",
+                false));
+        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/leframework.tar.gz",
+                "/app/dataplatform/scripts", false));
         copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
 
         if (doDependencyLibraryCopy()) {
@@ -186,7 +199,19 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
         doCopy(fs, copyEntries);
     }
-    
+
+    private void cleanupDatabase() {
+        algorithmEntityMgr.deleteAll();
+        throttleConfigurationEntityMgr.deleteAll();
+        jobEntityMgr.deleteAll();
+        modelEntityMgr.deleteAll();
+        modelDefinitionEntityMgr.deleteAll();
+    }
+
+    /**
+     * this helper method produces 1 definition with 3 algorithms
+     * @return
+     */
     protected ModelDefinition produceModelDefinition() {
         LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
         logisticRegressionAlgorithm.setPriority(0);
@@ -204,11 +229,37 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         randomForestAlgorithm.setSampleName("all");
 
         ModelDefinition modelDef = new ModelDefinition();
-        modelDef.setName("Model-"+System.currentTimeMillis());
+        modelDef.setName("Model-" + System.currentTimeMillis());
         modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 randomForestAlgorithm, logisticRegressionAlgorithm }));
-        
+
         return modelDef;
+    }
+
+    /**
+     * this helper method produces a Model for unit / functional test
+     * (note: ModelDefinition still needs to be set)
+     *  
+     * @param appIdStr
+     * @return
+     */
+    protected Model produceModel() {
+        String suffix = Long.toString(System.currentTimeMillis());
+        Model model = new Model();        
+        model.setName("Model Submission for Demo"+suffix);
+        model.setId(UUID.randomUUID().toString());
+        model.setTable("iris");
+        model.setMetadataTable("iris_metadata");
+        model.setFeaturesList(Arrays.<String> asList(new String[] { "SEPAL_LENGTH", //
+                "SEPAL_WIDTH", //
+                "PETAL_LENGTH", //
+                "PETAL_WIDTH" }));
+        model.setTargetsList(Arrays.<String> asList(new String[] { "CATEGORY" }));
+        model.setCustomer("INTERNAL");
+        model.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
+        model.setDataFormat("avro");
+        
+        return model;
     }
     
     public ApplicationId getApplicationId(String appIdStr) {

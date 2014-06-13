@@ -103,8 +103,6 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         model.setCustomer("DELL");
         model.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
         model.setDataFormat("avro");
-        // reset throttle       
-        throttleConfigurationEntityMgr.cleanUpAllConfiguration();
     }
 
     @Test(groups = "functional", enabled = true)

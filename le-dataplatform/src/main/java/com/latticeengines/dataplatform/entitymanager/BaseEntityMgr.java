@@ -16,25 +16,13 @@ public interface BaseEntityMgr<T> {
     
     void delete(T entity);
 
+    void deleteAll();
+    
     boolean containInSession(T entity);
     
     T findByKey(T entity);
  
     List<T> findAll();
-    
 
-/*    void save();
-
-    void load();
     
-    void post(T entity);
-    
-    void clear();*/
-   /* 
-    T getById(Object id);
-
-    List<T> getAll();
-    
-    T getByKey(T entity);
-*/
 }

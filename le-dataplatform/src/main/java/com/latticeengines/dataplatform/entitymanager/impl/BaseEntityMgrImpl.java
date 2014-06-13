@@ -39,6 +39,12 @@ public abstract class BaseEntityMgrImpl<T extends HasPid> implements BaseEntityM
     public void delete(T entity) {
         getDao().delete(entity);
     }
+    
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public void deleteAll() {
+        getDao().deleteAll();
+    }
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override

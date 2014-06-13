@@ -21,13 +21,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
-import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
-import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.Classifier;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.dataplatform.Model;
+import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 
 /**
  * This test working is dependent on the cluster settings. Ensure that:
@@ -124,15 +124,21 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
     
     @Test(groups = "functional.scheduler", enabled = true)
     public void testSubmit() throws Exception {
+        ModelDefinition modelDef = produceModelDefinition();
+        Model model = produceModel();
+        model.setModelDefinition(modelDef);
+        
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
-        // A
+        // A        
         for (int i = 0; i < 1; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.0", 0, "DELL");
+            model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
                 Job p1 = getJob(classifier2Mins, "Priority1.0", 1, "DELL");
+                model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }
             // */
@@ -143,11 +149,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         // B
         for (int i = 0; i < 1; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.1", 0, "DELL");
+            model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
                 Job p1 = getJob(classifier2Mins, "Priority1.1", 1, "DELL");
+                model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -156,11 +164,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         // C
         for (int i = 0; i < 1; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.2", 0, "DELL");
+            model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
                 Job p1 = getJob(classifier2Mins, "Priority1.2", 1, "DELL");
+                model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -168,11 +178,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         // D
         for (int i = 0; i < 1; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.3", 0, "DELL");
+            model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
                 Job p1 = getJob(classifier2Mins, "Priority1.3", 1, "DELL");
+                model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -180,11 +192,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         // E
         for (int i = 0; i < 1; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.4", 0, "DELL");
+            model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
                 Job p1 = getJob(classifier2Mins, "Priority1.4", 1, "DELL");
+                model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -195,15 +209,21 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Test(groups = "functional.scheduler", enabled = true)
     public void testSubmit2() throws Exception {
+        ModelDefinition modelDef = produceModelDefinition();
+        Model model = produceModel();
+        model.setModelDefinition(modelDef);
+        
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
         for (int i = 0; i < 4; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.0", 0, "DELL");
+            model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
                 Job p1 = getJob(classifier2Mins, "Priority1.0", 1, "DELL");
+                model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
 
@@ -213,11 +233,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         // B
         for (int i = 0; i < 1; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.1", 0, "DELL");
+            model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
                 Job p1 = getJob(classifier2Mins, "Priority1.1", 1, "DELL");
+                model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
@@ -226,11 +248,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         // C
         for (int i = 0; i < 1; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.2", 0, "DELL");
+            model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
                 Job p1 = getJob(classifier2Mins, "Priority1.2", 1, "DELL");
+                model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);

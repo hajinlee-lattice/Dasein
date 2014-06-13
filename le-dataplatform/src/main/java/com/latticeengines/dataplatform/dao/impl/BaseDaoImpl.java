@@ -12,12 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 @Repository
 public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
 
     /**
-     * Class presentation of the entity object that the subclass Dao is working with.
+     * Class presentation of the entity object that the subclass Dao is working
+     * with.
      */
     protected abstract Class<T> getEntityClass();
 
@@ -28,7 +30,8 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
     }
 
     /**
-     * This is a generic create for the ORM layer. This should work for all entity types.
+     * This is a generic create for the ORM layer. This should work for all
+     * entity types.
      * 
      */
     @Override
@@ -36,24 +39,26 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
     public void create(T entity) {
         sessionFactory.getCurrentSession().persist(entity);
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public boolean containInSession(T entity)  {
+    public boolean containInSession(T entity) {
         boolean bContains = sessionFactory.getCurrentSession().contains(entity);
-        
-        return bContains; 
+
+        return bContains;
     }
 
     /**
-     * Either create(Object) or update(Object) the given instance, depending upon
-     * resolution of the unsaved-value checks (see the manual for discussion of
-     * unsaved-value checking). This operation cascades to associated instances
-     * if the association is mapped with cascade="save-update"
+     * Either create(Object) or update(Object) the given instance, depending
+     * upon resolution of the unsaved-value checks (see the manual for
+     * discussion of unsaved-value checking). This operation cascades to
+     * associated instances if the association is mapped with
+     * cascade="save-update"
      * 
      * 
-     * @param entity - Parameters: object - a transient or detached instance containing new or
-     * updated state
+     * @param entity
+     *            - Parameters: object - a transient or detached instance
+     *            containing new or updated state
      * 
      */
     @Override
@@ -94,7 +99,7 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
         Query query = session.createQuery("from " + entityClz.getSimpleName());
         return query.list();
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void update(T entity) {
@@ -107,4 +112,12 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
         sessionFactory.getCurrentSession().delete(entity);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteAll() {
+        Session session = sessionFactory.getCurrentSession();
+        Class<T> entityClz = getEntityClass();
+        Query query = session.createQuery("delete from " + entityClz.getSimpleName());
+        query.executeUpdate();
+    }
 }

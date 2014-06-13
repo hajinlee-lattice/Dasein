@@ -52,7 +52,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
                 appIds.add(appId);
             }
         }
-        Set<Job> jobsToResubmit = jobEntityMgr.findAllByObjectIds(appIds); /// getByIds(appIds);
+        Set<Job> jobsToResubmit = jobEntityMgr.findAllByObjectIds(appIds); 
         for (Job job : jobsToResubmit) {
             jobService.resubmitPreemptedJob(job);
         }
