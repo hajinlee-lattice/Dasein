@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
+@Transactional 
 public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
@@ -93,10 +94,10 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         // also, modelDef 'name' should be unique
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
         //
-        model = createModel(modelDef);
+        model = produceModel(modelDef);
     }
 
-    private Model createModel(ModelDefinition modelDef) {
+    private Model produceModel(ModelDefinition modelDef) {
         Model m = new Model();
         m.setModelDefinition(modelDef);
         m.setName("Model Submission-"+System.currentTimeMillis());
@@ -140,6 +141,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @Transactional 
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submitModel() throws Exception {
         List<ApplicationId> appIds = modelingService.submitModel(model);
@@ -158,14 +160,16 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         }
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "submitModel" })
+    @Transactional 
+    @Test(groups = "functional", enabled = false, dependsOnMethods = { "submitModel" })
     public void submitModelMultithreaded() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(3);
 
+        //Model model = produceModel(modelDef)
         final Model[] models = new Model[3];
-        models[0] = createModel(model.getModelDefinition());
-        models[1] = createModel(model.getModelDefinition());
-        models[2] = createModel(model.getModelDefinition());
+        models[0] = produceModel(model.getModelDefinition());
+        models[1] = produceModel(model.getModelDefinition());
+        models[2] = produceModel(model.getModelDefinition());
 
         List<Future<List<ApplicationId>>> futures = new ArrayList<Future<List<ApplicationId>>>();
         for (int i = 0; i < 3; i++) {
