@@ -141,7 +141,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Transactional 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submitModel() throws Exception {
         List<ApplicationId> appIds = modelingService.submitModel(model);
@@ -159,17 +159,16 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
             assertNotNull(modelContents);
         }
     }
-
-    @Transactional 
-    @Test(groups = "functional", enabled = false, dependsOnMethods = { "submitModel" })
+ 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "submitModel" })
     public void submitModelMultithreaded() throws Exception {
-        ExecutorService executor = Executors.newFixedThreadPool(3);
-
-        //Model model = produceModel(modelDef)
+        ExecutorService executor = Executors.newFixedThreadPool(3);     
+        
         final Model[] models = new Model[3];
-        models[0] = produceModel(model.getModelDefinition());
-        models[1] = produceModel(model.getModelDefinition());
-        models[2] = produceModel(model.getModelDefinition());
+        models[0] = produceModel(produceModelDefinition());
+        models[1] = produceModel(produceModelDefinition());
+        models[2] = produceModel(produceModelDefinition());
 
         List<Future<List<ApplicationId>>> futures = new ArrayList<Future<List<ApplicationId>>>();
         for (int i = 0; i < 3; i++) {
@@ -233,6 +232,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
                 FinalApplicationStatus.KILLED);               
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     @Test(groups = "functional", dependsOnMethods = { "throttleImmediate" })
     public void throttleNewlySubmittedModels() throws Exception {
         ThrottleConfiguration config = new ThrottleConfiguration();
@@ -241,6 +241,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         modelingService.throttle(config);
 
         ModelDefinition modelDef = produceModelDefinition();
+        model = produceModel();
         model.setPid(null);
         model.setModelDefinition(modelDef);
         List<ApplicationId> appIds = modelingService.submitModel(model);

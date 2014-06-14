@@ -13,11 +13,12 @@ import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntity
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 @Component("throttleConfigurationEntityMgr")
-public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<ThrottleConfiguration> implements ThrottleConfigurationEntityMgr {
+public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<ThrottleConfiguration> implements
+        ThrottleConfigurationEntityMgr {
 
     @Autowired
     private ThrottleConfigurationDao throttleConfigurationDao;
-    
+
     public ThrottleConfigurationEntityMgrImpl() {
         super();
     }
@@ -26,25 +27,23 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
     public BaseDao<ThrottleConfiguration> getDao() {
         return throttleConfigurationDao;
     }
- 
+
     @Override
     public List<ThrottleConfiguration> getConfigsSortedBySubmissionTime() {
         List<ThrottleConfiguration> configs = throttleConfigurationDao.findAll();
-        
+
         Collections.sort(configs, new Comparator<ThrottleConfiguration>() {
 
             @Override
             public int compare(ThrottleConfiguration o1, ThrottleConfiguration o2) {
-                // TODO Auto-generated method stub
-                return 0;
+                boolean smaller = o1.getTimestamp().before(o2.getTimestamp());
+
+                return (smaller ? 1 : -1);
             }
-            
         });
         return configs;
     }
- 
-    
-    
+
     @Override
     public ThrottleConfiguration getLatestConfig() {
         List<ThrottleConfiguration> configs = getConfigsSortedBySubmissionTime();
@@ -53,10 +52,10 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
         }
         return configs.get(0);
     }
-    
+
     @Override
     public void cleanUpAllConfiguration() {
-        throttleConfigurationDao.deleteAll();        
+        throttleConfigurationDao.deleteAll();
     }
 
 }
