@@ -38,6 +38,7 @@ import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.test.context.YarnCluster;
 import org.springframework.yarn.test.junit.ApplicationInfo;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.dataplatform.entitymanager.AlgorithmEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
@@ -145,11 +146,19 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return "file:" + url.getFile();
     }
 
+    /**
+     * this is needed because there is an issue with Spring to have @Autowired and @BeforeClass to work together  
+     * @see https://jira.spring.io/browse/SPR-4072
+     * 
+     */
+    @BeforeMethod(enabled=true, firstTimeOnly=true)
+    public void setupBeforeSuite() {
+        cleanupDatabase();   
+    }
+
     @BeforeClass(groups = { "functional", "functional.scheduler" })
     public void setupRunEnvironment() throws Exception {
         log.info("Test name = " + this.getClass());
-
-        cleanupDatabase();
 
         if (!doYarnClusterSetup()) {
             return;
