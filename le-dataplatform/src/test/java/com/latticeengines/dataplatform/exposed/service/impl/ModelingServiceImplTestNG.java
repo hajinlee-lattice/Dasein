@@ -19,6 +19,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
@@ -205,6 +206,9 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @Test(groups = "functional", dependsOnMethods = { "submitModel" })
     @Transactional(propagation = Propagation.REQUIRED)
     public void throttleImmediate() throws Exception {        
+        // clean up:  this test case expects no previous throttle
+        throttleConfigurationEntityMgr.deleteAll();
+        
         ModelDefinition modelDef = produceModelDefinition();
         model.setPid(null);
         model.setModelDefinition(modelDef);
@@ -212,7 +216,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setImmediate(true);
         config.setJobRankCutoff(2);
-        // persist the throttle configuration
+        // save the throttle configuration
         modelingService.throttle(config);
 
         JobWatchdogService watchDog = getWatchdogService();

@@ -13,6 +13,8 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -42,6 +44,7 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressi
  * @author rgonzalez
  *
  */
+@Transactional
 public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
@@ -120,6 +123,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return config;
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     @Test(groups = "functional", enabled = true)
     public void load() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
@@ -130,6 +134,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
     
+    @Transactional(propagation = Propagation.REQUIRED)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "load" })
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
@@ -154,6 +159,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);

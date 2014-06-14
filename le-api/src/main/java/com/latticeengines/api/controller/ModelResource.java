@@ -63,6 +63,13 @@ public class ModelResource {
         return new ThrottleSubmission(config.isImmediate());
     }
 
+    @RequestMapping(value = "/resetThrottle", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
+    @ResponseBody
+    public ThrottleSubmission resetThrottle() {
+        modelingService.resetThrottle();  
+        return new ThrottleSubmission();
+    }
+    
     @RequestMapping(value = "/load", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
     @ResponseBody
     public AppSubmission loadData(@RequestBody LoadConfiguration config) {

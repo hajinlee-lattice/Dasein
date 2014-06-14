@@ -135,6 +135,9 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void submit() throws Exception {
+        // reset throttle
+        restTemplate.postForObject("http://localhost:8080/rest/resetThrottle", null, ThrottleSubmission.class);
+        // submit 
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         assertEquals(2, submission.getApplicationIds().size());

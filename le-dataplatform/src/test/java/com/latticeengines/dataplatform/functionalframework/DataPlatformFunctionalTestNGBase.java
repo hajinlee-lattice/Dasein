@@ -30,6 +30,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.test.context.transaction.TransactionConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -37,6 +39,7 @@ import org.springframework.yarn.client.YarnClient;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.test.context.YarnCluster;
 import org.springframework.yarn.test.junit.ApplicationInfo;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
@@ -54,6 +57,8 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
+@TransactionConfiguration(defaultRollback = true)
+@Transactional
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     private static final Log log = LogFactory.getLog(DataPlatformFunctionalTestNGBase.class);
 
@@ -147,15 +152,22 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     }
 
     /**
-     * this is needed because there is an issue with Spring to have @Autowired and @BeforeClass to work together  
-     * @see https://jira.spring.io/browse/SPR-4072
      * 
      */
     @BeforeMethod(enabled=true, firstTimeOnly=true, alwaysRun=true)
-    public void setupBeforeSuite() {
-        cleanupDatabase();   
+    public void beforeEachTest() {        
+        /** all this method does is to use annotation to start a transaction **/
     }
-
+  
+    // @Transactional(rollbackFor=java.lang.Exception.class)
+    // @org.springframework.test.annotation.Rollback()
+    @AfterMethod(enabled=true, lastTimeOnly=true, alwaysRun=true)
+    public void afterEachTest() { // throws Exception {
+        /** this method uses annotation to declare rolling back a transaction on Exception **/
+        /** an Exception is thrown purposefully to trigger a rollback of all test data inserted; thus clean up **/
+        //throw new Exception("purposely thorwn Exception to rollback test data");
+    }
+    
     @BeforeClass(groups = { "functional", "functional.scheduler" })
     public void setupRunEnvironment() throws Exception {
         log.info("Test name = " + this.getClass());
@@ -207,14 +219,6 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         }
 
         doCopy(fs, copyEntries);
-    }
-
-    private void cleanupDatabase() {
-        algorithmEntityMgr.deleteAll();
-        throttleConfigurationEntityMgr.deleteAll();
-        jobEntityMgr.deleteAll();
-        modelEntityMgr.deleteAll();
-        modelDefinitionEntityMgr.deleteAll();
     }
 
     /**
