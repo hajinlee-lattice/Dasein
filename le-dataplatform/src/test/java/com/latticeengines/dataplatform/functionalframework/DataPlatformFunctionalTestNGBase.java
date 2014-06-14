@@ -38,7 +38,6 @@ import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.test.context.YarnCluster;
 import org.springframework.yarn.test.junit.ApplicationInfo;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeSuite;
 
 import com.latticeengines.dataplatform.entitymanager.AlgorithmEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
@@ -146,20 +145,11 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return "file:" + url.getFile();
     }
 
-
-    /**
-     * this is needed because there is an issue with Spring to have @Autowired and @BeforeClass to work together  
-     * @see https://jira.spring.io/browse/SPR-4072
-     * 
-     */
-    
-    public void setupBeforeSuite() {
-        cleanupDatabase();   
-    }
-
     @BeforeClass(groups = { "functional", "functional.scheduler" })
     public void setupRunEnvironment() throws Exception {
         log.info("Test name = " + this.getClass());
+
+        cleanupDatabase();
 
         if (!doYarnClusterSetup()) {
             return;
@@ -220,7 +210,6 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     /**
      * this helper method produces 1 definition with 3 algorithms
-     * 
      * @return
      */
     protected ModelDefinition produceModelDefinition() {
@@ -248,16 +237,16 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     }
 
     /**
-     * this helper method produces a Model for unit / functional test (note:
-     * ModelDefinition still needs to be set)
-     * 
+     * this helper method produces a Model for unit / functional test
+     * (note: ModelDefinition still needs to be set)
+     *  
      * @param appIdStr
      * @return
      */
     protected Model produceModel() {
         String suffix = Long.toString(System.currentTimeMillis());
-        Model model = new Model();
-        model.setName("Model Submission for Demo" + suffix);
+        Model model = new Model();        
+        model.setName("Model Submission for Demo"+suffix);
         model.setId(UUID.randomUUID().toString());
         model.setTable("iris");
         model.setMetadataTable("iris_metadata");
@@ -269,10 +258,10 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         model.setCustomer("INTERNAL");
         model.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         model.setDataFormat("avro");
-
+        
         return model;
     }
-
+    
     public ApplicationId getApplicationId(String appIdStr) {
         String[] tokens = appIdStr.split("_");
         TestApplicationId appId = new TestApplicationId();
