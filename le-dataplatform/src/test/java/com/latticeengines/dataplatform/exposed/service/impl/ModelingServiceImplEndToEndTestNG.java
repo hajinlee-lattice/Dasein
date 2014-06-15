@@ -86,7 +86,7 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model1");
-        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
+        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 logisticRegressionAlgorithm }));
         // 
         // in the application, it is assumed that the model definition is defined in the metadata db

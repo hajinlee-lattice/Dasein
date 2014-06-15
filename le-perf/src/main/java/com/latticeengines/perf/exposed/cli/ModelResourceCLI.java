@@ -112,7 +112,7 @@ public class ModelResourceCLI {
                 algorithms.add(rfa);
             }
         }
-        modelDef.setAlgorithms(algorithms);
+        modelDef.addAlgorithms(algorithms);
         model.setModelDefinition(modelDef);
         model.setName(modelName);
         model.setTable(table);

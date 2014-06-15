@@ -81,7 +81,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model Definition For Demo");
-        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm,
+        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm,
                 logisticRegressionAlgorithm, decisionTreeAlgorithm }));
 
         model = new Model();

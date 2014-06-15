@@ -61,7 +61,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Logistic regression against all");
-        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { logisticRegression }));
+        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { logisticRegression }));
 
         model = new Model();
         model.setModelDefinition(modelDef);
