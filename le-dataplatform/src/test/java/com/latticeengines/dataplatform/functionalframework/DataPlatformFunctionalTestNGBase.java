@@ -57,7 +57,7 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
-@TransactionConfiguration(defaultRollback = true)
+//@TransactionConfiguration(defaultRollback = true)
 @Transactional
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     private static final Log log = LogFactory.getLog(DataPlatformFunctionalTestNGBase.class);
@@ -154,7 +154,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     /**
      * 
      */
-    @BeforeMethod(enabled=true, firstTimeOnly=true, alwaysRun=true)
+    @BeforeMethod(enabled=true, firstTimeOnly=true, alwaysRun=true)    
     public void beforeEachTest() {        
         /** all this method does is to use annotation to start a transaction **/
     }
@@ -256,7 +256,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
      * @param appIdStr
      * @return
      */
-    protected Model produceModel() {
+    protected Model produceIrisMetadataModel() {
         String suffix = Long.toString(System.currentTimeMillis());
         Model model = new Model();        
         model.setName("Model Submission for Demo"+suffix);

@@ -58,15 +58,32 @@ public class ModelDefinition implements HasName, HasPid {
     }
 
     @JsonProperty("algorithms")
-    @OneToMany(mappedBy = "modelDefinition", targetEntity = AlgorithmBase.class, fetch=FetchType.EAGER )
+    @OneToMany(mappedBy = "modelDefinition", targetEntity = AlgorithmBase.class, fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST })
     public List<Algorithm> getAlgorithms() {
         return algorithms;
     }
 
     @JsonProperty("algorithms")
-    public void setAlgorithms(List<Algorithm> algorithms) {
-        this.algorithms = algorithms;
+    public void setAlgorithms(List<Algorithm> algos) {
+        this.algorithms = algos; 
     }
+    
+    /**
+     * add algorithm(s) to the model definition
+     * - not intended to be used by ORM
+     *  
+     * @param algos
+     */
+    public void addAlgorithms(List<Algorithm> algos) {
+        this.algorithms = (this.algorithms == null) ? new ArrayList<Algorithm>() : this.algorithms; 
+        if (algos != null && !algos.isEmpty()) {
+            this.algorithms.addAll(algos);
+            for (Algorithm a : algos) {
+                a.setModelDefinition(this);
+            }
+        }
+    }
+    
 
     @JsonIgnore
     @OneToMany(mappedBy = "modelDefinition", fetch = FetchType.LAZY)

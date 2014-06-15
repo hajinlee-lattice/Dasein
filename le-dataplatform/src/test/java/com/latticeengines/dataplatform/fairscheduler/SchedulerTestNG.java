@@ -55,8 +55,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional.scheduler")
     public void setup() throws Exception {
-        ///jobEntityMgr.deleteStoreFile();
-        ///throttleConfigurationEntityMgr.deleteStoreFile();
+ 
         classifier1Min = new Classifier();
         classifier1Min.setName("IrisClassifier");
         classifier1Min.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
@@ -122,10 +121,33 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         doCopy(fs, copyEntries);
     }
     
+    private Model produceModel(ModelDefinition modelDef) {
+        Model m = new Model();
+        m.setModelDefinition(modelDef);
+        m.setName("Model Submission-"+System.currentTimeMillis());
+        m.setTable("DELL_EVENT_TABLE_TEST");
+        m.setMetadataTable("EventMetadata");
+        m.setFeaturesList(Arrays.<String> asList(new String[] {     
+                "Column5", //
+                "Column6", //
+                "Column7", //
+                "Column8", //
+                "Column9", //
+                "Column10" }));
+        m.setTargetsList(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
+        m.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
+        m.setCustomer("DELL");
+        m.setDataFormat("avro");
+
+        return m;
+    }
+
+    
+    
     @Test(groups = "functional.scheduler", enabled = true)
     public void testSubmit() throws Exception {
         ModelDefinition modelDef = produceModelDefinition();
-        Model model = produceModel();
+        Model model = produceIrisMetadataModel();
         model.setModelDefinition(modelDef);
         
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
@@ -210,7 +232,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = "functional.scheduler", enabled = true)
     public void testSubmit2() throws Exception {
         ModelDefinition modelDef = produceModelDefinition();
-        Model model = produceModel();
+        Model model = produceIrisMetadataModel();
         model.setModelDefinition(modelDef);
         
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();

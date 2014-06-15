@@ -47,4 +47,8 @@ public interface Algorithm extends HasName, HasPid {
     
     void setSampleName(String sampleName);
 
+    ModelDefinition getModelDefinition();
+    
+    void setModelDefinition(ModelDefinition modelDefinition);
+         
 }

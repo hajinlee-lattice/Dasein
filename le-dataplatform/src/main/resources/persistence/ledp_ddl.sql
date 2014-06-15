@@ -52,6 +52,7 @@ GO
 CREATE TABLE [dbo].[ALGORITHM](
 	[PID] [int] NOT NULL IDENTITY (1000, 1),
 	[NAME] [nvarchar](100) NOT NULL,
+        [ALGO_TYPE] varchar(50) NOT NULL,
 	[SCRIPT] [nvarchar](500) NULL,
 	[CONTAINER_PROPERTIES] [nvarchar](max) NULL,
 	[ALGORITHM_PROPERTIES] [nvarchar](max) NULL,

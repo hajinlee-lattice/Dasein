@@ -77,16 +77,16 @@ public class Model implements HasName, HasPid, HasId<String> {
     }
 
     @JsonProperty("model_definition")
-    @ManyToOne(cascade = { CascadeType.DETACH }, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     // TODO
     @JoinColumn(name = "FK_MODEL_DEF_ID")
     public ModelDefinition getModelDefinition() {
         return modelDefinition;
-    }
+    } 
 
     @JsonProperty("model_definition")
-    public void setModelDefinition(ModelDefinition modelDefinition) {
-        this.modelDefinition = modelDefinition;
+    public void setModelDefinition(ModelDefinition modelDef) {
+        this.modelDefinition = modelDef;
         if (this.modelDefinition != null) {
             this.modelDefinition.addModel(this);
         }
@@ -328,9 +328,9 @@ public class Model implements HasName, HasPid, HasId<String> {
                 .append(dataHdfsPath, model.getDataHdfsPath()).append(metadataHdfsPath, model.getMetadataHdfsPath())
                 .append(schemaHdfsPath, model.getSchemaHdfsPath()).append(modelHdfsDir, model.getModelHdfsDir())
                 .append(features, model.getFeaturesList()).append(targets, model.getTargetsList())
-                .append(keyCols, model.getKeyColsList())
-                .append(dataFormat, model.getDataFormat()).append(customer, model.getCustomer())
-                .append(table, model.getTable()).append(metadataTable, model.getMetadataTable()).isEquals();
+                .append(keyCols, model.getKeyColsList()).append(dataFormat, model.getDataFormat())
+                .append(customer, model.getCustomer()).append(table, model.getTable())
+                .append(metadataTable, model.getMetadataTable()).isEquals();
 
     }
 }

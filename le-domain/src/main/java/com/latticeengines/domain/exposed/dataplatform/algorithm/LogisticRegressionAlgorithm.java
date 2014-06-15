@@ -1,5 +1,12 @@
 package com.latticeengines.domain.exposed.dataplatform.algorithm;
 
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "ALGORITHM")
+@DiscriminatorValue("LogisticRegression")
 public class LogisticRegressionAlgorithm extends AlgorithmBase {
 
     public LogisticRegressionAlgorithm() {

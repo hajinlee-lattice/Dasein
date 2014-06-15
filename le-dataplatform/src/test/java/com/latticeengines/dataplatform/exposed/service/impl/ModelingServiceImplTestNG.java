@@ -19,7 +19,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
@@ -167,9 +166,13 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         ExecutorService executor = Executors.newFixedThreadPool(3);     
         
         final Model[] models = new Model[3];
-        models[0] = produceModel(produceModelDefinition());
-        models[1] = produceModel(produceModelDefinition());
-        models[2] = produceModel(produceModelDefinition());
+        ModelDefinition modelDef = produceModelDefinition(); 
+        modelDefinitionEntityMgr.createOrUpdate(modelDef);
+        models[0] = produceModel(modelDef);
+        modelDefinitionEntityMgr.createOrUpdate(modelDef);
+        models[1] = produceModel(modelDef);
+        modelDefinitionEntityMgr.createOrUpdate(modelDef);
+        models[2] = produceModel(modelDef);
 
         List<Future<List<ApplicationId>>> futures = new ArrayList<Future<List<ApplicationId>>>();
         for (int i = 0; i < 3; i++) {
@@ -210,9 +213,9 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         throttleConfigurationEntityMgr.deleteAll();
         
         ModelDefinition modelDef = produceModelDefinition();
-        model.setPid(null);
-        model.setModelDefinition(modelDef);
-        List<ApplicationId> appIds = modelingService.submitModel(model);
+        Model m = produceModel(modelDef);
+        m.setModelDefinition(modelDef);
+        List<ApplicationId> appIds = modelingService.submitModel(m);
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setImmediate(true);
         config.setJobRankCutoff(2);
@@ -245,10 +248,9 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         modelingService.throttle(config);
 
         ModelDefinition modelDef = produceModelDefinition();
-        model = produceModel();
-        model.setPid(null);
-        model.setModelDefinition(modelDef);
-        List<ApplicationId> appIds = modelingService.submitModel(model);
+        Model m = produceModel(modelDef);
+        m.setModelDefinition(modelDef);
+        List<ApplicationId> appIds = modelingService.submitModel(m);
 
         // Only one job would be submitted since new jobs won't even come in
         assertEquals(appIds.size(), 1);
