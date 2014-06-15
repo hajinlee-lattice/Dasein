@@ -66,6 +66,7 @@ public class AlgorithmBase implements Algorithm {
         this.name = name;
     }
 
+    @JsonIgnore
     @Override
     @ManyToOne
     @JoinColumn(name = "FK_MODEL_DEF_ID")
