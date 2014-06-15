@@ -242,8 +242,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         randomForestAlgorithm.setSampleName("all");
 
         ModelDefinition modelDef = new ModelDefinition();
-        modelDef.setName("Model-" + System.currentTimeMillis());
-        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
+        modelDef.setName("Model-" + System.currentTimeMillis());        
+        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 randomForestAlgorithm, logisticRegressionAlgorithm }));
 
         return modelDef;
