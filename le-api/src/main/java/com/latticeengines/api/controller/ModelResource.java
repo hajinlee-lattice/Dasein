@@ -73,7 +73,7 @@ public class ModelResource {
     @RequestMapping(value = "/load", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
     @ResponseBody
     public AppSubmission loadData(@RequestBody LoadConfiguration config) {
-        AppSubmission submission = new AppSubmission(modelingService.loadData(config));
+        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId>asList(modelingService.loadData(config)));
         return submission;
     }
     
