@@ -321,7 +321,7 @@ public class ModelingServiceImpl implements ModelingService {
         Algorithm dataProfileAlgorithm = new DataProfilingAlgorithm();
         dataProfileAlgorithm.setSampleName("all");
         dataProfileAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
-        modelDefinition.setAlgorithms(Arrays.<Algorithm>asList(new Algorithm[] { dataProfileAlgorithm }));
+        modelDefinition.addAlgorithms(Arrays.<Algorithm>asList(new Algorithm[] { dataProfileAlgorithm }));
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         Job job = createJob(m, dataProfileAlgorithm, assignedQueue);
         m.addJob(job);
