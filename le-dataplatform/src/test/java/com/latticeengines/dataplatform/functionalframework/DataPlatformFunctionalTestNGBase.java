@@ -56,7 +56,6 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
-//@TransactionConfiguration(defaultRollback = true)
 @Transactional
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     private static final Log log = LogFactory.getLog(DataPlatformFunctionalTestNGBase.class);
@@ -235,7 +234,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model-" + System.currentTimeMillis());
-        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
+        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 randomForestAlgorithm, logisticRegressionAlgorithm }));
 
         return modelDef;

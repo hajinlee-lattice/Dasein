@@ -326,7 +326,7 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
         
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName(commandParameters.getModelName());
-        modelDef.setAlgorithms(algorithms);
+        modelDef.addAlgorithms(algorithms);
         
         Model model = new Model();
         model.setModelDefinition(modelDef);
