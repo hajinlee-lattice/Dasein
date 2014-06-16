@@ -48,7 +48,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model Definition For Demo");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
+        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 logisticRegressionAlgorithm }));
         
         // 

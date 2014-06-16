@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -49,18 +50,19 @@ import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.DataProfilingAlgorithm;
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {
-
+    
     private static final Log log = LogFactory.getLog(ModelingServiceImpl.class);
-
+    
     @Autowired
     private Configuration yarnConfiguration;
-
+    
     @Autowired
     private JobService jobService;
-
+    
     @Autowired
     private ModelEntityMgr modelEntityMgr;
 
@@ -107,10 +109,10 @@ public class ModelingServiceImpl implements ModelingService {
 
             Job job = createJob(model, algorithm);
             model.addJob(job);
-            /** jobservice is responsible for persistence during submitjob() **/
+            // JobService is responsible for persistence during submitJob
             applicationIds.add(jobService.submitJob(job));
         }
-
+        
         return applicationIds;
     }
 
@@ -149,7 +151,7 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setSchemaHdfsPath(createSchemaInHdfs(trainingPath, model));
         return classifier;
     }
-
+    
     private String getAvroMetadataPathInHdfs(String path) {
         List<String> files = new ArrayList<String>();
         try {
@@ -164,7 +166,7 @@ public class ModelingServiceImpl implements ModelingService {
         } catch (Exception e) {
             log.warn(e);
         }
-
+        
         if (files.size() != 1) {
             log.warn("No metadata file found.");
             return path;
@@ -210,14 +212,18 @@ public class ModelingServiceImpl implements ModelingService {
         }
         return null;
     }
-
+    
     private Job createJob(Model model, Algorithm algorithm) {
+        String assignedQueue = LedpQueueAssigner.getNonMRQueueNameForSubmission(algorithm.getPriority());
+        return createJob(model, algorithm, assignedQueue);
+    }
+
+    private Job createJob(Model model, Algorithm algorithm, String assignedQueue) {
         Job job = new Job();
         Classifier classifier = createClassifier(model, algorithm);
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), model.getCustomer());
         appMasterProperties.put(AppMasterProperty.TABLE.name(), model.getTable());
-        String assignedQueue = LedpQueueAssigner.getNonMRQueueNameForSubmission(algorithm.getPriority());
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
@@ -268,11 +274,60 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     @Override
-    public ApplicationId createFeatures(Model model) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    @Transactional(propagation = Propagation.REQUIRED)
+    public ApplicationId createFeatures(Model model, Set<String> excludeList) {
+        if (model.getCustomer() == null) {
+            throw new LedpException(LedpCode.LEDP_15002);
+        }
+        Model m = new Model();
+        
+        try {
+            BeanUtils.copyProperties(m, model);
+            m.setPid(null);
+        } catch (Exception e) {
+        }
+        setupModelProperties(m);
+        try {
+            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, m.getDataHdfsPath() + "/samples",
+                    new HdfsFilenameFilter() {
 
+                @Override
+                public boolean accept(Path filename) {
+                    Pattern p = Pattern.compile(".*.avro");
+                    Matcher matcher = p.matcher(filename.toString());
+                    return matcher.matches();
+                }
+
+            });
+            
+            if (paths.size() == 0) {
+                throw new LedpException(LedpCode.LEDP_00002);
+            }
+            String schemaPath = paths.get(0);
+            List<String> featureList = new ArrayList<String>();
+            Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(schemaPath));
+            for (Field field : schema.getFields()) {
+                String name = field.name();
+                if (!excludeList.contains(name)) {
+                    featureList.add(name);
+                }
+            }
+            m.setFeaturesList(featureList);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_00002, e);
+        }
+        m.setModelHdfsDir(m.getMetadataHdfsPath());
+        ModelDefinition modelDefinition = new ModelDefinition();
+        Algorithm dataProfileAlgorithm = new DataProfilingAlgorithm();
+        dataProfileAlgorithm.setSampleName("all");
+        dataProfileAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
+        modelDefinition.setAlgorithms(Arrays.<Algorithm>asList(new Algorithm[] { dataProfileAlgorithm }));
+        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        Job job = createJob(m, dataProfileAlgorithm, assignedQueue);
+        m.addJob(job);
+        return jobService.submitJob(job);
+    }
+    
     @Override
     public List<String> getFeatures(Model model, boolean depivoted) {
         if (model.getCustomer() == null) {
@@ -285,7 +340,7 @@ public class ModelingServiceImpl implements ModelingService {
         List<GenericRecord> data = new ArrayList<GenericRecord>();
         List<String> features = new ArrayList<String>();
         Set<String> pivotedFeatures = new LinkedHashSet<>();
-
+        
         try {
             HdfsFilenameFilter filter = new HdfsFilenameFilter() {
 
@@ -293,47 +348,47 @@ public class ModelingServiceImpl implements ModelingService {
                 public boolean accept(Path path) {
                     return path.toString().endsWith(".avro");
                 }
-
+                
             };
             List<String> avroDataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dataSchemaPath, filter);
-
+            
             if (avroDataFiles.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
             }
-
+            
             dataSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDataFiles.get(0)));
 
             List<String> avroMetadataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, metadataPath, filter);
-
+            
             if (avroMetadataFiles.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
             }
-
+            
             for (String avroMetadataFile : avroMetadataFiles) {
                 data.addAll(AvroUtils.getData(yarnConfiguration, new Path(avroMetadataFile)));
             }
-
+            
             Set<String> columnSet = new HashSet<String>();
             Set<String> featureSet = new HashSet<String>();
             for (Field field : dataSchema.getFields()) {
                 columnSet.add(field.getProp("columnName"));
-            }
-
+            }            
+            
             for (GenericRecord datum : data) {
                 String name = datum.get("barecolumnname").toString();
                 if (!depivoted) {
                     pivotedFeatures.add(name);
                     continue;
                 }
-
+                               
                 String value = datum.get("columnvalue").toString();
                 String datatype = datum.get("Dtype").toString();
                 String featureName = name;
-
+                
                 if (featureName.equals("P1_Event")) {
                     continue;
                 }
-
+                
                 if (datatype.equals("BND")) {
                     featureName += "_Continuous";
                 } else {
@@ -344,11 +399,11 @@ public class ModelingServiceImpl implements ModelingService {
                     featureSet.add(featureName);
                 }
             }
-
+            
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
-
+        
         if (depivoted) {
             return new ArrayList<String>(features);
         } else {
@@ -357,19 +412,15 @@ public class ModelingServiceImpl implements ModelingService {
     }
 
     @Override
-    public List<ApplicationId> loadData(LoadConfiguration config) {
+    public ApplicationId loadData(LoadConfiguration config) {
         Model model = new Model();
         model.setCustomer(config.getCustomer());
         model.setTable(config.getTable());
         model.setMetadataTable(config.getMetadataTable());
         setupModelProperties(model);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        ApplicationId dataLoadId = jobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(),
-                assignedQueue, model.getCustomer(), config.getKeyCols());
-        ApplicationId metadataLoadId = jobService.loadData(model.getMetadataTable(), model.getMetadataHdfsPath(),
-                config.getCreds(), assignedQueue, model.getCustomer(),
-                Arrays.<String> asList(new String[] { "QueryForMacro" }), 1);
-        return Arrays.<ApplicationId> asList(new ApplicationId[] { metadataLoadId, dataLoadId });
+        return jobService.loadData(model.getTable(), model.getDataHdfsPath(),
+                config.getCreds(), assignedQueue, model.getCustomer(), config.getKeyCols());
     }
 
     @Override

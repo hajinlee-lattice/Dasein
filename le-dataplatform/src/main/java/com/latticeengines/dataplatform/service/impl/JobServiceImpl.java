@@ -219,12 +219,12 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
                  
         ModelDefinition modelDefinition = model.getModelDefinition();
         // find the model def. already setup;  model def is expected to be pre-setup by user
-        ModelDefinition predefinedModelDef = modelDefinitionEntityMgr.findByName(modelDefinition.getName());        
-        if(predefinedModelDef != null)  {
+        ModelDefinition predefinedModelDef = modelDefinitionEntityMgr.findByName(modelDefinition.getName());
+        if (predefinedModelDef != null)  {
             // associate persisted model def with model.
             model.setModelDefinition(predefinedModelDef);
         } else {
-            // TODO:  this should not be needed; since the way how it works is that model def should already been setup & persisted.
+            // TODO:  this should not be needed; since the way how it works is that model def is already created in persistence
             modelDefinitionEntityMgr.create(modelDefinition);
             model.setModelDefinition(modelDefinition);
         }  
@@ -245,20 +245,17 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         }
         String metadata = resubmitJob.getContainerPropertiesObject().getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
         resubmitJob.getContainerPropertiesObject().setProperty(PythonContainerProperty.METADATA.name(), metadata);
-        ///String parentId = job.getId();
         Long parentId = resubmitJob.getPid();
-        resubmitJob.setId(null);        
+        resubmitJob.setId(null);
         resubmitJob.setParentJobId(parentId); 
         ApplicationId appId = submitJob(resubmitJob);
         log.info("Resubmitted " + parentId + " with " + resubmitJob.getId() + "to queue " + resubmitJob.getAppMasterPropertiesObject().getProperty(AppMasterProperty.QUEUE.name()) + ".");
-        //
         // find the parent job 
         com.latticeengines.domain.exposed.dataplatform.Job parentJob = new com.latticeengines.domain.exposed.dataplatform.Job();
         parentJob.setPid(parentId);
-        parentJob = jobEntityMgr.findByKey(parentJob); /// jobEntityMgr.getById(parentId);
+        parentJob = jobEntityMgr.findByKey(parentJob);
         parentJob.addChildJobId(resubmitJob.getId());
         jobEntityMgr.update(parentJob);
-
         return appId;
     }
 

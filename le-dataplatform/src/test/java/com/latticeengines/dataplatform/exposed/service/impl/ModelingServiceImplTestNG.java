@@ -6,7 +6,9 @@ import static org.testng.Assert.assertNotNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -78,16 +80,6 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         doCopy(fs, copyEntries);
 
-        inputDir = ClassLoader.getSystemResource(
-                "com/latticeengines/dataplatform/exposed/service/impl/DELL_EVENT_TABLE_TEST/EventMetadata").getPath();
-        avroFiles = getAvroFilesForDir(inputDir);
-        for (File avroFile : avroFiles) {
-            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(),
-                    "/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST/EventMetadata", false));
-        }
-
-        doCopy(fs, copyEntries);
-
         ModelDefinition modelDef = produceModelDefinition();
         // 
         // in the application, it is assumed that the model definition is defined in the metadata db
@@ -103,7 +95,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         m.setName("Model Submission-"+System.currentTimeMillis());
         m.setTable("DELL_EVENT_TABLE_TEST");
         m.setMetadataTable("EventMetadata");
-        m.setFeaturesList(Arrays.<String> asList(new String[] {     
+        m.setFeaturesList(Arrays.<String> asList(new String[] {
                 "Column5", //
                 "Column6", //
                 "Column7", //
@@ -143,6 +135,18 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
+    public void createFeatures() throws Exception {
+        Set<String> excludeList = new HashSet<>();
+        excludeList.add("IDX");
+        excludeList.add("CustomerID");
+        excludeList.add("LeadID");
+        excludeList.add("Target_LatitudeOptiplex_Retention_PCA_PPA_Customer");
+        ApplicationId appId = modelingService.createFeatures(model, excludeList);
+        FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
+
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createFeatures" })
     public void submitModel() throws Exception {
         List<ApplicationId> appIds = modelingService.submitModel(model);
 
@@ -163,7 +167,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "submitModel" })
     public void submitModelMultithreaded() throws Exception {
-        ExecutorService executor = Executors.newFixedThreadPool(3);     
+        ExecutorService executor = Executors.newFixedThreadPool(3);
         
         final Model[] models = new Model[3];
         ModelDefinition modelDef = produceModelDefinition(); 
@@ -208,7 +212,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     @Test(groups = "functional", dependsOnMethods = { "submitModel" })
     @Transactional(propagation = Propagation.REQUIRED)
-    public void throttleImmediate() throws Exception {        
+    public void throttleImmediate() throws Exception {
         // clean up:  this test case expects no previous throttle
         throttleConfigurationEntityMgr.deleteAll();
         
@@ -236,7 +240,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         // Second job should have been killed since we throttled
         status = waitForStatus(appIds.get(1), 10, TimeUnit.SECONDS,
-                FinalApplicationStatus.KILLED);               
+                FinalApplicationStatus.KILLED);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -259,7 +263,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         assertNotNull(state);
         FinalApplicationStatus status = waitForStatus(appIds.get(0), 120, TimeUnit.SECONDS,
                 FinalApplicationStatus.SUCCEEDED);
-        assertEquals(status, FinalApplicationStatus.SUCCEEDED);        
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
     private JobWatchdogService getWatchdogService() {

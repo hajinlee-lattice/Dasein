@@ -5,10 +5,6 @@ import logging
 from encoder import HashEncoder
 import fastavro as avro
 import pandas as pd
-from pipeline import EnumeratedColumnTransformStep
-from pipeline import ImputationStep
-from pipeline import Pipeline
-
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -71,7 +67,7 @@ class ArgumentParser(object):
         self.featureIndex = set()
         self.nameToFeatureIndex = dict()
         self.keyColIndex = set()
-        stringColNames = dict()
+        self.stringColNames = dict()
         encoder = HashEncoder()
         for f in self.fields:
             fType = f["type"][0]
@@ -90,7 +86,7 @@ class ArgumentParser(object):
                 if fName in self.keyCols:
                     self.keyColIndex.add(k)
                 if fType == 'string' and fName not in self.targets:
-                    stringColNames[fName] = encoder
+                    self.stringColNames[fName] = encoder
                 k = k+1
             l = l+1
         
@@ -126,16 +122,8 @@ class ArgumentParser(object):
                     logger.error(str(e))
             tmp.append(rowlist)
         self.__populateSchemaWithMetadata(self.getSchema(), self)
-        df = pd.DataFrame(tmp, columns=includedNames)
-        df = self.__prepareDataForModeling(df, stringColNames)
-        return df.as_matrix()
+        return pd.DataFrame(tmp, columns=includedNames)
     
-    def __prepareDataForModeling(self, dataFrame, stringColNames):
-        steps = [EnumeratedColumnTransformStep(stringColNames), ImputationStep()]
-        self.pipeline = Pipeline(steps)
-        
-        return self.pipeline.predict(dataFrame)
-
     def __populateSchemaWithMetadata(self, schema, parser):
         schema["featureIndex"] = parser.getFeatureTuple()
         schema["features"] = self.metadataSchema["features"]
@@ -144,6 +132,7 @@ class ArgumentParser(object):
         schema["nameToFeatureIndex"] = parser.getNameToFeatureIndex()
         schema["metadata"] = self.stripPath(self.metadataSchema["metadata"])
         schema["targets"] = self.targets
+        schema["stringColumns"] = self.stringColNames
      
     def isAvro(self):
         return self.metadataSchema["data_format"] == "avro"
@@ -169,5 +158,5 @@ class ArgumentParser(object):
     def getKeyColumns(self):
         return tuple(self.keyColIndex)
     
-    def getPipeline(self):
-        return self.pipeline
+    def getStringColumns(self):
+        return self.stringColNames

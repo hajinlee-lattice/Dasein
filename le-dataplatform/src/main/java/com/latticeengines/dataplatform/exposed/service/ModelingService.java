@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.exposed.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
@@ -20,11 +21,11 @@ public interface ModelingService {
     
     ApplicationId createSamples(SamplingConfiguration config);
 
-    ApplicationId createFeatures(Model model);
-
-    List<ApplicationId> loadData(LoadConfiguration config);
+    ApplicationId loadData(LoadConfiguration config);
     
     JobStatus getJobStatus(String applicationId);
 
     List<String> getFeatures(Model model, boolean depivoted);
+
+    ApplicationId createFeatures(Model model, Set<String> excludeList);
 }

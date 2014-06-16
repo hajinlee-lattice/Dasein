@@ -30,7 +30,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -151,21 +150,12 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return "file:" + url.getFile();
     }
 
-    /**
-     * 
-     */
-    @BeforeMethod(enabled=true, firstTimeOnly=true, alwaysRun=true)    
-    public void beforeEachTest() {        
-        /** all this method does is to use annotation to start a transaction **/
+    @BeforeMethod(enabled = true, firstTimeOnly = true, alwaysRun = true)
+    public void beforeEachTest() {
     }
   
-    // @Transactional(rollbackFor=java.lang.Exception.class)
-    // @org.springframework.test.annotation.Rollback()
     @AfterMethod(enabled=true, lastTimeOnly=true, alwaysRun=true)
-    public void afterEachTest() { // throws Exception {
-        /** this method uses annotation to declare rolling back a transaction on Exception **/
-        /** an Exception is thrown purposefully to trigger a rollback of all test data inserted; thus clean up **/
-        //throw new Exception("purposely thorwn Exception to rollback test data");
+    public void afterEachTest() {
     }
     
     @BeforeClass(groups = { "functional", "functional.scheduler" })
@@ -203,6 +193,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
                 "/app/dataplatform/scripts/algorithm", false));
         copyEntries.add(new CopyEntry(
                 "file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/rf_train.py",
+                "/app/dataplatform/scripts/algorithm", false));
+        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/feature_selection.py",
                 "/app/dataplatform/scripts/algorithm", false));
         String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/*.jar", "/app/dataplatform",
@@ -242,8 +234,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         randomForestAlgorithm.setSampleName("all");
 
         ModelDefinition modelDef = new ModelDefinition();
-        modelDef.setName("Model-" + System.currentTimeMillis());        
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
+        modelDef.setName("Model-" + System.currentTimeMillis());
+        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 randomForestAlgorithm, logisticRegressionAlgorithm }));
 
         return modelDef;
@@ -258,8 +250,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
      */
     protected Model produceIrisMetadataModel() {
         String suffix = Long.toString(System.currentTimeMillis());
-        Model model = new Model();        
-        model.setName("Model Submission for Demo"+suffix);
+        Model model = new Model();
+        model.setName("Model Submission for Demo " + suffix);
         model.setId(UUID.randomUUID().toString());
         model.setTable("iris");
         model.setMetadataTable("iris_metadata");

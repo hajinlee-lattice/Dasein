@@ -194,11 +194,10 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
         }
                        
         List<ApplicationId> appIds = new ArrayList<>();
-        List<ApplicationId> pivotedAppIds = modelingService.loadData(generateLoadConfiguration(RF_SAMPLENAME_PREFIX, customer, commandParameters));
         // No LR for now.
 //        List<ApplicationId> depivotedAppIds = modelingService.loadData(generateLoadConfiguration(LR_SAMPLENAME_PREFIX, customer, commandParameters));
         
-        appIds.addAll(pivotedAppIds);
+        appIds.add(modelingService.loadData(generateLoadConfiguration(RF_SAMPLENAME_PREFIX, customer, commandParameters)));
 //        appIds.addAll(depivotedAppIds);
         
         return appIds;
@@ -327,7 +326,7 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
         
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName(commandParameters.getModelName());
-        modelDef.addAlgorithms(algorithms);
+        modelDef.setAlgorithms(algorithms);
         
         Model model = new Model();
         model.setModelDefinition(modelDef);

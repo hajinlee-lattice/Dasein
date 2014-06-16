@@ -4,7 +4,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -34,8 +36,7 @@ import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
 
 /**
  * This is an end-to-end test against a SQL Server database without having to go through the REST API.
@@ -65,7 +66,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     private Model model = null;
     
     protected boolean doYarnClusterSetup() {
-        return false;
+        return true;
     }
     
     @BeforeMethod(groups = "functional")
@@ -73,25 +74,20 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
     @BeforeClass(groups = "functional")
-    public void setup() throws Exception {                
+    public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
         fs.delete(new Path("/user/s-analytics/customers/Nutanix"), true);
 
-        LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
-        logisticRegressionAlgorithm.setPriority(0);
-        logisticRegressionAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
-        logisticRegressionAlgorithm.setSampleName("s0");
-
-        DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
-        decisionTreeAlgorithm.setPriority(1);
-        decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
-        decisionTreeAlgorithm.setSampleName("s1");
+        RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
+        randomForestAlgorithm.setPriority(0);
+        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
+        randomForestAlgorithm.setSampleName("s0");
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model1");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
-                logisticRegressionAlgorithm }));
+        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm }));
+
         model = createModel(modelDef);
     }
     
@@ -126,8 +122,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     @Test(groups = "functional", enabled = true)
     public void load() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
-        List<ApplicationId> loadIds = modelingService.loadData(loadConfig);
-        ApplicationId appId = loadIds.get(0);
+        ApplicationId appId = modelingService.loadData(loadConfig);
         FinalApplicationStatus status = waitForStatus(appId, 360, TimeUnit.SECONDS,
                 FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -160,6 +155,22 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
+    public void createFeatures() throws Exception {
+        Set<String> excludeList = new HashSet<>();
+        excludeList.add("Nutanix_EventTable_Clean");
+        excludeList.add("LeadID");
+        excludeList.add("CustomerID");
+        excludeList.add("PeriodID");
+        excludeList.add("P1_Target");
+        excludeList.add("P1_TargetTraining");
+        excludeList.add("Email");
+        excludeList.add("Company");
+        ApplicationId appId = modelingService.createFeatures(model, excludeList);
+        FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
+    
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createFeatures" })
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);

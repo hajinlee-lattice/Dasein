@@ -6,7 +6,7 @@ class StateMachine(object):
         self.mediator = mdtr.Mediator()
         self.states = []
         
-    def addState(self, state,jsonOrder):
+    def addState(self, state, jsonOrder):
         state.setMediator(self.mediator)
         state.setStateMachine(self)
         state.setJsonOrder(jsonOrder)

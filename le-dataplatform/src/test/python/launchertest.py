@@ -1,8 +1,8 @@
+import csv
 import filecmp
 import json
 import os
 import pickle
-import csv
 from random import random
 from random import shuffle
 import shutil
@@ -11,29 +11,38 @@ from unittest import TestCase
 
 from launcher import Launcher
 from leframework import scoringengine as se
+from leframework.model.statemachine import StateMachine
+from leframework.model.states.initialize import Initialize
 
 
 class LauncherTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        results = "./results"
-        if os.path.exists(results):
-            shutil.rmtree(results)
             
         # Simulate what happens in yarn when it copies the framework code over
         # before running the python script
         fwkdir = "./leframework.tar.gz"
         if os.path.exists(fwkdir):
             shutil.rmtree(fwkdir)
+        if os.path.exists("feature_selection.py"):
+            os.remove("feature_selection.py")
             
         os.makedirs(fwkdir + "/leframework")
         enginedir = "/leframework/scoringengine.py"
         shutil.copyfile("../../main/python" + enginedir, fwkdir + enginedir)
         shutil.copyfile("../../main/python/pipeline.py", fwkdir + "/pipeline.py")
         shutil.copyfile("../../main/python/encoder.py", fwkdir + "/encoder.py")
+        shutil.copyfile("../../main/python/algorithm/lr_train.py", "./lr_train.py")
+        shutil.copyfile("../../main/python/algorithm/rf_train.py", "./rf_train.py")
+        shutil.copyfile("../../main/python/algorithm/feature_selection.py", "./feature_selection.py")
+    
+    def setUp(self):
+        results = "./results"
+        if os.path.exists(results):
+            shutil.rmtree(results)
 
-    def testExecute(self):
+    def testExecuteLearning(self):
         # These properties won't really be used since these are just unit tests.
         # Functional and end-to-end tests should be done from java
         os.environ["CONTAINER_ID"] = "xyz"
@@ -75,7 +84,7 @@ class LauncherTest(TestCase):
         self.assertEquals(resultFrame1['Score'][0], resultFrame2['Score'][0])
         print("===========================================")
         # Generate the csv files
-        testcase = 2       
+        testcase = 2
         values = []
         values.append(value)
         for i in range(testcase-1):
@@ -88,10 +97,6 @@ class LauncherTest(TestCase):
         
             
     def __getLineToScore(self, inputColumns, value):
-        '''
-         This tests whether or not the order of input matters. It shuffles the columns so that
-         to simulate VisiDB passing in data in a different order.
-        '''
         columnWithValue = zip(inputColumns, value)
         line1 = self.__getLine(columnWithValue)
         
@@ -138,4 +143,21 @@ class LauncherTest(TestCase):
         
         with open(filename, "wb") as output:
             output.write(pklByteArray)
-        
+
+    def testExecuteLearningForProfile(self):
+        # These properties won't really be used since these are just unit tests.
+        # Functional and end-to-end tests should be done from java
+        os.environ["CONTAINER_ID"] = "xyz"
+        os.environ["SHDP_HD_FSWEB"] = "localhost:50070"
+        launcher = Launcher("model-dataprofile.json")
+        launcher.execute(False)
+        initialize = Initialize()
+        stateMachine = StateMachine()
+        stateMachine.addState(initialize, 1)
+        mediator = stateMachine.getMediator()
+        mediator.schema = dict()
+        mediator.schema["metadata"] = "./results/metadata.avro"
+        mediator.depivoted = False
+          
+        results = initialize.retrieveMetadata(mediator)
+        self.assertTrue(results is not None)

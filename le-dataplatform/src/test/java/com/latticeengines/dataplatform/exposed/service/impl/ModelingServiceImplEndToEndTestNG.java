@@ -4,7 +4,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -18,9 +20,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.entitymanager.impl.JobEntityMgrImpl;
-import com.latticeengines.dataplatform.entitymanager.impl.ModelEntityMgrImpl;
-import com.latticeengines.dataplatform.entitymanager.impl.ThrottleConfigurationEntityMgrImpl;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -86,7 +85,7 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model1");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
+        modelDef.setAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 logisticRegressionAlgorithm }));
         // 
         // in the application, it is assumed that the model definition is defined in the metadata db
@@ -123,17 +122,16 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
         return config;
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void load() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
-        List<ApplicationId> loadIds = modelingService.loadData(loadConfig);
-        ApplicationId appId = loadIds.get(0);
+        ApplicationId appId = modelingService.loadData(loadConfig);
         FinalApplicationStatus status = waitForStatus(appId, 360, TimeUnit.SECONDS,
                 FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
     
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "load" })
+    @Test(groups = "functional", enabled = false, dependsOnMethods = { "load" })
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
@@ -157,7 +155,15 @@ public class ModelingServiceImplEndToEndTestNG extends DataPlatformFunctionalTes
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
+    @Test(groups = "functional", enabled = false, dependsOnMethods = { "createSamples" })
+    public void createFeatures() throws Exception {
+        Set<String> excludeList = new HashSet<>();
+        ApplicationId appId = modelingService.createFeatures(model, excludeList);
+        FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
+    
+    @Test(groups = "functional", enabled = false, dependsOnMethods = { "createFeatures" })
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, true);
         model.setFeaturesList(features);
