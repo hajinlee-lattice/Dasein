@@ -74,7 +74,7 @@ public class ModelStepProcessorImplTestNG extends DataPlatformFunctionalTestNGBa
         List<ModelCommandParameter> commandParameters = createListModelCommandParameters();
         List<ApplicationId> appIds = modelStepProcessor.executeYarnStep("Nutanix", ModelCommandStep.LOAD_DATA, commandParameters);
         log.info("Waiting for these appIds to succeed: " + Joiner.on(",").join(appIds));       
-        assertEquals(2*NUM_ALGORITHMS, appIds.size());
+        assertEquals(1*NUM_ALGORITHMS, appIds.size());
         
         for (ApplicationId appId : appIds) {
             FinalApplicationStatus status = waitForStatus(appId, 360, TimeUnit.SECONDS,
