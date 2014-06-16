@@ -178,11 +178,6 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
                 YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
         validateAppStatus(metadataLoadAppId);
-        ApplicationId dataLoadAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(1));
-        state = platformTestBase.waitState(dataLoadAppId, 120, TimeUnit.SECONDS,
-                YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
-        validateAppStatus(dataLoadAppId);
     }
     
     @Test(groups = "functional", dependsOnMethods = { "load" })
