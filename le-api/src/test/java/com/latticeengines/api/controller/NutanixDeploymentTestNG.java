@@ -2,7 +2,6 @@ package com.latticeengines.api.controller;
 
 import static org.testng.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +18,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.MetadataService;
+import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
@@ -140,29 +140,8 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setCustomer(model.getCustomer());
         config.setTable(model.getTable());
         config.setMetadataTable(model.getMetadataTable());
-        List<String> excludeList = new ArrayList<>();
-        excludeList.add("Nutanix_EventTable_Clean");
-        excludeList.add("P1_Event");
-        excludeList.add("P1_Target");
-        excludeList.add("P1_TargetTraining");
-        excludeList.add("PeriodID");
-        excludeList.add("CustomerID");
-        excludeList.add("AwardYear");
-        excludeList.add("FundingFiscalQuarter");
-        excludeList.add("FundingFiscalYear");
-        excludeList.add("BusinessAssets");
-        excludeList.add("BusinessEntityType");
-        excludeList.add("BusinessIndustrySector");
-        excludeList.add("RetirementAssetsYOY");
-        excludeList.add("RetirementAssetsEOY");
-        excludeList.add("TotalParticipantsSOY");
-        excludeList.add("BusinessType");
-        excludeList.add("LeadID");
-        excludeList.add("Company");
-        excludeList.add("Domain");
-        excludeList.add("Email");
-        excludeList.add("LeadSource");
-        config.setExcludeColumnList(excludeList);
+        config.setSamplePrefix("all");
+        config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));

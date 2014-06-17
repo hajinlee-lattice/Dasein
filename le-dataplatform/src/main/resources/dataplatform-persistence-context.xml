@@ -34,6 +34,7 @@
             <props>
                 <prop key="hibernate.dialect">${dataplatform.dao.datasource.dialect}</prop>
                 <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.globally_quoted_identifiers">false</prop>                                
                 <!--   <prop key="hibernate.current_session_context_class">thread</prop> -->
                 <!--   <prop key="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</prop>  -->
             </props>
@@ -44,5 +45,32 @@
         p:sessionFactory-ref="sessionFactory" />
 
     <tx:annotation-driven transaction-manager="transactionManager" />
+
+    <bean id="dataSourceDlOrchestration" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${dataplatform.dlorchestration.datasource.driver}" />
+        <property name="url"      value="${dataplatform.dlorchestration.datasource.url}" />
+        <property name="username" value="${dataplatform.dlorchestration.datasource.user}" />
+        <property name="password" value="${dataplatform.dlorchestration.datasource.password}" />
+    </bean>
+
+    <!-- Hibernate session factory -->
+    <bean id="sessionFactoryDlOrchestration" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSourceDlOrchestration" />
+        <property name="packagesToScan" value="com.latticeengines.domain.exposed" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${dataplatform.dlorchestration.datasource.dialect}</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.globally_quoted_identifiers">true</prop>                
+                <!--   <prop key="hibernate.current_session_context_class">thread</prop> -->
+                <!--   <prop key="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</prop>  -->
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManagerDlOrchestration" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+         p:sessionFactory-ref="sessionFactoryDlOrchestration">
+         <qualifier value="dlorchestration"/>
+    </bean>   
 
 </beans>

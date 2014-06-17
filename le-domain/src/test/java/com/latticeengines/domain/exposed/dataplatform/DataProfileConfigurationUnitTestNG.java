@@ -14,6 +14,7 @@ public class DataProfileConfigurationUnitTestNG {
         config.setCustomer("INTERNAL");
         config.setTable("iris");
         config.setMetadataTable("iris_metadata");
+        config.setSamplePrefix("all");
         
         String jsonString = config.toString();
         System.out.println(jsonString);

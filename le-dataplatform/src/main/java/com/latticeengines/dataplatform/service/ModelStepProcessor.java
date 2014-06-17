@@ -11,5 +11,4 @@ public interface ModelStepProcessor {
 
     List<ApplicationId> executeYarnStep(String deploymentId, ModelCommandStep currentStep, List<ModelCommandParameter> commandParameters);
 
-    void executeJsonStep(String deploymentExternalId, int modelCommandId, List<ModelCommandParameter> commandParameters);
 }

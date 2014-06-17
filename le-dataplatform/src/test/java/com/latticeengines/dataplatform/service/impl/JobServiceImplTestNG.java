@@ -53,7 +53,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private JobNameService jobNameService;
 
-    @Value("${dataplatform.mysqldatasource.host}")
+    @Value("${dataplatform.iris.mysqldatasource.host}")
     private String dbHost;
 
     private String inputDir = null;

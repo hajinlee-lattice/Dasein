@@ -78,23 +78,23 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     @Autowired
     protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
-    @Value("${dataplatform.datasource.host}")
-    protected String dbHost;
+    @Value("${dataplatform.dlorchestration.datasource.host}")
+    protected String dbDlOrchestrationHost;
 
-    @Value("${dataplatform.datasource.port}")
-    protected int dbPort;
+    @Value("${dataplatform.dlorchestration.datasource.port}")
+    protected int dbDlOrchestrationPort;
 
-    @Value("${dataplatform.datasource.dbname}")
-    protected String dbName;
+    @Value("${dataplatform.dlorchestration.datasource.dbname}")
+    protected String dbDlOrchestrationName;
 
-    @Value("${dataplatform.datasource.user}")
-    protected String dbUser;
+    @Value("${dataplatform.dlorchestration.datasource.user}")
+    protected String dbDlOrchestrationUser;
 
-    @Value("${dataplatform.datasource.password}")
-    protected String dbPassword;
+    @Value("${dataplatform.dlorchestration.datasource.password}")
+    protected String dbDlOrchestrationPassword;
 
-    @Value("${dataplatform.datasource.type}")
-    protected String dbType;
+    @Value("${dataplatform.dlorchestration.datasource.type}")
+    protected String dbDlOrchestrationType;
 
     @Value("${dataplatform.container.virtualcores}")
     protected int virtualCores;

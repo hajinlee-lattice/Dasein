@@ -1,45 +1,100 @@
 package com.latticeengines.domain.exposed.dataplatform.dlorchestration;
 
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.dataplatform.HasId;
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
-public class ModelCommand implements HasPid, HasId<Integer> {
+@Entity
+@Access(AccessType.FIELD)
+@Table(name = "LeadScoringCommand")
+public class ModelCommand implements HasPid, Serializable {
+    
+    private static final long serialVersionUID = 1L;
 
-    private Long pid;
-    private int commandId;
+    @Id
+    @Column(name = "CommandId", unique = true, nullable = false)
+    private Long commandId;
+
+    @Column(name = "Deployment_External_ID", nullable = false)
     private String deploymentExternalId;
+
+    @Column(name = "CommandStatus", nullable = false)
+    @Type(type = "com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatusUserType", parameters = {
+            @Parameter(name = "enumClassName", value = "com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus"),
+            @Parameter(name = "identifierMethod", value = "getValue"),
+            @Parameter(name = "valueOfMethod", value = "valueOf") })
     private ModelCommandStatus commandStatus;
+
+    @Immutable
+    @OneToMany(mappedBy = "modelCommand", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<ModelCommandParameter> commandParameters;
+
+    @Column(name = "ModelCommandStep")
+    @Enumerated(EnumType.STRING)
     private ModelCommandStep modelCommandStep;
+
+    @Immutable
+    @OneToMany(mappedBy = "modelCommand", fetch = FetchType.LAZY)
+    @LazyCollection(LazyCollectionOption.TRUE)
+    @OrderBy("Created ASC")
+    private List<ModelCommandLog> commandLogs;
+
+    @Immutable
+    @OneToMany(mappedBy = "modelCommand", fetch = FetchType.LAZY)
+    @LazyCollection(LazyCollectionOption.TRUE)
+    @OrderBy("Created ASC")
+    private List<ModelCommandState> commandStates;
+    
+    ModelCommand() {
+        super();
+    }
+    
+    @VisibleForTesting
+    public ModelCommand(Long commandId, String deploymentExternalId, ModelCommandStatus commandStatus,
+            List<ModelCommandParameter> commandParameters) {
+        super();
+        this.commandId = commandId;
+        this.deploymentExternalId = deploymentExternalId;
+        this.commandStatus = commandStatus;
+        this.commandParameters = commandParameters;
+    }
 
     @Override
     public Long getPid() {
-        return this.pid;
+        return this.commandId;
     }
 
     @Override
     public void setPid(Long id) {
-        this.pid = id;
-    }
-
-    @Override
-    public Integer getId() {
-        return commandId;
-    }
-
-    @Override
-    public void setId(Integer id) {
         this.commandId = id;
     }
 
     public String getDeploymentExternalId() {
         return deploymentExternalId;
-    }
-
-    public void setDeploymentExternalId(String deploymentExternalId) {
-        this.deploymentExternalId = deploymentExternalId;
     }
 
     public ModelCommandStatus getCommandStatus() {
@@ -51,27 +106,17 @@ public class ModelCommand implements HasPid, HasId<Integer> {
     }
 
     public List<ModelCommandParameter> getCommandParameters() {
-        return commandParameters;
+        return Collections.unmodifiableList(commandParameters);
     }
 
-    public void setCommandParameters(List<ModelCommandParameter> commandParameters) {
-        this.commandParameters = commandParameters;
-    }
-
+    @Transient
     public boolean isNew() {
         return commandStatus.equals(ModelCommandStatus.NEW);
     }
 
+    @Transient
     public boolean isInProgress() {
         return commandStatus.equals(ModelCommandStatus.IN_PROGRESS);
-    }
-
-    public Integer getCommandId() {
-        return commandId;
-    }
-
-    public void setCommandId(Integer commandId) {
-        this.commandId = commandId;
     }
 
     public ModelCommandStep getModelCommandStep() {
@@ -80,6 +125,39 @@ public class ModelCommand implements HasPid, HasId<Integer> {
 
     public void setModelCommandStep(ModelCommandStep modelCommandStep) {
         this.modelCommandStep = modelCommandStep;
+    }
+
+    public List<ModelCommandLog> getCommandLogs() {
+        return Collections.unmodifiableList(commandLogs);
+    }
+    
+    public List<ModelCommandState> getCommandStates() {
+        return commandStates;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((commandId == null) ? 0 : commandId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ModelCommand other = (ModelCommand) obj;
+        if (commandId == null) {
+            if (other.commandId != null)
+                return false;
+        } else if (!commandId.equals(other.commandId))
+            return false;
+        return true;
     }
 
 }

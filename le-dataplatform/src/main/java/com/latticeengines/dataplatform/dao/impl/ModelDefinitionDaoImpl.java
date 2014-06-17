@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.latticeengines.dataplatform.dao.ModelDefinitionDao;
@@ -12,6 +14,15 @@ import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 @Repository("modelDefinitionDao")
 public class ModelDefinitionDaoImpl extends BaseDaoImpl<ModelDefinition> implements ModelDefinitionDao {
 
+    @Autowired
+    protected SessionFactory sessionFactory;
+
+    @Override
+    protected SessionFactory getSessionFactory() {        
+        return sessionFactory;
+    }
+
+    
     public ModelDefinitionDaoImpl() {
         super();
     }

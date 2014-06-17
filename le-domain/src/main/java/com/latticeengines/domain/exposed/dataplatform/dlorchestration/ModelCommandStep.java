@@ -2,12 +2,21 @@ package com.latticeengines.domain.exposed.dataplatform.dlorchestration;
 
 
 public enum ModelCommandStep {
-    LOAD_DATA,
-    GENERATE_SAMPLES,
-    SUBMIT_MODELS,
-    SEND_JSON;
+    LOAD_DATA("Load data"),
+    GENERATE_SAMPLES("Generate samples"),
+    PROFILE_DATA("Profile data"),
+    SUBMIT_MODELS("Submit models"),
+    FINISH("Finished");
     
-//   public static final EnumSet<ModelCommandStep> YARN_STATES = EnumSet.range(LOAD_CUSTOMER_DATA, SUBMIT_MODELS);
+    private String description;
+    
+    private ModelCommandStep(String description) {
+        this.description = description;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
     
     public ModelCommandStep getNextStep() {
         return ModelCommandStep.values()[ordinal()+1];

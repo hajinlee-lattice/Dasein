@@ -15,7 +15,8 @@ public class SchemaGenerator {
     public SchemaGenerator(String... packages) throws Exception {
         cfg = new Configuration();
         cfg.setProperty("hibernate.hbm2ddl.auto", "create");
-        
+        cfg.setProperty("hibernate.globally_quoted_identifiers", "true");
+
         List<Class<?>> classes = new ArrayList<>();
         for (String packageName : packages) {
             classes.addAll(getClasses(packageName));
@@ -26,11 +27,16 @@ public class SchemaGenerator {
     }
 
     private void generate(Dialect dialect) {
+        generate(dialect, "ddl_" + dialect.name().toLowerCase() + ".sql");
+    }
+    
+    private void generate(Dialect dialect, String outputFileName) {
         cfg.setProperty("hibernate.dialect", dialect.getDialectClass());
 
         SchemaExport export = new SchemaExport(cfg);
         export.setDelimiter(";");
-        export.setOutputFile("ddl_" + dialect.name().toLowerCase() + ".sql");
+        export.setFormat(true);
+        export.setOutputFile(outputFileName);
         export.execute(true, false, false, false);
     }
 
@@ -40,6 +46,13 @@ public class SchemaGenerator {
         gen.generate(Dialect.MYSQL);
         gen.generate(Dialect.SQLSERVER);
         gen.generate(Dialect.HSQL);
+        
+        SchemaGenerator genDlOrchestration = new SchemaGenerator("com.latticeengines.domain.exposed.dataplatform.dlorchestration",
+                "com.latticeengines.domain.exposed.dataplatform.dlorchestration.hibernate");
+        genDlOrchestration.generate(Dialect.MYSQL, "ddl_dlOrchestration_" + Dialect.MYSQL.name().toLowerCase() + ".sql");
+        genDlOrchestration.generate(Dialect.SQLSERVER, "ddl_dlOrchestration_" + Dialect.SQLSERVER.name().toLowerCase() + ".sql");
+        genDlOrchestration.generate(Dialect.HSQL, "ddl_dlOrchestration_" + Dialect.HSQL.name().toLowerCase() + ".sql");
+
     }
 
     private List<Class<?>> getClasses(String packageName) throws Exception {
@@ -55,7 +68,7 @@ public class SchemaGenerator {
             if (resources == null) {
                 throw new ClassNotFoundException("No resources for " + path);
             }
-            
+
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
                 directory = new File(url.getFile());
@@ -71,7 +84,7 @@ public class SchemaGenerator {
                     throw new ClassNotFoundException(packageName + " is not a valid package.");
                 }
             }
-            
+
         } catch (NullPointerException x) {
             throw new ClassNotFoundException(packageName + " (" + directory + ") does not appear to be a valid package");
         }

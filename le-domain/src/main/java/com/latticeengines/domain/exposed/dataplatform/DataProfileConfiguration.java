@@ -12,6 +12,7 @@ public class DataProfileConfiguration {
     private String customer;
     private String table;
     private String metadataTable;
+    private String samplePrefix;
     private List<String> excludeColumnList = new ArrayList<String>();
     private List<String> includeColumnList = new ArrayList<String>();
     
@@ -68,6 +69,16 @@ public class DataProfileConfiguration {
     @JsonProperty("include_list")
     public void setIncludeColumnList(List<String> includeColumnList) {
         this.includeColumnList = includeColumnList;
+    }
+
+    @JsonProperty("sample_prefix")
+    public String getSamplePrefix() {
+        return samplePrefix;
+    }
+
+    @JsonProperty("sample_prefix")
+    public void setSamplePrefix(String samplePrefix) {
+        this.samplePrefix = samplePrefix;
     }
 
     

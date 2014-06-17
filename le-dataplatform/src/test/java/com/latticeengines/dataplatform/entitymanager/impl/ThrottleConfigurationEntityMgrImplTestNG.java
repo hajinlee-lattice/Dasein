@@ -6,17 +6,14 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
+import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
-
-import org.springframework.test.context.transaction.TransactionConfiguration; 
 
 @TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true)
 @Transactional  

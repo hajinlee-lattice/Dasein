@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 public class ModelStepProcessorImplUnitTestNG {
     
     private ModelStepProcessorImpl processor = new ModelStepProcessorImpl();
-    private static final int MODEL_COMMAND_ID = 1;
     
     @BeforeClass(groups = "unit")
     public void beforeClass() throws Exception {
@@ -32,17 +31,8 @@ public class ModelStepProcessorImplUnitTestNG {
         ReflectionTestUtils.setField(processor, "modelingService", modelingService);
     }
     
-    public ModelCommandParameters createModelCommandParameters() {
-        List<ModelCommandParameter> parameters = new ArrayList<>();
-        parameters.add(new ModelCommandParameter(MODEL_COMMAND_ID, ModelCommandParameters.DEPIVOTED_EVENT_TABLE, "Q_EventTableDepivot"));
-        parameters.add(new ModelCommandParameter(MODEL_COMMAND_ID, ModelCommandParameters.EVENT_TABLE, "Q_EventTable"));
-        parameters.add(new ModelCommandParameter(MODEL_COMMAND_ID, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
-        parameters.add(new ModelCommandParameter(MODEL_COMMAND_ID, ModelCommandParameters.METADATA_TABLE, "EventMetadata"));
-        parameters.add(new ModelCommandParameter(MODEL_COMMAND_ID, ModelCommandParameters.MODEL_NAME, "Model Submission1"));
-        parameters.add(new ModelCommandParameter(MODEL_COMMAND_ID, ModelCommandParameters.MODEL_TARGETS, "P1_Event_1"));
-        parameters.add(new ModelCommandParameter(MODEL_COMMAND_ID, ModelCommandParameters.NUM_SAMPLES, "3"));
-        
-        return processor.validateCommandParameters(parameters);
+    public ModelCommandParameters createModelCommandParameters() {        
+        return processor.validateCommandParameters(ModelingServiceTestUtils.createModelCommandWithCommandParameters().getCommandParameters());
     }
     
     @Test(groups = "unit", expectedExceptions = LedpException.class)
@@ -51,13 +41,12 @@ public class ModelStepProcessorImplUnitTestNG {
         try {
             processor.validateCommandParameters(parameters);
         } catch(LedpException e) {
-            String msg = e.getMessage();
-            assertTrue(msg.contains(ModelCommandParameters.DEPIVOTED_EVENT_TABLE));
+            String msg = e.getMessage();            
             assertTrue(msg.contains(ModelCommandParameters.EVENT_TABLE));
             assertTrue(msg.contains(ModelCommandParameters.KEY_COLS));
-            assertTrue(msg.contains(ModelCommandParameters.METADATA_TABLE));
             assertTrue(msg.contains(ModelCommandParameters.MODEL_NAME));
             assertTrue(msg.contains(ModelCommandParameters.MODEL_TARGETS));
+            assertTrue(msg.contains(ModelCommandParameters.EXCLUDE_COLUMNS));
             
             throw e;
         }
@@ -67,19 +56,23 @@ public class ModelStepProcessorImplUnitTestNG {
     public void testSplit() {
         List<String> splits = processor.splitCommaSeparatedStringToList("one, two,  three, four");
         assertEquals(4, splits.size());
+        assertEquals("one", splits.get(0));
+        assertEquals("two", splits.get(1));
+        assertEquals("three", splits.get(2)); 
+        assertEquals("four", splits.get(3));
     }
     
     @Test(groups = "unit")
     public void testGenerateSamplingConfiguration() {
-        SamplingConfiguration samplingConfig = processor.generateSamplingConfiguration(ModelStepProcessorImpl.RF_SAMPLENAME_PREFIX, "Nutanix", createModelCommandParameters());
-        assertEquals("Q_EventTable", samplingConfig.getTable());
-        assertEquals(3, samplingConfig.getSamplingElements().size());
+        SamplingConfiguration samplingConfig = processor.generateSamplingConfiguration(ModelStepProcessorImpl.AlgorithmType.RANDOM_FOREST, "Nutanix", createModelCommandParameters());
+        assertEquals(samplingConfig.getTable(), "Q_EventTable_Nutanix");
+        assertEquals(1, samplingConfig.getSamplingElements().size());
     }
     
     @Test(groups = "unit")
-    public void testGenerateModel() {
-        Model model = processor.generateModel(ModelStepProcessorImpl.RF_SAMPLENAME_PREFIX, "Nutanix", createModelCommandParameters());
-        assertEquals(3, model.getModelDefinition().getAlgorithms().size());        
+    public void testGenerateModel() {        
+        Model model = processor.generateModel(ModelStepProcessorImpl.AlgorithmType.RANDOM_FOREST, "Nutanix", createModelCommandParameters());
+        assertEquals(1, model.getModelDefinition().getAlgorithms().size());        
     }
     
     @Test(groups = "unit")

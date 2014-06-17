@@ -178,6 +178,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setTable(model.getTable());
         config.setMetadataTable(model.getMetadataTable());
         config.setIncludeColumnList(model.getFeaturesList());
+        config.setSamplePrefix("all");
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
