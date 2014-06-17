@@ -26,7 +26,8 @@ class SummaryGenerator(State, JsonGenBase):
             self.logger.info("Generating predictors for " + key)
             predictors.append(self.generatePredictors(key, value, eventData))
         
-        predictors = sorted(predictors, key = lambda x: [x["Name"]])
+        # Sort predictor by UncertaintyCoefficient
+        predictors = sorted(predictors, key = lambda x: x["UncertaintyCoefficient"], reverse=True)
         self.summary["Predictors"] = predictors
         self.summary["RocScore"] = self.__getRocScore(zip(self.mediator.scored, self.mediator.target))
         self.summary["SegmentChart"] = self.__getSegmentChart(mediator.probRange, mediator.widthRange, mediator.buckets, mediator.averageProbability)
@@ -77,6 +78,8 @@ class SummaryGenerator(State, JsonGenBase):
                 element["Value"] = record["columnvalue"]
             elements.append(element)
         
+        # Sort elements by UncertaintyCoefficient
+        elements = sorted(elements, key = lambda x: x["UncertaintyCoefficient"], reverse=True)
         predictor = OrderedDict()
         predictor["Elements"] = elements
         predictor["Name"] = colname
@@ -111,12 +114,14 @@ class SummaryGenerator(State, JsonGenBase):
         return metrics.mutual_info_score(x, y)/entropy(x) 
 
     def __getSegmentChart(self, probRange, widthRange, buckets, averageProbability):
-     
         # Generate inclusive (min,max) with highest max = null and lowest min = 0
-        inclusive = [((probRange[0]+probRange[1])/2,None)]         
-        for i in range (1,len(probRange)-1):
-            inclusive.append(((probRange[i]+probRange[i+1])/2,inclusive[i-1][0]))
-        inclusive.append((0,inclusive[len(probRange)-2][0]))
+        if len(probRange) == 1:
+            inclusive = [(0,None)]
+        else:
+            inclusive = [((probRange[0]+probRange[1])/2,None)]         
+            for i in range (1,len(probRange)-1):
+                inclusive.append(((probRange[i]+probRange[i+1])/2,inclusive[i-1][0]))
+            inclusive.append((0,inclusive[len(probRange)-2][0]))
                   
         # Generate name for each segment
         names = []
