@@ -14,6 +14,10 @@
 		<relativePath>../le-parent</relativePath>
 	</parent>
 
+	<properties>
+		<environment.type>default</environment.type>
+	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
