@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
+import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.Model;
@@ -165,7 +166,22 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "createSamples" })
+    @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
+    public void profile() throws Exception {
+        DataProfileConfiguration config = new DataProfileConfiguration();
+        config.setCustomer(model.getCustomer());
+        config.setTable(model.getTable());
+        config.setMetadataTable(model.getMetadataTable());
+        config.setIncludeColumnList(model.getFeaturesList());
+        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
+                AppSubmission.class, new Object[] {});
+        ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
+        FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, 120, TimeUnit.SECONDS,
+                FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
+    
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
     public void submit() throws Exception {
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/submit", model,
                 AppSubmission.class, new Object[] {});

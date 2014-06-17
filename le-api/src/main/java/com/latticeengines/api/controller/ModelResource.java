@@ -17,6 +17,7 @@ import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.api.ThrottleSubmission;
+import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.Model;
@@ -81,6 +82,13 @@ public class ModelResource {
     @ResponseBody
     public JobStatus getJobStatus(@PathVariable String applicationId) {
         return modelingService.getJobStatus(applicationId);
+    }
+    
+    @RequestMapping(value = "/profile", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
+    @ResponseBody
+    public AppSubmission profile(@RequestBody DataProfileConfiguration config) {
+        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId>asList(modelingService.profileData(config)));
+        return submission;
     }
     
     @RequestMapping(value = "/features", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")

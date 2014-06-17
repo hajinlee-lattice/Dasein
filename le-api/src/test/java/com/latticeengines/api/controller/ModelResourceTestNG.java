@@ -15,6 +15,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,9 +25,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.api.AppSubmission;
-import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.api.ThrottleSubmission;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
+import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
@@ -46,7 +47,6 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
     
-    //
     // datasource host property for load data
     @Value("${api.datasource.host}")
     private String dbHost;
@@ -93,7 +93,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         model.setName("Model Submission for Demo");
         model.setTable("DELL_EVENT_TABLE_TEST");
         model.setMetadataTable("EventMetadata");
-        model.setFeaturesList(Arrays.<String> asList(new String[] { "Column5", //        
+        model.setFeaturesList(Arrays.<String> asList(new String[] { "Column5", //
                 "Column6", //
                 "Column7", //
                 "Column8", //
@@ -104,7 +104,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         model.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
         model.setDataFormat("avro");
     }
-
+    
     @Test(groups = "functional", enabled = true)
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
@@ -133,7 +133,22 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         validateAppStatus(appId);
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
+    @Test(groups = "functional", dependsOnMethods = { "createSamples" })
+    public void profile() throws Exception {
+        DataProfileConfiguration config = new DataProfileConfiguration();
+        config.setCustomer(model.getCustomer());
+        config.setTable(model.getTable());
+        config.setMetadataTable(model.getMetadataTable());
+        config.setIncludeColumnList(model.getFeaturesList());
+        AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/profile", config,
+                AppSubmission.class, new Object[] {});
+        ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
+        FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, 120, TimeUnit.SECONDS,
+                FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
+    }
+
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "profile" })
     public void submit() throws Exception {
         // reset throttle
         restTemplate.postForObject("http://localhost:8080/rest/resetThrottle", null, ThrottleSubmission.class);
@@ -155,7 +170,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         assertTrue(submission.isImmediate());
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void load() throws Exception {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
@@ -178,18 +193,6 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
                 YarnApplicationState.FINISHED);
         assertEquals(state, YarnApplicationState.FINISHED);
         validateAppStatus(metadataLoadAppId);
-    }
-    
-    @Test(groups = "functional", dependsOnMethods = { "load" })
-    public void getFeatures() {
-        Model modelForIris = new Model();
-        modelForIris.setCustomer("INTERNAL");
-        modelForIris.setTable("iris");
-        modelForIris.setMetadataTable("iris_metadata");
-        StringList list = restTemplate.postForObject("http://localhost:8080/rest/features", modelForIris,
-                StringList.class, new Object[] {});
-        // iris_metadata table is empty so no features will be returned from here
-        assertEquals(list.getElements().size(), 0);
     }
 
     private void validateAppStatus(ApplicationId appId) {
