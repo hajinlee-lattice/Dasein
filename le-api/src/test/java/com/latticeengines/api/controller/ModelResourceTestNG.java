@@ -24,6 +24,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
+import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.ThrottleSubmission;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
@@ -44,6 +45,9 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Autowired
+    private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
+
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
     
@@ -55,6 +59,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        throttleConfigurationEntityMgr.deleteAll();
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
         fs.delete(new Path(customerBaseDir + "/DELL"), true);
