@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -43,6 +42,7 @@ import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProper
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.Classifier;
+import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
@@ -275,17 +275,16 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public ApplicationId createFeatures(Model model, Set<String> excludeList) {
-        if (model.getCustomer() == null) {
+    public ApplicationId profileData(DataProfileConfiguration dataProfileConfig) {
+        Set<String> excludeList = new HashSet<String>(dataProfileConfig.getExcludeColumnList());
+        Set<String> includeList = new HashSet<String>(dataProfileConfig.getIncludeColumnList());
+        if (dataProfileConfig.getCustomer() == null) {
             throw new LedpException(LedpCode.LEDP_15002);
         }
         Model m = new Model();
-        
-        try {
-            BeanUtils.copyProperties(m, model);
-            m.setPid(null);
-        } catch (Exception e) {
-        }
+        m.setCustomer(dataProfileConfig.getCustomer());
+        m.setTable(dataProfileConfig.getTable());
+        m.setMetadataTable(dataProfileConfig.getMetadataTable());
         setupModelProperties(m);
         try {
             List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, m.getDataHdfsPath() + "/samples",
@@ -306,12 +305,26 @@ public class ModelingServiceImpl implements ModelingService {
             String schemaPath = paths.get(0);
             List<String> featureList = new ArrayList<String>();
             Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(schemaPath));
+            boolean useIncludeList = includeList.size() > 0;
             for (Field field : schema.getFields()) {
                 String name = field.name();
-                if (!excludeList.contains(name)) {
-                    featureList.add(name);
+                
+                // If an include list is passed, only use the features in the include list
+                // if the name is part of the schema. If the include list is empty, then
+                // just add all the columns in the schema except for any columns in the excluded list
+                if (useIncludeList) {
+                    if (includeList.contains(name)) {
+                        featureList.add(name);
+                    }
+                } else {
+                    if (!excludeList.contains(name)) {
+                        featureList.add(name);
+                    }
                 }
             }
+            m.setDataFormat("avro");
+            m.setTargetsList(Arrays.<String>asList(new String[] { featureList.get(0) }));
+            m.setKeyCols(Arrays.<String>asList(new String[] { featureList.get(0) }));
             m.setFeaturesList(featureList);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
@@ -323,6 +336,7 @@ public class ModelingServiceImpl implements ModelingService {
         dataProfileAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
         modelDefinition.addAlgorithms(Arrays.<Algorithm>asList(new Algorithm[] { dataProfileAlgorithm }));
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        m.setModelDefinition(modelDefinition);
         Job job = createJob(m, dataProfileAlgorithm, assignedQueue);
         m.addJob(job);
         return jobService.submitJob(job);

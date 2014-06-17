@@ -6,9 +6,7 @@ import static org.testng.Assert.assertNotNull;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,6 +33,7 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.JobWatchdogService;
 import com.latticeengines.dataplatform.service.impl.JobWatchdogServiceImpl;
+import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
@@ -136,12 +135,17 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void createFeatures() throws Exception {
-        Set<String> excludeList = new HashSet<>();
+        DataProfileConfiguration config = new DataProfileConfiguration();
+        config.setCustomer(model.getCustomer());
+        config.setTable(model.getTable());
+        config.setMetadataTable(model.getMetadataTable());
+        List<String> excludeList = new ArrayList<>();
         excludeList.add("IDX");
         excludeList.add("CustomerID");
         excludeList.add("LeadID");
         excludeList.add("Target_LatitudeOptiplex_Retention_PCA_PPA_Customer");
-        ApplicationId appId = modelingService.createFeatures(model, excludeList);
+        config.setExcludeColumnList(excludeList);
+        ApplicationId appId = modelingService.profileData(config);
         FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }

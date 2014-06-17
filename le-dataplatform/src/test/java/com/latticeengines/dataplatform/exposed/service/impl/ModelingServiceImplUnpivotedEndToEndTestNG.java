@@ -3,10 +3,9 @@ package com.latticeengines.dataplatform.exposed.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.FileSystem;
@@ -29,6 +28,7 @@ import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
+import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
@@ -156,16 +156,35 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     @Transactional(propagation = Propagation.REQUIRED)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void createFeatures() throws Exception {
-        Set<String> excludeList = new HashSet<>();
+        DataProfileConfiguration config = new DataProfileConfiguration();
+        config.setCustomer(model.getCustomer());
+        config.setTable(model.getTable());
+        config.setMetadataTable(model.getMetadataTable());
+
+        List<String> excludeList = new ArrayList<>();
         excludeList.add("Nutanix_EventTable_Clean");
-        excludeList.add("LeadID");
-        excludeList.add("CustomerID");
-        excludeList.add("PeriodID");
+        excludeList.add("P1_Event");
         excludeList.add("P1_Target");
         excludeList.add("P1_TargetTraining");
-        excludeList.add("Email");
+        excludeList.add("PeriodID");
+        excludeList.add("CustomerID");
+        excludeList.add("AwardYear");
+        excludeList.add("FundingFiscalQuarter");
+        excludeList.add("FundingFiscalYear");
+        excludeList.add("BusinessAssets");
+        excludeList.add("BusinessEntityType");
+        excludeList.add("BusinessIndustrySector");
+        excludeList.add("RetirementAssetsYOY");
+        excludeList.add("RetirementAssetsEOY");
+        excludeList.add("TotalParticipantsSOY");
+        excludeList.add("BusinessType");
+        excludeList.add("LeadID");
         excludeList.add("Company");
-        ApplicationId appId = modelingService.createFeatures(model, excludeList);
+        excludeList.add("Domain");
+        excludeList.add("Email");
+        excludeList.add("LeadSource");
+        config.setExcludeColumnList(excludeList);
+        ApplicationId appId = modelingService.profileData(config);
         FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
