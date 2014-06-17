@@ -92,25 +92,31 @@ public class Job implements HasPid, HasId<String> {
     @JsonIgnore
     @Column(name = "APPMASTER_PROPERTIES", length = 65535)
     public String getAppMasterProperties() {
-        String propstr = (appMasterProperties == null || appMasterProperties.isEmpty()) ? "" : appMasterProperties
-                .toString();
-        return propstr;
-    }
-    
+        String propstr = "";
+        try {
+            StringWriter strWriter = new StringWriter();
+            if (appMasterProperties != null && !appMasterProperties.isEmpty()) {
+                appMasterProperties.store(strWriter, null);
+            }
+            propstr = strWriter.toString();
+        } catch (IOException e) {
+            log.error("Error serializing the properties value", e);
+        }
+
+        return propstr;       
+    }    
     @JsonIgnore
     /** data store has string / varchar as persistence type **/
     public void setAppMasterProperties(String appMasterPropertiesStr) throws IOException {
         this.appMasterProperties = new Properties();
-        if (appMasterPropertiesStr != null && !appMasterPropertiesStr.equalsIgnoreCase("")) {
+        if (appMasterPropertiesStr != null && !appMasterPropertiesStr.equalsIgnoreCase("")) {            
             this.appMasterProperties.load(new StringReader(appMasterPropertiesStr));
         }
-    }
-    
+    }    
     @Transient
     public Properties getAppMasterPropertiesObject() {
         return appMasterProperties;
     }
-
     public void setAppMasterPropertiesObject(Properties appMasterPropertiesObject) {
         this.appMasterProperties = appMasterPropertiesObject;
         if (this.appMasterProperties == null) {
@@ -134,7 +140,6 @@ public class Job implements HasPid, HasId<String> {
 
         return propstr;
     }
-
     @JsonIgnore
     public void setContainerProperties(String containerPropertiesStr) throws IOException {
         this.containerProperties = new Properties();
@@ -142,12 +147,10 @@ public class Job implements HasPid, HasId<String> {
             this.containerProperties.load(new StringReader(containerPropertiesStr));
         }
     }
-
     @Transient
     public Properties getContainerPropertiesObject() {
         return this.containerProperties;
     }
-
     public void setContainerPropertiesObject(Properties containerPropertiesObject) {
         this.containerProperties = containerPropertiesObject;
         if (this.containerProperties == null) {
