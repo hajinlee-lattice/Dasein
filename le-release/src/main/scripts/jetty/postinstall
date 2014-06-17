@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "postinstalling now"
+cd /opt
 ln -s jetty-distribution-9.1.4.v20140401 jetty
 chown -R yarn:yarn /opt/jetty
 cd /etc/init.d
