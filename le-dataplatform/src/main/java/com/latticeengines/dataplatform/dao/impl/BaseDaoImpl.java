@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +77,7 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly=true)
     public T findByKey(T entity) {
         Class<?> clz = entity.getClass();
 
@@ -85,14 +86,14 @@ public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
 
     @SuppressWarnings("unchecked")
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly=true)
     public T findByKey(Class<T> entityClz, Long key) {
         return (T) sessionFactory.getCurrentSession().get(entityClz, key);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly=true)
     public List<T> findAll() {
         Session session = sessionFactory.getCurrentSession();
         Class<T> entityClz = getEntityClass();
