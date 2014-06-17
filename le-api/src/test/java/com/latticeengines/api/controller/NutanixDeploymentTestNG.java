@@ -71,7 +71,6 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         model.setName("Nutanix Random Forest Model on Depivoted Data");
         model.setTable("Q_EventTable_Nutanix");
         model.setMetadataTable("EventMetadata");
-        
         model.setCustomer("Nutanix");
         model.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         model.setDataFormat("avro");

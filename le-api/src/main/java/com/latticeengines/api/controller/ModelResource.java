@@ -94,6 +94,6 @@ public class ModelResource {
     @RequestMapping(value = "/features", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
     @ResponseBody
     public StringList getFeatures(@RequestBody Model model) {
-        return new StringList(modelingService.getFeatures(model, true));
+        return new StringList(modelingService.getFeatures(model, false));
     }
 }
