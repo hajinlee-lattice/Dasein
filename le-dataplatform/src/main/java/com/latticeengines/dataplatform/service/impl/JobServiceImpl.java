@@ -246,7 +246,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         String metadata = resubmitJob.getContainerPropertiesObject().getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
         resubmitJob.getContainerPropertiesObject().setProperty(PythonContainerProperty.METADATA.name(), metadata);
         Long parentId = resubmitJob.getPid();
-        resubmitJob.setId(null);
+        resubmitJob.setPid(null);
         resubmitJob.setParentJobId(parentId); 
         ApplicationId appId = submitJob(resubmitJob);
         log.info("Resubmitted " + parentId + " with " + resubmitJob.getId() + "to queue " + resubmitJob.getAppMasterPropertiesObject().getProperty(AppMasterProperty.QUEUE.name()) + ".");
