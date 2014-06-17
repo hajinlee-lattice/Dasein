@@ -134,7 +134,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
-    public void createFeatures() throws Exception {
+    public void profileData() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
         config.setTable(model.getTable());
@@ -150,7 +150,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createFeatures" })
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "profileData" })
     public void submitModel() throws Exception {
         List<ApplicationId> appIds = modelingService.submitModel(model);
 

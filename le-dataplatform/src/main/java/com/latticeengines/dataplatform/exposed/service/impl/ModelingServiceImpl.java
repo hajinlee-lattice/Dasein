@@ -339,6 +339,7 @@ public class ModelingServiceImpl implements ModelingService {
         }
         m.setModelHdfsDir(m.getMetadataHdfsPath());
         ModelDefinition modelDefinition = new ModelDefinition();
+        modelDefinition.setName("data-profile-" + System.currentTimeMillis());
         Algorithm dataProfileAlgorithm = new DataProfilingAlgorithm();
         dataProfileAlgorithm.setSampleName("all");
         dataProfileAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");

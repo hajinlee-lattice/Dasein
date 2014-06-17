@@ -155,7 +155,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
-    public void createFeatures() throws Exception {
+    public void profileData() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
         config.setTable(model.getTable());
@@ -189,7 +189,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
     
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createFeatures" })
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "profileData" })
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
