@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.ModelCommandDao;
@@ -11,7 +13,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 
 @Component("modelCommandEntityMgr")
-public class ModelCommandEntityMgrImpl extends BaseEntityMgrImpl<ModelCommand> implements ModelCommandEntityMgr {
+public class ModelCommandEntityMgrImpl extends BaseOrchestrationEntityMgrImpl<ModelCommand> implements ModelCommandEntityMgr {
 
     @Autowired
     private ModelCommandDao modelCommandDao;
@@ -26,6 +28,7 @@ public class ModelCommandEntityMgrImpl extends BaseEntityMgrImpl<ModelCommand> i
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public List<ModelCommand> getNewAndInProgress() {
         return modelCommandDao.getNewAndInProgress();
     }

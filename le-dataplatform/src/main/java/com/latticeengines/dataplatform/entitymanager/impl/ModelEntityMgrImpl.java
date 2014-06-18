@@ -2,6 +2,8 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.ModelDao;
@@ -24,6 +26,7 @@ public class ModelEntityMgrImpl extends BaseEntityMgrImpl<Model> implements Mode
     }
     
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public Model findByObjectId(String id) {
         return modelDao.findByObjectId(id);
     }

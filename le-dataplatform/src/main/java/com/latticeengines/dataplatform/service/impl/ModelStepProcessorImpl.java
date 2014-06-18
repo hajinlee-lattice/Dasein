@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.latticeengines.dataplatform.entitymanager.EventOutgoingEntityMgr;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
@@ -27,6 +24,7 @@ import com.latticeengines.dataplatform.service.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelCommandParameters;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
+import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.Model;
@@ -42,12 +40,13 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 @Component("modelStepProcessor")
 public class ModelStepProcessorImpl implements ModelStepProcessor {
     
-    private static final Log log = LogFactory.getLog(ModelStepProcessorImpl.class);
-    
     private static final char COMMA = ',';
     private static final String AVRO = "avro";
-    static final String LR_SAMPLENAME_PREFIX = "sLR";
-    static final String RF_SAMPLENAME_PREFIX = "sRF";
+    private static final String SAMPLENAME_PREFIX = "s";
+    
+    static enum AlgorithmType {
+        LOGISTIC_REGRESSION, RANDOM_FOREST; 
+    }
     
     @Autowired
     private ModelingService modelingService;
@@ -58,25 +57,22 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
     @Autowired
     private ModelCommandLogService modelCommandLogService;
     
-    @Autowired
-    private EventOutgoingEntityMgr eventOutgoingEntityMgr;
-
-    @Value("${dataplatform.datasource.host}")
+    @Value("${dataplatform.dlorchestration.datasource.host}")
     private String dbHost;
     
-    @Value("${dataplatform.datasource.port}")
+    @Value("${dataplatform.dlorchestration.datasource.port}")
     private int dbPort;
     
-    @Value("${dataplatform.datasource.dbname}")
+    @Value("${dataplatform.dlorchestration.datasource.dbname}")
     private String dbName;
     
-    @Value("${dataplatform.datasource.user}")
+    @Value("${dataplatform.dlorchestration.datasource.user}")
     private String dbUser;
     
-    @Value("${dataplatform.datasource.password}")
+    @Value("${dataplatform.dlorchestration.datasource.password}")
     private String dbPassword;
    
-    @Value("${dataplatform.datasource.type}")
+    @Value("${dataplatform.dlorchestration.datasource.type}")
     private String dbType;
     
     @Value("${dataplatform.container.virtualcores}")
@@ -84,14 +80,6 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
     
     @Value("${dataplatform.container.memory}")
     private int memory;
-    
-    @Override
-    public void executeJsonStep(String deploymentExternalId, int modelCommandId, List<ModelCommandParameter> commandParameters) {        
-        // TODO drop and create the new EvntTable schema.  write out HDFS paths
-        // send compressed JSON to BARD, add some new LedpCode JSON error messages here
-        // ex: /user/s-analytics/customers/Nutanix/models/Q_EventTableDepivot/dc93e0d7-ef30-43c5-8e7c-c8adab587f9f/1401731761443_1074/model.json
-        // retry REST request as necessary, don't load complete JSON in memory
-    }
     
     @Override
     @SuppressWarnings("incomplete-switch")
@@ -105,6 +93,9 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
             break;    
         case GENERATE_SAMPLES:
             appIds = generateSamples(deploymentExternalId, parameters);
+            break;
+        case PROFILE_DATA:
+            appIds = profileData(deploymentExternalId, parameters);
             break;
         case SUBMIT_MODELS:
             appIds = submitModel(deploymentExternalId, parameters);
@@ -129,9 +120,6 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
             case ModelCommandParameters.KEY_COLS:
                 modelCommandParameters.setKeyCols(splitCommaSeparatedStringToList(parameter.getValue()));
                 break;
-            case ModelCommandParameters.METADATA_TABLE:
-                modelCommandParameters.setMetadataTable(parameter.getValue());
-                break;
             case ModelCommandParameters.MODEL_NAME:
                 modelCommandParameters.setModelName(parameter.getValue());
                 break;
@@ -141,27 +129,28 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
             case ModelCommandParameters.NUM_SAMPLES:
                 modelCommandParameters.setNumSamples(Integer.parseInt(parameter.getValue()));
                 break;
+            case ModelCommandParameters.EXCLUDE_COLUMNS:
+                modelCommandParameters.setExcludeColumns(splitCommaSeparatedStringToList(parameter.getValue()));
+                break;
+
             }
         }
         
         List<String> missingParameters = new ArrayList<>();
-        if (Strings.isNullOrEmpty(modelCommandParameters.getDepivotedEventTable())) {
-            missingParameters.add(ModelCommandParameters.DEPIVOTED_EVENT_TABLE);
-        } 
         if (Strings.isNullOrEmpty(modelCommandParameters.getEventTable())) {
             missingParameters.add(ModelCommandParameters.EVENT_TABLE);
         } 
         if (modelCommandParameters.getKeyCols().isEmpty()) {
             missingParameters.add(ModelCommandParameters.KEY_COLS);
         } 
-        if (Strings.isNullOrEmpty(modelCommandParameters.getMetadataTable())) {
-            missingParameters.add(ModelCommandParameters.METADATA_TABLE);
-        } 
         if (Strings.isNullOrEmpty(modelCommandParameters.getModelName())) {
             missingParameters.add(ModelCommandParameters.MODEL_NAME);
-        }   
+        }
         if (modelCommandParameters.getModelTargets().isEmpty()) {
             missingParameters.add(ModelCommandParameters.MODEL_TARGETS);
+        }
+        if (modelCommandParameters.getExcludeColumns().isEmpty()) {
+            missingParameters.add(ModelCommandParameters.EXCLUDE_COLUMNS);
         }
         
         if (!missingParameters.isEmpty()) {
@@ -193,27 +182,27 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
             throw new LedpException(LedpCode.LEDP_16001, e, new String[] { deletePath });            
         }
                        
-        List<ApplicationId> appIds = new ArrayList<>();
+        List<ApplicationId> appIds = new ArrayList<>(); 
+        ApplicationId pivotedAppId = modelingService.loadData(generateLoadConfiguration(AlgorithmType.RANDOM_FOREST, customer, commandParameters));
+        appIds.add(pivotedAppId);
         // No LR for now.
-//        List<ApplicationId> depivotedAppIds = modelingService.loadData(generateLoadConfiguration(LR_SAMPLENAME_PREFIX, customer, commandParameters));
-        
-        appIds.add(modelingService.loadData(generateLoadConfiguration(RF_SAMPLENAME_PREFIX, customer, commandParameters)));
-//        appIds.addAll(depivotedAppIds);
+//        ApplicationId depivotedAppId = modelingService.loadData(generateLoadConfiguration(AlgorithmType.LOGISTIC_REGRESSION, customer, commandParameters));        
+//        appIds.add(depivotedAppIds);
         
         return appIds;
     }
     
-    private LoadConfiguration generateLoadConfiguration(String type, String customer, ModelCommandParameters commandParameters) {
+    private LoadConfiguration generateLoadConfiguration(AlgorithmType type, String customer, ModelCommandParameters commandParameters) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).type(dbType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer(customer);
-        if (type == LR_SAMPLENAME_PREFIX) {
-            config.setTable(commandParameters.getDepivotedEventTable());
-        } else {
+        if (type == AlgorithmType.RANDOM_FOREST) {
             config.setTable(commandParameters.getEventTable());
+        } else {
+            config.setTable(commandParameters.getDepivotedEventTable());            
         }
         config.setMetadataTable(commandParameters.getMetadataTable());
         config.setKeyCols(commandParameters.getKeyCols());
@@ -240,44 +229,59 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
     
     private List<ApplicationId> generateSamples(String customer, ModelCommandParameters commandParameters) {
         // No LR for now.
-//        ApplicationId lrAppId = modelingService.createSamples(generateSamplingConfiguration(LR_SAMPLENAME_PREFIX, customer, commandParameters));
-        ApplicationId rfAppId = modelingService.createSamples(generateSamplingConfiguration(RF_SAMPLENAME_PREFIX, customer, commandParameters));
+//        ApplicationId lrAppId = modelingService.createSamples(generateSamplingConfiguration(AlgorithmType.LOGISTIC_REGRESSION, customer, commandParameters));
+        ApplicationId rfAppId = modelingService.createSamples(generateSamplingConfiguration(AlgorithmType.RANDOM_FOREST, customer, commandParameters));
 
         return Arrays.asList(/*lrAppId, */rfAppId);
     }
   
-    private String constructSampleName(String prefix, int percentage) {
-        return prefix + String.valueOf(percentage);
+    private String constructSampleName(int percentage) {
+        return SAMPLENAME_PREFIX + String.valueOf(percentage);
     }
     
     @VisibleForTesting
-    SamplingConfiguration generateSamplingConfiguration(String type, String customer, ModelCommandParameters commandParameters) {
+    SamplingConfiguration generateSamplingConfiguration(AlgorithmType type, String customer, ModelCommandParameters commandParameters) {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
         
         for (int percentage : calculateSamplePercentages(commandParameters.getNumSamples())) {
             SamplingElement s = new SamplingElement();
-            s.setName(constructSampleName(type, percentage));
+            s.setName(constructSampleName(percentage));
             s.setPercentage(percentage);
             samplingConfig.addSamplingElement(s);                 
         }       
         
         samplingConfig.setCustomer(customer);      
         
-        if (type.equals(LR_SAMPLENAME_PREFIX)) {
-            samplingConfig.setTable(commandParameters.getDepivotedEventTable());
-        } else {
+        if (type.equals(AlgorithmType.RANDOM_FOREST)) {
             samplingConfig.setTable(commandParameters.getEventTable());
+        } else {
+            samplingConfig.setTable(commandParameters.getDepivotedEventTable());            
         }
         
         return samplingConfig;
     }  
     
+    /*
+     * No commented out code exists in this method to handle logistic regression.
+     */
+    private List<ApplicationId> profileData(String customer, ModelCommandParameters commandParameters) {
+        DataProfileConfiguration config = new DataProfileConfiguration();
+        config.setCustomer(customer);
+        config.setTable(commandParameters.getEventTable());
+        config.setMetadataTable(commandParameters.getMetadataTable());
+        config.setExcludeColumnList(commandParameters.getExcludeColumns());
+        config.setSamplePrefix(SAMPLENAME_PREFIX+"100");
+        ApplicationId appId = modelingService.profileData(config);
+        
+        return Arrays.asList(appId);        
+    }
+    
     private List<ApplicationId> submitModel(String customer, ModelCommandParameters commandParameters) {
         List<ApplicationId> appIds = new ArrayList<>();
-        List<ApplicationId> rfAppIds = modelingService.submitModel(generateModel(RF_SAMPLENAME_PREFIX, customer, commandParameters));
         // No LR for now.
-//        List<ApplicationId> lrAppIds = modelingService.submitModel(generateModel(LR_SAMPLENAME_PREFIX, customer, commandParameters));
+        List<ApplicationId> rfAppIds = modelingService.submitModel(generateModel(AlgorithmType.RANDOM_FOREST, customer, commandParameters));
+//        List<ApplicationId> lrAppIds = modelingService.submitModel(generateModel(AlgorithmType.LOGISTIC_REGRESSION, customer, commandParameters));
         
         appIds.addAll(rfAppIds);
 //        appIds.addAll(lrAppIds);
@@ -285,6 +289,7 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
         return appIds;
     }
     
+    @VisibleForTesting
     int calculatePriority(int sampleIndex) {
         int priority = 0;            
         switch (sampleIndex) {
@@ -303,22 +308,22 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
     }
     
     @VisibleForTesting
-    Model generateModel(String type, String customer, ModelCommandParameters commandParameters) {
+    Model generateModel(AlgorithmType type, String customer, ModelCommandParameters commandParameters) {
         List<Algorithm> algorithms = new ArrayList<>();
         
         int sampleIndex = 0;
         for (int percentage : calculateSamplePercentages(commandParameters.getNumSamples())) {
             AlgorithmBase algorithm;
-            if (type.equals(LR_SAMPLENAME_PREFIX)) {
-                algorithm = new LogisticRegressionAlgorithm();
-            } else {
+            if (type.equals(AlgorithmType.RANDOM_FOREST)) {
                 algorithm = new RandomForestAlgorithm();
+            } else {
+                algorithm = new LogisticRegressionAlgorithm();                
             }
                       
             int priority = calculatePriority(sampleIndex);
             algorithm.setPriority(calculatePriority(sampleIndex));
             algorithm.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY=" + priority);
-            algorithm.setSampleName(constructSampleName(type, percentage)); 
+            algorithm.setSampleName(constructSampleName(percentage)); 
             algorithms.add(algorithm);
             
             sampleIndex++;
@@ -331,10 +336,10 @@ public class ModelStepProcessorImpl implements ModelStepProcessor {
         Model model = new Model();
         model.setModelDefinition(modelDef);
         model.setName(commandParameters.getModelName());
-        if (type.equals(LR_SAMPLENAME_PREFIX)) {
-            model.setTable(commandParameters.getDepivotedEventTable());
-        } else {
+        if (type.equals(AlgorithmType.RANDOM_FOREST)) {
             model.setTable(commandParameters.getEventTable());
+        } else {            
+            model.setTable(commandParameters.getDepivotedEventTable());
         }
         model.setMetadataTable(commandParameters.getMetadataTable());
         model.setTargetsList(commandParameters.getModelTargets());

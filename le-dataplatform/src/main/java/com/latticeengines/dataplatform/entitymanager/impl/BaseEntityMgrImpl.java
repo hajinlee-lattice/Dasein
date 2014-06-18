@@ -56,11 +56,13 @@ public abstract class BaseEntityMgrImpl<T extends HasPid> implements BaseEntityM
      * get object by key. entity.getPid() must NOT be empty.
      */
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly=true)
     public T findByKey(T entity) {
         return getDao().findByKey(entity);
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly=true)
     public List<T> findAll() {
         return getDao().findAll();
     }

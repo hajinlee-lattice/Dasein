@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.JobDao;
@@ -27,6 +29,7 @@ public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntit
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public Job findByObjectId(String id) {
         return jobDao.findByObjectId(id);
     }
@@ -41,6 +44,7 @@ public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntit
      *  
      */
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public Set<Job> findAllByObjectIds(Set<String> jobIds) {
         if(jobIds == null || jobIds.isEmpty())
             return new HashSet<Job>();

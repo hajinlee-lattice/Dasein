@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.ThrottleConfigurationDao;
@@ -29,6 +31,7 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public List<ThrottleConfiguration> getConfigsSortedBySubmissionTime() {
         List<ThrottleConfiguration> configs = throttleConfigurationDao.findAll();
 
@@ -45,6 +48,7 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public ThrottleConfiguration getLatestConfig() {
         List<ThrottleConfiguration> configs = getConfigsSortedBySubmissionTime();
         if (configs.size() == 0) {
@@ -54,6 +58,7 @@ public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<Thrott
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void cleanUpAllConfiguration() {
         throttleConfigurationDao.deleteAll();
     }

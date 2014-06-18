@@ -9,7 +9,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
 
 @Component("modelCommandLogEntityMgr")
-public class ModelCommandLogEntityMgrImpl extends BaseEntityMgrImpl<ModelCommandLog> implements ModelCommandLogEntityMgr {
+public class ModelCommandLogEntityMgrImpl extends BaseOrchestrationEntityMgrImpl<ModelCommandLog> implements ModelCommandLogEntityMgr {
 
     @Autowired
     private ModelCommandLogDao modelCommandLogDao;

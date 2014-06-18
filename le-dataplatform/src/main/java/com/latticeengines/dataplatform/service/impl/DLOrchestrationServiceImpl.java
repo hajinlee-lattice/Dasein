@@ -13,6 +13,8 @@ import org.quartz.JobExecutionException;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
@@ -50,8 +52,9 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
     }
 
     @Override
+    @Transactional(value="dlorchestration", propagation = Propagation.REQUIRED)    
     public void run(JobExecutionContext context) throws JobExecutionException {
-        List<Future<Integer>> futures = new ArrayList<>();
+        List<Future<Long>> futures = new ArrayList<>();
         List<ModelCommand> modelCommands = modelCommandEntityMgr.getNewAndInProgress();
         String modelCommandsStr = Joiner.on(",").join(modelCommands);
         log.debug("Begin processing " + modelCommands.size() + " model commands: " + modelCommandsStr);
@@ -60,7 +63,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
                     jobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepProcessor,
                     modelCommandLogService)));
         }
-        for (Future<Integer> future : futures) {
+        for (Future<Long> future : futures) {
             try {
                 future.get(waitTime, TimeUnit.SECONDS);                
             } catch (Exception e) {
