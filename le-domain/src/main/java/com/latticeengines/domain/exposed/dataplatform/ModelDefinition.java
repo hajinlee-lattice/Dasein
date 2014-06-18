@@ -63,7 +63,6 @@ public class ModelDefinition implements HasName, HasPid {
         return algorithms;
     }
 
-    @JsonProperty("algorithms")
     public void setAlgorithms(List<Algorithm> algos) {
         this.algorithms = algos;        
     }
@@ -74,6 +73,7 @@ public class ModelDefinition implements HasName, HasPid {
      *  
      * @param algos
      */
+    @JsonProperty("algorithms")
     public void addAlgorithms(List<Algorithm> algos) {
         this.algorithms = (this.algorithms == null) ? new ArrayList<Algorithm>() : this.algorithms; 
         if (algos != null && !algos.isEmpty()) {
