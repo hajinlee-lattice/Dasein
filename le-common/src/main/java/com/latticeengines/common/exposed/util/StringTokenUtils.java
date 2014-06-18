@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
-
+ 
 public class StringTokenUtils  {
 
     /**
@@ -15,14 +15,18 @@ public class StringTokenUtils  {
      */
     public static <T> String listToString(List<T> stringInList) {
         StringBuilder sb = null;
+        boolean firsttime = true;
         if (stringInList != null && stringInList.size() > 0) {
             sb = new StringBuilder(stringInList.size());
             for (Iterator<T> iter = stringInList.iterator(); iter.hasNext();) {
                 T feature = iter.next();
+                if(!firsttime) {
+                    sb.append(',');
+                }
                 sb.append(feature);
-                sb.append(',');
-            }
-        }
+                firsttime = false;                
+            }            
+        } 
         
         String str = (sb == null) ? "" : sb.toString();
         return str;
