@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -33,14 +35,13 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 
 public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
+    private static final Log log = LogFactory.getLog(NutanixDeploymentTestNG.class);
+    
     @Autowired
     private Configuration yarnConfiguration;
     
     @Autowired
     private MetadataService metadataService;
-
-    @Value("${dataplatform.customer.basedir}")
-    private String customerBaseDir;
 
     @Value("${api.rest.endpoint.hostport}")
     private String restEndpointHost;
@@ -56,6 +57,24 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(new Path(customerBaseDir + "/Nutanix"), true);
 
+        ModelDefinition modelDef = produceModelDefinition();
+        this.model = produceModel(modelDef);
+    }
+
+    protected Model produceModel(ModelDefinition modelDef) {
+        Model model = new Model();
+        model.setModelDefinition(modelDef);
+        model.setName("Nutanix Random Forest Model on Depivoted Data");
+        model.setTable("Q_EventTable_Nutanix");
+        model.setMetadataTable("EventMetadata");
+        model.setCustomer("Nutanix");
+        model.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
+        model.setDataFormat("avro");
+        
+        return model;
+    }
+
+    protected ModelDefinition produceModelDefinition() {
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
@@ -65,18 +84,11 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Logistic regression against all");
         modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm }));
-
-        model = new Model();
-        model.setModelDefinition(modelDef);
-        model.setName("Nutanix Random Forest Model on Depivoted Data");
-        model.setTable("Q_EventTable_Nutanix");
-        model.setMetadataTable("EventMetadata");
-        model.setCustomer("Nutanix");
-        model.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
-        model.setDataFormat("avro");
+        return modelDef;
     }
     
     private Pair<String, List<String>> getTargetAndFeatures() {
+        log.info("               info..............."+this.getClass().getSimpleName()+"getTargetAndFeatures");
         StringList features = restTemplate.postForObject("http://" + restEndpointHost + "/rest/features", model,
                 StringList.class, new Object[] {});
         return new Pair<String, List<String>>("P1_Event", features.getElements());
@@ -84,6 +96,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
     
     @Test(groups = "deployment", enabled = true)
     public void load() throws Exception {
+        log.info("               info..............."+this.getClass().getSimpleName()+"load");
         LoadConfiguration config = getLoadConfig();
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
@@ -107,6 +120,8 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = true)
     public void createSamples() throws Exception {
+        log.info("               info..............."+this.getClass().getSimpleName()+"createSamples");
+        
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
         SamplingElement s0 = new SamplingElement();
@@ -121,8 +136,8 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.addSamplingElement(s0);
         samplingConfig.addSamplingElement(s1);
         samplingConfig.addSamplingElement(all);
-        samplingConfig.setCustomer(model.getCustomer());
-        samplingConfig.setTable(model.getTable());
+        samplingConfig.setCustomer(this.model.getCustomer());
+        samplingConfig.setTable(this.model.getTable());
         
         AppSubmission submission = restTemplate.postForObject(
                 "http://" + restEndpointHost + "/rest/createSamples", samplingConfig, AppSubmission.class,
@@ -136,10 +151,12 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
     public void profile() throws Exception {
+        log.info("               info..............."+this.getClass().getSimpleName()+"profile");
+        
         DataProfileConfiguration config = new DataProfileConfiguration();
-        config.setCustomer(model.getCustomer());
-        config.setTable(model.getTable());
-        config.setMetadataTable(model.getMetadataTable());
+        config.setCustomer(this.model.getCustomer());
+        config.setTable(this.model.getTable());
+        config.setMetadataTable(this.model.getMetadataTable());
         config.setSamplePrefix("all");
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
@@ -152,11 +169,13 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
     
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
     public void submit() throws Exception {
+        log.info("               info..............."+this.getClass().getSimpleName()+"submit");
+        
         Pair<String, List<String>> targetAndFeatures = getTargetAndFeatures();
-        model.setFeaturesList(targetAndFeatures.getValue());
-        model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
+        this.model.setFeaturesList(targetAndFeatures.getValue());
+        this.model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/submit",
-                model, AppSubmission.class, new Object[] {});
+                this.model, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
 
         for (String appIdStr : submission.getApplicationIds()) {
