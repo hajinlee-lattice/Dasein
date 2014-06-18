@@ -2,11 +2,13 @@ import logging
 import os
 import pwd
 import sys
+import string
 from urlparse import urlparse
 
 from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
 from leframework.webhdfs import WebHDFS
+
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -19,7 +21,7 @@ class Launcher(object):
         self.parser = ArgumentParser(modelFileName)
     
     def stripPath(self, fileName):
-        return fileName[fileName.rfind('/')+1:len(fileName)]
+        return fileName[fileName.rfind('/') + 1:len(fileName)]
 
     def __validateEnvVariable(self, variable):
         try:
@@ -98,7 +100,19 @@ class Launcher(object):
             (_, _, filenames) = os.walk(modelLocalDir).next()
             for filename in filenames:
                 hdfs.copyFromLocal(modelLocalDir + filename, "%s/%s" % (modelHdfsDir, filename))
-
+                if filename == "model.json":
+                    modelName = parser.getSchema()["name"]
+                    self.__publishToConsumer(hdfs, modelLocalDir + filename, modelHdfsDir, "BARD", modelName)
+    
+    def __publishToConsumer(self, hdfs, modelLocalPath, modelHdfsDir, consumer, modelName):
+        tokens = string.split(modelHdfsDir, "/")
+        modelToConsumerHdfsPath = ""
+        for index in range(0, 5):
+            modelToConsumerHdfsPath = modelToConsumerHdfsPath + tokens[index] + "/"
+            
+        modelToConsumerHdfsPath = modelToConsumerHdfsPath + consumer + "/" + modelName
+        hdfs.rmdir(modelToConsumerHdfsPath + "/1.json")
+        hdfs.copyFromLocal(modelLocalPath, "%s/%s" % (modelToConsumerHdfsPath, "1.json"))
 
 if __name__ == "__main__":
     """

@@ -54,15 +54,15 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.DataProfilingAlg
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {
-    
+
     private static final Log log = LogFactory.getLog(ModelingServiceImpl.class);
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private JobService jobService;
-    
+
     @Autowired
     private ModelEntityMgr modelEntityMgr;
 
@@ -112,7 +112,7 @@ public class ModelingServiceImpl implements ModelingService {
             // JobService is responsible for persistence during submitJob
             applicationIds.add(jobService.submitJob(job));
         }
-        
+
         return applicationIds;
     }
 
@@ -126,6 +126,11 @@ public class ModelingServiceImpl implements ModelingService {
 
     private Classifier createClassifier(Model model, Algorithm algorithm) {
         Classifier classifier = new Classifier();
+        String modelName = model.getName();
+
+        if (modelName != null) {
+            classifier.setName(modelName.replace(' ', '_'));
+        }
 
         classifier.setModelHdfsDir(model.getModelHdfsDir());
         classifier.setFeatures(model.getFeaturesList());
@@ -151,7 +156,7 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setSchemaHdfsPath(createSchemaInHdfs(trainingPath, model));
         return classifier;
     }
-    
+
     private String getAvroMetadataPathInHdfs(String path) {
         List<String> files = new ArrayList<String>();
         try {
@@ -166,7 +171,7 @@ public class ModelingServiceImpl implements ModelingService {
         } catch (Exception e) {
             log.warn(e);
         }
-        
+
         if (files.size() != 1) {
             log.warn("No metadata file found.");
             return path;
@@ -212,7 +217,7 @@ public class ModelingServiceImpl implements ModelingService {
         }
         return null;
     }
-    
+
     private Job createJob(Model model, Algorithm algorithm) {
         String assignedQueue = LedpQueueAssigner.getNonMRQueueNameForSubmission(algorithm.getPriority());
         return createJob(model, algorithm, assignedQueue);
@@ -247,7 +252,7 @@ public class ModelingServiceImpl implements ModelingService {
         config.setTimestampLong(System.currentTimeMillis());
         throttleConfigurationEntityMgr.create(config);
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void resetThrottle() {
@@ -290,15 +295,15 @@ public class ModelingServiceImpl implements ModelingService {
             List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, m.getDataHdfsPath() + "/samples",
                     new HdfsFilenameFilter() {
 
-                @Override
-                public boolean accept(Path filename) {
-                    Pattern p = Pattern.compile(".*.avro");
-                    Matcher matcher = p.matcher(filename.toString());
-                    return matcher.matches();
-                }
+                        @Override
+                        public boolean accept(Path filename) {
+                            Pattern p = Pattern.compile(".*.avro");
+                            Matcher matcher = p.matcher(filename.toString());
+                            return matcher.matches();
+                        }
 
-            });
-            
+                    });
+
             if (paths.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_00002);
             }
@@ -310,16 +315,19 @@ public class ModelingServiceImpl implements ModelingService {
             for (Field field : schema.getFields()) {
                 String name = field.name();
                 Schema fieldSchema = field.schema();
-                
-                if (firstNumericColumn == null &&
-                        (fieldSchema.getTypes().get(0).getType().equals(Schema.Type.DOUBLE)
-                        || fieldSchema.getTypes().get(0).getType().equals(Schema.Type.FLOAT)
-                        || fieldSchema.getTypes().get(0).getType().equals(Schema.Type.INT))) {
+
+                if (firstNumericColumn == null
+                        && (fieldSchema.getTypes().get(0).getType().equals(Schema.Type.DOUBLE)
+                                || fieldSchema.getTypes().get(0).getType().equals(Schema.Type.FLOAT) || fieldSchema
+                                .getTypes().get(0).getType().equals(Schema.Type.INT))) {
                     firstNumericColumn = name;
                 }
-                // If an include list is passed, only use the features in the include list
-                // if the name is part of the schema. If the include list is empty, then
-                // just add all the columns in the schema except for any columns in the excluded list
+                // If an include list is passed, only use the features in the
+                // include list
+                // if the name is part of the schema. If the include list is
+                // empty, then
+                // just add all the columns in the schema except for any columns
+                // in the excluded list
                 if (useIncludeList) {
                     if (includeList.contains(name)) {
                         featureList.add(name);
@@ -331,8 +339,8 @@ public class ModelingServiceImpl implements ModelingService {
                 }
             }
             m.setDataFormat("avro");
-            m.setTargetsList(Arrays.<String>asList(new String[] { firstNumericColumn }));
-            m.setKeyCols(Arrays.<String>asList(new String[] { featureList.get(0) }));
+            m.setTargetsList(Arrays.<String> asList(new String[] { firstNumericColumn }));
+            m.setKeyCols(Arrays.<String> asList(new String[] { featureList.get(0) }));
             m.setFeaturesList(featureList);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
@@ -343,14 +351,14 @@ public class ModelingServiceImpl implements ModelingService {
         Algorithm dataProfileAlgorithm = new DataProfilingAlgorithm();
         dataProfileAlgorithm.setSampleName(dataProfileConfig.getSamplePrefix());
         dataProfileAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
-        modelDefinition.addAlgorithms(Arrays.<Algorithm>asList(new Algorithm[] { dataProfileAlgorithm }));
+        modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataProfileAlgorithm }));
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         m.setModelDefinition(modelDefinition);
         Job job = createJob(m, dataProfileAlgorithm, assignedQueue);
         m.addJob(job);
         return jobService.submitJob(job);
     }
-    
+
     @Override
     public List<String> getFeatures(Model model, boolean depivoted) {
         if (model.getCustomer() == null) {
@@ -363,7 +371,7 @@ public class ModelingServiceImpl implements ModelingService {
         List<GenericRecord> data = new ArrayList<GenericRecord>();
         List<String> features = new ArrayList<String>();
         Set<String> pivotedFeatures = new LinkedHashSet<>();
-        
+
         try {
             HdfsFilenameFilter filter = new HdfsFilenameFilter() {
 
@@ -371,47 +379,47 @@ public class ModelingServiceImpl implements ModelingService {
                 public boolean accept(Path path) {
                     return path.toString().endsWith(".avro");
                 }
-                
+
             };
             List<String> avroDataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, dataSchemaPath, filter);
-            
+
             if (avroDataFiles.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
             }
-            
+
             dataSchema = AvroUtils.getSchema(yarnConfiguration, new Path(avroDataFiles.get(0)));
 
             List<String> avroMetadataFiles = HdfsUtils.getFilesForDir(yarnConfiguration, metadataPath, filter);
-            
+
             if (avroMetadataFiles.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
             }
-            
+
             for (String avroMetadataFile : avroMetadataFiles) {
                 data.addAll(AvroUtils.getData(yarnConfiguration, new Path(avroMetadataFile)));
             }
-            
+
             Set<String> columnSet = new HashSet<String>();
             Set<String> featureSet = new HashSet<String>();
             for (Field field : dataSchema.getFields()) {
                 columnSet.add(field.getProp("columnName"));
-            }            
-            
+            }
+
             for (GenericRecord datum : data) {
                 String name = datum.get("barecolumnname").toString();
                 if (!depivoted) {
                     pivotedFeatures.add(name);
                     continue;
                 }
-                               
+
                 String value = datum.get("columnvalue").toString();
                 String datatype = datum.get("Dtype").toString();
                 String featureName = name;
-                
+
                 if (featureName.equals("P1_Event")) {
                     continue;
                 }
-                
+
                 if (datatype.equals("BND")) {
                     featureName += "_Continuous";
                 } else {
@@ -422,11 +430,11 @@ public class ModelingServiceImpl implements ModelingService {
                     featureSet.add(featureName);
                 }
             }
-            
+
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
-        
+
         if (depivoted) {
             return new ArrayList<String>(features);
         } else {
@@ -442,8 +450,8 @@ public class ModelingServiceImpl implements ModelingService {
         model.setMetadataTable(config.getMetadataTable());
         setupModelProperties(model);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        return jobService.loadData(model.getTable(), model.getDataHdfsPath(),
-                config.getCreds(), assignedQueue, model.getCustomer(), config.getKeyCols());
+        return jobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
+                model.getCustomer(), config.getKeyCols());
     }
 
     @Override
