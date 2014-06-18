@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 
 public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
-    private static final Log log = LogFactory.getLog(CopyOfNutanixDeploymentTestNG.class);
+    private static final Log log = LogFactory.getLog(NutanixDeploymentTestNG.class);
     
     @Autowired
     private Configuration yarnConfiguration;
