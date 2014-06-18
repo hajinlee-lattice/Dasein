@@ -284,7 +284,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         return new Properties[] { appMasterProperties, containerProperties };
     }
 
-    private Map<ApplicationId, ApplicationReport> waitForAllJobsToFinish(List<ApplicationId> appIds) throws Exception {
+    private Map<ApplicationId, ApplicationReport> waitForAllJobsToFinish(List<ApplicationId> appIds) throws Exception {        
         Map<ApplicationId, ApplicationReport> jobStatus = new HashMap<ApplicationId, ApplicationReport>();
         List<ApplicationId> jobStatusToCollect = new ArrayList<ApplicationId>(appIds);
 
@@ -293,6 +293,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
             JobStatus status = jobService.getJobStatus(appId.toString());
             YarnApplicationState state = waitState(getApplicationId(status.getId()), 30, TimeUnit.SECONDS,
                     YarnApplicationState.FAILED, YarnApplicationState.FINISHED);
+            System.out.println("                 =========================================ScedhulerTestNG.waitForAllJobsToFinish()");            
             if (state == null) {
                 System.out.println("ERROR: Invalid state detected");
                 jobStatusToCollect.remove(appId);
