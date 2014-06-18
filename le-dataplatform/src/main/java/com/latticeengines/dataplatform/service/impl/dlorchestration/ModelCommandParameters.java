@@ -5,23 +5,28 @@ import java.util.List;
 
 public class ModelCommandParameters {
     
+    // Hardcoded name of hdfs subfolder
+    public static final String EVENT_METADATA = "EventMetadata";
+    
+    // Mandatory parameters
     public static final String EVENT_TABLE = "EventTable";
-    public static final String DEPIVOTED_EVENT_TABLE = "DepivotedEventTable";
-    public static final String METADATA_TABLE = "MetadataTable";
     public static final String KEY_COLS = "KeyCols";
     public static final String MODEL_NAME = "ModelName";
     public static final String MODEL_TARGETS = "ModelTargets";
+    public static final String EXCLUDE_COLUMNS = "ExcludeColumns";    
     
-    // OPTIONAL
+    // Optional parameters
     public static final String NUM_SAMPLES = "NumSamples";
+    public static final String DEPIVOTED_EVENT_TABLE = "DepivotedEventTable";
     
     private String eventTable;
     private String depivotedEventTable;
-    private String metadataTable;
+    private String metadataTable = EVENT_METADATA;
     private List<String> keyCols = Collections.emptyList();
     private int numSamples = 1; // 1 is default
     private String modelName;
     private List<String> modelTargets = Collections.emptyList();
+    private List<String> excludeColumns = Collections.emptyList();
 
     public String getEventTable() {
         return eventTable;
@@ -41,10 +46,6 @@ public class ModelCommandParameters {
 
     public String getMetadataTable() {
         return metadataTable;
-    }
-
-    public void setMetadataTable(String metadataTable) {
-        this.metadataTable = metadataTable;
     }
 
     public List<String> getKeyCols() {
@@ -77,5 +78,13 @@ public class ModelCommandParameters {
 
     public void setModelTargets(List<String> modelTargets) {
         this.modelTargets = modelTargets;
+    }
+
+    public List<String> getExcludeColumns() {
+        return excludeColumns;
+    }
+
+    public void setExcludeColumns(List<String> excludeColumns) {
+        this.excludeColumns = excludeColumns;
     }
 }

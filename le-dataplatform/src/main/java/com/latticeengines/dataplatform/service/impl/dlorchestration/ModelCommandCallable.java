@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
-public class ModelCommandCallable implements Callable<Integer> {
+public class ModelCommandCallable implements Callable<Long> {
     
     private static final Log log = LogFactory.getLog(ModelCommandCallable.class);
     
@@ -52,30 +52,31 @@ public class ModelCommandCallable implements Callable<Integer> {
     }
     
     @Override
-    public Integer call() throws Exception {
+    public Long call() throws Exception {
         int result = SUCCESS;
         try {
-            log.info("Begin work on modelcommand id:" + modelCommand.getId()); // Need this line to associate modelCommandId with threadId in log4j output.
+            log.info("Begin work on modelcommand id:" + modelCommand.getPid()); // Need this line to associate modelCommandId with threadId in log4j output.
             executeWorkflow();
-            log.info("End work on modelcommand id:" + modelCommand.getId());            
+            log.info("End work on modelcommand id:" + modelCommand.getPid());            
         } catch (LedpException e) {
             result = FAIL;
-            modelCommandLogService.logLedpException(modelCommand.getCommandId(), e);
+            modelCommandLogService.logLedpException(modelCommand, e);
         } catch (Exception e) {
             result = FAIL;
-            modelCommandLogService.logException(modelCommand.getCommandId(), e);
+            modelCommandLogService.logException(modelCommand, e);
         } finally {
             if (result == FAIL) {
                 handleJobFailed();                                
             }
         }
-        return modelCommand.getCommandId();
+        return modelCommand.getPid();
     }
     
     private void executeWorkflow() {             
         if (modelCommand.isNew()) {                          
             modelCommand.setCommandStatus(ModelCommandStatus.IN_PROGRESS);
-            //modelCommandEntityMgr.post(modelCommand);            
+            modelCommand.setModelCommandStep(ModelCommandStep.LOAD_DATA);
+            modelCommandEntityMgr.update(modelCommand);            
                         
             executeYarnStep(ModelCommandStep.LOAD_DATA);            
         } else { // modelCommand IN_PROGRESS
@@ -107,63 +108,57 @@ public class ModelCommandCallable implements Callable<Integer> {
     }
     
     private void handleAllJobsSucceeded() {
-        modelCommandLogService.logCompleteStep(modelCommand.getCommandId(), modelCommand.getModelCommandStep(), ModelCommandStatus.SUCCESS);
+        modelCommandLogService.logCompleteStep(modelCommand, modelCommand.getModelCommandStep(), ModelCommandStatus.SUCCESS);
         
         ModelCommandStep nextStep = modelCommand.getModelCommandStep().getNextStep();
         modelCommand.setModelCommandStep(nextStep);
         
-        if (nextStep.equals(ModelCommandStep.SEND_JSON)) {
-            executeJSONStep();
+        if (nextStep.equals(ModelCommandStep.FINISH)) {
+            finish();
         } else {
             executeYarnStep(nextStep); 
         }                         
 
-        //modelCommandEntityMgr.post(modelCommand);     
+        modelCommandEntityMgr.update(modelCommand);     
         
     }
    
     private void handleJobFailed() {     
-        modelCommandLogService.logCompleteStep(modelCommand.getCommandId(), modelCommand.getModelCommandStep(), ModelCommandStatus.FAIL);
+        modelCommandLogService.logCompleteStep(modelCommand, modelCommand.getModelCommandStep(), ModelCommandStatus.FAIL);
         
         modelCommand.setCommandStatus(ModelCommandStatus.FAIL);                
-        ///modelCommandEntityMgr.post(modelCommand);        
+        modelCommandEntityMgr.update(modelCommand);        
     }
     
     private void executeYarnStep(ModelCommandStep step) {
-        modelCommandLogService.logBeginStep(modelCommand.getCommandId(), step);
+        modelCommandLogService.logBeginStep(modelCommand, step);
         
         List<ApplicationId> appIds = modelStepProcessor.executeYarnStep(modelCommand.getDeploymentExternalId(), step, modelCommand.getCommandParameters());       
         for (ApplicationId appId : appIds) {
             JobStatus jobStatus = jobService.getJobStatus(appId.toString());
             
-            ModelCommandState commandState = new ModelCommandState();
-            commandState.setYarnApplicationId(appId.toString());
-            commandState.setCommandId(modelCommand.getCommandId());
-            commandState.setModelCommandStep(step);
-            
+            ModelCommandState commandState = new ModelCommandState(modelCommand, step);
+            commandState.setYarnApplicationId(appId.toString());                                   
             saveModelCommandStateFromJobStatus(commandState, jobStatus);            
         }               
     }       
     
-    private void executeJSONStep() {
-        modelCommandLogService.logBeginStep(modelCommand.getCommandId(), ModelCommandStep.SEND_JSON);            
+    private void finish() {
+        modelCommandLogService.logBeginStep(modelCommand, ModelCommandStep.FINISH);            
 
-        ModelCommandState commandState = new ModelCommandState();                   
-        commandState.setCommandId(modelCommand.getCommandId());
-        commandState.setModelCommandStep(ModelCommandStep.SEND_JSON);                                                                               
-        ///modelCommandStateEntityMgr.post(commandState);        
-             
-        modelStepProcessor.executeJsonStep(modelCommand.getDeploymentExternalId(), modelCommand.getCommandId(), modelCommand.getCommandParameters());
+        ModelCommandState commandState = new ModelCommandState(modelCommand, ModelCommandStep.FINISH);                                                                                                                  
+        modelCommandStateEntityMgr.create(commandState);        
         
-        modelCommandLogService.logCompleteStep(modelCommand.getCommandId(), ModelCommandStep.SEND_JSON, ModelCommandStatus.SUCCESS);
+        modelCommandLogService.logCompleteStep(modelCommand, ModelCommandStep.FINISH, ModelCommandStatus.SUCCESS);
         modelCommand.setCommandStatus(ModelCommandStatus.SUCCESS);
     }
     
     private void saveModelCommandStateFromJobStatus(ModelCommandState commandState, JobStatus jobStatus) {
+        commandState.setStatus(jobStatus.getState());
         commandState.setProgress(jobStatus.getProgress());
         commandState.setDiagnostics(jobStatus.getDiagnostics());
         commandState.setTrackingUrl(jobStatus.getTrackingUrl());
         commandState.setElapsedTimeInMillis(System.currentTimeMillis()-jobStatus.getStartTime());                
-        ///modelCommandStateEntityMgr.post(commandState);
+        modelCommandStateEntityMgr.createOrUpdate(commandState);
     }
 }       
