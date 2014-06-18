@@ -28,7 +28,6 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
     public void run(JobExecutionContext context) throws JobExecutionException {
         ThrottleConfiguration latestConfig = throttleConfigurationEntityMgr.getLatestConfig();
         List<Job> jobsToKill = getJobsToKill(latestConfig);
@@ -64,7 +63,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
         if (config != null) {
             int cutoffIndex = config.getJobRankCutoff();
 
-            List<Model> models = modelEntityMgr.findAll();  // getAll();
+            List<Model> models = modelEntityMgr.findAll();  ;
             for (Model model : models) {
                 List<Job> ownedJobs = model.getJobs();                
                 for (int i = 1; i <= ownedJobs.size(); i++) {
