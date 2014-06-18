@@ -126,7 +126,7 @@ class LauncherTest(TestCase):
             for i in range(len(values)):
                 csvWriter.writerow([i+1]+values[i])
         
-    def __getPredictScore(self,pipeline, values):
+    def __getPredictScore(self, pipeline, values):
         scores = []
         inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
         for value in values:
