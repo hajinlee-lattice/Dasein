@@ -75,7 +75,7 @@ GO
 CREATE TABLE [dbo].[MODEL](
 	[PID] [int] NOT NULL IDENTITY (1000, 1),
 	[MODEL_ID] [varchar](50) NOT NULL,
-	[NAME] [nvarchar](100) NOT NULL,
+	[NAME] [nvarchar](100) NULL,
 	[DATA_HDFS_PATH] [varchar](200) NULL,
     [METADATA_HDFS_PATH] [varchar](200) NULL,
 	[SCHEMA_HDFS_PATH] [varchar](200) NULL,
