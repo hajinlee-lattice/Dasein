@@ -5,7 +5,8 @@ cd /tmp/Python-2.7.6
 ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
 make && make altinstall
 # First get the setup script for Setuptools:
-cd /tmp && wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+cd /tmp
+wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
 # Then install it for Python 2.7:
 /usr/local/bin/python2.7 ez_setup.py
 # Now install pip using the newly installed setuptools:

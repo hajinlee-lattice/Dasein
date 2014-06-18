@@ -46,6 +46,9 @@
 							</sources>
 						</mapping>
 					</mappings>
+					<preremoveScriptlet>
+						<scriptFile>src/main/scripts/jetty/preremove</scriptFile>
+					</preremoveScriptlet>
 					<preinstallScriptlet>
 						<scriptFile>src/main/scripts/jetty/preinstall</scriptFile>
 					</preinstallScriptlet>
