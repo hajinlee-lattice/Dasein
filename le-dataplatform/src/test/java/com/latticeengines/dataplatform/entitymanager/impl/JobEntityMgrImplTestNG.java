@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgo
 import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
 
 public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
- 
+
     private Job job;
 
     @Override
@@ -61,7 +61,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         classifier.setTestDataHdfsPath("/test/nn_test.dat");
         classifier.setPythonScriptHdfsPath("/datascientist1/nn_train.py");
         classifier.setModelHdfsDir("/datascientist1/result");
-        
+
         //
         // job
         job = new Job();
@@ -88,32 +88,33 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         decisionTreeAlgorithm.setPriority(1);
         decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
         decisionTreeAlgorithm.setSampleName("s1");
-        
+
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model Definition For Demo");
         modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 logisticRegressionAlgorithm }));
-        // 
-        // in the application, it is assumed that the model definition is defined in the metadata db
+        //
+        // in the application, it is assumed that the model definition is
+        // defined in the metadata db
         // also, modelDef 'name' should be unique
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
-        // 
+        //
         // setup and persist a test model first
-        Model model = new Model();                
-        model.setId("model_"+this.getClass().getSimpleName()+"_0001");
+        Model model = new Model();
+        model.setId("model_" + this.getClass().getSimpleName() + "_0001");
         model.setName("MODEL TEST NAME");
         model.setModelDefinition(modelDef);
-        modelEntityMgr.create(model);         
+        modelEntityMgr.create(model);
         // link model--job
         job.setModel(model);
     }
 
     @AfterClass(groups = "functional")
     public void cleanup() {
-        
+
     }
-    
-    private void assertJobsEqual(Job originalJob,         Job retrievedJob) {
+
+    private void assertJobsEqual(Job originalJob, Job retrievedJob) {
         assertEquals(retrievedJob.getId(), retrievedJob.getId());
         assertEquals(retrievedJob.getAppId(), retrievedJob.getAppId());
         assertEquals(retrievedJob.getAppMasterPropertiesObject(), retrievedJob.getAppMasterPropertiesObject());
@@ -123,14 +124,11 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(retrievedJob.getModel(), retrievedJob.getModel());
         assertEquals(retrievedJob.getParentJobId(), retrievedJob.getParentJobId());
 
-        /*
-         * assertEquals(job.getAppMasterPropertiesObject().getProperty("QUEUE"),
-         * retrievedJob.getAppMasterPropertiesObject() .getProperty("QUEUE"));
-         * assertEquals
-         * (job.getContainerPropertiesObject().getProperty("METADATA"),
-         * retrievedJob.getContainerPropertiesObject()
-         * .getProperty("METADATA"));
-         */
+        assertEquals(job.getAppMasterPropertiesObject().getProperty("QUEUE"), retrievedJob
+                .getAppMasterPropertiesObject().getProperty("QUEUE"));
+        assertEquals(job.getContainerPropertiesObject().getProperty("METADATA"), retrievedJob
+                .getContainerPropertiesObject().getProperty("METADATA"));
+
     }
 
     @Transactional
@@ -142,9 +140,10 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Transactional
     @Test(groups = "functional", dependsOnMethods = { "testPersist" })
     public void testRetrieval() {
-        Job retrievedJob = new Job();        
+        Job retrievedJob = new Job();
         retrievedJob.setPid(job.getPid());
-        retrievedJob = jobEntityMgr.findByKey(retrievedJob); /// getByKey(retrievedJob);
+        retrievedJob = jobEntityMgr.findByKey(retrievedJob); // /
+                                                             // getByKey(retrievedJob);
         // assert for correctness
         assertJobsEqual(job, retrievedJob);
     }
