@@ -39,7 +39,11 @@ class ColumnMetadataGenerator(State, JsonGenBase):
             f["Purpose"] = 3
             if field[0] in mediator.schema["targets"]:
                 f["Purpose"] = 4
-            f["ValueType"] = 0
+                
+            if field[0] in mediator.schema["stringColumns"]:
+                f["ValueType"] = 1
+            else:
+                f["ValueType"] = 0
             
             self.inputColumnMetadata.append(f)
             
