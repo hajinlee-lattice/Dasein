@@ -58,14 +58,14 @@ public class ModelDefinition implements HasName, HasPid {
     }
 
     @JsonProperty("algorithms")
-    @OneToMany(mappedBy = "modelDefinition", targetEntity = AlgorithmBase.class, fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST })
+    @OneToMany(mappedBy = "modelDefinition", targetEntity = AlgorithmBase.class, fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
     public List<Algorithm> getAlgorithms() {
         return algorithms;
     }
 
     @JsonProperty("algorithms")
     public void setAlgorithms(List<Algorithm> algos) {
-        this.algorithms = algos; 
+        this.algorithms = algos;        
     }
     
     /**
