@@ -39,8 +39,9 @@ import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
 
 /**
- * This is an end-to-end test against a SQL Server database without having to go through the REST API.
- * It allows for an easier development-test cycle without having to either deploy to Jetty or run from le-api.
+ * This is an end-to-end test against a SQL Server database without having to go
+ * through the REST API. It allows for an easier development-test cycle without
+ * having to either deploy to Jetty or run from le-api.
  * 
  * @author rgonzalez
  *
@@ -56,19 +57,19 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
     @Autowired
     private ModelingService modelingService;
-    
+
     @Autowired
     private JobEntityMgr jobEntityMgr;
 
     @Autowired
     private ModelEntityMgr modelEntityMgr;
-    
+
     private Model model = null;
-    
+
     protected boolean doYarnClusterSetup() {
         return true;
     }
-    
+
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
     }
@@ -90,7 +91,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
         model = createModel(modelDef);
     }
-    
+
     private Model createModel(ModelDefinition modelDef) {
         Model m = new Model();
         m.setModelDefinition(modelDef);
@@ -101,14 +102,15 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         m.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         m.setCustomer("Nutanix");
         m.setDataFormat("avro");
-        
+
         return m;
     }
 
     private LoadConfiguration getLoadConfig() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dbDlOrchestrationHost).port(dbDlOrchestrationPort).db(dbDlOrchestrationName).user(dbDlOrchestrationUser).password(dbDlOrchestrationPassword);
+        builder.host(dbDlOrchestrationHost).port(dbDlOrchestrationPort).db(dbDlOrchestrationName)
+                .user(dbDlOrchestrationUser).password(dbDlOrchestrationPassword).type(dbDlOrchestrationType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("Nutanix");
@@ -123,11 +125,10 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     public void load() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
         ApplicationId appId = modelingService.loadData(loadConfig);
-        FinalApplicationStatus status = waitForStatus(appId, 360, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appId, 360, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
-    
+
     @Transactional(propagation = Propagation.REQUIRED)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "load" })
     public void createSamples() throws Exception {
@@ -148,8 +149,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
         ApplicationId appId = modelingService.createSamples(samplingConfig);
-        FinalApplicationStatus status = waitForStatus(appId, 240, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appId, 240, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -159,19 +159,19 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
         config.setTable(model.getTable());
-        config.setMetadataTable(model.getMetadataTable());        
+        config.setMetadataTable(model.getMetadataTable());
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
         config.setSamplePrefix("all");
         ApplicationId appId = modelingService.profileData(config);
         FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
-    
+
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "profileData" })
     public void submitModel() throws Exception {
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
-        
+
         List<ApplicationId> appIds = modelingService.submitModel(model);
 
         for (ApplicationId appId : appIds) {
@@ -189,4 +189,3 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     }
 
 }
-
