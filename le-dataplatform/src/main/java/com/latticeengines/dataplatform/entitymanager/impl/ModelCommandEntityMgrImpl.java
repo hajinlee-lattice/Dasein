@@ -28,7 +28,7 @@ public class ModelCommandEntityMgrImpl extends BaseOrchestrationEntityMgrImpl<Mo
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(value = "dlorchestration", propagation = Propagation.REQUIRED)
     public List<ModelCommand> getNewAndInProgress() {
         return modelCommandDao.getNewAndInProgress();
     }

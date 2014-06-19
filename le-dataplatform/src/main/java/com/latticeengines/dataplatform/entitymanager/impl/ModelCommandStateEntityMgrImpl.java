@@ -30,7 +30,7 @@ public class ModelCommandStateEntityMgrImpl extends BaseOrchestrationEntityMgrIm
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(value="dlorchestration", propagation = Propagation.REQUIRED)
     public List<ModelCommandState> findByModelCommandAndStep(ModelCommand modelCommand, ModelCommandStep modelCommandStep) {
         return modelCommandStateDao.findByModelCommandAndStep(modelCommand, modelCommandStep);
     }

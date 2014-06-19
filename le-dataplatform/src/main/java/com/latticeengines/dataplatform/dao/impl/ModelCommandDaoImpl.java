@@ -8,8 +8,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.dataplatform.dao.ModelCommandDao;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
@@ -36,12 +34,12 @@ public class ModelCommandDaoImpl extends BaseDaoImpl<ModelCommand> implements Mo
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    @Transactional(value="dlorchestration", propagation = Propagation.REQUIRED)
+    @Override   
     public List<ModelCommand> getNewAndInProgress() {
         Session session = getSessionFactory().getCurrentSession();
         List<ModelCommand> commands = session
                 .createCriteria(ModelCommand.class)
+                .add(Restrictions.eq("modelId", ModelCommand.TAHOE))
                 .add(Restrictions.or(Restrictions.eq("commandStatus", ModelCommandStatus.NEW),
                         Restrictions.eq("commandStatus", ModelCommandStatus.IN_PROGRESS)))
                 .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
