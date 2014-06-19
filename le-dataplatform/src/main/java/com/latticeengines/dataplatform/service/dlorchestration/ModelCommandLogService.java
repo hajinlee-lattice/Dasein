@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.service;
+package com.latticeengines.dataplatform.service.dlorchestration;
 
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;

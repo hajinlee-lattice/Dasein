@@ -6,15 +6,18 @@
 
     <bean name="dlorchestrationJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
         <property name="durability" value="true" /> 
-        <property name="jobClass" value="com.latticeengines.dataplatform.service.impl.DLOrchestrationServiceImpl" />
+        <property name="jobClass" value="com.latticeengines.dataplatform.service.impl.dlorchestration.DLOrchestrationServiceImpl" />
         <property name="jobDataAsMap">
             <map>
                 <entry key="dlOrchestrationJobTaskExecutor" value-ref="dlOrchestrationJobTaskExecutor" />
                 <entry key="modelCommandEntityMgr" value-ref="modelCommandEntityMgr" />
                 <entry key="jobService" value-ref="jobService" />
                 <entry key="modelCommandStateEntityMgr" value-ref="modelCommandStateEntityMgr" />
-                <entry key="modelStepProcessor" value-ref="modelStepProcessor" />
+                <entry key="modelStepYarnProcessor" value-ref="modelStepYarnProcessor" />
                 <entry key="modelCommandLogService" value-ref="modelCommandLogService" />
+                <entry key="modelCommandResultEntityMgr" value-ref="modelCommandResultEntityMgr" />               
+                <entry key="modelStepOutputResultsProcessor" value-ref="modelStepOutputResultsProcessor" />
+                <entry key="modelStepFinishProcessor" value-ref="modelStepFinishProcessor" />                                    
                 <entry key="waitTime" value="${dataplatform.dlorchestrationjob.wait.time}" />
             </map>
         </property>

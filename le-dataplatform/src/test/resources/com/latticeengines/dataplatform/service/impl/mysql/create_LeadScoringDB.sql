@@ -1,6 +1,12 @@
-CREATE DATABASE LeadScoringDB;
+#CREATE DATABASE LeadScoringDB;
 
 USE LeadScoringDB;
+
+drop table if exists `Q_EventTable_Nutanix`;
+
+drop table if exists `Q_EventTableDepivot_Nutanix`;
+
+drop table if exists `EventMetadata_Nutanix`;
 
 CREATE TABLE Q_EventTable_Nutanix (
   ID INT NOT NULL AUTO_INCREMENT,

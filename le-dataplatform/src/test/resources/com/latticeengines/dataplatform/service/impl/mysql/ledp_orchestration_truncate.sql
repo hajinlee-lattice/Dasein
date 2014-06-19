@@ -7,6 +7,18 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
+update LeadScoringDB.dbo.LeadScoringCommand set CommandStatus=0, ModelCommandStep=NULL where CommandId=186
+truncate table [LeadScoringDB].[dbo].[LeadScoringCommandLog]
+GO
+truncate table [LeadScoringDB].[dbo].[LeadScoringCommandState]
+GO
+truncate table [LeadScoringDB].[dbo].[LeadScoringResult]
+GO
+
+
+insert into DataForScoring_Lattice_Bernard select * from DataForScoring_Lattice
+
+
 INSERT INTO [LeadScoringDB].[dbo].[LeadScoringCommandParameter]
      VALUES (180, 'MetadataTable'
            ,'EventMetadata_Nutanix');
@@ -87,8 +99,9 @@ GO
 
 
 update LeadScoringDB.dbo.LeadScoringCommand set CommandStatus=4 where CommandId=179
-
 update LeadScoringDB.dbo.LeadScoringCommand set Deployment_External_ID='Nutanix' where CommandId=180
+
+
 update LeadScoringDB.dbo.LeadScoringCommand set CommandStatus=0 where CommandId=180
 truncate table [LeadScoringDB].[dbo].[LeadScoringCommandLog]
 GO

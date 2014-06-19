@@ -14,6 +14,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Table(name = "LeadScoringCommand")
 public class ModelCommand implements HasPid, Serializable {
     
+    public static final String TAHOE = "Tahoe";
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -69,18 +71,25 @@ public class ModelCommand implements HasPid, Serializable {
     @OrderBy("Created ASC")
     private List<ModelCommandState> commandStates;
     
+    @Column(name = "ModelId", nullable = false)
+    private String modelId;
+    
+    @OneToOne(mappedBy = "modelCommand", fetch = FetchType.LAZY)
+    private ModelCommandResult modelCommandResult;
+    
     ModelCommand() {
         super();
     }
     
     @VisibleForTesting
     public ModelCommand(Long commandId, String deploymentExternalId, ModelCommandStatus commandStatus,
-            List<ModelCommandParameter> commandParameters) {
+            List<ModelCommandParameter> commandParameters, String modelId) {
         super();
         this.commandId = commandId;
         this.deploymentExternalId = deploymentExternalId;
         this.commandStatus = commandStatus;
         this.commandParameters = commandParameters;
+        this.modelId = modelId;
     }
 
     @Override
@@ -133,6 +142,10 @@ public class ModelCommand implements HasPid, Serializable {
     
     public List<ModelCommandState> getCommandStates() {
         return commandStates;
+    }
+
+    public String getModelId() {
+        return modelId;
     }
 
     @Override

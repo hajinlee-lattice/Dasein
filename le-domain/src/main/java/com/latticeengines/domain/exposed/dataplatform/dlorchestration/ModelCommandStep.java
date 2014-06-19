@@ -6,6 +6,7 @@ public enum ModelCommandStep {
     GENERATE_SAMPLES("Generate samples"),
     PROFILE_DATA("Profile data"),
     SUBMIT_MODELS("Submit models"),
+    OUTPUT_COMMAND_RESULTS("Output command results"),
     FINISH("Finished");
     
     private String description;

@@ -37,7 +37,8 @@ public enum LedpCode {
     LEDP_15003("There should at least be one file of type {0}."), //
     // DLOrchestration service: 16000-16999
     LEDP_16000("Missing model command parameter(s) {0}."), //
-    LEDP_16001("Problem deleting path {0} before load.");
+    LEDP_16001("Problem deleting path {0} before load."), //
+    LEDP_16002("Problem retrieving JSON model HDFS path for model command:{0}, yarnAppId:{1}.");
 
     private String message;
 

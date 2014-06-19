@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.dataplatform.dlorchestration;
 
 public enum ModelCommandStatus {
-    NEW(0), IN_PROGRESS(1), SUCCESS(3), FAIL(4);
+    NEW(0), IN_PROGRESS(2), SUCCESS(3), FAIL(4);
     
     private int value;
     
