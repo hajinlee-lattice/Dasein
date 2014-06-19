@@ -24,4 +24,8 @@ def transform(x):
     '''
     if x is None:
         x = '__unknown__'
-    return int(0xffffffff & reduce(lambda h,c: ord(c) + (h << 6) + (h << 16) - h, x, 0))
+    try:
+        return int(0xffffffff & reduce(lambda h,c: ord(c) + (h << 6) + (h << 16) - h, x, 0))
+    except Exception:
+        print("Error with type = %s and value = %s" % (type(x), x))
+        raise
