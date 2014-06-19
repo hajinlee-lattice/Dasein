@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
@@ -252,6 +253,9 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             int priority = calculatePriority(sampleIndex);
             algorithm.setPriority(calculatePriority(sampleIndex));
             algorithm.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY=" + priority);
+            if (!Strings.isNullOrEmpty(commandParameters.getAlgorithmProperties())) {
+                algorithm.setAlgorithmProperties(commandParameters.getAlgorithmProperties());
+            }
             algorithm.setSampleName(constructSampleName(percentage)); 
             algorithms.add(algorithm);
             

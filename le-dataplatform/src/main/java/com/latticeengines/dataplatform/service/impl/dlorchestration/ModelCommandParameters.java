@@ -18,15 +18,17 @@ public class ModelCommandParameters {
     // Optional parameters
     public static final String NUM_SAMPLES = "NumSamples";
     public static final String DEPIVOTED_EVENT_TABLE = "DepivotedEventTable";
+    public static final String ALGORITHM_PROPERTIES = "AlgorithmProperties";
     
-    private String eventTable;
-    private String depivotedEventTable;
+    private String eventTable = null;
+    private String depivotedEventTable = null;
     private String metadataTable = EVENT_METADATA;
     private List<String> keyCols = Collections.emptyList();
     private int numSamples = 1; // 1 is default
-    private String modelName;
+    private String modelName = null;
     private List<String> modelTargets = Collections.emptyList();
     private List<String> excludeColumns = Collections.emptyList();
+    private String algorithmProperties = null;
 
     public String getEventTable() {
         return eventTable;
@@ -86,5 +88,13 @@ public class ModelCommandParameters {
 
     public void setExcludeColumns(List<String> excludeColumns) {
         this.excludeColumns = excludeColumns;
+    }
+
+    public String getAlgorithmProperties() {
+        return algorithmProperties;
+    }
+
+    public void setAlgorithmProperties(String algorithmProperties) {
+        this.algorithmProperties = algorithmProperties;
     }
 }

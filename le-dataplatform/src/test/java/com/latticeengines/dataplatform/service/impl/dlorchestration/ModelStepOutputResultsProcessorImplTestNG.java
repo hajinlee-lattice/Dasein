@@ -40,7 +40,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     public void testExecutePostStep() throws Exception {
         List<ModelCommandParameter> listParameters = ModelingServiceTestUtils.createModelCommandWithCommandParameters()
                 .getCommandParameters();
-        ModelCommandParameters commandParameters = modelCommandCallable.validateCommandParameters(listParameters);
+        ModelCommandParameters commandParameters = modelCommandCallable.validateAndSetCommandParameters(listParameters);
         commandParameters.setEventTable("ATable");
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
 //        modelCommandEntityMgr.create(command);

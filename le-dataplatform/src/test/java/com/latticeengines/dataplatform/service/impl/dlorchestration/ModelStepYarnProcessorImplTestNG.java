@@ -43,7 +43,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
     public void testExecuteYarnSteps() throws Exception {
         List<ModelCommandParameter> listParameters = ModelingServiceTestUtils.createModelCommandWithCommandParameters()
                 .getCommandParameters();
-        ModelCommandParameters commandParameters = modelCommandCallable.validateCommandParameters(listParameters);
+        ModelCommandParameters commandParameters = modelCommandCallable.validateAndSetCommandParameters(listParameters);
 
         List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.LOAD_DATA,
                 commandParameters);

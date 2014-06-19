@@ -35,7 +35,7 @@ public class ModelStepYarnProcessorImplUnitTestNG {
     }
 
     public ModelCommandParameters createModelCommandParameters() {
-        return modelCommandCallable.validateCommandParameters(ModelingServiceTestUtils
+        return modelCommandCallable.validateAndSetCommandParameters(ModelingServiceTestUtils
                 .createModelCommandWithCommandParameters().getCommandParameters());
     }
 
@@ -43,7 +43,7 @@ public class ModelStepYarnProcessorImplUnitTestNG {
     public void testInvalidCommandParameters() throws Exception {
         List<ModelCommandParameter> parameters = new ArrayList<>();
         try {
-            modelCommandCallable.validateCommandParameters(parameters);
+            modelCommandCallable.validateAndSetCommandParameters(parameters);
         } catch (LedpException e) {
             String msg = e.getMessage();
             assertTrue(msg.contains(ModelCommandParameters.EVENT_TABLE));

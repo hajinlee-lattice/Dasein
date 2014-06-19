@@ -102,7 +102,7 @@ public class ModelCommandCallable implements Callable<Long> {
             modelCommand.setModelCommandStep(ModelCommandStep.LOAD_DATA);
             modelCommandEntityMgr.update(modelCommand);            
             
-            ModelCommandParameters commandParameters = validateCommandParameters(modelCommand.getCommandParameters());
+            ModelCommandParameters commandParameters = validateAndSetCommandParameters(modelCommand.getCommandParameters());
             executeYarnStep(ModelCommandStep.LOAD_DATA, commandParameters);            
         } else { // modelCommand IN_PROGRESS
             List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand, modelCommand.getModelCommandStep());
@@ -138,7 +138,7 @@ public class ModelCommandCallable implements Callable<Long> {
         ModelCommandStep nextStep = modelCommand.getModelCommandStep().getNextStep();
         modelCommand.setModelCommandStep(nextStep);
         
-        ModelCommandParameters commandParameters = validateCommandParameters(modelCommand.getCommandParameters());
+        ModelCommandParameters commandParameters = validateAndSetCommandParameters(modelCommand.getCommandParameters());
         if (nextStep.equals(ModelCommandStep.OUTPUT_COMMAND_RESULTS)) {
             executePostStep(modelStepOutputResultsProcessor, ModelCommandStep.OUTPUT_COMMAND_RESULTS, commandParameters);
             executePostStep(modelStepFinishProcessor, ModelCommandStep.FINISH, commandParameters);            
@@ -201,7 +201,7 @@ public class ModelCommandCallable implements Callable<Long> {
     }
     
     @VisibleForTesting
-    ModelCommandParameters validateCommandParameters(List<ModelCommandParameter> commandParameters) {
+    ModelCommandParameters validateAndSetCommandParameters(List<ModelCommandParameter> commandParameters) {
         ModelCommandParameters modelCommandParameters = new ModelCommandParameters();
         
         for (ModelCommandParameter parameter : commandParameters) {
@@ -227,6 +227,8 @@ public class ModelCommandCallable implements Callable<Long> {
             case ModelCommandParameters.EXCLUDE_COLUMNS:
                 modelCommandParameters.setExcludeColumns(splitCommaSeparatedStringToList(parameter.getValue()));
                 break;
+            case ModelCommandParameters.ALGORITHM_PROPERTIES:
+                modelCommandParameters.setAlgorithmProperties(parameter.getValue());
             }
         }
         
