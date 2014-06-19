@@ -5,7 +5,6 @@ import static org.testng.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -89,8 +88,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, 360, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(state, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -130,8 +128,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
                 new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, 240, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(state, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -167,8 +164,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, 120, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
     
@@ -183,8 +179,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         for (String appIdStr : submission.getApplicationIds()) {
             ApplicationId appId = platformTestBase.getApplicationId(appIdStr);
-            FinalApplicationStatus state = platformTestBase.waitForStatus(appId, 240, TimeUnit.SECONDS,
-                    FinalApplicationStatus.SUCCEEDED);
+            FinalApplicationStatus state = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
             assertEquals(state, FinalApplicationStatus.SUCCEEDED);
         }
     }

@@ -7,9 +7,9 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,7 +20,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.api.records.impl.pb.TestApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,7 +57,10 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
 @Transactional
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+    
     private static final Log log = LogFactory.getLog(DataPlatformFunctionalTestNGBase.class);
+    public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED, FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
+    private static final long MAX_MILLIS_TO_WAIT = 1000L*60*20;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -351,79 +353,26 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     }
 
     /**
-     * Submits application and wait state. On default waits 60 seconds.
-     * 
-     * @return Application info for submit
-     * @throws Exception
-     *             if exception occurred
-     * @see ApplicationInfo
-     * @see #submitApplicationAndWaitState(long, TimeUnit,
-     *      YarnApplicationState...)
-     */
-    protected ApplicationInfo submitApplicationAndWait() throws Exception {
-        return submitApplicationAndWait(60, TimeUnit.SECONDS);
-    }
-
-    /**
-     * Submits application and wait state.
-     * 
-     * @param timeout
-     *            the timeout for wait
-     * @param unit
-     *            the unit for timeout
-     * @return Application info for submit
-     * @throws Exception
-     *             if exception occurred
-     * @see ApplicationInfo
-     * @see #submitApplicationAndWaitState(long, TimeUnit,
-     *      YarnApplicationState...)
-     */
-    protected ApplicationInfo submitApplicationAndWait(long timeout, TimeUnit unit) throws Exception {
-        return submitApplicationAndWaitState(timeout, unit, YarnApplicationState.FINISHED, YarnApplicationState.FAILED);
-    }
-
-    /**
      * Submits application and wait state. Returned state is <code>NULL</code>
      * if something failed or final known state after the wait/poll operations.
      * Array of application states can be used to return immediately from wait
      * loop if state is matched.
      * 
-     * @param timeout
-     *            the timeout for wait
-     * @param unit
-     *            the unit for timeout
      * @param applicationStates
      *            the application states to wait
-     * @return Application info for submit
+     * @return Application id for submit
      * @throws Exception
      *             if exception occurred
      * @see ApplicationInfo
      */
-    protected ApplicationInfo submitApplicationAndWaitState(long timeout, TimeUnit unit,
-            YarnApplicationState... applicationStates) throws Exception {
-        Assert.notEmpty(applicationStates, "Need to have at least one state");
-        Assert.notNull(yarnClient, "Yarn client must be set");
-
-        YarnApplicationState state = null;
+    protected ApplicationId submitApplicationAndWaitState(FinalApplicationStatus... applicationStatuses) throws Exception {
+        Assert.notEmpty(applicationStatuses, "Need to have at least one state");
+        
         ApplicationId applicationId = submitApplication();
-        Assert.notNull(applicationId, "Failed to get application id from submit");
+        
+        waitForStatus(applicationId, applicationStatuses);
 
-        long end = System.currentTimeMillis() + unit.toMillis(timeout);
-
-        // break label for inner loop
-        done: do {
-            state = findState(yarnClient, applicationId);
-            if (state == null) {
-                break;
-            }
-            for (YarnApplicationState stateCheck : applicationStates) {
-                if (state.equals(stateCheck)) {
-                    break done;
-                }
-            }
-            Thread.sleep(1000);
-        } while (System.currentTimeMillis() < end);
-        return new ApplicationInfo(state, applicationId);
+        return applicationId;
     }
 
     /**
@@ -437,57 +386,14 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         Assert.notNull(applicationId, "Failed to get application id from submit");
         return applicationId;
     }
-
-    /**
-     * Waits state. Returned state is <code>NULL</code> if something failed or
-     * final known state after the wait/poll operations. Array of application
-     * states can be used to return immediately from wait loop if state is
-     * matched.
-     * 
-     * @param applicationId
-     *            the application id
-     * @param timeout
-     *            the timeout for wait
-     * @param unit
-     *            the unit for timeout
-     * @param applicationStates
-     *            the application states to wait
-     * @return Last known application state or <code>NULL</code> if timeout
-     * @throws Exception
-     *             if exception occurred
-     */
-    public YarnApplicationState waitState(ApplicationId applicationId, long timeout, TimeUnit unit,
-            YarnApplicationState... applicationStates) throws Exception {
-        Assert.notNull(yarnClient, "Yarn client must be set");
-        Assert.notNull(applicationId, "ApplicationId must not be null");
-
-        YarnApplicationState state = null;
-        long end = System.currentTimeMillis() + unit.toMillis(timeout);
-
-        // break label for inner loop
-        done: do {
-            state = findState(yarnClient, applicationId);
-            if (state == null) {
-                break;
-            }
-            for (YarnApplicationState stateCheck : applicationStates) {
-                if (state.equals(stateCheck)) {
-                    break done;
-                }
-            }
-            Thread.sleep(1000);
-        } while (System.currentTimeMillis() < end);
-        return state;
-    }
-
-    public FinalApplicationStatus waitForStatus(ApplicationId applicationId, long timeout, TimeUnit unit,
-            FinalApplicationStatus... applicationStatuses) throws Exception {
+       
+    public FinalApplicationStatus waitForStatus(ApplicationId applicationId, FinalApplicationStatus... applicationStatuses) throws Exception {
         Assert.notNull(yarnClient, "Yarn client must be set");
         Assert.notNull(applicationId, "ApplicationId must not be null");
 
         FinalApplicationStatus status = null;
-        long end = System.currentTimeMillis() + unit.toMillis(timeout);
-
+        long start = System.currentTimeMillis();
+        
         // break label for inner loop
         done: do {
             status = findStatus(yarnClient, applicationId);
@@ -495,12 +401,12 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
                 break;
             }
             for (FinalApplicationStatus statusCheck : applicationStatuses) {
-                if (status.equals(statusCheck)) {
+                if (status.equals(statusCheck) || TERMINAL_STATUS.contains(status)) {
                     break done;
-                }
+                } 
             }
             Thread.sleep(1000);
-        } while (System.currentTimeMillis() < end);
+        } while (System.currentTimeMillis()-start < MAX_MILLIS_TO_WAIT);
         return status;
     }
 
@@ -516,39 +422,12 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         yarnClient.killApplication(applicationId);
     }
 
-    /**
-     * Get the current application state.
-     * 
-     * @param applicationId
-     *            Yarn app application id
-     * @return Current application state or <code>NULL</code> if not found
-     */
-    protected YarnApplicationState getState(ApplicationId applicationId) {
+    protected FinalApplicationStatus getStatus(ApplicationId applicationId) {
         Assert.notNull(yarnClient, "Yarn client must be set");
         Assert.notNull(applicationId, "ApplicationId must not be null");
-        return findState(yarnClient, applicationId);
+        return findStatus(yarnClient, applicationId);
     }
-
-    /**
-     * Finds the current application state.
-     * 
-     * @param client
-     *            the Yarn client
-     * @param applicationId
-     *            Yarn app application id
-     * @return Current application state or <code>NULL</code> if not found
-     */
-    private YarnApplicationState findState(YarnClient client, ApplicationId applicationId) {
-        YarnApplicationState state = null;
-        for (ApplicationReport report : client.listApplications()) {
-            if (report.getApplicationId().toString().equals(applicationId.toString())) {
-                state = report.getYarnApplicationState();
-                break;
-            }
-        }
-        return state;
-    }
-
+    
     private FinalApplicationStatus findStatus(YarnClient client, ApplicationId applicationId) {
         FinalApplicationStatus status = null;
         for (ApplicationReport report : client.listApplications()) {

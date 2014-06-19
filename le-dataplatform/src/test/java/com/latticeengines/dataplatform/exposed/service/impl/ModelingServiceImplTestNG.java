@@ -11,13 +11,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,7 +126,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
         ApplicationId appId = modelingService.createSamples(samplingConfig);
-        FinalApplicationStatus status = waitForStatus(appId, 240, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -147,7 +145,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         excludeList.add("Target_LatitudeOptiplex_Retention_PCA_PPA_Customer");
         config.setExcludeColumnList(excludeList);
         ApplicationId appId = modelingService.profileData(config);
-        FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -156,10 +154,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         List<ApplicationId> appIds = modelingService.submitModel(model);
 
         for (ApplicationId appId : appIds) {
-            YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
-            assertNotNull(state);
-            FinalApplicationStatus status = waitForStatus(appId, 480, TimeUnit.SECONDS,
-                    FinalApplicationStatus.SUCCEEDED);
+            FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
             assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
             JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
@@ -202,10 +197,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         }
 
         for (ApplicationId appId : appIds) {
-            YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
-            assertNotNull(state);
-            FinalApplicationStatus status = waitForStatus(appId, 300, TimeUnit.SECONDS,
-                    FinalApplicationStatus.SUCCEEDED);
+            FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
             assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
             JobStatus jobStatus = modelingService.getJobStatus(appId.toString());
@@ -237,15 +229,11 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         assertEquals(appIds.size(), 3);
 
         // First job to complete  
-        YarnApplicationState state = waitState(appIds.get(0), 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
-        assertNotNull(state);
-        FinalApplicationStatus status = waitForStatus(appIds.get(0), 300, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appIds.get(0), FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         // Second job should have been killed since we throttled
-        status = waitForStatus(appIds.get(1), 10, TimeUnit.SECONDS,
-                FinalApplicationStatus.KILLED);
+        status = waitForStatus(appIds.get(1), FinalApplicationStatus.KILLED);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -264,10 +252,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         // Only one job would be submitted since new jobs won't even come in
         assertEquals(appIds.size(), 1);
         
-        YarnApplicationState state = waitState(appIds.get(0), 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
-        assertNotNull(state);
-        FinalApplicationStatus status = waitForStatus(appIds.get(0), 120, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appIds.get(0), FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 

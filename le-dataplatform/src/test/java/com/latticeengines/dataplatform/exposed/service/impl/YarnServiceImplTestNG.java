@@ -4,7 +4,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -60,8 +59,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         AppInfo appInfo = yarnService.getApplication(applicationId.toString());
         assertNotNull(appInfo);
 
-        FinalApplicationStatus status = waitForStatus(applicationId, 120, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 

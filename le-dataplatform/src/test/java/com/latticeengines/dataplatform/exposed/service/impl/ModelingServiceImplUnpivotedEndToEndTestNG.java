@@ -5,13 +5,11 @@ import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -125,7 +123,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     public void load() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
         ApplicationId appId = modelingService.loadData(loadConfig);
-        FinalApplicationStatus status = waitForStatus(appId, 360, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -149,7 +147,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         samplingConfig.setCustomer(model.getCustomer());
         samplingConfig.setTable(model.getTable());
         ApplicationId appId = modelingService.createSamples(samplingConfig);
-        FinalApplicationStatus status = waitForStatus(appId, 240, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -163,7 +161,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
         config.setSamplePrefix("all");
         ApplicationId appId = modelingService.profileData(config);
-        FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -175,10 +173,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         List<ApplicationId> appIds = modelingService.submitModel(model);
 
         for (ApplicationId appId : appIds) {
-            YarnApplicationState state = waitState(appId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
-            assertNotNull(state);
-            FinalApplicationStatus status = waitForStatus(appId, 300, TimeUnit.SECONDS,
-                    FinalApplicationStatus.SUCCEEDED);
+            FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
             assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
             JobStatus jobStatus = modelingService.getJobStatus(appId.toString());

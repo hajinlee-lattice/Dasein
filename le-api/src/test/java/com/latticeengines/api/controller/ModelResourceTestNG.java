@@ -9,14 +9,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
@@ -132,9 +130,8 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(appId, 120, TimeUnit.SECONDS,
-                YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         validateAppStatus(appId);
     }
 
@@ -149,8 +146,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, 120, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -195,9 +191,8 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId metadataLoadAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        YarnApplicationState state = platformTestBase.waitState(metadataLoadAppId, 120, TimeUnit.SECONDS,
-                YarnApplicationState.FINISHED);
-        assertEquals(state, YarnApplicationState.FINISHED);
+        FinalApplicationStatus status = waitForStatus(metadataLoadAppId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         validateAppStatus(metadataLoadAppId);
     }
 

@@ -3,7 +3,6 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 import static org.testng.Assert.assertEquals;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,27 +46,24 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
 
         List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.LOAD_DATA,
                 commandParameters);
-        waitForSuccess(1 * NUM_ALGORITHMS, appIds, 180, ModelCommandStep.LOAD_DATA);
+        waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.LOAD_DATA);
 
         appIds = modelStepYarnProcessor
                 .executeYarnStep("Nutanix", ModelCommandStep.GENERATE_SAMPLES, commandParameters);
-        waitForSuccess(1 * NUM_ALGORITHMS, appIds, 180, ModelCommandStep.GENERATE_SAMPLES);
+        waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.GENERATE_SAMPLES);
 
         appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.PROFILE_DATA, commandParameters);
-        waitForSuccess(1 * NUM_ALGORITHMS, appIds, 180, ModelCommandStep.PROFILE_DATA);
+        waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.PROFILE_DATA);
 
         appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.SUBMIT_MODELS, commandParameters);
-        waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, 360,
-                ModelCommandStep.SUBMIT_MODELS);
+        waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
     }
 
-    private void waitForSuccess(int expectedNumAppIds, List<ApplicationId> appIds, int secondsToWait,
-            ModelCommandStep step) throws Exception {
+    private void waitForSuccess(int expectedNumAppIds, List<ApplicationId> appIds, ModelCommandStep step) throws Exception {
         log.info(step + ": Waiting for these appIds to succeed: " + Joiner.on(",").join(appIds));
         assertEquals(expectedNumAppIds, appIds.size());
         for (ApplicationId appId : appIds) {
-            FinalApplicationStatus status = waitForStatus(appId, secondsToWait, TimeUnit.SECONDS,
-                    FinalApplicationStatus.SUCCEEDED);
+            FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
             assertEquals(status, FinalApplicationStatus.SUCCEEDED);
             log.info(step + ": appId succeeded: " + appId.toString());
         }

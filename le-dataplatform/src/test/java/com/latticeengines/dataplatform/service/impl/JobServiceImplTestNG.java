@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -21,7 +20,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
@@ -152,12 +150,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
-        YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
-        assertNotNull(state);
+        FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
+        assertEquals(status, FinalApplicationStatus.UNDEFINED);
         jobService.killJob(applicationId);
-        state = getState(applicationId);
-        assertNotNull(state);
-        assertTrue(state.equals(YarnApplicationState.KILLED));
+        status = getStatus(applicationId);
+        assertEquals(status, FinalApplicationStatus.KILLED);        
     }
 
     @Test(groups = "functional", enabled = true)
@@ -168,12 +165,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
-        YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
-        assertNotNull(state);
+        FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
+        assertEquals(status, FinalApplicationStatus.UNDEFINED);        
         jobService.killJob(applicationId);
-        state = getState(applicationId);
-        assertNotNull(state);
-        assertTrue(state.equals(YarnApplicationState.KILLED));
+        status = getStatus(applicationId);
+        assertNotNull(status);
+        assertTrue(status.equals(FinalApplicationStatus.KILLED));
+
 
         ApplicationReport app = jobService.getJobReportById(applicationId);
 
@@ -183,7 +181,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
 
-        state = waitState(applicationId, 10, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+        status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
+        assertEquals(status, FinalApplicationStatus.UNDEFINED);
         reports = jobService.getJobReportByUser(app.getUser());
         assertTrue(reports.size() > numJobs);
         jobService.killJob(applicationId);
@@ -196,7 +195,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
-        waitState(applicationId, 10, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
+        FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
+        assertEquals(status, FinalApplicationStatus.UNDEFINED);
         jobService.killJob(applicationId);
 
         ApplicationReport app = jobService.getJobReportById(applicationId);
@@ -227,12 +227,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         ApplicationId applicationId = jobService
                 .submitYarnJob("pythonClient", appMasterProperties, containerProperties);
-        YarnApplicationState state = waitState(applicationId, 30, TimeUnit.SECONDS, YarnApplicationState.RUNNING);
-        assertNotNull(state);
-        ApplicationReport app = jobService.getJobReportById(applicationId);
-        assertNotNull(app);
-        FinalApplicationStatus status = waitForStatus(applicationId, 120, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         NumberFormat appIdFormat = getAppIdFormat();
@@ -257,12 +252,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
         properties.setProperty(EventDataSamplingProperty.CUSTOMER.name(), "Dell");
         ApplicationId applicationId = jobService.submitMRJob("samplingJob", properties);
-        YarnApplicationState state = waitState(applicationId, 240, TimeUnit.SECONDS, YarnApplicationState.FINISHED);
-
-        state = getState(applicationId);
-        assertNotNull(state);
-        FinalApplicationStatus status = waitForStatus(applicationId, 300, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, outputDir, new HdfsFilenameFilter() {
@@ -292,7 +282,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0", "Dell",
                 Arrays.<String> asList(new String[] { "ID" }));
-        FinalApplicationStatus status = waitForStatus(appId, 240, TimeUnit.SECONDS, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, "/tmp/import", new HdfsFilenameFilter() {
 

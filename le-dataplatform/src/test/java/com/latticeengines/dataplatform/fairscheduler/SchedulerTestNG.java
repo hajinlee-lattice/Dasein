@@ -6,13 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
@@ -291,15 +290,14 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         while (!jobStatusToCollect.isEmpty()) {
             ApplicationId appId = jobStatusToCollect.get(0);
             JobStatus status = jobService.getJobStatus(appId.toString());
-            YarnApplicationState state = waitState(getApplicationId(status.getId()), 30, TimeUnit.SECONDS,
-                    YarnApplicationState.FAILED, YarnApplicationState.FINISHED);
+            FinalApplicationStatus appStatus = waitForStatus(getApplicationId(status.getId()), FinalApplicationStatus.SUCCEEDED, FinalApplicationStatus.FAILED);            
             System.out.println("                 =========================================ScedhulerTestNG.waitForAllJobsToFinish()");            
-            if (state == null) {
+            if (appStatus == null) {
                 System.out.println("ERROR: Invalid state detected");
                 jobStatusToCollect.remove(appId);
                 continue;
             }
-            if (state.equals(YarnApplicationState.FAILED) || state.equals(YarnApplicationState.FINISHED)) {
+            if (TERMINAL_STATUS.contains(appStatus)) {            
                 jobStatusToCollect.remove(appId);
                 jobStatus.put(appId, jobService.getJobReportById(appId));
             }

@@ -6,7 +6,6 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -111,8 +110,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -166,8 +164,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
                 samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
@@ -182,8 +179,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, 120, TimeUnit.SECONDS,
-                FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
     
@@ -195,8 +191,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         for (String appIdStr : submission.getApplicationIds()) {
             ApplicationId appId = platformTestBase.getApplicationId(appIdStr);
-            FinalApplicationStatus status = waitForStatus(appId, 120, TimeUnit.SECONDS,
-                    FinalApplicationStatus.SUCCEEDED);
+            FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
             assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         }
     }
