@@ -18,9 +18,11 @@ def debugWrite(logString):
     logger.info(logString)
 
 def decodeDataValue(serializedValueAndType):
-    serializedValue = serializedValueAndType.partition('|')[2]
+    serializedType, sep, serializedValue = serializedValueAndType.partition('|')
     if len(serializedValue) > 0:
         serializedValue = serializedValue[1:-1]
+    elif serializedType == "String":
+        serializedValue = None
     else:
         serializedValue = np.NaN
         

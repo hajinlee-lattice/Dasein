@@ -1,14 +1,13 @@
 import logging
 import os
 import pwd
-import sys
 import string
+import sys
 from urlparse import urlparse
 
 from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
 from leframework.webhdfs import WebHDFS
-
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -42,6 +41,9 @@ class Launcher(object):
         self.__validateSchemaParam(schema, "test_data")
         self.__validateSchemaParam(schema, "python_script")
         self.__validateSchemaParam(schema, "model_data_dir")
+    
+    def getParser(self):
+        return self.parser
     
     def execute(self, writeToHdfs):
         parser = self.parser
