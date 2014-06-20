@@ -3,9 +3,8 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
-import java.sql.Timestamp;
+import java.util.Calendar;
 
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,16 +15,16 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 @TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true)
-@Transactional  
+@Transactional
 public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
-    
+
     private ThrottleConfiguration config;
-    
+
     @Override
     protected boolean doYarnClusterSetup() {
         return false;
     }
-    
+
     @BeforeClass(groups = "functional")
     public void setup() {
         config = new ThrottleConfiguration();
@@ -36,10 +35,10 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
 
     @Transactional
     @Test(groups = "functional")
-    public void testPersist() {    	
-    	throttleConfigurationEntityMgr.create(config);
+    public void testPersist() {
+        throttleConfigurationEntityMgr.create(config);
     }
-    
+
     @Transactional
     @Test(groups = "functional", dependsOnMethods = { "testPersist" })
     public void testRetrieval() {
@@ -47,13 +46,17 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
         newConfig = throttleConfigurationEntityMgr.findByKey(newConfig); // /
                                                                          // getByKey(newConfig);
 
-        Timestamp ts1 = config.getTimestamp();
-        Timestamp newTs = newConfig.getTimestamp();
+        newConfig.getTimestamp();
+        Calendar configTime = Calendar.getInstance();
+        Calendar newConfigTime = Calendar.getInstance();
+        configTime.setTimeInMillis(config.getTimestamp().getTime());
+        newConfigTime.setTimeInMillis(newConfig.getTimestamp().getTime());
         // workaround for nano-second discrepency
-        boolean assertion = (ts1.getYear() == newTs.getYear()) && (ts1.getMonth() == newTs.getMonth())
-                && (ts1.getDay() == newTs.getDay()) && (ts1.getHours() == newTs.getHours())
-                && (ts1.getMinutes() == newTs.getMinutes());
-
+        boolean assertion = (configTime.get(Calendar.YEAR) == newConfigTime.get(Calendar.YEAR))
+                && (configTime.get(Calendar.MONTH) == newConfigTime.get(Calendar.MONTH))
+                && (configTime.get(Calendar.DAY_OF_MONTH) == newConfigTime.get(Calendar.DAY_OF_MONTH))
+                && (configTime.get(Calendar.HOUR) == newConfigTime.get(Calendar.HOUR))
+                && (configTime.get(Calendar.MINUTE) == newConfigTime.get(Calendar.MINUTE));
         assertEquals(assertion, true);
         assertEquals(newConfig.getJobRankCutoff(), config.getJobRankCutoff());
         assertEquals(newConfig.isEnabled(), config.isEnabled());
@@ -76,24 +79,13 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         ThrottleConfiguration newConfig = new ThrottleConfiguration(config.getPid());
-        newConfig = throttleConfigurationEntityMgr.findByKey(newConfig); // /getByKey(newConfig);
+        newConfig = throttleConfigurationEntityMgr.findByKey(newConfig); 
 
         assertNotNull(newConfig.getTimestamp());
         throttleConfigurationEntityMgr.delete(newConfig);
-        // should be deleted
         newConfig = null;
-        newConfig = throttleConfigurationEntityMgr.findByKey(config); // /getByKey(config);
+        newConfig = throttleConfigurationEntityMgr.findByKey(config); 
         assertNull(newConfig);
-    }
-    
-    // TODO REMOVE
-    public void postThenSave() {
-        //throttleConfigurationEntityMgr.post(config);
-        ThrottleConfiguration retrievedConfig = throttleConfigurationEntityMgr.findByKey(new ThrottleConfiguration(config.getPid()));  ///getById(config.getPid());
-        assertEquals(Integer.valueOf(5), retrievedConfig.getJobRankCutoff());
-        assertTrue(retrievedConfig.isImmediate());
-        assertEquals(config.getTimestamp(), retrievedConfig.getTimestamp());
-        //throttleConfigurationEntityMgr.save();
     }
 
 }
