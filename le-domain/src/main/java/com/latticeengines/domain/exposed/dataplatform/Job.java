@@ -77,12 +77,14 @@ public class Job implements HasPid, HasId<String> {
         return YarnUtils.getApplicationIdFromString(id);
     }
 
+    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "FK_MODEL_ID")
     public Model getModel() {
         return model;
     }
 
+    @JsonIgnore
     public void setModel(Model model) {
         this.model = model;
     }
