@@ -77,19 +77,17 @@ public class Job implements HasPid, HasId<String> {
         return YarnUtils.getApplicationIdFromString(id);
     }
 
-    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "FK_MODEL_ID")
     public Model getModel() {
         return model;
     }
 
-    @JsonIgnore
     public void setModel(Model model) {
         this.model = model;
     }
 
-    @JsonIgnore
+    @JsonIgnore  /** string representation is ignored; json uses getAppMasterPropertiesObject() **/
     @Column(name = "APPMASTER_PROPERTIES", length = 65535)
     public String getAppMasterProperties() {
         String propstr = "";
@@ -105,7 +103,7 @@ public class Job implements HasPid, HasId<String> {
 
         return propstr;       
     }    
-    @JsonIgnore
+    @JsonIgnore /** string representation is ignored; json uses setAppMasterPropertiesObject() **/
     /** data store has string / varchar as persistence type **/
     public void setAppMasterProperties(String appMasterPropertiesStr) throws IOException {
         this.appMasterProperties = new Properties();
@@ -124,7 +122,7 @@ public class Job implements HasPid, HasId<String> {
         }
     }
       
-    @JsonIgnore
+    @JsonIgnore /** string representation is ignored; json uses getContainerPropertiesObject() **/
     @Column(name = "CONTAINER_PROPERTIES", length = 65535)
     public String getContainerProperties() {
         String propstr = "";
@@ -140,7 +138,7 @@ public class Job implements HasPid, HasId<String> {
 
         return propstr;
     }
-    @JsonIgnore
+    @JsonIgnore /** string representation is ignored; json uses setContainerPropertiesObject() **/
     public void setContainerProperties(String containerPropertiesStr) throws IOException {
         this.containerProperties = new Properties();
         if (containerPropertiesStr != null && !containerPropertiesStr.equalsIgnoreCase("")) {
@@ -192,10 +190,6 @@ public class Job implements HasPid, HasId<String> {
     public void setChildJobIds(String listOfIds) {
         // convert csv string to list
         this.childJobIds = StringTokenUtils.stringToList(listOfIds);
-    }
-
-    public void setChildJobIdList(List<String> ids) {
-        this.childJobIds = ids;
     }
 
     @Transient
