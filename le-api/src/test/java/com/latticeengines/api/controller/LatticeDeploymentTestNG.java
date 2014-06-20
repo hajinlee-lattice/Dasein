@@ -2,10 +2,11 @@ package com.latticeengines.api.controller;
 
 import static org.testng.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -18,6 +19,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.MetadataService;
+import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
@@ -32,6 +34,8 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 
 public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
+	private static final Log log = LogFactory.getLog(LatticeDeploymentTestNG.class);
+	
     @Autowired
     private Configuration yarnConfiguration;
     
@@ -84,6 +88,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
     
     @Test(groups = "deployment", enabled = true)
     public void load() throws Exception {
+    	log.info("               info..............."+this.getClass().getSimpleName()+"load");
         LoadConfiguration config = getLoadConfig();
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
@@ -106,6 +111,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = true)
     public void createSamples() throws Exception {
+    	log.info("               info..............."+this.getClass().getSimpleName()+"createSamples");
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
         SamplingElement s0 = new SamplingElement();
@@ -134,33 +140,13 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
     public void profile() throws Exception {
+    	log.info("               info..............."+this.getClass().getSimpleName()+"profile");
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
         config.setTable(model.getTable());
         config.setMetadataTable(model.getMetadataTable());
-        List<String> excludeList = new ArrayList<>();
-        
-        excludeList.add("P1_Event");
-        excludeList.add("P1_Target");
-        excludeList.add("P1_TargetTraining");
-        excludeList.add("PeriodID");
-        excludeList.add("CustomerID");
-        excludeList.add("AwardYear");
-        excludeList.add("FundingFiscalQuarter");
-        excludeList.add("FundingFiscalYear");
-        excludeList.add("BusinessAssets");
-        excludeList.add("BusinessEntityType");
-        excludeList.add("BusinessIndustrySector");
-        excludeList.add("RetirementAssetsYOY");
-        excludeList.add("RetirementAssetsEOY");
-        excludeList.add("TotalParticipantsSOY");
-        excludeList.add("BusinessType");
-        excludeList.add("LeadID");
-        excludeList.add("Company");
-        excludeList.add("Domain");
-        excludeList.add("Email");
-        excludeList.add("LeadSource");
-        config.setExcludeColumnList(excludeList);
+        config.setSamplePrefix("all");
+        config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -170,6 +156,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
     
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
     public void submit() throws Exception {
+    	log.info("               info..............."+this.getClass().getSimpleName()+"submit");
         Pair<String, List<String>> targetAndFeatures = getTargetAndFeatures();
         model.setFeaturesList(targetAndFeatures.getValue());
         model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
