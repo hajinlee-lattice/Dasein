@@ -41,45 +41,48 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
     }
     
     @Transactional
-    @Test(groups = "functional", dependsOnMethods={"testPersist"})
+    @Test(groups = "functional", dependsOnMethods = { "testPersist" })
     public void testRetrieval() {
-    	ThrottleConfiguration newConfig = new ThrottleConfiguration(config.getPid());    	
-    	newConfig = throttleConfigurationEntityMgr.findByKey(newConfig);  ///  getByKey(newConfig);
-    	
-    	Timestamp ts1 = config.getTimestamp();
-    	Timestamp newTs = newConfig.getTimestamp();
-    	// workaround for nano-second discrepency
-    	boolean assertion = (ts1.getYear()==newTs.getYear()) && (ts1.getMonth()==newTs.getMonth()) && (ts1.getDay()==newTs.getDay()) && (ts1.getHours()==newTs.getHours()) && (ts1.getMinutes()==newTs.getMinutes());                     
-    	
-    	assertEquals(assertion, true);
-    	assertEquals(newConfig.getJobRankCutoff(), config.getJobRankCutoff());    	
-    	assertEquals(newConfig.isEnabled(), config.isEnabled());
-    	assertEquals(newConfig.isImmediate(), config.isImmediate());
+        ThrottleConfiguration newConfig = new ThrottleConfiguration(config.getPid());
+        newConfig = throttleConfigurationEntityMgr.findByKey(newConfig); // /
+                                                                         // getByKey(newConfig);
+
+        Timestamp ts1 = config.getTimestamp();
+        Timestamp newTs = newConfig.getTimestamp();
+        // workaround for nano-second discrepency
+        boolean assertion = (ts1.getYear() == newTs.getYear()) && (ts1.getMonth() == newTs.getMonth())
+                && (ts1.getDay() == newTs.getDay()) && (ts1.getHours() == newTs.getHours())
+                && (ts1.getMinutes() == newTs.getMinutes());
+
+        assertEquals(assertion, true);
+        assertEquals(newConfig.getJobRankCutoff(), config.getJobRankCutoff());
+        assertEquals(newConfig.isEnabled(), config.isEnabled());
+        assertEquals(newConfig.isImmediate(), config.isImmediate());
     }
 
     @Transactional
-    @Test(groups = "functional", dependsOnMethods={"testPersist"})
-    public void testUpdate() {    	
+    @Test(groups = "functional", dependsOnMethods = { "testPersist" })
+    public void testUpdate() {
         assertNotNull(config.getPid());
-    	config.setEnabled(true);
-    	config.setJobRankCutoff(10);
-    	config.setImmediate(false);
-    	throttleConfigurationEntityMgr.update(config);
-    	
-    	testRetrieval();
+        config.setEnabled(true);
+        config.setJobRankCutoff(10);
+        config.setImmediate(false);
+        throttleConfigurationEntityMgr.update(config);
+
+        testRetrieval();
     }
-    
+
     @Transactional
-    @Test(groups = "functional", dependsOnMethods={"testUpdate"})
+    @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
-    	ThrottleConfiguration newConfig = new ThrottleConfiguration(config.getPid());    	
-    	newConfig = throttleConfigurationEntityMgr.findByKey(newConfig);  ///getByKey(newConfig);
-      
-    	assertNotNull(newConfig.getTimestamp());
-        throttleConfigurationEntityMgr.delete(newConfig);    	
-    	// should be deleted
+        ThrottleConfiguration newConfig = new ThrottleConfiguration(config.getPid());
+        newConfig = throttleConfigurationEntityMgr.findByKey(newConfig); // /getByKey(newConfig);
+
+        assertNotNull(newConfig.getTimestamp());
+        throttleConfigurationEntityMgr.delete(newConfig);
+        // should be deleted
         newConfig = null;
-        newConfig = throttleConfigurationEntityMgr.findByKey(config);  ///getByKey(config);
+        newConfig = throttleConfigurationEntityMgr.findByKey(config); // /getByKey(config);
         assertNull(newConfig);
     }
     
