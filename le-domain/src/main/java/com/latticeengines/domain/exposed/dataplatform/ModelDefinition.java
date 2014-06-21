@@ -63,6 +63,7 @@ public class ModelDefinition implements HasName, HasPid {
         return algorithms;
     }
 
+    @JsonIgnore
     public void setAlgorithms(List<Algorithm> algos) {
         this.algorithms = algos;
     }
