@@ -66,7 +66,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
                 List<Job> ownedJobs = model.getJobs();
                 for (int i = 1; i <= ownedJobs.size(); i++) {
                     if (i >= cutoffIndex) {
-                        log.info("Adding job " + ownedJobs.get(i - 1).getId() + " for model " + model.getId());
+                        log.debug("Adding job " + ownedJobs.get(i - 1).getId() + " for model " + model.getId());
                         jobs.add(ownedJobs.get(i - 1));
                     }
                 }
