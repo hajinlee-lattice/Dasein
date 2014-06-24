@@ -28,7 +28,6 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        /// modelEntityMgr.deleteStoreFile();
         Job job1 = new Job();
         job1.setId("application_12345_00001");
         job1.setClient("CLIENT 1"); 
@@ -47,10 +46,9 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         decisionTreeAlgorithm.setSampleName("s1");
         
         ModelDefinition modelDef = new ModelDefinition();
-        modelDef.setName("Model Definition For Demo");
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
-                logisticRegressionAlgorithm }));
-        
+        modelDef.setName("Model Definition For Demo"); 
+        modelDef.addAlgorithm(logisticRegressionAlgorithm);
+        modelDef.addAlgorithm(decisionTreeAlgorithm);
         // 
         // in the application, it is assumed that the model definition is defined in the metadata db
         // also, modelDef 'name' should be unique
@@ -76,7 +74,6 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(model.getKeyCols(), retrievedModel.getKeyCols());
         assertEquals(model.getMetadataHdfsPath(), retrievedModel.getMetadataHdfsPath());
         assertEquals(model.getMetadataTable(), retrievedModel.getMetadataTable());
-        // assertEquals(model.getModelDefinition(), retr
         assertEquals(model.getModelHdfsDir(), retrievedModel.getModelHdfsDir());
         assertEquals(model.getName(), retrievedModel.getName());
         assertEquals(model.getSampleHdfsPath(), retrievedModel.getSampleHdfsPath());
@@ -97,7 +94,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void testRetrieval() {
         Model retrievedModel = new Model();
         retrievedModel.setPid(model.getPid());
-        retrievedModel = modelEntityMgr.findByKey(retrievedModel);  ///getByKey(retrievedModel);
+        retrievedModel = modelEntityMgr.findByKey(retrievedModel);   
         // assert for correctness
         assertModelsEqual(model, retrievedModel);
         assertEquals(2, model.getJobs().size());
@@ -120,16 +117,5 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         modelEntityMgr.delete(model);
     }
 
-    /*
-     * @Test(groups = "functional") public void postThenSave() {
-     * modelEntityMgr.post(model); verifyRetrievedModel(model.getId());
-     * modelEntityMgr.save(); }
-     * 
-     * @Test(groups = "functional", dependsOnMethods = { "postThenSave" })
-     * public void clear() { modelEntityMgr.clear();
-     * assertNull(modelEntityMgr.getById(model.getId())); }
-     * 
-     * @Test(groups = "functional", dependsOnMethods = { "clear" }) public void
-     * load() { modelEntityMgr.load(); verifyRetrievedModel(model.getId()); }
-     */
+   
 }
