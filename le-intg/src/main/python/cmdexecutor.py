@@ -7,7 +7,7 @@ import sys
 app = Flask(__name__)
 
 @app.route('/')
-def index(cmd):
+def index():
     return "This is REST Command Line Executor v1.0"
 
 @app.route('/cmd/<cmd>', methods = ['POST', 'GET'])
