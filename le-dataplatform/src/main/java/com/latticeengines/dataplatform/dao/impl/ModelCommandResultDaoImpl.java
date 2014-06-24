@@ -11,17 +11,9 @@ import com.latticeengines.dataplatform.dao.ModelCommandResultDao;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
 
-@Component("modelCommandResultDao")
 public class ModelCommandResultDaoImpl extends BaseDaoImpl<ModelCommandResult> implements ModelCommandResultDao {
 
-    @Autowired
-    protected SessionFactory sessionFactoryDlOrchestration;
-
-    @Override
-    protected SessionFactory getSessionFactory() {        
-        return sessionFactoryDlOrchestration;
-    }
-    
+        
     public ModelCommandResultDaoImpl() {
         super();
     }

@@ -11,16 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.latticeengines.dataplatform.dao.ModelDefinitionDao;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 
-@Repository("modelDefinitionDao")
 public class ModelDefinitionDaoImpl extends BaseDaoImpl<ModelDefinition> implements ModelDefinitionDao {
-
-    @Autowired
-    protected SessionFactory sessionFactory;
-
-    @Override
-    protected SessionFactory getSessionFactory() {        
-        return sessionFactory;
-    }
 
     
     public ModelDefinitionDaoImpl() {
@@ -41,7 +32,7 @@ public class ModelDefinitionDaoImpl extends BaseDaoImpl<ModelDefinition> impleme
         query.setString("aModelDefName", name);
         
         ModelDefinition modelDef = null;
-        List list = query.list(); // uniqueResult();
+        List list = query.list(); 
         if (!list.isEmpty()) {
             modelDef = (ModelDefinition) list.get(0);
         }        

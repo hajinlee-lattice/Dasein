@@ -17,17 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.dataplatform.dao.JobDao;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 
-@Repository("jobDao")
 public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
 
-    @Autowired
-    protected SessionFactory sessionFactory;
-
-    @Override
-    protected SessionFactory getSessionFactory() {        
-        return sessionFactory;
-    }
-    
+     
     public JobDaoImpl() {
         super();
     }

@@ -13,16 +13,7 @@ import com.latticeengines.dataplatform.dao.ModelCommandDao;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 
-@Component("modelCommandDao")
 public class ModelCommandDaoImpl extends BaseDaoImpl<ModelCommand> implements ModelCommandDao {
-
-    @Autowired
-    protected SessionFactory sessionFactoryDlOrchestration;
-
-    @Override
-    protected SessionFactory getSessionFactory() {        
-        return sessionFactoryDlOrchestration;
-    }
     
     public ModelCommandDaoImpl() {
         super();

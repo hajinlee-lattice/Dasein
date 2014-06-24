@@ -4,26 +4,15 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.dao.ModelCommandStateDao;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
-@Component("modelCommandStateDao")
 public class ModelCommandStateDaoImpl extends BaseDaoImpl<ModelCommandState> implements ModelCommandStateDao {
 
-    @Autowired
-    protected SessionFactory sessionFactoryDlOrchestration;
-
-    @Override
-    protected SessionFactory getSessionFactory() {        
-        return sessionFactoryDlOrchestration;
-    }
     
     public ModelCommandStateDaoImpl() {
         super();

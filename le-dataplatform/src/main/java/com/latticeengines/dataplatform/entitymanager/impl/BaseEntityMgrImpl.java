@@ -46,7 +46,7 @@ public abstract class BaseEntityMgrImpl<T extends HasPid> implements BaseEntityM
         getDao().deleteAll();
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED, readOnly=true)
     @Override
     public boolean containInSession(T entity) {
         return getDao().containInSession(entity);
@@ -54,7 +54,7 @@ public abstract class BaseEntityMgrImpl<T extends HasPid> implements BaseEntityM
 
     /**
      * get object by key. entity.getPid() must NOT be empty.
-     */
+     */    
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly=true)
     public T findByKey(T entity) {

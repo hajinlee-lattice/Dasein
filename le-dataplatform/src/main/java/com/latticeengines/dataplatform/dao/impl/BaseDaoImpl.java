@@ -13,13 +13,22 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Repository
 public abstract class BaseDaoImpl<T extends HasPid> implements BaseDao<T> {
 
+    protected SessionFactory sessionFactory;
+
+    protected SessionFactory getSessionFactory() {
+        return this.sessionFactory;
+    }
+
+    public void setSessionFactory(SessionFactory factory) {
+        this.sessionFactory = factory;
+    }
+
+    
     /**
      * Class presentation of the entity object that the subclass Dao is working
      * with.
      */
     protected abstract Class<T> getEntityClass();
-
-    protected abstract SessionFactory getSessionFactory();
 
     BaseDaoImpl() {
     }
