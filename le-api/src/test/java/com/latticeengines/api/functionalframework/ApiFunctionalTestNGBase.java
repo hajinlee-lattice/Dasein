@@ -2,6 +2,9 @@ package com.latticeengines.api.functionalframework;
 
 import java.io.IOException;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,16 +17,21 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.api.exposed.exception.ModelingServiceRestException;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
+
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-api-context.xml" })
 public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
 
+    private static final Log log = LogFactory.getLog(ApiFunctionalTestNGBase.class);
+
     protected RestTemplate restTemplate = new RestTemplate();
+    protected RestTemplate ignoreErrorRestTemplate = new RestTemplate();
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -48,20 +56,40 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
+        restTemplate.setErrorHandler(new ThrowExceptionResponseErrorHandler());
+        ignoreErrorRestTemplate.setErrorHandler(new IgnoreErrorResponseErrorHandler());
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
 
         platformTestBase.setYarnClient(defaultYarnClient);
         platformTestBase.setJobEntityMgr(jobEntityMgr);
         platformTestBase.setModelEntityMgr(modelEntityMgr);
-        platformTestBase.setThrottleConfigurationEntityMgr(throttleConfigurationEntityMgr);
-        restTemplate.setErrorHandler(new DefaultResponseErrorHandler());
+        platformTestBase.setThrottleConfigurationEntityMgr(throttleConfigurationEntityMgr);        
         if (!doYarnClusterSetup()) {
             return;
         }
         platformTestBase.setupRunEnvironment();
     }
+    
+    static class ThrowExceptionResponseErrorHandler implements ResponseErrorHandler {
 
-    static class DefaultResponseErrorHandler implements ResponseErrorHandler {
+        @Override
+        public boolean hasError(ClientHttpResponse response) throws IOException {
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public void handleError(ClientHttpResponse response) throws IOException {
+            String responseBody = IOUtils.toString(response.getBody());
+            log.info("Error response from rest call: " + response.getStatusCode() + " " + response.getStatusText() + " " + responseBody);                        
+
+            throw new ModelingServiceRestException(responseBody);
+        }
+    }
+
+    static class IgnoreErrorResponseErrorHandler implements ResponseErrorHandler {
 
         @Override
         public boolean hasError(ClientHttpResponse response) throws IOException {
@@ -74,7 +102,6 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
         @Override
         public void handleError(ClientHttpResponse response) throws IOException {
         }
-
     }
-
+    
 }

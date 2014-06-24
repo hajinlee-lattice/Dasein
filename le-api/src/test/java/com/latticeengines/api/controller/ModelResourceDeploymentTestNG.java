@@ -118,7 +118,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = { "load" })
     public void loadAgain() throws Exception {
         LoadConfiguration config = getLoadConfig();
-        Map<String, String> errorResult = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load",
+        Map<String, String> errorResult = ignoreErrorRestTemplate.postForObject("http://" + restEndpointHost + "/rest/load",
                 config, HashMap.class, new Object[] {});
         assertEquals(errorResult.get("errorCode"), "LEDP_00002");
         assertTrue(errorResult.get("errorMsg").contains("FileAlreadyExistsException"));
