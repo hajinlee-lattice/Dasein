@@ -1,4 +1,5 @@
 from StringIO import StringIO
+import os
 from unittest import TestCase
 
 import cmdexecutor
@@ -6,9 +7,12 @@ import cmdexecutor
 
 class CmdExecutorTest(TestCase):
     
+    
     def setUp(self):
         self.client = cmdexecutor.app.test_client()
         cmdexecutor.app.config['UPLOAD_FOLDER'] = "/tmp"
+        if os.path.isfile("/tmp/helloworld.txt"):
+            os.remove("/tmp/helloworld.txt")
         
     def testIndex(self):
         rv = self.client.get("/")
@@ -22,5 +26,6 @@ class CmdExecutorTest(TestCase):
         
     def testUpload(self):
         rv = self.client.post("/upload", data = { "file": (StringIO("my file contents\n"), "helloworld.txt")})
+        self.assertTrue(os.path.isfile("/tmp/helloworld.txt"))
         self.assertEquals(rv._status_code, 200)
         
