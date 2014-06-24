@@ -75,7 +75,7 @@
 							<directory>/tmp/app/dataplatform</directory>
 							<filemode>644</filemode>
 							<username>yarn</username>
-							<groupname>yarn</groupname>
+							<groupname>hdfs</groupname>
 							<sources>
 								<source>
 									<location>target/le-dataplatform-1.0.0-SNAPSHOT.jar</location>
@@ -98,7 +98,7 @@
 							<directory>/tmp/app/dataplatform/scripts</directory>
 							<filemode>644</filemode>
 							<username>yarn</username>
-							<groupname>yarn</groupname>
+							<groupname>hdfs</groupname>
 							<sources>
 								<source>
 									<location>target/leframework.tar.gz</location>
@@ -113,7 +113,7 @@
 							<directory>/tmp/lib/</directory>
 							<filemode>644</filemode>
 							<username>yarn</username>
-							<groupname>yarn</groupname>
+							<groupname>hdfs</groupname>
 							<sources>
 								<source>
 									<location>target/dependency</location>
