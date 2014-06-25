@@ -1,0 +1,8 @@
+[
+{
+	"customerID": "Test_Customer",
+	"customerKey": "test",
+	"destination": "Database",
+	"databaseServer": "jdbc:jtds:sqlserver://localhost;DatabaseName=BardDB;useNTLMv2=true;domain=Lattice"
+}
+]
