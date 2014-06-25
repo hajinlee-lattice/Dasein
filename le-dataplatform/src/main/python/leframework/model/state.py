@@ -28,7 +28,7 @@ class State(object):
     def getStateMachine(self):
         return self.stateMachine
     
-    def setJsonOrder(self,jsonOrder):
+    def setJsonOrder(self, jsonOrder):
         self.jsonOrder = jsonOrder
     
     def getJsonOrder(self):

@@ -11,7 +11,7 @@ class ModelGenerator(State, JsonGenBase):
     
     def __init__(self):
         State.__init__(self, "ModelGenerator")
-        self.logger = logging.getLogger(name='modelgenerator')
+        self.logger = logging.getLogger(name = 'modelgenerator')
         
     
     @overrides(State)
@@ -39,7 +39,7 @@ class ModelGenerator(State, JsonGenBase):
         model["SupportFiles"] = [{"Value": encoderPkl, "Key": "encoder.py" }, {"Value": pipelinePkl, "Key": "pipeline.py" }, {"Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" }]
         self.model = model
         
-    def __getSerializedFile(self,filename):
+    def __getSerializedFile(self, filename):
         return map(lambda x: int(x), bytearray(open(filename, "rb").read()))
     
     @overrides(JsonGenBase)

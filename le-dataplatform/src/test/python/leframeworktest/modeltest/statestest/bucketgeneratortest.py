@@ -41,19 +41,19 @@ class BucketGeneratorTest(TestCase):
         highest = buckets[0]["Minimum"]
         high = buckets[1]["Minimum"]
         if highest != None:
-            self.assertTrue(high!=None, "High Bucket is empty!")
+            self.assertTrue(high != None, "High Bucket is empty!")
             highestIndex = probRange.index(highest)
             
             for i in range(len(probRange)):
-                if probRange[i]<high:
-                    highIndex = i-1 
+                if probRange[i] < high:
+                    highIndex = i - 1 
            
-            self.assertTrue(self.__getCumulativeWidth(widthRange,highestIndex) < 0.5*self.__getCumulativeWidth(widthRange,highIndex),"Invalid bucket size for highest!" )
+            self.assertTrue(self.__getCumulativeWidth(widthRange, highestIndex) < 0.5 * self.__getCumulativeWidth(widthRange, highIndex), "Invalid bucket size for highest!")
             
         
-    def __getCumulativeWidth(self,widthRange,idx):   
+    def __getCumulativeWidth(self, widthRange, idx):   
         cumWidth = 0
-        for i in range(idx+1):
+        for i in range(idx + 1):
             cumWidth += widthRange[i]
             
         return cumWidth
