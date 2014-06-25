@@ -1,7 +1,4 @@
 #!/bin/bash
-yum clean all
-yum -y groupinstall "Development tools"
-yum -y install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
 cd /tmp/Python-2.7.6
 ./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
 make && make altinstall
@@ -12,8 +9,7 @@ wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
 /usr/local/bin/python2.7 ez_setup.py
 # Now install pip using the newly installed setuptools:
 cd /usr/local/bin
-./easy_install-2.7 pip
-yum -y install atlas, atlas-devel, blas, blas-devel, lapack lapack-devel 
+./easy_install-2.7 pip 
 ./pip2.7 install numpy
 ./pip2.7 install scipy
 ./pip2.7 install scikit-learn
