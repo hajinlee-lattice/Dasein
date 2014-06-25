@@ -69,7 +69,7 @@
 					<!--distribution>Trash 2005</distribution -->
 					<group>Application/Collectors</group>
 					<!-- prefix>/usr/local</prefix -->
-					<changelogFile>src/main/resources/changelog</changelogFile>
+					<changelogFile>src/main/resources/rpm/dataplatform/changelog</changelogFile>
 					<mappings>
 						<mapping>
 							<directory>/tmp/app/dataplatform</directory>
@@ -108,24 +108,13 @@
 								</source>
 						
 							</sources>
-						</mapping>
-						<mapping>
-							<directory>/tmp/lib</directory>
-							<filemode>644</filemode>
-							<username>yarn</username>
-							<groupname>hdfs</groupname>
-							<sources>
-								<source>
-									<location>target/dependency</location>
-								</source>
-							</sources>
-						</mapping>
+						</mapping>	
 					</mappings>
 					<preinstallScriptlet>
-						<scriptFile>src/main/resources/scripts/preinstall</scriptFile>
+						<scriptFile>src/main/resources/rpm/dataplatform/scripts/preinstall</scriptFile>
 					</preinstallScriptlet>
 					<postinstallScriptlet>
-						<scriptFile>src/main/resources/scripts/postinstall</scriptFile>
+						<scriptFile>src/main/resources/rpm/dataplatform/scripts/postinstall</scriptFile>
 						<fileEncoding>utf-8</fileEncoding>
 					</postinstallScriptlet>
 				</configuration>
