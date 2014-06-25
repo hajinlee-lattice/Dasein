@@ -18,3 +18,6 @@ yum -y install atlas, atlas-devel, blas, blas-devel, lapack lapack-devel
 ./pip2.7 install scikit-learn
 ./pip2.7 install fastavro
 ./pip2.7 install pandas
+# Install avro
+cd /tmp/avro-1.7.6
+/usr/local/bin/python2.7 setup.py install
