@@ -1,0 +1,3 @@
+#!/bin/bash
+runuser -l yarn -c 'hadoop fs -copyFromLocal /tmp/app/dataplatform /app/dataplatform'
+rm -rf /tmp/app

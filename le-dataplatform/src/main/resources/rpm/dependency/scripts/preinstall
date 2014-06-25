@@ -1,0 +1,3 @@
+#!/bin/bash
+rm -rf /tmp/lib
+hadoop fs -rm -f -r /lib

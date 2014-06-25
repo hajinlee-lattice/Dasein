@@ -1,0 +1,6 @@
+#!/bin/bash
+hadoop fs -mkdir /lib
+hadoop fs -copyFromLocal /tmp/lib/* /lib
+runuser -l hdfs -c 'hadoop fs -chown -R yarn:hdfs /lib'
+rm -rf /tmp/lib
+
