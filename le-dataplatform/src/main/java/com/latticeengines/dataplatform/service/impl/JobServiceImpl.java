@@ -234,27 +234,34 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         return appId;
     }
 
+     
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public ApplicationId resubmitPreemptedJob(com.latticeengines.domain.exposed.dataplatform.Job resubmitJob) {
-        if (resubmitJob.getChildJobIdList().size() > 0) {
+    public ApplicationId resubmitPreemptedJob(com.latticeengines.domain.exposed.dataplatform.Job resumbitJob) {
+        if (resumbitJob.getChildJobIdList().size() > 0) {
             if (log.isDebugEnabled()) {
-                log.debug("Did not resubmit preempted job " + resubmitJob.getId() + ". Already resubmitted.");
+                log.debug("Did not resubmit preempted job " + resumbitJob.getId() + ". Already resubmitted.");
             }
             return null;
         }
-        String metadata = resubmitJob.getContainerPropertiesObject().getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
-        resubmitJob.getContainerPropertiesObject().setProperty(PythonContainerProperty.METADATA.name(), metadata);
-        Long parentId = resubmitJob.getPid();
-        resubmitJob = new com.latticeengines.domain.exposed.dataplatform.Job();        
-        resubmitJob.setParentJobId(parentId); 
-        ApplicationId appId = submitJob(resubmitJob);
-        log.info("Resubmitted " + parentId + " with " + resubmitJob.getId() + "to queue " + resubmitJob.getAppMasterPropertiesObject().getProperty(AppMasterProperty.QUEUE.name()) + ".");
+        Long parentId = resumbitJob.getPid();
+        String metadata = resumbitJob.getContainerPropertiesObject().getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
+        
+        com.latticeengines.domain.exposed.dataplatform.Job newJob = new com.latticeengines.domain.exposed.dataplatform.Job();        
+        newJob.setParentJobId(parentId);        
+        newJob.setModel(resumbitJob.getModel());
+        newJob.setClient(resumbitJob.getClient());
+        newJob.setAppMasterPropertiesObject(resumbitJob.getAppMasterPropertiesObject());
+        newJob.setContainerPropertiesObject(resumbitJob.getContainerPropertiesObject());
+        newJob.getContainerPropertiesObject().setProperty(PythonContainerProperty.METADATA.name(), metadata);
+        // submit job to yarn and persist metadata
+        ApplicationId appId = submitJob(newJob);
+        log.info("Resubmitted " + parentId + " with " + newJob.getId() + "to queue " + newJob.getAppMasterPropertiesObject().getProperty(AppMasterProperty.QUEUE.name()) + ".");
         // find the parent job 
         com.latticeengines.domain.exposed.dataplatform.Job parentJob = new com.latticeengines.domain.exposed.dataplatform.Job();
         parentJob.setPid(parentId);
         parentJob = jobEntityMgr.findByKey(parentJob);
-        parentJob.addChildJobId(resubmitJob.getId());
+        parentJob.addChildJobId(newJob.getId());
         jobEntityMgr.update(parentJob);
         return appId;
     }
