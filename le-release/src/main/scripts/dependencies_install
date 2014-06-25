@@ -1,8 +1,8 @@
 #!/bin/bash
 echo "____yum___clean"
-yum clean all
+sudo yum clean all
 echo "____yum___group___install"
-yum -y groupinstall "Development tools"
+sudo yum -y groupinstall "Development tools"
 echo "____yum___install"
-yum -y install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
-yum -y install atlas, atlas-devel, blas, blas-devel, lapack lapack-devel
+sudo yum -y install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
+sudo yum -y install atlas, atlas-devel, blas, blas-devel, lapack lapack-devel
