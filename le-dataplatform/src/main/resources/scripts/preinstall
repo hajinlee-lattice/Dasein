@@ -1,5 +1,5 @@
 #!/bin/bash
 rm -rf /tmp/lib
 rm -rf /tmp/app
-hadoop fs -rm -f -r /lib
+hadoop fs -rm -f  /lib/*
 hadoop fs -rm -f -r /app/dataplatform
