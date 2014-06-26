@@ -96,10 +96,5 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         assertEquals(states.size(), 6);
 */
     }
-    /*
-     * @Test(groups = "functional") public void testModelCommandEntityMgr() {
-     * ModelCommand command = createModelCommand(); List<ModelCommand> commands
-     * = modelCommandEntityMgr.getNewAndInProgress();
-     * assertEquals(commands.size(), 1); }
-     */
+
 }
