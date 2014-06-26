@@ -4,16 +4,13 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 
 import com.latticeengines.dataplatform.dao.ModelDefinitionDao;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 
 public class ModelDefinitionDaoImpl extends BaseDaoImpl<ModelDefinition> implements ModelDefinitionDao {
 
-    
+
     public ModelDefinitionDaoImpl() {
         super();
     }
@@ -27,16 +24,16 @@ public class ModelDefinitionDaoImpl extends BaseDaoImpl<ModelDefinition> impleme
      * return 'null' if model definition is not found by name
      */
     public ModelDefinition findByName(String name) {
-        Session session = sessionFactory.getCurrentSession();       
+        Session session = sessionFactory.getCurrentSession();
         Query query = session.createQuery("from " + ModelDefinition.class.getSimpleName() + " modelDef where modelDef.name=:aModelDefName");
         query.setString("aModelDefName", name);
-        
+
         ModelDefinition modelDef = null;
-        List list = query.list(); 
+        List list = query.list();
         if (!list.isEmpty()) {
             modelDef = (ModelDefinition) list.get(0);
-        }        
-             
+        }
+
         return modelDef;
     }
 

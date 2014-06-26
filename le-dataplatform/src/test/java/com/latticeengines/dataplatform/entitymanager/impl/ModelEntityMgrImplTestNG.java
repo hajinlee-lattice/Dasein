@@ -3,14 +3,11 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.util.Arrays;
-
 import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
@@ -30,7 +27,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void setup() {
         Job job1 = new Job();
         job1.setId("application_12345_00001");
-        job1.setClient("CLIENT 1"); 
+        job1.setClient("CLIENT 1");
         Job job2 = new Job();
         job2.setId("application_12345_00002");
         job2.setClient("CLIENT 2");
@@ -44,23 +41,23 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         decisionTreeAlgorithm.setPriority(1);
         decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
         decisionTreeAlgorithm.setSampleName("s1");
-        
+
         ModelDefinition modelDef = new ModelDefinition();
-        modelDef.setName("Model Definition For Demo"); 
+        modelDef.setName("Model Definition For Demo");
         modelDef.addAlgorithm(logisticRegressionAlgorithm);
         modelDef.addAlgorithm(decisionTreeAlgorithm);
-        // 
+        //
         // in the application, it is assumed that the model definition is defined in the metadata db
         // also, modelDef 'name' should be unique
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
 
-        model = new Model();        
+        model = new Model();
         model.addJob(job1);
         model.addJob(job2);
-        
+
         model.setId("model_12345_0001");
         model.setName("MODEL TEST NAME");
-        model.setModelDefinition(modelDef);        
+        model.setModelDefinition(modelDef);
     }
 
     private void assertModelsEqual(Model originalModel, Model retrievedModel) {
@@ -94,7 +91,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void testRetrieval() {
         Model retrievedModel = new Model();
         retrievedModel.setPid(model.getPid());
-        retrievedModel = modelEntityMgr.findByKey(retrievedModel);   
+        retrievedModel = modelEntityMgr.findByKey(retrievedModel);
         // assert for correctness
         assertModelsEqual(model, retrievedModel);
         assertEquals(2, model.getJobs().size());
@@ -106,8 +103,8 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertNotNull(model.getPid());
         model.setCustomer("NEW CUSTOMER");
         model.setName("NEW NAME");
-        
-        modelEntityMgr.update(model);        
+
+        modelEntityMgr.update(model);
         testRetrieval();
     }
 
@@ -117,5 +114,5 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         modelEntityMgr.delete(model);
     }
 
-   
+
 }

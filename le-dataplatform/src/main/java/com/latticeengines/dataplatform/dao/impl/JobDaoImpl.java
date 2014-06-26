@@ -7,10 +7,7 @@ import java.util.Set;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +16,7 @@ import com.latticeengines.domain.exposed.dataplatform.Job;
 
 public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
 
-     
+
     public JobDaoImpl() {
         super();
     }
@@ -47,7 +44,7 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
         Criteria criteria = session.createCriteria(Job.class, "listAllByObjectIds");
         criteria.add(Restrictions.in("id", jobIds));
         List<Job> jobs = criteria.list();
-        
+
         return new HashSet<Job>(jobs);
     }
 }

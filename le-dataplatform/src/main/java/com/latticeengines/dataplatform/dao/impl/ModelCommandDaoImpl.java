@@ -4,17 +4,14 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.dao.ModelCommandDao;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 
 public class ModelCommandDaoImpl extends BaseDaoImpl<ModelCommand> implements ModelCommandDao {
-    
+
     public ModelCommandDaoImpl() {
         super();
     }
@@ -25,7 +22,7 @@ public class ModelCommandDaoImpl extends BaseDaoImpl<ModelCommand> implements Mo
     }
 
     @SuppressWarnings("unchecked")
-    @Override   
+    @Override
     public List<ModelCommand> getNewAndInProgress() {
         Session session = getSessionFactory().getCurrentSession();
         List<ModelCommand> commands = session

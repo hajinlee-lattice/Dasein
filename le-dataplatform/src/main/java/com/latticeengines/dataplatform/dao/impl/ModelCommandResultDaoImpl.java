@@ -2,10 +2,7 @@ package com.latticeengines.dataplatform.dao.impl;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.dao.ModelCommandResultDao;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
@@ -13,7 +10,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 
 public class ModelCommandResultDaoImpl extends BaseDaoImpl<ModelCommandResult> implements ModelCommandResultDao {
 
-        
+
     public ModelCommandResultDaoImpl() {
         super();
     }
@@ -22,7 +19,7 @@ public class ModelCommandResultDaoImpl extends BaseDaoImpl<ModelCommandResult> i
     protected Class<ModelCommandResult> getEntityClass() {
         return ModelCommandResult.class;
     }
-    
+
     @Override
     public ModelCommandResult findByModelCommand(ModelCommand modelCommand) {
         Session session = getSessionFactory().getCurrentSession();
@@ -35,7 +32,7 @@ public class ModelCommandResultDaoImpl extends BaseDaoImpl<ModelCommandResult> i
         if (result != null) {
             modelCommandResult = (ModelCommandResult)result;
         }
-        
+
         return modelCommandResult;
 
     }
