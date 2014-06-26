@@ -1,0 +1,8 @@
+#!/bin/bash
+rm -rf /opt/jetty/webapps/le-api-1.0.0-SNAPSHOT.war
+rm -rf /etc/ledp/*
+rm -rf /opt/jetty/bin/jetty.sh
+rm -rf /home/yarn/.bashrc
+mkdir -p /var/log/ledp
+chmod -R 755 /var/log/ledp
+chown yarn:hadoop /var/log/ledp

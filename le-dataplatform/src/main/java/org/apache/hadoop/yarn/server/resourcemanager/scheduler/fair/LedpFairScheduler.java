@@ -23,25 +23,26 @@ import com.latticeengines.dataplatform.fairscheduler.LedpQueueAssigner;
 public class LedpFairScheduler extends FairScheduler {
     private static final Log log = LogFactory.getLog(LedpFairScheduler.class);
     private static final ResourceCalculator resourceCalculator = new DefaultResourceCalculator();
-    private static final Resource clusterCapacity = RecordFactoryProvider.getRecordFactory(null).newRecordInstance(Resource.class);
+    private static final Resource clusterCapacity = RecordFactoryProvider.getRecordFactory(null).newRecordInstance(
+            Resource.class);
 
     private LedpQueueAssigner queueAssigner = new LedpQueueAssigner();
-    
+
     @Override
     protected Resource resToPreempt(FSLeafQueue sched, long curTime) {
         if (isP0(sched)) {
             Resource resToPreempt = super.resToPreempt(sched, curTime);
             if (Resources.greaterThan(resourceCalculator, clusterCapacity, resToPreempt, Resources.none())) {
-                Resource targetForMinShare = Resources.min(resourceCalculator, clusterCapacity,
-                        sched.getMinShare(), sched.getDemand());
-                Resource targetForFairShare = Resources.min(resourceCalculator, clusterCapacity,
-                        sched.getFairShare(), sched.getDemand());
-                Resource resDueToMinShare = Resources.max(resourceCalculator, clusterCapacity,
-                        Resources.none(), Resources.subtract(targetForMinShare, sched.getResourceUsage()));
-                Resource resDueToFairShare = Resources.max(resourceCalculator, clusterCapacity,
-                        Resources.none(), Resources.subtract(targetForFairShare, sched.getResourceUsage()));
-                
-                String msg = "demand = " + sched.getDemand() + " resUsage = " + sched.getResourceUsage() 
+                Resource targetForMinShare = Resources.min(resourceCalculator, clusterCapacity, sched.getMinShare(),
+                        sched.getDemand());
+                Resource targetForFairShare = Resources.min(resourceCalculator, clusterCapacity, sched.getFairShare(),
+                        sched.getDemand());
+                Resource resDueToMinShare = Resources.max(resourceCalculator, clusterCapacity, Resources.none(),
+                        Resources.subtract(targetForMinShare, sched.getResourceUsage()));
+                Resource resDueToFairShare = Resources.max(resourceCalculator, clusterCapacity, Resources.none(),
+                        Resources.subtract(targetForFairShare, sched.getResourceUsage()));
+
+                String msg = "demand = " + sched.getDemand() + " resUsage = " + sched.getResourceUsage()
                         + " targetForMinShare = " + targetForMinShare + " resDueToMinShare = " + resDueToMinShare
                         + " targetForFairShare = " + targetForFairShare + " resDueToFairShare = " + resDueToFairShare;
                 log.info(msg);
@@ -57,7 +58,7 @@ public class LedpFairScheduler extends FairScheduler {
             if (isP0(sched)) {
                 continue;
             }
-            for (AppSchedulable as : sched.getAppSchedulables()) {
+            for (AppSchedulable as : sched.getRunnableAppSchedulables()) {
                 for (RMContainer c : as.getApp().getLiveContainers()) {
                     runningContainers.add(c);
                 }
@@ -79,7 +80,6 @@ public class LedpFairScheduler extends FairScheduler {
         for (RMContainer container : runningContainers) {
             Resources.subtractFrom(toPreempt, container.getContainer().getResource());
         }
-        
 
         if (Resources.greaterThan(resourceCalculator, clusterCapacity, toPreempt, Resources.none())) {
             return false;
@@ -98,8 +98,7 @@ public class LedpFairScheduler extends FairScheduler {
                 mrScheds.add(sched);
             }
         }
-        
-        
+
         if (canPreemptUsingNonP0Resources(mrScheds, resToPreempt)) {
             Collection<FSLeafQueue> noP0Scheds = new ArrayList<FSLeafQueue>();
 
@@ -108,17 +107,17 @@ public class LedpFairScheduler extends FairScheduler {
                     noP0Scheds.add(sched);
                 }
             }
-            
+
             super.preemptResources(noP0Scheds, toPreempt);
         } else {
             super.preemptResources(mrScheds, toPreempt);
         }
     }
-    
+
     private boolean isP0(FSLeafQueue queue) {
         return queue.getQueueName().contains("Priority0");
     }
-    
+
     private boolean isMapReduce(FSLeafQueue queue) {
         return queue.getQueueName().contains("MapReduce");
     }
@@ -129,10 +128,10 @@ public class LedpFairScheduler extends FairScheduler {
         switch (event.getType()) {
         case APP_REMOVED:
             if (!(event instanceof AppRemovedSchedulerEvent)) {
-              throw new RuntimeException("Unexpected event type: " + event);
+                throw new RuntimeException("Unexpected event type: " + event);
             }
-            AppRemovedSchedulerEvent appRemovedEvent = (AppRemovedSchedulerEvent)event;
-            queueAssigner.removeApplication(appRemovedEvent.getApplicationAttemptID());
+            AppRemovedSchedulerEvent appRemovedEvent = (AppRemovedSchedulerEvent) event;
+            queueAssigner.removeApplication(appRemovedEvent.getApplicationID());
             break;
         }
         super.handle(event);

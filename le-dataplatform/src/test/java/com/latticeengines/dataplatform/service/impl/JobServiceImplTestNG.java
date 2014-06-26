@@ -52,7 +52,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     private JobNameService jobNameService;
 
     @Value("${dataplatform.iris.mysqldatasource.host}")
-    private String dbHost;
+    private String dataSourceHost;
 
     private String inputDir = null;
     private String outputDir = null;
@@ -153,7 +153,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
         assertEquals(status, FinalApplicationStatus.UNDEFINED);
         jobService.killJob(applicationId);
-        status = getStatus(applicationId);
+        status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
         assertEquals(status, FinalApplicationStatus.KILLED);        
     }
 
@@ -168,7 +168,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
         assertEquals(status, FinalApplicationStatus.UNDEFINED);        
         jobService.killJob(applicationId);
-        status = getStatus(applicationId);
+        status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
         assertNotNull(status);
         assertTrue(status.equals(FinalApplicationStatus.KILLED));
 
@@ -278,7 +278,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testLoadData() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dbHost).port(3306).db("dataplatformtest").user("root").password("welcome").type("MySQL");
+        builder.host(dataSourceHost).port(3306).db("dataplatformtest").user("root").password("welcome").type("MySQL");
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0", "Dell",
                 Arrays.<String> asList(new String[] { "ID" }));

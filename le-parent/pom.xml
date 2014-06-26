@@ -33,11 +33,11 @@
         <jacoco.coverage.dir>${project.build.directory}</jacoco.coverage.dir>
         <jetty.version>9.1.1.v20140108</jetty.version>
         <!-- <spring.version>3.2.3.RELEASE</spring.version> -->
-        <hibernate.version>4.1.9.Final</hibernate.version>        
+        <hibernate.version>4.1.9.Final</hibernate.version>
     </properties>
 
-    <!--  set up to use LE local Nexus Repository for dependencies -->
-    <repositories>       
+    <!-- set up to use LE local Nexus Repository for dependencies -->
+    <repositories>
         <repository>
             <id>central</id>
             <name>LE Maven REPOSITORY</name>
@@ -55,7 +55,7 @@
             </snapshots>
         </repository>
     </repositories>
-    <!--  set up to use LE local Nexus Repository for maven plugins -->
+    <!-- set up to use LE local Nexus Repository for maven plugins -->
     <pluginRepositories>
         <pluginRepository>
             <id>central</id>
@@ -70,7 +70,7 @@
             </releases>
         </pluginRepository>
     </pluginRepositories>
-     
+
     <profiles>
         <profile>
             <id>unit</id>
@@ -341,13 +341,14 @@
         <defaultGoal>install</defaultGoal>
         <pluginManagement>
             <plugins>
-            <!-- The Jetty Maven plugin is useful for rapid development and testing. You can add it to any webapp project that is structured 
-                according to the usual Maven defaults. The plugin can then periodically scan your project for changes and automatically redeploy 
-                the webapp if any are found. This makes the development cycle more productive by eliminating the build and deploy steps: 
-                you use your IDE to make changes to the project, and the running web container automatically picks them up, allowing you 
-                to test them straight away. 
-                To run - mvn jetty:run
-                --> 
+                <!-- The Jetty Maven plugin is useful for rapid development
+                    and testing. You can add it to any webapp project that is structured according
+                    to the usual Maven defaults. The plugin can then periodically scan your project
+                    for changes and automatically redeploy the webapp if any are found. This
+                    makes the development cycle more productive by eliminating the build and
+                    deploy steps: you use your IDE to make changes to the project, and the running
+                    web container automatically picks them up, allowing you to test them straight
+                    away. To run - mvn jetty:run -->
                 <plugin>
                     <groupId>org.eclipse.jetty</groupId>
                     <artifactId>jetty-maven-plugin</artifactId>
@@ -386,9 +387,10 @@
                         <target>1.7</target>
                     </configuration>
                 </plugin>
-                <!--       -->
-                <!-- jar plugin to produce 3 jars: impl (default), interface, tests -->
-                <plugin>                    
+                <!-- -->
+                <!-- jar plugin to produce 3 jars: impl (default), interface,
+                    tests -->
+                <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${maven.jar.version}</version>
                     <executions>
@@ -508,6 +510,11 @@
                         </lifecycleMappingMetadata>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>rpm-maven-plugin</artifactId>
+                    <version>2.1-alpha-4</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -553,7 +560,7 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>16.0</version>
-        </dependency>  
+        </dependency>
 
         <dependency>
             <groupId>com.google.http-client</groupId>
@@ -634,6 +641,7 @@
             <version>4.0.0.RELEASE</version>
         </dependency>
 
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-oxm</artifactId>
@@ -645,11 +653,11 @@
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
-             <version>2.2.1</version>
+            <version>2.2.1</version>
         </dependency>
 
         <!-- TEST dependencies -->

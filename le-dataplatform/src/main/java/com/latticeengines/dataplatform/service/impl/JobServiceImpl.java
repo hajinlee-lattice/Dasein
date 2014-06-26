@@ -6,7 +6,6 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +27,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
-
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -71,7 +69,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private Configuration hadoopConfiguration;
 
@@ -92,10 +90,10 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Autowired
     private YarnService yarnService;
-    
+
     @Autowired
     private JobNameService jobNameService;
-    
+
     @Override
     public List<ApplicationReport> getJobReportsAll() {
         return defaultYarnClient.listApplications();
@@ -278,7 +276,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             }
         }
     }
-    
+
     private ApplicationId getAppIdFromName(String appName) {
         List<ApplicationReport> apps = defaultYarnClient.listApplications();
         for (ApplicationReport app : apps) {
@@ -299,7 +297,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Override
     public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, int numMappers) {
-        
+
         final String jobName = jobNameService.createJobName(customer, "data-load");
 
         Future<Integer> future = loadAsync(table, targetDir, creds, queue, jobName, splitCols, numMappers);
@@ -311,7 +309,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
                 Thread.sleep(APP_WAIT_TIME);
             } catch (InterruptedException e) {
                 // do nothing
-            	log.warn("Thread.sleep interrupted.", e);
+                log.warn("Thread.sleep interrupted.", e);
             }
             appId = getAppIdFromName(jobName);
             if (appId != null) {
@@ -342,21 +340,20 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
                 return Sqoop.runTool(new String[] { //
                         "import", //
-                        "-Dmapred.job.queue.name=" + queue, //
-                        "--connect", //
-                        metadataService.getJdbcConnectionUrl(creds), //
-                        "--m", //
-                        Integer.toString(numMappers), // 
-                        "--table", //
-                        table, //
-                        "--as-avrodatafile",
-                        "--compress", //
-                        "--mapreduce-job-name", //
-                        jobName, //
-                        "--split-by", //
-                        StringUtils.join(splitCols, ","), //
-                        "--target-dir", //
-                        targetDir }, yarnConfiguration);
+                                "-Dmapred.job.queue.name=" + queue, //
+                                "--connect", //
+                                metadataService.getJdbcConnectionUrl(creds), //
+                                "--m", //
+                                Integer.toString(numMappers), //
+                                "--table", //
+                                table, //
+                                "--as-avrodatafile", "--compress", //
+                                "--mapreduce-job-name", //
+                                jobName, //
+                                "--split-by", //
+                                StringUtils.join(splitCols, ","), //
+                                "--target-dir", //
+                                targetDir }, yarnConfiguration);
 
             }
         });
@@ -382,7 +379,8 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             }
         }
 
-        ApplicationReport appReport = defaultYarnClient.getApplicationReport(YarnUtils.getApplicationIdFromString(applicationId));
+        ApplicationReport appReport = defaultYarnClient.getApplicationReport(YarnUtils
+                .getApplicationIdFromString(applicationId));
         if (appReport != null) {
             jobStatus.setState(appReport.getFinalApplicationStatus());
             jobStatus.setDiagnostics(appReport.getDiagnostics());
@@ -397,7 +395,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     private com.latticeengines.domain.exposed.dataplatform.Job getLeafJob(String applicationId) {
         com.latticeengines.domain.exposed.dataplatform.Job job = jobEntityMgr.findByObjectId(applicationId); /// jobEntityMgr.getById(applicationId);
-        
+
         if (job != null) {
             List<String> childIds = job.getChildJobIdList();
             for (String jobId : childIds) {

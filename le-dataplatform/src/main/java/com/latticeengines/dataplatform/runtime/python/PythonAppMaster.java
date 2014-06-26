@@ -42,10 +42,12 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
     @Override
     protected void onInit() throws Exception {
         log.info("Initializing application.");
+        setEnvironment(System.getenv());
         super.onInit();
         if (getLauncher() instanceof AbstractLauncher) {
             ((AbstractLauncher) getLauncher()).addInterceptor(this);
         }
+        registerAppmaster();
         String appAttemptId = getApplicationAttemptId().toString();
         final String appId = getApplicationId(appAttemptId);
 

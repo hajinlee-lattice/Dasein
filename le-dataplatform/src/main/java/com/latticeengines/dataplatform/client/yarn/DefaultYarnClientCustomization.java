@@ -6,11 +6,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
 import org.springframework.yarn.fs.DefaultResourceLocalizer;
@@ -52,31 +50,22 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 
     @Override
     public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
-        String defaultFs = configuration.get(CommonConfigurationKeysPublic.FS_DEFAULT_NAME_KEY);
         Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = new ArrayList<LocalResourcesFactoryBean.TransferEntry>();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
                 "/lib/*", //
-                defaultFs, //
-                defaultFs, //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
                 "/app/dataplatform/*.properties", //
-                defaultFs, //
-                defaultFs, //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
                 "/app/dataplatform/*.jar", //
-                defaultFs, //
-                defaultFs, //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
                 getJobDir(containerProperties) + "/*", //
-                defaultFs, //
-                defaultFs, //
                 false));
         return hdfsEntries;
     }
@@ -129,7 +118,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
         String propStr = containerProperties.toString();
 
         return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
-                // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
+                //"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
                 // //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //

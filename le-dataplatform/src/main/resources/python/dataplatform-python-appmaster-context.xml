@@ -36,7 +36,7 @@
         PYTHONPATH=leframework.tar.gz
     </yarn:environment>
 
-    <yarn:master class="com.latticeengines.dataplatform.runtime.python.PythonAppMaster">
+    <yarn:master appmaster-class="com.latticeengines.dataplatform.runtime.python.PythonAppMaster">
         <yarn:container-allocator
             virtualcores="$$VIRTUALCORES$$"
             memory="$$MEMORY$$"

@@ -3,18 +3,16 @@ package org.springframework.yarn.fs;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
 
-public class PrototypeLocalResourcesFactoryBean extends
-        LocalResourcesFactoryBean {
+public class PrototypeLocalResourcesFactoryBean extends LocalResourcesFactoryBean {
 
     @Override
     public boolean isSingleton() {
         return false;
     }
 
-    public static class TransferEntry extends
-            org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry {
+    public static class TransferEntry extends org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry {
         public TransferEntry() {
-            super(null, null, null, null, null, false);
+            super(null, null, null, false);
         }
 
         public void setType(LocalResourceType type) {
@@ -23,14 +21,6 @@ public class PrototypeLocalResourcesFactoryBean extends
 
         public void setVisibility(LocalResourceVisibility visibility) {
             this.visibility = visibility;
-        }
-
-        public void setLocal(String local) {
-            this.local = local;
-        }
-
-        public void setRemote(String remote) {
-            this.remote = remote;
         }
 
         public void setPath(String path) {
@@ -42,8 +32,7 @@ public class PrototypeLocalResourcesFactoryBean extends
         }
     }
 
-    public static class CopyEntry extends
-            org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry {
+    public static class CopyEntry extends org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry {
         public CopyEntry(String src, String dest, boolean staging) {
             super(src, dest, staging);
         }
