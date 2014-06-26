@@ -60,11 +60,12 @@ class SummaryGenerator(State, JsonGenBase):
                 self.logger.critical("No data found in the test set for this band or value.")
                 continue
             
-            countForBandValueAndEventIsOne = self.__getCountWhereEventIsOne(predictorData, eventData) #TODO
-            lift = float(countForBandValueAndEventIsOne)/float(countForBandValue) # TODO
+            countForBandValueAndEventIsOne = self.__getCountWhereEventIsOne(predictorData, eventData)
+            lift = float(countForBandValueAndEventIsOne)/float(countForBandValue)
             avgLift = float(sum(eventData))/float(len(eventData))
             element["CorrelationSign"] = 1 if lift > avgLift else -1
             element["Count"] = countForBandValue
+            element["Lift"] = avgLift/self.mediator.averageProbability
             if record["Dtype"] == "BND":
                 element["LowerInclusive"] = record["minV"]
             element["Name"] = str(uuid.uuid4())
@@ -96,7 +97,7 @@ class SummaryGenerator(State, JsonGenBase):
                 maxV = record["maxV"]
                 converter = lambda x: 1 if x >= minV and x < maxV else 0
                 return map(converter, columnData)
-            elif self.mediator.depivoted:                
+            elif self.mediator.depivoted:
                 return self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][colname + "_" + record["columnvalue"]]]
             else:
                 columnData = self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][colname]]

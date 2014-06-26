@@ -13,7 +13,7 @@ class AverageProbabilityGenerator(State, JsonGenBase):
     
     @overrides(State)
     def execute(self):
-        self.averageProbability = self.mediator.averageProbability        
+        self.averageProbability = self.mediator.averageProbability
         
     @overrides(JsonGenBase)
     def getKey(self):
