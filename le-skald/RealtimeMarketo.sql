@@ -1,6 +1,7 @@
 
 CREATE TABLE RealtimeMarketo(
 	[RealtimeMarketoID] INT IDENTITY(1,1) NOT NULL,
+	[CustomerID] NVARCHAR(50) NOT NULL,
 	[ID] INT NOT NULL,
 	[AnnualRevenue] FLOAT NULL,
 	[AnonymousIP] NVARCHAR(255) NULL,

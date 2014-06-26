@@ -36,8 +36,15 @@ public class RecordDispatcher
         if (destination == null)
         {
             log.warn("Received a request with unknown destination: " + settings.destination);
-            throw new RuntimeException("Invalid customer configuration; please contact support");
+            throw new RuntimeException("Encountered an internal configuration error");
         }
+        
+        if (record.containsKey("CustomerID"))
+        {
+            log.warn("Received a request that contained a CustomerID");
+            throw new RuntimeException("CustomerID is not a valid field name.");
+        }
+        record.put("CustomerID", settings.customerID);
         
         return destination.receiveRecord(settings.customerID, record);
     }

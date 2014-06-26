@@ -3,6 +3,7 @@ package com.latticeengines.skald;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,8 +44,6 @@ public class DatabaseDestination implements RecordDestination
             }
         }
         
-        // TODO: Automatically add CustomerID to the insert; yay multitenancy.
-
         CustomerSettings settings = manager.getCustomerSettingsByID(customerID);
         
         List<String> sortedKeys = new ArrayList<String>(record.keySet());
@@ -66,10 +65,16 @@ public class DatabaseDestination implements RecordDestination
             
             statement.executeUpdate();
         }
-        catch (Exception exc)
+        catch (SQLException exc)
         {
-            // TODO: Throw a nice exception here that doesn't leak details.
             log.error("Unable to insert record into database", exc);
+            
+            if (exc.getErrorCode() == 207 || exc.getErrorCode() == 245)
+            {
+                throw new RuntimeException(exc.getMessage().replace("column",  "field"));
+            }
+
+            throw new RuntimeException("Encountered an internal system error");
         }
         
         return null;
