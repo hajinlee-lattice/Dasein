@@ -1,5 +1,7 @@
+import base64
 import csv
 import filecmp
+import gzip
 import json
 import os
 import pickle
@@ -53,19 +55,19 @@ class LauncherTest(TestCase):
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open("./results/model.json").read())
         
-        payload = "./results/STPipelineBinary.p"
-        self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][2]["Value"], payload)
+        payload = "./results/STPipelineBinary.p.gz"
+        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][2]["Value"], payload)
         # Load from the file system and deserialize into the model
-        pipeline = pickle.load(open(payload, "r"))
+        pipeline = pickle.load(open(payload + ".decompressed", "r"))
         self.assertTrue(isinstance(pipeline.getPipeline()[2].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
         
-        pipelineScript = "./results/pipeline.py"
-        self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][1]["Value"], pipelineScript)
-        self.assertTrue(filecmp.cmp(pipelineScript, './leframework.tar.gz/pipeline.py'))
+        pipelineScript = "./results/pipeline.py.gz"
+        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][1]["Value"], pipelineScript)
+        self.assertTrue(filecmp.cmp(pipelineScript + ".decompressed", './leframework.tar.gz/pipeline.py'))
         
-        encoderScript = "./results/encoder.py"
-        self.__writeToFileFromBinary(jsonDict["Model"]["SupportFiles"][0]["Value"], encoderScript)
-        self.assertTrue(filecmp.cmp(encoderScript, './leframework.tar.gz/encoder.py'))
+        encoderScript = "./results/encoder.py.gz"
+        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][0]["Value"], encoderScript)
+        self.assertTrue(filecmp.cmp(encoderScript + ".decompressed", './leframework.tar.gz/encoder.py'))
 
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
         
@@ -137,12 +139,20 @@ class LauncherTest(TestCase):
         return scores
         
         
-    def __writeToFileFromBinary(self, data, filename):
-        pklByteArray = bytearray(data)
-        # Write to the file system
-        
+    def __decodeBase64ThenDecompressToFile(self, data, filename):
+        gzipByteArray = bytearray(base64.decodestring(data))
         with open(filename, "wb") as output:
-            output.write(pklByteArray)
+            output.write(gzipByteArray)
+        output.close()
+        
+        with gzip.GzipFile(filename, "rb") as compressed:
+            data = compressed.read()
+            with open(filename + ".decompressed", "wb") as decompressed:
+                decompressed.write(data)
+        compressed.close()
+        decompressed.close()
+        
+        return decompressed.name
 
     def testExecuteLearningForProfile(self):
         # These properties won't really be used since these are just unit tests.

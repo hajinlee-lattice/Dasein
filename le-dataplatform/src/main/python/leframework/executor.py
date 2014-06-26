@@ -16,3 +16,6 @@ class Executor(object):
 
     @abstractmethod
     def getModelDirPath(self, schema): pass
+    
+    @abstractmethod
+    def accept(self, filename): pass

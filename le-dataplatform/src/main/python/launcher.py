@@ -101,6 +101,8 @@ class Launcher(object):
             # Copy the model data files from local to hdfs
             (_, _, filenames) = os.walk(modelLocalDir).next()
             for filename in filenames:
+                if executor.accept(filename) is False:
+                    continue
                 hdfs.copyFromLocal(modelLocalDir + filename, "%s/%s" % (modelHdfsDir, filename))
                 if filename == "model.json":
                     modelName = parser.getSchema()["name"]

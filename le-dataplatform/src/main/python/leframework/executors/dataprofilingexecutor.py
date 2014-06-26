@@ -23,3 +23,7 @@ class DataProfilingExecutor(Executor):
     @overrides(Executor)
     def getModelDirPath(self, schema):
         return schema["model_data_dir"]
+    
+    @overrides(Executor)
+    def accept(self, filename):
+        return True

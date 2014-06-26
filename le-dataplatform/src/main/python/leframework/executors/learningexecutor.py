@@ -82,4 +82,13 @@ class LearningExecutor(Executor):
         appIdList = os.environ['CONTAINER_ID'].split("_")[1:3]
         modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
         return modelDirPath
+    
+    @overrides(Executor)
+    def accept(self, filename):
+        badSuffixes = [".p", ".dot", ".gz"]
+        
+        for badSuffix in badSuffixes:
+            if filename.endswith(badSuffix):
+                return False
+        return True
         
