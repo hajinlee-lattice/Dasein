@@ -52,11 +52,9 @@ public class DatabaseDestination implements RecordDestination
                 Collections.nCopies(sortedKeys.size(), "?"));
         String text = "INSERT INTO " + tableName + " (" + names + ") VALUES (" + values + ")";
 
-        try
+        // TODO: Connection pooling, performance improvements, etc.
+        try (Connection connection = DriverManager.getConnection(settings.databaseServer))
         {
-            // TODO: Connection pooling, performance improvements, etc.
-            Connection connection = DriverManager.getConnection(settings.databaseServer);
-
             PreparedStatement statement = connection.prepareStatement(text);
             for (int index = 0; index < sortedKeys.size(); index++)
             {
