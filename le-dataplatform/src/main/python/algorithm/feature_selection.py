@@ -103,6 +103,8 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties):
     return None
 
 def writeCategoricalValuesToAvro(dataWriter, uniquevalues, mode, colname, index):
+    if len(uniquevalues) > 200:
+        return index
     for value in uniquevalues:
         if len(uniquevalues) > 1 and value is None:
             continue
