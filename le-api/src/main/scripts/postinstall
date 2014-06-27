@@ -1,4 +1,5 @@
 #!/bin/bash
 echo "finishing"
 /etc/init.d/jetty restart
-
+echo "execute here"
+exit 0
