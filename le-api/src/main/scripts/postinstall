@@ -1,4 +1,3 @@
 #!/bin/bash -x
 echo "finishing"
 service jetty restart < /dev/null > /tmp/mylogfile 2>&1
-echo "exit executed"
