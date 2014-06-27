@@ -15,9 +15,9 @@
                 <entry key="modelCommandStateEntityMgr" value-ref="modelCommandStateEntityMgr" />
                 <entry key="modelStepYarnProcessor" value-ref="modelStepYarnProcessor" />
                 <entry key="modelCommandLogService" value-ref="modelCommandLogService" />
-                <entry key="modelCommandResultEntityMgr" value-ref="modelCommandResultEntityMgr" />               
+                <entry key="modelCommandResultEntityMgr" value-ref="modelCommandResultEntityMgr" />
                 <entry key="modelStepOutputResultsProcessor" value-ref="modelStepOutputResultsProcessor" />
-                <entry key="modelStepFinishProcessor" value-ref="modelStepFinishProcessor" />                                    
+                <entry key="modelStepFinishProcessor" value-ref="modelStepFinishProcessor" />
                 <entry key="waitTime" value="${dataplatform.dlorchestrationjob.wait.time}" />
             </map>
         </property>

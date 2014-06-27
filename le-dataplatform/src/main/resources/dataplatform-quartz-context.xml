@@ -26,7 +26,7 @@
         <property name="cronExpression" value="0/15 * * * * ?" />
     </bean>
 
-    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">      
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
                 <ref bean="cronTrigger" />
