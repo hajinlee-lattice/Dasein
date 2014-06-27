@@ -119,9 +119,9 @@
                         </mapping>
                         <mapping>
                             <directory>/home/yarn</directory>
-                            <filemode>644</filemode>
+                            <filemode>700</filemode>
                             <username>yarn</username>
-                            <groupname>yarn</groupname>
+                            <groupname>hadoop</groupname>
                             <sources>
                                 <source>
                                     <location>${bin.env.path}/.bashrc</location>

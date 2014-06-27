@@ -1,3 +1,4 @@
 #!/bin/bash
 echo "finishing"
+/etc/init.d/jetty restart
 
