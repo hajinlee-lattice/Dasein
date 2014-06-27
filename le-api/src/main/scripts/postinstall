@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 echo "finishing"
 service jetty restart
 echo "execute here"
