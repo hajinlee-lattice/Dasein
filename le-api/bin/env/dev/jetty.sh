@@ -93,7 +93,7 @@ JAVA_HOME=/usr/java/default
 
 
 
-JAVA_OPTIONS=(-XX:MaxPermSize=2048m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common-2.2.0.2.0.6.0-102.jar:/etc/hadoop/conf.empty -DAPI_PROPDIR=/etc/ledp -DDATAPLATFORM_PROPDIR=/etc/ledp)
+JAVA_OPTIONS=(-XX:MaxPermSize=2048m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common.jar:/etc/hadoop/conf.empty -DAPI_PROPDIR=/etc/ledp -DDATAPLATFORM_PROPDIR=/etc/ledp)
 
 usage()
 {
