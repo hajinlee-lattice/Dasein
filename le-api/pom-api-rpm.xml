@@ -25,9 +25,9 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>conf/env/dev</api.properties.path>
+                <api.properties.path>conf/env/devcluster</api.properties.path>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/dev
+                    ../le-dataplatform/conf/env/devcluster
                 </dataplatform.properties.path>
                 <bin.env.path>bin/env/dev</bin.env.path>
             </properties>
