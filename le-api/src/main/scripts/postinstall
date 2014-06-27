@@ -1,4 +1,3 @@
 #!/bin/bash
-echo "postinstalling now"
-/etc/init.d/jetty restart
+echo "finishing"
 
