@@ -83,7 +83,7 @@
                     <mappings>
                         <mapping>
                             <directory>/opt/jetty/webapps</directory>
-                            <filemode>666</filemode>
+                            <filemode>755</filemode>
                             <username>yarn</username>
                             <groupname>yarn</groupname>
                             <sources>
@@ -94,7 +94,7 @@
                         </mapping>
                         <mapping>
                             <directory>/etc/ledp</directory>
-                            <filemode>666</filemode>
+                            <filemode>755</filemode>
                             <username>root</username>
                             <groupname>root</groupname>
                             <sources>
