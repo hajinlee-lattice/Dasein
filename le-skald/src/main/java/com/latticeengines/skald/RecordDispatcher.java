@@ -39,13 +39,6 @@ public class RecordDispatcher
             throw new RuntimeException("Encountered an internal configuration error");
         }
         
-        if (record.containsKey("CustomerID"))
-        {
-            log.warn("Received a request that contained a CustomerID");
-            throw new RuntimeException("CustomerID is not a valid field name.");
-        }
-        record.put("CustomerID", settings.customerID);
-        
         return destination.receiveRecord(settings.customerID, record);
     }
     

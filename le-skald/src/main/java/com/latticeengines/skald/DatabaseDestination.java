@@ -46,6 +46,13 @@ public class DatabaseDestination implements RecordDestination
         
         CustomerSettings settings = manager.getCustomerSettingsByID(customerID);
         
+        if (record.containsKey("CustomerID"))
+        {
+            log.warn("Received a request that contained a CustomerID");
+            throw new RuntimeException("CustomerID is not a valid field name.");
+        }
+        record.put("CustomerID", settings.customerID);
+        
         List<String> sortedKeys = new ArrayList<String>(record.keySet());
         String names = StringUtils.collectionToCommaDelimitedString(sortedKeys);
         String values = StringUtils.collectionToCommaDelimitedString(
