@@ -15,7 +15,7 @@ class DataProfilingExecutor(Executor):
     def transformData(self, params):
         training = params["training"]
         test = params["test"]
-        return (training, test)
+        return (training, test, None)
     
     @overrides(Executor)
     def postProcessClassifier(self, clf, params): pass

@@ -62,8 +62,16 @@ class ColumnTypeConversionStep:
         return outputFrame
     
 class ImputationStep:
+    _enumMappings = dict()
+    def __init__(self, enumMappings):
+        self._enumMappings = enumMappings
+
     def transform(self, dataFrame):
-        outputFrame = dataFrame.fillna(0)
+        outputFrame = dataFrame
+        if len(self._enumMappings) > 0:
+            for column, value in self._enumMappings.iteritems():
+                if column in outputFrame:
+                    outputFrame[column] = outputFrame[column].fillna(value)
         return outputFrame
         
 class ModelStep:

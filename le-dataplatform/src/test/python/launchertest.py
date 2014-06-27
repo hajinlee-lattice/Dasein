@@ -13,8 +13,7 @@ from unittest import TestCase
 
 from launcher import Launcher
 from leframework import scoringengine as se
-from leframework.model.statemachine import StateMachine
-from leframework.model.states.initialize import Initialize
+from leframework.executors.learningexecutor import LearningExecutor
 
 
 class LauncherTest(TestCase):
@@ -43,7 +42,7 @@ class LauncherTest(TestCase):
         results = "./results"
         if os.path.exists(results):
             shutil.rmtree(results)
-
+            
     def testExecuteLearning(self):
         # These properties won't really be used since these are just unit tests.
         # Functional and end-to-end tests should be done from java
@@ -96,7 +95,7 @@ class LauncherTest(TestCase):
         for i in range(len(scores)):
             print str(i+1)+", "+str(scores[i])
         self.__createCSV(inputColumns, values)
-        
+
             
     def __getLineToScore(self, inputColumns, value):
         columnWithValue = zip(inputColumns, value)
@@ -154,6 +153,7 @@ class LauncherTest(TestCase):
         
         return decompressed.name
 
+
     def testExecuteLearningForProfile(self):
         # These properties won't really be used since these are just unit tests.
         # Functional and end-to-end tests should be done from java
@@ -161,13 +161,7 @@ class LauncherTest(TestCase):
         os.environ["SHDP_HD_FSWEB"] = "localhost:50070"
         launcher = Launcher("model-dataprofile.json")
         launcher.execute(False)
-        initialize = Initialize()
-        stateMachine = StateMachine()
-        stateMachine.addState(initialize, 1)
-        mediator = stateMachine.getMediator()
-        mediator.schema = dict()
-        mediator.schema["metadata"] = "./results/metadata.avro"
-        mediator.depivoted = False
+        learningExecutor = LearningExecutor()
           
-        results = initialize.retrieveMetadata(mediator)
+        results = learningExecutor.retrieveMetadata("./results/metadata.avro", False)
         self.assertTrue(results is not None)

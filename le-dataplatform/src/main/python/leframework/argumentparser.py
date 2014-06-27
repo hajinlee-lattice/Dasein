@@ -2,7 +2,6 @@ import csv
 import json
 import logging
 
-from encoder import HashEncoder
 import fastavro as avro
 import pandas as pd
 
@@ -67,8 +66,8 @@ class ArgumentParser(object):
         self.featureIndex = set()
         self.nameToFeatureIndex = dict()
         self.keyColIndex = set()
-        self.stringColNames = dict()
-        encoder = HashEncoder()
+        self.stringColNames = set()
+
         for f in self.fields:
             fType = f["type"][0]
             fName = f["name"]
@@ -86,7 +85,7 @@ class ArgumentParser(object):
                 if fName in self.keyCols:
                     self.keyColIndex.add(k)
                 if fType == 'string' and fName not in self.targets:
-                    self.stringColNames[fName] = encoder
+                    self.stringColNames.add(fName)
                 k = k+1
             l = l+1
         
@@ -108,13 +107,9 @@ class ArgumentParser(object):
                 try:  
                     if self.isAvro():
                         value = row[self.__getField(i)["name"]]
-                        fType = self.__getField(i)["type"][0]
-                        
                         if i == included[self.targetIndex]:
                             value = float(value)
-                            
                         rowlist.append(value)
-                            
                     else:
                         rowlist.append(self.__convertType(row[i], self.__getField(i)["type"][0]))
                 except Exception as e:

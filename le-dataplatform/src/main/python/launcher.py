@@ -83,10 +83,11 @@ class Launcher(object):
         params["schema"] = schema
         params["parser"] = parser
             
-        (training, test) = executor.transformData(params)
+        (training, test, metadata) = executor.transformData(params)
 
         params["training"] = training
         params["test"] = test
+        params["metadata"] = metadata
         
         clf = globals()['train'](training, test, schema, modelLocalDir, algorithmProperties)
         

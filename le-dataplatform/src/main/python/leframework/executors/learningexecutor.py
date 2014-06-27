@@ -1,5 +1,8 @@
 import logging
 import os
+
+import encoder
+import fastavro as avro
 from leframework.codestyle import overrides
 from leframework.executor import Executor
 from leframework.model.statemachine import StateMachine
@@ -45,19 +48,60 @@ class LearningExecutor(Executor):
         stateMachine.addState(Finalize(), 8)
         return stateMachine
 
+    def retrieveMetadata(self, schema, depivoted):
+        metadata = dict()
+        realColNameToRecord = dict()
+        
+        if os.path.isfile(schema):
+            with open(schema) as fp:
+                reader = avro.reader(fp)
+                for record in reader:
+                    colname = record["barecolumnname"]
+                    sqlcolname = ""
+                    record["hashValue"] = None
+                    if record["Dtype"] == "BND":
+                        sqlcolname = colname + "_Continuous"  if depivoted else colname
+                    elif depivoted:
+                        sqlcolname = colname + "_" + record["columnvalue"]
+                    else:
+                        sqlcolname = colname
+                        record["hashValue"] = encoder.transform(record["columnvalue"])
+                
+                    if colname in metadata:
+                        metadata[colname].append(record)
+                    else:
+                        metadata[colname] = [record]
+                
+                    realColNameToRecord[sqlcolname] = [record]
+        return (metadata, realColNameToRecord)
+    
+    def getDecoratedColumns(self, metadata):
+        stringColumns = dict()
+        continuousColumns = dict()
+        transform = encoder.HashEncoder()
+        
+        for key, value in metadata.iteritems():
+            if value[0]["Dtype"] == "STR":
+                stringColumns[key] = transform
+            else:
+                continuousColumns[key] = value[0]["median"]
+        
+        return (stringColumns, continuousColumns)
+
     @overrides(Executor)
     def transformData(self, params):
+        metadata = self.retrieveMetadata(params["schema"]["metadata"], params["parser"].isDepivoted())
+        (stringColumns, continuousColumns) = self.getDecoratedColumns(metadata[0])
         training = params["training"]
         test = params["test"]
-        stringColNames = params["parser"].getStringColumns()
         
-        steps = [EnumeratedColumnTransformStep(stringColNames), ImputationStep()]
+        steps = [EnumeratedColumnTransformStep(stringColumns), ImputationStep(continuousColumns)]
         pipeline = Pipeline(steps)
         params["pipeline"] = pipeline
         
         training = pipeline.predict(training).as_matrix()
         test = pipeline.predict(test).as_matrix()
-        return (training, test)
+        return (training, test, metadata)
 
     @overrides(Executor)
     def postProcessClassifier(self, clf, params):
@@ -73,6 +117,7 @@ class LearningExecutor(Executor):
             mediator.target = mediator.data[:, mediator.schema["targetIndex"]]
             mediator.pipeline = params["pipeline"]
             mediator.depivoted = parser.isDepivoted()
+            mediator.metadata = params["metadata"]
             stateMachine.run()
         else:
             logger.error("Generated classifier is null!")
