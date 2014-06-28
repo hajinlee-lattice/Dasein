@@ -1,7 +1,5 @@
 {
   "features": [
-    "P1_Event",
-    "Domain",
     "AwardYear",
     "BankruptcyFiled",
     "BusinessAnnualSalesAbs",

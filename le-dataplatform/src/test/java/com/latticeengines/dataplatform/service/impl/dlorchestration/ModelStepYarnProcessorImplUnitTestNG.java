@@ -51,7 +51,8 @@ public class ModelStepYarnProcessorImplUnitTestNG {
             assertTrue(msg.contains(ModelCommandParameters.MODEL_NAME));
             assertTrue(msg.contains(ModelCommandParameters.MODEL_TARGETS));
             assertTrue(msg.contains(ModelCommandParameters.EXCLUDE_COLUMNS));
-
+            assertTrue(msg.contains(ModelCommandParameters.DL_URL));
+            assertTrue(msg.contains(ModelCommandParameters.DL_TENANT));
             throw e;
         }
     }

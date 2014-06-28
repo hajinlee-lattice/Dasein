@@ -51,7 +51,9 @@ public class ModelingServiceTestUtils {
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.NUM_SAMPLES, String.valueOf(NUM_SAMPLES)));              
         String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());        
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
-       
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "ADEBD2V67059448rX25059174r"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://10.41.1.238/"));
+
         return command;
     }
 }

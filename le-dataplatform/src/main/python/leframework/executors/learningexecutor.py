@@ -14,6 +14,7 @@ from leframework.model.states.finalize import Finalize
 from leframework.model.states.initialize import Initialize
 from leframework.model.states.modelgenerator import ModelGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
+from leframework.model.states.namegenerator import NameGenerator
 from pipeline import EnumeratedColumnTransformStep
 from pipeline import ImputationStep
 from pipeline import Pipeline
@@ -31,11 +32,15 @@ class LearningExecutor(Executor):
     '''
 
 
-    def __init__(self):
-        '''
-        Constructor
-        '''
-
+    def __init__(self, runTimeProperties = None):
+        if runTimeProperties is None:
+            logger.error("No runtime properties available")
+            self.amHost = None
+            self.amPort = 0
+        else:
+            self.amHost = runTimeProperties["host"]
+            self.amPort = int(runTimeProperties["port"])
+        
     def __setupJsonGenerationStateMachine(self):
         stateMachine = StateMachine()
         stateMachine.addState(Initialize(), 1)  
@@ -45,7 +50,8 @@ class LearningExecutor(Executor):
         stateMachine.addState(ColumnMetadataGenerator(), 5)
         stateMachine.addState(ModelGenerator(), 6)
         stateMachine.addState(SummaryGenerator(), 7)
-        stateMachine.addState(Finalize(), 8)
+        stateMachine.addState(NameGenerator(), 8)
+        stateMachine.addState(Finalize(), 9)
         return stateMachine
 
     def retrieveMetadata(self, schema, depivoted):
@@ -117,6 +123,7 @@ class LearningExecutor(Executor):
             mediator.target = mediator.data[:, mediator.schema["targetIndex"]]
             mediator.pipeline = params["pipeline"]
             mediator.depivoted = parser.isDepivoted()
+            mediator.provenanceProperties = parser.getProvenanceProperties()
             mediator.metadata = params["metadata"]
             stateMachine.run()
         else:
@@ -136,4 +143,3 @@ class LearningExecutor(Executor):
             if filename.endswith(badSuffix):
                 return False
         return True
-        

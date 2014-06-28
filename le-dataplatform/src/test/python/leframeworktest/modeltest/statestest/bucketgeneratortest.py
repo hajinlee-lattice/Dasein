@@ -46,14 +46,14 @@ class BucketGeneratorTest(TestCase):
             
             for i in range(len(probRange)):
                 if probRange[i] < high:
-                    highIndex = i - 1 
+                    highIndex = i-1 
            
-            self.assertTrue(self.__getCumulativeWidth(widthRange, highestIndex) < 0.5 * self.__getCumulativeWidth(widthRange, highIndex), "Invalid bucket size for highest!")
+            self.assertTrue(self.__getCumulativeWidth(widthRange, highestIndex) < 0.5*self.__getCumulativeWidth(widthRange, highIndex), "Invalid bucket size for highest!")
             
         
     def __getCumulativeWidth(self, widthRange, idx):   
         cumWidth = 0
-        for i in range(idx + 1):
+        for i in range(idx+1):
             cumWidth += widthRange[i]
             
         return cumWidth

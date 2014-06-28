@@ -4,22 +4,24 @@ import java.util.Collections;
 import java.util.List;
 
 public class ModelCommandParameters {
-    
+
     // Hardcoded name of hdfs subfolder
     public static final String EVENT_METADATA = "EventMetadata";
-    
+
     // Mandatory parameters
     public static final String EVENT_TABLE = "EventTable";
     public static final String KEY_COLS = "KeyCols";
     public static final String MODEL_NAME = "ModelName";
     public static final String MODEL_TARGETS = "ModelTargets";
-    public static final String EXCLUDE_COLUMNS = "ExcludeColumns";    
-    
+    public static final String EXCLUDE_COLUMNS = "ExcludeColumns";
+    public static final String DL_URL = "DataLoader_Instance";
+    public static final String DL_TENANT = "DataLoader_TenantName";
+
     // Optional parameters
     public static final String NUM_SAMPLES = "NumSamples";
     public static final String DEPIVOTED_EVENT_TABLE = "DepivotedEventTable";
     public static final String ALGORITHM_PROPERTIES = "AlgorithmProperties";
-    
+
     private String eventTable = null;
     private String depivotedEventTable = null;
     private String metadataTable = EVENT_METADATA;
@@ -29,6 +31,24 @@ public class ModelCommandParameters {
     private List<String> modelTargets = Collections.emptyList();
     private List<String> excludeColumns = Collections.emptyList();
     private String algorithmProperties = null;
+    private String dlUrl = null;
+    private String dlTenant = null;
+
+    public String getDlUrl() {
+        return dlUrl;
+    }
+
+    public void setDlUrl(String dlUrl) {
+        this.dlUrl = dlUrl;
+    }
+
+    public String getDlTenant() {
+        return dlTenant;
+    }
+
+    public void setDlTenant(String dlTenant) {
+        this.dlTenant = dlTenant;
+    }
 
     public String getEventTable() {
         return eventTable;

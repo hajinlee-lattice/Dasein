@@ -46,6 +46,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     private String customer;
     private String table;
     private String metadataTable;
+    private String provenanceProperties;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -82,7 +83,7 @@ public class Model implements HasName, HasPid, HasId<String> {
     @JoinColumn(name = "FK_MODEL_DEF_ID")
     public ModelDefinition getModelDefinition() {
         return modelDefinition;
-    } 
+    }
 
     @JsonProperty("model_definition")
     public void setModelDefinition(ModelDefinition modelDef) {
@@ -289,6 +290,17 @@ public class Model implements HasName, HasPid, HasId<String> {
 
     public void setKeyCols(String keyCols) {
         this.keyCols = StringTokenUtils.stringToList(keyCols);
+    }
+
+    @JsonProperty("provenance_properties")
+    public void setProvenanceProperties(String provenanceProperties) {
+        this.provenanceProperties = provenanceProperties;
+    }
+
+    @JsonProperty("provenance_properties")
+    @Column(name = "PROVENANCE_PROPERTIES")
+    public String getProvenanceProperties() {
+        return this.provenanceProperties;
     }
 
     /**

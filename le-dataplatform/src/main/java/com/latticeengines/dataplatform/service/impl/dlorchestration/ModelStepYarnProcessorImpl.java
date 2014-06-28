@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -279,10 +280,25 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         model.setKeyCols(commandParameters.getKeyCols());
         model.setCustomer(customer);
         model.setDataFormat(AVRO);
-               
+        model.setProvenanceProperties(generateProvenanceProperties(commandParameters));       
+        
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
         
         return model;
+    }
+
+    private String generateProvenanceProperties(ModelCommandParameters commandParameters) {
+        Properties provenanceProperties = new Properties();
+        provenanceProperties.put(ModelCommandParameters.DL_URL, commandParameters.getDlUrl());
+        provenanceProperties.put(ModelCommandParameters.DL_TENANT, commandParameters.getDlTenant());
+        provenanceProperties.put(ModelCommandParameters.EVENT_TABLE, commandParameters.getEventTable());
+        
+        String serialized = "";
+        for (String key : provenanceProperties.stringPropertyNames()) {
+            serialized += key+"="+provenanceProperties.getProperty(key)+" ";
+        }
+
+        return serialized.trim();
     }
 }

@@ -1,7 +1,8 @@
 import csv
 import json
 import logging
-
+import ConfigParser
+from StringIO import StringIO
 import fastavro as avro
 import pandas as pd
 
@@ -17,7 +18,7 @@ class ArgumentParser(object):
     This class is responsible for parsing the json file as understood by the 
     LE data platform.
     """
-    def __init__(self, metadataFile):
+    def __init__(self, metadataFile, propertyFile = None):
         metadataJson = open(self.stripPath(metadataFile)).read()
         logger.debug("JSON metadata %s" % metadataJson)
         self.metadataSchema = json.loads(metadataJson)
@@ -32,13 +33,34 @@ class ArgumentParser(object):
         self.depivoted = False
         if "depivoted" in self.metadataSchema:
             self.depivoted = self.metadataSchema["depivoted"] == "True"
-        self.algorithmProperties = {}
         self.transformer = None
+        
+        self.algorithmProperties = self.__parseProperties("algorithm_properties")
+        self.provenanceProperties = self.__parseProperties("provenance_properties")
+        self.runtimeProperties = self.__parseRuntimeProperties(propertyFile)
+        logger.debug("reading runtime properties" + str(self.runtimeProperties))
+        
+    def __parseProperties(self, name):
+        element = {}
         try:
-            properties = self.metadataSchema["algorithm_properties"]
-            self.algorithmProperties = dict(u.split("=") for u in properties.split(" "))
+            properties = self.metadataSchema[name]
+            element = dict(u.split("=") for u in properties.split(" "))
         except Exception:
             pass
+    
+        return element
+        
+    def __parseRuntimeProperties(self, propertyFile):
+        if propertyFile is None:
+            logger.info("No runtime properties found")
+            return None
+        
+        logger.info("Reading properties file: " + propertyFile)
+        properties = '[runtimeconfig]\n' + open(propertyFile, 'r').read()
+        properties_fp = StringIO(properties)
+        cf = ConfigParser.ConfigParser()
+        cf.readfp(properties_fp)
+        return dict(cf.items("runtimeconfig"))
         
     def stripPath(self, fileName):
         return fileName[fileName.rfind('/')+1:len(fileName)]
@@ -155,3 +177,9 @@ class ArgumentParser(object):
     
     def getStringColumns(self):
         return self.stringColNames
+
+    def getProvenanceProperties(self):
+        return self.provenanceProperties
+
+    def getRuntimeProperties(self):
+        return self.runtimeProperties

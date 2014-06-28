@@ -103,7 +103,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         m.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
         m.setCustomer("DELL");
         m.setDataFormat("avro");
-
+        m.setProvenanceProperties("DataLoader_Instance=http://10.41.1.238/ DataLoader_TenantName=ADEBD2V67059448rX25059174r EventTable=DataForScoring_Lattice");
         return m;
     }
 

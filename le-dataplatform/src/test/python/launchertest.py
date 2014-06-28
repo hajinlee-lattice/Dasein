@@ -72,7 +72,7 @@ class LauncherTest(TestCase):
         
         # Test the scoring engine using the generated pipeline that was deserialized
         inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
-        value = [ random() for j in range(len(inputColumns))]
+        value = [ random() for _ in range(len(inputColumns))]
         lines = self.__getLineToScore(inputColumns, value)
         rowDict1 = se.getRowToScore(lines[0])
         resultFrame1 = se.predict(pipeline, rowDict1)
@@ -89,14 +89,14 @@ class LauncherTest(TestCase):
         values = []
         values.append(value)
         for i in range(testcase-1):
-            values.append([random() for j in range(len(inputColumns))])
+            values.append([random() for _ in range(len(inputColumns))])
         
         scores = self.__getPredictScore(pipeline, values) 
         for i in range(len(scores)):
             print str(i+1)+", "+str(scores[i])
         self.__createCSV(inputColumns, values)
 
-            
+
     def __getLineToScore(self, inputColumns, value):
         columnWithValue = zip(inputColumns, value)
         line1 = self.__getLine(columnWithValue)
@@ -120,7 +120,7 @@ class LauncherTest(TestCase):
         line += "]"
         return line
     
-    def __createCSV(self,inputColumns, values):
+    def __createCSV(self, inputColumns, values):
         with open('./results/test.csv', 'wb') as csvfile:
             csvWriter = csv.writer(csvfile)
             csvWriter.writerow(['id']+inputColumns)

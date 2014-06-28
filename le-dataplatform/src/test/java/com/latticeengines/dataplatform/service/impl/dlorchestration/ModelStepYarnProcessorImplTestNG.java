@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
 public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
-    
+
     private static final Log log = LogFactory.getLog(ModelStepYarnProcessorImplTestNG.class);
 
     private static final int NUM_ALGORITHMS = 1; // No LR; only RF for now.
@@ -59,7 +59,8 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
         waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
     }
 
-    private void waitForSuccess(int expectedNumAppIds, List<ApplicationId> appIds, ModelCommandStep step) throws Exception {
+    private void waitForSuccess(int expectedNumAppIds, List<ApplicationId> appIds, ModelCommandStep step)
+            throws Exception {
         log.info(step + ": Waiting for these appIds to succeed: " + Joiner.on(",").join(appIds));
         assertEquals(expectedNumAppIds, appIds.size());
         for (ApplicationId appId : appIds) {
