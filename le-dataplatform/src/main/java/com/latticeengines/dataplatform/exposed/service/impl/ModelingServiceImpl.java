@@ -139,6 +139,7 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setPythonScriptHdfsPath(algorithm.getScript());
         classifier.setDataFormat(model.getDataFormat());
         classifier.setAlgorithmProperties(algorithm.getAlgorithmProperties());
+        classifier.setProvenanceProperties(model.getProvenanceProperties());
         classifier.setMetadataHdfsPath(getAvroMetadataPathInHdfs(model.getMetadataHdfsPath()));
 
         String samplePrefix = algorithm.getSampleName();
