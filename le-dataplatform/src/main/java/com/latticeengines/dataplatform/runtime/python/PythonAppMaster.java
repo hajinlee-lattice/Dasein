@@ -13,8 +13,10 @@ import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.yarn.am.AppmasterConstants;
 import org.springframework.yarn.am.ContainerLauncherInterceptor;
 import org.springframework.yarn.am.StaticEventingAppmaster;
+import org.springframework.yarn.am.allocate.AbstractAllocator;
 import org.springframework.yarn.am.container.AbstractLauncher;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -23,6 +25,8 @@ import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
+import com.latticeengines.dataplatform.runtime.ProgressMonitor;
+import com.latticeengines.dataplatform.runtime.RuntimeConfig;
 import com.latticeengines.dataplatform.runtime.metric.LedpMetricsMgr;
 
 public class PythonAppMaster extends StaticEventingAppmaster implements ContainerLauncherInterceptor {
@@ -39,37 +43,71 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 
     private String pythonContainerId;
 
+    private ProgressMonitor monitor;
+
+    private String priority;
+
+    private String customer;
+
     @Override
     protected void onInit() throws Exception {
         log.info("Initializing application.");
-        setEnvironment(System.getenv());
         super.onInit();
         if (getLauncher() instanceof AbstractLauncher) {
             ((AbstractLauncher) getLauncher()).addInterceptor(this);
         }
-        registerAppmaster();
+        monitor = new ProgressMonitor(super.getAllocator());
+    }
+
+    @Override
+    public void setParameters(Properties parameters) {
+        if (parameters == null) {
+            return;
+        }
+        for (Map.Entry<Object, Object> parameter : parameters.entrySet()) {
+            log.info("Key = " + parameter.getKey().toString() + " Value = " + parameter.getValue().toString());
+        }
+        super.setParameters(parameters);
+
+        priority = parameters.getProperty(ContainerProperty.PRIORITY.name());
+        if (priority == null) {
+            throw new LedpException(LedpCode.LEDP_12000);
+        }
+        customer = parameters.getProperty(AppMasterProperty.CUSTOMER.name());
+        if (customer == null) {
+            throw new LedpException(LedpCode.LEDP_12007);
+        }
+
+        setRuntimeConfig(parameters);
+    }
+
+    @Override
+    public void submitApplication() {
+        super.submitApplication();
         String appAttemptId = getApplicationAttemptId().toString();
         final String appId = getApplicationId(appAttemptId);
 
         ledpMetricsMgr = LedpMetricsMgr.getInstance(appAttemptId);
+        ledpMetricsMgr.setPriority(priority);
+        ledpMetricsMgr.setCustomer(customer);
         final long appStartTime = System.currentTimeMillis();
         ledpMetricsMgr.setAppStartTime(appStartTime);
 
-        log.info("Application id = " + getApplicationId(appId));
+        log.info("Application submitted with Application id = " + getApplicationId(appId));
 
         new Thread(new Runnable() {
 
             @Override
             public void run() {
-            	AppInfo appInfo = yarnService.getApplication(appId);
+                AppInfo appInfo = yarnService.getApplication(appId);
+
                 String queue = appInfo.getQueue();
                 if (queue == null) {
                     throw new LedpException(LedpCode.LEDP_12006);
                 }
-
                 ledpMetricsMgr.setQueue(queue);
                 ledpMetricsMgr.start();
-                
+
                 long appSubmissionTime = appInfo.getStartTime();
                 log.info("App start latency = " + (appStartTime - appSubmissionTime));
                 ledpMetricsMgr.setAppSubmissionTime(appSubmissionTime);
@@ -78,37 +116,13 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         }).start();
     }
 
-    private String getApplicationId(String appAttemptId) {
-        String[] tokens = appAttemptId.split("_");
-        return "application_" + tokens[1] + "_" + tokens[2];
-    }
-
-    @Override
-    public void setParameters(Properties parameters) {
-        if (parameters == null) {
-            return;
-        }            
-        for (Map.Entry<Object, Object> parameter : parameters.entrySet()) {
-            log.info("Key = " + parameter.getKey().toString() + " Value = " + parameter.getValue().toString());
-        }
-        super.setParameters(parameters);
-        
-        String priority = parameters.getProperty(ContainerProperty.PRIORITY.name());
-        if (priority == null) {
-            throw new LedpException(LedpCode.LEDP_12000);
-        }
-        String customer = parameters.getProperty(AppMasterProperty.CUSTOMER.name());
-        if (customer == null) {
-            throw new LedpException(LedpCode.LEDP_12007);
-        }
-        ledpMetricsMgr.setPriority(priority);
-        ledpMetricsMgr.setCustomer(customer);;
-    }
-
     @Override
     public ContainerLaunchContext preLaunch(Container container, ContainerLaunchContext context) {
         pythonContainerId = container.getId().toString();
         log.info("Container id = " + pythonContainerId);
+        // Start monitoring process
+        monitor.start();
+
         return context;
     }
 
@@ -121,21 +135,12 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         super.onContainerLaunched(container);
     }
 
-    private void cleanupJobDir() {
-        String dir = "/app/dataplatform/" + getParameters().getProperty(ContainerProperty.JOBDIR.name());
-        try {
-            HdfsUtils.rmdir(yarnConfiguration, dir);
-        } catch (Exception e) {
-            log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
-        }
-    }
-
     @Override
-    protected void onContainerCompleted(ContainerStatus status) { 	
+    protected void onContainerCompleted(ContainerStatus status) {
         if (status.getExitStatus() == ContainerExitStatus.SUCCESS) {
             log.info("Container id = " + status.getContainerId().toString() + " completed.");
             ledpMetricsMgr.setContainerEndTime(System.currentTimeMillis());
-            // immediately publish 
+            // immediately publish
             ledpMetricsMgr.publishMetricsNow();
         }
 
@@ -143,7 +148,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 
         } else {
             log.info("Printing out the status to find the reason: " + status.getExitStatus());
-        }     
+        }
         super.onContainerCompleted(status);
     }
 
@@ -153,7 +158,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 
         if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
             ledpMetricsMgr.incrementNumberPreemptions();
-            // immediately publish 
+            // immediately publish
             ledpMetricsMgr.publishMetricsNow();
             try {
                 Thread.sleep(5000L);
@@ -161,7 +166,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
             } catch (InterruptedException e) {
                 log.error(e);
             }
-            
+
             getAllocator().allocateContainers(1);
             return true;
         }
@@ -184,8 +189,34 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         super.doStop();
         cleanupJobDir();
         ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
-        // immediately publish 
+        // immediately publish
         ledpMetricsMgr.publishMetricsNow();
     }
 
+    private String getApplicationId(String appAttemptId) {
+        String[] tokens = appAttemptId.split("_");
+        return "application_" + tokens[1] + "_" + tokens[2];
+    }
+
+    private void setRuntimeConfig(Properties parameters) {
+        // Sets runtime host and port needed by python
+        String configPath = "/app/dataplatform/" + parameters.getProperty(ContainerProperty.JOBDIR.name()) + "/"
+                + parameters.getProperty(ContainerProperty.RUNTIME_CONFIG.name());
+        RuntimeConfig runtimeConfig = new RuntimeConfig(configPath, yarnConfiguration);
+        runtimeConfig.addProperties("host", monitor.getHost());
+        runtimeConfig.addProperties("port", Integer.toString(monitor.getPort()));
+        runtimeConfig.writeToHdfs();
+        log.info("Writing runtime host: " + monitor.getHost() + " port: " + monitor.getPort());
+    }
+
+    private void cleanupJobDir() {
+
+        String dir = "/app/dataplatform/" + getParameters().getProperty(ContainerProperty.JOBDIR.name());
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, dir);
+        } catch (Exception e) {
+            log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
+        }
+
+    }
 }

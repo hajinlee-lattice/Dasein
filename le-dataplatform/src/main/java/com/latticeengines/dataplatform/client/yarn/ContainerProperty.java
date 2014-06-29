@@ -7,6 +7,6 @@ public enum ContainerProperty {
     MEMORY, //
     PRIORITY, //
     METADATA, //
-    JOBDIR;
-
+    JOBDIR, //
+    RUNTIME_CONFIG;
 }

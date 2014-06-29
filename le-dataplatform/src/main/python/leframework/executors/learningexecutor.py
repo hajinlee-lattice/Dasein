@@ -42,7 +42,7 @@ class LearningExecutor(Executor):
             self.amPort = int(runTimeProperties["port"])
         
     def __setupJsonGenerationStateMachine(self):
-        stateMachine = StateMachine()
+        stateMachine = StateMachine(self.amHost, self.amPort)
         stateMachine.addState(Initialize(), 1)  
         stateMachine.addState(CalibrationGenerator(), 4)
         stateMachine.addState(AverageProbabilityGenerator(), 2)

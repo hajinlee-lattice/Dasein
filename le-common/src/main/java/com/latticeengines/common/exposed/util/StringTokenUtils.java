@@ -3,6 +3,7 @@ package com.latticeengines.common.exposed.util;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.StringTokenizer;
  
 public class StringTokenUtils  {
@@ -45,4 +46,29 @@ public class StringTokenUtils  {
         return strList;
     }
 
+    public static String propertyToString(Properties p) {
+        String serialized = "";
+        if(p.isEmpty()) {
+            return serialized;
+        }
+            
+        for (String key : p.stringPropertyNames()) {
+            serialized += key+"="+p.getProperty(key)+" ";
+        }
+
+        return serialized.trim();
+    }
+    
+    public static Properties stringToProperty(String s) {
+        Properties p = new Properties();
+        if (s == null) {
+            return p;
+        }
+        String[] propertyKeyValues = s.split(" ");
+        for (String propertyKeyValue : propertyKeyValues) {
+            String[] kv = propertyKeyValue.split("=");
+            p.setProperty(kv[0], kv[1]);
+        }
+        return p;
+    }
 }

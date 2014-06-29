@@ -16,8 +16,8 @@ logger = logging.getLogger(name='launcher')
 
 class Launcher(object):
     
-    def __init__(self, modelFileName):
-        self.parser = ArgumentParser(modelFileName)
+    def __init__(self, modelFileName, propertyFileName = None):
+        self.parser = ArgumentParser(modelFileName, propertyFileName)
     
     def stripPath(self, fileName):
         return fileName[fileName.rfind('/') + 1:len(fileName)]
@@ -68,7 +68,7 @@ class Launcher(object):
         # that contains the generated model data
         execfile(script, globals())
         
-        executor = LearningExecutor()
+        executor = LearningExecutor(self.parser.getRuntimeProperties())
         if 'getExecutor' in globals():
             executor = globals()['getExecutor']()
 
@@ -125,8 +125,11 @@ if __name__ == "__main__":
     
     Arguments:
     sys.argv[1] -- schema json file
+    sys.argv[2] -- runtime properties file
     """
-    l = Launcher(sys.argv[1])
+ 
+    l = Launcher(sys.argv[1], sys.argv[2])
     l.execute(True)
+    
      
     

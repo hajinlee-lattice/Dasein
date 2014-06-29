@@ -21,6 +21,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 
@@ -147,27 +148,14 @@ public class AlgorithmBase implements Algorithm {
     @JsonIgnore
     @Transient
     public Properties getAlgorithmProps() {
-        return createPropertiesFromString(getAlgorithmProperties());
+        return StringTokenUtils.stringToProperty(getAlgorithmProperties());
     }
 
     @Override
     @JsonIgnore
     @Transient
     public Properties getContainerProps() {
-        return createPropertiesFromString(getContainerProperties());
-    }
-
-    private static Properties createPropertiesFromString(String value) {
-        Properties props = new Properties();
-        if (value == null) {
-            return props;
-        }
-        String[] propertyKeyValues = value.split(" ");
-        for (String propertyKeyValue : propertyKeyValues) {
-            String[] kv = propertyKeyValue.split("=");
-            props.setProperty(kv[0], kv[1]);
-        }
-        return props;
+        return StringTokenUtils.stringToProperty(getContainerProperties());
     }
 
     @Override

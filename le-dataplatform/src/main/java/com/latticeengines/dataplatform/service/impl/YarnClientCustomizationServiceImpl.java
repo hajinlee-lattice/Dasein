@@ -31,7 +31,7 @@ import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 
 @Component("yarnClientCustomizationService")
 public class YarnClientCustomizationServiceImpl implements YarnClientCustomizationService {
-    
+
     private static final Log log = LogFactory.getLog(YarnClientCustomizationServiceImpl.class);
 
     @Autowired
@@ -42,6 +42,8 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
 
     @Autowired
     private JobNameService jobNameService;
+
+    private static final String RUNTIME_CONFIG = "runtimeconfig.properties";
 
     @Override
     public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties,
@@ -62,6 +64,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         customization.beforeCreateLocalLauncherContextFile(containerProperties);
         String fileName = createContainerLauncherContextFile(customization, appMasterProperties, containerProperties);
         containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
+        containerProperties.put(ContainerProperty.RUNTIME_CONFIG.name(), RUNTIME_CONFIG);
         containerProperties.setProperty(AppMasterProperty.QUEUE.name(),
                 appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()));
         containerProperties.setProperty(AppMasterProperty.CUSTOMER.name(),

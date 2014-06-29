@@ -19,6 +19,7 @@ public enum LedpCode {
     LEDP_11003("Could not retrieve keys for table {0}."), //
     // Runtime service: 12000-12999
     LEDP_12000("Parameter PRIORITY undefined for analytics job."), //
+    LEDP_12001("Could not create runtime configuration."), //
     LEDP_12003("No avro file in specified directory {0}."), //
     LEDP_12004("Sampling configuration property ledp.sampling.config not specified."), //
     LEDP_12005("Model definition must not be null."), //

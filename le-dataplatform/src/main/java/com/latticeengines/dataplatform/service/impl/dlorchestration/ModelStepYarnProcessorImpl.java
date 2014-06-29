@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
@@ -294,11 +295,6 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         provenanceProperties.put(ModelCommandParameters.DL_TENANT, commandParameters.getDlTenant());
         provenanceProperties.put(ModelCommandParameters.EVENT_TABLE, commandParameters.getEventTable());
         
-        String serialized = "";
-        for (String key : provenanceProperties.stringPropertyNames()) {
-            serialized += key+"="+provenanceProperties.getProperty(key)+" ";
-        }
-
-        return serialized.trim();
+        return StringTokenUtils.propertyToString(provenanceProperties);
     }
 }
