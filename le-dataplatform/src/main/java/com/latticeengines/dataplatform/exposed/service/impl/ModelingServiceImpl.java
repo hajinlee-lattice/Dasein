@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -50,6 +51,7 @@ import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.algorithm.AlgorithmBase;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.DataProfilingAlgorithm;
 
 @Component("modelingService")
@@ -349,9 +351,12 @@ public class ModelingServiceImpl implements ModelingService {
         m.setModelHdfsDir(m.getMetadataHdfsPath());
         ModelDefinition modelDefinition = new ModelDefinition();
         modelDefinition.setName("DataProfile-" + System.currentTimeMillis());
-        Algorithm dataProfileAlgorithm = new DataProfilingAlgorithm();
+        AlgorithmBase dataProfileAlgorithm = new DataProfilingAlgorithm();
         dataProfileAlgorithm.setSampleName(dataProfileConfig.getSamplePrefix());
         dataProfileAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
+        if (!StringUtils.isEmpty(dataProfileConfig.getScript())) {
+            dataProfileAlgorithm.setScript(dataProfileConfig.getScript());
+        }
         modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataProfileAlgorithm }));
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         m.setModelDefinition(modelDefinition);

@@ -23,7 +23,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.dlorchestration.DLOrchestrationService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelStepPostProcessor;
+import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 
@@ -37,7 +37,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
     
     private ModelCommandEntityMgr modelCommandEntityMgr;
          
-    private JobService jobService;  
+    private JobService jobService;
    
     private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
     
@@ -47,9 +47,9 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
     
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
     
-    private ModelStepPostProcessor modelStepFinishProcessor;
+    private ModelStepProcessor modelStepFinishProcessor;
     
-    private ModelStepPostProcessor modelStepOutputResultsProcessor;
+    private ModelStepProcessor modelStepOutputResultsProcessor;
     
     private int waitTime = 180;
     
@@ -59,12 +59,16 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
     }
 
     @Override
-    @Transactional(value="dlorchestration", propagation = Propagation.REQUIRED)    
+    @Transactional(value="dlorchestration", propagation = Propagation.REQUIRED)
     public void run(JobExecutionContext context) throws JobExecutionException {
         List<Future<Long>> futures = new ArrayList<>();
         List<ModelCommand> modelCommands = modelCommandEntityMgr.getNewAndInProgress();
         String modelCommandsStr = Joiner.on(",").join(modelCommands);
-        log.debug("Begin processing " + modelCommands.size() + " model commands: " + modelCommandsStr);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Begin processing " + modelCommands.size() + " model commands: " + modelCommandsStr);
+        }
+        
         for (ModelCommand modelCommand : modelCommands) {
             futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(modelCommand, 
                     jobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor,
@@ -72,22 +76,25 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
         }
         for (Future<Long> future : futures) {
             try {
-                future.get(waitTime, TimeUnit.SECONDS);                
+                future.get(waitTime, TimeUnit.SECONDS);
             } catch (Exception e) {
                 // ModelCommandCallable is responsible for consuming any exceptions while processing
                 // An exception here indicates a problem outside of the workflow.
                 log.error(e.getMessage(), e);
             }
         }
-   
-        log.debug("Finished processing " + modelCommands.size() + " model commands: " + modelCommandsStr);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Finished processing " + modelCommands.size() + " model commands: " + modelCommandsStr);
+        }
+        
     }
 
     public AsyncTaskExecutor getDlOrchestrationJobTaskExecutor() {
         return dlOrchestrationJobTaskExecutor;
     }
 
-    public void setDlOrchestrationJobTaskExecutor(AsyncTaskExecutor dlOrchestrationJobTaskExecutor) {        
+    public void setDlOrchestrationJobTaskExecutor(AsyncTaskExecutor dlOrchestrationJobTaskExecutor) {
         this.dlOrchestrationJobTaskExecutor = dlOrchestrationJobTaskExecutor;
     }
 
@@ -139,19 +146,19 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
         this.modelCommandResultEntityMgr = modelCommandResultEntityMgr;
     }
 
-    public ModelStepPostProcessor getModelStepFinishProcessor() {
+    public ModelStepProcessor getModelStepFinishProcessor() {
         return modelStepFinishProcessor;
     }
 
-    public void setModelStepFinishProcessor(ModelStepPostProcessor modelStepFinishProcessor) {
+    public void setModelStepFinishProcessor(ModelStepProcessor modelStepFinishProcessor) {
         this.modelStepFinishProcessor = modelStepFinishProcessor;
     }
 
-    public ModelStepPostProcessor getModelStepOutputResultsProcessor() {
+    public ModelStepProcessor getModelStepOutputResultsProcessor() {
         return modelStepOutputResultsProcessor;
     }
 
-    public void setModelStepOutputResultsProcessor(ModelStepPostProcessor modelStepOutputResultsProcessor) {
+    public void setModelStepOutputResultsProcessor(ModelStepProcessor modelStepOutputResultsProcessor) {
         this.modelStepOutputResultsProcessor = modelStepOutputResultsProcessor;
     }
 

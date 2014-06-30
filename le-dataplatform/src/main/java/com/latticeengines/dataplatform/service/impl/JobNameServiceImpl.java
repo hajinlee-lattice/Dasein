@@ -22,7 +22,7 @@ public class JobNameServiceImpl implements JobNameService {
     private Splitter jobNameSplitter = Splitter.on(JOBNAME_DELIMITER);
     
     @Override
-    public String createJobName(String customer, String jobType) {        
+    public String createJobName(String customer, String jobType) {
         return joiner.join(customer, jobType, dateTimeFormatter.print(new DateTime()));
     }
     

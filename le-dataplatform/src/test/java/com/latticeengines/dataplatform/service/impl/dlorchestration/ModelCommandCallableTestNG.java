@@ -17,7 +17,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelStepPostProcessor;
+import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
@@ -50,10 +50,10 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
 
     @Autowired
-    private ModelStepPostProcessor modelStepFinishProcessor;
+    private ModelStepProcessor modelStepFinishProcessor;
 
     @Autowired
-    private ModelStepPostProcessor modelStepOutputResultsProcessor;
+    private ModelStepProcessor modelStepOutputResultsProcessor;
 
     protected boolean doDependencyLibraryCopy() {
         return false;

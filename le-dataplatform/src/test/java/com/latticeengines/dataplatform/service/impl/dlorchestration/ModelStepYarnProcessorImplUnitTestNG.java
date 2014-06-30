@@ -70,14 +70,14 @@ public class ModelStepYarnProcessorImplUnitTestNG {
     @Test(groups = "unit")
     public void testGenerateSamplingConfiguration() {
         SamplingConfiguration samplingConfig = processor.generateSamplingConfiguration(
-                ModelStepYarnProcessorImpl.AlgorithmType.RANDOM_FOREST, "Nutanix", createModelCommandParameters());
+                ModelStepYarnProcessorImpl.DataSetType.STANDARD, "Nutanix", createModelCommandParameters());
         assertEquals(samplingConfig.getTable(), "Q_EventTable_Nutanix");
         assertEquals(1, samplingConfig.getSamplingElements().size());
     }
 
     @Test(groups = "unit")
     public void testGenerateModel() {
-        Model model = processor.generateModel(ModelStepYarnProcessorImpl.AlgorithmType.RANDOM_FOREST, "Nutanix",
+        Model model = processor.generateModel(ModelStepYarnProcessorImpl.DataSetType.STANDARD, "Nutanix",
                 createModelCommandParameters());
         assertEquals(1, model.getModelDefinition().getAlgorithms().size());
     }

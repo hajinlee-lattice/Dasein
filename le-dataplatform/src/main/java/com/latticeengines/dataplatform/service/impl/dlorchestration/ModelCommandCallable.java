@@ -22,7 +22,7 @@ import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelStepPostProcessor;
+import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
@@ -52,17 +52,17 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
 
-    private ModelStepPostProcessor modelStepFinishProcessor;
+    private ModelStepProcessor modelStepFinishProcessor;
 
-    private ModelStepPostProcessor modelStepOutputResultsProcessor;
+    private ModelStepProcessor modelStepOutputResultsProcessor;
 
     private ModelCommand modelCommand;
 
     public ModelCommandCallable(ModelCommand modelCommand, JobService jobService,
             ModelCommandEntityMgr modelCommandEntityMgr, ModelCommandStateEntityMgr modelCommandStateEntityMgr,
             ModelStepYarnProcessor modelStepYarnProcessor, ModelCommandLogService modelCommandLogService,
-            ModelCommandResultEntityMgr modelCommandResultEntityMgr, ModelStepPostProcessor modelStepFinishProcessor,
-            ModelStepPostProcessor modelStepOutputResultsProcessor) {
+            ModelCommandResultEntityMgr modelCommandResultEntityMgr, ModelStepProcessor modelStepFinishProcessor,
+            ModelStepProcessor modelStepOutputResultsProcessor) {
         this.modelCommand = modelCommand;
         this.jobService = jobService;
         this.modelCommandEntityMgr = modelCommandEntityMgr;
@@ -188,7 +188,7 @@ public class ModelCommandCallable implements Callable<Long> {
         modelCommandEntityMgr.update(modelCommand);
     }
 
-    private void executePostStep(ModelStepPostProcessor processor, ModelCommandStep step,
+    private void executePostStep(ModelStepProcessor processor, ModelCommandStep step,
             ModelCommandParameters commandParameters) {
         long start = System.currentTimeMillis();
         modelCommandLogService.logBeginStep(modelCommand, step);

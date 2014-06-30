@@ -31,9 +31,9 @@ public class ModelCommandLogServiceImpl implements ModelCommandLogService {
     
     @Override
     public void log(ModelCommand modelCommand, String message) {
-        log.info(MODELCOMMAND_ID_LOG_PREFIX+":" + modelCommand.getPid() + " " + message);
+        log.info(MODELCOMMAND_ID_LOG_PREFIX + ":" + modelCommand.getPid() + " " + message);
 
-        ModelCommandLog modelCommandLog = new ModelCommandLog(modelCommand, message);        
+        ModelCommandLog modelCommandLog = new ModelCommandLog(modelCommand, message);
 
         // Insert new row for each message
         modelCommandLogEntityMgr.create(modelCommandLog);

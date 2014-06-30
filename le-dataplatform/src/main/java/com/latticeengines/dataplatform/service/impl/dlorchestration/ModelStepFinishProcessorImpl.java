@@ -7,13 +7,13 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelStepPostProcessor;
+import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 
 @Component("modelStepFinishProcessor")
-public class ModelStepFinishProcessorImpl implements ModelStepPostProcessor {
+public class ModelStepFinishProcessorImpl implements ModelStepProcessor {
 
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;

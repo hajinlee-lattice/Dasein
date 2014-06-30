@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelStepPostProcessor;
+import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
@@ -27,7 +27,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     private static final Log log = LogFactory.getLog(ModelStepOutputResultsProcessorImplTestNG.class);
 
     @Autowired
-    private ModelStepPostProcessor modelStepOutputResultsProcessor;
+    private ModelStepProcessor modelStepOutputResultsProcessor;
 
     private ModelCommandCallable modelCommandCallable = new ModelCommandCallable(null, null, null, null, null, null,
             null, null, null);

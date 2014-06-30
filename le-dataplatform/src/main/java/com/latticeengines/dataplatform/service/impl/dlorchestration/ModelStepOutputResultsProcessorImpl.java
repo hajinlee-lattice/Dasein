@@ -13,7 +13,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelStepPostProcessor;
+import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandOutput;
@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
 @Component("modelStepOutputResultsProcessor")
-public class ModelStepOutputResultsProcessorImpl implements ModelStepPostProcessor {
+public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
 
     public static final int SAMPLE_SIZE = 100;
     public static final String RANDOM_FOREST = "RandomForest";
