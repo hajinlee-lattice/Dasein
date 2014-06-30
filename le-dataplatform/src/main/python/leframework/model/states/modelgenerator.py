@@ -39,7 +39,7 @@ class ModelGenerator(State, JsonGenBase):
         pipelineBinaryPkl = self.__getSerializedFile(filename)
         pipelinePkl = self.__getSerializedFile(self.__compressFile("leframework.tar.gz/pipeline.py"))
         encoderPkl = self.__getSerializedFile(self.__compressFile("leframework.tar.gz/encoder.py"))
-        model["CompressedSupportFiles"] = [{ "Value": encoderPkl, "Key": "encoder.py.gz" }, { "Value": pipelinePkl, "Key": "pipeline.py.gz" }, { "Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p.gz" }]
+        model["CompressedSupportFiles"] = [{ "Value": encoderPkl, "Key": "encoder.py" }, { "Value": pipelinePkl, "Key": "pipeline.py" }, { "Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" }]
         self.model = model
     
     def __compressFile(self, filename):
