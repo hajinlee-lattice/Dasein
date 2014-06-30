@@ -44,7 +44,7 @@ class ModelGenerator(State, JsonGenBase):
     
     def __compressFile(self, filename):
         with open(filename, "rb") as uncompressedFile:
-            with gzip.open(filename + ".gz", "wb", compresslevel=9) as compressedFile:
+            with gzip.open(filename + ".gz", "wb", compresslevel=6) as compressedFile:
                 compressedFile.write(uncompressedFile.read())
         return compressedFile.name
 
