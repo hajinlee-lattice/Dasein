@@ -28,7 +28,7 @@ import com.latticeengines.common.exposed.util.StringTokenUtils;
 
 @Entity
 @Table(name = "MODEL")
-public class Model implements HasName, HasPid, HasId<String> {
+public class Model implements HasName, HasPid, HasId<String>  {
 
     private Long pid;
     private String id;
@@ -79,7 +79,6 @@ public class Model implements HasName, HasPid, HasId<String> {
 
     @JsonProperty("model_definition")
     @ManyToOne(fetch = FetchType.LAZY)
-    // TODO
     @JoinColumn(name = "FK_MODEL_DEF_ID")
     public ModelDefinition getModelDefinition() {
         return modelDefinition;
@@ -201,9 +200,6 @@ public class Model implements HasName, HasPid, HasId<String> {
     @JsonIgnore
     public void setId(String id) {
         this.id = id;
-        if (id == null) {
-            jobs = new ArrayList<Job>();
-        }
     }
 
     @JsonIgnore
@@ -278,7 +274,7 @@ public class Model implements HasName, HasPid, HasId<String> {
         return keyCols;
     }
 
-    @Column(name = "KEYCOLS")
+    @Column(name = "KEYCOLS", length = 500)
     public String getKeyCols() {
         return StringTokenUtils.listToString(this.keyCols);
     }

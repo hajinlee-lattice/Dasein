@@ -51,7 +51,7 @@ public class ThrottleConfiguration implements HasPid {
     }
 
     @JsonProperty("immediate")
-    @Column(name = "IMMEDIATE")
+    @Column(name = "IMMEDIATE", nullable = false)
     public boolean isImmediate() {
         return immediate;
     }
@@ -62,7 +62,7 @@ public class ThrottleConfiguration implements HasPid {
     }
 
     @JsonProperty("jobrank_cutoff")
-    @Column(name = "JOB_RANK_CUTOFF")
+    @Column(name = "JOB_RANK_CUTOFF", nullable = false)
     public Integer getJobRankCutoff() {
         return jobRankCutoff;
     }
@@ -72,7 +72,7 @@ public class ThrottleConfiguration implements HasPid {
         this.jobRankCutoff = jobRankCutoff;
     }
 
-    @Column(name = "TIMESTAMP")
+    @Column(name = "TIMESTAMP", nullable = false)
     public Timestamp getTimestamp() {
         return timestamp;
     }
@@ -96,7 +96,7 @@ public class ThrottleConfiguration implements HasPid {
     }
 
     @JsonProperty("enabled")
-    @Column(name = "ENABLED")
+    @Column(name = "ENABLED", nullable = false)
     public Boolean isEnabled() {
         return enabled;
     }

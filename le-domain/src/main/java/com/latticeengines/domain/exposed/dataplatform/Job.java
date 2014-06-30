@@ -61,7 +61,7 @@ public class Job implements HasPid, HasId<String> {
     }
 
     @Override
-    @Column(name = "JOB_ID")
+    @Column(name = "JOB_ID", nullable = false)
     public String getId() {
         return id;
     }
@@ -165,7 +165,7 @@ public class Job implements HasPid, HasId<String> {
         return JsonUtils.serialize(this);
     }
 
-    @Column(name = "CLIENT")
+    @Column(name = "CLIENT", nullable = false)
     public String getClient() {
         return client;
     }

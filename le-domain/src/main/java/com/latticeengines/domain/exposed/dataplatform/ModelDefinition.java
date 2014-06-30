@@ -46,7 +46,7 @@ public class ModelDefinition implements HasName, HasPid {
 
     @Override
     @JsonProperty("name")
-    @Column(name = "NAME")
+    @Column(name = "NAME", nullable = false)
     public String getName() {
         return name;
     }
@@ -80,7 +80,7 @@ public class ModelDefinition implements HasName, HasPid {
             this.algorithms.addAll(algos);
             for (Algorithm a : algos) {
                 a.setModelDefinition(this);
-            }
+            } 
         }
     }
 

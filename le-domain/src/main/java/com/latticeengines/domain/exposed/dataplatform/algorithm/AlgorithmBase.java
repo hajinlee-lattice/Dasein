@@ -36,14 +36,14 @@ public class AlgorithmBase implements Algorithm {
     private String script;
     private String containerProperties;
     private String algorithmProperties;
-    private int priority;
+    private int priority; 
     private String sampleName;
     private ModelDefinition modelDefinition;
 
     @Override
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
+    @Basic(optional = false)    
     @Column(name = "PID", unique = true, nullable = false)
     public Long getPid() {
         return this.pid;
@@ -56,7 +56,7 @@ public class AlgorithmBase implements Algorithm {
 
     @Override
     @JsonProperty("name")
-    @Column(name = "NAME")
+    @Column(name = "NAME", nullable = false)
     public String getName() {
         return name;
     }
@@ -82,7 +82,7 @@ public class AlgorithmBase implements Algorithm {
 
     @Override
     @JsonProperty("script")
-    @Column(name = "SCRIPT")
+    @Column(name = "SCRIPT", length = 500)
     public String getScript() {
         return script;
     }
@@ -93,8 +93,8 @@ public class AlgorithmBase implements Algorithm {
     }
 
     @Override
-    @JsonProperty("container_properties")
-    @Column(name = "CONTAINER_PROPERTIES", length = 65535)
+    @JsonProperty("container_properties")       
+    @Column(name = "CONTAINER_PROPERTIES", length = 65535)        
     public String getContainerProperties() {
         return containerProperties;
     }
@@ -106,7 +106,7 @@ public class AlgorithmBase implements Algorithm {
     }
 
     @Override
-    @JsonProperty("algorithm_properties")
+    @JsonProperty("algorithm_properties")        
     @Column(name = "ALGORITHM_PROPERTIES", length = 65535)
     public String getAlgorithmProperties() {
         return algorithmProperties;
@@ -120,7 +120,7 @@ public class AlgorithmBase implements Algorithm {
 
     @Override
     @JsonProperty("priority")
-    @Column(name = "PRIORITY")
+    @Column(name = "PRIORITY", nullable = false)
     public int getPriority() {
         return priority;
     }
