@@ -13,10 +13,8 @@ import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.yarn.am.AppmasterConstants;
 import org.springframework.yarn.am.ContainerLauncherInterceptor;
 import org.springframework.yarn.am.StaticEventingAppmaster;
-import org.springframework.yarn.am.allocate.AbstractAllocator;
 import org.springframework.yarn.am.container.AbstractLauncher;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
