@@ -10,9 +10,9 @@ from leframework.executors.learningexecutor import LearningExecutor
 from leframework.webhdfs import WebHDFS
 
 
-logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(name='launcher')
+logging.basicConfig(level = logging.DEBUG, datefmt = '%m/%d/%Y %I:%M:%S %p',
+                    format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(name = 'launcher')
 
 class Launcher(object):
     
@@ -127,8 +127,12 @@ if __name__ == "__main__":
     sys.argv[1] -- schema json file
     sys.argv[2] -- runtime properties file
     """
- 
-    l = Launcher(sys.argv[1], sys.argv[2])
+
+    logger.info("Python script launched with arguments: " + str(sys.argv[1:]))
+    if  len(sys.argv) != 3:
+        logger.error("Argument length is :" + str(len(sys.argv)) + " which should be 3")
+    
+    l = Launcher(sys.argv[1], sys.argv[2])    
     l.execute(True)
     
      
