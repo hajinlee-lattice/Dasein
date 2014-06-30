@@ -60,6 +60,16 @@ public class MarketoReceiver
             throw new RuntimeException(keyField + " field value was not a string type");
         }
         
+        // Marketo will pass default values rather than null for missing information.
+        // Explicitly set those defaults to a sentinel value, and replace them with null.
+        for (String field : data.keySet())
+        {
+            if ("LatticeNull".equals(data.get(field)))
+            {
+                data.put(field,  null);
+            }
+        }
+        
         String key = (String)data.get(keyField);
         data.remove(keyField);
         String result = dispatcher.receiveRecord(key, data);
