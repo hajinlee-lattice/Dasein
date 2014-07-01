@@ -13,6 +13,7 @@ public class DataProfileConfiguration {
     private String table;
     private String metadataTable;
     private String samplePrefix;
+    private String script;
     private List<String> excludeColumnList = new ArrayList<String>();
     private List<String> includeColumnList = new ArrayList<String>();
     
@@ -79,6 +80,16 @@ public class DataProfileConfiguration {
     @JsonProperty("sample_prefix")
     public void setSamplePrefix(String samplePrefix) {
         this.samplePrefix = samplePrefix;
+    }
+
+    @JsonProperty("script")
+    public String getScript() {
+        return script;
+    }
+
+    @JsonProperty("script")
+    public void setScript(String script) {
+        this.script = script;
     }
 
     

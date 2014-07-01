@@ -4,6 +4,7 @@ package com.latticeengines.domain.exposed.dataplatform.dlorchestration;
 public enum ModelCommandStep {
     LOAD_DATA("Load data"),
     GENERATE_SAMPLES("Generate samples"),
+    RETRIEVE_METADATA("Retrieve metadata"),
     PROFILE_DATA("Profile data"),
     SUBMIT_MODELS("Submit models"),
     OUTPUT_COMMAND_RESULTS("Output command results"),
