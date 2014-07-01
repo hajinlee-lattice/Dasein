@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.fairscheduler;
+package com.latticeengines.scheduler.exposed.fairscheduler;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -22,6 +22,8 @@ import org.mockito.Mock;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 public class LedpQueueAssignerUnitTestNG {
 

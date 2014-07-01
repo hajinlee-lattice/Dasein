@@ -25,8 +25,8 @@
 				</property>
 			</activation>
 			<properties>
-				<dataplatform.properties.path>conf/env/dev</dataplatform.properties.path>
-				<hadoop-metrics2.properties.path>conf/env/dev</hadoop-metrics2.properties.path>
+				<dataplatform.properties.path>conf/env/devcluster</dataplatform.properties.path>
+				<hadoop-metrics2.properties.path>conf/env/devcluster</hadoop-metrics2.properties.path>
 			</properties>
 		</profile>
 		<profile>
@@ -108,7 +108,18 @@
 								</source>
 						
 							</sources>
-						</mapping>	
+						</mapping>
+						<mapping>
+							<directory>/tmp/lib</directory>
+							<filemode>644</filemode>
+							<username>yarn</username>
+							<groupname>hdfs</groupname>
+							<sources>
+								<source>
+									<location>target/dependency</location>
+								</source>
+							</sources>
+						</mapping>
 					</mappings>
 					<preinstallScriptlet>
 						<scriptFile>src/main/resources/rpm/dataplatform/scripts/preinstall</scriptFile>

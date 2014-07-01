@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.fairscheduler.generator;
+package com.latticeengines.scheduler.fairscheduler.generator;
 
 import java.io.File;
 import java.math.BigInteger;
@@ -58,9 +58,9 @@ public class AllocationsGenerator {
 
         allocations.setUser(user);
         
-        Marshaller marshaller = JAXBContext.newInstance("com.latticeengines.dataplatform.fairscheduler.generator").createMarshaller();
+        Marshaller marshaller = JAXBContext.newInstance("com.latticeengines.scheduler.fairscheduler.generator").createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        marshaller.marshal(allocations, new File("/Users/bnguyen/dev/fair-scheduler.xml"));
+        marshaller.marshal(allocations, new File("./fair-scheduler.xml"));
     }
     
     static void addLeaves(ObjectFactory factory, Queue q, boolean minResources, int numLeaves) {

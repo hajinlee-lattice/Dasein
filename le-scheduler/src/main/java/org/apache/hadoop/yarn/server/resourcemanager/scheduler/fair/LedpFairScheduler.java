@@ -18,7 +18,7 @@ import org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator;
 import org.apache.hadoop.yarn.util.resource.ResourceCalculator;
 import org.apache.hadoop.yarn.util.resource.Resources;
 
-import com.latticeengines.dataplatform.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 public class LedpFairScheduler extends FairScheduler {
     private static final Log log = LogFactory.getLog(LedpFairScheduler.class);

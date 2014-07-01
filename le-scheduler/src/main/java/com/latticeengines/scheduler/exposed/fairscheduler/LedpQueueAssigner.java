@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.fairscheduler;
+package com.latticeengines.scheduler.exposed.fairscheduler;
 
 import java.util.HashMap;
 import java.util.Map;

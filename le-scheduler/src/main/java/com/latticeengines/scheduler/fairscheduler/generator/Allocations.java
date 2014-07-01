@@ -6,7 +6,7 @@
 //
 
 
-package com.latticeengines.dataplatform.fairscheduler.generator;
+package com.latticeengines.scheduler.fairscheduler.generator;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

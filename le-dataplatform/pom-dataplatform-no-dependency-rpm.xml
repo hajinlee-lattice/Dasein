@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>le-dataplatform-dependency-rpm</artifactId>
+	<artifactId>le-dataplatform-no-dependency-rpm</artifactId>
 	<packaging>rpm</packaging>
-	<description>LE DATAPLATFORM DEPENDENCY RPM</description>
+	<description>LE DATAPLATFORM NO DEPENDENCY RPM</description>
 
 	<parent>
 		<groupId>com.latticeengines</groupId>
@@ -25,8 +25,8 @@
 				</property>
 			</activation>
 			<properties>
-				<dataplatform.properties.path>conf/env/dev</dataplatform.properties.path>
-				<hadoop-metrics2.properties.path>conf/env/dev</hadoop-metrics2.properties.path>
+				<dataplatform.properties.path>conf/env/devcluster</dataplatform.properties.path>
+				<hadoop-metrics2.properties.path>conf/env/devcluster</hadoop-metrics2.properties.path>
 			</properties>
 		</profile>
 		<profile>
@@ -72,22 +72,48 @@
 					<changelogFile>src/main/resources/rpm/dependency/changelog</changelogFile>
 					<mappings>
 						<mapping>
-							<directory>/tmp/lib</directory>
+							<directory>/tmp/app/dataplatform</directory>
 							<filemode>644</filemode>
 							<username>yarn</username>
 							<groupname>hdfs</groupname>
 							<sources>
 								<source>
-									<location>target/dependency</location>
+									<location>target/le-dataplatform-1.0.0-SNAPSHOT.jar</location>
+								</source>
+								<source>
+									<location>target/le-dataplatform-1.0.0-SNAPSHOT-intf.jar</location>
+								</source>
+								<source>
+									<location>target/le-dataplatform-1.0.0-SNAPSHOT-tests.jar</location>
+								</source>
+								<source>
+									<location>${hadoop-metrics2.properties.path}/hadoop-metrics2.properties</location>
+								</source>
+								<source>
+									<location>${dataplatform.properties.path}/dataplatform.properties</location>
+								</source>
+							</sources>
+						</mapping>
+						<mapping>
+							<directory>/tmp/app/dataplatform/scripts</directory>
+							<filemode>644</filemode>
+							<username>yarn</username>
+							<groupname>hdfs</groupname>
+							<sources>
+								<source>
+									<location>target/leframework.tar.gz</location>
+								</source>
+								<source>
+									<location>src/main/python/launcher.py</location>
 								</source>
 							</sources>
 						</mapping>
 					</mappings>
 					<preinstallScriptlet>
-						<scriptFile>src/main/resources/rpm/dependency/scripts/preinstall</scriptFile>
+						<scriptFile>src/main/resources/rpm/dataplatform-no-dependency/scripts/preinstall</scriptFile>
 					</preinstallScriptlet>
 					<postinstallScriptlet>
-						<scriptFile>src/main/resources/rpm/dependency/scripts/postinstall</scriptFile>
+						<scriptFile>src/main/resources/rpm/dataplatform-no-dependency/scripts/postinstall</scriptFile>
 						<fileEncoding>utf-8</fileEncoding>
 					</postinstallScriptlet>
 				</configuration>

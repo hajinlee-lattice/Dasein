@@ -38,7 +38,6 @@ import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntity
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
-import com.latticeengines.dataplatform.fairscheduler.LedpQueueAssigner;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
@@ -53,6 +52,7 @@ import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.AlgorithmBase;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.DataProfilingAlgorithm;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 @Component("modelingService")
 public class ModelingServiceImpl implements ModelingService {
