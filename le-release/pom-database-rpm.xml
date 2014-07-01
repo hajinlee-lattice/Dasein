@@ -25,11 +25,9 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>conf/env/dev</api.properties.path>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/dev
+                    ../le-dataplatform/conf/env/devcluster
                 </dataplatform.properties.path>
-                <bin.env.path>bin/env/dev</bin.env.path>
             </properties>
         </profile>
         <profile>
@@ -41,11 +39,9 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>conf/env/qe</api.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/qe
                 </dataplatform.properties.path>
-                <bin.env.path>bin/env/qe</bin.env.path>
             </properties>
         </profile>
         <profile>
@@ -57,11 +53,9 @@
                 </property>
             </activation>
             <properties>
-                <api.properties.path>conf/env/deployment</api.properties.path>
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/prod
                 </dataplatform.properties.path>
-                <bin.env.path>bin/env/prod</bin.env.path>
             </properties>
         </profile>
     </profiles>
