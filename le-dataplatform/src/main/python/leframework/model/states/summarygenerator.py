@@ -1,14 +1,15 @@
 from collections import OrderedDict
+from datetime import datetime
 import logging
 from sklearn import metrics
 from sklearn.metrics.cluster.supervised import entropy
-import uuid
 import time
-from datetime import datetime
+import uuid
 
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
+
 
 class SummaryGenerator(State, JsonGenBase):
     
@@ -78,9 +79,9 @@ class SummaryGenerator(State, JsonGenBase):
             if record["Dtype"] == "BND":
                 element["UpperExclusive"] = record["maxV"]
             if record["Dtype"] == "BND":
-                element["Value"] = None
+                element["Values"] = []
             else:
-                element["Value"] = [record["columnvalue"]]
+                element["Values"] = [record["columnvalue"]]
             elements.append(element)
         
         # Sort elements by UncertaintyCoefficient
