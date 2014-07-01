@@ -98,7 +98,7 @@
 							<groupname>hadoop</groupname>
 							<sources>
 								<source>
-									<location>${fair-scheduler.path}/fair-scheduler.xml</location>
+									<location>${fair-scheduler.xml.path}/fair-scheduler.xml</location>
 								</source>
 							</sources>
 						</mapping>
