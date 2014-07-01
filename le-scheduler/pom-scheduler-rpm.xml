@@ -52,6 +52,18 @@
 				<fair-scheduler.xml.path>conf/env/prod</fair-scheduler.xml.path>
 			</properties>
 		</profile>
+		<profile>
+			<id>buildmachine</id>
+			<activation>
+				<property>
+					<name>environment.type</name>
+					<value>buildmachine</value>
+				</property>
+			</activation>
+			<properties>
+				<fair-scheduler.xml.path>conf/env/buildmachine</fair-scheduler.xml.path>
+			</properties>
+		</profile>
 	</profiles>
 
 	<build>
