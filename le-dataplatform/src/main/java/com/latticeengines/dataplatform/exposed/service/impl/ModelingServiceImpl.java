@@ -321,14 +321,13 @@ public class ModelingServiceImpl implements ModelingService {
 
                 if (firstNumericColumn == null
                         && (fieldSchema.getTypes().get(0).getType().equals(Schema.Type.DOUBLE)
-                                || fieldSchema.getTypes().get(0).getType().equals(Schema.Type.FLOAT) || fieldSchema
-                                .getTypes().get(0).getType().equals(Schema.Type.INT))) {
+                                || fieldSchema.getTypes().get(0).getType().equals(Schema.Type.FLOAT) 
+                                || fieldSchema.getTypes().get(0).getType().equals(Schema.Type.INT))) {
                     firstNumericColumn = name;
                 }
                 // If an include list is passed, only use the features in the
                 // include list
-                // if the name is part of the schema. If the include list is
-                // empty, then
+                // if the name is part of the schema. If the include list is empty, then
                 // just add all the columns in the schema except for any columns
                 // in the excluded list
                 if (useIncludeList) {
