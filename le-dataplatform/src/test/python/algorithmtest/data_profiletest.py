@@ -12,5 +12,5 @@ class FeatureSelectionTest(TestCase, AlgorithmTestBase):
 
 
     def testTrain(self):
-        clf = self.execute("feature_selection.py", dict(), False)
+        clf = self.execute("data_profile.py", dict(), False)
         self.assertTrue(clf is None)
