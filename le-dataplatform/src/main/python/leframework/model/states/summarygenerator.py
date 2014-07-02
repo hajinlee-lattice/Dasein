@@ -184,7 +184,7 @@ class SummaryGenerator(State, JsonGenBase):
         
     def __getDLEventTableData(self, provenanceProperties):
         if len(provenanceProperties) == 0:
-            self.logger.error("Provenance property is Null")
+            self.logger.error("Provenance property is null.")
             return OrderedDict()
         
         element = OrderedDict()
@@ -197,7 +197,7 @@ class SummaryGenerator(State, JsonGenBase):
     def __getConstructionInfo(self):
         constructionTime = OrderedDict()
         # DateTime returns UTC epoch in seconds
-        constructionTime["DateTime"] = "/Date(" + str(int(time.time())) + ")/"  
+        constructionTime["DateTime"] = "/Date(" + str(int(time.time())) + ")/"
         # OffsetMinutes returns UTC offset in current time zone in minutes
         constructionTime["OffsetMinutes"] = str(int((datetime.today() - datetime.utcnow()).total_seconds()) / 60)
         element = OrderedDict()

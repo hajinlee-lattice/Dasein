@@ -1,21 +1,15 @@
-import argparse
 from avro import schema, datafile, io
 import codecs
 import re
-import sklearn.metrics
-from sklearn.metrics.cluster.supervised import contingency_matrix, check_clusterings
 import sys
 
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 import numpy as np
-import pandas as pd
 import pandas.core.algorithms as algos
 
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
-
-
 
 def getExecutor():
     return DataProfilingExecutor()
@@ -126,8 +120,7 @@ def binContinuousColumn(columnSeries, numbins, eventSeries):
 
     for i in range(len(betterBins) - 1):
         # handle edge cases where algos.quantile had to interpolate and there were no entries for that bin
-        # XXX Jake: this might be better handled by setting the interpolation to 'lowest' or 'highest' in the quantile call
-        dictList.append(str(betterBins[i])+","+str(betterBins[i + 1]))
+        dictList.append(str(betterBins[i]) + "," + str(betterBins[i + 1]))
         
     return dictList
 
