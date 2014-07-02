@@ -3,7 +3,7 @@ import shutil
 from unittest import TestCase
 from algorithmtestbase import AlgorithmTestBase
 
-class FeatureSelectionTest(TestCase, AlgorithmTestBase):
+class DataProfileTest(TestCase, AlgorithmTestBase):
 
     @classmethod
     def setUpClass(cls):
