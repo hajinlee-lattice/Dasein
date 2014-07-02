@@ -76,7 +76,8 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties):
     avroSchema = getSchema()
     recordWriter = io.DatumWriter(avroSchema)
     print(sys.getdefaultencoding())
-    dataWriter = datafile.DataFileWriter(codecs.open(modelDir + '/metadata.avro', 'wb'), recordWriter, writers_schema=avroSchema, codec='deflate')
+    dataWriter = datafile.DataFileWriter(codecs.open(modelDir + '/metadata.avro', 'wb'), 
+                                         recordWriter, writers_schema=avroSchema, codec='deflate')
     
     colnames = list(data.columns.values)
     stringcols = set(schema["stringColumns"])
@@ -128,8 +129,8 @@ def writeCategoricalValuesToAvro(dataWriter, uniquevalues, mode, colname, index)
     if len(uniquevalues) > 200:
         return index
     for value in uniquevalues:
-        if len(uniquevalues) > 1 and value is None:
-            continue
+        if value is None:
+            value = '__unknown__'
         datum = {}
         datum["id"] = index
         datum["barecolumnname"] = colname
