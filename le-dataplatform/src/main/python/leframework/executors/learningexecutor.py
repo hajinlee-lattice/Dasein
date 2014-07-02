@@ -13,8 +13,9 @@ from leframework.model.states.columnmetadatagenerator import ColumnMetadataGener
 from leframework.model.states.finalize import Finalize
 from leframework.model.states.initialize import Initialize
 from leframework.model.states.modelgenerator import ModelGenerator
-from leframework.model.states.summarygenerator import SummaryGenerator
 from leframework.model.states.namegenerator import NameGenerator
+from leframework.model.states.percentilebucketgenerator import PercentileBucketGenerator
+from leframework.model.states.summarygenerator import SummaryGenerator
 from pipeline import EnumeratedColumnTransformStep
 from pipeline import ImputationStep
 from pipeline import Pipeline
@@ -51,7 +52,8 @@ class LearningExecutor(Executor):
         stateMachine.addState(ModelGenerator(), 6)
         stateMachine.addState(SummaryGenerator(), 7)
         stateMachine.addState(NameGenerator(), 8)
-        stateMachine.addState(Finalize(), 9)
+        stateMachine.addState(PercentileBucketGenerator(), 9)
+        stateMachine.addState(Finalize(), 10)
         return stateMachine
 
     def retrieveMetadata(self, schema, depivoted):

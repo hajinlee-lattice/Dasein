@@ -133,8 +133,8 @@
     "Nutanix_EventTable_Clean"
   ],
   "algorithm_properties": "",
-  "training_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/unicodeTraining.avro",
-  "test_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/unicodeTest.avro",
+  "training_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/s0Training-r-00000.avro",
+  "test_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/s0Test-r-00000.avro",
   "python_script": "/app/dataplatform/scripts/algorithm/feature_selection.py",
   "name": null
 }
