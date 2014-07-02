@@ -4,7 +4,6 @@ import re
 import sys
 
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
-import numpy as np
 import pandas.core.algorithms as algos
 
 
@@ -70,14 +69,14 @@ def getSchema():
     }"""
     return schema.parse(metadataSchema)
 
-def train(trainingData, testData, schema, modelDir, algorithmProperties):
+def train(trainingData, testData, schema, modelDir, algorithmProperties):    
     data = trainingData.append(testData)
 
     avroSchema = getSchema()
     recordWriter = io.DatumWriter(avroSchema)
     print(sys.getdefaultencoding())
-    dataWriter = datafile.DataFileWriter(codecs.open(modelDir + '/metadata.avro', 'wb'), 
-                                         recordWriter, writers_schema=avroSchema, codec='deflate')
+    dataWriter = datafile.DataFileWriter(codecs.open(modelDir + '/metadata.avro', 'wb'),
+                                         recordWriter, writers_schema = avroSchema, codec = 'deflate')
     
     colnames = list(data.columns.values)
     stringcols = set(schema["stringColumns"])
@@ -106,7 +105,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties):
 
 def binContinuousColumn(columnSeries, numbins, eventSeries):
     populatedRows = columnSeries[columnSeries.notnull()]
-    ranges = np.linspace(0, 1, numbins + 1, endpoint=True)
+    ranges = np.linspace(0, 1, numbins + 1, endpoint = True)
     betterBins = algos.quantile(populatedRows, ranges)
     
     # combine adjacent buckets of equal value and try to break up the remaining range evenly

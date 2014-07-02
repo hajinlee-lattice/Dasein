@@ -26,8 +26,8 @@ class LauncherTest(TestCase):
         fwkdir = "./leframework.tar.gz"
         if os.path.exists(fwkdir):
             shutil.rmtree(fwkdir)
-        if os.path.exists("feature_selection.py"):
-            os.remove("feature_selection.py")
+        if os.path.exists("data_profile.py"):
+            os.remove("data_profile.py")
             
         os.makedirs(fwkdir + "/leframework")
         enginedir = "/leframework/scoringengine.py"
@@ -36,7 +36,7 @@ class LauncherTest(TestCase):
         shutil.copyfile("../../main/python/encoder.py", fwkdir + "/encoder.py")
         shutil.copyfile("../../main/python/algorithm/lr_train.py", "./lr_train.py")
         shutil.copyfile("../../main/python/algorithm/rf_train.py", "./rf_train.py")
-        shutil.copyfile("../../main/python/algorithm/feature_selection.py", "./feature_selection.py")
+        shutil.copyfile("../../main/python/algorithm/data_profile.py", "./data_profile.py")
     
     def setUp(self):
         results = "./results"
@@ -165,3 +165,4 @@ class LauncherTest(TestCase):
           
         results = learningExecutor.retrieveMetadata("./results/metadata.avro", False)
         self.assertTrue(results is not None)
+

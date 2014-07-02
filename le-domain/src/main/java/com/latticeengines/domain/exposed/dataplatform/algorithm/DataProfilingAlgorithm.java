@@ -11,6 +11,6 @@ public class DataProfilingAlgorithm extends AlgorithmBase {
 
     public DataProfilingAlgorithm() {
         setName("DP");
-        setScript("/app/dataplatform/scripts/algorithm/feature_selection.py");
+        setScript("/app/dataplatform/scripts/algorithm/data_profile.py");
     }
 }
