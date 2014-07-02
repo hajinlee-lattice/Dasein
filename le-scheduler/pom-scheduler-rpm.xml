@@ -81,7 +81,7 @@
 					<changelogFile>src/main/resources/rpm/changelog</changelogFile>
 					<mappings>
 						<mapping>
-							<directory>/usr/lib/hadoop-yarn</directory>
+							<directory>/tmp/usr/lib/hadoop-yarn</directory>
 							<filemode>644</filemode>
 							<username>root</username>
 							<groupname>root</groupname>
@@ -92,7 +92,7 @@
 							</sources>
 						</mapping>
 						<mapping>
-							<directory>/etc/hadoop/conf.empty</directory>
+							<directory>/tmp/etc/hadoop/conf</directory>
 							<filemode>644</filemode>
 							<username>yarn</username>
 							<groupname>hadoop</groupname>
@@ -106,6 +106,9 @@
 					<preinstallScriptlet>
 						<scriptFile>src/main/resources/rpm/scripts/preinstall</scriptFile>
 					</preinstallScriptlet>
+					<postinstallScriptlet>
+						<scriptFile>src/main/resources/rpm/scripts/postinstall</scriptFile>
+					</postinstallScriptlet>
 				</configuration>
 			</plugin>
 		</plugins>
