@@ -3,28 +3,22 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceImpl;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 
 public class ModelStepYarnProcessorImplUnitTestNG {
 
     private ModelStepYarnProcessorImpl processor = new ModelStepYarnProcessorImpl();
-    private ModelCommandCallable modelCommandCallable = new ModelCommandCallable(null, null, null, null, null, null,
-            null, null, null);
 
     @BeforeClass(groups = "unit")
     public void beforeClass() throws Exception {
@@ -35,36 +29,8 @@ public class ModelStepYarnProcessorImplUnitTestNG {
     }
 
     public ModelCommandParameters createModelCommandParameters() {
-        return modelCommandCallable.validateAndSetCommandParameters(ModelingServiceTestUtils
+        return new ModelCommandParameters(ModelingServiceTestUtils
                 .createModelCommandWithCommandParameters().getCommandParameters());
-    }
-
-    @Test(groups = "unit", expectedExceptions = LedpException.class)
-    public void testInvalidCommandParameters() throws Exception {
-        List<ModelCommandParameter> parameters = new ArrayList<>();
-        try {
-            modelCommandCallable.validateAndSetCommandParameters(parameters);
-        } catch (LedpException e) {
-            String msg = e.getMessage();
-            assertTrue(msg.contains(ModelCommandParameters.EVENT_TABLE));
-            assertTrue(msg.contains(ModelCommandParameters.KEY_COLS));
-            assertTrue(msg.contains(ModelCommandParameters.MODEL_NAME));
-            assertTrue(msg.contains(ModelCommandParameters.MODEL_TARGETS));
-            assertTrue(msg.contains(ModelCommandParameters.EXCLUDE_COLUMNS));
-            assertTrue(msg.contains(ModelCommandParameters.DL_URL));
-            assertTrue(msg.contains(ModelCommandParameters.DL_TENANT));
-            throw e;
-        }
-    }
-
-    @Test(groups = "unit")
-    public void testSplit() {
-        List<String> splits = modelCommandCallable.splitCommaSeparatedStringToList("one, two,  three, four");
-        assertEquals(4, splits.size());
-        assertEquals("one", splits.get(0));
-        assertEquals("two", splits.get(1));
-        assertEquals("three", splits.get(2));
-        assertEquals("four", splits.get(3));
     }
 
     @Test(groups = "unit")

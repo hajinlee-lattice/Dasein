@@ -1,7 +1,5 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -11,14 +9,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
-import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
@@ -26,7 +20,6 @@ import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcesso
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
-import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
@@ -36,7 +29,6 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private static final Log log = LogFactory.getLog(ModelCommandCallable.class);
 
-    private static final char COMMA = ',';
     private static final int SUCCESS = 0;
     private static final int FAIL = -1;
 
@@ -56,13 +48,15 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private ModelStepProcessor modelStepOutputResultsProcessor;
 
+    ModelStepProcessor modelStepRetrieveMetadataProcessor;
+
     private ModelCommand modelCommand;
 
     public ModelCommandCallable(ModelCommand modelCommand, JobService jobService,
             ModelCommandEntityMgr modelCommandEntityMgr, ModelCommandStateEntityMgr modelCommandStateEntityMgr,
             ModelStepYarnProcessor modelStepYarnProcessor, ModelCommandLogService modelCommandLogService,
             ModelCommandResultEntityMgr modelCommandResultEntityMgr, ModelStepProcessor modelStepFinishProcessor,
-            ModelStepProcessor modelStepOutputResultsProcessor) {
+            ModelStepProcessor modelStepOutputResultsProcessor, ModelStepProcessor modelStepRetrieveMetadataProcessor) {
         this.modelCommand = modelCommand;
         this.jobService = jobService;
         this.modelCommandEntityMgr = modelCommandEntityMgr;
@@ -72,6 +66,7 @@ public class ModelCommandCallable implements Callable<Long> {
         this.modelCommandResultEntityMgr = modelCommandResultEntityMgr;
         this.modelStepOutputResultsProcessor = modelStepOutputResultsProcessor;
         this.modelStepFinishProcessor = modelStepFinishProcessor;
+        this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
     }
 
     @Override
@@ -102,15 +97,15 @@ public class ModelCommandCallable implements Callable<Long> {
     private void executeWorkflow() {
         if (modelCommand.isNew()) {
             Date now = new Date();
-            modelCommandResultEntityMgr.create(new ModelCommandResult(modelCommand, now, now,
-                    ModelCommandStatus.IN_PROGRESS));
+            modelCommandResultEntityMgr.create(new ModelCommandResult(modelCommand, now, now, ModelCommandStatus.IN_PROGRESS));
 
             modelCommand.setCommandStatus(ModelCommandStatus.IN_PROGRESS);
+
+            ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
+            executeStep(modelStepRetrieveMetadataProcessor, ModelCommandStep.RETRIEVE_METADATA, commandParameters);
+
             modelCommand.setModelCommandStep(ModelCommandStep.LOAD_DATA);
             modelCommandEntityMgr.update(modelCommand);
-
-            ModelCommandParameters commandParameters = validateAndSetCommandParameters(modelCommand
-                    .getCommandParameters());
             executeYarnStep(ModelCommandStep.LOAD_DATA, commandParameters);
         } else { // modelCommand IN_PROGRESS
             List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand,
@@ -151,10 +146,10 @@ public class ModelCommandCallable implements Callable<Long> {
         ModelCommandStep nextStep = modelCommand.getModelCommandStep().getNextStep();
         modelCommand.setModelCommandStep(nextStep);
 
-        ModelCommandParameters commandParameters = validateAndSetCommandParameters(modelCommand.getCommandParameters());
+        ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
         if (nextStep.equals(ModelCommandStep.OUTPUT_COMMAND_RESULTS)) {
-            executePostStep(modelStepOutputResultsProcessor, ModelCommandStep.OUTPUT_COMMAND_RESULTS, commandParameters);
-            executePostStep(modelStepFinishProcessor, ModelCommandStep.FINISH, commandParameters);
+            executeStep(modelStepOutputResultsProcessor, ModelCommandStep.OUTPUT_COMMAND_RESULTS, commandParameters);
+            executeStep(modelStepFinishProcessor, ModelCommandStep.FINISH, commandParameters);
         } else {
             executeYarnStep(nextStep, commandParameters);
         }
@@ -188,7 +183,7 @@ public class ModelCommandCallable implements Callable<Long> {
         modelCommandEntityMgr.update(modelCommand);
     }
 
-    private void executePostStep(ModelStepProcessor processor, ModelCommandStep step,
+    private void executeStep(ModelStepProcessor processor, ModelCommandStep step,
             ModelCommandParameters commandParameters) {
         long start = System.currentTimeMillis();
         modelCommandLogService.logBeginStep(modelCommand, step);
@@ -196,7 +191,7 @@ public class ModelCommandCallable implements Callable<Long> {
         commandState.setStatus(FinalApplicationStatus.UNDEFINED);
         modelCommandStateEntityMgr.create(commandState);
 
-        processor.executePostStep(modelCommand, commandParameters);
+        processor.executeStep(modelCommand, commandParameters);
 
         commandState.setElapsedTimeInMillis(System.currentTimeMillis() - start);
         commandState.setStatus(FinalApplicationStatus.SUCCEEDED);
@@ -216,82 +211,4 @@ public class ModelCommandCallable implements Callable<Long> {
         modelCommandStateEntityMgr.createOrUpdate(commandState);
     }
 
-    @VisibleForTesting
-    ModelCommandParameters validateAndSetCommandParameters(List<ModelCommandParameter> commandParameters) {
-        ModelCommandParameters modelCommandParameters = new ModelCommandParameters();
-
-        for (ModelCommandParameter parameter : commandParameters) {
-            switch (parameter.getKey()) {
-            case ModelCommandParameters.DEPIVOTED_EVENT_TABLE:
-                modelCommandParameters.setDepivotedEventTable(parameter.getValue());
-                break;
-            case ModelCommandParameters.EVENT_TABLE:
-                modelCommandParameters.setEventTable(parameter.getValue());
-                break;
-            case ModelCommandParameters.KEY_COLS:
-                modelCommandParameters.setKeyCols(splitCommaSeparatedStringToList(parameter.getValue()));
-                break;
-            case ModelCommandParameters.MODEL_NAME:
-                modelCommandParameters.setModelName(parameter.getValue());
-                break;
-            case ModelCommandParameters.MODEL_TARGETS:
-                modelCommandParameters.setModelTargets(splitCommaSeparatedStringToList(parameter.getValue()));
-                break;
-            case ModelCommandParameters.NUM_SAMPLES:
-                modelCommandParameters.setNumSamples(Integer.parseInt(parameter.getValue()));
-                break;
-            case ModelCommandParameters.EXCLUDE_COLUMNS:
-                modelCommandParameters.setExcludeColumns(splitCommaSeparatedStringToList(parameter.getValue()));
-                break;
-            case ModelCommandParameters.ALGORITHM_PROPERTIES:
-                modelCommandParameters.setAlgorithmProperties(parameter.getValue());
-                break;
-            case ModelCommandParameters.DL_TENANT:
-                modelCommandParameters.setDlTenant(parameter.getValue());
-                break;
-            case ModelCommandParameters.DL_URL:
-                modelCommandParameters.setDlUrl(parameter.getValue());
-            }
-        }
-
-        List<String> missingParameters = new ArrayList<>();
-        if (Strings.isNullOrEmpty(modelCommandParameters.getEventTable())) {
-            missingParameters.add(ModelCommandParameters.EVENT_TABLE);
-        }
-        if (modelCommandParameters.getKeyCols().isEmpty()) {
-            missingParameters.add(ModelCommandParameters.KEY_COLS);
-        }
-        if (Strings.isNullOrEmpty(modelCommandParameters.getModelName())) {
-            missingParameters.add(ModelCommandParameters.MODEL_NAME);
-        }
-        if (modelCommandParameters.getModelTargets().isEmpty()) {
-            missingParameters.add(ModelCommandParameters.MODEL_TARGETS);
-        }
-        if (modelCommandParameters.getExcludeColumns().isEmpty()) {
-            missingParameters.add(ModelCommandParameters.EXCLUDE_COLUMNS);
-        }
-
-        if (Strings.isNullOrEmpty(modelCommandParameters.getDlTenant())) {
-            missingParameters.add(ModelCommandParameters.DL_TENANT);
-        }
-
-        if (Strings.isNullOrEmpty(modelCommandParameters.getDlUrl())) {
-            missingParameters.add(ModelCommandParameters.DL_URL);
-        }
-
-        if (!missingParameters.isEmpty()) {
-            throw new LedpException(LedpCode.LEDP_16000, new String[] { missingParameters.toString() });
-        }
-
-        return modelCommandParameters;
-    }
-
-    @VisibleForTesting
-    List<String> splitCommaSeparatedStringToList(String input) {
-        if (Strings.isNullOrEmpty(input)) {
-            return Collections.emptyList();
-        } else {
-            return Splitter.on(COMMA).trimResults().omitEmptyStrings().splitToList(input);
-        }
-    }
 }

@@ -5,6 +5,6 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 
 public interface ModelStepProcessor {
 
-    void executePostStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters);
+    void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters);
 
 }

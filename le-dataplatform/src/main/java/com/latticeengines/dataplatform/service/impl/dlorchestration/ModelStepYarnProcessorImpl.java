@@ -38,50 +38,50 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 
 @Component("modelStepYarnProcessor")
 public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
-        
+
     private static final String AVRO = "avro";
     private static final String SAMPLENAME_PREFIX = "s";
-    
+
     static enum DataSetType {
-        DEPIVOTED, STANDARD; 
+        DEPIVOTED, STANDARD;
     }
-    
+
     @Autowired
     private ModelingService modelingService;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private ModelCommandLogService modelCommandLogService;
-    
+
     @Value("${dataplatform.dlorchestration.datasource.host}")
     private String dbHost;
-    
+
     @Value("${dataplatform.dlorchestration.datasource.port}")
     private int dbPort;
-    
+
     @Value("${dataplatform.dlorchestration.datasource.dbname}")
     private String dbName;
-    
+
     @Value("${dataplatform.dlorchestration.datasource.user}")
     private String dbUser;
-    
+
     @Value("${dataplatform.dlorchestration.datasource.password}")
     private String dbPassword;
-   
+
     @Value("${dataplatform.dlorchestration.datasource.type}")
     private String dbType;
-    
+
     @Value("${dataplatform.container.virtualcores}")
     private int virtualCores;
-    
+
     @Value("${dataplatform.container.memory}")
     private int memory;
-    
+
     @Override
     @SuppressWarnings("incomplete-switch")
-    public List<ApplicationId> executeYarnStep(String deploymentExternalId, ModelCommandStep currentStep, ModelCommandParameters commandParameters) {                
+    public List<ApplicationId> executeYarnStep(String deploymentExternalId, ModelCommandStep currentStep, ModelCommandParameters commandParameters) {
         List<ApplicationId> appIds = Collections.emptyList();
         switch (currentStep) {
         case LOAD_DATA:
@@ -97,10 +97,10 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             appIds = submitModel(deploymentExternalId, commandParameters);
             break;
         }
-        
+
         return appIds;
-    }       
-    
+    }
+
     private List<ApplicationId> load(String customer, ModelCommandParameters commandParameters) {
         String deletePath = "/user/s-analytics/customers/" + customer + "/data";
         try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
@@ -113,17 +113,17 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_16001, e, new String[] { deletePath });
         }
-                       
-        List<ApplicationId> appIds = new ArrayList<>(); 
+
+        List<ApplicationId> appIds = new ArrayList<>();
         ApplicationId unpivotedAppId = modelingService.loadData(generateLoadConfiguration(DataSetType.STANDARD, customer, commandParameters));
         appIds.add(unpivotedAppId);
         // No LR for now.
-//        ApplicationId pivotedAppId = modelingService.loadData(generateLoadConfiguration(DataSetType.PIVOTED, customer, commandParameters));        
+//        ApplicationId pivotedAppId = modelingService.loadData(generateLoadConfiguration(DataSetType.PIVOTED, customer, commandParameters));
 //        appIds.add(pivotedAppIds);
-        
+
         return appIds;
     }
-    
+
     private LoadConfiguration generateLoadConfiguration(DataSetType type, String customer, ModelCommandParameters commandParameters) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
@@ -138,27 +138,27 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         }
         config.setMetadataTable(commandParameters.getMetadataTable());
         config.setKeyCols(commandParameters.getKeyCols());
-        
+
         return config;
     }
-    
+
     @VisibleForTesting
     List<Integer> calculateSamplePercentages(int numSamples) {
         if (numSamples < 1) return Collections.emptyList();
-        
+
         List<Integer> list = new ArrayList<>();
-        
+
         int interval = 100/numSamples;
         int sum = interval;
         while (sum <= (100-interval)) {
             list.add(sum);
             sum += interval;
-        }           
+        }
         list.add(100);
-        
+
         return list;
     }
-    
+
     private List<ApplicationId> generateSamples(String customer, ModelCommandParameters commandParameters) {
         // No LR for now.
 //        ApplicationId lrAppId = modelingService.createSamples(generateSamplingConfiguration(AlgorithmType.LOGISTIC_REGRESSION, customer, commandParameters));
@@ -166,34 +166,34 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
         return Arrays.asList(/*lrAppId, */unpivotedAppId);
     }
-  
+
     private String constructSampleName(int percentage) {
         return SAMPLENAME_PREFIX + String.valueOf(percentage);
     }
-    
+
     @VisibleForTesting
     SamplingConfiguration generateSamplingConfiguration(DataSetType type, String customer, ModelCommandParameters commandParameters) {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
-        
+
         for (int percentage : calculateSamplePercentages(commandParameters.getNumSamples())) {
             SamplingElement s = new SamplingElement();
             s.setName(constructSampleName(percentage));
             s.setPercentage(percentage);
             samplingConfig.addSamplingElement(s);
         }
-        
+
         samplingConfig.setCustomer(customer);
-        
+
         if (type.equals(DataSetType.STANDARD)) {
             samplingConfig.setTable(commandParameters.getEventTable());
         } else {
             samplingConfig.setTable(commandParameters.getDepivotedEventTable());
         }
-        
+
         return samplingConfig;
-    }  
-    
+    }
+
     /*
      * No commented out code exists in this method to handle logistic regression.
      */
@@ -205,22 +205,22 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         config.setExcludeColumnList(commandParameters.getExcludeColumns());
         config.setSamplePrefix(SAMPLENAME_PREFIX+"100");
         ApplicationId appId = modelingService.profileData(config);
-        
-        return Arrays.asList(appId);        
+
+        return Arrays.asList(appId);
     }
-    
+
     private List<ApplicationId> submitModel(String customer, ModelCommandParameters commandParameters) {
         List<ApplicationId> appIds = new ArrayList<>();
         // No LR for now.
         List<ApplicationId> unpivotedModelAppIds = modelingService.submitModel(generateModel(DataSetType.STANDARD, customer, commandParameters));
 //        List<ApplicationId> lrAppIds = modelingService.submitModel(generateModel(AlgorithmType.LOGISTIC_REGRESSION, customer, commandParameters));
-        
+
         appIds.addAll(unpivotedModelAppIds);
 //        appIds.addAll(lrAppIds);
-   
+
         return appIds;
     }
-    
+
     @VisibleForTesting
     int calculatePriority(int sampleIndex) {
         int priority = 0;
@@ -235,18 +235,23 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             priority = 2;
             break;
         }
-        
+
         return priority;
     }
-    
+
     @VisibleForTesting
     Model generateModel(DataSetType type, String customer, ModelCommandParameters commandParameters) {
         List<Algorithm> algorithms = new ArrayList<>();
-        
+
         int sampleIndex = 0;
         for (int percentage : calculateSamplePercentages(commandParameters.getNumSamples())) {
             AlgorithmBase algorithm;
-            if (type.equals(DataSetType.STANDARD)) {
+
+            if (!Strings.isNullOrEmpty(commandParameters.getAlgorithmScript())) {
+                algorithm = new AlgorithmBase();
+                algorithm.setName("CUSTOM");
+                algorithm.setScript(commandParameters.getAlgorithmScript());
+            } else if (type.equals(DataSetType.STANDARD)) {
                 algorithm = new RandomForestAlgorithm();
             } else {
                 algorithm = new LogisticRegressionAlgorithm();
@@ -258,16 +263,16 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             if (!Strings.isNullOrEmpty(commandParameters.getAlgorithmProperties())) {
                 algorithm.setAlgorithmProperties(commandParameters.getAlgorithmProperties());
             }
-            algorithm.setSampleName(constructSampleName(percentage)); 
+            algorithm.setSampleName(constructSampleName(percentage));
             algorithms.add(algorithm);
-            
+
             sampleIndex++;
         }
-        
+
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName(commandParameters.getModelName());
         modelDef.addAlgorithms(algorithms);
-        
+
         Model model = new Model();
         model.setModelDefinition(modelDef);
         model.setName(commandParameters.getModelName());
@@ -281,11 +286,11 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         model.setKeyCols(commandParameters.getKeyCols());
         model.setCustomer(customer);
         model.setDataFormat(AVRO);
-        model.setProvenanceProperties(generateProvenanceProperties(commandParameters));       
-        
+        model.setProvenanceProperties(generateProvenanceProperties(commandParameters));
+
         List<String> features = modelingService.getFeatures(model, false);
         model.setFeaturesList(features);
-        
+
         return model;
     }
 
@@ -294,7 +299,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         provenanceProperties.put(ModelCommandParameters.DL_URL, commandParameters.getDlUrl());
         provenanceProperties.put(ModelCommandParameters.DL_TENANT, commandParameters.getDlTenant());
         provenanceProperties.put(ModelCommandParameters.EVENT_TABLE, commandParameters.getEventTable());
-        
+
         return StringTokenUtils.propertyToString(provenanceProperties);
     }
 }

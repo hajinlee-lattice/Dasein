@@ -23,14 +23,11 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 
 @SuppressWarnings("unused")
 public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
-    
+
     private static final Log log = LogFactory.getLog(ModelStepOutputResultsProcessorImplTestNG.class);
 
     @Autowired
     private ModelStepProcessor modelStepOutputResultsProcessor;
-
-    private ModelCommandCallable modelCommandCallable = new ModelCommandCallable(null, null, null, null, null, null,
-            null, null, null);
 
     protected boolean doYarnClusterSetup() {
         return false;
@@ -40,7 +37,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     public void testExecutePostStep() throws Exception {
         List<ModelCommandParameter> listParameters = ModelingServiceTestUtils.createModelCommandWithCommandParameters()
                 .getCommandParameters();
-        ModelCommandParameters commandParameters = modelCommandCallable.validateAndSetCommandParameters(listParameters);
+        ModelCommandParameters commandParameters = new ModelCommandParameters(listParameters);
         commandParameters.setEventTable("ATable");
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
 //        modelCommandEntityMgr.create(command);

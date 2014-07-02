@@ -39,7 +39,11 @@ public enum LedpCode {
     // DLOrchestration service: 16000-16999
     LEDP_16000("Missing model command parameter(s) {0}."), //
     LEDP_16001("Problem deleting path {0} before load."), //
-    LEDP_16002("Problem retrieving JSON model HDFS path for model command:{0}, yarnAppId:{1}.");
+    LEDP_16002("Problem retrieving JSON model HDFS path for model command:{0}, yarnAppId:{1}."), //
+    LEDP_16003("Problem retrieving DL sessionId for model command:{0} from url:{1}."), //
+    LEDP_16004("Retrieved empty DL sessionId for model command:{0} from url:{1}."), //
+    LEDP_16005("Problem retrieving DL metadata columns for model command:{0} from url:{1}."), //
+    LEDP_16006("Retrieved empty DL metadata columns for model command:{0} from url:{1}.");
 
     private String message;
 

@@ -1,9 +1,11 @@
 package com.latticeengines.common.exposed.util;
 
 import java.io.IOException;
+import java.util.Map;
 
-import com.google.api.client.http.EmptyContent;
-import com.google.api.client.http.GZipEncoding;
+import org.apache.commons.io.IOUtils;
+
+//import com.google.api.client.http.GZipEncoding;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler;
 import com.google.api.client.http.HttpRequest;
@@ -11,6 +13,7 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.util.ExponentialBackOff;
 
@@ -23,7 +26,7 @@ public class HttpUtils {
 
             @Override
             public void initialize(HttpRequest request) throws IOException {
-                request.setEncoding(new GZipEncoding());
+                //request.setEncoding(new GZipEncoding());
                 request.setConnectTimeout(60000);
                 request.setNumberOfRetries(10);
 
@@ -38,19 +41,27 @@ public class HttpUtils {
     /*
      * Request will retry with exponential backoff on any 5xx server error
      * response.
-     * 
-     * @return Returns the HTTP status code or 0 for none.
+     *
+     * @return Returns the response text
      */
-    public static int executePostRequest(String url) throws IOException {
-        HttpRequest request = requestFactory.buildPostRequest(new GenericUrl(url), new EmptyContent());
-        HttpResponse response = request.execute();            
-        return response.getStatusCode();
-    }
-    
-    public static int executeGetRequest(String url) throws IOException {
-        HttpRequest request = requestFactory.buildGetRequest(new GenericUrl(url));        
+    public static String executePostRequest(String url, Map<String, String> parameters) throws IOException {
+        HttpRequest request = requestFactory.buildPostRequest(new GenericUrl(url), new UrlEncodedContent(parameters));
+
         HttpResponse response = request.execute();
-        return response.getStatusCode();
+        return IOUtils.toString(response.getContent());
+    }
+
+    /*
+     * Request will retry with exponential backoff on any 5xx server error
+     * response.
+     *
+     * @return Returns the response text
+     */
+    public static String executeGetRequest(String url) throws IOException {
+        HttpRequest request = requestFactory.buildGetRequest(new GenericUrl(url));
+        HttpResponse response = request.execute();
+
+        return IOUtils.toString(response.getContent());
     }
 
 }

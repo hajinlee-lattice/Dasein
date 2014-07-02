@@ -1,10 +1,19 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import com.latticeengines.dataplatform.exposed.exception.LedpCode;
+import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
+
 public class ModelCommandParameters {
 
+    private static final char COMMA = ',';
     // Hardcoded name of hdfs subfolder
     public static final String EVENT_METADATA = "EventMetadata";
 
@@ -16,11 +25,15 @@ public class ModelCommandParameters {
     public static final String EXCLUDE_COLUMNS = "ExcludeColumns";
     public static final String DL_URL = "DataLoader_Instance";
     public static final String DL_TENANT = "DataLoader_TenantName";
+    public static final String DL_USERNAME = "DataLoader_UserName";
+    public static final String DL_PASSWORD = "DataLoader_Password";
+    public static final String DL_TOKEN = "DataLoader_Token";
 
     // Optional parameters
     public static final String NUM_SAMPLES = "NumSamples";
     public static final String DEPIVOTED_EVENT_TABLE = "DepivotedEventTable";
     public static final String ALGORITHM_PROPERTIES = "AlgorithmProperties";
+    public static final String ALGORITHM_SCRIPT = "AlgorithmScript";
 
     private String eventTable = null;
     private String depivotedEventTable = null;
@@ -31,14 +44,116 @@ public class ModelCommandParameters {
     private List<String> modelTargets = Collections.emptyList();
     private List<String> excludeColumns = Collections.emptyList();
     private String algorithmProperties = null;
+    private String algorithmScript = null;
     private String dlUrl = null;
     private String dlTenant = null;
+    private String dlUsername = null;
+    private String dlPassword = null;
+    private String dlToken = null;
+
+    public ModelCommandParameters (List<ModelCommandParameter> commandParameters) {
+        super();
+
+        for (ModelCommandParameter parameter : commandParameters) {
+            switch (parameter.getKey()) {
+            case ModelCommandParameters.DEPIVOTED_EVENT_TABLE:
+                this.setDepivotedEventTable(parameter.getValue());
+                break;
+            case ModelCommandParameters.EVENT_TABLE:
+                this.setEventTable(parameter.getValue());
+                break;
+            case ModelCommandParameters.KEY_COLS:
+                this.setKeyCols(splitCommaSeparatedStringToList(parameter.getValue()));
+                break;
+            case ModelCommandParameters.MODEL_NAME:
+                this.setModelName(parameter.getValue());
+                break;
+            case ModelCommandParameters.MODEL_TARGETS:
+                this.setModelTargets(splitCommaSeparatedStringToList(parameter.getValue()));
+                break;
+            case ModelCommandParameters.NUM_SAMPLES:
+                this.setNumSamples(Integer.parseInt(parameter.getValue()));
+                break;
+            case ModelCommandParameters.EXCLUDE_COLUMNS:
+                this.setExcludeColumns(splitCommaSeparatedStringToList(parameter.getValue()));
+                break;
+            case ModelCommandParameters.ALGORITHM_PROPERTIES:
+                this.setAlgorithmProperties(parameter.getValue());
+                break;
+            case ModelCommandParameters.ALGORITHM_SCRIPT:
+                this.setAlgorithmScript(parameter.getValue());
+                break;
+            case ModelCommandParameters.DL_TENANT:
+                this.setDlTenant(parameter.getValue());
+                break;
+            case ModelCommandParameters.DL_URL:
+                this.setDlUrl(parameter.getValue());
+                break;
+            case ModelCommandParameters.DL_USERNAME:
+                this.setDlUsername(parameter.getValue());
+                break;
+            case ModelCommandParameters.DL_PASSWORD:
+                this.setDlPassword(parameter.getValue());
+                break;
+            case ModelCommandParameters.DL_TOKEN:
+                this.setDlToken(parameter.getValue());
+                break;
+
+            }
+        }
+
+        List<String> missingParameters = new ArrayList<>();
+        if (Strings.isNullOrEmpty(this.getEventTable())) {
+            missingParameters.add(ModelCommandParameters.EVENT_TABLE);
+        }
+        if (this.getKeyCols().isEmpty()) {
+            missingParameters.add(ModelCommandParameters.KEY_COLS);
+        }
+        if (Strings.isNullOrEmpty(this.getModelName())) {
+            missingParameters.add(ModelCommandParameters.MODEL_NAME);
+        }
+        if (this.getModelTargets().isEmpty()) {
+            missingParameters.add(ModelCommandParameters.MODEL_TARGETS);
+        }
+        if (this.getExcludeColumns().isEmpty()) {
+            missingParameters.add(ModelCommandParameters.EXCLUDE_COLUMNS);
+        }
+        if (Strings.isNullOrEmpty(this.getDlTenant())) {
+            missingParameters.add(ModelCommandParameters.DL_TENANT);
+        }
+        if (Strings.isNullOrEmpty(this.getDlUrl())) {
+            missingParameters.add(ModelCommandParameters.DL_URL);
+        }
+        if (Strings.isNullOrEmpty(this.getDlUsername())) {
+            missingParameters.add(ModelCommandParameters.DL_USERNAME);
+        }
+        if (Strings.isNullOrEmpty(this.getDlPassword())) {
+            missingParameters.add(ModelCommandParameters.DL_PASSWORD);
+        }
+        if (Strings.isNullOrEmpty(this.getDlToken())) {
+            missingParameters.add(ModelCommandParameters.DL_TOKEN);
+        }
+
+        if (!missingParameters.isEmpty()) {
+            throw new LedpException(LedpCode.LEDP_16000, new String[] { missingParameters.toString() });
+        }
+    }
+
+    @VisibleForTesting
+    List<String> splitCommaSeparatedStringToList(String input) {
+        if (Strings.isNullOrEmpty(input)) {
+            return Collections.emptyList();
+        } else {
+            return Splitter.on(COMMA).trimResults().omitEmptyStrings().splitToList(input);
+        }
+    }
 
     public String getDlUrl() {
         return dlUrl;
     }
 
-    public void setDlUrl(String dlUrl) {
+    @VisibleForTesting
+    void setDlUrl(String dlUrl) {
         this.dlUrl = dlUrl;
     }
 
@@ -46,7 +161,7 @@ public class ModelCommandParameters {
         return dlTenant;
     }
 
-    public void setDlTenant(String dlTenant) {
+    private void setDlTenant(String dlTenant) {
         this.dlTenant = dlTenant;
     }
 
@@ -54,7 +169,8 @@ public class ModelCommandParameters {
         return eventTable;
     }
 
-    public void setEventTable(String eventTable) {
+    @VisibleForTesting
+    void setEventTable(String eventTable) {
         this.eventTable = eventTable;
     }
 
@@ -62,7 +178,7 @@ public class ModelCommandParameters {
         return depivotedEventTable;
     }
 
-    public void setDepivotedEventTable(String depivotedEventTable) {
+    private void setDepivotedEventTable(String depivotedEventTable) {
         this.depivotedEventTable = depivotedEventTable;
     }
 
@@ -70,11 +186,15 @@ public class ModelCommandParameters {
         return metadataTable;
     }
 
+    public void setMetadataTable(String metadataTable) {
+        this.metadataTable = metadataTable;;
+    }
+
     public List<String> getKeyCols() {
         return keyCols;
     }
 
-    public void setKeyCols(List<String> keyCols) {
+    private void setKeyCols(List<String> keyCols) {
         this.keyCols = keyCols;
     }
 
@@ -82,7 +202,7 @@ public class ModelCommandParameters {
         return numSamples;
     }
 
-    public void setNumSamples(int numSamples) {
+    private void setNumSamples(int numSamples) {
         this.numSamples = numSamples;
     }
 
@@ -90,7 +210,7 @@ public class ModelCommandParameters {
         return modelName;
     }
 
-    public void setModelName(String modelName) {
+    private void setModelName(String modelName) {
         this.modelName = modelName;
     }
 
@@ -98,7 +218,7 @@ public class ModelCommandParameters {
         return modelTargets;
     }
 
-    public void setModelTargets(List<String> modelTargets) {
+    private void setModelTargets(List<String> modelTargets) {
         this.modelTargets = modelTargets;
     }
 
@@ -106,7 +226,7 @@ public class ModelCommandParameters {
         return excludeColumns;
     }
 
-    public void setExcludeColumns(List<String> excludeColumns) {
+    private void setExcludeColumns(List<String> excludeColumns) {
         this.excludeColumns = excludeColumns;
     }
 
@@ -114,7 +234,39 @@ public class ModelCommandParameters {
         return algorithmProperties;
     }
 
-    public void setAlgorithmProperties(String algorithmProperties) {
+    private void setAlgorithmProperties(String algorithmProperties) {
         this.algorithmProperties = algorithmProperties;
+    }
+
+    public String getAlgorithmScript() {
+        return algorithmScript;
+    }
+
+    private void setAlgorithmScript(String algorithmScript) {
+        this.algorithmScript = algorithmScript;
+    }
+
+    public String getDlUsername() {
+        return dlUsername;
+    }
+
+    private void setDlUsername(String dlUsername) {
+        this.dlUsername = dlUsername;
+    }
+
+    public String getDlPassword() {
+        return dlPassword;
+    }
+
+    private void setDlPassword(String dlPassword) {
+        this.dlPassword = dlPassword;
+    }
+
+    public String getDlToken() {
+        return dlToken;
+    }
+
+    private void setDlToken(String dlToken) {
+        this.dlToken = dlToken;
     }
 }

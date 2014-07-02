@@ -31,9 +31,6 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
     @Autowired
     private ModelingService modelingService;
 
-    private ModelCommandCallable modelCommandCallable = new ModelCommandCallable(null, null, null, null, null, null,
-            null, null, null);
-
     protected boolean doDependencyLibraryCopy() {
         return false;
     }
@@ -42,7 +39,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
     public void testExecuteYarnSteps() throws Exception {
         List<ModelCommandParameter> listParameters = ModelingServiceTestUtils.createModelCommandWithCommandParameters()
                 .getCommandParameters();
-        ModelCommandParameters commandParameters = modelCommandCallable.validateAndSetCommandParameters(listParameters);
+        ModelCommandParameters commandParameters = new ModelCommandParameters(listParameters);
 
         List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.LOAD_DATA,
                 commandParameters);

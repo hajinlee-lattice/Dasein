@@ -55,6 +55,9 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
     @Autowired
     private ModelStepProcessor modelStepOutputResultsProcessor;
 
+    @Autowired
+    private ModelStepProcessor modelStepRetrieveMetadataProcessor;
+
     protected boolean doDependencyLibraryCopy() {
         return false;
     }
@@ -78,7 +81,8 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         // ModelCommand command = commands.get(0);
         ModelCommandCallable modelCommandCallable = new ModelCommandCallable(command, jobService,
                 modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
-                modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor);
+                modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
+                modelStepRetrieveMetadataProcessor);
 
         int iterations = 0;
         while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
@@ -91,9 +95,9 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         assertTrue(command.getCommandStatus() == ModelCommandStatus.SUCCESS);
 
         List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
-        assertEquals(logs.size(), 12);
+        assertEquals(logs.size(), 14);
         List<ModelCommandState> states = modelCommandStateEntityMgr.findAll();
-        assertEquals(states.size(), 6);
+        assertEquals(states.size(), 7);
 */
     }
 

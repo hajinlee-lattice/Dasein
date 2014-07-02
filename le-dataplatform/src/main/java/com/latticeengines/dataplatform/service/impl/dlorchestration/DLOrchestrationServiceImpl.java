@@ -30,56 +30,61 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 @DisallowConcurrentExecution
 @Component("dlOrchestrationJob")
 public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrchestrationService {
-    
+
     private static final Log log = LogFactory.getLog(DLOrchestrationServiceImpl.class);
-    
+
     private AsyncTaskExecutor dlOrchestrationJobTaskExecutor;
-    
+
     private ModelCommandEntityMgr modelCommandEntityMgr;
-         
+
     private JobService jobService;
-   
+
     private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
-    
+
     private ModelStepYarnProcessor modelStepYarnProcessor;
-    
+
     private ModelCommandLogService modelCommandLogService;
-    
+
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
-    
+
     private ModelStepProcessor modelStepFinishProcessor;
-    
+
     private ModelStepProcessor modelStepOutputResultsProcessor;
-    
+
+    private ModelStepProcessor modelStepRetrieveMetadataProcessor;
+
     private int waitTime = 180;
-    
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         run(context);
     }
 
     @Override
-    @Transactional(value="dlorchestration", propagation = Propagation.REQUIRED)
+    @Transactional(value = "dlorchestration", propagation = Propagation.REQUIRED)
     public void run(JobExecutionContext context) throws JobExecutionException {
         List<Future<Long>> futures = new ArrayList<>();
         List<ModelCommand> modelCommands = modelCommandEntityMgr.getNewAndInProgress();
         String modelCommandsStr = Joiner.on(",").join(modelCommands);
-        
+
         if (log.isDebugEnabled()) {
             log.debug("Begin processing " + modelCommands.size() + " model commands: " + modelCommandsStr);
         }
-        
+
         for (ModelCommand modelCommand : modelCommands) {
-            futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(modelCommand, 
-                    jobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor,
-                    modelCommandLogService, modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor)));
+            futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(modelCommand, jobService,
+                    modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
+                    modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
+                    modelStepRetrieveMetadataProcessor)));
         }
         for (Future<Long> future : futures) {
             try {
                 future.get(waitTime, TimeUnit.SECONDS);
             } catch (Exception e) {
-                // ModelCommandCallable is responsible for consuming any exceptions while processing
-                // An exception here indicates a problem outside of the workflow.
+                // ModelCommandCallable is responsible for consuming any
+                // exceptions while processing
+                // An exception here indicates a problem outside of the
+                // workflow.
                 log.error(e.getMessage(), e);
             }
         }
@@ -87,7 +92,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
         if (log.isDebugEnabled()) {
             log.debug("Finished processing " + modelCommands.size() + " model commands: " + modelCommandsStr);
         }
-        
+
     }
 
     public AsyncTaskExecutor getDlOrchestrationJobTaskExecutor() {
@@ -102,7 +107,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
         return modelCommandEntityMgr;
     }
 
-    public void setModelCommandEntityMgr(ModelCommandEntityMgr modelCommandEntityMgr) {                 
+    public void setModelCommandEntityMgr(ModelCommandEntityMgr modelCommandEntityMgr) {
         this.modelCommandEntityMgr = modelCommandEntityMgr;
     }
 
@@ -137,7 +142,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
     public void setModelCommandLogService(ModelCommandLogService modelCommandLogService) {
         this.modelCommandLogService = modelCommandLogService;
     }
-    
+
     public ModelCommandResultEntityMgr getModelCommandResultEntityMgr() {
         return modelCommandResultEntityMgr;
     }
@@ -162,6 +167,14 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
         this.modelStepOutputResultsProcessor = modelStepOutputResultsProcessor;
     }
 
+    public ModelStepProcessor getModelStepRetrieveMetadataProcessor() {
+        return modelStepRetrieveMetadataProcessor;
+    }
+
+    public void setModelStepRetrieveMetadataProcessor(ModelStepProcessor modelStepRetrieveMetadataProcessor) {
+        this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
+    }
+
     public int getWaitTime() {
         return waitTime;
     }
@@ -169,6 +182,5 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
     public void setWaitTime(int waitTime) {
         this.waitTime = waitTime;
     }
-    
 
 }

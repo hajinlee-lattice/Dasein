@@ -22,7 +22,7 @@ public class ModelStepFinishProcessorImpl implements ModelStepProcessor {
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
     
     @Override
-    public void executePostStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
+    public void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
         ModelCommandResult result = modelCommandResultEntityMgr.findByModelCommand(modelCommand);
         result.setEndTime(new Date());
         result.setProcessStatus(ModelCommandStatus.SUCCESS);

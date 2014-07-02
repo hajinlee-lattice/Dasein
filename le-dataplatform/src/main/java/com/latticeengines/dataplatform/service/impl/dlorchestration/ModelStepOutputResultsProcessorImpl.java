@@ -50,7 +50,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
     private JdbcTemplate dlOrchestrationJdbcTemplate;
         
     @Override
-    public void executePostStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {               
+    public void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {               
         List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand, ModelCommandStep.SUBMIT_MODELS);
         String appId = commandStates.get(0).getYarnApplicationId();
         JobStatus jobStatus = modelingService.getJobStatus(appId);
