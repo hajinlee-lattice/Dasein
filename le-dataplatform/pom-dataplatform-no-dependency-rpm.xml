@@ -55,6 +55,19 @@
 				<hadoop-metrics2.properties.path>conf/env/prod</hadoop-metrics2.properties.path>
 			</properties>
 		</profile>
+		<profile>
+			<id>buildmachine</id>
+			<activation>
+				<property>
+					<name>environment.type</name>
+					<value>buildmachine</value>
+				</property>
+			</activation>
+			<properties>
+				<dataplatform.properties.path>conf/env/buildmachine</dataplatform.properties.path>
+				<hadoop-metrics2.properties.path>conf/env/buildmachine</hadoop-metrics2.properties.path>
+			</properties>
+		</profile>
 	</profiles>
 
 	<build>
