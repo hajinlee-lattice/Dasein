@@ -40,8 +40,7 @@ public class SchemaGenerator {
 
     /**
      *
-     * @param dbProp
-     *            - properties for database settings
+     * @param dbProp properties for database settings
      * @param packages
      * @throws Exception
      */
@@ -58,15 +57,15 @@ public class SchemaGenerator {
         cfg.setProperty("hibernate.hbm2ddl.auto", "create");
         cfg.setProperty("hibernate.globally_quoted_identifiers", "true");
         cfg.setProperty("connection.autocommit", "true");
-        //cfg.setProperty("hibernate.show_sql", "true");
 
         List<Class<?>> classes = new ArrayList<>();
         for (String packageName : packages) {
             classes.addAll(getClasses(packageName));
         }
         // error checking
-        if(classes.isEmpty())
+        if (classes.isEmpty()) {
             throw new ClassNotFoundException("class not found for package: "+packages);
+        }
 
         for (Class<?> clazz : classes) {
             cfg.addAnnotatedClass(clazz);
@@ -79,8 +78,10 @@ public class SchemaGenerator {
         SchemaExport export = new SchemaExport(cfg);
         export.setDelimiter(";");
         export.setFormat(true);
-        if(outputFileName!=null)
-           export.setOutputFile(outputFileName);
+        if (outputFileName != null) {
+            export.setOutputFile(outputFileName); 
+        }
+           
         export.execute(bScript, bExportToDb, false, false);
     }
 
@@ -249,8 +250,11 @@ public class SchemaGenerator {
                 directory = new File(url.getFile());
 
                 if (directory.exists()) {
-                    log.debug("   classes directory mode");
-                    /** deal with filesystem with classes case **/
+                    if (log.isDebugEnabled()) {
+                        log.debug("   classes directory mode");
+                    }
+                    
+                    // deal with filesystem with classes case
                     String[] files = directory.list();
                     for (int i = 0; i < files.length; i++) {
                         if (files[i].endsWith(".class")) {
@@ -261,13 +265,15 @@ public class SchemaGenerator {
                         }
                     }
                 } else {
-                    log.debug("   jar classes mode");
-                    /** deal with the classes within jar files **/
+                    if (log.isDebugEnabled()) {
+                        log.debug("   jar classes mode");
+                    }
+                    
+                    // deal with the classes within jar files
                     // url=jar:file:/tmp/dataplatform/database/lib/le-domain-1.0.0-SNAPSHOT.jar!/com/latticeengines/domain/exposed/dataplatform
                     String[] paths = directory.getPath().split("!");
                     // strip off file:
                     File jarFilepath = new File(paths[0].substring(5));
-                    String relativePackagePath = paths[1].replace(File.separatorChar, '/');
                     JarFile jarFile = null;
 
                     try {
@@ -282,7 +288,10 @@ public class SchemaGenerator {
                                 // remove .class extension
                                 String fullyClassname = jarEntry.getName().substring(0, jarEntry.getName().length() - 6);
                                 classes.add(Class.forName(fullyClassname.replace('/', '.')));
-                                log.debug("adding class:"+fullyClassname);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("adding class: " + fullyClassname);
+                                }
+                                
                             }
                         }
                     } finally {
@@ -302,8 +311,9 @@ public class SchemaGenerator {
         /**
          * uses a custom dialect for SQLSERVER
          **/
-        SQLSERVER("com.latticeengines.dataplatform.dao.impl.LeSQLServer2008Dialect"), MYSQL(
-                "org.hibernate.dialect.MySQLDialect"), HSQL("org.hibernate.dialect.HSQLDialect");
+        SQLSERVER("com.latticeengines.dataplatform.dao.impl.LeSQLServer2008Dialect"), //
+        MYSQL("org.hibernate.dialect.MySQLDialect"), //
+        HSQL("org.hibernate.dialect.HSQLDialect");
 
         private String dialectClass;
 
