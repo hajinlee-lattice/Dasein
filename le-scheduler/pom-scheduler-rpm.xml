@@ -92,7 +92,7 @@
 							</sources>
 						</mapping>
 						<mapping>
-							<directory>/etc/hadoop/conf</directory>
+							<directory>/etc/hadoop/conf.empty</directory>
 							<filemode>644</filemode>
 							<username>yarn</username>
 							<groupname>hadoop</groupname>
@@ -103,6 +103,9 @@
 							</sources>
 						</mapping>
 					</mappings>
+					<preinstallScriptlet>
+						<scriptFile>src/main/resources/rpm/scripts/preinstall</scriptFile>
+					</preinstallScriptlet>
 				</configuration>
 			</plugin>
 		</plugins>
