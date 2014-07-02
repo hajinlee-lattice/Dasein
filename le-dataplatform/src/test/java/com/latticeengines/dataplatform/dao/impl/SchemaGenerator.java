@@ -26,7 +26,7 @@ public class SchemaGenerator {
     /**
      * an new instance is only good for one dialect. It seems that Hibernate configuration cannot be reused by other
      * dialect.
-     * 
+     *
      * @param name
      * @param packages  - specific packages,  not sub-package
      * @throws Exception
@@ -39,7 +39,7 @@ public class SchemaGenerator {
     }
 
     /**
-     * 
+     *
      * @param dbProp
      *            - properties for database settings
      * @param packages
@@ -59,12 +59,12 @@ public class SchemaGenerator {
         cfg.setProperty("hibernate.globally_quoted_identifiers", "true");
         cfg.setProperty("connection.autocommit", "true");
         //cfg.setProperty("hibernate.show_sql", "true");
-        
+
         List<Class<?>> classes = new ArrayList<>();
-        for (String packageName : packages) {                        
+        for (String packageName : packages) {
             classes.addAll(getClasses(packageName));
         }
-        // error checking 
+        // error checking
         if(classes.isEmpty())
             throw new ClassNotFoundException("class not found for package: "+packages);
 
@@ -77,7 +77,7 @@ public class SchemaGenerator {
         cfg.setProperty("hibernate.dialect", dialect.getDialectClass());
 
         SchemaExport export = new SchemaExport(cfg);
-        export.setDelimiter(";");        
+        export.setDelimiter(";");
         export.setFormat(true);
         if(outputFileName!=null)
            export.setOutputFile(outputFileName);
@@ -98,11 +98,11 @@ public class SchemaGenerator {
      * database directly. <br>
      * [1] database configuration properties file path - this leverages the dataplatform.properties for reusable
      * settings <br>
-     * 
+     *
      * hibernate.connection.driver_class - JDBC driver class hibernate.connection.url - JDBC URL
      * hibernate.connection.username - database user hibernate.connection.password - database user password
      * hibernate.connection.pool_size - maximum number of pooled connections
-     * 
+     *
      * @param args
      *            - [0]: scriptOnly - [1]: db properties file path
      * @throws Exception
@@ -168,15 +168,15 @@ public class SchemaGenerator {
 
     /**
      * Convert from dataplatform.properties to hibernate.properties
-     * 
+     *
      * from: dataplatform.dao.datasource.driver=com.microsoft.sqlserver.jdbc. SQLServerDriver
      * dataplatform.dao.datasource.user=root dataplatform.dao.datasource.password=welcome
      * dataplatform.dao.datasource.url =jdbc:sqlserver://10.41.1.250:1433;databaseName=ledp_buildmachine;
-     * 
+     *
      * to: hibernate.connection.driver_class - JDBC driver class hibernate.connection.url - JDBC URL
      * hibernate.connection.username - database user hibernate.connection.password - database user password
      * hibernate.connection.pool_size - maximum number of pooled connections
-     * 
+     *
      * @param dbPropFilepath
      * @return [0] ledp db properies [1] dlOrchestration db properties
      * @throws Exception
@@ -242,7 +242,7 @@ public class SchemaGenerator {
             if (resources == null) {
                 throw new ClassNotFoundException("No resources for " + packagePath);
             }
-           
+
             while (resources.hasMoreElements()) {
                 URL url = resources.nextElement();
                 log.debug("   url=" + url);
@@ -275,13 +275,13 @@ public class SchemaGenerator {
                         Enumeration<JarEntry> jarEntries = jarFile.entries();
                         while (jarEntries.hasMoreElements()) {
                             JarEntry jarEntry = jarEntries.nextElement();
-                            // strip off file entry name 
+                            // strip off file entry name
                             String jarPackage = jarEntry.getName().substring(0, jarEntry.getName().lastIndexOf('/'));
                             // only process specific package, not sub-package
-                            if (!jarEntry.isDirectory() && jarPackage.equalsIgnoreCase(packageName.replace('.', '/'))) {  
+                            if (!jarEntry.isDirectory() && jarPackage.equalsIgnoreCase(packageName.replace('.', '/'))) {
                                 // remove .class extension
                                 String fullyClassname = jarEntry.getName().substring(0, jarEntry.getName().length() - 6);
-                                classes.add(Class.forName(fullyClassname.replace('/', '.'))); 
+                                classes.add(Class.forName(fullyClassname.replace('/', '.')));
                                 log.debug("adding class:"+fullyClassname);
                             }
                         }
@@ -293,8 +293,8 @@ public class SchemaGenerator {
         } catch (NullPointerException x) {
             throw new ClassNotFoundException(packageName + " (" + directory + ") does not appear to be a valid package");
         }
-        
-        
+
+
         return classes;
     }
 
@@ -303,7 +303,7 @@ public class SchemaGenerator {
          * uses a custom dialect for SQLSERVER
          **/
         SQLSERVER("com.latticeengines.dataplatform.dao.impl.LeSQLServer2008Dialect"), MYSQL(
-                "org.hibernate.dialect.MySQL5Dialect"), HSQL("org.hibernate.dialect.HSQLDialect");
+                "org.hibernate.dialect.MySQLDialect"), HSQL("org.hibernate.dialect.HSQLDialect");
 
         private String dialectClass;
 
