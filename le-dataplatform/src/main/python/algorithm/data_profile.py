@@ -4,6 +4,7 @@ import re
 import sys
 
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
+import numpy as np
 import pandas.core.algorithms as algos
 
 
@@ -69,7 +70,7 @@ def getSchema():
     }"""
     return schema.parse(metadataSchema)
 
-def train(trainingData, testData, schema, modelDir, algorithmProperties):    
+def train(trainingData, testData, schema, modelDir, algorithmProperties):
     data = trainingData.append(testData)
 
     avroSchema = getSchema()
