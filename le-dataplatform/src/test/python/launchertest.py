@@ -8,6 +8,7 @@ import pickle
 from random import random
 from random import shuffle
 import shutil
+import uuid
 from sklearn.ensemble import RandomForestClassifier
 from unittest import TestCase
 
@@ -74,10 +75,10 @@ class LauncherTest(TestCase):
         inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
         value = [ random() for _ in range(len(inputColumns))]
         lines = self.__getLineToScore(inputColumns, value)
-        rowDict1 = se.getRowToScore(lines[0])
+        rowDict1 = se.getRowToScore(lines[0])[1]
         resultFrame1 = se.predict(pipeline, rowDict1)
         
-        rowDict2 = se.getRowToScore(lines[1])
+        rowDict2 = se.getRowToScore(lines[1])[1]
         resultFrame2 = se.predict(pipeline, rowDict2)
         print(lines[0])
         print(lines[1])
@@ -118,6 +119,7 @@ class LauncherTest(TestCase):
             line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (columnsWithValue[i][0], columnsWithValue[i][1])
 
         line += "]"
+        line = '{"key":"%s","value":%s}' % (str(uuid.uuid4()),line)
         return line
     
     def __createCSV(self, inputColumns, values):
@@ -132,7 +134,7 @@ class LauncherTest(TestCase):
         inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
         for value in values:
             row = self.__getLine(zip(inputColumns, value))
-            rowDict = se.getRowToScore(row)
+            rowDict = se.getRowToScore(row)[1]
             resultFrame = se.predict(pipeline, rowDict)
             scores.append(resultFrame['Score'][0])
         return scores
