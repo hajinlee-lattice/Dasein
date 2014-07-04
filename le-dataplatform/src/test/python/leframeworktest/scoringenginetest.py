@@ -6,26 +6,33 @@ Created on Jul 2, 2014
 from unittest import TestCase
 from leframework import scoringengine
 import pickle
+import filecmp
+import json
+import os
+from random import random
+from sklearn.ensemble import RandomForestClassifier
+
+
+from launcher import Launcher
+from leframework import scoringengine as se
+
+
 
 class ScoringEngineTest(TestCase):
     inputFileName = "scoringtestinput.txt"
     outputFileName = "scoringtestoutput.txt"
-    rowId = "68707d3d-b131-44e5-9f68-5e2e65256b41"
-
+    rowId = "736e7a75-b38a-4738-828f-92b698b00806"
+    
     def testGetRowToScore(self):
         with open(self.inputFileName) as f:
             for line in f:
                 rowId, rowDict = scoringengine.getRowToScore(line)
-                self.assertEqual(rowId, "68707d3d-b131-44e5-9f68-5e2e65256b41")
+                self.assertEqual(rowId, self.rowId)
                 self.assertTrue(rowDict.__contains__('BankruptcyFiled'))
-                self.assertEqual(rowDict['BankruptcyFiled'], '0.227284523331')
         f.close()
         
-
-
     def testGenerateScore(self):
-        currentPath = '/home/hliu/workspace/le-dataplatform/src/test/python/results'
-        pickleFile = currentPath + '/STPipelineBinary.p'
+        pickleFile = 'STPipelineBinary.p'
         pipeline = pickle.load(open(pickleFile, "rb"))
         scoringengine.generateScore(pipeline, self.inputFileName, self.outputFileName)
         with open(self.outputFileName) as f:

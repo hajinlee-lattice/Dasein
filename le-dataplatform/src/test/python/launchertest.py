@@ -74,7 +74,13 @@ class LauncherTest(TestCase):
         # Test the scoring engine using the generated pipeline that was deserialized
         inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
         value = [ random() for _ in range(len(inputColumns))]
-        lines = self.__getLineToScore(inputColumns, value)
+ 
+        fieldList = launcher.getParser().fields       
+        typeDict = {}
+        for field in fieldList:
+            typeDict[field['columnName']] = field['sqlType']
+            
+        lines = self.__getLineToScore(inputColumns, typeDict, value)
         rowDict1 = se.getRowToScore(lines[0])[1]
         resultFrame1 = se.predict(pipeline, rowDict1)
         
@@ -92,22 +98,22 @@ class LauncherTest(TestCase):
         for i in range(testcase-1):
             values.append([random() for _ in range(len(inputColumns))])
         
-        scores = self.__getPredictScore(pipeline, values) 
+        scores = self.__getPredictScore(pipeline, typeDict, values) 
         for i in range(len(scores)):
             print str(i+1)+", "+str(scores[i])
         self.__createCSV(inputColumns, values)
 
 
-    def __getLineToScore(self, inputColumns, value):
+    def __getLineToScore(self, inputColumns, typeDict, value):
         columnWithValue = zip(inputColumns, value)
-        line1 = self.__getLine(columnWithValue)
+        line1 = self.__getLine(columnWithValue, typeDict)
         
         shuffle(columnWithValue)
-        line2 = self.__getLine(columnWithValue)
+        line2 = self.__getLine(columnWithValue, typeDict)
         
         return (line1, line2)
     
-    def __getLine(self, columnsWithValue):
+    def __getLine(self, columnsWithValue, typeDict):
         line = "["
         first = True
         for i in range(len(columnsWithValue)):
@@ -115,9 +121,10 @@ class LauncherTest(TestCase):
                 first = False
             else:
                 line += ","
-            
-            line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (columnsWithValue[i][0], columnsWithValue[i][1])
-
+            if typeDict[columnsWithValue[i][0]] == '-9':
+                line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"String|'%s'\"}}" % (columnsWithValue[i][0], columnsWithValue[i][1])
+            else:
+                line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (columnsWithValue[i][0], columnsWithValue[i][1])
         line += "]"
         line = '{"key":"%s","value":%s}' % (str(uuid.uuid4()),line)
         return line
@@ -129,11 +136,11 @@ class LauncherTest(TestCase):
             for i in range(len(values)):
                 csvWriter.writerow([i+1]+values[i])
         
-    def __getPredictScore(self, pipeline, values):
+    def __getPredictScore(self, pipeline, typeDict, values):
         scores = []
         inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
         for value in values:
-            row = self.__getLine(zip(inputColumns, value))
+            row = self.__getLine(zip(inputColumns, value), typeDict)
             rowDict = se.getRowToScore(row)[1]
             resultFrame = se.predict(pipeline, rowDict)
             scores.append(resultFrame['Score'][0])
