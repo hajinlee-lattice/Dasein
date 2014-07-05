@@ -1,7 +1,7 @@
 In order to get this to run:
 
 mvn clean package
-mvn scala:run -DmainClass=com.latticeengines.sparkdb.ABCount
+scala -classpath target/le-sparkdb-1.0.0-SNAPSHOT.jar:$SPARK_YARN_APP_JAR:$HADOOP_HOME/etc/hadoop com.latticeengines.sparkdb.executor.LedpSparkLauncher
 
 The following env variables need to be defined if running from Eclipse:
 
@@ -13,10 +13,11 @@ SPARK_JAR - path to the jar file created by this project after doing mvn clean p
 You can also execute this from the command line:
 
 $SPARK_HOME/bin/spark-submit --class com.latticeengines.sparkdb.ABCount \
-    --master yarn-client \
+    --master yarn-cluster \
     --num-executors 3  \
-    --driver-memory 4g  \    
-    --executor-memory 2g  \   
+    --driver-memory 4g \
+    --executor-memory 2g  \
+    --queue Priority0 \
     --executor-cores 1 \
     target/le-sparkdb-1.0.0-SNAPSHOT.jar
 
