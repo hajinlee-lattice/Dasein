@@ -70,6 +70,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-assembly</artifactId>
+            <version>${spark.version}</version>
+            <classifier>hadoop2.2.0</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <version>${hadoop.version}</version>
@@ -83,12 +89,6 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.10</artifactId>
             <version>${spark.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-assembly</artifactId>
-            <version>${spark.version}</version>
-            <classifier>hadoop2.2.0</classifier>
         </dependency>
     </dependencies>
 

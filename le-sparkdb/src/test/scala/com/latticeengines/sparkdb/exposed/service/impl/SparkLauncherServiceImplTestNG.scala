@@ -16,5 +16,7 @@ class SparkLauncherServiceImplTestNG extends SparkDbFunctionalTestNGBase {
   @Test(groups = Array("functional"))
   def test() = {
     assertNotNull(sparkLauncherService)
+    var appId = sparkLauncherService.runApp("ABCount2", "Priority0")
+    println(appId)
   }
 }
