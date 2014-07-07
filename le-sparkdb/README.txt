@@ -1,7 +1,7 @@
 In order to get this to run:
 
 mvn clean package
-scala -classpath target/le-sparkdb-1.0.0-SNAPSHOT.jar:$SPARK_YARN_APP_JAR:$HADOOP_HOME/etc/hadoop com.latticeengines.sparkdb.executor.LedpSparkLauncher
+scala -classpath target/le-sparkdb-1.0.0-SNAPSHOT.jar:$SPARK_YARN_APP_JAR:$HADOOP_HOME/etc/hadoop com.latticeengines.sparkdb.exposed.service.impl.SparkLauncherServiceImpl
 
 The following env variables need to be defined if running from Eclipse:
 
