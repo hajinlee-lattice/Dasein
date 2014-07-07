@@ -1,11 +1,12 @@
 package com.latticeengines.sparkdb.exposed.service.impl
 
 import org.springframework.beans.factory.annotation.Autowired
-import com.latticeengines.sparkdb.exposed.service.SparkLauncherService
-
-import com.latticeengines.sparkdb.functionalframework.SparkDbFunctionalTestNGBase
+import org.springframework.test.context.ContextConfiguration
+import org.testng.Assert.assertNotNull
 import org.testng.annotations.Test
-import org.testng.Assert._
+
+import com.latticeengines.sparkdb.exposed.service.SparkLauncherService
+import com.latticeengines.sparkdb.functionalframework.SparkDbFunctionalTestNGBase
 
 class SparkLauncherServiceImplTestNG extends SparkDbFunctionalTestNGBase {
 
