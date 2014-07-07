@@ -19,7 +19,7 @@ class PercentileBucketsGeneratorTest(TestCase):
         mediator = Mediator()  
         mediator.scored = [] 
         mediator.target = []
-        for i in range(testSize):
+        for _ in range(testSize):
             prob = random.random()
             mediator.scored.append(prob)
             if prob > 0.7:
