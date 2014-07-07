@@ -6,7 +6,9 @@ import org.apache.spark.deploy.yarn.Client
 import org.apache.spark.deploy.yarn.ClientArguments
 
 import com.latticeengines.sparkdb.exposed.service.SparkLauncherService
+import org.springframework.stereotype.Component
 
+@Component("sparkLauncherService")
 class SparkLauncherServiceImpl extends SparkLauncherService {
   
   def runApp(appName: String, queue: String): ApplicationId = {
