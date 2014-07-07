@@ -115,7 +115,7 @@ class Launcher(object):
         for index in range(0, 5):
             modelToConsumerHdfsPath = modelToConsumerHdfsPath + tokens[index] + "/"
             
-        modelToConsumerHdfsPath = modelToConsumerHdfsPath + consumer + "/" + modelName
+        modelToConsumerHdfsPath = modelToConsumerHdfsPath + consumer + "/" + modelName + "-" + tokens[7]
         hdfs.rmdir(modelToConsumerHdfsPath + "/1.json")
         hdfs.copyFromLocal(modelLocalPath, "%s/%s" % (modelToConsumerHdfsPath, "1.json"))
 
