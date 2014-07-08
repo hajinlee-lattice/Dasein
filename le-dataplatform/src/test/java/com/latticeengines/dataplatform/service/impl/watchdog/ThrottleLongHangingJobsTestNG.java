@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.service.impl.watchdog;
 
+import static org.testng.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,28 +33,28 @@ import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 
 @ContextConfiguration(locations = { "classpath:dataplatform-quartz-context.xml" })
 public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGBase {
-    
+
     @Autowired
     private ThrottleLongHangingJobs throttleLongHangingJobs;
-    
+
     @Autowired
     private JobService jobService;
-    
+
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
     private Classifier classifier4Mins;
-    
+
     @BeforeClass(groups = "functional")
-    public void setup() throws Exception{
-        System.out.println("default threshold value is: "+throttleLongHangingJobs.throttleThreshold);
+    public void setup() throws Exception {
+        System.out.println("default threshold value is: " + throttleLongHangingJobs.throttleThreshold);
         // Timeout set to 10s
         ReflectionTestUtils.setField(throttleLongHangingJobs, "throttleThreshold", 10000L);
-        
+
         // Set up classifiers
         classifier1Min = setupClassifier("train_1min.py");
         classifier2Mins = setupClassifier("train_2mins.py");
         classifier4Mins = setupClassifier("train_4mins.py");
-        
+
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
         fs.delete(new Path("/training"), true);
@@ -83,48 +85,48 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
     }
 
     @Test(groups = "functional")
-    public void testThrottleLongHangingJobs() throws Exception  {
+    public void testThrottleLongHangingJobs() throws Exception {
         ModelDefinition modelDef = produceModelDefinition();
         Model model = produceIrisMetadataModel();
         model.setModelDefinition(modelDef);
-        
+
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
 
         for (int i = 0; i < 3; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.0", 0, "DELL");
             model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
-            
+
             p0 = getJob(classifier2Mins, "Priority0.0", 0, "DELL");
             model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
-            
+
             p0 = getJob(classifier4Mins, "Priority0.0", 0, "DELL");
             model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
-            
+
             Thread.sleep(5000L);
-        } 
-        
+        }
+
         waitForAllJobsToFinish(appIds);
     }
-    
-    private Classifier setupClassifier(String script) { 
+
+    private Classifier setupClassifier(String script) {
         Classifier classifier = new Classifier();
         classifier.setName("IrisClassifier");
-        classifier.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width",
-                "petal_length", "petal_width" }));
+        classifier.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
+                "petal_width" }));
         classifier.setTargets(Arrays.<String> asList(new String[] { "category" }));
         classifier.setSchemaHdfsPath("/scheduler/iris.json");
         classifier.setModelHdfsDir("/scheduler/result");
-        classifier.setPythonScriptHdfsPath("/scheduler/"+script);
+        classifier.setPythonScriptHdfsPath("/scheduler/" + script);
         classifier.setTrainingDataHdfsPath("/training/nn_train.dat");
         classifier.setTestDataHdfsPath("/test/nn_test.dat");
         classifier.setMetadataHdfsPath("/training/a.avsc");
-        
+
         return classifier;
     }
-        
+
     private Job getJob(Classifier classifier, String queue, int priority, String customer) {
         Job job = new Job();
         job.setClient("pythonClient");
@@ -155,17 +157,18 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         while (!jobStatusToCollect.isEmpty()) {
             ApplicationId appId = jobStatusToCollect.get(0);
             JobStatus status = jobService.getJobStatus(appId.toString());
-            FinalApplicationStatus appStatus = waitForStatus(getApplicationId(status.getId()), FinalApplicationStatus.KILLED);
-            System.out.println("=========================================ThrottleLongHangingJobTestNG.waitForAllJobsToFinish()");
+            FinalApplicationStatus appStatus = waitForStatus(getApplicationId(status.getId()),
+                    FinalApplicationStatus.KILLED);
+            System.out.println("===============================ThrottleLongHangingJobTestNG.waitForAllJobsToFinish()");
             if (appStatus == null) {
                 System.out.println("ERROR: Invalid state detected");
                 jobStatusToCollect.remove(appId);
                 continue;
             }
-            if (TERMINAL_STATUS.contains(appStatus)) {
-                jobStatusToCollect.remove(appId);
-                jobStatus.put(appId, jobService.getJobReportById(appId));
-            }
+            // All jobs should be throttled
+            assertEquals(appStatus, FinalApplicationStatus.KILLED);
+            jobStatusToCollect.remove(appId);
+            jobStatus.put(appId, jobService.getJobReportById(appId));
         }
         return jobStatus;
     }
