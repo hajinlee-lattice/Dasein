@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 
 @ContextConfiguration(locations = { "classpath:dataplatform-quartz-context.xml" })
-public class ThrottleLongHangingJobTestNG extends DataPlatformFunctionalTestNGBase {
+public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGBase {
     
     @Autowired
     private ThrottleLongHangingJobs throttleLongHangingJobs;
@@ -48,9 +48,9 @@ public class ThrottleLongHangingJobTestNG extends DataPlatformFunctionalTestNGBa
         // Timeout set to 10s
         ReflectionTestUtils.setField(throttleLongHangingJobs, "throttleThreshold", 10000L);
         
-        //set up classifiers
+        // Set up classifiers
         classifier1Min = setupClassifier("train_1min.py");
-        classifier2Mins = setupClassifier("train_2mins.py");   
+        classifier2Mins = setupClassifier("train_2mins.py");
         classifier4Mins = setupClassifier("train_4mins.py");
         
         FileSystem fs = FileSystem.get(yarnConfiguration);
@@ -148,21 +148,21 @@ public class ThrottleLongHangingJobTestNG extends DataPlatformFunctionalTestNGBa
         return new Properties[] { appMasterProperties, containerProperties };
     }
 
-    private Map<ApplicationId, ApplicationReport> waitForAllJobsToFinish(List<ApplicationId> appIds) throws Exception {        
+    private Map<ApplicationId, ApplicationReport> waitForAllJobsToFinish(List<ApplicationId> appIds) throws Exception {
         Map<ApplicationId, ApplicationReport> jobStatus = new HashMap<ApplicationId, ApplicationReport>();
         List<ApplicationId> jobStatusToCollect = new ArrayList<ApplicationId>(appIds);
 
         while (!jobStatusToCollect.isEmpty()) {
             ApplicationId appId = jobStatusToCollect.get(0);
             JobStatus status = jobService.getJobStatus(appId.toString());
-            FinalApplicationStatus appStatus = waitForStatus(getApplicationId(status.getId()), FinalApplicationStatus.KILLED);            
-            System.out.println("                 =========================================ThrottleLongHangingJobTestNG.waitForAllJobsToFinish()");            
+            FinalApplicationStatus appStatus = waitForStatus(getApplicationId(status.getId()), FinalApplicationStatus.KILLED);
+            System.out.println("=========================================ThrottleLongHangingJobTestNG.waitForAllJobsToFinish()");
             if (appStatus == null) {
                 System.out.println("ERROR: Invalid state detected");
                 jobStatusToCollect.remove(appId);
                 continue;
             }
-            if (TERMINAL_STATUS.contains(appStatus)) {            
+            if (TERMINAL_STATUS.contains(appStatus)) {
                 jobStatusToCollect.remove(appId);
                 jobStatus.put(appId, jobService.getJobReportById(appId));
             }
