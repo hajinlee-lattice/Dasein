@@ -3,6 +3,7 @@ package com.latticeengines.dataplatform.runtime;
 import java.io.StringWriter;
 import java.util.Properties;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -68,7 +69,7 @@ public class RuntimeConfig {
             log.info("Writing runtime config as:\n" + properties);
             HdfsUtils.writeToFile(yarnConfiguration, configPath, properties);
         } catch (Exception e) {
-            log.error("Could not write runtime configuration due to: " + e);
+            log.error("Could not write runtime configuration due to: " + ExceptionUtils.getStackTrace(e));
             throw new LedpException(LedpCode.LEDP_12001, e, new String[] { configPath });
         }
     }

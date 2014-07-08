@@ -7,7 +7,10 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.yarn.am.allocate.ContainerAllocator;
@@ -21,6 +24,8 @@ public class ProgressMonitor {
     private float progress = 0;
 
     private ContainerAllocator allocator;
+
+    private ExecutorService executor;
 
     public ProgressMonitor(ContainerAllocator allocator) {
         if (allocator == null) {
@@ -36,19 +41,22 @@ public class ProgressMonitor {
                 log.error("Can't find open port due to: " + e.getStackTrace());
             }
         }
+
+        executor = Executors.newSingleThreadScheduledExecutor();
     }
 
     public void start() {
-        new Thread(new Runnable() {
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 log.info("Listening application progress at : " + listener.getInetAddress().getHostAddress() + " "
                         + listener.getLocalPort());
-                while (true) {
+                // executor.shutdownNow() will interrupt this thread
+                while (!Thread.currentThread().isInterrupted()) {
                     try {
                         Socket connectionSocket = listener.accept();
-                        BufferedReader inFromClient = new BufferedReader(new InputStreamReader(
-                                connectionSocket.getInputStream()));
+                        BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket
+                                .getInputStream()));
                         String update = inFromClient.readLine();
 
                         float progress = Float.parseFloat(update);
@@ -57,20 +65,30 @@ public class ProgressMonitor {
 
                         connectionSocket.close();
                     } catch (IOException e) {
-                        log.error("Can't recieve progress status due to: " + e.getStackTrace());
+                        log.error("Can't recieve progress status due to: " + e.getStackTrace().toString());
                     }
                 }
             }
-        }).start();
+        });
     }
 
-    /**
-     * Sets the progress of the application through Container Allocator
-     * inherited from AbstractServiceAppMaster
-     * */
+    public void stop() {
+        log.info("Shutting down progress monitor");
+        executor.shutdownNow();
+        try {
+            listener.close();
+        } catch (IOException e) {
+            log.error("Can't close progress monitor socket due to: " + ExceptionUtils.getStackTrace(e));
+        }
+    }
+
     private void setProgress(float progress) {
         this.progress = progress;
         allocator.setProgress(progress);
+    }
+
+    public float getProgress() {
+        return progress;
     }
 
     public int getPort() {
@@ -81,12 +99,8 @@ public class ProgressMonitor {
         try {
             return InetAddress.getLocalHost().getHostName();
         } catch (UnknownHostException e) {
-            log.error(e);
+            log.error(ExceptionUtils.getStackTrace(e));
         }
         return null;
-    }
-
-    public float getProgress() {
-        return progress;
     }
 }

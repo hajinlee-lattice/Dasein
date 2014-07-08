@@ -1,7 +1,7 @@
 import os
 import time
 
-def train(trainingData, testData, schema, modelDir, algorithmProperties):
+def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties):
     print("Container %s" % (os.environ['CONTAINER_ID']))
     print("Sleeping for 5 min...")
     print("Start : %s" % time.ctime())

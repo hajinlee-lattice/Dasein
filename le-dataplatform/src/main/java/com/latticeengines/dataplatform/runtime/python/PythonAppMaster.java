@@ -189,6 +189,8 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
         // immediately publish
         ledpMetricsMgr.publishMetricsNow();
+        // Shut down monitor
+        monitor.stop();
     }
 
     private String getApplicationId(String appAttemptId) {

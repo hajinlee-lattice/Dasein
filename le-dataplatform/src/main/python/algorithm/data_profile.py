@@ -4,6 +4,7 @@ import re
 import sys
 
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
+from leframework.progressreporter import ProgressReporter
 import numpy as np
 import pandas.core.algorithms as algos
 
@@ -70,7 +71,15 @@ def getSchema():
     }"""
     return schema.parse(metadataSchema)
 
-def train(trainingData, testData, schema, modelDir, algorithmProperties):
+def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties = None):
+    if runtimeProperties is not None:
+        # Set up progress reporter for data profiling
+        progressReporter = ProgressReporter(runtimeProperties["host"], int(runtimeProperties["port"]))
+        progressReporter.inStateMachine()
+    else:
+        # progressReporter disabled        
+        progressReporter = ProgressReporter(None, 0)
+    
     data = trainingData.append(testData)
 
     avroSchema = getSchema()
@@ -85,7 +94,9 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties):
     index = 1
     event = set(schema["targets"])
 
+    progressReporter.setTotalState(len(colnames))
     for colname in colnames:
+        progressReporter.nextState()
         if colname not in features:
             continue
         # Categorical column

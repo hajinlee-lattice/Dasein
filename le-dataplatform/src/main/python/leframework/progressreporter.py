@@ -6,11 +6,11 @@ class ProgressReporter(object):
     This class tracks the python modeling progress in terms of states and reports to PythonAppMaster
     '''
     
-    def __init__(self, amHost, amPort, stateCount = 0, startState = 0):
+    def __init__(self, amHost, amPort, maxTry = 1, stateCount = 0, startState = 0):
         self.logger = logging.getLogger(name = 'progressReporter')
         self.host = amHost
         self.port = amPort
-        self.maxRetry = 5
+        self.maxTry = maxTry
         
         self.progress = 0
         self.preStateMachineWeight = float(1) / 3
@@ -47,7 +47,7 @@ class ProgressReporter(object):
             return
         
         self.logger.info("Reporting progress: " + str(self.progress))
-        for _ in range(self.maxRetry): 
+        for _ in range(self.maxTry): 
             try:
                 skt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 skt.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

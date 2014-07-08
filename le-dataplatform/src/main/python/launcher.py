@@ -68,7 +68,7 @@ class Launcher(object):
         # that contains the generated model data
         execfile(script, globals())
         
-        executor = LearningExecutor(self.parser.getRuntimeProperties())
+        executor = LearningExecutor(parser.getRuntimeProperties())
         if 'getExecutor' in globals():
             executor = globals()['getExecutor']()
 
@@ -89,7 +89,8 @@ class Launcher(object):
         params["test"] = test
         params["metadata"] = metadata
         
-        clf = globals()['train'](training, test, schema, modelLocalDir, algorithmProperties)
+        # Currently passes runtime properties to training script to report progress
+        clf = globals()['train'](training, test, schema, modelLocalDir, algorithmProperties, parser.getRuntimeProperties())
         
         executor.postProcessClassifier(clf, params)
 

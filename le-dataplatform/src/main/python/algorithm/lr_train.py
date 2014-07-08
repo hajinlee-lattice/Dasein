@@ -1,6 +1,6 @@
 from sklearn import linear_model
 
-def train(trainingData, testData, schema, modelDir, algorithmProperties):
+def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties = None):
     X_train = trainingData[:, schema["featureIndex"]]
     Y_train = trainingData[:, schema["targetIndex"]]
     

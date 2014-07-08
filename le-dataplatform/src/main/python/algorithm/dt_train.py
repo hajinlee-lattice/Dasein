@@ -1,10 +1,10 @@
 from sklearn import tree
 
-def train(trainingData, testData, schema, modelDir, algorithmProperties):
+def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties = None):
     X_train = trainingData[:, schema["featureIndex"]]
     Y_train = trainingData[:, schema["targetIndex"]]
     
-    clf = tree.DecisionTreeClassifier(criterion=algorithmProperties["criterion"])
+    clf = tree.DecisionTreeClassifier(criterion = algorithmProperties["criterion"])
     
     clf.fit(X_train, Y_train)
 

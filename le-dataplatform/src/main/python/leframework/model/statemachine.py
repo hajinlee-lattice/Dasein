@@ -1,5 +1,5 @@
 from leframework.model import mediator as mdtr
-from progressreporter import ProgressReporter
+from leframework.progressreporter import ProgressReporter
 
 class StateMachine(object):
     

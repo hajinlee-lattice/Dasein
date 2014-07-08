@@ -33,14 +33,14 @@ class LearningExecutor(Executor):
     '''
 
 
-    def __init__(self, runTimeProperties = None):
-        if runTimeProperties is None:
+    def __init__(self, runtimeProperties = None):
+        if runtimeProperties is None:
             logger.error("No runtime properties available")
             self.amHost = None
             self.amPort = 0
         else:
-            self.amHost = runTimeProperties["host"]
-            self.amPort = int(runTimeProperties["port"])
+            self.amHost = runtimeProperties["host"]
+            self.amPort = int(runtimeProperties["port"])
         
     def __setupJsonGenerationStateMachine(self):
         stateMachine = StateMachine(self.amHost, self.amPort)

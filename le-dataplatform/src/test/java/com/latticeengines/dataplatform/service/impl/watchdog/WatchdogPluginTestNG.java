@@ -10,18 +10,19 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
 public class WatchdogPluginTestNG extends DataPlatformFunctionalTestNGBase {
-    
+
     @Override
     protected boolean doYarnClusterSetup() {
         return false;
     }
-    
+
     @Test(groups = "functional")
     public void register() {
         Map<String, WatchdogPlugin> registry = WatchdogPlugin.getPlugins();
-        assertEquals(registry.size(), 2);
+        assertEquals(registry.size(), 3);
         assertTrue(registry.keySet().contains("ResubmitPreemptedJobsWithThrottling")
-                && registry.keySet().contains("ConvertSuccessfulJobsToPMML"));
-        
+                && registry.keySet().contains("ConvertSuccessfulJobsToPMML")
+                && registry.keySet().contains("ThrottleLongHangingJobs"));
+
     }
 }
