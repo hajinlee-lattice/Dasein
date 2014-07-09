@@ -82,6 +82,8 @@ class SummaryGenerator(State, JsonGenBase):
                 element["Values"] = []
             else:
                 element["Values"] = [record["columnvalue"]]
+            
+            element["IsVisible"] = True
             elements.append(element)
         
         # Sort elements by UncertaintyCoefficient

@@ -1,10 +1,12 @@
+import ConfigParser
+from StringIO import StringIO
 import csv
 import json
 import logging
-import ConfigParser
-from StringIO import StringIO
+
 import fastavro as avro
 import pandas as pd
+
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -43,10 +45,10 @@ class ArgumentParser(object):
     def __parseProperties(self, name):
         element = {}
         try:
-            properties = self.metadataSchema[name]
+            properties = self.metadataSchema[name].strip()
             element = dict(u.split("=") for u in properties.split(" "))
-        except Exception:
-            pass
+        except Exception, e:
+            logger.error(str(e))
     
         return element
         
