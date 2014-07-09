@@ -198,8 +198,8 @@ class SummaryGenerator(State, JsonGenBase):
     
     def __getConstructionInfo(self):
         constructionTime = OrderedDict()
-        # DateTime returns UTC epoch in seconds
-        constructionTime["DateTime"] = "/Date(" + str(int(time.time())) + ")/"
+        # DateTime returns UTC epoch in milliseconds
+        constructionTime["DateTime"] = "/Date(" + str(int(time.time()*1000)) + ")/"
         # OffsetMinutes returns UTC offset in current time zone in minutes
         constructionTime["OffsetMinutes"] = str(int((datetime.today() - datetime.utcnow()).total_seconds()) / 60)
         element = OrderedDict()
