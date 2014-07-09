@@ -36,3 +36,9 @@ class PercentileBucketsGeneratorTest(TestCase):
         buckets = pctBucketGenerator.getJsonProperty()
         self.assertEquals(len(buckets), 100)
         
+        for i in range(0, len(buckets)-1):
+            self.assertEquals(buckets[i]["MinimumScore"], buckets[i+1]["MaximumScore"])
+        
+        
+        
+        

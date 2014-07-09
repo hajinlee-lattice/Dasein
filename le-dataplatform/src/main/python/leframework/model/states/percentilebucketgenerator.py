@@ -29,7 +29,7 @@ class PercentileBucketGenerator(State, JsonGenBase):
         while indexForMin < scoredSortedLen:
             self.createBucket(scoredSorted, i, indexForMin, pct)
             pct = pct - 1
-            i = i + numElementsInBucket
+            i = indexForMin
             indexForMin = i + numElementsInBucket - 1
             if pct == 0:
                 self.percentileBuckets[len(self.percentileBuckets) - 1]["MinimumScore"] = 0.0
