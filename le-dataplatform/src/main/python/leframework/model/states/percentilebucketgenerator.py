@@ -19,11 +19,15 @@ class PercentileBucketGenerator(State, JsonGenBase):
         scoredSorted = sorted(set(scored), reverse=True)
         scoredSortedLen = len(scoredSorted)
         numElementsInBucket = int(scoredSortedLen/100.0)
-        
+
         i = 0
         indexForMin = i + numElementsInBucket - 1
         pct = 100
         self.percentileBuckets = []
+        # This means that the test set length is less than 100
+        if numElementsInBucket == 0:
+            self.logger.info("Test set length is less than 100 so no buckets can be created.")
+            return
         self.logger.info("Length of test set array = %d." % scoredSortedLen)
         self.logger.info("Bucket size = %d." % numElementsInBucket)
         while indexForMin < scoredSortedLen:
@@ -38,9 +42,15 @@ class PercentileBucketGenerator(State, JsonGenBase):
     def createBucket(self, scoredSorted, i, indexForMin, pct):
         bucket = OrderedDict()
         bucket["Percentile"] = pct
-        bucket["MinimumScore"] = scoredSorted[indexForMin]
-        bucket["MaximumScore"] = scoredSorted[i]
-        self.percentileBuckets.append(bucket)
+        
+        try:
+            if indexForMin > len(scoredSorted):
+                indexForMin = len(scoredSorted) - 1
+            bucket["MinimumScore"] = scoredSorted[indexForMin]
+            bucket["MaximumScore"] = scoredSorted[i]
+            self.percentileBuckets.append(bucket)
+        except Exception:
+            self.logger.info("Length of list = %d indexForMin = %d i = %d" % (len(scoredSorted), indexForMin, i))
 
     @overrides(JsonGenBase)
     def getKey(self):
