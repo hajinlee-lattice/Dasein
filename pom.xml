@@ -23,5 +23,6 @@
         <module>le-api</module>
         <module>le-perf</module>
         <module>le-scoring</module>
+        <module>le-web</module>
     </modules>
 </project>
