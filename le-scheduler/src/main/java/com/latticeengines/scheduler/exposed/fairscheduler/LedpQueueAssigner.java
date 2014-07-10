@@ -22,6 +22,10 @@ import com.google.common.annotations.VisibleForTesting;
 public class LedpQueueAssigner {
 
     private static final Log log = LogFactory.getLog(LedpQueueAssigner.class);
+
+    public static final String PRIORITY = "Priority";
+
+    private static final String MRQUEUENAME = "Priority0.MapReduce.0";
     private static final String JOBNAME_DELIMITER = "~";
     private static final String QUEUE_NAME_DELIMITER = ".";
     private static final int ABSOLUTE_MINIMUM_UTILIZATION = 0;
@@ -158,10 +162,10 @@ public class LedpQueueAssigner {
     }
 
     public static String getNonMRQueueNameForSubmission(int priority) {
-        return "Priority" + priority + ".0";
+        return PRIORITY + priority + ".0";
     }
 
     public static String getMRQueueNameForSubmission() {
-        return "Priority0.MapReduce.0";
+        return MRQUEUENAME;
     }
 }
