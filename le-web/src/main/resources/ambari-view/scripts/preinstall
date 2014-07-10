@@ -1,2 +1,4 @@
 #!/bin/bash
 rm -rf /tmp/views
+rm -rf /var/lib/ambari-server/resources/views/work
+rm /var/lib/ambari-server/resources/views/*
