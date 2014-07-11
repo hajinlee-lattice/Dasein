@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.fairscheduler;
 
+import static org.testng.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,16 +32,16 @@ import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 
 /**
  * This test working is dependent on the cluster settings. Ensure that:
- * 
+ *
  * 1. Set in yarn-site.xml <property>
  * <name>yarn.nodemanager.resource.cpu-vcores</name> <value>#cores in
  * system</value> </property>
- * 
+ *
  * 2. Set in fair-scheduler.xml <user name="User running resource manager">
  * <maxRunningApps>(#cores in system)/2</maxRunningApps> </user>
- * 
+ *
  * @author rgonzalez
- * 
+ *
  */
 @ContextConfiguration(locations = { "classpath:dataplatform-quartz-context.xml" })
 public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
@@ -47,14 +49,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private JobService jobService;
 
-
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
     private Classifier classifier4Mins;
 
     @BeforeClass(groups = "functional.scheduler")
     public void setup() throws Exception {
- 
+
         classifier1Min = new Classifier();
         classifier1Min.setName("IrisClassifier");
         classifier1Min.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
@@ -68,7 +69,6 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier1Min.setDataProfileHdfsPath("/training/a.avro");
         classifier1Min.setConfigMetadataHdfsPath("/training/a.avsc");
 
-
         classifier2Mins = new Classifier();
         classifier2Mins.setName("IrisClassifier");
         classifier2Mins.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width",
@@ -81,7 +81,6 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier2Mins.setTestDataHdfsPath("/test/nn_test.dat");
         classifier2Mins.setDataProfileHdfsPath("/training/a.avro");
         classifier2Mins.setConfigMetadataHdfsPath("/training/a.avsc");
-        
 
         classifier4Mins = new Classifier();
         classifier4Mins.setName("IrisClassifier");
@@ -95,7 +94,6 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier4Mins.setTestDataHdfsPath("/test/nn_test.dat");
         classifier4Mins.setDataProfileHdfsPath("/training/a.avro");
         classifier4Mins.setConfigMetadataHdfsPath("/training/a.avsc");
-
 
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
@@ -125,23 +123,23 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         doCopy(fs, copyEntries);
     }
-    
+
     @Test(groups = "functional.scheduler", enabled = true)
     public void testSubmit() throws Exception {
         ModelDefinition modelDef = produceModelDefinition();
         Model model = produceIrisMetadataModel();
         model.setModelDefinition(modelDef);
-        
+
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
-        // A        
+        // A
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.0", 0, "DELL");
+            Job p0 = createJob(classifier1Min, "Priority0.0", 0, "DELL");
             model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.0", 1, "DELL");
+                Job p1 = createJob(classifier2Mins, "Priority1.0", 1, "DELL");
                 model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }
@@ -152,13 +150,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // B
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.1", 0, "DELL");
+            Job p0 = createJob(classifier1Min, "Priority0.1", 0, "DELL");
             model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.1", 1, "DELL");
+                Job p1 = createJob(classifier2Mins, "Priority1.1", 1, "DELL");
                 model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
@@ -167,13 +165,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // C
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.2", 0, "DELL");
+            Job p0 = createJob(classifier1Min, "Priority0.2", 0, "DELL");
             model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.2", 1, "DELL");
+                Job p1 = createJob(classifier2Mins, "Priority1.2", 1, "DELL");
                 model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
@@ -181,13 +179,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         }
         // D
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.3", 0, "DELL");
+            Job p0 = createJob(classifier1Min, "Priority0.3", 0, "DELL");
             model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.3", 1, "DELL");
+                Job p1 = createJob(classifier2Mins, "Priority1.3", 1, "DELL");
                 model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
@@ -195,20 +193,20 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         }
         // E
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.4", 0, "DELL");
+            Job p0 = createJob(classifier1Min, "Priority0.4", 0, "DELL");
             model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.4", 1, "DELL");
+                Job p1 = createJob(classifier2Mins, "Priority1.4", 1, "DELL");
                 model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
         }
-        
-        waitForAllJobsToFinish(appIds);
+
+        waitForAllJobsToFinishThenConfirmAllSucceeded(appIds);
     }
 
     @Test(groups = "functional.scheduler", enabled = true)
@@ -216,17 +214,17 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         ModelDefinition modelDef = produceModelDefinition();
         Model model = produceIrisMetadataModel();
         model.setModelDefinition(modelDef);
-        
+
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
         // A
         for (int i = 0; i < 4; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.0", 0, "DELL");
+            Job p0 = createJob(classifier1Min, "Priority0.0", 0, "DELL");
             model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.0", 1, "DELL");
+                Job p1 = createJob(classifier2Mins, "Priority1.0", 1, "DELL");
                 model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
@@ -236,13 +234,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // B
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.1", 0, "DELL");
+            Job p0 = createJob(classifier1Min, "Priority0.1", 0, "DELL");
             model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.1", 1, "DELL");
+                Job p1 = createJob(classifier2Mins, "Priority1.1", 1, "DELL");
                 model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
@@ -251,22 +249,22 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
 
         // C
         for (int i = 0; i < 1; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.2", 0, "DELL");
+            Job p0 = createJob(classifier1Min, "Priority0.2", 0, "DELL");
             model.addJob(p0);
             appIds.add(jobService.submitJob(p0));
 
             // /*
             for (int j = 0; j < 2; j++) {
-                Job p1 = getJob(classifier2Mins, "Priority1.2", 1, "DELL");
+                Job p1 = createJob(classifier2Mins, "Priority1.2", 1, "DELL");
                 model.addJob(p1);
                 appIds.add(jobService.submitJob(p1));
             }// */
             Thread.sleep(5000L);
         }
-        waitForAllJobsToFinish(appIds);
+        waitForAllJobsToFinishThenConfirmAllSucceeded(appIds);
     }
 
-    private Job getJob(Classifier classifier, String queue, int priority, String customer) {
+    private Job createJob(Classifier classifier, String queue, int priority, String customer) {
         Job job = new Job();
         job.setClient("pythonClient");
         Properties[] properties = getPropertiesPair(classifier, queue, priority, customer);
@@ -289,25 +287,31 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         return new Properties[] { appMasterProperties, containerProperties };
     }
 
-    private Map<ApplicationId, ApplicationReport> waitForAllJobsToFinish(List<ApplicationId> appIds) throws Exception {        
+    private Map<ApplicationId, ApplicationReport> waitForAllJobsToFinishThenConfirmAllSucceeded(List<ApplicationId> appIds) throws Exception {
         Map<ApplicationId, ApplicationReport> jobStatus = new HashMap<ApplicationId, ApplicationReport>();
         List<ApplicationId> jobStatusToCollect = new ArrayList<ApplicationId>(appIds);
-
+        int successCount = 0;
         while (!jobStatusToCollect.isEmpty()) {
             ApplicationId appId = jobStatusToCollect.get(0);
             JobStatus status = jobService.getJobStatus(appId.toString());
-            FinalApplicationStatus appStatus = waitForStatus(getApplicationId(status.getId()), FinalApplicationStatus.SUCCEEDED, FinalApplicationStatus.FAILED);            
-            System.out.println("                 =========================================SchedulerTestNG.waitForAllJobsToFinish()");            
+            FinalApplicationStatus appStatus = waitForStatus(getApplicationId(status.getId()), FinalApplicationStatus.SUCCEEDED);
+
             if (appStatus == null) {
                 System.out.println("ERROR: Invalid state detected");
                 jobStatusToCollect.remove(appId);
                 continue;
             }
-            if (TERMINAL_STATUS.contains(appStatus)) {            
+            if (appStatus == FinalApplicationStatus.SUCCEEDED) {
+                successCount++;
+            }
+            if (TERMINAL_STATUS.contains(appStatus)) {
                 jobStatusToCollect.remove(appId);
                 jobStatus.put(appId, jobService.getJobReportById(appId));
             }
         }
+
+        assertEquals(appIds.size(), successCount);
+
         return jobStatus;
     }
 }
