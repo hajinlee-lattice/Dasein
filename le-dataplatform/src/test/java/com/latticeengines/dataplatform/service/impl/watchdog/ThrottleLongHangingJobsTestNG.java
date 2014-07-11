@@ -14,8 +14,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
+import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.Classifier;
@@ -31,12 +32,14 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 
-@ContextConfiguration(locations = { "classpath:dataplatform-quartz-context.xml" })
 public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private ThrottleLongHangingJobs throttleLongHangingJobs;
-
+    
+    @Autowired
+    private YarnService yarnService;
+    
     @Autowired
     private JobService jobService;
 
@@ -46,10 +49,6 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        System.out.println("default threshold value is: " + throttleLongHangingJobs.throttleThreshold);
-        // Timeout set to 10s
-        ReflectionTestUtils.setField(throttleLongHangingJobs, "throttleThreshold", 10000L);
-
         // Set up classifiers
         classifier1Min = setupClassifier("train_1min.py");
         classifier2Mins = setupClassifier("train_2mins.py");
@@ -82,6 +81,23 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         copyEntries.add(new CopyEntry(train4MinsScriptPath, "/scheduler", false));
 
         doCopy(fs, copyEntries);
+        
+        // Timeout set to 10s
+        ReflectionTestUtils.setField(throttleLongHangingJobs, "throttleThreshold", 10000L);
+        throttleLongHangingJobs.setJobService(jobService);
+        throttleLongHangingJobs.setYarnService(yarnService);
+        // Runs every 15 seconds
+        this.startQuartzJob(new Runnable() {
+            
+            @Override
+            public void run() {
+                try {
+                    throttleLongHangingJobs.run(null);
+                } catch (JobExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        },15L);
     }
 
     @Test(groups = "functional")
@@ -109,6 +125,7 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         }
 
         waitForAllJobsToFinish(appIds);
+        this.stopQuartzJob();
     }
 
     private Classifier setupClassifier(String script) {

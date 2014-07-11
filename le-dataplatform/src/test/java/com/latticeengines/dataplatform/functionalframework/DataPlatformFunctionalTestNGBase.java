@@ -10,7 +10,11 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -57,10 +61,11 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
 @Transactional
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
-    
+
     private static final Log log = LogFactory.getLog(DataPlatformFunctionalTestNGBase.class);
-    public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED, FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
-    private static final long MAX_MILLIS_TO_WAIT = 1000L*60*20;
+    public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
+            FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
+    private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 20;
 
     @Autowired
     protected Configuration yarnConfiguration;
@@ -108,6 +113,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     protected YarnClient yarnClient;
 
+    protected ScheduledExecutorService executor;
+
     public DataPlatformFunctionalTestNGBase() {
     }
 
@@ -154,11 +161,11 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     @BeforeMethod(enabled = true, firstTimeOnly = true, alwaysRun = true)
     public void beforeEachTest() {
     }
-  
-    @AfterMethod(enabled=true, lastTimeOnly=true, alwaysRun=true)
+
+    @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
     public void afterEachTest() {
     }
-    
+
     @BeforeClass(groups = { "functional", "functional.scheduler" })
     public void setupRunEnvironment() throws Exception {
         log.info("Test name = " + this.getClass());
@@ -195,8 +202,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         copyEntries.add(new CopyEntry(
                 "file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/rf_train.py",
                 "/app/dataplatform/scripts/algorithm", false));
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/data_profile.py",
-                "/app/dataplatform/scripts/algorithm", false));
+        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir
+                + "/../../../src/main/python/algorithm/data_profile.py", "/app/dataplatform/scripts/algorithm", false));
         String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/*.jar", "/app/dataplatform",
                 false));
@@ -216,6 +223,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     /**
      * this helper method produces 1 definition with 3 algorithms
+     * 
      * @return
      */
     protected ModelDefinition produceModelDefinition() {
@@ -243,9 +251,9 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     }
 
     /**
-     * this helper method produces a Model for unit / functional test
-     * (note: ModelDefinition still needs to be set)
-     *  
+     * this helper method produces a Model for unit / functional test (note:
+     * ModelDefinition still needs to be set)
+     * 
      * @param appIdStr
      * @return
      */
@@ -264,10 +272,10 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         model.setCustomer("INTERNAL");
         model.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         model.setDataFormat("avro");
-        
+
         return model;
     }
-    
+
     public ApplicationId getApplicationId(String appIdStr) {
         String[] tokens = appIdStr.split("_");
         TestApplicationId appId = new TestApplicationId();
@@ -365,11 +373,12 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
      *             if exception occurred
      * @see ApplicationInfo
      */
-    protected ApplicationId submitApplicationAndWaitState(FinalApplicationStatus... applicationStatuses) throws Exception {
+    protected ApplicationId submitApplicationAndWaitState(FinalApplicationStatus... applicationStatuses)
+            throws Exception {
         Assert.notEmpty(applicationStatuses, "Need to have at least one state");
-        
+
         ApplicationId applicationId = submitApplication();
-        
+
         waitForStatus(applicationId, applicationStatuses);
 
         return applicationId;
@@ -386,14 +395,15 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         Assert.notNull(applicationId, "Failed to get application id from submit");
         return applicationId;
     }
-       
-    public FinalApplicationStatus waitForStatus(ApplicationId applicationId, FinalApplicationStatus... applicationStatuses) throws Exception {
+
+    public FinalApplicationStatus waitForStatus(ApplicationId applicationId,
+            FinalApplicationStatus... applicationStatuses) throws Exception {
         Assert.notNull(yarnClient, "Yarn client must be set");
         Assert.notNull(applicationId, "ApplicationId must not be null");
 
         FinalApplicationStatus status = null;
         long start = System.currentTimeMillis();
-        
+
         // break label for inner loop
         done: do {
             status = findStatus(yarnClient, applicationId);
@@ -403,10 +413,10 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
             for (FinalApplicationStatus statusCheck : applicationStatuses) {
                 if (status.equals(statusCheck) || TERMINAL_STATUS.contains(status)) {
                     break done;
-                } 
+                }
             }
             Thread.sleep(1000);
-        } while (System.currentTimeMillis()-start < MAX_MILLIS_TO_WAIT);
+        } while (System.currentTimeMillis() - start < MAX_MILLIS_TO_WAIT);
         return status;
     }
 
@@ -427,7 +437,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         Assert.notNull(applicationId, "ApplicationId must not be null");
         return findStatus(yarnClient, applicationId);
     }
-    
+
     private FinalApplicationStatus findStatus(YarnClient client, ApplicationId applicationId) {
         FinalApplicationStatus status = null;
         for (ApplicationReport report : client.listApplications()) {
@@ -437,5 +447,22 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
             }
         }
         return status;
+    }
+
+    protected void startQuartzJob(Runnable command, long period) {
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(command, 0L, period, TimeUnit.SECONDS);
+    }
+
+    protected void stopQuartzJob() {
+        executor.shutdownNow();
+        try {
+            executor.awaitTermination(500L, TimeUnit.MILLISECONDS);
+            if (!executor.isTerminated()) {
+                log.warn("Quartz thread is not shut down properly");
+            }
+        } catch (InterruptedException e) {
+            log.error("Can't shut down quartz thread due to: " + ExceptionUtils.getStackTrace(e));
+        }
     }
 }

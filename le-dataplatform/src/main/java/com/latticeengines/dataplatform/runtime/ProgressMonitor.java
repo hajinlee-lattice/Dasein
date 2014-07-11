@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -38,7 +39,7 @@ public class ProgressMonitor {
                 listener = new ServerSocket(0);
                 break;
             } catch (IOException e) {
-                log.error("Can't find open port due to: " + e.getStackTrace());
+                log.warn("Can't find open port due to: " + ExceptionUtils.getStackTrace(e));
             }
         }
 
@@ -65,9 +66,10 @@ public class ProgressMonitor {
 
                         connectionSocket.close();
                     } catch (IOException e) {
-                        log.error("Can't recieve progress status due to: " + e.getStackTrace().toString());
+                        log.error("Can't recieve progress status due to: " + ExceptionUtils.getStackTrace(e));
                     }
                 }
+                log.info("Listening thread terminated");
             }
         });
     }
@@ -75,6 +77,15 @@ public class ProgressMonitor {
     public void stop() {
         log.info("Shutting down progress monitor");
         executor.shutdownNow();
+        try {
+            executor.awaitTermination(500L, TimeUnit.MILLISECONDS);
+            if (!executor.isTerminated()) {
+                log.warn("Progress monitor thread is not shut down properly");
+            }
+        } catch (InterruptedException e) {
+            log.error("Can't shutdown progress monitor thread due to: " + ExceptionUtils.getStackTrace(e));
+        }
+        // Shut down socket
         try {
             listener.close();
         } catch (IOException e) {
