@@ -41,7 +41,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
         // commandParameters.setDlUrl("http://httpbin.org/post");
         // modelStepRetrieveMetadataProcessor.setQueryMetadataUrlSuffix("");
-        commandParameters.setDlUrl("http://visidb.lattice-engines.com");
+        commandParameters.setDlUrl("https://visidb.lattice-engines.com");
 
         modelStepRetrieveMetadataProcessor.executeStep(command, commandParameters);
 
