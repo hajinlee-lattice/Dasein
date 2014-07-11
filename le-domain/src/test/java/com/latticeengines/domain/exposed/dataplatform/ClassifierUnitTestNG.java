@@ -40,7 +40,7 @@ public class ClassifierUnitTestNG {
         classifier.setTestDataHdfsPath("/test/nn_test.dat");
         classifier.setPythonScriptHdfsPath("/datascientist1/nn_train.py");
         classifier.setModelHdfsDir("/datascientist1/result");
-        classifier.setMetadataHdfsPath("/datascientist1/a.avro");
+        classifier.setDataProfileHdfsPath("/datascientist1/a.avro");
 
         String jsonString = classifier.toString();
         System.out.println(jsonString);

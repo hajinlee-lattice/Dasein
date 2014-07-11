@@ -21,7 +21,8 @@ public class Classifier implements HasName {
     private String dataFormat;
     private String algorithmProperties;
     private String provenanceProperties;
-    private String metadataHdfsPath;
+    private String dataProfileHdfsPath;
+    private String configMetadataHdfsPath;
 
     @Override
     @JsonProperty("name")
@@ -158,14 +159,24 @@ public class Classifier implements HasName {
         this.keyCols = keyCols;
     }
 
-    @JsonProperty("metadata")
-    public String getMetadataHdfsPath() {
-        return metadataHdfsPath;
+    @JsonProperty("data_profile")
+    public String getDataProfileHdfsPath() {
+        return dataProfileHdfsPath;
     }
 
-    @JsonProperty("metadata")
-    public void setMetadataHdfsPath(String dataProfileHdfsPath) {
-        this.metadataHdfsPath = dataProfileHdfsPath;
+    @JsonProperty("data_profile")
+    public void setDataProfileHdfsPath(String dataProfileHdfsPath) {
+        this.dataProfileHdfsPath = dataProfileHdfsPath;
+    }
+
+    @JsonProperty("config_metadata")
+    public String getConfigMetadataHdfsPath() {
+        return configMetadataHdfsPath;
+    }
+
+    @JsonProperty("config_metadata")
+    public void setConfigMetadataHdfsPath(String configMetadataHdfsPath) {
+        this.configMetadataHdfsPath = configMetadataHdfsPath;
     }
 
 }
