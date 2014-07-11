@@ -38,7 +38,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
     public void testSuccessfulExecuteStep() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
-
+        commandParameters.setEventTable("Q_MetaDataTest");
         // commandParameters.setDlUrl("http://httpbin.org/post");
         // modelStepRetrieveMetadataProcessor.setQueryMetadataUrlSuffix("");
         commandParameters.setDlUrl("https://visidb.lattice-engines.com");

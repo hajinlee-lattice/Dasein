@@ -44,7 +44,7 @@ public class ModelingServiceTestUtils {
         List<ModelCommandParameter> parameters = new ArrayList<>();
         ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, parameters, ModelCommand.TAHOE);
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE, "Q_EventTableDepivot_Nutanix"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, "Q_MetaDataTest"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, "Q_EventTable_Nutanix"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_NAME, "Model Submission1"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "P1_Event"));
