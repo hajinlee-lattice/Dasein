@@ -142,7 +142,8 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setDataFormat(model.getDataFormat());
         classifier.setAlgorithmProperties(algorithm.getAlgorithmProperties());
         classifier.setProvenanceProperties(model.getProvenanceProperties());
-        classifier.setMetadataHdfsPath(getAvroMetadataPathInHdfs(model.getMetadataHdfsPath()));
+        classifier.setDataProfileHdfsPath(getDataProfileAvroPathInHdfs(model.getMetadataHdfsPath()));
+        classifier.setConfigMetadataHdfsPath(getConfigMetadataPathInHdfs(model.getMetadataHdfsPath()));
 
         String samplePrefix = algorithm.getSampleName();
         String trainingPath = getAvroFileHdfsPath(samplePrefix + "Training", model.getSampleHdfsPath());
@@ -160,7 +161,7 @@ public class ModelingServiceImpl implements ModelingService {
         return classifier;
     }
 
-    private String getAvroMetadataPathInHdfs(String path) {
+    private String getDataProfileAvroPathInHdfs(String path) {
         List<String> files = new ArrayList<String>();
         try {
             files = HdfsUtils.getFilesForDir(yarnConfiguration, path, new HdfsFilenameFilter() {
@@ -168,6 +169,29 @@ public class ModelingServiceImpl implements ModelingService {
                 @Override
                 public boolean accept(Path filename) {
                     return filename.toString().endsWith(".avro");
+                }
+
+            });
+        } catch (Exception e) {
+            log.warn(e);
+        }
+
+        if (files.size() != 1) {
+            log.warn("No metadata file found.");
+            return path;
+        }
+        String p = files.get(0);
+        return p.substring(p.indexOf(customerBaseDir));
+    }
+
+    private String getConfigMetadataPathInHdfs(String path) {
+        List<String> files = new ArrayList<String>();
+        try {
+            files = HdfsUtils.getFilesForDir(yarnConfiguration, path, new HdfsFilenameFilter() {
+
+                @Override
+                public boolean accept(Path filename) {
+                    return filename.toString().endsWith(".avsc");
                 }
 
             });
@@ -290,6 +314,7 @@ public class ModelingServiceImpl implements ModelingService {
             throw new LedpException(LedpCode.LEDP_15002);
         }
         Model m = new Model();
+        m.setName("DataProfile-" + System.currentTimeMillis());
         m.setCustomer(dataProfileConfig.getCustomer());
         m.setTable(dataProfileConfig.getTable());
         m.setMetadataTable(dataProfileConfig.getMetadataTable());
@@ -349,7 +374,7 @@ public class ModelingServiceImpl implements ModelingService {
         }
         m.setModelHdfsDir(m.getMetadataHdfsPath());
         ModelDefinition modelDefinition = new ModelDefinition();
-        modelDefinition.setName("DataProfile-" + System.currentTimeMillis());
+        modelDefinition.setName(m.getName());
         AlgorithmBase dataProfileAlgorithm = new DataProfilingAlgorithm();
         dataProfileAlgorithm.setSampleName(dataProfileConfig.getSamplePrefix());
         dataProfileAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");

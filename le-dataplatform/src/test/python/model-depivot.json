@@ -34,7 +34,8 @@
     "PD_DA_JobTitle__Technical",
     "PD_DA_PrimarySIC1_3"
   ],
-  "metadata": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/EventMetadata/part-m-00000-depivot.avro",
+  "data_profile": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/EventMetadata/part-m-00000-depivot.avro",
+  "config_metadata": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/EventMetadata/metadata.avsc",
   "schema": "/user/s-analytics/customers/Nutanix/data/Q_EventTableDepivot/Q_EventTableDepivot_Nutanix.avsc",
   "model_data_dir": "/user/s-analytics/customers/Nutanix/models/Q_EventTableDepivot/2ea40cb5-622e-4a86-b471-0cfc505962da",
   "data_format": "avro",

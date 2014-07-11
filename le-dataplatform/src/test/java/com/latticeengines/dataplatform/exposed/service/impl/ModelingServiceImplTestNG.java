@@ -89,7 +89,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     private Model produceModel(ModelDefinition modelDef) {
         Model m = new Model();
         m.setModelDefinition(modelDef);
-        m.setName("Model Submission-"+System.currentTimeMillis());
+        m.setName("ModelSubmission-" + System.currentTimeMillis());
         m.setTable("DELL_EVENT_TABLE_TEST");
         m.setMetadataTable("EventMetadata");
         m.setFeaturesList(Arrays.<String> asList(new String[] {

@@ -124,7 +124,8 @@
   "targets": [
     "P1_Event"
   ],
-  "metadata": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/EventMetadata_Nutanix/part-m-00000.avro",
+  "config_metadata": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/EventMetadata_Nutanix/metadata.avsc",
+  "data_profile": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/EventMetadata_Nutanix/part-m-00000.avro",
   "schema": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/Q_EventTable_Nutanix.avsc",
   "model_data_dir": "/user/s-analytics/customers/Nutanix/models/Q_EventTable_Nutanix/EventMetadata_Nutanix",
   "data_format": "avro",

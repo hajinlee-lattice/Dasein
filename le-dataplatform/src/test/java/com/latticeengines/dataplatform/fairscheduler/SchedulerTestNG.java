@@ -65,7 +65,9 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier1Min.setPythonScriptHdfsPath("/scheduler/train_1min.py");
         classifier1Min.setTrainingDataHdfsPath("/training/nn_train.dat");
         classifier1Min.setTestDataHdfsPath("/test/nn_test.dat");
-        classifier1Min.setMetadataHdfsPath("/training/a.avsc");
+        classifier1Min.setDataProfileHdfsPath("/training/a.avro");
+        classifier1Min.setConfigMetadataHdfsPath("/training/a.avsc");
+
 
         classifier2Mins = new Classifier();
         classifier2Mins.setName("IrisClassifier");
@@ -77,7 +79,9 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier2Mins.setPythonScriptHdfsPath("/scheduler/train_2mins.py");
         classifier2Mins.setTrainingDataHdfsPath("/training/nn_train.dat");
         classifier2Mins.setTestDataHdfsPath("/test/nn_test.dat");
-        classifier2Mins.setMetadataHdfsPath("/training/a.avsc");
+        classifier2Mins.setDataProfileHdfsPath("/training/a.avro");
+        classifier2Mins.setConfigMetadataHdfsPath("/training/a.avsc");
+        
 
         classifier4Mins = new Classifier();
         classifier4Mins.setName("IrisClassifier");
@@ -89,7 +93,9 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         classifier4Mins.setPythonScriptHdfsPath("/scheduler/train_4mins.py");
         classifier4Mins.setTrainingDataHdfsPath("/training/nn_train.dat");
         classifier4Mins.setTestDataHdfsPath("/test/nn_test.dat");
-        classifier4Mins.setMetadataHdfsPath("/training/a.avsc");
+        classifier4Mins.setDataProfileHdfsPath("/training/a.avro");
+        classifier4Mins.setConfigMetadataHdfsPath("/training/a.avsc");
+
 
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
@@ -291,7 +297,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
             ApplicationId appId = jobStatusToCollect.get(0);
             JobStatus status = jobService.getJobStatus(appId.toString());
             FinalApplicationStatus appStatus = waitForStatus(getApplicationId(status.getId()), FinalApplicationStatus.SUCCEEDED, FinalApplicationStatus.FAILED);            
-            System.out.println("                 =========================================ScedhulerTestNG.waitForAllJobsToFinish()");            
+            System.out.println("                 =========================================SchedulerTestNG.waitForAllJobsToFinish()");            
             if (appStatus == null) {
                 System.out.println("ERROR: Invalid state detected");
                 jobStatusToCollect.remove(appId);

@@ -26,6 +26,7 @@
         <yarn:hdfs path="$$TEST$$" />
         <yarn:hdfs path="$$SCHEMA$$" />
         <yarn:hdfs path="$$DATAPROFILE$$" />
+        <yarn:hdfs path="$$CONFIGMETADATA$$" />
         <yarn:hdfs path="$$PYTHONSCRIPT$$" />
     </yarn:localresources>
 

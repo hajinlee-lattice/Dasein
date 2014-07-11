@@ -8,9 +8,9 @@ import pickle
 from random import random
 from random import shuffle
 import shutil
-import uuid
 from sklearn.ensemble import RandomForestClassifier
 from unittest import TestCase
+import uuid
 
 from launcher import Launcher
 from leframework import scoringengine as se

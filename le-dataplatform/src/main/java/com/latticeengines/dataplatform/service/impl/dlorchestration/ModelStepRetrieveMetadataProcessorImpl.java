@@ -1,12 +1,17 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpUtils;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
@@ -15,17 +20,15 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 
 @Component("modelStepRetrieveMetadataProcessor")
 public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcessor {
+    private static final Log log = LogFactory.getLog(ModelStepRetrieveMetadataProcessorImpl.class);
+    
+    @Autowired
+    private Configuration yarnConfiguration;
 
-    private static final String DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS = "/DLConfigService/GetQueryMetaDataColumns";
-    private static final String DL_CONFIG_SERVICE_LOGIN = "/DLConfigService/Login";
+    private static final String DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS = "/DLRestService/GetQueryMetaDataColumns";
 
     // Make this settable for easier testing
-    private String loginUrlSuffix = DL_CONFIG_SERVICE_LOGIN;
     private String queryMetadataUrlSuffix = DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS;
-
-    public void setLoginUrlSuffix(String loginUrlSuffix) {
-        this.loginUrlSuffix = loginUrlSuffix;
-    }
 
     public void setQueryMetadataUrlSuffix(String queryMetadataUrlSuffix) {
         this.queryMetadataUrlSuffix = queryMetadataUrlSuffix;
@@ -33,39 +36,72 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     @Override
     public void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
-        String loginUrl = modelCommandParameters.getDlUrl() + loginUrlSuffix;
         String queryMetadataUrl = modelCommandParameters.getDlUrl() + queryMetadataUrlSuffix;
-
-        String sessionId = null;
-        try {
-            Map<String, String> parameters = new HashMap<>();
-            parameters.put("userName", modelCommandParameters.getDlUsername());
-            parameters.put("password", modelCommandParameters.getDlPassword());
-            parameters.put("token", modelCommandParameters.getDlToken());
-            sessionId = HttpUtils.executePostRequest(loginUrl, parameters);
-            if (Strings.isNullOrEmpty(sessionId)) {
-                throw new LedpException(LedpCode.LEDP_16004, new String[] { String.valueOf(modelCommand.getPid()), loginUrl });
-            }
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_16003, e, new String[] { String.valueOf(modelCommand.getPid()), loginUrl });
-        }
-
         String metadata = null;
         try {
-            Map<String, String> parameters = new HashMap<>();
-            parameters.put("sessionId", sessionId);
-            parameters.put("tenantName", modelCommandParameters.getDlTenant());
-            parameters.put("queryName", modelCommandParameters.getEventTable());
-            metadata = HttpUtils.executePostRequest(queryMetadataUrl, parameters);
+            GetQueryMetadataRequest request = new GetQueryMetadataRequest(modelCommandParameters.getDlTenant(),
+                    modelCommandParameters.getEventTable());
+            Map<String, String> headers = new HashMap<String, String>();
+            headers.put("MagicAuthentication", "Security through obscurity!");
+            metadata = HttpUtils.executePostRequest(queryMetadataUrl, request, headers);
             if (Strings.isNullOrEmpty(metadata)) {
-                throw new LedpException(LedpCode.LEDP_16006, new String[] { String.valueOf(modelCommand.getPid()), queryMetadataUrl });
+                throw new LedpException(LedpCode.LEDP_16006, new String[] { String.valueOf(modelCommand.getPid()),
+                        queryMetadataUrl });
             }
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_16005, e, new String[] { String.valueOf(modelCommand.getPid()), queryMetadataUrl });
+            log.info(metadata);
+            String hdfsPath = getHdfsPathForMetadataFile(modelCommand, modelCommandParameters);
+            HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, metadata);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_16005, e, new String[] { String.valueOf(modelCommand.getPid()),
+                    queryMetadataUrl });
+        }
+    }
+    
+    String getHdfsPathForMetadataFile(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
+        String customer = modelCommand.getDeploymentExternalId();
+        return "/user/s-analytics/customers/" + customer + "/data/" + modelCommandParameters.getMetadataTable() + "/metadata.avsc";
+    }
+
+    public static class GetQueryMetadataRequest {
+
+        private String tenantName;
+        private String queryName;
+        private String revisionTag;
+
+        public GetQueryMetadataRequest(String tenantName, String queryName) {
+            this.tenantName = tenantName;
+            this.queryName = queryName;
         }
 
-        // TODO do something with metadata
+        @JsonProperty("tenantName")
+        public String getTenantName() {
+            return tenantName;
+        }
+
+        @JsonProperty("tenantName")
+        public void setTenantName(String tenantName) {
+            this.tenantName = tenantName;
+        }
+
+        @JsonProperty("queryName")
+        public String getQueryName() {
+            return queryName;
+        }
+
+        @JsonProperty("queryName")
+        public void setQueryName(String queryName) {
+            this.queryName = queryName;
+        }
+
+        @JsonProperty("revisionTag")
+        public String getRevisionTag() {
+            return revisionTag;
+        }
+
+        @JsonProperty("revisionTag")
+        public void setRevisionTag(String revisionTag) {
+            this.revisionTag = revisionTag;
+        }
     }
 
 }
-

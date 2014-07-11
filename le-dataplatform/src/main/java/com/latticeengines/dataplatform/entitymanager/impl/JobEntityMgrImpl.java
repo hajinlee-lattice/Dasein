@@ -46,8 +46,9 @@ public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntit
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public Set<Job> findAllByObjectIds(Set<String> jobIds) {
-        if(jobIds == null || jobIds.isEmpty())
+        if (jobIds == null || jobIds.isEmpty()) {
             return new HashSet<Job>();
+        }
                     
         return jobDao.findAllByObjectIds(jobIds);
     }

@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 public class ModelCommandParameters {
 
     private static final char COMMA = ',';
-    // Hardcoded name of hdfs subfolder
+    // Hard-coded name of HDFS subfolder
     public static final String EVENT_METADATA = "EventMetadata";
 
     // Mandatory parameters
@@ -25,9 +25,6 @@ public class ModelCommandParameters {
     public static final String EXCLUDE_COLUMNS = "ExcludeColumns";
     public static final String DL_URL = "DataLoader_Instance";
     public static final String DL_TENANT = "DataLoader_TenantName";
-    public static final String DL_USERNAME = "DataLoader_UserName";
-    public static final String DL_PASSWORD = "DataLoader_Password";
-    public static final String DL_TOKEN = "DataLoader_Token";
 
     // Optional parameters
     public static final String NUM_SAMPLES = "NumSamples";
@@ -47,9 +44,6 @@ public class ModelCommandParameters {
     private String algorithmScript = null;
     private String dlUrl = null;
     private String dlTenant = null;
-    private String dlUsername = null;
-    private String dlPassword = null;
-    private String dlToken = null;
 
     public ModelCommandParameters (List<ModelCommandParameter> commandParameters) {
         super();
@@ -89,16 +83,6 @@ public class ModelCommandParameters {
             case ModelCommandParameters.DL_URL:
                 this.setDlUrl(parameter.getValue());
                 break;
-            case ModelCommandParameters.DL_USERNAME:
-                this.setDlUsername(parameter.getValue());
-                break;
-            case ModelCommandParameters.DL_PASSWORD:
-                this.setDlPassword(parameter.getValue());
-                break;
-            case ModelCommandParameters.DL_TOKEN:
-                this.setDlToken(parameter.getValue());
-                break;
-
             }
         }
 
@@ -124,16 +108,6 @@ public class ModelCommandParameters {
         if (Strings.isNullOrEmpty(this.getDlUrl())) {
             missingParameters.add(ModelCommandParameters.DL_URL);
         }
-        if (Strings.isNullOrEmpty(this.getDlUsername())) {
-            missingParameters.add(ModelCommandParameters.DL_USERNAME);
-        }
-        if (Strings.isNullOrEmpty(this.getDlPassword())) {
-            missingParameters.add(ModelCommandParameters.DL_PASSWORD);
-        }
-        if (Strings.isNullOrEmpty(this.getDlToken())) {
-            missingParameters.add(ModelCommandParameters.DL_TOKEN);
-        }
-
         if (!missingParameters.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_16000, new String[] { missingParameters.toString() });
         }
@@ -246,27 +220,4 @@ public class ModelCommandParameters {
         this.algorithmScript = algorithmScript;
     }
 
-    public String getDlUsername() {
-        return dlUsername;
-    }
-
-    private void setDlUsername(String dlUsername) {
-        this.dlUsername = dlUsername;
-    }
-
-    public String getDlPassword() {
-        return dlPassword;
-    }
-
-    private void setDlPassword(String dlPassword) {
-        this.dlPassword = dlPassword;
-    }
-
-    public String getDlToken() {
-        return dlToken;
-    }
-
-    private void setDlToken(String dlToken) {
-        this.dlToken = dlToken;
-    }
 }

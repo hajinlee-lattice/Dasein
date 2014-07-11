@@ -12,6 +12,7 @@ public enum LedpCode {
     LEDP_10003("Exactly one target required."), //
     LEDP_10004("Feature {0} not found in schema."), //
     LEDP_10005("Could not deserialize data schema."), //
+    LEDP_10006("Name is null."), //
     // Metadata service: 11000-11999
     LEDP_11000("Could not load driver class {0}."), //
     LEDP_11001("Failed connecting to db."), //

@@ -85,7 +85,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     avroSchema = getSchema()
     recordWriter = io.DatumWriter(avroSchema)
     print(sys.getdefaultencoding())
-    dataWriter = datafile.DataFileWriter(codecs.open(modelDir + '/metadata.avro', 'wb'),
+    dataWriter = datafile.DataFileWriter(codecs.open(modelDir + '/profile.avro', 'wb'),
                                          recordWriter, writers_schema = avroSchema, codec = 'deflate')
     
     colnames = list(data.columns.values)

@@ -44,18 +44,15 @@ public class ModelingServiceTestUtils {
         List<ModelCommandParameter> parameters = new ArrayList<>();
         ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, parameters, ModelCommand.TAHOE);
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE, "Q_EventTableDepivot_Nutanix"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, "Q_EventTable_Nutanix"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, "Q_MetaDataTest"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_NAME, "Model Submission1"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "P1_Event"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.NUM_SAMPLES, String.valueOf(NUM_SAMPLES)));
         String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "ADEBD2V67059448rX25059174r"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://10.41.1.238/"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_USERNAME, "someperson@lattice-engines.com"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_PASSWORD, "somepersonpassword"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TOKEN, "somepersontoken"));
 
         return command;
     }

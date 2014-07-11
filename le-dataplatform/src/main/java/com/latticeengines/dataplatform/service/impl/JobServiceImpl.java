@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
+
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -246,7 +248,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         String metadata = resumbitJob.getContainerPropertiesObject().getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
         
         com.latticeengines.domain.exposed.dataplatform.Job newJob = new com.latticeengines.domain.exposed.dataplatform.Job();        
-        newJob.setParentJobId(parentId);        
+        newJob.setParentJobId(parentId);
         newJob.setModel(resumbitJob.getModel());
         newJob.setClient(resumbitJob.getClient());
         newJob.setAppMasterPropertiesObject(resumbitJob.getAppMasterPropertiesObject());

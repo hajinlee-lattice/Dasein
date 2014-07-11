@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.springframework.util.StringUtils;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 
@@ -53,7 +54,8 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.TEST.name(), classifier.getTestDataHdfsPath());
             properties.put(PythonContainerProperty.PYTHONSCRIPT.name(), classifier.getPythonScriptHdfsPath());
             properties.put(PythonContainerProperty.SCHEMA.name(), classifier.getSchemaHdfsPath());
-            properties.put(PythonContainerProperty.DATAPROFILE.name(), classifier.getMetadataHdfsPath());
+            properties.put(PythonContainerProperty.DATAPROFILE.name(), classifier.getDataProfileHdfsPath());
+            properties.put(PythonContainerProperty.CONFIGMETADATA.name(), classifier.getConfigMetadataHdfsPath());
 
             File metadataFile = new File(dir  + "/metadata.json");
             FileUtils.writeStringToFile(metadataFile, metadata);
@@ -81,6 +83,11 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
         List<String> features = classifier.getFeatures();
         List<String> targets = classifier.getTargets();
         String schemaHdfsPath = classifier.getSchemaHdfsPath();
+        String name = classifier.getName();
+        
+        if (StringUtils.isEmpty(name)) {
+            throw new LedpException(LedpCode.LEDP_10006);
+        }
 
         if (features == null || features.size() == 0) {
             throw new LedpException(LedpCode.LEDP_10002);
