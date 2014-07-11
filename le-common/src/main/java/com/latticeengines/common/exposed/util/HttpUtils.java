@@ -1,12 +1,13 @@
 package com.latticeengines.common.exposed.util;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.google.api.client.http.ByteArrayContent;
-//import com.google.api.client.http.GZipEncoding;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler;
 import com.google.api.client.http.HttpRequest;
@@ -19,15 +20,23 @@ import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
 
 public class HttpUtils {
-    static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
+    static HttpTransport HTTPS_TRANSPORT = null;
+    static HttpTransport HTTP_TRANSPORT = null;
     static HttpRequestFactory requestFactory;
+    static HttpRequestFactory requestSslFactory;
 
     static {
-        requestFactory = HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
+        
+        try {
+            HTTP_TRANSPORT = new NetHttpTransport();
+            HTTPS_TRANSPORT = new NetHttpTransport.Builder().doNotValidateCertificate().build();
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }
+        HttpRequestInitializer initializer = new HttpRequestInitializer() {
 
             @Override
             public void initialize(HttpRequest request) throws IOException {
-                // request.setEncoding(new GZipEncoding());
                 request.setConnectTimeout(60000);
                 request.setNumberOfRetries(10);
 
@@ -35,8 +44,19 @@ public class HttpUtils {
                         .setMultiplier(2).setMaxElapsedTimeMillis(180000).build();
                 request.setUnsuccessfulResponseHandler(new HttpBackOffUnsuccessfulResponseHandler(backoff));
             }
-        });
-
+        };
+        requestFactory = HTTP_TRANSPORT.createRequestFactory(initializer);
+        requestSslFactory = HTTPS_TRANSPORT.createRequestFactory(initializer);
+    }
+    
+    private static HttpRequestFactory getRequestFactory(String url) {
+        if (StringUtils.isEmpty(url)) {
+            throw new RuntimeException("Url cannot be empty.");
+        }
+        if (url.startsWith("https:")) {
+            return requestSslFactory;
+        }
+        return requestFactory;
     }
 
     /*
@@ -48,11 +68,14 @@ public class HttpUtils {
     public static String executePostRequest(String url, Object requestData, Map<String, String> headers)
             throws IOException {
         String jsonString = JsonUtils.serialize(requestData);
-        HttpRequest request = requestFactory.buildPostRequest(new GenericUrl(url),
+        HttpRequest request = getRequestFactory(url).buildPostRequest(new GenericUrl(url),
                 ByteArrayContent.fromString("application/json", jsonString));
         request.setParser(new JacksonFactory().createJsonObjectParser());
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            request.getHeaders().set(entry.getKey(), entry.getValue());
+        
+        if (headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                request.getHeaders().set(entry.getKey(), entry.getValue());
+            }
         }
 
         HttpResponse response = request.execute();
