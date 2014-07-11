@@ -2,4 +2,4 @@
 rm -rf /tmp/lib
 rm -rf /tmp/app
 hadoop fs -rm -f -r /lib
-hadoop fs -rm -f -r /app/dataplatform
+hadoop fs -rm -f -r /app

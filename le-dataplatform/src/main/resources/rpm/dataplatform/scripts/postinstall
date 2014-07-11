@@ -2,6 +2,10 @@
 hadoop fs -mkdir /lib
 hadoop fs -copyFromLocal /tmp/lib/* /lib
 runuser -l hdfs -c 'hadoop fs -chown -R yarn:hdfs /lib'
+
+hadoop fs -mkdir /app
 runuser -l yarn -c 'hadoop fs -copyFromLocal /tmp/app/dataplatform /app/dataplatform'
+
+# clean up
 rm -rf /tmp/lib
 rm -rf /tmp/app
