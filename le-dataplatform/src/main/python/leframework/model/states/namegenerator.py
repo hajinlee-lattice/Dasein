@@ -1,5 +1,5 @@
 import logging
-
+import time
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
@@ -12,7 +12,7 @@ class NameGenerator(State, JsonGenBase):
     
     @overrides(State)
     def execute(self):
-        self.name = self.mediator.schema["name"]       
+        self.name = self.mediator.schema["name"]+"_"+time.strftime("%Y/%m/%d-%H:%M")
         
     @overrides(JsonGenBase)
     def getKey(self):
