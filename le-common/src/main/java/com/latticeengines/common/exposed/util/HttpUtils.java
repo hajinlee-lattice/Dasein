@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 
+import com.google.api.client.http.ByteArrayContent;
 //import com.google.api.client.http.GZipEncoding;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler;
@@ -13,8 +14,8 @@ import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.UrlEncodedContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
 
 public class HttpUtils {
@@ -26,7 +27,7 @@ public class HttpUtils {
 
             @Override
             public void initialize(HttpRequest request) throws IOException {
-                //request.setEncoding(new GZipEncoding());
+                // request.setEncoding(new GZipEncoding());
                 request.setConnectTimeout(60000);
                 request.setNumberOfRetries(10);
 
@@ -41,11 +42,18 @@ public class HttpUtils {
     /*
      * Request will retry with exponential backoff on any 5xx server error
      * response.
-     *
+     * 
      * @return Returns the response text
      */
-    public static String executePostRequest(String url, Map<String, String> parameters) throws IOException {
-        HttpRequest request = requestFactory.buildPostRequest(new GenericUrl(url), new UrlEncodedContent(parameters));
+    public static String executePostRequest(String url, Object requestData, Map<String, String> headers)
+            throws IOException {
+        String jsonString = JsonUtils.serialize(requestData);
+        HttpRequest request = requestFactory.buildPostRequest(new GenericUrl(url),
+                ByteArrayContent.fromString("application/json", jsonString));
+        request.setParser(new JacksonFactory().createJsonObjectParser());
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            request.getHeaders().set(entry.getKey(), entry.getValue());
+        }
 
         HttpResponse response = request.execute();
         return IOUtils.toString(response.getContent());
@@ -54,7 +62,7 @@ public class HttpUtils {
     /*
      * Request will retry with exponential backoff on any 5xx server error
      * response.
-     *
+     * 
      * @return Returns the response text
      */
     public static String executeGetRequest(String url) throws IOException {
