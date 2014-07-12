@@ -67,7 +67,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     @Value("${dataplatform.dlorchestration.datasource.user}")
     private String dbUser;
 
-    @Value("${dataplatform.dlorchestration.datasource.password}")
+    @Value("${dataplatform.dlorchestration.datasource.password.encrypted}")
     private String dbPassword;
 
     @Value("${dataplatform.dlorchestration.datasource.type}")

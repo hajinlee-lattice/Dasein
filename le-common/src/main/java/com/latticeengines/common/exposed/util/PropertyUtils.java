@@ -24,15 +24,21 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
     protected void processProperties(
             ConfigurableListableBeanFactory beanFactory, Properties props)
             throws BeansException {
-        super.processProperties(beanFactory, props);
 
         propertiesMap = new HashMap<String, String>();
         for (Object key : props.keySet()) {
             String keyStr = key.toString();
             String valueStr = resolvePlaceholder(keyStr, props,
                     springSystemPropertiesMode);
+            // Decrypt credentials
+            if(keyStr.contains(CipherUtils.ENCRYPTED)) {
+                valueStr = CipherUtils.decrypt(valueStr);
+                props.put(keyStr, valueStr);
+            }
             propertiesMap.put(keyStr, valueStr);
         }
+        
+        super.processProperties(beanFactory, props);
     }
 
     public static String getProperty(String name) {

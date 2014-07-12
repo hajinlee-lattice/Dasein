@@ -97,7 +97,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     @Value("${dataplatform.dlorchestration.datasource.user}")
     protected String dbDlOrchestrationUser;
 
-    @Value("${dataplatform.dlorchestration.datasource.password}")
+    @Value("${dataplatform.dlorchestration.datasource.password.encrypted}")
     protected String dbDlOrchestrationPassword;
 
     @Value("${dataplatform.dlorchestration.datasource.type}")

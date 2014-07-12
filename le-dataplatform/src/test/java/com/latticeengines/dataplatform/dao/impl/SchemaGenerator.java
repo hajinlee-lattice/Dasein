@@ -171,7 +171,7 @@ public class SchemaGenerator {
      * Convert from dataplatform.properties to hibernate.properties
      *
      * from: dataplatform.dao.datasource.driver=com.microsoft.sqlserver.jdbc. SQLServerDriver
-     * dataplatform.dao.datasource.user=root dataplatform.dao.datasource.password=welcome
+     * dataplatform.dao.datasource.user=root dataplatform.dao.datasource.password.encrypted=welcome
      * dataplatform.dao.datasource.url =jdbc:sqlserver://10.41.1.250:1433;databaseName=ledp_buildmachine;
      *
      * to: hibernate.connection.driver_class - JDBC driver class hibernate.connection.url - JDBC URL
@@ -193,7 +193,7 @@ public class SchemaGenerator {
                 .put("hibernate.connection.driver_class", prop.get("dataplatform.dao.datasource.driver"));
         hibernatePropertiesLEDP.put("hibernate.connection.url", prop.get("dataplatform.dao.datasource.url"));
         hibernatePropertiesLEDP.put("hibernate.connection.username", prop.get("dataplatform.dao.datasource.user"));
-        hibernatePropertiesLEDP.put("hibernate.connection.password", prop.get("dataplatform.dao.datasource.password"));
+        hibernatePropertiesLEDP.put("hibernate.connection.password", prop.get("dataplatform.dao.datasource.password.encrypted"));
         DBDialect dbDialect = convertDbDialect(prop.getProperty("dataplatform.dao.datasource.dialect"));
         hibernatePropertiesLEDP.put("local.dbdialect", dbDialect);
 
@@ -205,7 +205,7 @@ public class SchemaGenerator {
         hibernatePropertiesDlOrchestration.put("hibernate.connection.username",
                 prop.get("dataplatform.dlorchestration.datasource.user"));
         hibernatePropertiesDlOrchestration.put("hibernate.connection.password",
-                prop.get("dataplatform.dlorchestration.datasource.password"));
+                prop.get("dataplatform.dlorchestration.datasource.password.encrypted"));
         dbDialect = convertDbDialect(prop.getProperty("dataplatform.dlorchestration.datasource.dialect"));
         hibernatePropertiesDlOrchestration.put("local.dbdialect", dbDialect);
 

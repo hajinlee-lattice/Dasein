@@ -23,7 +23,7 @@
         <property name="driverClassName" value="${dataplatform.dao.datasource.driver}" />
         <property name="url"      value="${dataplatform.dao.datasource.url}" />
         <property name="username" value="${dataplatform.dao.datasource.user}" />
-        <property name="password" value="${dataplatform.dao.datasource.password}" />
+        <property name="password" value="${dataplatform.dao.datasource.password.encrypted}" />
     </bean>
 
     <!-- Hibernate session factory -->
@@ -50,7 +50,7 @@
         <property name="driverClassName" value="${dataplatform.dlorchestration.datasource.driver}" />
         <property name="url"      value="${dataplatform.dlorchestration.datasource.url}" />
         <property name="username" value="${dataplatform.dlorchestration.datasource.user}" />
-        <property name="password" value="${dataplatform.dlorchestration.datasource.password}" />
+        <property name="password" value="${dataplatform.dlorchestration.datasource.password.encrypted}" />
     </bean>
 
     <!-- Hibernate session factory -->
