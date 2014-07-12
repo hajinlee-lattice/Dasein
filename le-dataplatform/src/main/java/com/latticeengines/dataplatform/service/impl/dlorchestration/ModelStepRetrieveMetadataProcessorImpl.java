@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 @Component("modelStepRetrieveMetadataProcessor")
 public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcessor {
     private static final Log log = LogFactory.getLog(ModelStepRetrieveMetadataProcessorImpl.class);
-    
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -56,10 +56,11 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
                     queryMetadataUrl });
         }
     }
-    
+
     String getHdfsPathForMetadataFile(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
         String customer = modelCommand.getDeploymentExternalId();
-        return "/user/s-analytics/customers/" + customer + "/data/" + modelCommandParameters.getMetadataTable() + "/metadata.avsc";
+        return "/user/s-analytics/customers/" + customer + "/data/" + modelCommandParameters.getEventTable() + "/"
+                + modelCommandParameters.getMetadataTable() + "/metadata.avsc";
     }
 
     public static class GetQueryMetadataRequest {
