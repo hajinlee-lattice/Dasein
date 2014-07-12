@@ -72,6 +72,20 @@
                 </dataplatform.properties.path>
             </properties>
         </profile>
+       <profile>
+            <id>production_test</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>prod_test</value>
+                </property>
+            </activation>
+            <properties>
+                <dataplatform.properties.path>
+                    ../le-dataplatform/conf/env/prod_test
+                </dataplatform.properties.path>
+            </properties>
+        </profile>
     </profiles>
 
 
@@ -88,7 +102,7 @@
                     <group>Application/Collectors</group>
                     <!-- prefix>/usr/local</prefix -->
                     <changelogFile>src/main/resources/database/changelog</changelogFile>
-                    <mappings>                        
+                    <mappings>
                         <mapping>
                             <directory>/tmp/dataplatform/database</directory>
                             <filemode>755</filemode>
@@ -100,7 +114,7 @@
                                     <location>${dataplatform.properties.path}/dataplatform.properties</location>
                                 </source>
                             </sources>
-                        </mapping>       
+                        </mapping>
                         <mapping>
                             <directory>/tmp/dataplatform/database/lib</directory>
                             <filemode>755</filemode>
@@ -110,9 +124,9 @@
                                 <!-- SchemaGenerator.class -->
                                 <source>
                                     <location>../le-dataplatform/target/le-dataplatform-1.0.0-SNAPSHOT-tests.jar</location>
-                                </source>            
+                                </source>
                                 <source>
-                                    <location>../le-domain/target/le-domain-1.0.0-SNAPSHOT.jar</location>    
+                                    <location>../le-domain/target/le-domain-1.0.0-SNAPSHOT.jar</location>
                                 </source>
                                 <!-- drivers and other libraries -->
                                 <source>
@@ -122,7 +136,7 @@
                                     <location>src/main/resources/database/log4j.xml</location>
                                 </source>
                             </sources>
-                        </mapping>                                      
+                        </mapping>
                     </mappings>
                     <preinstallScriptlet>
                         <scriptFile>src/main/scripts/database/preinstall</scriptFile>
@@ -132,7 +146,7 @@
                     </postinstallScriptlet>
                 </configuration>
             </plugin>
-            
+
         </plugins>
     </build>
 </project>
