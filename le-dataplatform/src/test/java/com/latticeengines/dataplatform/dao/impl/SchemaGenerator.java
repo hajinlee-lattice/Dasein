@@ -15,6 +15,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
+
 public class SchemaGenerator {
 
     private static final Log log = LogFactory.getLog(SchemaGenerator.class);
@@ -105,7 +107,7 @@ public class SchemaGenerator {
      * hibernate.connection.pool_size - maximum number of pooled connections
      *
      * @param args
-     *            - [0]: scriptOnly - [1]: db properties file path
+     *            - [0]: scriptOnly - [1]: db properties (dataplatform.properties) file path
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
@@ -193,7 +195,7 @@ public class SchemaGenerator {
                 .put("hibernate.connection.driver_class", prop.get("dataplatform.dao.datasource.driver"));
         hibernatePropertiesLEDP.put("hibernate.connection.url", prop.get("dataplatform.dao.datasource.url"));
         hibernatePropertiesLEDP.put("hibernate.connection.username", prop.get("dataplatform.dao.datasource.user"));
-        hibernatePropertiesLEDP.put("hibernate.connection.password", prop.get("dataplatform.dao.datasource.password.encrypted"));
+        hibernatePropertiesLEDP.put("hibernate.connection.password", CipherUtils.decrypt((String)prop.get("dataplatform.dao.datasource.password.encrypted")));
         DBDialect dbDialect = convertDbDialect(prop.getProperty("dataplatform.dao.datasource.dialect"));
         hibernatePropertiesLEDP.put("local.dbdialect", dbDialect);
 
@@ -205,7 +207,7 @@ public class SchemaGenerator {
         hibernatePropertiesDlOrchestration.put("hibernate.connection.username",
                 prop.get("dataplatform.dlorchestration.datasource.user"));
         hibernatePropertiesDlOrchestration.put("hibernate.connection.password",
-                prop.get("dataplatform.dlorchestration.datasource.password.encrypted"));
+                CipherUtils.decrypt((String)prop.get("dataplatform.dlorchestration.datasource.password.encrypted")));
         dbDialect = convertDbDialect(prop.getProperty("dataplatform.dlorchestration.datasource.dialect"));
         hibernatePropertiesDlOrchestration.put("local.dbdialect", dbDialect);
 
