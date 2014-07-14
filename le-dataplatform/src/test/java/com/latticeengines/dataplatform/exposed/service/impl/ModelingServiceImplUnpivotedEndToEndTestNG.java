@@ -3,6 +3,7 @@ package com.latticeengines.dataplatform.exposed.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,6 +18,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
@@ -24,7 +26,9 @@ import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
+import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelCommandParameters;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
@@ -35,6 +39,9 @@ import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 
 /**
  * This is an end-to-end test against a SQL Server database without having to go
@@ -61,6 +68,9 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
     @Autowired
     private ModelEntityMgr modelEntityMgr;
+    
+    @Autowired
+    private ModelStepProcessor modelStepRetrieveMetadataProcessor;
 
     private Model model = null;
 
@@ -95,7 +105,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         m.setModelDefinition(modelDef);
         m.setName("Model Submission1");
         m.setTable("Q_EventTable_Nutanix");
-        m.setMetadataTable("EventMetadata_Nutanix");
+        m.setMetadataTable("EventMetadata");
         m.setTargetsList(Arrays.<String> asList(new String[] { "P1_Event" }));
         m.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         m.setCustomer("Nutanix");
@@ -113,7 +123,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         config.setCreds(creds);
         config.setCustomer("Nutanix");
         config.setTable("Q_EventTable_Nutanix");
-        config.setMetadataTable("EventMetadata_Nutanix");
+        config.setMetadataTable("EventMetadata");
         config.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         return config;
     }
@@ -151,8 +161,31 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
+    private ModelCommand createModelCommandWithCommandParameters() {
+        List<ModelCommandParameter> parameters = new ArrayList<>();
+        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, parameters, ModelCommand.TAHOE);
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_NAME, "Model Submission1"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "P1_Event"));
+        String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, "Q_EventTable_Nutanix"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_METADATA, "EventMetadata"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "https://visidb.lattice-engines.com/DLRestService"));
+
+        return command;
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "createSamples" })
+    public void retrieveMetadataAndWriteToHdfs() throws Exception {
+        ModelCommand command = createModelCommandWithCommandParameters();
+        List<ModelCommandParameter> commandParameters = command.getCommandParameters();
+        modelStepRetrieveMetadataProcessor.executeStep(command, new ModelCommandParameters(commandParameters));
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "retrieveMetadataAndWriteToHdfs" })
     public void profileData() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());

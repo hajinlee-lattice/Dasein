@@ -1,0 +1,67 @@
+{
+  "ErrorMessage": null,
+  "Metadata": [
+    {
+      "ApprovedUsage": "Model",
+      "ColumnName": "BusinessAnnualSalesAbs",
+      "DataSource": "SQL Server",
+      "DataType": "Double",
+      "Description": "BusinessAnnualSalesAbs_Description",
+      "DisplayDiscretizationStrategy": "{\"linear\":{\"index\": 0, \"increment\":10}}",
+      "DisplayName": "BusinessAnnualSalesAbs_DisplayName",
+      "Extensions": [
+        {
+          "Key": "MeasurementType",
+          "Value": "ratio"
+        },
+        {
+          "Key": "DataPackage",
+          "Value": "PLS Standard"
+        },
+        {
+          "Key": "Derived",
+          "Value": "True"
+        },
+        {
+          "Key": "ID",
+          "Value": "https://www.dl.com"
+        },
+        {
+          "Key": "ValueFrequnecy",
+          "Value": "2.3"
+        },
+        {
+          "Key": "ValueDistinctCount",
+          "Value": "3"
+        },
+        {
+          "Key": "LastUpdatedMetadata",
+          "Value": "2014-07-09 19:30:11"
+        },
+        {
+          "Key": "DataQuality",
+          "Value": "Good"
+        }
+      ],
+      "FundamentalType": "currency",
+      "LastTimeSourceUpdated": "2014-07-09 17:50:20",
+      "StatisticalType": "nominal",
+      "Tags": "tag1,tag2"
+    },
+    {
+      "ApprovedUsage": null,
+      "ColumnName": "BankruptcyFiled",
+      "DataSource": "SFDC",
+      "DataType": "String",
+      "Description": null,
+      "DisplayDiscretizationStrategy": "{\"frequency\": {\"intervalCount\": 6}}",
+      "DisplayName": null,
+      "Extensions": null,
+      "FundamentalType": null,
+      "LastTimeSourceUpdated": "2014-07-05 08:50:20",
+      "StatisticalType": null,
+      "Tags": null
+    }
+  ],
+  "Status": 3
+}

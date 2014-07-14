@@ -177,7 +177,7 @@ public class ModelingServiceImpl implements ModelingService {
         }
 
         if (files.size() != 1) {
-            log.warn("No metadata file found.");
+            log.warn("No data profile found.");
             return path;
         }
         String p = files.get(0);
