@@ -5,13 +5,29 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.ParseException;
 
-public interface CommandLineSetup {
+public abstract class CommandLineSetup<T> {
 
-    public CommandLineParser clp = new GnuParser();
+    protected CommandLineParser clp = new GnuParser();
 
-    public final char DELIMETER = ';';
+    protected final char DELIMETER = ';';
 
-    public void setupOptions(String[] args) throws ParseException;
+    protected String customer;
 
-    public CommandLine getCommandLine();
+    protected String restEndpointHost;
+
+    public abstract void setupOptions(String[] args) throws ParseException;
+
+    public abstract CommandLine getCommandLine();
+
+    public abstract Class<T> getJobClassType();
+
+    public abstract void setConfiguration(T t) throws Exception;
+
+    public CommandLineSetup(String restEndpointHost) {
+        this.restEndpointHost = restEndpointHost;
+    }
+
+    public void setCustomer(String customer) {
+        this.customer = customer;
+    }
 }

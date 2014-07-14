@@ -4,39 +4,32 @@ import java.util.concurrent.Callable;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.latticeengines.perf.rest.client.LedpRestClient;
 
 public abstract class ModelingResourceJob<T, E> implements Callable<E> {
 
-    protected String customer;
+    protected String restEndpointHost;
     protected LedpRestClient rc;
     protected static final Log log = LogFactory.getLog(ModelingResourceJob.class);
+    protected T config;
 
-    public ModelingResourceJob() {
-    }
-
-    public ModelingResourceJob(String customer, String restEndpointHost) {
-        this.customer = customer;
+    public void setConfiguration(String restEndpointHost, T config) throws Exception {
+        this.config = config;
+        this.restEndpointHost = restEndpointHost;
         this.rc = new LedpRestClient(restEndpointHost);
     }
 
-    public void setCustomer(String customer) {
-        this.customer = customer;
+    public String getRestEndpointHost() {
+        return this.restEndpointHost;
     }
 
-    public void setLedpRestClient(String restEndpointHost) {
-        this.rc = new LedpRestClient(restEndpointHost);
-    }
-
-    public abstract T setConfiguration() throws Exception;
-
-    public abstract E executeJob(T config) throws Exception;
+    public abstract E executeJob() throws Exception;
 
     @Override
     public E call() throws Exception {
         try {
-            T config = setConfiguration();
-            return executeJob(config);
+            return executeJob();
         } catch (Exception e) {
             log.error(ExceptionUtils.getFullStackTrace(e));
         }

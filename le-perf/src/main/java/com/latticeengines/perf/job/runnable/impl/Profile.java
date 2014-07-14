@@ -1,26 +1,45 @@
 package com.latticeengines.perf.job.runnable.impl;
 
+import java.util.ArrayList;
 import java.util.List;
-
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 
-public abstract class Profile extends ModelingResourceJob<DataProfileConfiguration, List<String>> {
+public class Profile extends ModelingResourceJob<DataProfileConfiguration, List<String>> {
 
-    public Profile() {
+    public List<String> executeJob() throws Exception {
+        return profile();
     }
 
-    public Profile(String customer, String restEndpointHost) {
-        super(customer, restEndpointHost);
-    }
-
-    public List<String> executeJob(DataProfileConfiguration config) throws Exception {
-        return profile(config);
-    }
-
-    public List<String> profile(DataProfileConfiguration config) throws Exception {
+    public List<String> profile() throws Exception {
         List<String> applicationIds = rc.profile(config);
         log.info(applicationIds);
         return applicationIds;
+    }
+
+    public static List<String> createExcludeList() {
+        List<String> excludeList = new ArrayList<>();
+        excludeList.add("Nutanix_EventTable_Clean");
+        excludeList.add("P1_Event");
+        excludeList.add("P1_Target");
+        excludeList.add("P1_TargetTraining");
+        excludeList.add("PeriodID");
+        excludeList.add("CustomerID");
+        excludeList.add("AwardYear");
+        excludeList.add("FundingFiscalQuarter");
+        excludeList.add("FundingFiscalYear");
+        excludeList.add("BusinessAssets");
+        excludeList.add("BusinessEntityType");
+        excludeList.add("BusinessIndustrySector");
+        excludeList.add("RetirementAssetsYOY");
+        excludeList.add("RetirementAssetsEOY");
+        excludeList.add("TotalParticipantsSOY");
+        excludeList.add("BusinessType");
+        excludeList.add("LeadID");
+        excludeList.add("Company");
+        excludeList.add("Domain");
+        excludeList.add("Email");
+        excludeList.add("LeadSource");
+        return excludeList;
     }
 }
