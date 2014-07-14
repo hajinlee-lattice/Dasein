@@ -25,7 +25,7 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
     @Autowired
     private Configuration yarnConfiguration;
 
-    private static final String DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS = "/DLRestService/GetQueryMetaDataColumns";
+    private static final String DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS = "/GetQueryMetaDataColumns";
 
     // Make this settable for easier testing
     private String queryMetadataUrlSuffix = DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS;
