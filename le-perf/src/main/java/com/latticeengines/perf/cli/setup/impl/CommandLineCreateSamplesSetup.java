@@ -21,10 +21,12 @@ public class CommandLineCreateSamplesSetup extends CommandLineSetup<CreateSample
 
     public void setupOptions(String[] args) throws ParseException {
         Options ops = new Options();
-        Option customer = new CommandLineOption("c", "customer", true, true, "Number OF Customers sending requests");
-        Option table = new CommandLineOption("t", "table", true, true, "Table Name");
-        Option trainingPercentage = new CommandLineOption("tp", "trainingpercentage", true, true, "Training Percentage");
-        Option numOfSamples = new CommandLineOption("N", "samplesnumber", true, true, "Number of Samples to create");
+        Option customer = new CommandLineOption(CUSTOMER_OPT, CUSTOMER_LONGOPT, true, true, CUSTOMER_DEF);
+        Option table = new CommandLineOption(TABLE_OPT, TABLE_LONGOPT, true, true, TABLE_DEF);
+        Option trainingPercentage = new CommandLineOption(TRAINING_PERCENTAGE_OPT, TRAINING_PERCENTAGE_LONGOPT, true,
+                true, TRAINING_PERCENTAGE_DEF);
+        Option numOfSamples = new CommandLineOption(NUMOFSAMPLES_OPT, NUMOFSAMPLES_LONGOPT, true, true,
+                NUMOFSAMPLES_DEF);
         ops.addOption(customer).addOption(table).addOption(trainingPercentage).addOption(numOfSamples);
         cl = clp.parse(ops, args);
     }
@@ -41,9 +43,9 @@ public class CommandLineCreateSamplesSetup extends CommandLineSetup<CreateSample
     public void setConfiguration(CreateSamples cs) throws Exception {
         SamplingConfiguration config = new SamplingConfiguration();
 
-        String table = cl.getOptionValue("t");
-        String trainingPercentage = cl.getOptionValue("tp");
-        String numOfSamples = cl.getOptionValue("N");
+        String table = cl.getOptionValue(TABLE_OPT);
+        String trainingPercentage = cl.getOptionValue(TRAINING_PERCENTAGE_OPT);
+        String numOfSamples = cl.getOptionValue(NUMOFSAMPLES_OPT);
 
         config.setCustomer(customer);
         config.setTable(table);

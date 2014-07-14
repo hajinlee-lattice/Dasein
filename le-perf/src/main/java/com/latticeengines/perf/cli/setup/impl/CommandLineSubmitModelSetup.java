@@ -31,15 +31,16 @@ public class CommandLineSubmitModelSetup extends CommandLineSetup<SubmitModel> {
 
     public void setupOptions(String[] args) throws ParseException {
         Options ops = new Options();
-        Option customer = new CommandLineOption("c", "customer", true, true, "Number OF Customers sending requests");
-        Option table = new CommandLineOption("t", "table", true, true, "Table Name");
-        Option keyCol = new CommandLineOption("kc", "keycolumn", true, true, "Key Column Name");
-        Option target = new CommandLineOption("T", "target", true, true, "Target Column Name");
-        Option metadataTable = new CommandLineOption("mt", "metadatatable", true, false, "Metadata Table Name");
+        Option customer = new CommandLineOption(CUSTOMER_OPT, CUSTOMER_LONGOPT, true, true, CUSTOMER_DEF);
+        Option table = new CommandLineOption(TABLE_OPT, TABLE_LONGOPT, true, true, TABLE_DEF);
+        Option keyCol = new CommandLineOption(KEYCOLUMN_OPT, KEYCOLUMN_LONGOPT, true, true, KEYCOLUMN_DEF);
+        Option target = new CommandLineOption(TARGET_OPT, TARGET_LONGOPT, true, true, TARGET_DEF);
+        Option metadataTable = new CommandLineOption(METADATA_TABLE_OPT, METADATA_TABLE_LONGOPT, true, false,
+                METADATA_TABLE_DEF);
 
-        Option algorithmProps = new CommandLineOption("alg", "algorithmproperties", true, true,
-                "Algorithm Properties(Algorithm Name, virtual cores, memory, priority)");
-        algorithmProps.setValueSeparator(DELIMETER);
+        Option algorithmProps = new CommandLineOption(ALGORITHM_PROP_OPT, ALGORITHM_PROP_LONGOPT, true, true,
+                ALGORITHM_PROP_DEF);
+        algorithmProps.setValueSeparator(LIST_DELIMETER);
         algorithmProps.setArgs(Integer.MAX_VALUE);
 
         ops.addOption(customer).addOption(table).addOption(keyCol).addOption(target).addOption(metadataTable) //
@@ -61,32 +62,32 @@ public class CommandLineSubmitModelSetup extends CommandLineSetup<SubmitModel> {
         Model model = new Model();
         ModelDefinition modelDef = new ModelDefinition();
 
-        String table = cl.getOptionValue("t");
-        String targets = cl.getOptionValue("T");
-        String keyColumns = cl.getOptionValue("kc");
-        String metadataTable = cl.getOptionValue("mt");
+        String table = cl.getOptionValue(TABLE_OPT);
+        String targets = cl.getOptionValue(TARGET_OPT);
+        String keyColumns = cl.getOptionValue(KEYCOLUMN_OPT);
+        String metadataTable = cl.getOptionValue(METADATA_TABLE_OPT);
         modelDef.setName("Model Definition");
 
-        String[] algorithmProps = cl.getOptionValues("alg");
+        String[] algorithmProps = cl.getOptionValues(ALGORITHM_PROP_OPT);
         List<Algorithm> algorithms = new ArrayList<Algorithm>();
         for (String aps : algorithmProps) {
-            String[] propList = aps.split(CommandLineProperties.DELIMETER);
+            String[] propList = aps.split(CommandLineProperties.VALUE_DELIMETER);
             String name = propList[0];
             String virtualCores = propList[1];
             String memory = propList[2];
             String priority = propList[3];
-            if (name.equalsIgnoreCase("lr")) {
+            if (name.equalsIgnoreCase(ALGORITHM_NAME_LR)) {
                 LogisticRegressionAlgorithm lra = new LogisticRegressionAlgorithm();
                 configAlgorithm(lra, virtualCores, memory, priority);
                 algorithms.add(lra);
-            } else if (name.equalsIgnoreCase("dt")) {
+            } else if (name.equalsIgnoreCase(ALGORITHM_NAME_DT)) {
                 DecisionTreeAlgorithm dta = new DecisionTreeAlgorithm();
                 configAlgorithm(dta, virtualCores, memory, priority);
                 algorithms.add(dta);
-            } else if (name.equalsIgnoreCase("rf")) {
+            } else if (name.equalsIgnoreCase(ALGORITHM_NAME_RF)) {
                 RandomForestAlgorithm rfa = new RandomForestAlgorithm();
                 configAlgorithm(rfa, virtualCores, memory, priority);
-                rfa.setAlgorithmProperties("criterion=gini n_estimators=100 n_jobs=4 min_samples_split=25 min_samples_leaf=10 bootstrap=True");
+                rfa.setAlgorithmProperties(ALGORITHM_RF_PROP);
                 algorithms.add(rfa);
             }
         }
@@ -97,9 +98,9 @@ public class CommandLineSubmitModelSetup extends CommandLineSetup<SubmitModel> {
         model.setMetadataTable(metadataTable);
         // Currently we only need one target
         model.setCustomer(customer);
-        model.setDataFormat("avro");
-        model.setKeyCols(Arrays.<String> asList(keyColumns.split(CommandLineProperties.DELIMETER)));
-        model.setTargetsList(Arrays.<String> asList(targets.split(CommandLineProperties.DELIMETER)));
+        model.setDataFormat(DATA_FORMAT);
+        model.setKeyCols(Arrays.<String> asList(keyColumns.split(CommandLineProperties.VALUE_DELIMETER)));
+        model.setTargetsList(Arrays.<String> asList(targets.split(CommandLineProperties.VALUE_DELIMETER)));
 
         GetFeatures gf = new GetFeatures();
         gf.setConfiguration(restEndpointHost, model);

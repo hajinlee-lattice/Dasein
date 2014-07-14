@@ -7,6 +7,7 @@ import com.latticeengines.perf.cli.setup.impl.CommandLineCreateSamplesSetup;
 import com.latticeengines.perf.cli.setup.impl.CommandLineLoadDataSetup;
 import com.latticeengines.perf.cli.setup.impl.CommandLineProfileSetup;
 import com.latticeengines.perf.cli.setup.impl.CommandLineSubmitModelSetup;
+import com.latticeengines.perf.job.properties.CommandLineProperties;
 
 public class CommandLineSetupFactory {
 
@@ -16,16 +17,16 @@ public class CommandLineSetupFactory {
         String operation = command[1];
         String restEndpointHost = command[2];
         switch (operation.toLowerCase()) {
-        case "load":
+        case CommandLineProperties.OPERATION_LOAD:
             cls = new CommandLineLoadDataSetup(restEndpointHost);
             break;
-        case "createsamples":
+        case CommandLineProperties.OPERATION_CREATE_SAMPLES:
             cls = new CommandLineCreateSamplesSetup(restEndpointHost);
             break;
-        case "profile":
+        case CommandLineProperties.OPERATION_PROFILE:
             cls = new CommandLineProfileSetup(restEndpointHost);
             break;
-        case "submitmodel":
+        case CommandLineProperties.OPERATION_SUBMIT_MODEL:
             cls = new CommandLineSubmitModelSetup(restEndpointHost);
             break;
         }

@@ -5,11 +5,11 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.ParseException;
 
-public abstract class CommandLineSetup<T> {
+import com.latticeengines.perf.job.properties.CommandLineProperties;
+
+public abstract class CommandLineSetup<T> implements CommandLineProperties {
 
     protected CommandLineParser clp = new GnuParser();
-
-    protected final char DELIMETER = ';';
 
     protected String customer;
 

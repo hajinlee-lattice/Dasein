@@ -17,6 +17,7 @@ import org.apache.commons.cli.ParseException;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.perf.cli.setup.CommandLineSetup;
 import com.latticeengines.perf.cli.setup.factory.CommandLineSetupFactory;
+import com.latticeengines.perf.job.properties.CommandLineProperties;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 import com.latticeengines.perf.job.runnable.impl.GetJobStatus;
 
@@ -48,7 +49,7 @@ public class ModelingResourceCLI {
     }
 
     private static void executeJob(CommandLineSetup cmdlstp) throws Exception {
-        int numOfCustomers = Integer.parseInt(cl.getOptionValue("c"));
+        int numOfCustomers = Integer.parseInt(cl.getOptionValue(CommandLineProperties.CUSTOMER_OPT));
         int customerID = 0;
         while (customerID < numOfCustomers) {
             Class<? extends ModelingResourceJob> cls = cmdlstp.getJobClassType();

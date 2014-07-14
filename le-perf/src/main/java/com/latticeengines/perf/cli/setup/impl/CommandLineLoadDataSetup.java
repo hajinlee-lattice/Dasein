@@ -6,34 +6,33 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
 import com.latticeengines.perf.cli.setup.CommandLineOption;
 import com.latticeengines.perf.cli.setup.CommandLineSetup;
-import com.latticeengines.perf.job.properties.CommandLineProperties;
 import com.latticeengines.perf.job.runnable.impl.LoadData;
 
 public class CommandLineLoadDataSetup extends CommandLineSetup<LoadData> {
 
     private CommandLine cl;
-    
+
     public CommandLineLoadDataSetup(String restEndpointHost) {
         super(restEndpointHost);
     }
 
     public void setupOptions(String[] args) throws ParseException {
         Options ops = new Options();
-        Option host = new CommandLineOption("H", "host", true, true, "Datasource Host Address");
-        Option port = new CommandLineOption("P", "port", true, true, "Datasource port");
-        Option dbtp = new CommandLineOption("dbtp", "databasetype", true, true, "Datasource type");
-        Option db = new CommandLineOption("db", "database", true, true, "Datasource Database Name");
-        Option user = new CommandLineOption("u", "user", true, true, "Datasource User Name");
-        Option passwd = new CommandLineOption("ps", "passowrd", true, true, "Datasource password");
-        Option customer = new CommandLineOption("c", "customer", true, true, "Number OF Customers sending requests");
-        Option table = new CommandLineOption("t", "table", true, true, "Table Name");
-        Option keyCol = new CommandLineOption("kc", "keycolumn", true, true, "Key Column Name");
-        Option metadataTable = new CommandLineOption("mt", "metadatatable", true, false, "Metadata Table Name");
+        Option host = new CommandLineOption(HOST_OPT, HOST_LONGOPT, true, true, HOST_DEF);
+        Option port = new CommandLineOption(PORT_OPT, PORT_LONGOPT, true, true, PORT_DEF);
+        Option dbtp = new CommandLineOption(DATABASE_TYPE_OPT, DATABASE_TYPE_LONGOPT, true, true, DATABASE_TYPE_DEF);
+        Option db = new CommandLineOption(DATABASE_OPT, DATABASE_LONGOPT, true, true, DATABASE_DEF);
+        Option user = new CommandLineOption(USER_OPT, USER_LONGOPT, true, true, USER_DEF);
+        Option passwd = new CommandLineOption(PASSWORD_OPT, PASSWORD_LONGOPT, true, true, PASSWORD_DEF);
+        Option customer = new CommandLineOption(CUSTOMER_OPT, CUSTOMER_LONGOPT, true, true, CUSTOMER_DEF);
+        Option table = new CommandLineOption(TABLE_OPT, TABLE_LONGOPT, true, true, TABLE_DEF);
+        Option keyCol = new CommandLineOption(KEYCOLUMN_OPT, KEYCOLUMN_LONGOPT, true, true, KEYCOLUMN_DEF);
+        Option metadataTable = new CommandLineOption(METADATA_TABLE_OPT, METADATA_TABLE_LONGOPT, true, false,
+                METADATA_TABLE_DEF);
 
         ops.addOption(host).addOption(port).addOption(dbtp).addOption(db).addOption(user).addOption(passwd)//
                 .addOption(customer).addOption(table).addOption(keyCol)//
@@ -55,22 +54,22 @@ public class CommandLineLoadDataSetup extends CommandLineSetup<LoadData> {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
 
-        String host = cl.getOptionValue("H");
-        String port = cl.getOptionValue("P");
-        String dbtp = cl.getOptionValue("dbtp");
-        String db = cl.getOptionValue("db");
-        String user = cl.getOptionValue("u");
-        String passwd = cl.getOptionValue("ps");
-        String table = cl.getOptionValue("t");
-        String keyCol = cl.getOptionValue("kc");
-        String metadataTable = cl.getOptionValue("mt");
+        String host = cl.getOptionValue(HOST_OPT);
+        String port = cl.getOptionValue(PORT_OPT);
+        String dbtp = cl.getOptionValue(DATABASE_TYPE_OPT);
+        String db = cl.getOptionValue(DATABASE_OPT);
+        String user = cl.getOptionValue(USER_OPT);
+        String passwd = cl.getOptionValue(PASSWORD_OPT);
+        String table = cl.getOptionValue(TABLE_OPT);
+        String keyCol = cl.getOptionValue(KEYCOLUMN_OPT);
+        String metadataTable = cl.getOptionValue(METADATA_TABLE_OPT);
 
         builder.host(host).port(Integer.parseInt(port)).db(db).user(user).password(passwd).type(dbtp);
         DbCreds dc = new DbCreds(builder);
         config.setCustomer(customer);
         config.setTable(table);
         config.setMetadataTable(metadataTable);
-        config.setKeyCols(Arrays.<String> asList(keyCol.split(CommandLineProperties.DELIMETER)));
+        config.setKeyCols(Arrays.<String> asList(keyCol.split(VALUE_DELIMETER)));
         config.setCreds(dc);
 
         ld.setConfiguration(restEndpointHost, config);
