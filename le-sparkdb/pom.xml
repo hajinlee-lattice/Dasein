@@ -73,7 +73,7 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-assembly</artifactId>
             <version>${spark.version}</version>
-            <classifier>hadoop2.2.0</classifier>
+            <classifier>hadoop${hadoop.version}</classifier>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
