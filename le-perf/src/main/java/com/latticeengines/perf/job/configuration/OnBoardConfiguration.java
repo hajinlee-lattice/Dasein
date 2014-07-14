@@ -10,6 +10,9 @@ public class OnBoardConfiguration {
     SamplingConfiguration sc;
     DataProfileConfiguration dc;
 
+    public OnBoardConfiguration() {
+    }
+
     public OnBoardConfiguration(LoadConfiguration lc, SamplingConfiguration sc, DataProfileConfiguration dc) {
         this.lc = lc;
         this.sc = sc;
