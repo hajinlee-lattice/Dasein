@@ -30,8 +30,8 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
 
-    public PythonClientCustomization(Configuration configuration) {
-        super(configuration);
+    public PythonClientCustomization(Configuration configuration, String hdfsJobBaseDir) {
+        super(configuration,hdfsJobBaseDir);
     }
 
     @Override

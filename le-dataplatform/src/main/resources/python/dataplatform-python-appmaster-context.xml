@@ -19,7 +19,7 @@
 
     <yarn:localresources>
         <yarn:hdfs path="/app/dataplatform/hadoop-metrics2.properties" />
-        <yarn:hdfs path="/app/dataplatform/$$JOBDIR$$/*" />
+        <yarn:hdfs path="${dataplatform.yarn.job.basedir}/$$JOBDIR$$/*" />
         <yarn:hdfs path="/app/dataplatform/scripts/*" />
         <yarn:hdfs path="/app/dataplatform/scripts/leframework.tar.gz" type="ARCHIVE" />
         <yarn:hdfs path="$$TRAINING$$" />
@@ -46,7 +46,7 @@
         <yarn:container-command>
                         <![CDATA[
                         /usr/local/bin/python2.7
-                        launcher.py $$METADATA$$ runtimeconfig.properties
+                        launcher.py $$METADATA$$ ${dataplatform.yarn.job.runtime.config} 
                         1><LOG_DIR>/PythonContainer.stdout
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>

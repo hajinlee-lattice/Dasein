@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -22,9 +23,12 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
     private static final Log log = LogFactory.getLog(DefaultYarnClientCustomization.class);
 
     protected Configuration configuration;
+    
+    private String hdfsJobBaseDir;
 
-    public DefaultYarnClientCustomization(Configuration configuration) {
+    public DefaultYarnClientCustomization(Configuration configuration, String hdfsJobBaseDir) {
         this.configuration = configuration;
+        this.hdfsJobBaseDir = hdfsJobBaseDir;
     }
 
     @Override
@@ -34,7 +38,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
     }
 
     protected String getJobDir(Properties containerProperties) {
-        return "/app/dataplatform/" + containerProperties.getProperty(ContainerProperty.JOBDIR.name());
+        return hdfsJobBaseDir+"/"+containerProperties.getProperty(ContainerProperty.JOBDIR.name());
     }
 
     @Override
@@ -118,7 +122,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
         String propStr = containerProperties.toString();
 
         return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
-                //"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
+                // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
                 // //
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //

@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.yarn.client.CommandYarnClient;
@@ -42,8 +43,12 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
 
     @Autowired
     private JobNameService jobNameService;
-
-    private static final String RUNTIME_CONFIG = "runtimeconfig.properties";
+  
+    @Value("${dataplatform.yarn.job.basedir}")
+    private String hdfsJobBaseDir;
+    
+    @Value("${dataplatform.yarn.job.runtime.config}")
+    private String runtimeConfig;
 
     @Override
     public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties,
@@ -55,7 +60,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         }
         String dir = UUID.randomUUID().toString();
         try {
-            HdfsUtils.mkdir(yarnConfiguration, "/app/dataplatform/" + dir);
+            HdfsUtils.mkdir(yarnConfiguration, hdfsJobBaseDir+"/"+dir);
             new File("./" + dir).mkdir();
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00000, e, new String[] { dir });
@@ -64,7 +69,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         customization.beforeCreateLocalLauncherContextFile(containerProperties);
         String fileName = createContainerLauncherContextFile(customization, appMasterProperties, containerProperties);
         containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
-        containerProperties.put(ContainerProperty.RUNTIME_CONFIG.name(), RUNTIME_CONFIG);
+        containerProperties.put(ContainerProperty.RUNTIME_CONFIG.name(), runtimeConfig);
         containerProperties.setProperty(AppMasterProperty.QUEUE.name(),
                 appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()));
         containerProperties.setProperty(AppMasterProperty.CUSTOMER.name(),

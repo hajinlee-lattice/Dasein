@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -20,33 +19,41 @@ public class ProgressMonitor {
 
     private final static Log log = LogFactory.getLog(ProgressMonitor.class);
 
+    private static final int MAX_ATTEMPT = 5;
+
     private ServerSocket listener;
 
     private float progress = 0;
-
+    
     private ContainerAllocator allocator;
 
     private ExecutorService executor;
 
     public ProgressMonitor(ContainerAllocator allocator) {
-        if (allocator == null) {
-            log.error("Container Allocator is null");
-        }
         this.allocator = allocator;
-
-        while (true) {
+        int attempt = 1;
+        while (attempt <= MAX_ATTEMPT) {
             try {
                 listener = new ServerSocket(0);
                 break;
             } catch (IOException e) {
-                log.warn("Can't find open port due to: " + ExceptionUtils.getStackTrace(e));
+                log.warn("Couldn't find open port at " + attempt + " attempt due to: "
+                        + ExceptionUtils.getStackTrace(e));
+                attempt++;
             }
+        }
+        if (listener == null) {
+            log.error("Couldn't find open port after " + MAX_ATTEMPT + "attempts, aborting progress monitor");
         }
 
         executor = Executors.newSingleThreadScheduledExecutor();
     }
 
     public void start() {
+        if (listener == null) {
+            return;
+        }
+
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -62,8 +69,9 @@ public class ProgressMonitor {
 
                         float progress = Float.parseFloat(update);
                         setProgress(progress);
-                        log.info("Setting application progress to: " + progress);
-
+                        if (log.isDebugEnabled()) {
+                            log.debug("Setting application progress to: " + progress);
+                        }
                         connectionSocket.close();
                     } catch (IOException e) {
                         log.error("Can't recieve progress status due to: " + ExceptionUtils.getStackTrace(e));
@@ -75,26 +83,24 @@ public class ProgressMonitor {
     }
 
     public void stop() {
+        if (listener == null) {
+            return;
+        }
+
         log.info("Shutting down progress monitor");
         executor.shutdownNow();
-        try {
-            executor.awaitTermination(500L, TimeUnit.MILLISECONDS);
-            if (!executor.isTerminated()) {
-                log.warn("Progress monitor thread is not shut down properly");
-            }
-        } catch (InterruptedException e) {
-            log.error("Can't shutdown progress monitor thread due to: " + ExceptionUtils.getStackTrace(e));
-        }
+       
         // Shut down socket
         try {
             listener.close();
         } catch (IOException e) {
-            log.error("Can't close progress monitor socket due to: " + ExceptionUtils.getStackTrace(e));
+            log.error("Couldn't close progress monitor socket due to: " + ExceptionUtils.getStackTrace(e));
         }
     }
 
     private void setProgress(float progress) {
         this.progress = progress;
+        // Allocator reports progress asynchronously to RM through heart beat
         allocator.setProgress(progress);
     }
 
