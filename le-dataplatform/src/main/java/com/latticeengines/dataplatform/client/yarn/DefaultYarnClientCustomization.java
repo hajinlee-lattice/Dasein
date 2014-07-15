@@ -24,7 +24,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 
     protected Configuration configuration;
     
-    private String hdfsJobBaseDir;
+    protected String hdfsJobBaseDir;
 
     public DefaultYarnClientCustomization(Configuration configuration, String hdfsJobBaseDir) {
         this.configuration = configuration;

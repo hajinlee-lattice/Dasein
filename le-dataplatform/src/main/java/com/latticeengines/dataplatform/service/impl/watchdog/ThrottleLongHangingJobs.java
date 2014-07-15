@@ -2,26 +2,40 @@ package com.latticeengines.dataplatform.service.impl.watchdog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
+import com.latticeengines.domain.exposed.dataplatform.Job;
 
 @Component("throttleLongHangingJobs")
 public class ThrottleLongHangingJobs extends WatchdogPlugin {
     private static final Log log = LogFactory.getLog(ThrottleLongHangingJobs.class);
 
+    @Autowired
+    private Configuration yarnConfiguration;
+    
     @Value("${dataplatform.throttle.threshold:600000}")
-    public long throttleThreshold;
+    private long throttleThreshold;
 
+    @Value("${dataplatform.yarn.job.basedir}")
+    private String hdfsJobBaseDir;
+    
     private HashMap<String, AppStatus> appRecords = new HashMap<String, AppStatus>();
 
     public ThrottleLongHangingJobs() {
@@ -95,15 +109,31 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
         if (appsToKill.isEmpty()) {
             return;
         }
+        
         log.info("Throttling " + appsToKill.size() + " applications");
+        Set<String> appsKilled = new HashSet<String>();
         for (String appId : appsToKill) {
             try {
                 jobService.killJob(YarnUtils.getApplicationIdFromString(appId));
+                appsKilled.add(appId);
                 appRecords.remove(appId);
             } catch (Exception e) {
-                log.warn("Cannot kill job " + appId, e);
+                log.warn("Cannot kill job with id : " + appId, e);
             }
         }
+        
+        // clean up job directories
+        Set<Job> jobsKilled = jobEntityMgr.findAllByObjectIds(appsKilled);
+        for (Job job : jobsKilled) {
+            String dir = hdfsJobBaseDir + "/" + job.getContainerPropertiesObject().get(ContainerProperty.JOBDIR.name());
+            try {
+                HdfsUtils.rmdir(yarnConfiguration, dir);
+            } catch (Exception e) {
+                log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
+            }
+        }
+    
+        
     }
 
     private class AppStatus {

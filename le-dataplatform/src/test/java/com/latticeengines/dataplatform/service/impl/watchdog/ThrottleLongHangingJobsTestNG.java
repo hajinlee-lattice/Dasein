@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
+import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
@@ -42,6 +43,9 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
     
     @Autowired
     private JobService jobService;
+    
+    @Autowired
+    private JobEntityMgr jobEntityMgr;
 
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
@@ -86,6 +90,7 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         ReflectionTestUtils.setField(throttleLongHangingJobs, "throttleThreshold", 10000L);
         throttleLongHangingJobs.setJobService(jobService);
         throttleLongHangingJobs.setYarnService(yarnService);
+        throttleLongHangingJobs.setJobEntityMgr(jobEntityMgr);
         // Runs every 15 seconds
         this.startQuartzJob(new Runnable() {
             
