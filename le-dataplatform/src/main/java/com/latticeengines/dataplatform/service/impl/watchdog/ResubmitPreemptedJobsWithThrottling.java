@@ -5,14 +5,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
@@ -21,6 +27,12 @@ import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     private static final Log log = LogFactory.getLog(ResubmitPreemptedJobsWithThrottling.class);
 
+    @Autowired
+    private Configuration yarnConfiguration;
+    
+    @Value("${dataplatform.yarn.job.basedir}")
+    private String hdfsJobBaseDir;
+    
     public ResubmitPreemptedJobsWithThrottling() {
         register(this);
     }
@@ -86,17 +98,31 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
         for (AppInfo appInfo : appInfos) {
             runningJobIds.add(appInfo.getAppId());
         }
+        
+        Set<String> appsKilled = new HashSet<String>();
         if (config != null && config.isEnabled() && config.isImmediate()) {
             for (Job job : jobs) {
                 String jobId = job.getId();
                 if (runningJobIds.contains(jobId)) {
-                    log.info("Killing job " + job.getId());
+                    log.info("Killing job " + jobId);
                     try {
                         jobService.killJob(job.getAppId());
+                        appsKilled.add(jobId);
                     } catch (Exception e) {
                         log.warn("Cannot kill job " + jobId, e);
                     }
                 }
+            }
+        }
+        
+        // clean up job directories
+        Set<Job> jobsKilled = jobEntityMgr.findAllByObjectIds(appsKilled);
+        for (Job job : jobsKilled) {
+            String dir = hdfsJobBaseDir + "/" + job.getContainerPropertiesObject().get(ContainerProperty.JOBDIR.name());
+            try {
+                HdfsUtils.rmdir(yarnConfiguration, dir);
+            } catch (Exception e) {
+                log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
             }
         }
     }
