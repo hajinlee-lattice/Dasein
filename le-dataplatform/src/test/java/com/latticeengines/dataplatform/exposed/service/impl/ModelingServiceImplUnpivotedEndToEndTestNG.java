@@ -26,9 +26,9 @@ import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelCommandParameters;
+import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelStepRetrieveMetadataProcessorImpl;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
@@ -70,7 +70,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     private ModelEntityMgr modelEntityMgr;
     
     @Autowired
-    private ModelStepProcessor modelStepRetrieveMetadataProcessor;
+    private ModelStepRetrieveMetadataProcessorImpl modelStepRetrieveMetadataProcessor;
 
     private Model model = null;
 
@@ -172,7 +172,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, "Q_EventTable_Nutanix"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_METADATA, "EventMetadata"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "https://visidb.lattice-engines.com/DLRestService"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://httpbin.org/post"));
 
         return command;
     }
@@ -181,6 +181,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     public void retrieveMetadataAndWriteToHdfs() throws Exception {
         ModelCommand command = createModelCommandWithCommandParameters();
         List<ModelCommandParameter> commandParameters = command.getCommandParameters();
+        modelStepRetrieveMetadataProcessor.setQueryMetadataUrlSuffix("");
         modelStepRetrieveMetadataProcessor.executeStep(command, new ModelCommandParameters(commandParameters));
     }
 
