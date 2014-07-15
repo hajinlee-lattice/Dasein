@@ -13,6 +13,7 @@ import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.am.ContainerLauncherInterceptor;
 import org.springframework.yarn.am.StaticEventingAppmaster;
 import org.springframework.yarn.am.container.AbstractLauncher;
@@ -46,6 +47,9 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
     private String priority;
 
     private String customer;
+    
+    @Value("${dataplatform.yarn.job.basedir}")
+    private String hdfsJobBaseDir;
 
     @Override
     protected void onInit() throws Exception {
@@ -200,7 +204,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 
     private void setRuntimeConfig(Properties parameters) {
         // Sets runtime host and port needed by python
-        String configPath = "/app/dataplatform/" + parameters.getProperty(ContainerProperty.JOBDIR.name()) + "/"
+        String configPath = hdfsJobBaseDir + "/" + parameters.getProperty(ContainerProperty.JOBDIR.name()) + "/"
                 + parameters.getProperty(ContainerProperty.RUNTIME_CONFIG.name());
         RuntimeConfig runtimeConfig = new RuntimeConfig(configPath, yarnConfiguration);
         runtimeConfig.addProperties("host", monitor.getHost());
@@ -210,8 +214,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
     }
 
     private void cleanupJobDir() {
-
-        String dir = "/app/dataplatform/" + getParameters().getProperty(ContainerProperty.JOBDIR.name());
+        String dir = hdfsJobBaseDir + "/" + getParameters().getProperty(ContainerProperty.JOBDIR.name());
         try {
             HdfsUtils.rmdir(yarnConfiguration, dir);
         } catch (Exception e) {
