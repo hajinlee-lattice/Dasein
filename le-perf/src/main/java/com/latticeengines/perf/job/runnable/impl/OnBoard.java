@@ -1,9 +1,6 @@
 package com.latticeengines.perf.job.runnable.impl;
 
 import java.util.List;
-
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-
 import com.latticeengines.perf.job.configuration.OnBoardConfiguration;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 
@@ -34,28 +31,11 @@ public class OnBoard extends ModelingResourceJob<OnBoardConfiguration, List<Stri
 
     public List<String> onBoard() throws Exception {
         List<String> appIds = ld.executeJob();
-        checkStatus(restEndpointHost, appIds);
+        GetJobStatus.checkStatus(restEndpointHost, appIds);
         appIds = cs.executeJob();
-        checkStatus(restEndpointHost, appIds);
+        GetJobStatus.checkStatus(restEndpointHost, appIds);
         appIds = pf.executeJob();
-        checkStatus(restEndpointHost, appIds);
+        GetJobStatus.checkStatus(restEndpointHost, appIds);
         return appIds;
-    }
-
-    public boolean checkStatus(String restEndpointHost, List<String> appIds) throws Exception {
-        while (appIds.size() > 0) {
-            for (String appId : appIds) {
-                GetJobStatus gjs = new GetJobStatus();
-                gjs.setConfiguration(restEndpointHost, appId);
-                FinalApplicationStatus state = gjs.getJobStatus().getState();
-                if (state.equals(FinalApplicationStatus.SUCCEEDED)) {
-                    appIds.remove(appId);
-                } else if (!state.equals(FinalApplicationStatus.UNDEFINED)) {
-                    return false;
-                }
-            }
-            Thread.sleep(10000L);
-        }
-        return true;
     }
 }

@@ -1,4 +1,4 @@
-package com.latticeengines.perf.exposed.test;
+package com.latticeengines.perf.exposed.test.unit;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,6 +20,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.perf.exposed.metric.sink.SocketSink;
+import com.latticeengines.perf.exposed.test.PerfFunctionalTestBase;
 
 public class PerfFunctionalTestBaseUnitTestNG {
     

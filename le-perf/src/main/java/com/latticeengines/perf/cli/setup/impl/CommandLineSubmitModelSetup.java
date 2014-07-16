@@ -7,7 +7,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
@@ -18,7 +17,6 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 import com.latticeengines.perf.cli.setup.CommandLineOption;
 import com.latticeengines.perf.cli.setup.CommandLineSetup;
 import com.latticeengines.perf.job.properties.CommandLineProperties;
-import com.latticeengines.perf.job.runnable.impl.GetFeatures;
 import com.latticeengines.perf.job.runnable.impl.SubmitModel;
 
 public class CommandLineSubmitModelSetup extends CommandLineSetup<SubmitModel> {
@@ -102,10 +100,6 @@ public class CommandLineSubmitModelSetup extends CommandLineSetup<SubmitModel> {
         model.setKeyCols(Arrays.<String> asList(keyColumns.split(CommandLineProperties.VALUE_DELIMETER)));
         model.setTargetsList(Arrays.<String> asList(targets.split(CommandLineProperties.VALUE_DELIMETER)));
 
-        GetFeatures gf = new GetFeatures();
-        gf.setConfiguration(restEndpointHost, model);
-        List<String> featureList = gf.getFeatures();
-        model.setFeaturesList(featureList);
         sm.setConfiguration(restEndpointHost, model);
     }
 

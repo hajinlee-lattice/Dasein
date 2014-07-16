@@ -25,7 +25,7 @@ public class ModelingResourceCLI {
 
     private static CommandLine cl;
     private static ExecutorService executor;
-    private static ConcurrentLinkedQueue<Future<List<String>>> appIdQueue = new ConcurrentLinkedQueue<Future<List<String>>>();
+    private static List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
 
     public static void main(String[] args) throws IOException, ParseException, Exception {
         if (args.length > 0)
@@ -58,18 +58,17 @@ public class ModelingResourceCLI {
             cmdlstp.setCustomer("c" + customerID);
             cmdlstp.setConfiguration(worker);
             Future<List<String>> appIdList = executor.submit(worker);
-            appIdQueue.offer(appIdList);
+            futures.add(appIdList);
             customerID++;
         }
 
         List<String> applicationIds = new ArrayList<String>();
-        System.out.println(appIdQueue.size());
-        while (appIdQueue.size() == numOfCustomers) {
-            for (Future<List<String>> future : appIdQueue) {
-                applicationIds.addAll(future.get());
-            }
-            appIdQueue.clear();
+        System.out.println(futures.size());
+
+        for (Future<List<String>> future : futures) {
+            applicationIds.addAll(future.get());
         }
+
         executor.shutdown();
         Thread.sleep(30000L);
 

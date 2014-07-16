@@ -22,6 +22,67 @@
 		<relativePath>../le-parent</relativePath>
 	</parent>
 
+	<profiles>
+		<profile>
+			<id>load</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>${maven.surefire.version}</version>
+
+						<executions>
+							<execution>
+								<id>unit-test</id>
+								<configuration>
+									<skip>true</skip>
+								</configuration>
+							</execution>
+							<execution>
+								<id>default-test</id>
+								<configuration>
+									<skip>true</skip>
+								</configuration>
+							</execution>
+							<execution>
+								<id>functional-test</id>
+								<configuration>
+									<skip>true</skip>
+								</configuration>
+							</execution>
+							<execution>
+								<id>load-test</id>
+								<goals>
+									<goal>test</goal>
+								</goals>
+								<phase>integration-test</phase>
+								<configuration>
+									<systemPropertyVariables>
+										<dataplatformProp>${DATAPLATFORM_PROP}</dataplatformProp>
+										<apiProp>${API_PROP}</apiProp>
+										<numOfThreads>${THREADS_NUM}</numOfThreads>
+										<numOfCustomers>${CUSTOMERS_NUM}</numOfCustomers>
+										<numOfRuns>${RUNS_NUMBER}</numOfRuns>
+									</systemPropertyVariables>
+									<argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
+									<skip>false</skip>
+									<includes>
+										<include>${load.classes.include}</include>
+									</includes>
+									<groups>${load.groups}</groups>
+									<forkMode>always</forkMode>
+									<additionalClasspathElements>
+										<additionalClasspathElement>${env.HADOOP_HOME}/etc/hadoop</additionalClasspathElement>
+									</additionalClasspathElements>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
