@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -17,6 +18,8 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 import org.springframework.yarn.fs.ResourceLocalizer;
+
+import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 
 public class DefaultYarnClientCustomization implements YarnClientCustomization {
     @SuppressWarnings("unused")
@@ -119,7 +122,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
             throw new IllegalStateException("Container launcher context file " + containerLaunchContextFile
                     + " does not exist.");
         }
-        String propStr = containerProperties.toString();
+        String parameter = setupParameters(containerProperties);
 
         return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
                 // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
@@ -127,7 +130,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
                 "yarnAppmaster", //
-                propStr.substring(1, propStr.length() - 1).replaceAll(",", " "), //
+                 parameter, //
                 "1><LOG_DIR>/Appmaster.stdout", //
                 "2><LOG_DIR>/Appmaster.stderr" });
     }
@@ -142,6 +145,18 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
 
     @Override
     public void finalize(Properties appMasterProperties, Properties containerProperties) {
+    }
+    
+    private String setupParameters(Properties containerProperties) {
+        Properties prop = new Properties();
+        for (Map.Entry<Object, Object> entry : containerProperties.entrySet()) {
+            // Exclude METADATA_CONTENT to avoid nested properties
+            if (!entry.getKey().toString().equals(PythonContainerProperty.METADATA_CONTENTS.name())) {
+                prop.put(entry.getKey(), entry.getValue());
+            }
+        }
+        String propStr = prop.toString();
+        return propStr.substring(1, propStr.length() - 1).replaceAll(",", " ");
     }
 
 }
