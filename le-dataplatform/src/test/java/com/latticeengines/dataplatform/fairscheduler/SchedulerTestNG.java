@@ -137,13 +137,6 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
     }
 
     @Test(groups = "functional.scheduler", enabled = true)
-    public void testBernard() throws Exception {
-        while (true) {
-            Thread.sleep(5000L);
-        }
-    }
-
-    @Test(groups = "functional.scheduler", enabled = true)
     public void testSubmit() throws Exception {
         ModelDefinition modelDef = produceModelDefinition();
         Model model = produceIrisMetadataModel();
