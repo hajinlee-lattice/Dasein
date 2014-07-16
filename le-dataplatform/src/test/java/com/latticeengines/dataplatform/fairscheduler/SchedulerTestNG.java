@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.fairscheduler;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,12 +17,15 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.yarn.client.YarnClient;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
+import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.Classifier;
@@ -49,12 +53,20 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private JobService jobService;
 
+    @Autowired
+    private YarnClient defaultYarnClient;
+
+    @Autowired
+    private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
+
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
     private Classifier classifier4Mins;
 
     @BeforeClass(groups = "functional.scheduler")
     public void setup() throws Exception {
+        // TODO remove this once we rollback all test db changes
+        throttleConfigurationEntityMgr.cleanUpAllConfiguration();
 
         classifier1Min = new Classifier();
         classifier1Min.setName("IrisClassifier");
@@ -122,6 +134,13 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         copyEntries.add(new CopyEntry(train4MinsScriptPath, "/scheduler", false));
 
         doCopy(fs, copyEntries);
+    }
+
+    @Test(groups = "functional.scheduler", enabled = true)
+    public void testBernard() throws Exception {
+        while (true) {
+            Thread.sleep(5000L);
+        }
     }
 
     @Test(groups = "functional.scheduler", enabled = true)
@@ -207,6 +226,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
         }
 
         waitForAllJobsToFinishThenConfirmAllSucceeded(appIds);
+//        assertTrue(countPremptedJobs(appIds) > 0);
     }
 
     @Test(groups = "functional.scheduler", enabled = true)
@@ -262,6 +282,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
             Thread.sleep(5000L);
         }
         waitForAllJobsToFinishThenConfirmAllSucceeded(appIds);
+//        assertTrue(countPremptedJobs(appIds) > 0);
     }
 
     private Job createJob(Classifier classifier, String queue, int priority, String customer) {
@@ -310,8 +331,23 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
             }
         }
 
-//        assertEquals(appIds.size(), successCount);
+        assertEquals(appIds.size(), successCount);
 
         return jobStatus;
     }
+
+    private int countPremptedJobs(List<ApplicationId> appIds) {
+        int total = 0;
+
+        for (ApplicationId applicationId : appIds) {
+            ApplicationReport appReport = defaultYarnClient.getApplicationReport(applicationId);
+            if (YarnUtils.isPrempted(appReport.getDiagnostics())) {
+                total++;
+            }
+        }
+
+        return total;
+    }
+
+
 }
