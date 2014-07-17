@@ -93,8 +93,8 @@ public class AlgorithmBase implements Algorithm {
     }
 
     @Override
-    @JsonProperty("container_properties")       
-    @Column(name = "CONTAINER_PROPERTIES", length = 65535)        
+    @JsonProperty("container_properties")
+    @Column(name = "CONTAINER_PROPERTIES", length = 65535)
     public String getContainerProperties() {
         return containerProperties;
     }
@@ -106,7 +106,7 @@ public class AlgorithmBase implements Algorithm {
     }
 
     @Override
-    @JsonProperty("algorithm_properties")        
+    @JsonProperty("algorithm_properties")
     @Column(name = "ALGORITHM_PROPERTIES", length = 65535)
     public String getAlgorithmProperties() {
         return algorithmProperties;
