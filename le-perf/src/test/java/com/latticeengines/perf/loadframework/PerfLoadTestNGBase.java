@@ -3,17 +3,20 @@ package com.latticeengines.perf.loadframework;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
@@ -53,38 +56,46 @@ public class PerfLoadTestNGBase {
     @Parameters({ "dataplatformProp", "apiProp", "numOfThreads", "numOfCustomers", "numOfRuns" })
     @BeforeClass(groups = "load")
     public void setup(String dataplatformProp, String apiProp, String numOfThreads, String numOfCustomers,
-            String numOfRuns) throws Exception {
+            String numOfRuns) {
         this.numOfThreads = Integer.parseInt(numOfThreads);
-
         this.numOfCustomers = Integer.parseInt(numOfCustomers);
-
         this.numOfRuns = Integer.parseInt(numOfRuns);
-
         executor = Executors.newFixedThreadPool(this.numOfThreads);
 
-        prop = new Properties();
-        // propertyPath =
-        // "../le-dataplatform/conf/env/dev/dataplatform.properties";
-        InputStream inputStream = new FileInputStream(new File(apiProp));
-        if (inputStream == null) {
-            throw new FileNotFoundException("property file '" + apiProp + "' not found in the classpath");
-        }
-
-        prop.load(inputStream);
+        prop = generateProperty(apiProp);
         restEndpointHost = prop.getProperty("api.rest.endpoint.hostport");
 
-        inputStream = new FileInputStream(new File(dataplatformProp));
-        if (inputStream == null) {
-            throw new FileNotFoundException("property file '" + dataplatformProp + "' not found in the classpath");
-        }
-        prop.load(inputStream);
-
+        prop = generateProperty(dataplatformProp);
         customerBaseDir = prop.getProperty("dataplatform.customer.basedir");
         YarnConfiguration yarnConfiguration = createYarnConfiguration(prop);
 
-        fs = FileSystem.get(yarnConfiguration);
-
+        try {
+            fs = FileSystem.get(yarnConfiguration);
+        } catch (IOException e) {
+            log.error(ExceptionUtils.getFullStackTrace(e));
+        }
         modelDef = produceModelDef(0);
+    }
+
+    protected Properties generateProperty(String propertyPath) {
+        Properties prop = new Properties();
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(new File(propertyPath));
+            prop.load(inputStream);
+        } catch (FileNotFoundException e) {
+            log.error("property file '" + propertyPath + "' not found in the classpath");
+            log.error(ExceptionUtils.getFullStackTrace(e));
+        } catch (IOException e) {
+            log.error(ExceptionUtils.getFullStackTrace(e));
+        } finally {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                log.error(ExceptionUtils.getFullStackTrace(e));
+            }
+        }
+        return prop;
     }
 
     protected YarnConfiguration createYarnConfiguration(Properties prop) {
@@ -134,17 +145,27 @@ public class PerfLoadTestNGBase {
         DbCreds.Builder builder = new DbCreds.Builder();
 
         // jdbc:sqlserver://10.41.1.250:1433;databaseName=ledp_dev;
-        String url = prop.getProperty("dataplatform.dao.datasource.url");
-        String str = url.substring(url.indexOf("//") + 2);
-        String[] subStrArr = str.split(":");
-        String host = subStrArr[0];
-        subStrArr = subStrArr[1].split(";");
-        int port = Integer.parseInt(subStrArr[0]);
-        subStrArr = subStrArr[1].split("=");
-        String database = subStrArr[1];
+        // String url = prop.getProperty("dataplatform.dao.datasource.url");
+        // String str = url.substring(url.indexOf("//") + 2);
+        // String[] subStrArr = str.split(":");
+        // String host = subStrArr[0];
+        //
+        // subStrArr = subStrArr[1].split(";");
+        // int port = Integer.parseInt(subStrArr[0]);
+        // subStrArr = subStrArr[1].split("=");
+        // String database = subStrArr[1];
 
-        String user = prop.getProperty("dataplatform.dao.datasource.user");
-        String password = prop.getProperty("dataplatform.dao.datasource.password");
+        // dataplatform.dlorchestration.datasource.host=10.41.1.250
+        // dataplatform.dlorchestration.datasource.port=1433
+        // dataplatform.dlorchestration.datasource.dbname=LeadScoringDB_buildmachine
+
+        String host = prop.getProperty("dataplatform.dlorchestration.datasource.host");
+        int port = Integer.parseInt(prop.getProperty("dataplatform.dlorchestration.datasource.port"));
+        String database = prop.getProperty("dataplatform.dlorchestration.datasource.dbname");
+
+        String user = prop.getProperty("dataplatform.dlorchestration.datasource.user");
+        String password = CipherUtils.decrypt(prop
+                .getProperty("dataplatform.dlorchestration.datasource.password.encrypted"));
         builder.host(host).port(port).db(database).user(user).password(password);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);

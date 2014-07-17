@@ -27,7 +27,7 @@ public abstract class ModelingResourceJob<T, E> implements Callable<E> {
     public abstract E executeJob() throws Exception;
 
     @Override
-    public E call() throws Exception {
+    public E call() {
         try {
             return executeJob();
         } catch (Exception e) {

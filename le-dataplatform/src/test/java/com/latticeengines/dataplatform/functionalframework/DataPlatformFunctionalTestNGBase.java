@@ -361,21 +361,21 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     }
 
     /**
-     * Submits application and wait state. Returned state is <code>NULL</code>
-     * if something failed or final known state after the wait/poll operations.
-     * Array of application states can be used to return immediately from wait
-     * loop if state is matched.
+     * Submits application and wait status. Returned status is <code>NULL</code>
+     * if something failed or final known status after the wait/poll operations.
+     * Array of application statuses can be used to return immediately from wait
+     * loop if status is matched.
      * 
-     * @param applicationStates
-     *            the application states to wait
+     * @param applicationStatuses
+     *            the application statuses to wait
      * @return Application id for submit
      * @throws Exception
      *             if exception occurred
      * @see ApplicationInfo
      */
-    protected ApplicationId submitApplicationAndWaitState(FinalApplicationStatus... applicationStatuses)
+    protected ApplicationId submitApplicationAndWaitStatus(FinalApplicationStatus... applicationStatuses)
             throws Exception {
-        Assert.notEmpty(applicationStatuses, "Need to have at least one state");
+        Assert.notEmpty(applicationStatuses, "Need to have at least one status");
 
         ApplicationId applicationId = submitApplication();
 

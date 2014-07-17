@@ -11,6 +11,8 @@ import com.latticeengines.perf.job.runnable.impl.GetJobStatus;
 import com.latticeengines.perf.job.runnable.impl.OnBoard;
 import com.latticeengines.perf.job.runnable.impl.SubmitModel;
 import com.latticeengines.perf.loadframework.PerfLoadTestNGBase;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNotNull;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
@@ -31,9 +33,11 @@ public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
             }
             List<String> appIds = new ArrayList<String>();
             for (Future<List<String>> future : futures) {
-                appIds.addAll(future.get());
+                List<String> appId = future.get();
+                assertNotNull(appId);
+                appIds.addAll(appId);
             }
-            GetJobStatus.checkStatus(restEndpointHost, appIds);
+            assertTrue(GetJobStatus.checkStatus(restEndpointHost, appIds));
         }
     }
 
@@ -54,34 +58,10 @@ public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
         }
         List<String> appIds = new ArrayList<String>();
         for (Future<List<String>> future : futures) {
-            appIds.addAll(future.get());
+            List<String> appId = future.get();
+            assertNotNull(appId);
+            appIds.addAll(appId);
         }
-        GetJobStatus.checkStatus(restEndpointHost, appIds);
-    }
-
-    @Test(groups = "load", enabled = true, dependsOnMethods = { "noPreemptionSubmit" })
-    public void preemptionSubmit() throws Exception {
-        log.info("               info..............." + this.getClass().getSimpleName() + "submit");
-
-        List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
-        for (int i = 0; i < numOfRuns; i++) {
-            int priority = 1;
-            while (priority >= 0) {
-                modelDef = produceModelDef(priority--);
-                for (int j = 0; j < numOfCustomers; j++) {
-                    String customer = "c" + j;
-                    model = produceAModel(customer);
-                    SubmitModel sm = new SubmitModel();
-                    sm.setConfiguration(restEndpointHost, model);
-                    Future<List<String>> future = executor.submit(sm);
-                    futures.add(future);
-                }
-            }
-        }
-        List<String> appIds = new ArrayList<String>();
-        for (Future<List<String>> future : futures) {
-            appIds.addAll(future.get());
-        }
-        GetJobStatus.checkStatus(restEndpointHost, appIds);
+        assertTrue(GetJobStatus.checkStatus(restEndpointHost, appIds));
     }
 }

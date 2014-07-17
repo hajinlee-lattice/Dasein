@@ -1,23 +1,13 @@
 package com.latticeengines.perf.rest.client;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
-
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.web.client.RestTemplate;
-
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
@@ -92,15 +82,9 @@ public class LedpRestClient {
         return ycs.getProperties();
     }
 
-    public static void main(String[] args) throws JAXBException, IOException {
-        LedpRestClient lrc = new LedpRestClient();
+    public static void main(String[] args) throws Exception {
+        LedpRestClient lrc = new LedpRestClient("localhost:8080");
         // System.out.println(lrc.getYarnConfiguration("localhost:8088").get(1).getName());
-
-        String url = "jdbc:sqlserver://10.41.1.250:1433;databaseName=ledp_dev";
-
-        String str = url.substring(url.indexOf("//") + 2);
-        System.out.println(str.split(":")[0]);
-        System.out.println(str.split(":")[1].split(";")[0]);
-        System.out.println(str.split(":")[1].split(";")[1].split("=")[1]);
+        System.out.println(lrc.getJobStatus("application_1405629346039_0039").getStatus());
     }
 }

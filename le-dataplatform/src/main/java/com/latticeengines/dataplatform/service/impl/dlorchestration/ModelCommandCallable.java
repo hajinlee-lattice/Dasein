@@ -117,12 +117,12 @@ public class ModelCommandCallable implements Callable<Long> {
                 JobStatus jobStatus = jobService.getJobStatus(commandState.getYarnApplicationId());
                 saveModelCommandStateFromJobStatus(commandState, jobStatus);
 
-                if (jobStatus.getState().equals(FinalApplicationStatus.SUCCEEDED)) {
+                if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
                     successCount++;
-                } else if (jobStatus.getState().equals(FinalApplicationStatus.KILLED)
-                        || jobStatus.getState().equals(FinalApplicationStatus.FAILED)) {
+                } else if (jobStatus.getStatus().equals(FinalApplicationStatus.KILLED)
+                        || jobStatus.getStatus().equals(FinalApplicationStatus.FAILED)) {
                     jobFailed = true;
-                } else if (jobStatus.getState().equals(FinalApplicationStatus.UNDEFINED)
+                } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
                         || YarnUtils.isPrempted(jobStatus.getDiagnostics())) {
                     // Job in progress.
                 }
@@ -203,7 +203,7 @@ public class ModelCommandCallable implements Callable<Long> {
     }
 
     private void saveModelCommandStateFromJobStatus(ModelCommandState commandState, JobStatus jobStatus) {
-        commandState.setStatus(jobStatus.getState());
+        commandState.setStatus(jobStatus.getStatus());
         commandState.setProgress(jobStatus.getProgress());
         commandState.setDiagnostics(jobStatus.getDiagnostics());
         commandState.setTrackingUrl(jobStatus.getTrackingUrl());

@@ -77,7 +77,7 @@ public class ModelingResourceCLI {
                 GetJobStatus gjs = new GetJobStatus();
                 gjs.setConfiguration("localhost:8080", appId);
                 JobStatus js = gjs.getJobStatus();
-                System.out.println(js.getState());
+                System.out.println(js.getStatus());
             }
         }
         System.out.println(applicationIds);
