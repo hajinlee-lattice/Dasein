@@ -5,7 +5,7 @@
     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean name="dlorchestrationJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
-        <property name="durability" value="true" /> 
+        <property name="durability" value="true" />
         <property name="jobClass" value="com.latticeengines.dataplatform.service.impl.dlorchestration.DLOrchestrationServiceImpl" />
         <property name="jobDataAsMap">
             <map>
@@ -18,6 +18,7 @@
                 <entry key="modelCommandResultEntityMgr" value-ref="modelCommandResultEntityMgr" />
                 <entry key="modelStepOutputResultsProcessor" value-ref="modelStepOutputResultsProcessor" />
                 <entry key="modelStepFinishProcessor" value-ref="modelStepFinishProcessor" />
+                <entry key="modelStepRetrieveMetadataProcessor" value-ref="modelStepRetrieveMetadataProcessor" />
                 <entry key="waitTime" value="${dataplatform.dlorchestrationjob.wait.time}" />
             </map>
         </property>
