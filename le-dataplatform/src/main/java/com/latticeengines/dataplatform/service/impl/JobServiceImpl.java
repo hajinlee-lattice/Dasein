@@ -77,13 +77,13 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Autowired
     private ModelEntityMgr modelEntityMgr;
-    
+
     @Autowired
-    private ModelDefinitionEntityMgr modelDefinitionEntityMgr;    
-    
+    private ModelDefinitionEntityMgr modelDefinitionEntityMgr;
+
     @Autowired
     private JobEntityMgr jobEntityMgr;
-    
+
     @Autowired
     private MetadataService metadataService;
 
@@ -216,7 +216,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         ApplicationId appId = submitYarnJob(job.getClient(), job.getAppMasterPropertiesObject(), job.getContainerPropertiesObject());
         job.setId(appId.toString());
         Model model = job.getModel();
-                 
+
         ModelDefinition modelDefinition = model.getModelDefinition();
         // find the model def. already setup;  model def is expected to be pre-setup by user
         ModelDefinition predefinedModelDef = modelDefinitionEntityMgr.findByName(modelDefinition.getName());
@@ -227,42 +227,41 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             // TODO:  this should not be needed; since the way how it works is that model def is already created in persistence
             modelDefinitionEntityMgr.create(modelDefinition);
             model.setModelDefinition(modelDefinition);
-        }  
+        }
         // create the model given the associated definition
         modelEntityMgr.createOrUpdate(model);
-        
+
         return appId;
     }
 
-     
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public ApplicationId resubmitPreemptedJob(com.latticeengines.domain.exposed.dataplatform.Job resumbitJob) {
-        if (resumbitJob.getChildJobIdList().size() > 0) {
+    public ApplicationId resubmitPreemptedJob(com.latticeengines.domain.exposed.dataplatform.Job resubmitJob) {
+        if (resubmitJob.getChildJobIdList().size() > 0) {
             if (log.isDebugEnabled()) {
-                log.debug("Did not resubmit preempted job " + resumbitJob.getId() + ". Already resubmitted.");
+                log.debug("Did not resubmit preempted job " + resubmitJob.getId() + ". Already resubmitted.");
             }
             return null;
         }
-        Long parentId = resumbitJob.getPid();
-        String metadata = resumbitJob.getContainerPropertiesObject().getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
-        
-        com.latticeengines.domain.exposed.dataplatform.Job newJob = new com.latticeengines.domain.exposed.dataplatform.Job();        
+        Long parentId = resubmitJob.getPid();
+        String metadata = resubmitJob.getContainerPropertiesObject().getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
+
+        com.latticeengines.domain.exposed.dataplatform.Job newJob = new com.latticeengines.domain.exposed.dataplatform.Job();
         newJob.setParentJobId(parentId);
-        newJob.setModel(resumbitJob.getModel());
-        newJob.setClient(resumbitJob.getClient());
-        newJob.setAppMasterPropertiesObject(resumbitJob.getAppMasterPropertiesObject());
-        newJob.setContainerPropertiesObject(resumbitJob.getContainerPropertiesObject());
+        newJob.setModel(resubmitJob.getModel());
+        newJob.setClient(resubmitJob.getClient());
+        newJob.setAppMasterPropertiesObject(resubmitJob.getAppMasterPropertiesObject());
+        newJob.setContainerPropertiesObject(resubmitJob.getContainerPropertiesObject());
         newJob.getContainerPropertiesObject().setProperty(PythonContainerProperty.METADATA.name(), metadata);
         // submit job to yarn and persist metadata
         ApplicationId appId = submitJob(newJob);
-        log.info("Resubmitted " + parentId + " with " + newJob.getId() + "to queue " + newJob.getAppMasterPropertiesObject().getProperty(AppMasterProperty.QUEUE.name()) + ".");
-        // find the parent job 
-        com.latticeengines.domain.exposed.dataplatform.Job parentJob = new com.latticeengines.domain.exposed.dataplatform.Job();
-        parentJob.setPid(parentId);
-        parentJob = jobEntityMgr.findByKey(parentJob);
-        parentJob.addChildJobId(newJob.getId());
-        jobEntityMgr.update(parentJob);
+        jobEntityMgr.createOrUpdate(newJob);
+        if (log.isInfoEnabled()) {
+            log.info("Resubmitted job pid(" + parentId + ") and received new appId(" + newJob.getId() + ") in queue " + newJob.getAppMasterPropertiesObject().getProperty(AppMasterProperty.QUEUE.name()) + ".");
+        }
+        resubmitJob.addChildJobId(newJob.getId());
+        jobEntityMgr.update(resubmitJob);
         return appId;
     }
 
@@ -315,7 +314,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             }
             appId = getAppIdFromName(jobName);
             if (appId != null) {
-                return appId; 
+                return appId;
             }
             tries++;
         }

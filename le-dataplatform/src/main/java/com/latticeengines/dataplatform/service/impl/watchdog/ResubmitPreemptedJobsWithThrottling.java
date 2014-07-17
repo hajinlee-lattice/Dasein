@@ -1,8 +1,10 @@
 package com.latticeengines.dataplatform.service.impl.watchdog;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -20,7 +22,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
-import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
 @Component("resubmitPreemptedJobsWithThrottling")
@@ -29,10 +30,10 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
 
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
-    
+
     public ResubmitPreemptedJobsWithThrottling() {
         register(this);
     }
@@ -61,45 +62,59 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
                 appIds.add(appId);
             }
         }
-        Set<Job> jobsToResubmit = jobEntityMgr.findAllByObjectIds(appIds); 
+        Set<Job> jobsToResubmit = jobEntityMgr.findAllByObjectIds(appIds);
         for (Job job : jobsToResubmit) {
             jobService.resubmitPreemptedJob(job);
         }
     }
 
     private List<Job> getJobsToKill(ThrottleConfiguration config) {
-        List<Job> jobs = new ArrayList<Job>();
+        List<Job> jobsToKill = new ArrayList<Job>();
 
         if (config != null) {
             int cutoffIndex = config.getJobRankCutoff();
 
-            List<Model> models = modelEntityMgr.findAll();
-            for (Model model : models) {
-                List<Job> ownedJobs = model.getJobs();
-                for (int i = 1; i <= ownedJobs.size(); i++) {
-                    if (i >= cutoffIndex) {
-                        log.debug("Finding job [over the rank cutoff]: " + ownedJobs.get(i - 1).getId() + " for model " + model.getId());
-                        jobs.add(ownedJobs.get(i - 1));
-                    }
+            Set<Job> runningJobs = jobEntityMgr.findAllByObjectIds(getRunningJobIds());
+            Map<Long, Integer> modelToJobCounter = new HashMap<>();
+
+            for (Job job : runningJobs) {
+                Long modelId = job.getModel().getPid();
+                Integer jobCounter = modelToJobCounter.get(modelId);
+                if (jobCounter == null) {
+                    jobCounter = 0;
                 }
-
+                jobCounter += 1;
+                modelToJobCounter.put(modelId, jobCounter);
+                if (jobCounter >= cutoffIndex) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Finding job [over the rank cutoff]: " + job.getId() + " for model " + modelId);
+                    }
+                    jobsToKill.add(job);
+                }
             }
-
         }
-        return jobs;
+
+        return jobsToKill;
+    }
+
+    private Set<String> getRunningJobIds() {
+        AppsInfo appsInfo = yarnService.getApplications("states=RUNNING");
+        ArrayList<AppInfo> appInfos = appsInfo.getApps();
+        Set<String> runningJobIds = new HashSet<String>();
+
+        for (AppInfo appInfo : appInfos) {
+            runningJobIds.add(appInfo.getAppId());
+        }
+
+        return runningJobIds;
     }
 
     // kill jobs specified
     private void throttle(ThrottleConfiguration config, List<Job> jobs) {
-        AppsInfo appsInfo = yarnService.getApplications("states=RUNNING");
-        ArrayList<AppInfo> appInfos = appsInfo.getApps();
-        Set<String> runningJobIds = new HashSet<String>();
-        
-        for (AppInfo appInfo : appInfos) {
-            runningJobIds.add(appInfo.getAppId());
-        }
-        
+        Set<String> runningJobIds = getRunningJobIds();
+
         Set<String> appsKilled = new HashSet<String>();
+
         if (config != null && config.isEnabled() && config.isImmediate()) {
             for (Job job : jobs) {
                 String jobId = job.getId();
@@ -114,7 +129,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
                 }
             }
         }
-        
+
         // clean up job directories
         Set<Job> jobsKilled = jobEntityMgr.findAllByObjectIds(appsKilled);
         for (Job job : jobsKilled) {

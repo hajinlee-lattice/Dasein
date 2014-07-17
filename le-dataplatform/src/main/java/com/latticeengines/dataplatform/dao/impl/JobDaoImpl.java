@@ -43,6 +43,7 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
         Session session = sessionFactory.getCurrentSession();
         Criteria criteria = session.createCriteria(Job.class, "listAllByObjectIds");
         criteria.add(Restrictions.in("id", jobIds));
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         List<Job> jobs = criteria.list();
 
         return new HashSet<Job>(jobs);

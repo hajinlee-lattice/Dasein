@@ -324,7 +324,7 @@ public class SchedulerTestNG extends DataPlatformFunctionalTestNGBase {
             }
         }
 
-//        assertEquals(successCount, appIds.size());
+        assertEquals(successCount, appIds.size());
 
         return jobStatus;
     }
