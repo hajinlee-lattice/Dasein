@@ -144,24 +144,19 @@ public class PerfLoadTestNGBase {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
 
-        // jdbc:sqlserver://10.41.1.250:1433;databaseName=ledp_dev;
-        // String url = prop.getProperty("dataplatform.dao.datasource.url");
-        // String str = url.substring(url.indexOf("//") + 2);
-        // String[] subStrArr = str.split(":");
-        // String host = subStrArr[0];
-        //
-        // subStrArr = subStrArr[1].split(";");
-        // int port = Integer.parseInt(subStrArr[0]);
-        // subStrArr = subStrArr[1].split("=");
-        // String database = subStrArr[1];
-
         // dataplatform.dlorchestration.datasource.host=10.41.1.250
         // dataplatform.dlorchestration.datasource.port=1433
         // dataplatform.dlorchestration.datasource.dbname=LeadScoringDB_buildmachine
-
-        String host = prop.getProperty("dataplatform.dlorchestration.datasource.host");
-        int port = Integer.parseInt(prop.getProperty("dataplatform.dlorchestration.datasource.port"));
-        String database = prop.getProperty("dataplatform.dlorchestration.datasource.dbname");
+        
+        // String host =
+        // prop.getProperty("dataplatform.dlorchestration.datasource.host");
+        String host = "10.41.1.250";
+        // int port =
+        // Integer.parseInt(prop.getProperty("dataplatform.dlorchestration.datasource.port"));
+        int port = 1433;
+        // String database =
+        // prop.getProperty("dataplatform.dlorchestration.datasource.dbname");
+        String database = "LeadScoringDB_qe";
 
         String user = prop.getProperty("dataplatform.dlorchestration.datasource.user");
         String password = CipherUtils.decrypt(prop

@@ -2,14 +2,11 @@ package com.latticeengines.perf.exposed.test.load;
 
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
-
 import org.apache.hadoop.fs.Path;
 import org.testng.annotations.Test;
-
 import com.latticeengines.perf.job.configuration.ConstructModelConfiguration;
 import com.latticeengines.perf.job.runnable.impl.ConstructModel;
 import com.latticeengines.perf.job.runnable.impl.GetJobStatus;
@@ -43,7 +40,7 @@ public class ModelingResourceLoadTestNG extends PerfLoadTestNGBase {
             assertTrue(GetJobStatus.checkStatus(restEndpointHost, appIds));
         }
     }
-    
+
     @Test(groups = "load", enabled = true, dependsOnMethods = { "modelingResource" })
     public void preemptionSubmit() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "submit");
