@@ -31,6 +31,7 @@ class SummaryGenerator(State, JsonGenBase):
         
         # Sort predictor by UncertaintyCoefficient
         predictors = sorted(predictors, key = lambda x: x["UncertaintyCoefficient"], reverse = True)
+        self.summary["SchemaVersion"] = 1
         self.summary["Predictors"] = predictors
         self.summary["RocScore"] = self.__getRocScore(zip(self.mediator.scored, self.mediator.target))
         self.summary["SegmentChart"] = self.__getSegmentChart(mediator.probRange, mediator.widthRange, mediator.buckets, mediator.averageProbability)
