@@ -79,7 +79,7 @@ class WebHDFS(object):
         logger.debug("Send redirect to: host: %s, port: %s, path: %s " % (redirect_host, redirect_port, redirect_path))
         fileUploadClient = httplib.HTTPConnection(redirect_host, redirect_port, timeout=600)
         # This requires currently Python 2.6 or higher
-        fileUploadClient.request('PUT', redirect_path, open(source_path, "r").read(), headers={})
+        fileUploadClient.request('PUT', redirect_path, open(source_path, "r").read(), headers={"Content-Type":"application/octet-stream"})
         response = fileUploadClient.getresponse()
         logger.debug("HTTP Response: %d, %s" % (response.status, response.reason))
         httpClient.close()
