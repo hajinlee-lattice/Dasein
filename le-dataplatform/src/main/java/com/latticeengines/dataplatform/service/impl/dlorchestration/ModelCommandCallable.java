@@ -100,12 +100,10 @@ public class ModelCommandCallable implements Callable<Long> {
             modelCommandResultEntityMgr.create(new ModelCommandResult(modelCommand, now, now, ModelCommandStatus.IN_PROGRESS));
 
             modelCommand.setCommandStatus(ModelCommandStatus.IN_PROGRESS);
+            modelCommandEntityMgr.update(modelCommand);
 
             ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
             executeStep(modelStepRetrieveMetadataProcessor, ModelCommandStep.RETRIEVE_METADATA, commandParameters);
-
-            modelCommand.setModelCommandStep(ModelCommandStep.LOAD_DATA);
-            modelCommandEntityMgr.update(modelCommand);
             executeYarnStep(ModelCommandStep.LOAD_DATA, commandParameters);
         } else { // modelCommand IN_PROGRESS
             List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand,
@@ -169,6 +167,8 @@ public class ModelCommandCallable implements Callable<Long> {
     }
 
     private void executeYarnStep(ModelCommandStep step, ModelCommandParameters commandParameters) {
+        modelCommand.setModelCommandStep(step);
+        modelCommandEntityMgr.update(modelCommand);
         modelCommandLogService.logBeginStep(modelCommand, step);
 
         List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep(modelCommand.getDeploymentExternalId(),
@@ -180,12 +180,13 @@ public class ModelCommandCallable implements Callable<Long> {
             commandState.setYarnApplicationId(appId.toString());
             saveModelCommandStateFromJobStatus(commandState, jobStatus);
         }
-        modelCommandEntityMgr.update(modelCommand);
     }
 
     private void executeStep(ModelStepProcessor processor, ModelCommandStep step,
             ModelCommandParameters commandParameters) {
         long start = System.currentTimeMillis();
+        modelCommand.setModelCommandStep(step);
+        modelCommandEntityMgr.update(modelCommand);
         modelCommandLogService.logBeginStep(modelCommand, step);
         ModelCommandState commandState = new ModelCommandState(modelCommand, step);
         commandState.setStatus(FinalApplicationStatus.UNDEFINED);
@@ -197,9 +198,6 @@ public class ModelCommandCallable implements Callable<Long> {
         commandState.setStatus(FinalApplicationStatus.SUCCEEDED);
         modelCommandStateEntityMgr.update(commandState);
         modelCommandLogService.logCompleteStep(modelCommand, step, ModelCommandStatus.SUCCESS);
-
-        modelCommand.setModelCommandStep(step);
-        modelCommandEntityMgr.update(modelCommand);
     }
 
     private void saveModelCommandStateFromJobStatus(ModelCommandState commandState, JobStatus jobStatus) {
