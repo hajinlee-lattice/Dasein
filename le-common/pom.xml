@@ -9,8 +9,8 @@
 
     <properties>
         <component-name>le-common</component-name>
-        <hadoop.version>2.4.0.2.1.2.0-402</hadoop.version>
-        <spring.data.version>2.0.0.RC4-hdp21</spring.data.version>
+        <hadoop.version>2.4.0.2.1.3.0-563</hadoop.version>
+        <spring.data.version>2.0.0.RELEASE-hdp21</spring.data.version>
         <avro.version>1.7.4</avro.version>
         <sqoop.version>1.4.4.2.0.6.1-102</sqoop.version>
     </properties>
