@@ -93,8 +93,8 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(state, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
     private LoadConfiguration getLoadConfig() {
@@ -134,8 +134,8 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
                 new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
-        FinalApplicationStatus state = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-        assertEquals(state, FinalApplicationStatus.SUCCEEDED);
+        FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+        assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
@@ -166,8 +166,8 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         for (String appIdStr : submission.getApplicationIds()) {
             ApplicationId appId = platformTestBase.getApplicationId(appIdStr);
-            FinalApplicationStatus state = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
-            assertEquals(state, FinalApplicationStatus.SUCCEEDED);
+            FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
+            assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         }
     }
 
