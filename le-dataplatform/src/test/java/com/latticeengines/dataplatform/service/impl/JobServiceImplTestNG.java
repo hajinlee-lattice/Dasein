@@ -26,6 +26,7 @@ import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
@@ -51,8 +52,23 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private JobNameService jobNameService;
 
-    @Value("${dataplatform.iris.mysqldatasource.host}")
-    private String dataSourceHost;
+    @Value("${dataplatform.dlorchestration.datasource.host}")
+    protected String dataSourceHost;
+
+    @Value("${dataplatform.dlorchestration.datasource.port}")
+    protected int dataSourcePort;
+
+    @Value("${dataplatform.dlorchestration.datasource.dbname}")
+    protected String dataSourceDB;
+
+    @Value("${dataplatform.dlorchestration.datasource.user}")
+    protected String dataSourceUser;
+
+    @Value("${dataplatform.dlorchestration.datasource.password.encrypted}")
+    protected String dataSourcePasswd;
+
+    @Value("${dataplatform.dlorchestration.datasource.type}")
+    protected String dataSourceType;
 
     private String inputDir = null;
     private String outputDir = null;
@@ -154,7 +170,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.UNDEFINED);
         jobService.killJob(applicationId);
         status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
-        assertEquals(status, FinalApplicationStatus.KILLED);        
+        assertEquals(status, FinalApplicationStatus.KILLED);
     }
 
     @Test(groups = "functional", enabled = true)
@@ -166,12 +182,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
-        assertEquals(status, FinalApplicationStatus.UNDEFINED);        
+        assertEquals(status, FinalApplicationStatus.UNDEFINED);
         jobService.killJob(applicationId);
         status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
         assertNotNull(status);
         assertTrue(status.equals(FinalApplicationStatus.KILLED));
-
 
         ApplicationReport app = jobService.getJobReportById(applicationId);
 
@@ -279,7 +294,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testLoadData() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dataSourceHost).port(3306).db("dataplatformtest").user("root").password("welcome").type("MySQL");
+        builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
+                .password(dataSourcePasswd).type(dataSourceType);
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0", "Dell",
                 Arrays.<String> asList(new String[] { "ID" }));

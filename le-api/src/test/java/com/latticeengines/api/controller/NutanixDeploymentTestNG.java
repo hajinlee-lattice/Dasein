@@ -1,10 +1,8 @@
 package com.latticeengines.api.controller;
 
 import static org.testng.Assert.assertEquals;
-
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -13,11 +11,10 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -35,18 +32,12 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     private static final Log log = LogFactory.getLog(NutanixDeploymentTestNG.class);
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private MetadataService metadataService;
-
-    @Value("${dataplatform.customer.basedir}")
-    private String customerBaseDir;
-
-    @Value("${api.rest.endpoint.hostport}")
-    private String restEndpointHost;
 
     private Model model;
 
@@ -72,7 +63,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         model.setCustomer("Nutanix");
         model.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         model.setDataFormat("avro");
-        
+
         return model;
     }
 
@@ -81,24 +72,25 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         randomForestAlgorithm.setPriority(0);
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
         randomForestAlgorithm.setSampleName("all");
-        randomForestAlgorithm.setAlgorithmProperties("criterion=gini n_estimators=10 n_jobs=4 min_samples_split=25 min_samples_leaf=10 bootstrap=True");
+        randomForestAlgorithm
+                .setAlgorithmProperties("criterion=gini n_estimators=10 n_jobs=4 min_samples_split=25 min_samples_leaf=10 bootstrap=True");
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Logistic regression against all");
         modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { randomForestAlgorithm }));
         return modelDef;
     }
-    
+
     private Pair<String, List<String>> getTargetAndFeatures() {
-        log.info("               info..............."+this.getClass().getSimpleName()+"getTargetAndFeatures");
+        log.info("               info..............." + this.getClass().getSimpleName() + "getTargetAndFeatures");
         StringList features = restTemplate.postForObject("http://" + restEndpointHost + "/rest/features", model,
                 StringList.class, new Object[] {});
         return new Pair<String, List<String>>("P1_Event", features.getElements());
     }
-    
+
     @Test(groups = "deployment", enabled = true)
     public void load() throws Exception {
-        log.info("               info..............."+this.getClass().getSimpleName()+"load");
+        log.info("               info..............." + this.getClass().getSimpleName() + "load");
         LoadConfiguration config = getLoadConfig();
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
@@ -110,7 +102,8 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
     private LoadConfiguration getLoadConfig() {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host("10.41.1.250").port(1433).db("dataplatformtest").user("root").password("welcome");
+        builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
+                .password(dataSourcePasswd).type(dataSourceType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("Nutanix");
@@ -121,8 +114,8 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = true)
     public void createSamples() throws Exception {
-        log.info("               info..............."+this.getClass().getSimpleName()+"createSamples");
-        
+        log.info("               info..............." + this.getClass().getSimpleName() + "createSamples");
+
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
         SamplingElement s0 = new SamplingElement();
@@ -139,10 +132,9 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         samplingConfig.addSamplingElement(all);
         samplingConfig.setCustomer(this.model.getCustomer());
         samplingConfig.setTable(this.model.getTable());
-        
-        AppSubmission submission = restTemplate.postForObject(
-                "http://" + restEndpointHost + "/rest/createSamples", samplingConfig, AppSubmission.class,
-                new Object[] {});
+
+        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/createSamples",
+                samplingConfig, AppSubmission.class, new Object[] {});
         assertEquals(1, submission.getApplicationIds().size());
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
@@ -151,8 +143,8 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
     public void profile() throws Exception {
-        log.info("               info..............."+this.getClass().getSimpleName()+"profile");
-        
+        log.info("               info..............." + this.getClass().getSimpleName() + "profile");
+
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(this.model.getCustomer());
         config.setTable(this.model.getTable());
@@ -165,11 +157,11 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
-    
+
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
     public void submit() throws Exception {
-        log.info("               info..............."+this.getClass().getSimpleName()+"submit");
-        
+        log.info("               info..............." + this.getClass().getSimpleName() + "submit");
+
         Pair<String, List<String>> targetAndFeatures = getTargetAndFeatures();
         this.model.setFeaturesList(targetAndFeatures.getValue());
         this.model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
@@ -187,7 +179,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
     class Pair<K, V> {
         private K key;
         private V value;
-        
+
         public Pair(K key, V value) {
             this.setKey(key);
             this.setValue(value);
@@ -209,6 +201,5 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
             this.value = value;
         }
     }
-
 
 }

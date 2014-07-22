@@ -2,11 +2,9 @@ package com.latticeengines.api.controller;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -15,11 +13,10 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
@@ -44,18 +41,6 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
     
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
-
-    @Value("${dataplatform.customer.basedir}")
-    private String customerBaseDir;
-
-    @Value("${api.rest.endpoint.hostport}")
-    private String restEndpointHost;
-
-    @Value("${api.datasource.host}")
-    private String dataSourceHost;
-
-    @Value("${api.datasource.port}")
-    private int dataSourcePort;
 
     private Model model;
 
@@ -129,10 +114,9 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost) //
                 .port(dataSourcePort) //
-                .db("dataplatformtest") //
-                .user("root") //
-                .password("welcome") //
-                .type("MySQL");
+                .db(dataSourceDB) //
+                .user(dataSourceUser) //
+                .password(dataSourcePasswd).type(dataSourceType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("INTERNAL");

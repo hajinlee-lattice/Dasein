@@ -3,25 +3,22 @@ package com.latticeengines.api.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.ThrottleSubmission;
@@ -45,13 +42,6 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
 
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
-
-    @Value("${dataplatform.customer.basedir}")
-    private String customerBaseDir;
-    
-    // datasource host property for load data
-    @Value("${api.datasource.host}")
-    private String dbHost;
 
     private Model model;
 
@@ -107,7 +97,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         model.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
         model.setDataFormat("avro");
     }
-    
+
     @Test(groups = "functional", enabled = true)
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
@@ -154,14 +144,14 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
     public void submit() throws Exception {
         // reset throttle
         restTemplate.postForObject("http://localhost:8080/rest/resetThrottle", null, ThrottleSubmission.class);
-        // submit 
+        // submit
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         assertEquals(2, submission.getApplicationIds().size());
         String appId = submission.getApplicationIds().get(0);
         validateAppStatus(platformTestBase.getApplicationId(appId));
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = { "submit" })
     public void throttle() throws Exception {
         ThrottleConfiguration config = new ThrottleConfiguration();
@@ -176,12 +166,12 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
     public void load() throws Exception {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dbHost) //
-                .port(3306) //
-                .db("dataplatformtest") //
-                .user("root") //
-                .password("welcome") //
-                .type("MySQL");
+        builder.host(dataSourceHost) //
+                .port(dataSourcePort) //
+                .db(dataSourceDB) //
+                .user(dataSourceUser) //
+                .password(dataSourcePasswd)//
+                .type(dataSourceType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("INTERNAL");

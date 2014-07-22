@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.context.ContextConfiguration;
@@ -22,7 +23,6 @@ import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-api-context.xml" })
@@ -50,6 +50,30 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
 
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
+    @Value("${dataplatform.dlorchestration.datasource.host}")
+    protected String dataSourceHost;
+
+    @Value("${dataplatform.dlorchestration.datasource.port}")
+    protected int dataSourcePort;
+
+    @Value("${dataplatform.dlorchestration.datasource.dbname}")
+    protected String dataSourceDB;
+
+    @Value("${dataplatform.dlorchestration.datasource.user}")
+    protected String dataSourceUser;
+
+    @Value("${dataplatform.dlorchestration.datasource.password.encrypted}")
+    protected String dataSourcePasswd;
+
+    @Value("${dataplatform.dlorchestration.datasource.type}")
+    protected String dataSourceType;
+
+    @Value("${dataplatform.customer.basedir}")
+    protected String customerBaseDir;
+
+    @Value("${api.rest.endpoint.hostport}")
+    protected String restEndpointHost;
+
     protected boolean doYarnClusterSetup() {
         return true;
     }
@@ -63,13 +87,13 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
         platformTestBase.setYarnClient(defaultYarnClient);
         platformTestBase.setJobEntityMgr(jobEntityMgr);
         platformTestBase.setModelEntityMgr(modelEntityMgr);
-        platformTestBase.setThrottleConfigurationEntityMgr(throttleConfigurationEntityMgr);        
+        platformTestBase.setThrottleConfigurationEntityMgr(throttleConfigurationEntityMgr);
         if (!doYarnClusterSetup()) {
             return;
         }
         platformTestBase.setupRunEnvironment();
     }
-    
+
     static class ThrowExceptionResponseErrorHandler implements ResponseErrorHandler {
 
         @Override
@@ -83,7 +107,8 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
         @Override
         public void handleError(ClientHttpResponse response) throws IOException {
             String responseBody = IOUtils.toString(response.getBody());
-            log.info("Error response from rest call: " + response.getStatusCode() + " " + response.getStatusText() + " " + responseBody);                        
+            log.info("Error response from rest call: " + response.getStatusCode() + " " + response.getStatusText()
+                    + " " + responseBody);
 
             throw new ModelingServiceRestException(responseBody);
         }
@@ -103,5 +128,5 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
         public void handleError(ClientHttpResponse response) throws IOException {
         }
     }
-    
+
 }
