@@ -61,9 +61,9 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(new Path("/user/s-analytics/customers/DELL"), true);
-        fs.mkdirs(new Path("/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST"));
-        fs.mkdirs(new Path("/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST/EventMetadata"));
+        fs.delete(new Path(customerBaseDir + "/DELL"), true);
+        fs.mkdirs(new Path(customerBaseDir + "/DELL/data/DELL_EVENT_TABLE_TEST"));
+        fs.mkdirs(new Path(customerBaseDir + "/DELL/data/DELL_EVENT_TABLE_TEST/EventMetadata"));
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
@@ -72,7 +72,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         File[] avroFiles = getAvroFilesForDir(inputDir);
         for (File avroFile : avroFiles) {
             copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(),
-                    "/user/s-analytics/customers/DELL/data/DELL_EVENT_TABLE_TEST", false));
+                    customerBaseDir + "/DELL/data/DELL_EVENT_TABLE_TEST", false));
         }
 
         doCopy(fs, copyEntries);

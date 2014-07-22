@@ -172,6 +172,6 @@ class LauncherTest(TestCase):
         launcher.execute(False)
         learningExecutor = LearningExecutor()
           
-        results = learningExecutor.retrieveMetadata("./results/metadata.avro", False)
+        results = learningExecutor.retrieveMetadata("./results/profile.avro", False)
         self.assertTrue(results is not None)
 

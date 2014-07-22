@@ -28,6 +28,13 @@ class ArgumentParser(object):
         dataSchemaJsonData = open(self.stripPath(self.metadataSchema["schema"])).read()
         logger.debug("JSON data schema %s" % dataSchemaJsonData)
         dataSchema = json.loads(dataSchemaJsonData)
+        self.configMetadata = None
+        try:
+            configMetadataJson = open(self.stripPath(self.metadataSchema["config_metadata"])).read()
+            self.configMetadata = json.loads(configMetadataJson)
+        except:
+            logger.warn("Config_metadata does not exist!")
+        
         self.fields = dataSchema["fields"]
         self.features = set(self.metadataSchema["features"])
         self.targets = set(self.metadataSchema["targets"])
@@ -150,7 +157,7 @@ class ArgumentParser(object):
         schema["keyColIndex"] = parser.getKeyColumns()
         schema["nameToFeatureIndex"] = parser.getNameToFeatureIndex()
         schema["data_profile"] = self.stripPath(self.metadataSchema["data_profile"])
-        schema["config_metadata"] = self.stripPath(self.metadataSchema["config_metadata"])
+        schema["config_metadata"] = parser.getConfigMetadata()
         schema["targets"] = self.targets
         schema["stringColumns"] = self.stringColNames
      
@@ -186,3 +193,6 @@ class ArgumentParser(object):
 
     def getRuntimeProperties(self):
         return self.runtimeProperties
+    
+    def getConfigMetadata(self):
+        return self.configMetadata

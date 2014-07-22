@@ -1,13 +1,15 @@
-from avro import schema, datafile, io
 import codecs
-import re
 import sys
+import json
+import numpy as np
+import math
+from avro import schema, datafile, io
+from sklearn import metrics
+from sklearn.metrics.cluster.supervised import entropy
 
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 from leframework.progressreporter import ProgressReporter
-import numpy as np
-import pandas.core.algorithms as algos
-
+from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -66,7 +68,22 @@ def getSchema():
         "type" : [ "double", "null" ],
         "columnName" : "median",
         "sqlType" : "4"
-      } ],
+      }, {
+        "name" : "count",
+        "type" : [ "int", "null" ],
+        "columnName" : "count",
+        "sqlType" : "4"
+      }, {
+        "name" : "lift",
+        "type" : [ "double", "null" ],
+        "columnName" : "lift",
+        "sqlType" : "4"
+      }, {
+        "name" : "uncertaintyCoefficient",
+        "type" : [ "double", "null" ],
+        "columnName" : "uncertaintyCoefficient",
+        "sqlType" : "4"
+      }  ],
       "tableName" : "EventMetadata"
     }"""
     return schema.parse(metadataSchema)
@@ -77,71 +94,85 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
         progressReporter = ProgressReporter(runtimeProperties["host"], int(runtimeProperties["port"]))
         progressReporter.inStateMachine()
     else:
-        # progressReporter disabled        
+        # progressReporter disabled
         progressReporter = ProgressReporter(None, 0)
-    
-    data = trainingData.append(testData)
 
+    if schema["config_metadata"] is not None and schema["config_metadata"].has_key("Metadata"):
+        colnameBucketMetadata = retrieveColumnBucketMetadata(schema["config_metadata"]["Metadata"])
+    else:
+        colnameBucketMetadata = dict()
+  
+    data = trainingData.append(testData)
     avroSchema = getSchema()
+    bucketDispatcher = BucketerDispatcher()
     recordWriter = io.DatumWriter(avroSchema)
     print(sys.getdefaultencoding())
     dataWriter = datafile.DataFileWriter(codecs.open(modelDir + '/profile.avro', 'wb'),
                                          recordWriter, writers_schema = avroSchema, codec = 'deflate')
-    
+
     colnames = list(data.columns.values)
     stringcols = set(schema["stringColumns"])
     features = set(schema["features"])
+    eventVector = data[list(schema["targets"])[0]]
     index = 1
-    event = set(schema["targets"])
-
     progressReporter.setTotalState(len(colnames))
+
     for colname in colnames:
         progressReporter.nextState()
         if colname not in features:
             continue
         # Categorical column
         if colname in stringcols:
-            uniquevalues = data[colname].unique()
+            # Impute null value
+            data[colname] = data[colname].fillna('__unknown__')
             mode = data[colname].value_counts().idxmax()
-            index = writeCategoricalValuesToAvro(dataWriter, uniquevalues, mode, colname, index)
+            index = writeCategoricalValuesToAvro(dataWriter, data[colname], eventVector, mode, colname, index)
         else:
             mean = data[colname].mean()
             median = data[colname].median()
+            # Impute null value
+            data[colname] = data[colname].fillna(median)
             try:
-                bands = binContinuousColumn(data[colname], 5, event)
-                index = writeBandsToAvro(dataWriter, bands, mean, median, colname, index)
-            except Exception:
+                if colnameBucketMetadata.has_key(colname):
+                    bands = bucketDispatcher.bucketColumn(data[colname], colnameBucketMetadata[colname][0], colnameBucketMetadata[colname][1])
+                else:
+                    # default bucketer
+                    bands = bucketDispatcher.bucketColumn(data[colname])
+                # Consolidates buckets
+                bands = consolidateBins(data[colname], eventVector, bands, 10)
+                index = writeBandsToAvro(dataWriter, data[colname], eventVector, bands, mean, median, colname, index)
+            except Exception as e:
+                print e
                 continue
     dataWriter.close()
     return None
 
-def binContinuousColumn(columnSeries, numbins, eventSeries):
-    populatedRows = columnSeries[columnSeries.notnull()]
-    ranges = np.linspace(0, 1, numbins + 1, endpoint = True)
-    betterBins = algos.quantile(populatedRows, ranges)
-    
-    # combine adjacent buckets of equal value and try to break up the remaining range evenly
-    for i in range(numbins):
-        if betterBins[i] == betterBins[i + 1]:
-            remainingRanges = np.linspace(0, 1, numbins - i)
-            betterBins[i + 1:] = algos.quantile(populatedRows[populatedRows > betterBins[i]], remainingRanges)
+def retrieveColumnBucketMetadata(columnsMetadata):
+    bucketsMetadata = dict()
 
-    betterBins = betterBins[~np.isnan(betterBins)]
-    
-    dictList = []
+    for columnMetadata in columnsMetadata:
+        if not columnMetadata.has_key('DisplayDiscretizationStrategy'):
+            continue
 
-    for i in range(len(betterBins) - 1):
-        # handle edge cases where algos.quantile had to interpolate and there were no entries for that bin
-        dictList.append(str(betterBins[i]) + "," + str(betterBins[i + 1]))
-        
-    return dictList
+        bucketMetadata = json.loads(columnMetadata['DisplayDiscretizationStrategy'])
 
-def writeCategoricalValuesToAvro(dataWriter, uniquevalues, mode, colname, index):
+        if len(bucketMetadata) != 1:
+            raise RuntimeError("Only one bucketing strategy is allowed.")
+
+        for key, value in bucketMetadata.iteritems():
+            bucketsMetadata[columnMetadata['ColumnName']] = [key, value.values()]
+
+    return bucketsMetadata
+
+
+def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, colname, index):
+    uniquevalues = columnVector.unique()
+    avgProbability = sum(eventVector) / float(len(eventVector))
     if len(uniquevalues) > 200:
         return index
     for value in uniquevalues:
-        if value is None:
-            value = '__unknown__'
+        valueVector = map(lambda x: 1 if x == value else 0, columnVector)
+        valueCount = getCountWhereEventIsOne(valueVector, eventVector)
         datum = {}
         datum["id"] = index
         datum["barecolumnname"] = colname
@@ -152,28 +183,73 @@ def writeCategoricalValuesToAvro(dataWriter, uniquevalues, mode, colname, index)
         datum["mean"] = None
         datum["median"] = None
         datum["mode"] = mode
+        datum["count"] = valueCount
+        datum["lift"] = valueCount / (avgProbability * sum(valueVector))
+        datum["uncertaintyCoefficient"] = uncertaintyCoefficientXgivenY(eventVector, valueVector)
         index = index + 1
         dataWriter.append(datum)
-    
+
     return index
 
-def writeBandsToAvro(dataWriter, bands, mean, median, colname, index):
-    for band in bands:
-        regexp = ",|\(|\]| "
-        strs = re.split(regexp, band)
+def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, colname, index):
+    # Set +/- infinity to null
+    bands[0] = None
+    bands[-1] = None
+    avgProbability = sum(eventVector) / float(len(eventVector))
+    for i in range(len(bands) - 1):
+        bandVector = map(lambda x: 1 if x >= bands[i] and x < bands[i + 1] else 0, columnVector)
+        bandCount = getCountWhereEventIsOne(bandVector, eventVector)
         datum = {}
         datum["id"] = index
         datum["barecolumnname"] = colname
         datum["columnvalue"] = None
         datum["Dtype"] = "BND"
-        datum["minV"] = float(strs[0])
-        datum["maxV"] = float(strs[1])
+        datum["minV"] = bands[i]
+        datum["maxV"] = bands[i + 1]
         datum["mean"] = mean
         datum["median"] = median
         datum["mode"] = None
+        datum["count"] = bandCount
+        datum["lift"] = bandCount / (avgProbability * sum(bandVector))
+        datum["uncertaintyCoefficient"] = uncertaintyCoefficientXgivenY(eventVector, bandVector)
         index = index + 1
         dataWriter.append(datum)
-    
+
     return index
 
-    
+def getCountWhereEventIsOne(valueData, eventData):
+    counter = lambda x, y: 1 if x == 1 and y == 1 else 0
+    return sum(map(counter, valueData, eventData))
+
+def uncertaintyCoefficientXgivenY(x, y):
+    '''
+      Given y, what parts of x can we predict.
+      In this case, x should be the event column, while y should be the predictor column-value
+    '''
+    return metrics.mutual_info_score(x, y) / entropy(x)
+
+def logit(x):
+    val = min(max(x, 0.000001), 0.999999)
+    return math.log(val / (1 - val))
+
+def consolidateBins(columnSeries, eventSeries, bucketList, maxBuckets):
+    """
+    Method to consolidate a list of continuous attribute buckets given an attribute column and event column.  Ensures that the bucket count is 
+    less than maxBuckets by removing adjacent ranges that have the smallest delta in their log-odds 
+    """
+    if maxBuckets <= 0:
+        raise ValueError("maxBuckets cannot be less than or equal to zero.")    
+        
+    newBucketList = bucketList
+    while(len(newBucketList) > maxBuckets + 1):
+        getSelector = lambda x, nextX: (columnSeries >= x) & (columnSeries < nextX)
+        conversionRates = {x:logit(float(eventSeries[getSelector(x, nextX)].sum()) / (np.count_nonzero(getSelector(x, nextX)) + 1))
+            for x, nextX in zip(newBucketList, newBucketList[1::])}
+
+        deltaLogOdds = {nextK:abs(conversionRates[k] - conversionRates[nextK]) for k, nextK in zip(conversionRates.keys(), conversionRates.keys()[1::])}
+        
+        minDeltaKey = min(deltaLogOdds, key = lambda x: deltaLogOdds[x])
+ 
+        newBucketList.remove(minDeltaKey)
+    return newBucketList
+        

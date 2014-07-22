@@ -86,7 +86,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
-        fs.delete(new Path("/user/s-analytics/customers/Nutanix"), true);
+        fs.delete(new Path(customerBaseDir + "/Nutanix"), true);
 
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);

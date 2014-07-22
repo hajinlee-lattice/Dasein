@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -25,6 +26,9 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
+    
     private static final String DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS = "/GetQueryMetaDataColumns";
 
     // Make this settable for easier testing
@@ -59,7 +63,7 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     String getHdfsPathForMetadataFile(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
         String customer = modelCommand.getDeploymentExternalId();
-        return "/user/s-analytics/customers/" + customer + "/data/" + modelCommandParameters.getEventTable() + "/"
+        return customerBaseDir + customer + "/data/" + modelCommandParameters.getEventTable() + "/"
                 + modelCommandParameters.getMetadataTable() + "/metadata.avsc";
     }
 

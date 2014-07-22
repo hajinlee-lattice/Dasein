@@ -9,7 +9,7 @@ class AverageProbabilityGenerator(State, JsonGenBase):
     
     def __init__(self):
         State.__init__(self, "AverageProbabilityGenerator")
-        self.logger = logging.getLogger(name='AverageProbabilityGenerator')
+        self.logger = logging.getLogger(name='averageprobabilitygenerator')
     
     @overrides(State)
     def execute(self):

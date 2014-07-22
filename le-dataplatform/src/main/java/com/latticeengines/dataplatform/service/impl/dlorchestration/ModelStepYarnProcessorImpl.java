@@ -78,6 +78,9 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
     @Value("${dataplatform.container.memory}")
     private int memory;
+    
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
 
     @Override
     @SuppressWarnings("incomplete-switch")
@@ -102,7 +105,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     }
 
     private List<ApplicationId> load(String customer, ModelCommandParameters commandParameters) {
-        String deletePath = "/user/s-analytics/customers/" + customer + "/data";
+        String deletePath = customerBaseDir + customer + "/data";
         try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
             if (fs.exists(new Path(deletePath))) {
                 boolean result = fs.delete(new Path(deletePath), true);

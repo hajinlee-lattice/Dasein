@@ -108,6 +108,9 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     @Value("${dataplatform.container.memory}")
     protected int memory;
+    
+    @Value("${dataplatform.customer.basedir}")
+    protected String customerBaseDir;
 
     protected YarnCluster yarnCluster;
 

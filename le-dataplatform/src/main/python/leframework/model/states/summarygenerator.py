@@ -1,8 +1,6 @@
 from collections import OrderedDict
 from datetime import datetime
 import logging
-from sklearn import metrics
-from sklearn.metrics.cluster.supervised import entropy
 import time
 import uuid
 
@@ -45,37 +43,27 @@ class SummaryGenerator(State, JsonGenBase):
     @overrides(JsonGenBase)
     def getJsonProperty(self):
         return self.summary
-    
-    def __getCountWhereEventIsOne(self, predictorData, eventData):
-        counter = lambda x, y: 1 if x == 1 and y == 1 else 0
-        return sum(map(counter, predictorData, eventData))
-    
+
     def generatePredictors(self, colname, metadata, eventData):
         elements = []
 
         attrLevelUncertaintyCoeff = 0
         for record in metadata:
             self.logger.info(record)
-            predictorData = self.__getPredictorVector(colname, record)
             element = OrderedDict()
-            
-            countForBandValue = sum(predictorData)
-            
+                      
             # If a band value is not found, skip that predictor value
-            if countForBandValue == 0:
+            if record["count"] == 0:
                 self.logger.critical("No data found in the test set for this band or value.")
                 continue
             
-            avgProbability = self.mediator.averageProbability
-            countForBandValueAndEventIsOne = self.__getCountWhereEventIsOne(predictorData, eventData)
-            eventProbabilityGivenBin = float(countForBandValueAndEventIsOne)/float(countForBandValue)
-            element["CorrelationSign"] = 1 if eventProbabilityGivenBin > avgProbability else -1
-            element["Count"] = countForBandValue
-            element["Lift"] = eventProbabilityGivenBin/avgProbability
+            element["CorrelationSign"] = 1 if record["lift"] > 1 else -1
+            element["Count"] = record["count"]
+            element["Lift"] = record["lift"]
             if record["Dtype"] == "BND":
                 element["LowerInclusive"] = record["minV"]
             element["Name"] = str(uuid.uuid4())
-            element["UncertaintyCoefficient"] = self.__uncertaintyCoefficientXgivenY(eventData, predictorData)
+            element["UncertaintyCoefficient"] = record["uncertaintyCoefficient"] 
             attrLevelUncertaintyCoeff += element["UncertaintyCoefficient"]
             if record["Dtype"] == "BND":
                 element["UpperExclusive"] = record["maxV"]
@@ -94,33 +82,6 @@ class SummaryGenerator(State, JsonGenBase):
         predictor["Name"] = colname
         predictor["UncertaintyCoefficient"] = attrLevelUncertaintyCoeff
         return predictor
-    
-    def __getPredictorVector(self, colname, record):
-        converter = None
-        try:
-            if record["Dtype"] == "BND":
-                newColName = colname + "_Continuous" if self.mediator.depivoted else colname
-                columnData = self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][newColName]]
-                minV = record["minV"]
-                maxV = record["maxV"]
-                converter = lambda x: 1 if x >= minV and x < maxV else 0
-                return map(converter, columnData)
-            elif self.mediator.depivoted:
-                return self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][colname + "_" + record["columnvalue"]]]
-            else:
-                columnData = self.mediator.data[:, self.mediator.schema["nameToFeatureIndex"][colname]]
-                converter = lambda x: 1 if x == record["hashValue"] else 0
-                return map(converter, columnData)
-        except:
-            return self.mediator.data[:, 1]
-        
-        
-    def __uncertaintyCoefficientXgivenY(self, x, y):
-        '''
-          Given y, what parts of x can we predict.
-          In this case, x should be the event column, while y should be the predictor column-value
-        '''
-        return metrics.mutual_info_score(x, y) / entropy(x) 
 
     def __getSegmentChart(self, probRange, widthRange, buckets, averageProbability):
         # Generate inclusive (min,max) with highest max = null and lowest min = 0
@@ -200,7 +161,7 @@ class SummaryGenerator(State, JsonGenBase):
     def __getConstructionInfo(self):
         constructionTime = OrderedDict()
         # DateTime returns UTC epoch in milliseconds
-        constructionTime["DateTime"] = "/Date(" + str(int(time.time()*1000)) + ")/"
+        constructionTime["DateTime"] = "/Date(" + str(int(time.time() * 1000)) + ")/"
         # OffsetMinutes returns UTC offset in current time zone in minutes
         constructionTime["OffsetMinutes"] = str(int((datetime.today() - datetime.utcnow()).total_seconds()) / 60)
         element = OrderedDict()
