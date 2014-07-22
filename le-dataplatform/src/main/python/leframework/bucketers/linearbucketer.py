@@ -1,26 +1,24 @@
 import logging
 import math
-import numpy as np
+
 from bucketer import Bucketer
 from leframework.codestyle import overrides
+import numpy as np
 
 
 class LinearBucketer(Bucketer):
 
-
     def __init__(self):
         self.logger = logging.getLogger(name = 'linearbucketer')
-    
+
     @overrides(Bucketer)
-    def bucketColumn(self, *args):    
-        
+    def bucketColumn(self, *args):
         return [x for x in self.generateLinearBins(*args)]
-    
-                   
+
     def generateLinearBins(self, columnSeries, minValue, stepSize, minSamples = 0, minFreq = 0, maxPercentile = 1, maxIteration = 1000):
         """
         Generator function that takes a pandas Series and attempts to carve it into linear regions defined by the starting point and 
-        and a step size        
+        and a step size
         
         Yields:
             List of thresholds for the bins
@@ -29,7 +27,7 @@ class LinearBucketer(Bucketer):
             raise ValueError("minValue cannot be less than zero")
                 
         populatedRows = columnSeries[columnSeries.notnull()]
-        minRows = max([1, minSamples, minFreq * columnSeries.count()])      
+        minRows = max([1, minSamples, minFreq * columnSeries.count()])
         remainingCount = populatedRows.count()
         
         yield 0

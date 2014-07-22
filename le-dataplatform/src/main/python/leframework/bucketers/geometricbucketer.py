@@ -1,7 +1,8 @@
 import logging
-import numpy as np
+
 from bucketer import Bucketer
 from leframework.codestyle import overrides
+import numpy as np
 
 
 class GeometricBucketer(Bucketer):
@@ -11,8 +12,7 @@ class GeometricBucketer(Bucketer):
         self.logger = logging.getLogger(name = 'geometricbucketer')
     
     @overrides(Bucketer)
-    def bucketColumn(self, *args):    
-        
+    def bucketColumn(self, *args):
         return [x for x in self.generateGeometricBins(*args)]
             
     def generateGeometricBins(self, columnSeries, minValue, multiplierList, minSamples = 0, minFreq = 0, maxPercentile = 1):
@@ -42,7 +42,7 @@ class GeometricBucketer(Bucketer):
         currentValue = minValue
         lastBinValue = 0
         i = 0    
-        while(currentValue < maxValue):
+        while (currentValue < maxValue):
             possibleBinCount = populatedRows[(populatedRows >= lastBinValue) & (populatedRows < currentValue)].count()
             
             # make sure that this bin won't be below the minimum sample count 

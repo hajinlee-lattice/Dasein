@@ -1,8 +1,10 @@
 import logging
-import numpy as np
-import pandas.core.algorithms as algos
+
 from bucketer import Bucketer
 from leframework.codestyle import overrides
+import numpy as np
+import pandas.core.algorithms as algos
+
 
 class StandardBucketer(Bucketer):
 
@@ -11,8 +13,7 @@ class StandardBucketer(Bucketer):
         self.logger = logging.getLogger(name = 'standardbucketer')
     
     @overrides(Bucketer)
-    def bucketColumn(self, *args):    
-
+    def bucketColumn(self, *args):
         return self.getStandardBins(*args)
     
                    
@@ -43,7 +44,7 @@ class StandardBucketer(Bucketer):
         betterBins[-1] = np.inf
         betterBins = betterBins[~np.isnan(betterBins)]
             
-        binThresholds = zip(betterBins, betterBins[1::])    
+        binThresholds = zip(betterBins, betterBins[1::])
         binCounts = [populatedRows[(populatedRows >= x[0]) & (populatedRows < x[1])].count() for x in binThresholds]
         binData = zip(binThresholds, binCounts)
         
@@ -58,7 +59,7 @@ class StandardBucketer(Bucketer):
                 # if we're the first item in the list then combine with next bin
                 binData[smallestIndex + 1] = ((binData[smallestIndex][0][0], binData[smallestIndex + 1][0][1]), binData[smallestIndex + 1][1] + binData[smallestIndex][1])
                 
-            binData.remove(smallestBin)    
+            binData.remove(smallestBin)
     
         # unpack the thresholds from the bin data
         betterBins = [y[0] for y in [x[0] for x in binData]] + [np.inf]

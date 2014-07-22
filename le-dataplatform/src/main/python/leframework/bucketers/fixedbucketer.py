@@ -1,7 +1,8 @@
 import logging
-import numpy as np
+
 from bucketer import Bucketer
 from leframework.codestyle import overrides
+import numpy as np
 
 
 class FixedBucketer(Bucketer):
@@ -12,7 +13,6 @@ class FixedBucketer(Bucketer):
 
     @overrides(Bucketer)
     def bucketColumn(self, *args):
-
         return [x for x in self.generateFixedBins(*args)]
 
     def generateFixedBins(self, columnSeries, numbins = 10):
