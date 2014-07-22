@@ -105,7 +105,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     }
 
     private List<ApplicationId> load(String customer, ModelCommandParameters commandParameters) {
-        String deletePath = customerBaseDir + customer + "/data";
+        String deletePath = customerBaseDir + "/" + customer + "/data";
         try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
             if (fs.exists(new Path(deletePath))) {
                 boolean result = fs.delete(new Path(deletePath), true);
