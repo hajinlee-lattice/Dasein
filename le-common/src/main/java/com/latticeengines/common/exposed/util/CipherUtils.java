@@ -26,28 +26,16 @@ public class CipherUtils {
     // Required by CBC block-chaining mode
     private static IvParameterSpec ivspec = new IvParameterSpec(new byte[16]);
 
-    public static String encrypt(final String str) {
-        String encrypted = str;
-        try {
-            Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
-            cipher.init(Cipher.ENCRYPT_MODE, strToKey(KEY), ivspec);
-            encrypted = Base64.encodeBase64String(cipher.doFinal(str.getBytes()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return encrypted;
+    public static String encrypt(final String str) throws Exception {
+        Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
+        cipher.init(Cipher.ENCRYPT_MODE, strToKey(KEY), ivspec);
+        return Base64.encodeBase64String(cipher.doFinal(str.getBytes()));
     }
 
-    public static String decrypt(final String str) {
-        String decrypted = str;
-        try {
-            Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
-            cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), ivspec);
-            decrypted = new String(cipher.doFinal(Base64.decodeBase64(str)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return decrypted;
+    public static String decrypt(final String str) throws Exception {
+        Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
+        cipher.init(Cipher.DECRYPT_MODE, strToKey(KEY), ivspec);
+        return new String(cipher.doFinal(Base64.decodeBase64(str)));
     }
 
     /**
@@ -90,9 +78,7 @@ public class CipherUtils {
                 String decrypted = CipherUtils.decrypt(strToDecrypt.trim());
                 System.out.println("String To Decrypt : " + strToDecrypt);
                 System.out.println("Decrypted : " + decrypted);
-            }
-
-            else if (cmd.hasOption("generate")) {
+            } else if (cmd.hasOption("generate")) {
                 String key = generateKey();
                 System.out.println("The generated key is : " + key);
             }

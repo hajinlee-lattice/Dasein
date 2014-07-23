@@ -31,8 +31,12 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
             String valueStr = resolvePlaceholder(keyStr, props,
                     springSystemPropertiesMode);
             // Decrypt credentials
-            if(keyStr.contains(CipherUtils.ENCRYPTED)) {
-                valueStr = CipherUtils.decrypt(valueStr);
+            if (keyStr.contains(CipherUtils.ENCRYPTED)) {           
+                try {
+                    valueStr = CipherUtils.decrypt(valueStr);
+                } catch (Exception e) {
+                    throw new RuntimeException("Decryption failed when parsing properties.", e);
+                }
                 props.put(keyStr, valueStr);
             }
             propertiesMap.put(keyStr, valueStr);
