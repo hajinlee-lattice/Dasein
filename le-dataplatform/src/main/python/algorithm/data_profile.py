@@ -1,13 +1,14 @@
-import codecs
-import sys
-import json
 from avro import schema, datafile, io
+import codecs
+import json
 from sklearn import metrics
 from sklearn.metrics.cluster.supervised import entropy
+import sys
 
+from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 from leframework.progressreporter import ProgressReporter
-from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
+
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -153,6 +154,10 @@ def retrieveColumnBucketMetadata(columnsMetadata):
     for columnMetadata in columnsMetadata:
         if not columnMetadata.has_key('DisplayDiscretizationStrategy'):
             continue
+        
+        if columnMetadata['DisplayDiscretizationStrategy'] is None:
+            continue
+        
 
         bucketMetadata = json.loads(columnMetadata['DisplayDiscretizationStrategy'])
 
