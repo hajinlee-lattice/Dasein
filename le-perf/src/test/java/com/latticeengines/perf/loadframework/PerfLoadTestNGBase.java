@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,6 +17,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
+
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
@@ -140,7 +142,7 @@ public class PerfLoadTestNGBase {
         return modelDef;
     }
 
-    protected LoadConfiguration createLoadConfiguration(String customer) {
+    protected LoadConfiguration createLoadConfiguration(String customer) throws Exception{
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
 
