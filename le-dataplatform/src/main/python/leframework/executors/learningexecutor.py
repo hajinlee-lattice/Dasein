@@ -35,7 +35,7 @@ class LearningExecutor(Executor):
 
     def __init__(self, runtimeProperties = None):
         if runtimeProperties is None:
-            logger.error("No runtime properties available")
+            logger.warn("No runtime properties available")
             self.amHost = None
             self.amPort = 0
         else:

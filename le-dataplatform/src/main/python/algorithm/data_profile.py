@@ -1,8 +1,6 @@
 import codecs
 import sys
 import json
-import numpy as np
-import math
 from avro import schema, datafile, io
 from sklearn import metrics
 from sklearn.metrics.cluster.supervised import entropy
@@ -97,11 +95,6 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
         # progressReporter disabled
         progressReporter = ProgressReporter(None, 0)
 
-    if schema["config_metadata"] is not None and schema["config_metadata"].has_key("Metadata"):
-        colnameBucketMetadata = retrieveColumnBucketMetadata(schema["config_metadata"]["Metadata"])
-    else:
-        colnameBucketMetadata = dict()
-  
     data = trainingData.append(testData)
     avroSchema = getSchema()
     bucketDispatcher = BucketerDispatcher()
@@ -114,6 +107,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     stringcols = set(schema["stringColumns"])
     features = set(schema["features"])
     eventVector = data[list(schema["targets"])[0]]
+    colnameBucketMetadata = retrieveColumnBucketMetadata(schema["config_metadata"])
     index = 1
     progressReporter.setTotalState(len(colnames))
 
@@ -134,12 +128,10 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
             data[colname] = data[colname].fillna(median)
             try:
                 if colnameBucketMetadata.has_key(colname):
-                    bands = bucketDispatcher.bucketColumn(data[colname], colnameBucketMetadata[colname][0], colnameBucketMetadata[colname][1])
+                    bands = bucketDispatcher.bucketColumn(data[colname], eventVector, colnameBucketMetadata[colname][0], colnameBucketMetadata[colname][1])
                 else:
                     # default bucketer
-                    bands = bucketDispatcher.bucketColumn(data[colname])
-                # Consolidates buckets
-                bands = consolidateBins(data[colname], eventVector, bands, 10)
+                    bands = bucketDispatcher.bucketColumn(data[colname], eventVector)
                 index = writeBandsToAvro(dataWriter, data[colname], eventVector, bands, mean, median, colname, index)
             except Exception as e:
                 print e
@@ -148,7 +140,15 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     return None
 
 def retrieveColumnBucketMetadata(columnsMetadata):
+    '''
+    Returns a dictionary of key: columnName, value: [bucketing_type, bucketing_parameters]
+    '''
     bucketsMetadata = dict()
+    if columnsMetadata is None or not columnsMetadata.has_key("Metadata"):
+        return bucketsMetadata
+    else:
+        columnsMetadata = columnsMetadata["Metadata"]
+
 
     for columnMetadata in columnsMetadata:
         if not columnMetadata.has_key('DisplayDiscretizationStrategy'):
@@ -160,7 +160,7 @@ def retrieveColumnBucketMetadata(columnsMetadata):
             raise RuntimeError("Only one bucketing strategy is allowed.")
 
         for key, value in bucketMetadata.iteritems():
-            bucketsMetadata[columnMetadata['ColumnName']] = [key, value.values()]
+            bucketsMetadata[columnMetadata['ColumnName']] = [key, value]
 
     return bucketsMetadata
 
@@ -227,29 +227,3 @@ def uncertaintyCoefficientXgivenY(x, y):
       In this case, x should be the event column, while y should be the predictor column-value
     '''
     return metrics.mutual_info_score(x, y) / entropy(x)
-
-def logit(x):
-    val = min(max(x, 0.000001), 0.999999)
-    return math.log(val / (1 - val))
-
-def consolidateBins(columnSeries, eventSeries, bucketList, maxBuckets):
-    """
-    Method to consolidate a list of continuous attribute buckets given an attribute column and event column.  Ensures that the bucket count is 
-    less than maxBuckets by removing adjacent ranges that have the smallest delta in their log-odds 
-    """
-    if maxBuckets <= 0:
-        raise ValueError("maxBuckets cannot be less than or equal to zero.")    
-        
-    newBucketList = bucketList
-    while(len(newBucketList) > maxBuckets + 1):
-        getSelector = lambda x, nextX: (columnSeries >= x) & (columnSeries < nextX)
-        conversionRates = {x:logit(float(eventSeries[getSelector(x, nextX)].sum()) / (np.count_nonzero(getSelector(x, nextX)) + 1))
-            for x, nextX in zip(newBucketList, newBucketList[1::])}
-
-        deltaLogOdds = {nextK:abs(conversionRates[k] - conversionRates[nextK]) for k, nextK in zip(conversionRates.keys(), conversionRates.keys()[1::])}
-        
-        minDeltaKey = min(deltaLogOdds, key = lambda x: deltaLogOdds[x])
- 
-        newBucketList.remove(minDeltaKey)
-    return newBucketList
-        

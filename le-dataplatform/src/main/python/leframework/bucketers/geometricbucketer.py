@@ -12,10 +12,10 @@ class GeometricBucketer(Bucketer):
         self.logger = logging.getLogger(name = 'geometricbucketer')
     
     @overrides(Bucketer)
-    def bucketColumn(self, *args):
-        return [x for x in self.generateGeometricBins(*args)]
+    def bucketColumn(self, columnSeries, params):
+        return [x for x in self.generateGeometricBins(columnSeries, **params)]
             
-    def generateGeometricBins(self, columnSeries, minValue, multiplierList, minSamples = 0, minFreq = 0, maxPercentile = 1):
+    def generateGeometricBins(self, columnSeries, minValue, multiplierList, minSamples=100, minFreq=0, maxPercentile=1):
         """
         Generator function that takes a pandas Series and attempts to carve it into semi-geometric regions:
             [0, minValue], [minValue, minValue*muliplierList[i % len(multiplierList)], etc.
@@ -32,17 +32,17 @@ class GeometricBucketer(Bucketer):
         maxValue = columnSeries.quantile(maxPercentile)    
         
         if minValue <= 0:
-            raise ValueError("minValue cannot be less than or equal to zero")
+            raise ValueError("minValue cannot be less than or equal to zero.")
         
         if any([(x <= 1) for x in multiplierList]):
-            raise ValueError("multiplierList cannot contain values <= 1")
+            raise ValueError("multiplierList cannot contain values <= 1.")
         
         yield 0
         
         currentValue = minValue
         lastBinValue = 0
-        i = 0    
-        while (currentValue < maxValue):
+        i=0    
+        while(currentValue < maxValue):
             possibleBinCount = populatedRows[(populatedRows >= lastBinValue) & (populatedRows < currentValue)].count()
             
             # make sure that this bin won't be below the minimum sample count 
@@ -53,6 +53,6 @@ class GeometricBucketer(Bucketer):
                 yield currentValue
                 
             currentValue *= multiplierList[i % len(multiplierList)]
-            i += 1
+            i+=1
             
         yield np.inf
