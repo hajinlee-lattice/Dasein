@@ -100,7 +100,7 @@ public class PerfLoadTestNGBase {
 
     protected YarnConfiguration createYarnConfiguration(Properties prop) {
         YarnConfiguration yarnConfiguration = new YarnConfiguration();
-        yarnConfiguration.set("fs.defaultFS", prop.getProperty("dataplatform.fs.defaultFS"));
+        yarnConfiguration.set("fs.defaultFS", "hdfs://bodcprodvhdp195.prod.lattice.local:8020");
         yarnConfiguration.set("yarn.resourcemanager.address",
                 prop.getProperty("dataplatform.yarn.resourcemanager.address"));
         yarnConfiguration.set("yarn.resourcemanager.scheduler.address",
@@ -109,7 +109,6 @@ public class PerfLoadTestNGBase {
                 prop.getProperty("dataplatform.yarn.resourcemanager.webapp.address"));
         yarnConfiguration.set("yarn.nodemanager.remote-app-log-dir",
                 prop.getProperty("dataplatform.yarn.nodemanager.remote-app-log-dir"));
-        yarnConfiguration.set("fs.web.defaultFS", prop.getProperty("dataplatform.fs.web.defaultFS"));
         return yarnConfiguration;
     }
 
