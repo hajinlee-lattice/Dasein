@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,7 +16,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
-
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
@@ -111,6 +109,7 @@ public class PerfLoadTestNGBase {
                 prop.getProperty("dataplatform.yarn.resourcemanager.webapp.address"));
         yarnConfiguration.set("yarn.nodemanager.remote-app-log-dir",
                 prop.getProperty("dataplatform.yarn.nodemanager.remote-app-log-dir"));
+        yarnConfiguration.set("fs.web.defaultFS", prop.getProperty("dataplatform.fs.web.defaultFS"));
         return yarnConfiguration;
     }
 
@@ -149,7 +148,7 @@ public class PerfLoadTestNGBase {
         // dataplatform.dlorchestration.datasource.host=10.41.1.250
         // dataplatform.dlorchestration.datasource.port=1433
         // dataplatform.dlorchestration.datasource.dbname=LeadScoringDB_buildmachine
-        
+
         // String host =
         // prop.getProperty("dataplatform.dlorchestration.datasource.host");
         String host = "10.41.1.250";
