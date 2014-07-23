@@ -56,10 +56,17 @@ public class VisiDBMetadataServlet extends HttpServlet {
     
     private String getDisplayDiscretizationStrategy() {
         Random r = new Random();
-        if (r.nextInt(2) == 0) {
-            return "\"linear\":{\"stepSize\": 10, \"minSamples\": 100, \"minFreq\": 0.005, \"maxBuckets\": 7, \"maxPercentile\": 1, \"minValue\": 1900}";
+        int value = r.nextInt(3);
+        
+        switch (value) {
+        case 0:
+            return "{\"linear\":{\"minSamples\": 100, \"stepSize\": 10, \"minFreq\": 0.005, \"maxBuckets\": 7, \"maxPercentile\": 1, \"minValue\": 1900}}";
+        case 1:
+            return "{\"geometric\":{\"stepSize\": null, \"minSamples\": 100, \"minFreq\": 0.005, \"maxBuckets\": 7, \"maxPercentile\": 1, \"minValue\": 1}}";
+        case 2:
+            return "{\"standard\":{\"numBins\":10, \"minSamples\":100, \"minFreq\":0, \"maxPercentile\":1, \"maxBuckets\":7}}";
         }
-        return "{\"stepSize\": null, \"minSamples\": 100, \"minFreq\": 0.005, \"maxBuckets\": 7, \"maxPercentile\": 1, \"minValue\": 1}";
+        return null; 
     }
 
 }
