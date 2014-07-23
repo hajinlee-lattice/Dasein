@@ -6,7 +6,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,6 +17,7 @@ import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
+import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsRequest;
 
 @Component("modelStepRetrieveMetadataProcessor")
 public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcessor {
@@ -43,7 +43,7 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
         String queryMetadataUrl = modelCommandParameters.getDlUrl() + queryMetadataUrlSuffix;
         String metadata = null;
         try {
-            GetQueryMetadataRequest request = new GetQueryMetadataRequest(modelCommandParameters.getDlTenant(),
+            GetQueryMetaDataColumnsRequest request = new GetQueryMetaDataColumnsRequest(modelCommandParameters.getDlTenant(),
                     modelCommandParameters.getEventTable());
             Map<String, String> headers = new HashMap<String, String>();
             headers.put("MagicAuthentication", "Security through obscurity!");
@@ -65,48 +65,6 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
         String customer = modelCommand.getDeploymentExternalId();
         return customerBaseDir + customer + "/data/" + modelCommandParameters.getEventTable() + "/"
                 + modelCommandParameters.getMetadataTable() + "/metadata.avsc";
-    }
-
-    public static class GetQueryMetadataRequest {
-
-        private String tenantName;
-        private String queryName;
-        private String revisionTag;
-
-        public GetQueryMetadataRequest(String tenantName, String queryName) {
-            this.tenantName = tenantName;
-            this.queryName = queryName;
-        }
-
-        @JsonProperty("tenantName")
-        public String getTenantName() {
-            return tenantName;
-        }
-
-        @JsonProperty("tenantName")
-        public void setTenantName(String tenantName) {
-            this.tenantName = tenantName;
-        }
-
-        @JsonProperty("queryName")
-        public String getQueryName() {
-            return queryName;
-        }
-
-        @JsonProperty("queryName")
-        public void setQueryName(String queryName) {
-            this.queryName = queryName;
-        }
-
-        @JsonProperty("revisionTag")
-        public String getRevisionTag() {
-            return revisionTag;
-        }
-
-        @JsonProperty("revisionTag")
-        public void setRevisionTag(String revisionTag) {
-            this.revisionTag = revisionTag;
-        }
     }
 
 }

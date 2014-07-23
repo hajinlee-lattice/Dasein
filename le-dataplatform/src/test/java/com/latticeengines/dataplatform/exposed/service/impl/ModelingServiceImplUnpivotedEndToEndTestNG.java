@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math3.util.Pair;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -14,6 +15,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -25,13 +27,18 @@ import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.dataplatform.functionalframework.StandaloneHttpServer;
+import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataServlet;
 import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelCommandParameters;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelStepRetrieveMetadataProcessorImpl;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.dataplatform.DataSchema;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
+import com.latticeengines.domain.exposed.dataplatform.Field;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.Model;
@@ -71,8 +78,13 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     
     @Autowired
     private ModelStepRetrieveMetadataProcessorImpl modelStepRetrieveMetadataProcessor;
+    
+    @Autowired
+    private MetadataService metadataService;
 
     private Model model = null;
+    
+    private StandaloneHttpServer httpServer;
 
     protected boolean doYarnClusterSetup() {
         return true;
@@ -99,6 +111,11 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
         model = createModel(modelDef);
     }
+    
+    @AfterClass(groups = "functional")
+    public void tearDown() throws Exception {
+        httpServer.stop();
+    }
 
     private Model createModel(ModelDefinition modelDef) {
         Model m = new Model();
@@ -113,13 +130,30 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
         return m;
     }
-
-    private LoadConfiguration getLoadConfig() {
-        LoadConfiguration config = new LoadConfiguration();
+    
+    private Pair<String[], Integer[]> getTableColumnMetadata() {
+        DataSchema schema = metadataService.createDataSchema(getCreds(), "Q_EventTable_Nutanix");
+        List<Field> fields = schema.getFields();
+        String[] cols = new String[fields.size()];
+        Integer[] types = new Integer[fields.size()];
+        int i = 0;
+        for (Field field : fields) {
+            cols[i] = field.getName();
+            types[i++] = field.getSqlType();
+        }
+        return new Pair<>(cols, types);
+    }
+    
+    private DbCreds getCreds() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dbDlOrchestrationHost).port(dbDlOrchestrationPort).db(dbDlOrchestrationName)
                 .user(dbDlOrchestrationUser).password(dbDlOrchestrationPassword).type(dbDlOrchestrationType);
-        DbCreds creds = new DbCreds(builder);
+        return new DbCreds(builder);
+    }
+
+    private LoadConfiguration getLoadConfig() {
+        LoadConfiguration config = new LoadConfiguration();
+        DbCreds creds = getCreds();
         config.setCreds(creds);
         config.setCustomer("Nutanix");
         config.setTable("Q_EventTable_Nutanix");
@@ -172,16 +206,20 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, "Q_EventTable_Nutanix"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_METADATA, "EventMetadata"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://httpbin.org/post"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://localhost:8082/DLRestService"));
 
         return command;
     }
 
     @Test(groups = "functional", dependsOnMethods = { "createSamples" })
     public void retrieveMetadataAndWriteToHdfs() throws Exception {
+        httpServer = new StandaloneHttpServer();
+        httpServer.init();
+        Pair<String[], Integer[]> colMetadata = getTableColumnMetadata();
+        httpServer.addServlet(new VisiDBMetadataServlet(colMetadata.getFirst(), colMetadata.getSecond()), "/DLRestService/GetQueryMetaDataColumns");
+        httpServer.start();
         ModelCommand command = createModelCommandWithCommandParameters();
         List<ModelCommandParameter> commandParameters = command.getCommandParameters();
-        modelStepRetrieveMetadataProcessor.setQueryMetadataUrlSuffix("");
         modelStepRetrieveMetadataProcessor.executeStep(command, new ModelCommandParameters(commandParameters));
     }
 
