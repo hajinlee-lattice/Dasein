@@ -63,7 +63,7 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     String getHdfsPathForMetadataFile(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
         String customer = modelCommand.getDeploymentExternalId();
-        return customerBaseDir + customer + "/data/" + modelCommandParameters.getEventTable() + "/"
+        return customerBaseDir +"/" + customer + "/data/" + modelCommandParameters.getEventTable() + "/"
                 + modelCommandParameters.getMetadataTable() + "/metadata.avsc";
     }
 
