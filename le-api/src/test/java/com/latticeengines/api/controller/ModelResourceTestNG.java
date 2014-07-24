@@ -3,11 +3,13 @@ package com.latticeengines.api.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -17,8 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.ThrottleSubmission;
@@ -133,6 +135,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
         config.setMetadataTable(model.getMetadataTable());
         config.setIncludeColumnList(model.getFeaturesList());
         config.setSamplePrefix("all");
+        config.setTargets(model.getTargetsList());
         AppSubmission submission = restTemplate.postForObject("http://localhost:8080/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));

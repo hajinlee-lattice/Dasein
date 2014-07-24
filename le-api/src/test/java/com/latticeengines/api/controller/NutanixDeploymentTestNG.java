@@ -1,8 +1,10 @@
 package com.latticeengines.api.controller;
 
 import static org.testng.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -13,8 +15,8 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -82,7 +84,6 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
     }
 
     private Pair<String, List<String>> getTargetAndFeatures() {
-        log.info("               info..............." + this.getClass().getSimpleName() + "getTargetAndFeatures");
         StringList features = restTemplate.postForObject("http://" + restEndpointHost + "/rest/features", model,
                 StringList.class, new Object[] {});
         return new Pair<String, List<String>>("P1_Event", features.getElements());
@@ -90,7 +91,6 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", enabled = true)
     public void load() throws Exception {
-        log.info("               info..............." + this.getClass().getSimpleName() + "load");
         LoadConfiguration config = getLoadConfig();
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
@@ -114,8 +114,6 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "load" }, enabled = true)
     public void createSamples() throws Exception {
-        log.info("               info..............." + this.getClass().getSimpleName() + "createSamples");
-
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
         SamplingElement s0 = new SamplingElement();
@@ -143,14 +141,13 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "createSamples" })
     public void profile() throws Exception {
-        log.info("               info..............." + this.getClass().getSimpleName() + "profile");
-
         DataProfileConfiguration config = new DataProfileConfiguration();
-        config.setCustomer(this.model.getCustomer());
-        config.setTable(this.model.getTable());
-        config.setMetadataTable(this.model.getMetadataTable());
+        config.setCustomer(model.getCustomer());
+        config.setTable(model.getTable());
+        config.setMetadataTable(model.getMetadataTable());
         config.setSamplePrefix("all");
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
+        config.setTargets(model.getTargetsList());
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
@@ -160,8 +157,6 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
     public void submit() throws Exception {
-        log.info("               info..............." + this.getClass().getSimpleName() + "submit");
-
         Pair<String, List<String>> targetAndFeatures = getTargetAndFeatures();
         this.model.setFeaturesList(targetAndFeatures.getValue());
         this.model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));

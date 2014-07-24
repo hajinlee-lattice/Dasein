@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -14,8 +15,8 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.api.functionalframework.ApiFunctionalTestNGBase;
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -139,6 +140,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setTable(model.getTable());
         config.setMetadataTable(model.getMetadataTable());
         config.setSamplePrefix("all");
+        config.setTargets(Arrays.<String>asList(new String[] { "P1_Event" }));
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});

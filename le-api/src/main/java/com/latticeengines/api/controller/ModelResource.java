@@ -6,12 +6,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
-@Controller
+@RestController
 public class ModelResource {
     private static final Log log = LogFactory.getLog(ModelResource.class);
 
