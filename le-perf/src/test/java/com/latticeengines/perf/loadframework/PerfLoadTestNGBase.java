@@ -140,7 +140,7 @@ public class PerfLoadTestNGBase {
         return modelDef;
     }
 
-    protected LoadConfiguration createLoadConfiguration(String customer) throws Exception{
+    protected LoadConfiguration createLoadConfiguration(String customer) throws Exception {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
 
@@ -148,16 +148,12 @@ public class PerfLoadTestNGBase {
         // dataplatform.dlorchestration.datasource.port=1433
         // dataplatform.dlorchestration.datasource.dbname=LeadScoringDB_buildmachine
 
-        // String host =
-        // prop.getProperty("dataplatform.dlorchestration.datasource.host");
-        String host = "10.41.1.250";
-        // int port =
-        // Integer.parseInt(prop.getProperty("dataplatform.dlorchestration.datasource.port"));
-        int port = 1433;
-        // String database =
-        // prop.getProperty("dataplatform.dlorchestration.datasource.dbname");
-        String database = "LeadScoringDB_qe";
-
+        String host = prop.getProperty("dataplatform.dlorchestration.datasource.host");
+        // String host = "10.41.1.250";
+        int port = Integer.parseInt(prop.getProperty("dataplatform.dlorchestration.datasource.port"));
+        // int port = 1433;
+        String database = prop.getProperty("dataplatform.dlorchestration.datasource.dbname");
+        // String database = "LeadScoringDB_qe";
         String user = prop.getProperty("dataplatform.dlorchestration.datasource.user");
         String password = CipherUtils.decrypt(prop
                 .getProperty("dataplatform.dlorchestration.datasource.password.encrypted"));
