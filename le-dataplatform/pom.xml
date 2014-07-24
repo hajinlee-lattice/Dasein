@@ -139,7 +139,7 @@
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <skip>${skipTests}</skip>
+                            <skip>true</skip>
                             <executable>/usr/local/bin/python2.7</executable>
                             <workingDirectory>src/test/python</workingDirectory>
                             <arguments>
