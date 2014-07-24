@@ -1,9 +1,11 @@
-from avro import schema, datafile, io
+import sys
 import codecs
 import json
+import math
+import logging
 from sklearn import metrics
+from avro import schema, datafile, io
 from sklearn.metrics.cluster.supervised import entropy
-import sys
 
 from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
@@ -12,6 +14,11 @@ from leframework.progressreporter import ProgressReporter
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
+
+logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(name='data_profile')
 
 def getExecutor():
     return DataProfilingExecutor()
@@ -100,7 +107,6 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     avroSchema = getSchema()
     bucketDispatcher = BucketerDispatcher()
     recordWriter = io.DatumWriter(avroSchema)
-    print(sys.getdefaultencoding())
     dataWriter = datafile.DataFileWriter(codecs.open(modelDir + '/profile.avro', 'wb'),
                                          recordWriter, writers_schema = avroSchema, codec = 'deflate')
 
@@ -125,6 +131,9 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
         else:
             mean = data[colname].mean()
             median = data[colname].median()
+            if math.isnan(median):
+                logger.warn("Median to impute for column name: " + colname + " is null, excluding this column.")
+                continue
             # Impute null value
             data[colname] = data[colname].fillna(median)
             try:
@@ -135,7 +144,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
                     bands = bucketDispatcher.bucketColumn(data[colname], eventVector)
                 index = writeBandsToAvro(dataWriter, data[colname], eventVector, bands, mean, median, colname, index)
             except Exception as e:
-                print e
+                logger.error(e)
                 continue
     dataWriter.close()
     return None
@@ -157,7 +166,6 @@ def retrieveColumnBucketMetadata(columnsMetadata):
         
         if columnMetadata['DisplayDiscretizationStrategy'] is None:
             continue
-        
 
         bucketMetadata = json.loads(columnMetadata['DisplayDiscretizationStrategy'])
 
