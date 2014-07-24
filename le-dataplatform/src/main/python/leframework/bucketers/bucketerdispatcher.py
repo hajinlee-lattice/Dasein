@@ -25,11 +25,11 @@ class BucketerDispatcher(object):
                     path = list(sys.path)
                     sys.path.append(curDir)
                     try:
-                        # set the module name in the current global name space:
+                        # Set the module name in the current global name space:
                         mod = __import__(name, fromlist=[className])
                         globals()[className] = getattr(mod, className)
                     finally:
-                        # restore
+                        # Restore
                         sys.path[:] = path 
 
     def bucketColumn(self, columnSeries, eventSeries, methodType = None, methodParams = None):
@@ -50,8 +50,10 @@ class BucketerDispatcher(object):
                 maxBuckets = methodParams.pop("maxBuckets", maxBuckets)
                 params = methodParams
                 
-        bucketList =  bucketer.bucketColumn(columnSeries, params)
-        return self.consolidateBins(columnSeries, eventSeries, bucketList, maxBuckets)
+        bucketList = bucketer.bucketColumn(columnSeries, params)
+        bucketList = self.consolidateBins(columnSeries, eventSeries, bucketList, maxBuckets)
+        # Reset infinity to None
+        return map(lambda x: None if np.isinf(x) else x, bucketList)
 
     def consolidateBins(self, columnSeries, eventSeries, bucketList, maxBuckets):
         """
@@ -60,27 +62,28 @@ class BucketerDispatcher(object):
         ranges
         """
         if maxBuckets <= 0:
-            raise ValueError("maxBuckets cannot be less than or equal to zero.")    
-            
+            raise ValueError("maxBuckets cannot be less than or equal to zero.")
+
         zippedList = zip(bucketList, bucketList[1::])    
-        getSelector = lambda x, nextX: (columnSeries > x) & (columnSeries <= nextX)    
+        getSelector = lambda x, nextX: (columnSeries > x) & (columnSeries <= nextX)
         eventSums = [(eventSeries[getSelector(x, nextX)].sum(), np.count_nonzero(getSelector(x, nextX))) for x, nextX in zippedList]
-        
+
         while (len(zippedList) > maxBuckets):
             maxDelta = 0
-            removeIndex = None
-            for i in range(len(zippedList) - 1):
+            removeIndex = 0
+            for i in range(len(zippedList)-1):
                 newConversionRate = float(eventSums[i][0] + eventSums[i + 1][0] + 1) / float(eventSums[i][1] + eventSums[i + 1][1] + 1)
                 delta = scipy.stats.binom.pmf(eventSums[i][0], eventSums[i][1], newConversionRate) * scipy.stats.binom.pmf(eventSums[i + 1][0], eventSums[i + 1][1], newConversionRate)
+                if np.isnan(delta):
+                    raise RuntimeError("Invalid event series distribution.")
                 if delta > maxDelta:
                     maxDelta = delta
                     removeIndex = i
-            
+
             # combine the bins around the removed threshold 
             zippedList[removeIndex] = (zippedList[removeIndex][0], zippedList[removeIndex + 1][1])
             eventSums[removeIndex] = (eventSums[removeIndex][0] + eventSums[removeIndex + 1][0], eventSums[removeIndex][1] + eventSums[removeIndex + 1][1])
             zippedList.remove(zippedList[removeIndex + 1])
             eventSums.remove(eventSums[removeIndex + 1])
-        
+
         return [y[0] for y in zippedList] + [zippedList[-1][1]]    
-            

@@ -16,7 +16,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
+logging.basicConfig(level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(name='data_profile')
 
@@ -113,7 +113,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     colnames = list(data.columns.values)
     stringcols = set(schema["stringColumns"])
     features = set(schema["features"])
-    eventVector = data[list(schema["targets"])[0]]
+    eventVector = data.iloc[:,schema["targetIndex"]]
     colnameBucketMetadata = retrieveColumnBucketMetadata(schema["config_metadata"])
     index = 1
     progressReporter.setTotalState(len(colnames))
@@ -141,6 +141,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
                 bands = bucketDispatcher.bucketColumn(data[colname], eventVector, colnameBucketMetadata[colname][0], colnameBucketMetadata[colname][1])
             else:
                 # Default bucketer
+                logger.debug("Using defualt bucketer for column name: " + colname)
                 bands = bucketDispatcher.bucketColumn(data[colname], eventVector)
             index = writeBandsToAvro(dataWriter, data[colname], eventVector, bands, mean, median, colname, index)
 
@@ -157,7 +158,6 @@ def retrieveColumnBucketMetadata(columnsMetadata):
         return bucketsMetadata
     else:
         columnsMetadata = columnsMetadata["Metadata"]
-
 
     for columnMetadata in columnsMetadata:
         if not columnMetadata.has_key('DisplayDiscretizationStrategy'):
@@ -204,9 +204,6 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
     return index
 
 def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, colname, index):
-    # Set +/- infinity to null
-    bands[0] = None
-    bands[-1] = None
     avgProbability = sum(eventVector) / float(len(eventVector))
     for i in range(len(bands) - 1):
         bandVector = map(lambda x: 1 if x >= bands[i] and x < bands[i + 1] else 0, columnVector)
