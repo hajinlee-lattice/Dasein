@@ -53,6 +53,8 @@ public class PerfLoadTestNGBase {
 
     protected ExecutorService executor;
 
+    protected YarnConfiguration yarnConfiguration;
+
     @Parameters({ "dataplatformProp", "apiProp", "numOfThreads", "numOfCustomers", "numOfRuns" })
     @BeforeClass(groups = "load")
     public void setup(String dataplatformProp, String apiProp, String numOfThreads, String numOfCustomers,
@@ -67,7 +69,7 @@ public class PerfLoadTestNGBase {
 
         prop = generateProperty(dataplatformProp);
         customerBaseDir = prop.getProperty("dataplatform.customer.basedir");
-        YarnConfiguration yarnConfiguration = createYarnConfiguration(prop);
+        yarnConfiguration = createYarnConfiguration(prop);
 
         try {
             fs = FileSystem.get(yarnConfiguration);

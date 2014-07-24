@@ -23,10 +23,11 @@ public class ModelingResourceLoadTestNG extends PerfLoadTestNGBase {
         for (int i = 0; i < numOfRuns; i++) {
             for (int j = 0; j < numOfCustomers; j++) {
                 String customer = "c" + j;
-                fs.delete(new Path(customerBaseDir + "/" + customer), true);
+                String hdfsPath = customerBaseDir + "/" + customer;
+                fs.delete(new Path(hdfsPath), true);
 
                 ConstructModelConfiguration cmc = createConstructModelConfiguration(customer);
-                ConstructModel cm = new ConstructModel();
+                ConstructModel cm = new ConstructModel(yarnConfiguration, hdfsPath);
                 cm.setConfiguration(restEndpointHost, cmc);
                 Future<List<String>> future = executor.submit(cm);
                 futures.add(future);

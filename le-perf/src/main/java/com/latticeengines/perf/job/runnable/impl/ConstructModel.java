@@ -1,6 +1,9 @@
 package com.latticeengines.perf.job.runnable.impl;
 
 import java.util.List;
+
+import org.apache.hadoop.conf.Configuration;
+
 import com.latticeengines.perf.job.configuration.ConstructModelConfiguration;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 
@@ -10,8 +13,8 @@ public class ConstructModel extends ModelingResourceJob<ConstructModelConfigurat
 
     private SubmitModel sm;
 
-    public ConstructModel() {
-        this.ob = new OnBoard();
+    public ConstructModel(Configuration hadoopConfiguration, String hdfsPath) {
+        this.ob = new OnBoard(hadoopConfiguration, hdfsPath);
         this.sm = new SubmitModel();
     }
 

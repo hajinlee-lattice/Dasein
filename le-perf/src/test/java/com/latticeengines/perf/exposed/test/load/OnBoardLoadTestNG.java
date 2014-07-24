@@ -25,8 +25,9 @@ public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
         for (int i = 0; i < numOfRuns; i++) {
             for (int j = 0; j < numOfCustomers; j++) {
                 String customer = "c" + j;
-                fs.delete(new Path(customerBaseDir + "/" + customer), true);
-                OnBoard ob = new OnBoard();
+                String hdfsPath = customerBaseDir + "/" + customer;
+                fs.delete(new Path(hdfsPath), true);
+                OnBoard ob = new OnBoard(yarnConfiguration, hdfsPath);
                 ob.setConfiguration(restEndpointHost, createOnBoardConfiguration(customer));
                 Future<List<String>> future = executor.submit(ob);
                 futures.add(future);

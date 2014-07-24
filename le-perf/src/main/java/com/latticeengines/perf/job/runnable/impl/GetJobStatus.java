@@ -1,8 +1,12 @@
 package com.latticeengines.perf.job.runnable.impl;
 
 import java.util.List;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 
@@ -37,6 +41,19 @@ public class GetJobStatus extends ModelingResourceJob<String, JobStatus> {
             }
             Thread.sleep(5000L);
         }
+        Thread.sleep(2000L);
         return true;
+    }
+
+    public static boolean validateFiles(Configuration hadoopConfiguration, String hdfsPath, int numOfAvros)
+            throws Exception {
+        List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, hdfsPath, new HdfsFilenameFilter() {
+            @Override
+            public boolean accept(Path filename) {
+                return filename.toString().endsWith(".avro");
+            }
+
+        });
+        return files.size() >= numOfAvros;
     }
 }
