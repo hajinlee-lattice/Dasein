@@ -3,406 +3,390 @@
     <queue name="Priority0.MapReduce">
         <weight>1000</weight>
         <queue name="0">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="1">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="2">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="3">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="4">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="5">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="6">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="7">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="8">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="9">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="10">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="11">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="12">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="13">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="14">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="15">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="16">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="17">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="18">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="19">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="20">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="21">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="22">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="23">
-            <minResources>24576 mb, 6 vcores</minResources>
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="24">
-            <minResources>24576 mb, 6 vcores</minResources>
+            <minResources>21504 mb, 6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
     </queue>
     <queue name="Priority0">
         <weight>100</weight>
         <queue name="0">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="1">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="2">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="3">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="4">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="5">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="6">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="7">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="8">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="9">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="10">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="11">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="12">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="13">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="14">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="15">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="16">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="17">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="18">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="19">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="20">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="21">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="22">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="23">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="24">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="25">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="26">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="27">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="28">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="29">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="30">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="31">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="32">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="33">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="34">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="35">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="36">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="37">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="38">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="39">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="40">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="41">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="42">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="43">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="44">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="45">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="46">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="47">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="48">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="49">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="50">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="51">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="52">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="53">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="54">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="55">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="56">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="57">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="58">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="59">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="60">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="61">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="62">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="63">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="64">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="65">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="66">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="67">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="68">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="69">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="70">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="71">
-            <minResources>8192 mb, 2 vcores</minResources>
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="72">
-            <minResources>8192 mb, 2 vcores</minResources>
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="73">
-            <minResources>8192 mb, 2 vcores</minResources>
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="74">
-            <minResources>8192 mb, 2 vcores</minResources>
+            <minResources>7168 mb, 2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
     </queue>
@@ -624,15 +608,6 @@
         <queue name="71">
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
-        <queue name="72">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="73">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="74">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
     </queue>
     <queue name="Priority2">
         <weight>1</weight>
@@ -852,20 +827,10 @@
         <queue name="71">
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
-        <queue name="72">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="73">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
-        <queue name="74">
-            <schedulingPolicy>fifo</schedulingPolicy>
-        </queue>
     </queue>
     <defaultMinSharePreemptionTimeout>30</defaultMinSharePreemptionTimeout>
     <fairSharePreemptionTimeout>30</fairSharePreemptionTimeout>
     <user name="yarn">
-        <maxRunningApps>75</maxRunningApps>
+        <maxRunningApps>72</maxRunningApps>
     </user>
 </allocations>
-
