@@ -138,6 +138,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         config.setTable(model.getTable());
         config.setMetadataTable(model.getMetadataTable());
         config.setSamplePrefix("all");
+        config.setTargets(model.getTargetsList());
         List<String> excludeList = new ArrayList<>();
         excludeList.add("IDX");
         excludeList.add("CustomerID");

@@ -339,17 +339,8 @@ public class ModelingServiceImpl implements ModelingService {
             List<String> featureList = new ArrayList<String>();
             Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(schemaPath));
             boolean useIncludeList = includeList.size() > 0;
-            String firstNumericColumn = null;
             for (Field field : schema.getFields()) {
                 String name = field.name();
-                Schema fieldSchema = field.schema();
-
-                if (firstNumericColumn == null
-                        && (fieldSchema.getTypes().get(0).getType().equals(Schema.Type.DOUBLE)
-                                || fieldSchema.getTypes().get(0).getType().equals(Schema.Type.FLOAT) 
-                                || fieldSchema.getTypes().get(0).getType().equals(Schema.Type.INT))) {
-                    firstNumericColumn = name;
-                }
                 // If an include list is passed, only use the features in the
                 // include list
                 // if the name is part of the schema. If the include list is empty, then
@@ -366,7 +357,7 @@ public class ModelingServiceImpl implements ModelingService {
                 }
             }
             m.setDataFormat("avro");
-            m.setTargetsList(Arrays.<String> asList(new String[] { firstNumericColumn }));
+            m.setTargetsList(dataProfileConfig.getTargets());
             m.setKeyCols(Arrays.<String> asList(new String[] { featureList.get(0) }));
             m.setFeaturesList(featureList);
         } catch (Exception e) {

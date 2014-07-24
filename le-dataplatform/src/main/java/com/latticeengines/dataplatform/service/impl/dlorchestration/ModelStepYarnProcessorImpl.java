@@ -207,6 +207,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         config.setMetadataTable(commandParameters.getMetadataTable());
         config.setExcludeColumnList(commandParameters.getExcludeColumns());
         config.setSamplePrefix(SAMPLENAME_PREFIX+"100");
+        config.setTargets(commandParameters.getModelTargets());
         ApplicationId appId = modelingService.profileData(config);
 
         return Arrays.asList(appId);

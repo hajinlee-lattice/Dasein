@@ -232,6 +232,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         config.setMetadataTable(model.getMetadataTable());
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
         config.setSamplePrefix("all");
+        config.setTargets(model.getTargetsList());
         ApplicationId appId = modelingService.profileData(config);
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
