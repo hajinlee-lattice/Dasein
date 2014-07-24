@@ -1,18 +1,16 @@
 package com.latticeengines.sparkdb.operator.impl
 
-import org.apache.spark._
-import org.apache.spark.rdd.RDD
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.mapreduce.Job
-
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.mapred.AvroKey
-import org.apache.avro.mapreduce.AvroKeyInputFormat
-import org.apache.hadoop.io._
-import org.apache.hadoop.mapred.TextInputFormat
-import org.apache.hadoop.fs.Path
-import org.apache.avro.Schema
 import org.apache.avro.mapreduce.AvroJob
+import org.apache.avro.mapreduce.AvroKeyInputFormat
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.Path
+import org.apache.hadoop.io.NullWritable
+import org.apache.hadoop.mapreduce.Job
+import org.apache.spark.SparkConf
+import org.apache.spark.SparkContext
+import org.apache.spark.rdd.RDD
 
 import com.latticeengines.common.exposed.util.AvroUtils
 import com.latticeengines.sparkdb.operator.DataOperator
