@@ -16,6 +16,7 @@ public class DataProfileConfiguration {
     private String script;
     private List<String> excludeColumnList = new ArrayList<String>();
     private List<String> includeColumnList = new ArrayList<String>();
+    private List<String> targets = new ArrayList<String>();
     
     @JsonProperty("customer")
     public String getCustomer() {
@@ -90,6 +91,16 @@ public class DataProfileConfiguration {
     @JsonProperty("script")
     public void setScript(String script) {
         this.script = script;
+    }
+
+    @JsonProperty("targets")
+    public List<String> getTargets() {
+        return targets;
+    }
+
+    @JsonProperty("targets")
+    public void setTargets(List<String> targets) {
+        this.targets = targets;
     }
 
     
