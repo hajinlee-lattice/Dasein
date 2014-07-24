@@ -296,7 +296,6 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols) {
         int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 4);
-        numDefaultMappers = 1;
         return loadData(table, targetDir, creds, queue, customer, splitCols, numDefaultMappers);
     }
 
