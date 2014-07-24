@@ -62,7 +62,7 @@ public class VisiDBMetadataServlet extends HttpServlet {
         case 0:
             return "{\"linear\":{\"minSamples\": 100, \"stepSize\": 10, \"minFreq\": 0.005, \"maxBuckets\": 7, \"maxPercentile\": 1, \"minValue\": 1900}}";
         case 1:
-            return "{\"geometric\":{\"stepSize\": null, \"minSamples\": 100, \"minFreq\": 0.005, \"maxBuckets\": 7, \"maxPercentile\": 1, \"minValue\": 1}}";
+            return "{\"geometric\":{\"minValue\": 10, \"minSamples\": 100, \"minFreq\": 0, \"maxBuckets\": 7, \"maxPercentile\": 1, \"multiplierList\": [2.5, 2, 2]}}";
         case 2:
             return "{\"standard\":{\"numBins\":10, \"minSamples\":100, \"minFreq\":0, \"maxPercentile\":1, \"maxBuckets\":7}}";
         }

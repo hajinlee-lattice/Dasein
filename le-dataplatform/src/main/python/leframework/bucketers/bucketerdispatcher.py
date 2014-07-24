@@ -3,16 +3,18 @@ import sys
 import pkgutil as pkg
 import numpy as np
 import scipy.stats
-from standardbucketer import StandardBucketer
+from geometricbucketer import GeometricBucketer
 
 class BucketerDispatcher(object):
 
     def __init__(self):
         self.suffix = 'bucketer'
-        self.defaultBucketer = StandardBucketer()
         self.__importAllBucketers()
-        self.defaultMaxBuckets = 10
-        
+        # Set up default bucketing strategy
+        self.defaultBucketer = GeometricBucketer()
+        self.defaultMaxBuckets = 7
+        self.defaultParams = {'minValue': 1, 'multiplierList': [2, 2.5, 2]}
+
     def __importAllBucketers(self):
         curDir = os.path.dirname(os.path.abspath(__file__))
         for _, name, _ in pkg.iter_modules([curDir]):
@@ -29,15 +31,15 @@ class BucketerDispatcher(object):
                     finally:
                         # restore
                         sys.path[:] = path 
-                            
-    '''
-    Input i.e. methodType = 'linear' -> method = 'LinearBucketer'
-    If the bucketing method is not found, default bucketing algorithm will be invoked
-    '''
+
     def bucketColumn(self, columnSeries, eventSeries, methodType = None, methodParams = None):
+        '''
+        Input i.e. methodType = 'linear' -> method = 'LinearBucketer'
+        If the bucketing method is not found, default bucketing algorithm will be invoked
+        '''
         bucketer =  self.defaultBucketer
         maxBuckets = self.defaultMaxBuckets
-        params = dict()
+        params = self.defaultParams
 
         if methodType is not None:
             method = methodType.title() + self.suffix.title()

@@ -136,21 +136,20 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
                 continue
             # Impute null value
             data[colname] = data[colname].fillna(median)
-            try:
-                if colnameBucketMetadata.has_key(colname):
-                    bands = bucketDispatcher.bucketColumn(data[colname], eventVector, colnameBucketMetadata[colname][0], colnameBucketMetadata[colname][1])
-                else:
-                    # default bucketer
-                    bands = bucketDispatcher.bucketColumn(data[colname], eventVector)
-                index = writeBandsToAvro(dataWriter, data[colname], eventVector, bands, mean, median, colname, index)
-            except Exception as e:
-                logger.error(e)
-                continue
+            if colnameBucketMetadata.has_key(colname):
+                # Apply bucketing with specified type and parameters
+                bands = bucketDispatcher.bucketColumn(data[colname], eventVector, colnameBucketMetadata[colname][0], colnameBucketMetadata[colname][1])
+            else:
+                # Default bucketer
+                bands = bucketDispatcher.bucketColumn(data[colname], eventVector)
+            index = writeBandsToAvro(dataWriter, data[colname], eventVector, bands, mean, median, colname, index)
+
     dataWriter.close()
     return None
 
 def retrieveColumnBucketMetadata(columnsMetadata):
     '''
+    Reads DisplayDiscretizationStrategy for each column
     Returns a dictionary of key: columnName, value: [bucketing_type, bucketing_parameters]
     '''
     bucketsMetadata = dict()
