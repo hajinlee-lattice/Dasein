@@ -1,19 +1,18 @@
 package com.latticeengines.sparkdb.exposed.service.impl
 
-import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.yarn.conf.YarnConfiguration
+import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.SparkConf
 import org.apache.spark.deploy.yarn.Client
 import org.apache.spark.deploy.yarn.ClientArguments
+import org.springframework.stereotype.Component
 
 import com.latticeengines.sparkdb.exposed.service.SparkLauncherService
-import org.springframework.stereotype.Component
 
 @Component("sparkLauncherService")
 class SparkLauncherServiceImpl extends SparkLauncherService {
   
-  def runApp(conf: Configuration, appName: String, queue: String): ApplicationId = {
+  override def runApp(conf: Configuration, appName: String, queue: String): ApplicationId = {
     val params = Array("--class", "com.latticeengines.sparkdb.ABCount", //
         "--name", appName, //
         "--queue", queue, //
@@ -22,5 +21,11 @@ class SparkLauncherServiceImpl extends SparkLauncherService {
     val sparkConf = new SparkConf()
     val args = new ClientArguments(params, sparkConf)
     new Client(args, conf, sparkConf).runApp()
+  }
+}
+
+object SparkLauncherServiceImpl {
+  def main(args: Array[String]) {
+    
   }
 }
