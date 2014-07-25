@@ -1,8 +1,8 @@
 package com.latticeengines.dataplatform.entitymanager.impl;
 
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import java.util.Date;
 
@@ -23,7 +23,7 @@ public class ModelCommandResultEntityMgrImplTestNG extends DataPlatformFunctiona
 
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
-    
+
     @Autowired
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
 
@@ -43,24 +43,20 @@ public class ModelCommandResultEntityMgrImplTestNG extends DataPlatformFunctiona
     public void testFindByModelCommand() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
         modelCommandEntityMgr.create(command);
- 
+
         assertNull(modelCommandResultEntityMgr.findByModelCommand(command));
-             
+
         Date now = new Date();
         ModelCommandResult result = new ModelCommandResult(command, now, now, ModelCommandStatus.IN_PROGRESS);
         modelCommandResultEntityMgr.create(result);
-        
+
         ModelCommandResult retrieved = modelCommandResultEntityMgr.findByModelCommand(command);
         assertNotNull(retrieved);
         assertEquals(retrieved.getModelCommand(), command);
-        
+
         retrieved.setEndTime(new Date());
         retrieved.setProcessStatus(ModelCommandStatus.SUCCESS);
         modelCommandResultEntityMgr.update(retrieved);
-        
-        modelCommandResultEntityMgr.delete(retrieved);
-        modelCommandEntityMgr.delete(command);
-        
     }
-    
+
 }

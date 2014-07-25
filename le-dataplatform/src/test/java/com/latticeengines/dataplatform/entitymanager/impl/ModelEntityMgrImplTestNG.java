@@ -3,10 +3,12 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.Model;
@@ -17,6 +19,13 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressi
 public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private Model model;
+    private ModelDefinition modelDef = new ModelDefinition();
+
+    @Autowired
+    protected ModelEntityMgr modelEntityMgr;
+
+    @Autowired
+    protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
     @Override
     protected boolean doYarnClusterSetup() {
@@ -42,7 +51,6 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
         decisionTreeAlgorithm.setSampleName("s1");
 
-        ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model Definition For Demo");
         modelDef.addAlgorithm(logisticRegressionAlgorithm);
         modelDef.addAlgorithm(decisionTreeAlgorithm);
@@ -80,13 +88,11 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     }
 
-    @Transactional
     @Test(groups = "functional")
     public void testPersist() {
         modelEntityMgr.create(model);
     }
 
-    @Transactional
     @Test(groups = "functional", dependsOnMethods = { "testPersist" })
     public void testRetrieval() {
         Model retrievedModel = new Model();
@@ -97,7 +103,6 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(2, model.getJobs().size());
     }
 
-    @Transactional
     @Test(groups = "functional", dependsOnMethods = { "testPersist" })
     public void testUpdate() {
         assertNotNull(model.getPid());
@@ -108,7 +113,6 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         testRetrieval();
     }
 
-    @Transactional
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         modelEntityMgr.delete(model);

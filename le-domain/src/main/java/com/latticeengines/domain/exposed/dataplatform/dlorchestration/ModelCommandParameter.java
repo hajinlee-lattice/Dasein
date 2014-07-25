@@ -12,37 +12,39 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.latticeengines.domain.exposed.dataplatform.HasPid;
+
 @Entity
 @Access(AccessType.FIELD)
 @IdClass(ModelCommandParameterKey.class)
 @Table(name = "LeadScoringCommandParameter")
-public class ModelCommandParameter implements Serializable {
-    
+public class ModelCommandParameter implements Serializable, HasPid {
+
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @ManyToOne()
     @JoinColumn(name = "CommandId", nullable = false)
     private ModelCommand modelCommand;
-    
+
     @Id
     @Column(name = "Key", nullable = false)
     private String key;
-    
+
     @Column(name = "Value", length = 65535)
     private String value;
-    
+
     ModelCommandParameter() {
         super();
     }
-    
+
     public ModelCommandParameter(ModelCommand command, String key, String value) {
         super();
         this.modelCommand = command;
         this.key = key;
         this.value = value;
     }
-   
+
     public ModelCommand getModelCommand() {
         return modelCommand;
     }
@@ -84,6 +86,17 @@ public class ModelCommandParameter implements Serializable {
         } else if (!modelCommand.equals(other.modelCommand))
             return false;
         return true;
+    }
+
+    @Override
+    public Long getPid() {
+        // Intentionally unimplemented
+        return null;
+    }
+
+    @Override
+    public void setPid(Long id) {
+        // Intentionally unimplemented
     }
 
 }

@@ -52,7 +52,7 @@ public class ModelingServiceTestUtils {
         String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://10.41.1.238/"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://localhost:8082/DLRestService"));
 
         return command;
     }

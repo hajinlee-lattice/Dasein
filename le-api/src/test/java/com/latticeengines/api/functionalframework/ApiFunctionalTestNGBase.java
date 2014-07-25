@@ -85,9 +85,7 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
         platformTestBase = new DataPlatformFunctionalTestNGBase(yarnConfiguration);
 
         platformTestBase.setYarnClient(defaultYarnClient);
-        platformTestBase.setJobEntityMgr(jobEntityMgr);
-        platformTestBase.setModelEntityMgr(modelEntityMgr);
-        platformTestBase.setThrottleConfigurationEntityMgr(throttleConfigurationEntityMgr);
+
         if (!doYarnClusterSetup()) {
             return;
         }

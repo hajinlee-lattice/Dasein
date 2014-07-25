@@ -6,11 +6,13 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.AfterClass;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.Classifier;
@@ -24,6 +26,17 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressi
 public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private Job job;
+    private ModelDefinition modelDef = new ModelDefinition();
+    Model model = new Model();
+
+    @Autowired
+    protected JobEntityMgr jobEntityMgr;
+
+    @Autowired
+    protected ModelEntityMgr modelEntityMgr;
+
+    @Autowired
+    protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
     @Override
     protected boolean doYarnClusterSetup() {
@@ -32,7 +45,6 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        // / jobEntityMgr.deleteStoreFile();
         Classifier classifier = new Classifier();
         classifier.setName("NeuralNetworkClassifier");
         classifier.setSchemaHdfsPath("/datascientist1/iris.json");
@@ -89,7 +101,6 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
         decisionTreeAlgorithm.setSampleName("s1");
 
-        ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model Definition For Demo");
         modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 logisticRegressionAlgorithm }));
@@ -100,18 +111,12 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
         //
         // setup and persist a test model first
-        Model model = new Model();
         model.setId("model_" + this.getClass().getSimpleName() + "_0001");
         model.setName("MODEL TEST NAME");
         model.setModelDefinition(modelDef);
         modelEntityMgr.create(model);
         // link model--job
         job.setModel(model);
-    }
-
-    @AfterClass(groups = "functional")
-    public void cleanup() {
-
     }
 
     private void assertJobsEqual(Job originalJob, Job retrievedJob) {
@@ -131,13 +136,11 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     }
 
-    @Transactional
     @Test(groups = "functional")
     public void testPersist() {
         jobEntityMgr.create(job);
     }
 
-    @Transactional
     @Test(groups = "functional", dependsOnMethods = { "testPersist" })
     public void testRetrieval() {
         Job retrievedJob = new Job();
@@ -148,7 +151,6 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertJobsEqual(job, retrievedJob);
     }
 
-    @Transactional
     @Test(groups = "functional", dependsOnMethods = { "testPersist" })
     public void testUpdate() {
         assertNotNull(job.getPid());
@@ -161,24 +163,9 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         testRetrieval();
     }
 
-    @Transactional
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         jobEntityMgr.delete(job);
     }
 
-    /*
-     * @Test(groups = "functional") public void postThenSave() {
-     * jobEntityMgr.post(job); verifyRetrievedJob(job.getId());
-     * jobEntityMgr.save(); }
-     */
-
-    /*
-     * @Test(groups = "functional", dependsOnMethods = { "postThenSave" })
-     * public void clear() { jobEntityMgr.clear();
-     * assertNull(jobEntityMgr.getById(job.getId())); }
-     * 
-     * @Test(groups = "functional", dependsOnMethods = { "clear" }) public void
-     * load() { jobEntityMgr.load(); verifyRetrievedJob(job.getId()); }
-     */
 }

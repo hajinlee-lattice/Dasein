@@ -26,7 +26,6 @@ import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
@@ -288,7 +287,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
      * src/test/resources/com/latticeengines/dataplatform/
      * service/impl/mysql/create.sql should have been run before executing this
      * test.
-     * 
+     *
      * @throws Exception
      */
     @Test(groups = "functional", enabled = true)

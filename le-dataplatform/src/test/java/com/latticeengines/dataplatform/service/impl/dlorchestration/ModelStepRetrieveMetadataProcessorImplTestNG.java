@@ -30,7 +30,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     private StandaloneHttpServer httpServer;
 
     @BeforeClass(groups = "functional")
@@ -44,9 +44,10 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         httpServer.addServlet(new VisiDBMetadataServlet(cols, types), "/DLRestService/GetQueryMetaDataColumns");
         httpServer.start();
     }
-    
+
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
+        super.cleanup();
         httpServer.stop();
     }
 

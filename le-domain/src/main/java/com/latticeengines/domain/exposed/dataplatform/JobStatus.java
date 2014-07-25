@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.dataplatform;
 
-import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 
@@ -34,11 +33,11 @@ public class JobStatus implements HasId<String> {
     public void setStatus(FinalApplicationStatus status) {
         this.status = status;
     }
-    
+
     public YarnApplicationState getState(){
         return state;
     }
-    
+
     public void setState(YarnApplicationState state){
         this.state = state;
     }

@@ -26,31 +26,31 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
     public static final int SAMPLE_SIZE = 100;
     public static final String RANDOM_FOREST = "RandomForest";
     private static final String JSON_SUFFIX = ".json";
-    private static final String CREATE_OUTPUT_TABLE_SQL = "(Id int NOT NULL,\n" + 
-            "    CommandId int NOT NULL,\n" + 
-            "    SampleSize int NOT NULL,\n" + 
-            "    Algorithm varchar(50) NOT NULL,\n" + 
-            "    JsonPath varchar(512) NULL,\n" + 
-            "    Timestamp datetime NULL\n" + 
-            ")\n" + 
+    private static final String CREATE_OUTPUT_TABLE_SQL = "(Id int NOT NULL,\n" +
+            "    CommandId int NOT NULL,\n" +
+            "    SampleSize int NOT NULL,\n" +
+            "    Algorithm varchar(50) NOT NULL,\n" +
+            "    JsonPath varchar(512) NULL,\n" +
+            "    Timestamp datetime NULL\n" +
+            ")\n" +
             "";
-    
+
     private static final String INSERT_OUTPUT_TABLE_SQL = "(Id, CommandId, SampleSize, Algorithm, JsonPath, Timestamp) values (?, ?, ?, ?, ?, ?)";
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private ModelingService modelingService;
-    
+
     @Autowired
     private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
-    
+
     @Autowired
     private JdbcTemplate dlOrchestrationJdbcTemplate;
-        
+
     @Override
-    public void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {               
+    public void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
         List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand, ModelCommandStep.SUBMIT_MODELS);
         String appId = commandStates.get(0).getYarnApplicationId();
         JobStatus jobStatus = modelingService.getJobStatus(appId);
@@ -59,19 +59,19 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
             for (String filePath : HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory())) {
                 if (filePath.endsWith(JSON_SUFFIX)) {
                     modelFilePath = filePath;
-                    break;                    
+                    break;
                 }
             }
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_16002, e, new String[] { String.valueOf(modelCommand.getPid()), appId }); 
-        }             
-  
+            throw new LedpException(LedpCode.LEDP_16002, e, new String[] { String.valueOf(modelCommand.getPid()), appId });
+        }
+
         ModelCommandOutput output = new ModelCommandOutput(1, modelCommand.getPid().intValue(), SAMPLE_SIZE, RANDOM_FOREST, modelFilePath, new Date());
-        dlOrchestrationJdbcTemplate.execute("drop table " + modelCommandParameters.getEventTable());        
-        dlOrchestrationJdbcTemplate.execute("create table " + modelCommandParameters.getEventTable() + " " + CREATE_OUTPUT_TABLE_SQL);         
-        dlOrchestrationJdbcTemplate.update("insert into " + modelCommandParameters.getEventTable() + " " + INSERT_OUTPUT_TABLE_SQL, 
+        dlOrchestrationJdbcTemplate.execute("drop table " + modelCommandParameters.getEventTable());
+        dlOrchestrationJdbcTemplate.execute("create table " + modelCommandParameters.getEventTable() + " " + CREATE_OUTPUT_TABLE_SQL);
+        dlOrchestrationJdbcTemplate.update("insert into " + modelCommandParameters.getEventTable() + " " + INSERT_OUTPUT_TABLE_SQL,
                 output.getId(), output.getCommandId(), output.getSampleSize(), output.getAlgorithm(), output.getJsonPath(), output.getTimestamp());
     }
-    
+
 }
 

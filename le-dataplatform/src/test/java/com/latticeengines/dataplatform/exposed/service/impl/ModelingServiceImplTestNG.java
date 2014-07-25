@@ -27,6 +27,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -41,7 +45,7 @@ import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
-@Transactional 
+@Transactional
 public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
@@ -51,7 +55,19 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     private YarnService yarnService;
 
     @Autowired
+    protected JobEntityMgr jobEntityMgr;
+
+    @Autowired
     private ModelingService modelingService;
+
+    @Autowired
+    protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
+
+    @Autowired
+    protected ModelEntityMgr modelEntityMgr;
+
+    @Autowired
+    protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
     private Model model = null;
 
@@ -82,7 +98,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         doCopy(fs, copyEntries);
 
         ModelDefinition modelDef = produceModelDefinition();
-        // 
+        //
         // in the application, it is assumed that the model definition is defined in the metadata db
         // also, modelDef 'name' should be unique
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
@@ -168,14 +184,14 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
             assertNotNull(modelContents);
         }
     }
- 
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "submitModel" })
     public void submitModelMultithreaded() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(3);
-        
+
         final Model[] models = new Model[3];
-        ModelDefinition modelDef = produceModelDefinition(); 
+        ModelDefinition modelDef = produceModelDefinition();
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
         models[0] = produceModel(modelDef);
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
@@ -218,7 +234,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         // clean up:  this test case expects no previous throttle
         log.info("start throttling .........");
         throttleConfigurationEntityMgr.deleteAll();
-        
+
         ModelDefinition modelDef = produceModelDefinition();
         Model m = produceModel(modelDef);
         m.setModelDefinition(modelDef);
@@ -234,7 +250,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         assertEquals(appIds.size(), 3);
 
-        // First job to complete  
+        // First job to complete
         FinalApplicationStatus status = waitForStatus(appIds.get(0), FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
@@ -257,7 +273,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         // Only one job would be submitted since new jobs won't even come in
         assertEquals(appIds.size(), 1);
-        
+
         FinalApplicationStatus status = waitForStatus(appIds.get(0), FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }

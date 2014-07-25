@@ -6,19 +6,20 @@ import static org.testng.Assert.assertNull;
 
 import java.util.Calendar;
 
-import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 
-@TransactionConfiguration(transactionManager = "transactionManager", defaultRollback = true)
-@Transactional
 public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private ThrottleConfiguration config;
+
+    @Autowired
+    protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     @Override
     protected boolean doYarnClusterSetup() {
@@ -33,13 +34,11 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
         config.setTimestampLong(System.currentTimeMillis());
     }
 
-    @Transactional
     @Test(groups = "functional")
     public void testPersist() {
         throttleConfigurationEntityMgr.create(config);
     }
 
-    @Transactional
     @Test(groups = "functional", dependsOnMethods = { "testPersist" })
     public void testRetrieval() {
         ThrottleConfiguration newConfig = new ThrottleConfiguration(config.getPid());
@@ -63,7 +62,6 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
         assertEquals(newConfig.isImmediate(), config.isImmediate());
     }
 
-    @Transactional
     @Test(groups = "functional", dependsOnMethods = { "testPersist" })
     public void testUpdate() {
         assertNotNull(config.getPid());
@@ -75,16 +73,15 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
         testRetrieval();
     }
 
-    @Transactional
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         ThrottleConfiguration newConfig = new ThrottleConfiguration(config.getPid());
-        newConfig = throttleConfigurationEntityMgr.findByKey(newConfig); 
+        newConfig = throttleConfigurationEntityMgr.findByKey(newConfig);
 
         assertNotNull(newConfig.getTimestamp());
         throttleConfigurationEntityMgr.delete(newConfig);
         newConfig = null;
-        newConfig = throttleConfigurationEntityMgr.findByKey(config); 
+        newConfig = throttleConfigurationEntityMgr.findByKey(config);
         assertNull(newConfig);
     }
 

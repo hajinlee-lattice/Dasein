@@ -33,7 +33,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
@@ -41,15 +40,12 @@ import org.springframework.yarn.client.YarnClient;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.test.context.YarnCluster;
 import org.springframework.yarn.test.junit.ApplicationInfo;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
-import com.latticeengines.dataplatform.entitymanager.AlgorithmEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.BaseEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
@@ -59,7 +55,6 @@ import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgo
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
-@Transactional
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(DataPlatformFunctionalTestNGBase.class);
@@ -71,19 +66,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     protected Configuration yarnConfiguration;
 
     @Autowired
-    protected JobEntityMgr jobEntityMgr;
-
-    @Autowired
-    protected ModelEntityMgr modelEntityMgr;
-
-    @Autowired
-    protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
-
-    @Autowired
-    protected AlgorithmEntityMgr algorithmEntityMgr;
-
-    @Autowired
-    protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
+    private OrderedEntityMgrListForDbClean orderedEntityMgrListForDbClean;
 
     @Value("${dataplatform.dlorchestration.datasource.host}")
     protected String dbDlOrchestrationHost;
@@ -108,7 +91,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     @Value("${dataplatform.container.memory}")
     protected int memory;
-    
+
     @Value("${dataplatform.customer.basedir}")
     protected String customerBaseDir;
 
@@ -142,18 +125,6 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
             }
 
         });
-    }
-
-    public void setJobEntityMgr(JobEntityMgr jobEntityMgr) {
-        this.jobEntityMgr = jobEntityMgr;
-    }
-
-    public void setModelEntityMgr(ModelEntityMgr modelEntityMgr) {
-        this.modelEntityMgr = modelEntityMgr;
-    }
-
-    public void setThrottleConfigurationEntityMgr(ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr) {
-        this.throttleConfigurationEntityMgr = throttleConfigurationEntityMgr;
     }
 
     public String getFileUrlFromResource(String resource) {
@@ -224,9 +195,17 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         doCopy(fs, copyEntries);
     }
 
+    @AfterClass(groups = { "functional", "functional.scheduler" })
+    public void cleanup() throws Exception {
+        for (BaseEntityMgr<?> entityMgr : orderedEntityMgrListForDbClean.entityMgrs()) {
+            entityMgr.deleteAll();
+        }
+    }
+
+
     /**
      * this helper method produces 1 definition with 3 algorithms
-     * 
+     *
      * @return
      */
     protected ModelDefinition produceModelDefinition() {
@@ -256,7 +235,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     /**
      * this helper method produces a Model for unit / functional test (note:
      * ModelDefinition still needs to be set)
-     * 
+     *
      * @param appIdStr
      * @return
      */
@@ -317,7 +296,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     /**
      * Gets the running cluster runtime {@link Configuration} for tests.
-     * 
+     *
      * @return the Yarn cluster config
      */
     public Configuration getConfiguration() {
@@ -326,7 +305,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     /**
      * Gets the running {@link YarnCluster} for tests.
-     * 
+     *
      * @return the Yarn cluster
      */
     public YarnCluster getYarnCluster() {
@@ -335,7 +314,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     /**
      * Sets the {@link YarnCluster}
-     * 
+     *
      * @param yarnCluster
      *            the Yarn cluster
      */
@@ -345,7 +324,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     /**
      * Gets the {@link YarnClient}.
-     * 
+     *
      * @return the Yarn client
      */
     public YarnClient getYarnClient() {
@@ -354,7 +333,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     /**
      * Sets the {@link YarnClient}.
-     * 
+     *
      * @param yarnClient
      *            the Yarn client
      */
@@ -368,7 +347,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
      * if something failed or final known status after the wait/poll operations.
      * Array of application statuses can be used to return immediately from wait
      * loop if status is matched.
-     * 
+     *
      * @param applicationStatuses
      *            the application statuses to wait
      * @return Application id for submit
@@ -389,7 +368,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     /**
      * Submit an application.
-     * 
+     *
      * @return the submitted application {@link ApplicationId}
      */
     protected ApplicationId submitApplication() {
@@ -425,7 +404,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     /**
      * Kill the application.
-     * 
+     *
      * @param applicationId
      *            the application id
      */
