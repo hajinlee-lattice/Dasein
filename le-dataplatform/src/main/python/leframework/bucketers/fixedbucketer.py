@@ -23,17 +23,17 @@ class FixedBucketer(Bucketer):
         """
         if numbins < 1:
             raise ValueError("numbins cannot be less than or equal to one.")
-        
+
         yield -np.inf
-        
+
         lastThreshold = columnSeries.min()    
         bucketSize = (columnSeries.max() - columnSeries.min()) / float(numbins)
         if bucketSize == 0:
             yield np.inf
             return
-        
+
         for _ in range(numbins - 1):
             lastThreshold += bucketSize
             yield lastThreshold        
-        
+
         yield np.inf

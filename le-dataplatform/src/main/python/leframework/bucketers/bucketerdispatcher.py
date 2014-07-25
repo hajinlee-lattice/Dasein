@@ -49,7 +49,7 @@ class BucketerDispatcher(object):
                 # Set type specific parameters
                 maxBuckets = methodParams.pop("maxBuckets", maxBuckets)
                 params = methodParams
-                
+
         bucketList = bucketer.bucketColumn(columnSeries, params)
         bucketList = self.consolidateBins(columnSeries, eventSeries, bucketList, maxBuckets)
         # Reset infinity to None
