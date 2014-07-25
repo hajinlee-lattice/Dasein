@@ -54,6 +54,6 @@ public class GetJobStatus extends ModelingResourceJob<String, JobStatus> {
             }
 
         });
-        return files.size() >= numOfAvros;
+        return files.size() == numOfAvros;
     }
 }
