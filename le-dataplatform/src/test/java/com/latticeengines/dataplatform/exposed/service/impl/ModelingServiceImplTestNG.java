@@ -171,7 +171,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     }
  
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Test(groups = "functional", enabled = false, dependsOnMethods = { "submitModel" })
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "submitModel" })
     public void submitModelMultithreaded() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(3);
         
