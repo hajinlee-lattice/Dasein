@@ -40,7 +40,6 @@ import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
-import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 
 @Transactional 
 public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
