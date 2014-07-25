@@ -19,7 +19,7 @@ class SparkLauncherServiceImplTestNG extends SparkDbFunctionalTestNGBase {
     assertNotNull(sparkLauncherService)
     val conf = new YarnConfiguration()
     conf.setStrings(YarnConfiguration.YARN_APPLICATION_CLASSPATH, YarnConfiguration.DEFAULT_YARN_APPLICATION_CLASSPATH: _*)
-    var appId = sparkLauncherService.runApp(conf, "ABCount2", "Priority0")
+    var appId = sparkLauncherService.runApp(conf, "DataProfileJob", "Priority0")
     println(appId)
   }
 }

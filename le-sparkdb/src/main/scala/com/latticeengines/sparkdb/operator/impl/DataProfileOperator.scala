@@ -1,5 +1,6 @@
 package com.latticeengines.sparkdb.operator.impl
 
+import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.mapred.AvroKey
 import org.apache.avro.mapreduce.AvroJob
@@ -11,6 +12,8 @@ import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
+import org.apache.spark.storage.StorageLevel
+
 
 import com.latticeengines.common.exposed.util.AvroUtils
 import com.latticeengines.sparkdb.operator.DataOperator
@@ -35,21 +38,22 @@ class DataProfileOperator extends DataOperator {
 object DataProfileOperator {
   
   def main(args: Array[String]) = {
-    val sparkConf = new SparkConf().setAppName("AvroTest").setMaster("local[2]")
+    val sparkConf = new SparkConf().setAppName("AvroTest")
     val sc = new SparkContext(sparkConf)
     val conf = new Configuration()
     val job = new Job(conf)
-    val path = new Path("/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/allTraining-r-00000.avro");
-    val schema = AvroUtils.getSchema(conf, path);
+    val path = new Path("/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/allTraining-r-00000.avro")
+    val schema = AvroUtils.getSchema(conf, path)
 
-    AvroJob.setInputKeySchema(job, schema);
+    AvroJob.setInputKeySchema(job, schema)
     
     val rdd = sc.newAPIHadoopFile(
        path.toString(),
        classOf[AvroKeyInputFormat[GenericRecord]],
        classOf[AvroKey[GenericRecord]],
-       classOf[NullWritable], conf).map(x => x._1.datum())
-    val sum = rdd.map { p => p.get("SEPAL_WIDTH").asInstanceOf[Float] }.reduce(_ + _)
+       classOf[NullWritable], conf).map(x =>  { new Record(x._1.datum().asInstanceOf[Record], true) }).persist(StorageLevel.MEMORY_ONLY)
+       
+    val sum = rdd.map(p => p.get("SEPAL_WIDTH").asInstanceOf[Float]).reduce(_ + _)
     val avg = sum/rdd.count()
     println(s"Sum = $sum")
     println(s"Avg = $avg")
