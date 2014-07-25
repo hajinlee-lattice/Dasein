@@ -12,6 +12,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -38,6 +40,7 @@ import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
+import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 
 @Transactional 
 public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
@@ -57,6 +60,8 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     public void beforeMethod() {
 
     }
+    
+    protected static final Log log = LogFactory.getLog(ModelingServiceImplTestNG.class);
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -166,7 +171,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     }
  
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "submitModel" })
+    @Test(groups = "functional", enabled = false, dependsOnMethods = { "submitModel" })
     public void submitModelMultithreaded() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(3);
         
@@ -212,6 +217,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @Transactional(propagation = Propagation.REQUIRED)
     public void throttleImmediate() throws Exception {
         // clean up:  this test case expects no previous throttle
+        log.info("start throttling .........");
         throttleConfigurationEntityMgr.deleteAll();
         
         ModelDefinition modelDef = produceModelDefinition();
