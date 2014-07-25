@@ -147,7 +147,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setMetadataTable(model.getMetadataTable());
         config.setSamplePrefix("all");
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
-        config.setTargets(model.getTargetsList());
+        config.setTargets(Arrays.<String>asList(new String[] { "P1_Event" }));
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
