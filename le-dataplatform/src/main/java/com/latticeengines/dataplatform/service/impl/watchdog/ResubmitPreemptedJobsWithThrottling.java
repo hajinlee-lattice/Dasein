@@ -42,13 +42,24 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     public void run(JobExecutionContext context) throws JobExecutionException {
         ThrottleConfiguration latestConfig = throttleConfigurationEntityMgr.getLatestConfig();
         List<Job> jobsToKill = getJobsToKill(latestConfig);
+        if (jobsToKill.size() != 0) {
+            log.info("Received request to kill " + jobsToKill.size() + " applications");
+        }
+        
         // resubmit preempted jobs excluding jobsToKill
-        resubmitPreemptedJobs(jobsToKill);
+        int jobsResubmittedCount = resubmitPreemptedJobs(jobsToKill);
+        if (jobsResubmittedCount > 0) {
+            log.info(jobsResubmittedCount + " applications resubmitted, going to sleep");
+        }
+        
         // kill jobs
-        throttle(latestConfig, jobsToKill);
+        int jobsKilledCount = throttle(latestConfig, jobsToKill);
+        if (jobsKilledCount > 0) {
+            log.info(jobsKilledCount + " applications killed, going to sleep");
+        }
     }
 
-    private void resubmitPreemptedJobs(List<Job> jobsToExcludeFromResubmission) {
+    private int resubmitPreemptedJobs(List<Job> jobsToExcludeFromResubmission) {
         Set<String> jobIdsToExcludeFromResubmission = new HashSet<String>();
         for (Job job : jobsToExcludeFromResubmission) {
             jobIdsToExcludeFromResubmission.add(job.getId());
@@ -66,6 +77,8 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
         for (Job job : jobsToResubmit) {
             jobService.resubmitPreemptedJob(job);
         }
+        
+        return jobsToResubmit.size();
     }
 
     private List<Job> getJobsToKill(ThrottleConfiguration config) {
@@ -110,7 +123,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     }
 
     // kill jobs specified
-    private void throttle(ThrottleConfiguration config, List<Job> jobs) {
+    private int throttle(ThrottleConfiguration config, List<Job> jobs) {
         Set<String> runningJobIds = getRunningJobIds();
 
         Set<String> appsKilled = new HashSet<String>();
@@ -140,5 +153,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
                 log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
             }
         }
+        
+        return appsKilled.size();
     }
 }
