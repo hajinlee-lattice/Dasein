@@ -111,8 +111,8 @@ class Launcher(object):
                     self.__publishToConsumer(hdfs, modelLocalDir + filename, modelHdfsDir, "BARD", modelName)
     
     def __publishToConsumer(self, hdfs, modelLocalPath, modelHdfsDir, consumer, modelName):
-        # Id length cap by Bard
-        modelIdLengthLimit = 50 
+        # Id length cap by Bard, 120 for release
+        modelIdLengthLimit = 45 
         tokens = string.split(modelHdfsDir, "/")
         modelToConsumerHdfsPath = ""
         for index in range(0, 5):
