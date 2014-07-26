@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -29,6 +30,8 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 
 public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase {
+
+    private static final String TEMP_EVENTTABLE = "ModelCommandCallableTestNG_eventtable";
 
     @Autowired
     private JobService jobService;
@@ -60,14 +63,13 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
+    @Autowired
+    private JdbcTemplate dlOrchestrationJdbcTemplate;
+
     private StandaloneHttpServer httpServer;
 
     protected boolean doDependencyLibraryCopy() {
         return false;
-    }
-
-    @BeforeMethod(groups = "functional")
-    public void beforeMethod() {
     }
 
     @BeforeClass(groups = "functional")
@@ -78,21 +80,34 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         Integer[] types = new Integer[] { 0, 0, 0 };
         httpServer.addServlet(new VisiDBMetadataServlet(cols, types), "/DLRestService/GetQueryMetaDataColumns");
         httpServer.start();
+
+        String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
+        if (dbDriverName.contains("Microsoft")) {
+            // Microsoft JDBC Driver 4.0 for SQL Server
+            dlOrchestrationJdbcTemplate.execute("select * into " + TEMP_EVENTTABLE + " from Q_EventTable_Nutanix");
+        } else {
+            // MySQL Connector Java
+            dlOrchestrationJdbcTemplate.execute("create table " + TEMP_EVENTTABLE + " select * from Q_EventTable_Nutanix");
+        }
+
     }
 
     @AfterClass(groups = "functional")
     public void cleanup() throws Exception {
         super.cleanup();
         httpServer.stop();
+        dlOrchestrationJdbcTemplate.execute("drop table " + TEMP_EVENTTABLE);
     }
 
     @Test(groups = "functional")
     public void testWorkflow() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE);
         modelCommandEntityMgr.create(command);
-        // List<ModelCommand> commands =
-        // modelCommandEntityMgr.getNewAndInProgress();
-        // ModelCommand command = commands.get(0);
+        // Comment out above 2 lines and uncomment next block when testing against an integration database
+        /*
+        List<ModelCommand> commands = modelCommandEntityMgr.getNewAndInProgress();
+        ModelCommand command = commands.get(0);
+        */
         ModelCommandCallable modelCommandCallable = new ModelCommandCallable(command, jobService,
                 modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
                 modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,

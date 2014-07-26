@@ -4,8 +4,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 
-import java.util.List;
-
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,14 +20,13 @@ import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcesso
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
-import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
 public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private static final String YARN_APPLICATION_ID = "yarnApplicationId";
-    private static final String DUMMY_EVENTTABLE = "dummy_eventtable";
+    private static final String TEMP_EVENTTABLE = "ModelStepOutputResultsProcessorImplTestNG_eventtable";
 
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
@@ -59,23 +56,20 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
       ReflectionTestUtils.setField(modelStepOutputResultsProcessor, "modelingService", modelingService);
 
-      dlOrchestrationJdbcTemplate.execute("create table " + DUMMY_EVENTTABLE + " (Id int)");
+      dlOrchestrationJdbcTemplate.execute("create table " + TEMP_EVENTTABLE + " (Id int)");
   }
 
   @AfterClass(groups = { "functional" })
   public void cleanup() throws Exception {
       super.cleanup();
-      dlOrchestrationJdbcTemplate.execute("drop table " + DUMMY_EVENTTABLE);
+      dlOrchestrationJdbcTemplate.execute("drop table " + TEMP_EVENTTABLE);
   }
 
   @Test(groups = "functional")
   public void testExecutePostStep() throws Exception {
-      List<ModelCommandParameter> listParameters = ModelingServiceTestUtils.createModelCommandWithCommandParameters()
-              .getCommandParameters();
-      ModelCommandParameters commandParameters = new ModelCommandParameters(listParameters);
-      commandParameters.setEventTable(DUMMY_EVENTTABLE);
-      ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+      ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE);
       modelCommandEntityMgr.create(command);
+      ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
       ModelCommandState commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);
       commandState.setYarnApplicationId(YARN_APPLICATION_ID);
