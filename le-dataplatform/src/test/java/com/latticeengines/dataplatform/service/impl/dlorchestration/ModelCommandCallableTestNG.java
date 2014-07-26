@@ -118,7 +118,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
                 && iterations < 400) {
             modelCommandCallable.call();
             iterations++;
-            Thread.sleep(3000);
+            Thread.sleep(15000);
         }
 
         assertTrue(command.getCommandStatus() == ModelCommandStatus.SUCCESS);
