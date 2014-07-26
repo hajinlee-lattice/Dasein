@@ -2,11 +2,8 @@ package com.latticeengines.dataplatform.service.impl.watchdog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,7 +14,6 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
@@ -29,13 +25,13 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
 
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Value("${dataplatform.throttle.threshold:600000}")
     private long throttleThreshold;
 
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
-    
+
     private HashMap<String, AppStatus> appRecords = new HashMap<String, AppStatus>();
 
     public ThrottleLongHangingJobs() {
@@ -109,9 +105,9 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
         if (appsToKill.isEmpty()) {
             return;
         }
-        
+
         log.info("Throttling " + appsToKill.size() + " applications");
-        Set<String> appsKilled = new HashSet<String>();
+        List<String> appsKilled = new ArrayList<String>();
         for (String appId : appsToKill) {
             try {
                 jobService.killJob(YarnUtils.getApplicationIdFromString(appId));
@@ -121,9 +117,9 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
                 log.warn("Cannot kill job with id : " + appId, e);
             }
         }
-        
+
         // clean up job directories
-        Set<Job> jobsKilled = jobEntityMgr.findAllByObjectIds(appsKilled);
+        List<Job> jobsKilled = jobEntityMgr.findAllByObjectIds(appsKilled);
         for (Job job : jobsKilled) {
             String dir = hdfsJobBaseDir + "/" + job.getContainerPropertiesObject().get(ContainerProperty.JOBDIR.name());
             try {
@@ -132,8 +128,7 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
                 log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
             }
         }
-    
-        
+
     }
 
     private class AppStatus {

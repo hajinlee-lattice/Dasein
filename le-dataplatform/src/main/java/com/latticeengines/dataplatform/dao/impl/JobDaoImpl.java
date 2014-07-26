@@ -1,21 +1,16 @@
 package com.latticeengines.dataplatform.dao.impl;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.latticeengines.dataplatform.dao.JobDao;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 
 public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
-
 
     public JobDaoImpl() {
         super();
@@ -39,13 +34,13 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public Set<Job> findAllByObjectIds(Set<String> jobIds) {
+    public List<Job> findAllByObjectIds(List<String> jobIds) {
         Session session = sessionFactory.getCurrentSession();
         Criteria criteria = session.createCriteria(Job.class, "listAllByObjectIds");
         criteria.add(Restrictions.in("id", jobIds));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         List<Job> jobs = criteria.list();
 
-        return new HashSet<Job>(jobs);
+        return jobs;
     }
 }

@@ -2,7 +2,6 @@ package com.latticeengines.dataplatform.exposed.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +10,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
@@ -25,7 +23,6 @@ import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
@@ -75,7 +72,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     public void beforeMethod() {
 
     }
-    
+
     protected static final Log log = LogFactory.getLog(ModelingServiceImplTestNG.class);
 
     @BeforeClass(groups = "functional")
@@ -91,8 +88,8 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
                 "com/latticeengines/dataplatform/exposed/service/impl/DELL_EVENT_TABLE_TEST").getPath();
         File[] avroFiles = getAvroFilesForDir(inputDir);
         for (File avroFile : avroFiles) {
-            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(),
-                    customerBaseDir + "/DELL/data/DELL_EVENT_TABLE_TEST", false));
+            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), customerBaseDir
+                    + "/DELL/data/DELL_EVENT_TABLE_TEST", false));
         }
 
         doCopy(fs, copyEntries);
@@ -112,8 +109,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         m.setName("ModelSubmission-" + System.currentTimeMillis());
         m.setTable("DELL_EVENT_TABLE_TEST");
         m.setMetadataTable("EventMetadata");
-        m.setFeaturesList(Arrays.<String> asList(new String[] {
-                "Column5", //
+        m.setFeaturesList(Arrays.<String> asList(new String[] { "Column5", //
                 "Column6", //
                 "Column7", //
                 "Column8", //
@@ -231,7 +227,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @Test(groups = "functional", dependsOnMethods = { "submitModel" })
     @Transactional(propagation = Propagation.REQUIRED)
     public void throttleImmediate() throws Exception {
-        // clean up:  this test case expects no previous throttle
+        // clean up: this test case expects no previous throttle
         log.info("start throttling .........");
         throttleConfigurationEntityMgr.deleteAll();
 
@@ -256,6 +252,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         // Second job should have been killed since we throttled
         status = waitForStatus(appIds.get(1), FinalApplicationStatus.KILLED);
+        assertEquals(status, FinalApplicationStatus.KILLED);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

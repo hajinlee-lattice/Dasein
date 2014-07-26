@@ -1,13 +1,11 @@
 package com.latticeengines.dataplatform.entitymanager.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.JobDao;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
@@ -45,9 +43,9 @@ public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntit
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public Set<Job> findAllByObjectIds(Set<String> jobIds) {
+    public List<Job> findAllByObjectIds(List<String> jobIds) {
         if (jobIds == null || jobIds.isEmpty()) {
-            return new HashSet<Job>();
+            return new ArrayList<Job>();
         }
                     
         return jobDao.findAllByObjectIds(jobIds);

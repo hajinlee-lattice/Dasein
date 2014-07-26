@@ -1,7 +1,6 @@
 package com.latticeengines.dataplatform.dao;
 
-import java.util.Set;
-
+import java.util.List;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 
 public interface JobDao extends BaseDao<Job> {
@@ -9,5 +8,5 @@ public interface JobDao extends BaseDao<Job> {
     // Set<Job> getByJobIds(Set<String> jobIds);
     Job findByObjectId(String id);
 
-    Set<Job> findAllByObjectIds(Set<String> jobIds);
+    List<Job> findAllByObjectIds(List<String> jobIds);
 }
