@@ -1,4 +1,5 @@
 import os
+import copy
 import sys
 import pkgutil as pkg
 import numpy as np
@@ -47,8 +48,9 @@ class BucketerDispatcher(object):
                 bucketerClass = globals()[method]
                 bucketer = bucketerClass()
                 # Set type specific parameters
-                maxBuckets = methodParams.pop("maxBuckets", maxBuckets)
-                params = methodParams
+                copyParams = copy.deepcopy(methodParams)
+                maxBuckets = copyParams.pop("maxBuckets", maxBuckets)
+                params = copyParams
 
         bucketList = bucketer.bucketColumn(columnSeries, params)
         bucketList = self.consolidateBins(columnSeries, eventSeries, bucketList, maxBuckets)
