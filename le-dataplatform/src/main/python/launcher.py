@@ -111,12 +111,17 @@ class Launcher(object):
                     self.__publishToConsumer(hdfs, modelLocalDir + filename, modelHdfsDir, "BARD", modelName)
     
     def __publishToConsumer(self, hdfs, modelLocalPath, modelHdfsDir, consumer, modelName):
+        # Id length cap by Bard
+        modelIdLengthLimit = 50 
         tokens = string.split(modelHdfsDir, "/")
         modelToConsumerHdfsPath = ""
         for index in range(0, 5):
             modelToConsumerHdfsPath = modelToConsumerHdfsPath + tokens[index] + "/"
             
-        modelToConsumerHdfsPath = modelToConsumerHdfsPath + consumer + "/" + modelName + "-" + tokens[7]
+        modelId = tokens[7] + "-" + modelName 
+        if len(modelId) > modelIdLengthLimit:
+            modelId = modelId[:modelIdLengthLimit]
+        modelToConsumerHdfsPath = modelToConsumerHdfsPath + consumer + "/" + modelId
         hdfs.rmdir(modelToConsumerHdfsPath + "/1.json")
         hdfs.copyFromLocal(modelLocalPath, "%s/%s" % (modelToConsumerHdfsPath, "1.json"))
 
