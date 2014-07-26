@@ -8,10 +8,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.quartz.JobExecutionContext;
@@ -19,6 +21,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
@@ -112,8 +115,20 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     }
 
     private List<AppInfo> getAppInfos() {
-        AppsInfo appsInfo = yarnService.getApplications("states=RUNNING");
+        AppsInfo appsInfo = yarnService.getApplications("states=" + YarnApplicationState.NEW);
         ArrayList<AppInfo> appInfos = appsInfo.getApps();
+
+        appsInfo = yarnService.getApplications("states=" + YarnApplicationState.NEW_SAVING);
+        appInfos.addAll(appsInfo.getApps());
+
+        appsInfo = yarnService.getApplications("states=" + YarnApplicationState.SUBMITTED);
+        appInfos.addAll(appsInfo.getApps());
+
+        appsInfo = yarnService.getApplications("states=" + YarnApplicationState.ACCEPTED);
+        appInfos.addAll(appsInfo.getApps());
+
+        appsInfo = yarnService.getApplications("states=" + YarnApplicationState.RUNNING);
+        appInfos.addAll(appsInfo.getApps());
         Collections.sort(appInfos, new Comparator<AppInfo>() {
 
             @Override
