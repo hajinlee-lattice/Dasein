@@ -7,9 +7,9 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 
+@ContextConfiguration(locations = { "classpath:dataplatform-dlorchestration-quartz-context.xml" })
 public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase {
 
     private static final String TEMP_EVENTTABLE = "ModelCommandCallableTestNG_eventtable";
@@ -101,24 +102,16 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
     @Test(groups = "functional")
     public void testWorkflow() throws Exception {
+        // Comment out below 2 lines when testing against an integration database
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE);
         modelCommandEntityMgr.create(command);
-        // Comment out above 2 lines and uncomment next block when testing against an integration database
-        /*
-        List<ModelCommand> commands = modelCommandEntityMgr.getNewAndInProgress();
-        ModelCommand command = commands.get(0);
-        */
-        ModelCommandCallable modelCommandCallable = new ModelCommandCallable(command, jobService,
-                modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
-                modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
-                modelStepRetrieveMetadataProcessor);
 
         int iterations = 0;
         while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
-                && iterations < 400) {
-            modelCommandCallable.call();
+                && iterations < 60) {
             iterations++;
             Thread.sleep(15000);
+            command = modelCommandEntityMgr.findByKey(command);
         }
 
         assertTrue(command.getCommandStatus() == ModelCommandStatus.SUCCESS);
