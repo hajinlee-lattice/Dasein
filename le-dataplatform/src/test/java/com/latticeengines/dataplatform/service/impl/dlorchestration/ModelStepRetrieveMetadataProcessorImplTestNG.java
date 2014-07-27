@@ -47,7 +47,7 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
-        super.cleanup();
+        super.clearTables();
         httpServer.stop();
     }
 

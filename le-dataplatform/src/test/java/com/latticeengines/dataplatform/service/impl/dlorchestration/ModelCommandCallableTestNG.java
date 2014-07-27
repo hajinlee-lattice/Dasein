@@ -82,12 +82,16 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         httpServer.addServlet(new VisiDBMetadataServlet(cols, types), "/DLRestService/GetQueryMetaDataColumns");
         httpServer.start();
 
+        super.clearTables();
+
         String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
         if (dbDriverName.contains("Microsoft")) {
             // Microsoft JDBC Driver 4.0 for SQL Server
+            dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE + "', 'U') IS NOT NULL DROP TABLE " + TEMP_EVENTTABLE);
             dlOrchestrationJdbcTemplate.execute("select * into " + TEMP_EVENTTABLE + " from Q_EventTable_Nutanix");
         } else {
             // MySQL Connector Java
+            dlOrchestrationJdbcTemplate.execute("drop table if exists " + TEMP_EVENTTABLE);
             dlOrchestrationJdbcTemplate.execute("create table " + TEMP_EVENTTABLE + " select * from Q_EventTable_Nutanix");
         }
 
@@ -95,9 +99,9 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
     @AfterClass(groups = "functional")
     public void cleanup() throws Exception {
-        super.cleanup();
         httpServer.stop();
         dlOrchestrationJdbcTemplate.execute("drop table " + TEMP_EVENTTABLE);
+        super.clearTables();
     }
 
     @Test(groups = "functional")
@@ -114,6 +118,12 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
             command = modelCommandEntityMgr.findByKey(command);
         }
 
+        if (command.getCommandStatus() == ModelCommandStatus.FAIL) {
+            List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
+            for (ModelCommandLog modelCommandLog : logs) {
+                System.out.println(modelCommandLog.getMessage());
+            }
+        }
         assertTrue(command.getCommandStatus() == ModelCommandStatus.SUCCESS);
 
         List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();

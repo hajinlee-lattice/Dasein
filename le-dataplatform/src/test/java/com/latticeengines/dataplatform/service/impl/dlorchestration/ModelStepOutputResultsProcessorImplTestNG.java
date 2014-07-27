@@ -56,13 +56,21 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
       ReflectionTestUtils.setField(modelStepOutputResultsProcessor, "modelingService", modelingService);
 
+      String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
+      if (dbDriverName.contains("Microsoft")) {
+          // Microsoft JDBC Driver 4.0 for SQL Server
+          dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE + "', 'U') IS NOT NULL DROP TABLE " + TEMP_EVENTTABLE);
+      } else {
+          // MySQL Connector Java
+          dlOrchestrationJdbcTemplate.execute("drop table if exists " + TEMP_EVENTTABLE);
+      }
       dlOrchestrationJdbcTemplate.execute("create table " + TEMP_EVENTTABLE + " (Id int)");
   }
 
   @AfterClass(groups = { "functional" })
-  public void cleanup() throws Exception {
-      super.cleanup();
+  public void cleanup() {
       dlOrchestrationJdbcTemplate.execute("drop table " + TEMP_EVENTTABLE);
+      super.clearTables();
   }
 
   @Test(groups = "functional")

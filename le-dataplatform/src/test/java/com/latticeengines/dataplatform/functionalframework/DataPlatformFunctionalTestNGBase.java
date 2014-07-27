@@ -196,9 +196,13 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     }
 
     @AfterClass(groups = { "functional", "functional.scheduler" })
-    public void cleanup() throws Exception {
-        for (BaseEntityMgr<?> entityMgr : orderedEntityMgrListForDbClean.entityMgrs()) {
-            entityMgr.deleteAll();
+    public void clearTables() {
+        try {
+            for (BaseEntityMgr<?> entityMgr : orderedEntityMgrListForDbClean.entityMgrs()) {
+                entityMgr.deleteAll();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
