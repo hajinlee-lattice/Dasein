@@ -112,7 +112,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
         int iterations = 0;
         while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
-                && iterations < 60) {
+                && iterations < 121) {
             iterations++;
             Thread.sleep(15000);
             command = modelCommandEntityMgr.findByKey(command);
@@ -124,7 +124,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
                 System.out.println(modelCommandLog.getMessage());
             }
         }
-        assertTrue(command.getCommandStatus() == ModelCommandStatus.SUCCESS);
+        assertTrue(command.getCommandStatus() == ModelCommandStatus.SUCCESS, "The actual command state is " + command.getCommandStatus());
 
         List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
         assertEquals(logs.size(), 14);
