@@ -96,7 +96,8 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         ModelDefinition modelDef = produceModelDefinition();
         //
-        // in the application, it is assumed that the model definition is defined in the metadata db
+        // in the application, it is assumed that the model definition is
+        // defined in the metadata db
         // also, modelDef 'name' should be unique
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
         //
@@ -252,6 +253,10 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
         // Second job should have been killed since we throttled
         status = waitForStatus(appIds.get(1), FinalApplicationStatus.KILLED);
+        assertEquals(status, FinalApplicationStatus.KILLED);
+
+        // Third job should have been killed since we throttled
+        status = waitForStatus(appIds.get(2), FinalApplicationStatus.KILLED);
         assertEquals(status, FinalApplicationStatus.KILLED);
     }
 

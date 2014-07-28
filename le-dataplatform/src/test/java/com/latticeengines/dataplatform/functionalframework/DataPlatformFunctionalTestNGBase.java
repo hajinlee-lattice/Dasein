@@ -202,10 +202,9 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
                 entityMgr.deleteAll();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("Could not clear tables for all entity managers.", e);
         }
     }
-
 
     /**
      * this helper method produces 1 definition with 3 algorithms
