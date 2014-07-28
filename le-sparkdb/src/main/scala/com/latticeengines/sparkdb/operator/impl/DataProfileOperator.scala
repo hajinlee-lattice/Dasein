@@ -1,61 +1,56 @@
 package com.latticeengines.sparkdb.operator.impl
 
-import org.apache.avro.generic.GenericData.Record
+import scala.collection.JavaConversions.asScalaBuffer
+
 import org.apache.avro.generic.GenericRecord
-import org.apache.avro.mapred.AvroKey
-import org.apache.avro.mapreduce.AvroJob
-import org.apache.avro.mapreduce.AvroKeyInputFormat
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-import org.apache.hadoop.io.NullWritable
 import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
-import org.apache.spark.storage.StorageLevel
 
-
-import com.latticeengines.common.exposed.util.AvroUtils
 import com.latticeengines.sparkdb.operator.DataOperator
 
 class DataProfileOperator extends DataOperator {
-  
-  private var name: String = ""
-  
-  override def getName(): String = {
-    name
-  }
+  override def run(rdd: RDD[GenericRecord], job: Job, sc: SparkContext): RDD[GenericRecord] = {
+    val fields = getFields(rdd)
+    
+    for (f <- fields) {
+      val name = f.name()
+      val sum = rdd.map(
+        p => {
+            val value = p.get(name) 
+            if (value.isInstanceOf[Float]) {
+              value.asInstanceOf[Float]
+            } else if (value.isInstanceOf[Int]) {
+              value.asInstanceOf[Int]
+            } else {
+              0.0
+            }
+        }).reduce(_ + _)
 
-  override def setName(name: String) = {
-    this.name = name;
-  }
-  
-  override def run[T](rdd: RDD[T]) = {
-    // create multiple RDDs per column
+      val avg = sum/rdd.count()
+      print(s"Avg for $name = $avg\n")
+    }
+    null
   }
 }
 
-object DataProfileOperator {
+object DataProfileOperator extends App {
   
-  def main(args: Array[String]) = {
+  override def main(args: Array[String]) = {
     val sparkConf = new SparkConf().setAppName("AvroTest")
     val sc = new SparkContext(sparkConf)
     val conf = new Configuration()
     val job = new Job(conf)
     val path = new Path("/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/allTraining-r-00000.avro")
-    val schema = AvroUtils.getSchema(conf, path)
-
-    AvroJob.setInputKeySchema(job, schema)
     
-    val rdd = sc.newAPIHadoopFile(
-       path.toString(),
-       classOf[AvroKeyInputFormat[GenericRecord]],
-       classOf[AvroKey[GenericRecord]],
-       classOf[NullWritable], conf).map(x =>  { new Record(x._1.datum().asInstanceOf[Record], true) }).persist(StorageLevel.MEMORY_ONLY)
-       
-    val sum = rdd.map(p => p.get("SEPAL_WIDTH").asInstanceOf[Float]).reduce(_ + _)
-    val avg = sum/rdd.count()
-    println(s"Sum = $sum")
-    println(s"Avg = $avg")
+    val source = new AvroSourceTable()
+    source.setPropertyValue(AvroSourceTable.DataPath, "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/allTraining-r-00000.avro")
+    
+    val profiler = new DataProfileOperator()
+    profiler.run(source.run(null, job, sc), job, sc)
+    sc.stop()
   }
 }

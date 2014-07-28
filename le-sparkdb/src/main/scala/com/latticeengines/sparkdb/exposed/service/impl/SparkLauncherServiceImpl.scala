@@ -14,7 +14,8 @@ import com.latticeengines.sparkdb.exposed.service.SparkLauncherService
 class SparkLauncherServiceImpl extends SparkLauncherService {
   
   override def runApp(conf: Configuration, appName: String, queue: String): ApplicationId = {
-    val params = Array("--class", "com.latticeengines.sparkdb.operator.impl.DataProfileOperator", //
+    val params = Array("--class", //
+        "com.latticeengines.sparkdb.operator.impl.DataProfileOperator", //
         "--name", appName, //
         "--queue", queue, //
         "--driver-memory", "1024m", //
@@ -30,8 +31,7 @@ class SparkLauncherServiceImpl extends SparkLauncherService {
   private def getListOfDependencyJars(baseDir: String): String = {
     val files = new File(baseDir).listFiles().filter(!_.getName().startsWith("spark-assembly"))
     val prependedFiles = files.map(x => "file:" + x.getAbsolutePath())
-    val result = ((prependedFiles.tail.foldLeft(new StringBuilder(prependedFiles.head))) {(acc, e) => acc.append(", ").append(e)}).toString
-    print(result)
+    val result = ((prependedFiles.tail.foldLeft(new StringBuilder(prependedFiles.head))) {(acc, e) => acc.append(", ").append(e)}).toString()
     result
   }
 }
