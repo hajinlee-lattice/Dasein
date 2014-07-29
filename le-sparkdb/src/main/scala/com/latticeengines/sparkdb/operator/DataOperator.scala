@@ -7,11 +7,18 @@ import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
-trait DataOperator extends HasName with HasProperty {
-
-  def run(rdd: RDD[GenericRecord], job: Job, sc: SparkContext): RDD[GenericRecord]
+abstract class DataOperator(val dataFlow: DataFlow) extends HasName with HasProperty {
   
-  def getFields(rdd: RDD[GenericRecord]): java.util.List[Field] = {
-    rdd.first().getSchema().getFields()
+  dataFlow.addOperator(this)
+  
+  def run(rdd: RDD[(Int, GenericRecord)]): RDD[(Int, GenericRecord)]
+  
+  def run(rdds: Array[RDD[(Int, GenericRecord)]]): RDD[(Int, GenericRecord)] = {
+    run(rdds(0))
   }
+  
+  def getFields(record: GenericRecord): java.util.List[Field] = {
+    record.getSchema().getFields()
+  }
+  
 }

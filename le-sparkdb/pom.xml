@@ -147,6 +147,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.twitter</groupId>
+            <artifactId>chill-avro</artifactId>
+            <version>0.4.0</version>
+        </dependency>
     </dependencies>
 
 </project>

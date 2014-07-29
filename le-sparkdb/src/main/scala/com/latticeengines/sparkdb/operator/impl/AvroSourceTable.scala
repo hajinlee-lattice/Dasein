@@ -12,25 +12,27 @@ import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
 import com.latticeengines.common.exposed.util.AvroUtils
-import com.latticeengines.sparkdb.operator.DataOperator
+import com.latticeengines.sparkdb.operator._
 
-
-class AvroSourceTable extends DataOperator {
-  override def run(rdd: RDD[GenericRecord], job: Job, sc: SparkContext): RDD[GenericRecord] = {
-    val conf = job.getConfiguration()
+class AvroSourceTable(val df: DataFlow) extends DataOperator(df) {
+  override def run(rdd: RDD[(Int, GenericRecord)]): RDD[(Int, GenericRecord)] = {
+    val conf = dataFlow.job.getConfiguration()
     val path = new Path(getPropertyValue(AvroSourceTable.DataPath))
     val schema = AvroUtils.getSchema(conf, path)
+
+    AvroJob.setInputKeySchema(dataFlow.job, schema)
+    val hadoopFileRdd = dataFlow.sc.newAPIHadoopFile(
+      path.toString(),
+      classOf[AvroKeyInputFormat[GenericRecord]],
+      classOf[AvroKey[GenericRecord]],
+      classOf[NullWritable], conf).map(x => { new Record(x._1.datum().asInstanceOf[Record], true) })
     
-    AvroJob.setInputKeySchema(job, schema)
-    val resultRdd = sc.newAPIHadoopFile(
-       path.toString(),
-       classOf[AvroKeyInputFormat[GenericRecord]],
-       classOf[AvroKey[GenericRecord]],
-       classOf[NullWritable], conf).map(x => { new Record(x._1.datum().asInstanceOf[Record], true) }).persist()
-    resultRdd.asInstanceOf[RDD[GenericRecord]]
+    val ukCol = getPropertyValue(AvroSourceTable.UniqueKeyCol)
+    hadoopFileRdd.map(x => (x.get(ukCol).asInstanceOf[Int], x)).persist().asInstanceOf[RDD[(Int, GenericRecord)]]
   }
 }
 
 object AvroSourceTable {
   val DataPath = "DataPath"
+  val UniqueKeyCol = "UniqueKeyCol"
 }

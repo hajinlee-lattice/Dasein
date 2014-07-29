@@ -10,21 +10,23 @@ import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
-import com.latticeengines.sparkdb.operator.DataOperator
+import com.latticeengines.sparkdb.operator._
 
-class DataProfileOperator extends DataOperator {
-  override def run(rdd: RDD[GenericRecord], job: Job, sc: SparkContext): RDD[GenericRecord] = {
-    val fields = getFields(rdd)
+class DataProfileOperator(val df: DataFlow) extends DataOperator(df) {
+  override def run(rdd: RDD[(Int, GenericRecord)]): RDD[(Int, GenericRecord)] = {
+    val fields = getFields(rdd.first()._2)
     
     for (f <- fields) {
       val name = f.name()
       val sum = rdd.map(
         p => {
-            val value = p.get(name) 
+            val value = p._2.get(name) 
             if (value.isInstanceOf[Float]) {
               value.asInstanceOf[Float]
             } else if (value.isInstanceOf[Int]) {
               value.asInstanceOf[Int]
+            } else if (value.isInstanceOf[Double]) {
+              value.asInstanceOf[Double]
             } else {
               0.0
             }
@@ -40,17 +42,25 @@ class DataProfileOperator extends DataOperator {
 object DataProfileOperator extends App {
   
   override def main(args: Array[String]) = {
-    val sparkConf = new SparkConf().setAppName("AvroTest")
-    val sc = new SparkContext(sparkConf)
     val conf = new Configuration()
-    val job = new Job(conf)
-    val path = new Path("/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/allTraining-r-00000.avro")
+    val dataFlow = new DataFlow("AvroTest", conf, true)
+
+    val source1 = new AvroSourceTable(dataFlow)
+    source1.setPropertyValue(AvroSourceTable.DataPath, "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/allTraining-r-00000.avro")
+    source1.setPropertyValue(AvroSourceTable.UniqueKeyCol, "Nutanix_EventTable_Clean")
     
-    val source = new AvroSourceTable()
-    source.setPropertyValue(AvroSourceTable.DataPath, "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/allTraining-r-00000.avro")
+    val source2 = new AvroSourceTable(dataFlow)
+    source2.setPropertyValue(AvroSourceTable.DataPath, "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/allTraining-r-00000.avro")
+    source2.setPropertyValue(AvroSourceTable.UniqueKeyCol, "Nutanix_EventTable_Clean")
+
+    val filter = new Filter(dataFlow)
     
-    val profiler = new DataProfileOperator()
-    profiler.run(source.run(null, job, sc), job, sc)
-    sc.stop()
+    val join = new Join(dataFlow)
+    
+    val profiler = new DataProfileOperator(dataFlow)
+    
+    //profiler.run(filter.run(source1.run(null)))
+    profiler.run(filter.run(join.run(Array(source1.run(null), source2.run(null)))))
+    dataFlow.sc.stop()
   }
 }
