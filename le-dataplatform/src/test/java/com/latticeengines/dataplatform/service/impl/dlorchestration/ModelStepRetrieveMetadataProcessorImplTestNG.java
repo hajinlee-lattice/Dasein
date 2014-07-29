@@ -13,6 +13,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.functionalframework.StandaloneHttpServer;
@@ -30,6 +31,9 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private ModelCommandEntityMgr modelCommandEntityMgr;
 
     private StandaloneHttpServer httpServer;
 
@@ -54,7 +58,9 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
     @Test(groups = "functional")
     public void testSuccessfulExecuteStep() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        modelCommandEntityMgr.createOrUpdate(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
+
         commandParameters.setDlUrl("http://localhost:8082/DLRestService");
         modelStepRetrieveMetadataProcessor.executeStep(command, commandParameters);
 
