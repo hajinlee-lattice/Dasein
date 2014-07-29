@@ -135,19 +135,26 @@ class ArgumentParser(object):
             if len(row) != len(self.fields):
                 msg = "Data-metadata mismatch. Metadata has %s, while data has %s fields." % (len(self.fields), len(row))
                 raise Exception(msg)
+
+            targetIsNone = False
             for i in included:
                 try:  
                     if self.isAvro():
                         value = row[self.__getField(i)["name"]]
                         if i == included[self.targetIndex]:
-                            value = float(value)
+                            if value is None:
+                                targetIsNone = True
+                            else:
+                                value = float(value)
                         rowlist.append(value)
                     else:
                         rowlist.append(self.__convertType(row[i], self.__getField(i)["type"][0]))
                 except Exception as e:
                     logger.error("Issue with index " + str(i))
                     logger.error(str(e))
-            tmp.append(rowlist)
+
+            if not targetIsNone:
+                tmp.append(rowlist)
         self.__populateSchemaWithMetadata(self.getSchema(), self)
         return pd.DataFrame(tmp, columns=includedNames)
     

@@ -53,9 +53,7 @@ class BucketerDispatcher(object):
                 params = copyParams
 
         bucketList = bucketer.bucketColumn(columnSeries, params)
-        bucketList = self.consolidateBins(columnSeries, eventSeries, bucketList, maxBuckets)
-        # Reset infinity to None
-        return map(lambda x: None if np.isinf(x) else x, bucketList)
+        return self.consolidateBins(columnSeries, eventSeries, bucketList, maxBuckets)
 
     def consolidateBins(self, columnSeries, eventSeries, bucketList, maxBuckets):
         """

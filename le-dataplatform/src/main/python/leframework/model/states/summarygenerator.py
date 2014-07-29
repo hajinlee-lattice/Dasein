@@ -51,12 +51,6 @@ class SummaryGenerator(State, JsonGenBase):
         for record in metadata:
             self.logger.info(record)
             element = OrderedDict()
-                      
-            # If a band value is not found, skip that predictor value
-            if record["count"] == 0:
-                self.logger.critical("No data found in the test set for this band or value.")
-                continue
-            
             element["CorrelationSign"] = 1 if record["lift"] > 1 else -1
             element["Count"] = record["count"]
             element["Lift"] = record["lift"]

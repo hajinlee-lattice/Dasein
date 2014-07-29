@@ -3,6 +3,7 @@ import codecs
 import json
 import math
 import logging
+import numpy as np
 from sklearn import metrics
 from avro import schema, datafile, io
 from sklearn.metrics.cluster.supervised import entropy
@@ -129,6 +130,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
             mode = data[colname].value_counts().idxmax()
             index = writeCategoricalValuesToAvro(dataWriter, data[colname], eventVector, mode, colname, index)
         else:
+            logger.debug("Computing mean and median for column name: " + colname)
             mean = data[colname].mean()
             median = data[colname].median()
             if math.isnan(median):
@@ -141,7 +143,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
                 bands = bucketDispatcher.bucketColumn(data[colname], eventVector, colnameBucketMetadata[colname][0], colnameBucketMetadata[colname][1])
             else:
                 # Default bucketer
-                logger.debug("Using defualt bucketer for column name: " + colname)
+                logger.debug("Using default bucketer for column name: " + colname)
                 bands = bucketDispatcher.bucketColumn(data[colname], eventVector)
             index = writeBandsToAvro(dataWriter, data[colname], eventVector, bands, mean, median, colname, index)
 
@@ -184,7 +186,7 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         return index
     for value in uniquevalues:
         valueVector = map(lambda x: 1 if x == value else 0, columnVector)
-        valueCount = getCountWhereEventIsOne(valueVector, eventVector)
+        valueCount = sum(valueVector)
         datum = {}
         datum["id"] = index
         datum["barecolumnname"] = colname
@@ -196,7 +198,7 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         datum["median"] = None
         datum["mode"] = mode
         datum["count"] = valueCount
-        datum["lift"] = valueCount / (avgProbability * sum(valueVector))
+        datum["lift"] = getLift(avgProbability, valueCount, valueVector, eventVector)
         datum["uncertaintyCoefficient"] = uncertaintyCoefficientXgivenY(eventVector, valueVector)
         index = index + 1
         dataWriter.append(datum)
@@ -207,19 +209,25 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
     avgProbability = sum(eventVector) / float(len(eventVector))
     for i in range(len(bands) - 1):
         bandVector = map(lambda x: 1 if x >= bands[i] and x < bands[i + 1] else 0, columnVector)
-        bandCount = getCountWhereEventIsOne(bandVector, eventVector)
+        bandCount = sum(bandVector)
+        if bandCount == 0:
+            logger.critical("No samples found in band [" + str(bands[i]) + ", " + str(bands[i+1]) + "] for column: " + colname)
+            continue
+
+        # Replace np.inf with None value
+        band = map(lambda x: None if np.isinf(x) else x, [bands[i], bands[i + 1]])
         datum = {}
         datum["id"] = index
         datum["barecolumnname"] = colname
         datum["columnvalue"] = None
         datum["Dtype"] = "BND"
-        datum["minV"] = bands[i]
-        datum["maxV"] = bands[i + 1]
+        datum["minV"] = band[0]
+        datum["maxV"] = band[1]
         datum["mean"] = mean
         datum["median"] = median
         datum["mode"] = None
         datum["count"] = bandCount
-        datum["lift"] = bandCount / (avgProbability * sum(bandVector))
+        datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)
         datum["uncertaintyCoefficient"] = uncertaintyCoefficientXgivenY(eventVector, bandVector)
         index = index + 1
         dataWriter.append(datum)
@@ -230,9 +238,16 @@ def getCountWhereEventIsOne(valueData, eventData):
     counter = lambda x, y: 1 if x == 1 and y == 1 else 0
     return sum(map(counter, valueData, eventData))
 
+def getLift(avgProbability, valueCount, valueVector, eventVector):
+    if avgProbability == 0:
+        return -1
+    return getCountWhereEventIsOne(valueVector, eventVector) / float(avgProbability * valueCount)
+
 def uncertaintyCoefficientXgivenY(x, y):
     '''
       Given y, what parts of x can we predict.
       In this case, x should be the event column, while y should be the predictor column-value
     '''
+    if entropy(x) == 0:
+        return -1
     return metrics.mutual_info_score(x, y) / entropy(x)
