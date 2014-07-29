@@ -22,8 +22,8 @@ public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
         log.info("               info..............." + this.getClass().getSimpleName() + "on board");
 
         List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
-        for (int i = 0; i < numOfRuns; i++) {
-            for (int j = 0; j < numOfCustomers; j++) {
+        for (int i = numOfRuns; i < numOfRuns * 2; i++) {
+            for (int j = i; j < (i + 1) * numOfCustomers; j++) {
                 String customer = "c" + j;
                 String hdfsPath = customerBaseDir + "/" + customer;
 
@@ -52,8 +52,8 @@ public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
         log.info("               info..............." + this.getClass().getSimpleName() + "submit");
 
         List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
-        for (int i = 0; i < numOfRuns; i++) {
-            for (int j = 0; j < numOfCustomers; j++) {
+        for (int i = numOfRuns; i < numOfRuns * 2; i++) {
+            for (int j = i; j < (i + 1) * numOfCustomers; j++) {
                 String customer = "c" + j;
                 model = produceAModel(customer);
                 SubmitModel sm = new SubmitModel();
