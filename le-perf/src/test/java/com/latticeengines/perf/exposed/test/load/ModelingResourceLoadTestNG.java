@@ -24,8 +24,10 @@ public class ModelingResourceLoadTestNG extends PerfLoadTestNGBase {
             for (int j = 0; j < numOfCustomers; j++) {
                 String customer = "c" + j;
                 String hdfsPath = customerBaseDir + "/" + customer;
-                while (!fs.delete(new Path(hdfsPath), true)) {
-                    log.info("fail to delete hdfs path for " + customer);
+
+                while (fs.isDirectory(new Path(hdfsPath))) {
+                    log.info("delete hdfs path for " + customer);
+                    fs.delete(new Path(hdfsPath), true);
                 }
 
                 ConstructModelConfiguration cmc = createConstructModelConfiguration(customer);
