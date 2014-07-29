@@ -21,7 +21,7 @@ public class ModelingResourceLoadTestNG extends PerfLoadTestNGBase {
 
         List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
         for (int i = 0; i < numOfRuns; i++) {
-            for (int j = i; j < (i + 1) * numOfCustomers; j++) {
+            for (int j = i * numOfCustomers; j < (i + 1) * numOfCustomers; j++) {
                 String customer = "c" + j;
                 String hdfsPath = customerBaseDir + "/" + customer;
 
@@ -55,7 +55,7 @@ public class ModelingResourceLoadTestNG extends PerfLoadTestNGBase {
             int priority = 1;
             while (priority >= 0) {
                 modelDef = produceModelDef(priority--);
-                for (int j = i; j < (i + 1) * numOfCustomers; j++) {
+                for (int j = i * numOfCustomers; j < (i + 1) * numOfCustomers; j++) {
                     String customer = "c" + j;
                     model = produceAModel(customer);
                     SubmitModel sm = new SubmitModel();
