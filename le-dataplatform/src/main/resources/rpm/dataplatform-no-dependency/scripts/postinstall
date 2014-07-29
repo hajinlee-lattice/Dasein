@@ -1,4 +1,5 @@
 #!/bin/bash
+hadoop fs -mkdir /app
 runuser -l yarn -c 'hadoop fs -copyFromLocal /tmp/app/dataplatform /app/dataplatform'
 rm -rf /tmp/app
 
