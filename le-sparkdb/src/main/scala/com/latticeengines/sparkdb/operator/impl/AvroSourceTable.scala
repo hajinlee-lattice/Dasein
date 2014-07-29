@@ -15,7 +15,7 @@ import com.latticeengines.common.exposed.util.AvroUtils
 import com.latticeengines.sparkdb.operator._
 
 class AvroSourceTable(val df: DataFlow) extends DataOperator(df) {
-  override def run(rdd: RDD[(Int, GenericRecord)]): RDD[(Int, GenericRecord)] = {
+  override def run(rdd: RDD[GenericRecord]): RDD[GenericRecord] = {
     val conf = dataFlow.job.getConfiguration()
     val path = new Path(getPropertyValue(AvroSourceTable.DataPath))
     val schema = AvroUtils.getSchema(conf, path)
@@ -27,8 +27,7 @@ class AvroSourceTable(val df: DataFlow) extends DataOperator(df) {
       classOf[AvroKey[GenericRecord]],
       classOf[NullWritable], conf).map(x => { new Record(x._1.datum().asInstanceOf[Record], true) })
     
-    val ukCol = getPropertyValue(AvroSourceTable.UniqueKeyCol)
-    hadoopFileRdd.map(x => (x.get(ukCol).asInstanceOf[Int], x)).persist().asInstanceOf[RDD[(Int, GenericRecord)]]
+    hadoopFileRdd.asInstanceOf[RDD[GenericRecord]]
   }
 }
 

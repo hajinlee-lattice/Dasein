@@ -13,14 +13,14 @@ import org.apache.spark.rdd.RDD
 import com.latticeengines.sparkdb.operator._
 
 class DataProfileOperator(val df: DataFlow) extends DataOperator(df) {
-  override def run(rdd: RDD[(Int, GenericRecord)]): RDD[(Int, GenericRecord)] = {
-    val fields = getFields(rdd.first()._2)
+  override def run(rdd: RDD[GenericRecord]): RDD[GenericRecord] = {
+    val fields = getFields(rdd.first())
     
     for (f <- fields) {
       val name = f.name()
       val sum = rdd.map(
         p => {
-            val value = p._2.get(name) 
+            val value = p.get(name) 
             if (value.isInstanceOf[Float]) {
               value.asInstanceOf[Float]
             } else if (value.isInstanceOf[Int]) {

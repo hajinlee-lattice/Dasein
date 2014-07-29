@@ -11,9 +11,9 @@ abstract class DataOperator(val dataFlow: DataFlow) extends HasName with HasProp
   
   dataFlow.addOperator(this)
   
-  def run(rdd: RDD[(Int, GenericRecord)]): RDD[(Int, GenericRecord)]
+  def run(rdd: RDD[GenericRecord]): RDD[GenericRecord]
   
-  def run(rdds: Array[RDD[(Int, GenericRecord)]]): RDD[(Int, GenericRecord)] = {
+  def run(rdds: Array[RDD[GenericRecord]]): RDD[GenericRecord] = {
     run(rdds(0))
   }
   
