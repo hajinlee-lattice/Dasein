@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
@@ -54,7 +55,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
  * This is an end-to-end test against a SQL Server database without having to go
  * through the REST API. It allows for an easier development-test cycle without
  * having to either deploy to Jetty or run from le-api.
- * 
+ *
  * @author rgonzalez
  *
  */
@@ -75,15 +76,18 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
     @Autowired
     private ModelEntityMgr modelEntityMgr;
-    
+
+    @Autowired
+    private ModelCommandEntityMgr modelCommandEntityMgr;
+
     @Autowired
     private ModelStepRetrieveMetadataProcessorImpl modelStepRetrieveMetadataProcessor;
-    
+
     @Autowired
     private MetadataService metadataService;
 
     private Model model = null;
-    
+
     private StandaloneHttpServer httpServer;
 
     protected boolean doYarnClusterSetup() {
@@ -111,7 +115,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
         model = createModel(modelDef);
     }
-    
+
     @AfterClass(groups = "functional")
     public void tearDown() throws Exception {
         httpServer.stop();
@@ -130,7 +134,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
         return m;
     }
-    
+
     private Pair<String[], Integer[]> getTableColumnMetadata() {
         DataSchema schema = metadataService.createDataSchema(getCreds(), "Q_EventTable_Nutanix");
         List<Field> fields = schema.getFields();
@@ -143,7 +147,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         }
         return new Pair<>(cols, types);
     }
-    
+
     private DbCreds getCreds() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dbDlOrchestrationHost).port(dbDlOrchestrationPort).db(dbDlOrchestrationName)
@@ -219,6 +223,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         httpServer.addServlet(new VisiDBMetadataServlet(colMetadata.getFirst(), colMetadata.getSecond()), "/DLRestService/GetQueryMetaDataColumns");
         httpServer.start();
         ModelCommand command = createModelCommandWithCommandParameters();
+        modelCommandEntityMgr.createOrUpdate(command);
         List<ModelCommandParameter> commandParameters = command.getCommandParameters();
         modelStepRetrieveMetadataProcessor.executeStep(command, new ModelCommandParameters(commandParameters));
     }
