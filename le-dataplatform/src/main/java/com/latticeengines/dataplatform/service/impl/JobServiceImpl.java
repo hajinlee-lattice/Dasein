@@ -333,7 +333,12 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         } catch (InterruptedException e) {
             log.error(e);
         }
-        return getAppIdFromName(jobName);
+        //Final try
+        appId = getAppIdFromName(jobName);
+        if (appId == null) {
+            throw new LedpException(LedpCode.LEDP_12002, new String[] { jobName });
+        }
+        return appId;
     }
 
     private Future<Integer> loadAsync(final String table, final String targetDir, final DbCreds creds,
