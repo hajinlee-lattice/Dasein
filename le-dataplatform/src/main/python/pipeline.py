@@ -100,7 +100,10 @@ class ModelStep:
             if columnData.dtype == object:
                 dataFrame[columnName] = 0
         
-        scoreColumn = self.model_.predict_proba(dataFrame[self.modelInputColumns_])[:,1]
+        scoreColumn = self.model_.predict_proba(dataFrame[self.modelInputColumns_])
+        # Check number of event classes 
+        index = 1 if len(scoreColumn[0]) == 2 else 0
+        scoreColumn = scoreColumn[:,index]
         outputFrame = pd.DataFrame(scoreColumn, columns=[self.scoreColumnName_])
         
         for columnName in self.outputColumns_:

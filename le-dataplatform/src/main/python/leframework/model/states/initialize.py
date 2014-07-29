@@ -19,6 +19,10 @@ class Initialize(State):
         
     def score(self, mediator):
         scored = mediator.clf.predict_proba(mediator.data[:, mediator.schema["featureIndex"]])
-        scored = [row[1] for row in scored]
-        return scored
+        index = 1
+        if len(scored) > 0 and len(scored[0]) < 2:
+            self.logger.warn("All events have the same label.")
+            index = 0
+        return [sample[index] for sample in scored]
+
     

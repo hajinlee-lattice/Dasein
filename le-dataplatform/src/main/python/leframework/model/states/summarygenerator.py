@@ -144,6 +144,9 @@ class SummaryGenerator(State, JsonGenBase):
             actualBestCounter += score[i][1]
             actualBestArea += actualBestCounter
         
+        if theoreticalBestArea == 0:
+            self.logger.warn("All events are 0, could not calculate ROC score.")
+            return -1
         return actualBestArea / float(theoreticalBestArea)
         
     def __getDLEventTableData(self, provenanceProperties):
