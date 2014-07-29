@@ -15,6 +15,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpUtils;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsRequest;
@@ -26,9 +27,12 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
     @Autowired
     private Configuration yarnConfiguration;
 
+    @Autowired
+    private ModelCommandLogService modelCommandLogService;
+
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
-    
+
     private static final String DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS = "/GetQueryMetaDataColumns";
 
     // Make this settable for easier testing
@@ -51,8 +55,11 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
             if (Strings.isNullOrEmpty(metadata)) {
                 throw new LedpException(LedpCode.LEDP_16006, new String[] { String.valueOf(modelCommand.getPid()),
                         queryMetadataUrl });
+            } else if (metadata.contains("ErrorMessage")) {
+                modelCommandLogService.log(modelCommand, "Problem with metadata:" + metadata);
             }
             log.info(metadata);
+
             String hdfsPath = getHdfsPathForMetadataFile(modelCommand, modelCommandParameters);
             HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, metadata);
         } catch (Exception e) {
