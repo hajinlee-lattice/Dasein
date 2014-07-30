@@ -121,6 +121,17 @@
 								</source>
 							</sources>
 						</mapping>
+						<mapping>
+							<directory>/tmp/app/dataplatform/scripts/algorithm</directory>
+							<filemode>644</filemode>
+							<username>yarn</username>
+							<groupname>hdfs</groupname>
+							<sources>
+								<source>
+									<location>src/main/python/algorithm</location>
+								</source>
+							</sources>
+						</mapping>
 					</mappings>
 					<preinstallScriptlet>
 						<scriptFile>src/main/resources/rpm/dataplatform-no-dependency/scripts/preinstall</scriptFile>

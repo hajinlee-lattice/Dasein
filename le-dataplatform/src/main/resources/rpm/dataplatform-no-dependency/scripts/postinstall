@@ -1,6 +1,6 @@
 #!/bin/bash
 chmod 755 /tmp/app/dataplatform/scripts
-chmod 755 /tmp/app/dataplatform/algorithm
+chmod 755 /tmp/app/dataplatform/scripts/algorithm
 hadoop fs -mkdir /app
 runuser -l yarn -c 'hadoop fs -copyFromLocal /tmp/app/dataplatform /app/dataplatform'
 rm -rf /tmp/app
