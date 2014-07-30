@@ -32,6 +32,7 @@ public class ModelCommandParametersUnitTestNG {
             assertTrue(msg.contains(ModelCommandParameters.EXCLUDE_COLUMNS));
             assertTrue(msg.contains(ModelCommandParameters.DL_URL));
             assertTrue(msg.contains(ModelCommandParameters.DL_TENANT));
+            assertTrue(msg.contains(ModelCommandParameters.DL_QUERY));
             throw e;
         }
     }

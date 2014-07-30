@@ -3,7 +3,6 @@ package com.latticeengines.dataplatform.exposed.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,7 +19,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
@@ -49,7 +47,6 @@ import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
-import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 
 /**
  * This is an end-to-end test against a SQL Server database without having to go
@@ -199,22 +196,6 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    private ModelCommand createModelCommandWithCommandParameters() {
-        List<ModelCommandParameter> parameters = new ArrayList<>();
-        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, parameters, ModelCommand.TAHOE);
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_NAME, "Model Submission1"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "P1_Event"));
-        String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, "Q_EventTable_Nutanix"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_METADATA, "EventMetadata"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://localhost:8082/DLRestService"));
-
-        return command;
-    }
-
     @Test(groups = "functional", dependsOnMethods = { "createSamples" })
     public void retrieveMetadataAndWriteToHdfs() throws Exception {
         httpServer = new StandaloneHttpServer();
@@ -222,7 +203,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         Pair<String[], Integer[]> colMetadata = getTableColumnMetadata();
         httpServer.addServlet(new VisiDBMetadataServlet(colMetadata.getFirst(), colMetadata.getSecond()), "/DLRestService/GetQueryMetaDataColumns");
         httpServer.start();
-        ModelCommand command = createModelCommandWithCommandParameters();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
         modelCommandEntityMgr.createOrUpdate(command);
         List<ModelCommandParameter> commandParameters = command.getCommandParameters();
         modelStepRetrieveMetadataProcessor.executeStep(command, new ModelCommandParameters(commandParameters));

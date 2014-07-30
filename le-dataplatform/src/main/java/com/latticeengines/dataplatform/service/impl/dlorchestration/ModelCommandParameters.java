@@ -25,6 +25,7 @@ public class ModelCommandParameters {
     public static final String EXCLUDE_COLUMNS = "ExcludeColumns";
     public static final String DL_URL = "DataLoader_Instance";
     public static final String DL_TENANT = "DataLoader_TenantName";
+    public static final String DL_QUERY = "DataLoader_Query";
 
     // Optional parameters
     public static final String NUM_SAMPLES = "NumSamples";
@@ -44,6 +45,7 @@ public class ModelCommandParameters {
     private String algorithmScript = null;
     private String dlUrl = null;
     private String dlTenant = null;
+    private String dlQuery = null;
 
     public ModelCommandParameters (List<ModelCommandParameter> commandParameters) {
         super();
@@ -83,6 +85,8 @@ public class ModelCommandParameters {
             case ModelCommandParameters.DL_URL:
                 this.setDlUrl(parameter.getValue());
                 break;
+            case ModelCommandParameters.DL_QUERY:
+                this.setDlQuery(parameter.getValue());
             }
         }
 
@@ -107,6 +111,9 @@ public class ModelCommandParameters {
         }
         if (Strings.isNullOrEmpty(this.getDlUrl())) {
             missingParameters.add(ModelCommandParameters.DL_URL);
+        }
+        if (Strings.isNullOrEmpty(this.getDlQuery())) {
+            missingParameters.add(ModelCommandParameters.DL_QUERY);
         }
         if (!missingParameters.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_16000, new String[] { missingParameters.toString() });
@@ -218,6 +225,14 @@ public class ModelCommandParameters {
 
     private void setAlgorithmScript(String algorithmScript) {
         this.algorithmScript = algorithmScript;
+    }
+
+    public String getDlQuery() {
+        return dlQuery;
+    }
+
+    public void setDlQuery(String dlQuery) {
+        this.dlQuery = dlQuery;
     }
 
 }

@@ -48,7 +48,7 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
         String metadata = null;
         try {
             GetQueryMetaDataColumnsRequest request = new GetQueryMetaDataColumnsRequest(modelCommandParameters.getDlTenant(),
-                    modelCommandParameters.getEventTable());
+                    modelCommandParameters.getDlQuery());
             Map<String, String> headers = new HashMap<String, String>();
             headers.put("MagicAuthentication", "Security through obscurity!");
             metadata = HttpUtils.executePostRequest(queryMetadataUrl, request, headers);

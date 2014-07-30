@@ -61,7 +61,6 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         modelCommandEntityMgr.createOrUpdate(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
-        commandParameters.setDlUrl("http://localhost:8082/DLRestService");
         modelStepRetrieveMetadataProcessor.executeStep(command, commandParameters);
 
         assertTrue(HdfsUtils.fileExists(yarnConfiguration,

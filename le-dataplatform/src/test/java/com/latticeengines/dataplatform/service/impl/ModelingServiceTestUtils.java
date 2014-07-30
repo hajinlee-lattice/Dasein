@@ -57,6 +57,7 @@ public class ModelingServiceTestUtils {
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://localhost:8082/DLRestService"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_QUERY, "Q_DataForModeling"));
 
         return command;
     }
