@@ -83,6 +83,9 @@
 					<group>Application/Collectors</group>
 					<!-- prefix>/usr/local</prefix -->
 					<changelogFile>src/main/resources/rpm/dataplatform/changelog</changelogFile>
+					<defineStatements>
+						<defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+					</defineStatements>
 					<mappings>
 						<mapping>
 							<directory>/tmp/app/dataplatform</directory>
@@ -119,7 +122,6 @@
 								<source>
 									<location>src/main/python/launcher.py</location>
 								</source>
-						
 							</sources>
 						</mapping>
 						<mapping>
