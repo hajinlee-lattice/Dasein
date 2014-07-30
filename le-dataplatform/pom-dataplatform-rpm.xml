@@ -121,10 +121,6 @@
 								</source>
 								<source>
 									<location>src/main/python/launcher.py</location>
-									<excludes>
-										<exclude>src/main/python/*.pyc</exclude>
-										<exclude>src/main/python/*.pyo</exclude>
-									</excludes>
 								</source>
 							</sources>
 						</mapping>
@@ -136,10 +132,6 @@
 							<sources>
 								<source>
 									<location>src/main/python/algorithm</location>
-									<excludes>
-										<exclude>src/main/python/algorithm/*.pyc</exclude>
-										<exclude>src/main/python/algorithm/*.pyo</exclude>
-									</excludes>
 								</source>
 							</sources>
 						</mapping>

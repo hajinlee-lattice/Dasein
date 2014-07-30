@@ -83,6 +83,9 @@
 					<group>Application/Collectors</group>
 					<!-- prefix>/usr/local</prefix -->
 					<changelogFile>src/main/resources/rpm/dependency/changelog</changelogFile>
+					<defineStatements>
+						<defineStatement>_unpackaged_files_terminate_build 0</defineStatement>
+					</defineStatements>
 					<mappings>
 						<mapping>
 							<directory>/tmp/app/dataplatform</directory>

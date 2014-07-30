@@ -5,6 +5,10 @@ runuser -l yarn -c 'hadoop fs -copyFromLocal /tmp/lib/* /lib'
 
 chmod 755 /tmp/app/dataplatform/scripts
 chmod 755 /tmp/app/dataplatform/scripts/algorithm
+rm /tmp/app/dataplatform/scripts/*.pyc
+rm /tmp/app/dataplatform/scripts/*.pyo
+rm /tmp/app/dataplatform/scripts/algorithm/*.pyc
+rm /tmp/app/dataplatform/scripts/algorithm/*.pyo
 hadoop fs -mkdir /app
 runuser -l yarn -c 'hadoop fs -copyFromLocal /tmp/app/dataplatform /app/dataplatform'
 
