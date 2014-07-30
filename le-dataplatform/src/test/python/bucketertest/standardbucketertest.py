@@ -1,17 +1,15 @@
 from bucketertestbase import BucketerTestBase
-from unittest import TestCase
-import numpy as np
+from testbase import TestBase
 
-class StandardBucketerTest(TestCase, BucketerTestBase):
+class StandardBucketerTest(TestBase, BucketerTestBase):
 
     def setUp(self):
         self.setup()
-        
+
     def testBucketing(self): 
         params = {'maxBuckets': 6}
         bandsList = self.bucketColumns('standard', params)
         for bands in bandsList:
             self.assertTrue(len(bands) <= params['maxBuckets']+1)
             for band in bands:
-                if band is not None:
-                    self.assertFalse(np.isinf(band))
+                self.assertTrue(band is not None)

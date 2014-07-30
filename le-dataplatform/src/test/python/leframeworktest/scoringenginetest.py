@@ -1,15 +1,8 @@
-'''
-Created on Jul 2, 2014
-
-@author: hliu
-'''
 import pickle
-from unittest import TestCase
-
+from testbase import TestBase
 from leframework import scoringengine
 
-
-class ScoringEngineTest(TestCase):
+class ScoringEngineTest(TestBase):
     inputFileName = "scoringtestinput.txt"
     outputFileName = "scoringtestoutput.txt"
     rowId = "736e7a75-b38a-4738-828f-92b698b00806"

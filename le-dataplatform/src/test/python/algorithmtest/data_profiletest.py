@@ -1,12 +1,11 @@
 import os
 import shutil
-from unittest import TestCase
+from testbase import TestBase
 from algorithmtestbase import AlgorithmTestBase
 
-class DataProfileTest(TestCase, AlgorithmTestBase):
+class DataProfileTest(TestBase, AlgorithmTestBase):
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         if os.path.exists("./results"):
             shutil.rmtree("./results")
 

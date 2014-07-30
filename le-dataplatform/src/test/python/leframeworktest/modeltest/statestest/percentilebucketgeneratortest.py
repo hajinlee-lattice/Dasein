@@ -1,11 +1,10 @@
 import random
-from unittest import TestCase
-
+from testbase import TestBase
 from leframework.model.mediator import Mediator
 from leframework.model.states.percentilebucketgenerator import PercentileBucketGenerator
 
 
-class PercentileBucketsGeneratorTest(TestCase):
+class PercentileBucketsGeneratorTest(TestBase):
 
     def testExecuteWith5000(self):
         self.executeWithTestSize(5000)

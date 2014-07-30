@@ -1,9 +1,9 @@
-from unittest import TestCase
+from testbase import TestBase
 import random
 
 from leframework.model.states.calibrationgenerator import CalibrationGenerator
 from leframework.model.mediator import Mediator
-class CalibrationGeneratorTest(TestCase):
+class CalibrationGeneratorTest(TestBase):
 
     
     def testExecute(self):

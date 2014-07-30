@@ -1,11 +1,11 @@
-from unittest import TestCase
+from testbase import TestBase
 import random
 
 from leframework.model.states.calibrationgenerator import CalibrationGenerator
 from leframework.model.states.bucketgenerator import BucketGenerator
 from leframework.model.mediator import Mediator
 
-class BucketGeneratorTest(TestCase):
+class BucketGeneratorTest(TestBase):
     
     def testExecute(self):
         test_size = 5000

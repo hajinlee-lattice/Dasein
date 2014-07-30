@@ -1,8 +1,8 @@
-from unittest import TestCase
+from testbase import TestBase
 
 from leframework.model.states.summarygenerator import SummaryGenerator
 
-class SummaryGeneratorTest(TestCase):
+class SummaryGeneratorTest(TestBase):
 
     def testExecute(self):
         summaryGenerator = SummaryGenerator()

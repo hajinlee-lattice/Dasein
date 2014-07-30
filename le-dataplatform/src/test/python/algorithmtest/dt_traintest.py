@@ -1,14 +1,11 @@
 import os
 import shutil
-from unittest import TestCase
-
+from testbase import TestBase
 from algorithmtestbase import AlgorithmTestBase
 
+class LogisticRegressionTest(TestBase, AlgorithmTestBase):
 
-class LogisticRegressionTest(TestCase, AlgorithmTestBase):
-
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         if os.path.exists("./results"):
             shutil.rmtree("./results")
 

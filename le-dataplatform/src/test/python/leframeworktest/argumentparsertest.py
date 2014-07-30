@@ -1,9 +1,7 @@
-from unittest import TestCase
-
+from testbase import TestBase
 from leframework.argumentparser import ArgumentParser
 
-
-class ArgumentParserTest(TestCase):
+class ArgumentParserTest(TestBase):
 
     def testCreateListForAvro(self):
         parser = ArgumentParser("model.json")
