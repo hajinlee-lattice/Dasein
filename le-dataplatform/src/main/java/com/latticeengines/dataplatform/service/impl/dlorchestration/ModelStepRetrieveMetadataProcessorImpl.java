@@ -55,7 +55,7 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
             if (Strings.isNullOrEmpty(metadata)) {
                 throw new LedpException(LedpCode.LEDP_16006, new String[] { String.valueOf(modelCommand.getPid()),
                         queryMetadataUrl });
-            } else if (metadata.contains("ErrorMessage")) {
+            } else if (!metadata.contains("\"ErrorMessage\":null")) {
                 modelCommandLogService.log(modelCommand, "Problem with metadata:" + metadata);
             }
             log.info(metadata);
