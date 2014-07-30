@@ -6,13 +6,6 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>src/main/python/algorithm</directory>
-            <outputDirectory>algorithm</outputDirectory>
-            <includes>
-                <include>**/*.py</include>
-            </includes>
-        </fileSet>
-        <fileSet>
             <directory>src/main/python/leframework</directory>
             <outputDirectory>leframework</outputDirectory>
             <includes>
