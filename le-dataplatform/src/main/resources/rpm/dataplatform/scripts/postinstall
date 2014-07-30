@@ -1,9 +1,10 @@
 #!/bin/bash
+chmod 755 /tmp/lib
 hadoop fs -mkdir /lib
-hadoop fs -copyFromLocal /tmp/lib/* /lib
-runuser -l hdfs -c 'hadoop fs -chown -R yarn:hdfs /lib'
+runuser -l yarn -c 'hadoop fs -copyFromLocal /tmp/lib/* /lib'
 
 chmod 755 /tmp/app/dataplatform/scripts
+chmod 755 /tmp/app/dataplatform/algorithm
 hadoop fs -mkdir /app
 runuser -l yarn -c 'hadoop fs -copyFromLocal /tmp/app/dataplatform /app/dataplatform'
 
