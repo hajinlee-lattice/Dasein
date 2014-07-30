@@ -59,7 +59,6 @@ object DataProfileOperator extends App {
     
     val profiler = new DataProfileOperator(dataFlow)
     
-    //profiler.run(filter.run(source1.run(null)))
     profiler.run(filter.run(join.run(Array(source1.run(null), source2.run(null)))))
     dataFlow.sc.stop()
   }
