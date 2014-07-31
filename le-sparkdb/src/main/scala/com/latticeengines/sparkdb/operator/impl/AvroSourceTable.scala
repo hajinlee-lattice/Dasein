@@ -26,7 +26,7 @@ class AvroSourceTable(val df: DataFlow) extends DataOperator(df) {
       path.toString(),
       classOf[AvroKeyInputFormat[GenericRecord]],
       classOf[AvroKey[GenericRecord]],
-      classOf[NullWritable], conf).map(x => { new Record(x._1.datum().asInstanceOf[Record], true) })
+      classOf[NullWritable], conf).map(x => { new Record(x._1.datum().asInstanceOf[Record], true) }).persist()
     
     hadoopFileRdd.asInstanceOf[RDD[GenericRecord]]
   }
