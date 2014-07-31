@@ -109,6 +109,7 @@ class LearningExecutor(Executor):
         
         training = pipeline.predict(training).as_matrix()
         test = pipeline.predict(test).as_matrix()
+        logger.info("Training and test data transformed into ndarray.")
         return (training, test, metadata)
 
     @overrides(Executor)
