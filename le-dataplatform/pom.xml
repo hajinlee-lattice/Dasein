@@ -4,7 +4,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>le-dataplatform</artifactId>
-    <packaging>ejb</packaging>
+    <packaging>jar</packaging>
     <name>${component-name}</name>
 
     <properties>
