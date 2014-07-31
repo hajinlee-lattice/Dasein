@@ -99,7 +99,6 @@ class LearningExecutor(Executor):
     @overrides(Executor)
     def transformData(self, params):
         metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
-        logger.info("Transforming with metadata: "+str(metadata))
         (stringColumns, continuousColumns) = self.getDecoratedColumns(metadata[0])
         training = params["training"]
         test = params["test"]
@@ -110,7 +109,6 @@ class LearningExecutor(Executor):
         
         training = pipeline.predict(training).as_matrix()
         test = pipeline.predict(test).as_matrix()
-        logger.info("Training and test data transformed into ndarray.")
         return (training, test, metadata)
 
     @overrides(Executor)

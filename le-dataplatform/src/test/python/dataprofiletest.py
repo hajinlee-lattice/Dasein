@@ -7,26 +7,16 @@ from leframework.executors.learningexecutor import LearningExecutor
 class DataProfileTest(TestBase):
 
     def setUp(self):
-        # Simulate what happens in yarn when it copies the framework code over
-        # before running the python script
-        fwkdir = "./leframework.tar.gz"
-        if os.path.exists(fwkdir):
-            shutil.rmtree(fwkdir)
-        if os.path.exists("data_profile.py"):
-            os.remove("data_profile.py")
+        script = "data_profile.py"
+        if os.path.exists(script):
+            os.remove(script)
 
-        os.makedirs(fwkdir + "/leframework")
-        enginedir = "/leframework/scoringengine.py"
-        shutil.copyfile("../../main/python" + enginedir, fwkdir + enginedir)
-        shutil.copyfile("../../main/python/pipeline.py", fwkdir + "/pipeline.py")
-        shutil.copyfile("../../main/python/encoder.py", fwkdir + "/encoder.py")
-        shutil.copyfile("../../main/python/algorithm/lr_train.py", "./lr_train.py")
-        shutil.copyfile("../../main/python/algorithm/rf_train.py", "./rf_train.py")
-        shutil.copyfile("../../main/python/algorithm/data_profile.py", "./data_profile.py")
+        # Symbolic links will be cleaned up by testBase
+        os.symlink("../../main/python/algorithm/" + script, script)
         results = "./results"
         if os.path.exists(results):
             shutil.rmtree(results)
-            
+
     def testExecuteLearningForProfile(self):
         # These properties won't really be used since these are just unit tests.
         # Functional and end-to-end tests should be done from java

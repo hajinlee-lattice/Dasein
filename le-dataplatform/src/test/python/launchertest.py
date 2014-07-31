@@ -29,9 +29,14 @@ class LauncherTest(TestBase):
         shutil.copyfile("../../main/python" + enginedir, fwkdir + enginedir)
         shutil.copyfile("../../main/python/pipeline.py", fwkdir + "/pipeline.py")
         shutil.copyfile("../../main/python/encoder.py", fwkdir + "/encoder.py")
-        shutil.copyfile("../../main/python/algorithm/lr_train.py", "./lr_train.py")
-        shutil.copyfile("../../main/python/algorithm/rf_train.py", "./rf_train.py")
-        shutil.copyfile("../../main/python/algorithm/data_profile.py", "./data_profile.py")
+
+        # Symbolic links will be cleaned up by testBase
+        scriptDir = "../../main/python/algorithm/" 
+        for f in os.listdir(scriptDir):
+            fPath = os.path.join(scriptDir,f)
+            if os.path.isfile(fPath) and not os.path.exists(f):
+                os.symlink(fPath, f)
+
         results = "./results"
         if os.path.exists(results):
             shutil.rmtree(results)
