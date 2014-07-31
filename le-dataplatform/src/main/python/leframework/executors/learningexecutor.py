@@ -99,6 +99,7 @@ class LearningExecutor(Executor):
     @overrides(Executor)
     def transformData(self, params):
         metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
+        logger.info("Transforming with metadata: "+str(metadata))
         (stringColumns, continuousColumns) = self.getDecoratedColumns(metadata[0])
         training = params["training"]
         test = params["test"]

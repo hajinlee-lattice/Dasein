@@ -82,13 +82,15 @@ class Launcher(object):
         params["test"] = test
         params["schema"] = schema
         params["parser"] = parser
-            
+
+        logger.info("Transforming data with null value imputation and hashing with " + str(executor.__class__))
         (training, test, metadata) = executor.transformData(params)
 
         params["training"] = training
         params["test"] = test
         params["metadata"] = metadata
         
+        logger.info("Training model.")
         # Currently passes runtime properties to training script to report progress
         clf = globals()['train'](training, test, schema, modelLocalDir, algorithmProperties, parser.getRuntimeProperties())
         
