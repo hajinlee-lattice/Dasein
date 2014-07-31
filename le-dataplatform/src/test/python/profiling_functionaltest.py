@@ -17,7 +17,7 @@ class DataProfileTest(TestBase):
         if os.path.exists(results):
             shutil.rmtree(results)
 
-    def testExecuteLearningForProfile(self):
+    def testExecuteProfiling(self):
         # These properties won't really be used since these are just unit tests.
         # Functional and end-to-end tests should be done from java
         os.environ["CONTAINER_ID"] = "xyz"
