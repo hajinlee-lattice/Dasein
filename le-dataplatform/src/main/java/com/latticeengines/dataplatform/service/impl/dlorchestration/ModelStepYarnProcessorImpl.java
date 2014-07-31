@@ -302,7 +302,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         Properties provenanceProperties = new Properties();
         provenanceProperties.put(ModelCommandParameters.DL_URL, commandParameters.getDlUrl());
         provenanceProperties.put(ModelCommandParameters.DL_TENANT, commandParameters.getDlTenant());
-        provenanceProperties.put(ModelCommandParameters.EVENT_TABLE, commandParameters.getEventTable());
+        provenanceProperties.put(ModelCommandParameters.DL_QUERY, commandParameters.getDlQuery());
 
         return StringTokenUtils.propertyToString(provenanceProperties);
     }

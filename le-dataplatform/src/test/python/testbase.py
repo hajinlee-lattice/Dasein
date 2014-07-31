@@ -1,6 +1,7 @@
-import os
 import logging
+import os
 from unittest import TestCase
+
 
 logging.basicConfig(level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

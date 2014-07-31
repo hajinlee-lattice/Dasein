@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.exposed.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
@@ -23,6 +25,7 @@ import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
@@ -120,7 +123,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         m.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
         m.setCustomer("DELL");
         m.setDataFormat("avro");
-        m.setProvenanceProperties("DataLoader_Instance=http://10.41.1.238/ DataLoader_TenantName=ADEBD2V67059448rX25059174r EventTable=DataForScoring_Lattice");
+        m.setProvenanceProperties("DataLoader_Instance=http://10.41.1.238/ DataLoader_TenantName=ADEBD2V67059448rX25059174r DataLoader_Query=DataForScoring_Lattice");
         return m;
     }
 

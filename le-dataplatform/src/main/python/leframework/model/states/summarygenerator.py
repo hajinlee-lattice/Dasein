@@ -31,7 +31,11 @@ class SummaryGenerator(State, JsonGenBase):
         predictors = sorted(predictors, key = lambda x: x["UncertaintyCoefficient"], reverse = True)
         self.summary["SchemaVersion"] = 1
         self.summary["Predictors"] = predictors
-        self.summary["RocScore"] = self.__getRocScore(zip(self.mediator.scored, self.mediator.target))
+        
+        rocScore = self.__getRocScore(zip(self.mediator.scored, self.mediator.target))
+        
+        if rocScore is not None:
+            self.summary["RocScore"] = rocScore 
         self.summary["SegmentChart"] = self.__getSegmentChart(mediator.probRange, mediator.widthRange, mediator.buckets, mediator.averageProbability)
         self.summary["DLEventTableData"] = self.__getDLEventTableData(self.mediator.provenanceProperties)
         self.summary["ConstructionInfo"] = self.__getConstructionInfo()
@@ -53,11 +57,16 @@ class SummaryGenerator(State, JsonGenBase):
             element = OrderedDict()
             element["CorrelationSign"] = 1 if record["lift"] > 1 else -1
             element["Count"] = record["count"]
-            element["Lift"] = record["lift"]
+            
+            if record["lift"] != -1:
+                element["Lift"] = record["lift"]
+
             if record["Dtype"] == "BND":
                 element["LowerInclusive"] = record["minV"]
             element["Name"] = str(uuid.uuid4())
-            element["UncertaintyCoefficient"] = record["uncertaintyCoefficient"] 
+            
+            if record["uncertaintyCoefficient"] != -1:
+                element["UncertaintyCoefficient"] = record["uncertaintyCoefficient"] 
             attrLevelUncertaintyCoeff += element["UncertaintyCoefficient"]
             if record["Dtype"] == "BND":
                 element["UpperExclusive"] = record["maxV"]
@@ -82,7 +91,7 @@ class SummaryGenerator(State, JsonGenBase):
         if len(probRange) == 1:
             inclusive = [(0, None)]
         else:
-            inclusive = [((probRange[0] + probRange[1]) / 2, None)]         
+            inclusive = [((probRange[0] + probRange[1]) / 2, None)]
             for i in range (1, len(probRange) - 1):
                 inclusive.append(((probRange[i] + probRange[i + 1]) / 2, inclusive[i - 1][0]))
             inclusive.append((0, inclusive[len(probRange) - 2][0]))
@@ -140,7 +149,7 @@ class SummaryGenerator(State, JsonGenBase):
         
         if theoreticalBestArea == 0:
             self.logger.warn("All events are 0, could not calculate ROC score.")
-            return -1
+            return None
         return actualBestArea / float(theoreticalBestArea)
         
     def __getDLEventTableData(self, provenanceProperties):
@@ -151,7 +160,7 @@ class SummaryGenerator(State, JsonGenBase):
         element = OrderedDict()
         element["DataLoaderURL"] = provenanceProperties["DataLoader_Instance"] 
         element["TenantName"] = provenanceProperties["DataLoader_TenantName"]
-        element["QueryName"] = provenanceProperties["EventTable"]
+        element["QueryName"] = provenanceProperties["DataLoader_Query"]
         
         return element
     

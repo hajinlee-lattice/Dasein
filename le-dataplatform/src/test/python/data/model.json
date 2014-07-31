@@ -113,7 +113,7 @@
   "key_columns": [
     "Nutanix_EventTable_Clean"
   ],
-  "provenance_properties": "DataLoader_Instance=http://10.41.1.238/ DataLoader_TenantName=ADEBD2V67059448rX25059174r EventTable=DataForScoring_Lattice ",
+  "provenance_properties": "DataLoader_Instance=http://10.41.1.238/ DataLoader_TenantName=ADEBD2V67059448rX25059174r DataLoader_Query=DataForScoring_Lattice ",
   "algorithm_properties": "criterion=gini n_estimators=10 n_jobs=4 min_samples_split=25 min_samples_leaf=10 bootstrap=True",
   "training_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/s0Training-r-00000.avro",
   "test_data": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/samples/s0Test-r-00000.avro",

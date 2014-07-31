@@ -23,6 +23,7 @@
     </yarn:environment>
     
     <yarn:localresources>
+        <yarn:hdfs path="/app/dataplatform/scripts/leframework.tar.gz" type="ARCHIVE" />
         <yarn:hdfs path="/app/dataplatform/*" />
         <yarn:hdfs path="/lib/*" />
     </yarn:localresources>
