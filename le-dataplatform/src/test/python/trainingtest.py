@@ -46,12 +46,13 @@ class LauncherTest(TestBase):
         if 'launcher' in sys.modules:
             del sys.modules['launcher']
         from launcher import Launcher
+
         # These properties won't really be used since these are just unit tests.
         # Functional and end-to-end tests should be done from java
         os.environ["CONTAINER_ID"] = "xyz"
         os.environ["SHDP_HD_FSWEB"] = "localhost:50070"
-        launcher = Launcher("model.json")
-        launcher.execute(False)
+        traininglauncher = Launcher("model.json")
+        traininglauncher.execute(False)
 
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open("./results/model.json").read())
@@ -75,8 +76,8 @@ class LauncherTest(TestBase):
         # Test the scoring engine using the generated pipeline that was deserialized
         inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
         value = [ random() for _ in range(len(inputColumns))]
- 
-        fieldList = launcher.getParser().fields       
+
+        fieldList = traininglauncher.getParser().fields       
         typeDict = {}
         for field in fieldList:
             typeDict[field['columnName']] = field['sqlType']
