@@ -4,6 +4,7 @@ import filecmp
 import gzip
 import json
 import os
+import sys
 import pickle
 from random import random
 from random import shuffle
@@ -11,7 +12,6 @@ import shutil
 from sklearn.ensemble import RandomForestClassifier
 import uuid
 
-from launcher import Launcher
 from testbase import TestBase
 from leframework import scoringengine as se
 
@@ -42,6 +42,10 @@ class LauncherTest(TestBase):
             shutil.rmtree(results)
 
     def testExecuteLearning(self):
+        # Dynamically import launcher to make sure globals() is clean in launcher
+        if 'launcher' in sys.modules:
+            del sys.modules['launcher']
+        from launcher import Launcher
         # These properties won't really be used since these are just unit tests.
         # Functional and end-to-end tests should be done from java
         os.environ["CONTAINER_ID"] = "xyz"

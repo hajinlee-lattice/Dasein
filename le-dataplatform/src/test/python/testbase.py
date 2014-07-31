@@ -11,7 +11,9 @@ class TestBase(TestCase):
     @classmethod
     def setUpClass(cls):
         logger.info("=========Current test: " + str(cls) + " ===========")
-        dataDir = "./data/"
+        baseDir = os.path.dirname(os.path.abspath(__file__))
+        dataDir = baseDir+ "/data/"
+        # Creates symbolic links from data directory to current directory
         for f in os.listdir(dataDir):
             fPath = os.path.join(dataDir,f)
             if os.path.isfile(fPath) and not os.path.exists(f):
@@ -21,6 +23,7 @@ class TestBase(TestCase):
     def tearDownClass(cls):
         logger.info( "=========Tear down test: " + str(cls) + " ===========")
         curDir = "."
+        # Removes all symbolic links in current directory
         for f in os.listdir(curDir):
             if os.path.islink(f):
                 os.unlink(f)
