@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 from testbase import TestBase
 from launcher import Launcher
@@ -28,4 +29,8 @@ class DataProfileTest(TestBase):
 
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)
         self.assertTrue(results is not None)
+    
+    def tearDown(self):
+        # Remove launcher module to restore its globals()
+        del sys.modules['launcher'] 
 

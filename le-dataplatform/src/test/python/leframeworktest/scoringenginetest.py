@@ -1,4 +1,5 @@
 import pickle
+import os
 from testbase import TestBase
 from leframework import scoringengine
 
@@ -25,3 +26,6 @@ class ScoringEngineTest(TestBase):
                 self.assertEqual(result[0], self.rowId)
                 self.assertEqual(len(result), 2)
         f.close()
+        if os.path.exists(self.outputFileName):
+            os.remove(self.outputFileName)
+        

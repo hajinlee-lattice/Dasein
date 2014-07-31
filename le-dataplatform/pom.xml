@@ -51,7 +51,7 @@
                                         <argument>unittest</argument>
                                         <argument>discover</argument>
                                         <argument>-p</argument>
-                                        <argument>*unittest.py</argument>
+                                        <argument>*test.py</argument>
                                     </arguments>
                                     <environmentVariables>
                                         <PYTHONPATH>../../main/python:$PYTHONPATH</PYTHONPATH>
@@ -147,7 +147,7 @@
                                 <argument>unittest</argument>
                                 <argument>discover</argument>
                                 <argument>-p</argument>
-                                <argument>*unittest.py</argument>
+                                <argument>*test.py</argument>
                             </arguments>
                             <environmentVariables>
                                 <PYTHONPATH>../../main/python:$PYTHONPATH</PYTHONPATH>
