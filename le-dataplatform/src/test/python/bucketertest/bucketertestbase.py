@@ -5,11 +5,11 @@ from leframework.argumentparser import ArgumentParser
 class BucketerTestBase(object):
 
     def setup(self):
+        testSize = 100
         parser = ArgumentParser("model-dataprofile.json")
         schema = parser.getSchema()
         training = parser.createList(parser.stripPath(schema["training_data"]))
-        test = parser.createList(parser.stripPath(schema["test_data"]))
-        self.data = training.append(test)
+        self.data = training[:testSize]
         self.target = self.data.iloc[:,schema["targetIndex"]]
         self.stringcols = set(schema["stringColumns"])
         self.features = set(schema["features"])

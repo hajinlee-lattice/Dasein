@@ -5,6 +5,7 @@ class TestBase(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        print "=========Current test: " + str(cls) + " ==========="
         dataDir = "./data/"
         for f in os.listdir(dataDir):
             fPath = os.path.join(dataDir,f)
