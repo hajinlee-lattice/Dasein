@@ -99,6 +99,7 @@ public class ModelCommandCallable implements Callable<Long> {
             Date now = new Date();
             modelCommandResultEntityMgr.create(new ModelCommandResult(modelCommand, now, now, ModelCommandStatus.IN_PROGRESS));
 
+            modelCommand.setModelCommandStep(ModelCommandStep.RETRIEVE_METADATA);
             modelCommand.setCommandStatus(ModelCommandStatus.IN_PROGRESS);
             modelCommandEntityMgr.update(modelCommand);
 
