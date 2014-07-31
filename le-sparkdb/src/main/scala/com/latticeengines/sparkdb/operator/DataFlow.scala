@@ -14,6 +14,7 @@ class DataFlow(private var name: String, private var conf: Configuration, privat
   val job = new Job(conf)
   val sparkConf = new SparkConf().setAppName(name)
   sparkConf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+  sparkConf.set("spark.kryo.registrator", "com.latticeengines.sparkdb.service.impl.LedpKryoRegistrator")
   
   if (local) {
     sparkConf.setMaster("local[4]")

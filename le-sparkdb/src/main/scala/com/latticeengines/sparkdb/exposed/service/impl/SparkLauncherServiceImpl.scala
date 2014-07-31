@@ -22,7 +22,7 @@ class SparkLauncherServiceImpl extends SparkLauncherService {
         "--addJars", getListOfDependencyJars("/home/rgonzalez/workspace/ledp/le-sparkdb/target/dependency"), //
         "--jar", "file:/home/rgonzalez/workspace/ledp/le-sparkdb/target/le-sparkdb-1.0.0-SNAPSHOT.jar")
     System.setProperty("SPARK_YARN_MODE", "true")
-    System.setProperty("spark.driver.extraJavaOptions", "-XX:PermSize=128m -XX:MaxPermSize=128m")
+    System.setProperty("spark.driver.extraJavaOptions", "-XX:PermSize=128m -XX:MaxPermSize=128m -Dsun.io.serialization.extendedDebugInfo=true")
     val sparkConf = new SparkConf()
     val args = new ClientArguments(params, sparkConf)
     new Client(args, conf, sparkConf).runApp()

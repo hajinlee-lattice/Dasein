@@ -28,12 +28,13 @@ class Join(val df: DataFlow) extends DataOperator(df) {
     }
     
     val rdd1Broadcast = dataFlow.sc.broadcast(rdd1.collectAsMap())
-    val schema = AvroUtils.combineSchemas(rdds(0).first().getSchema(), rdds(1).first().getSchema())
+    val schemaAndMap = AvroUtils.combineSchemas(rdds(0).first().getSchema(), rdds(1).first().getSchema())
+    schemaAndMap(0) = schemaAndMap(0).toString()
     val joined = rdd2.mapPartitions({ iter =>
       val m = rdd1Broadcast.value
       for {
         (t, u) <- iter if m.contains(t)
-      } yield (Join.combineRecords(u, m.get(t).get, schema))
+      } yield (Join.combineRecords(u, m.get(t).get, schemaAndMap))
     }, preservesPartitioning = true)
     joined
   }
