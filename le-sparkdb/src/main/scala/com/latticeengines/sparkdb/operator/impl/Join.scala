@@ -1,8 +1,6 @@
 package com.latticeengines.sparkdb.operator.impl
 
-import org.apache.avro.Schema
 import org.apache.avro.generic.GenericRecord
-import org.apache.commons.math3.util.Pair
 import org.apache.spark.SparkContext.rddToPairRDDFunctions
 import org.apache.spark.rdd.RDD
 

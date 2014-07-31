@@ -12,7 +12,8 @@ import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
 import com.latticeengines.common.exposed.util.AvroUtils
-import com.latticeengines.sparkdb.operator._
+import com.latticeengines.sparkdb.operator.DataFlow
+import com.latticeengines.sparkdb.operator.DataOperator
 
 class AvroSourceTable(val df: DataFlow) extends DataOperator(df) {
   override def run(rdd: RDD[GenericRecord]): RDD[GenericRecord] = {

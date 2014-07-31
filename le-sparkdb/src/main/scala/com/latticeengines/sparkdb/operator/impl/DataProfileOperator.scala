@@ -4,13 +4,10 @@ import scala.collection.JavaConversions.asScalaBuffer
 
 import org.apache.avro.generic.GenericRecord
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
-import org.apache.hadoop.mapreduce.Job
-import org.apache.spark.SparkConf
-import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
-import com.latticeengines.sparkdb.operator._
+import com.latticeengines.sparkdb.operator.DataFlow
+import com.latticeengines.sparkdb.operator.DataOperator
 
 class DataProfileOperator(val df: DataFlow) extends DataOperator(df) {
   override def run(rdd: RDD[GenericRecord]): RDD[GenericRecord] = {

@@ -1,6 +1,9 @@
 package com.latticeengines.sparkdb.exposed.service.impl
 
 import java.io.File
+
+import scala.Array.canBuildFrom
+
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.spark.SparkConf
