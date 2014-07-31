@@ -1,11 +1,16 @@
 import os
+import logging
 from unittest import TestCase
+
+logging.basicConfig(level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(name='testbase')
 
 class TestBase(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        print "=========Current test: " + str(cls) + " ==========="
+        logger.info("=========Current test: " + str(cls) + " ===========")
         dataDir = "./data/"
         for f in os.listdir(dataDir):
             fPath = os.path.join(dataDir,f)
@@ -14,6 +19,7 @@ class TestBase(TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        logger.info( "=========Tear down test: " + str(cls) + " ===========")
         curDir = "."
         for f in os.listdir(curDir):
             if os.path.islink(f):

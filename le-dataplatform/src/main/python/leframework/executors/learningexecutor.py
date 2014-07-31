@@ -23,7 +23,7 @@ from pipeline import Pipeline
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(name='launcher')
+logger = logging.getLogger(name='learningexecutor')
 
 
 class LearningExecutor(Executor):
