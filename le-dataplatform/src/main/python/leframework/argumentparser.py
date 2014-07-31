@@ -87,7 +87,7 @@ class ArgumentParser(object):
 
     def createList(self, dataFileName):
         '''
-          Creates a numpy matrix from the data set in dataFileName. It only creates data in memory for features and targets.
+          Creates a pandas dataframe from the data set in dataFileName. It only creates data in memory for features and targets.
         '''
         # k is the index of the features/target in the resulting data
         k = 0

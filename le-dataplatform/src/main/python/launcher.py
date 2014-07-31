@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
     logger.info("Python script launched with arguments: " + str(sys.argv[1:]))
     if  len(sys.argv) != 3:
-        logger.error("Argument length is :" + str(len(sys.argv)) + " which should be 3")
+        logger.error("Argument length is :" + str(len(sys.argv)) + " which should be three.")
     
     l = Launcher(sys.argv[1], sys.argv[2])    
     l.execute(True)
