@@ -67,7 +67,7 @@ class SummaryGenerator(State, JsonGenBase):
             
             if record["uncertaintyCoefficient"] != -1:
                 element["UncertaintyCoefficient"] = record["uncertaintyCoefficient"] 
-            attrLevelUncertaintyCoeff += element["UncertaintyCoefficient"]
+                attrLevelUncertaintyCoeff += element["UncertaintyCoefficient"]
             if record["Dtype"] == "BND":
                 element["UpperExclusive"] = record["maxV"]
             if record["Dtype"] == "BND":
