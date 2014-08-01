@@ -33,7 +33,6 @@ public class LedpRestClient {
     private RetryTemplate rtt = new RetryTemplate();
     private static final Log log = LogFactory.getLog(LedpRestClient.class);
     private String restEndpointHost;
-    private boolean hasError = false;
 
     public LedpRestClient() {
         rt.setErrorHandler(new ThrowExceptionResponseErrorHandler());
@@ -130,7 +129,6 @@ public class LedpRestClient {
             LoadData ld = new LoadData();
             ld.setConfiguration("localhost:8080", new LoadConfiguration());
             List<String> appIds = ld.executeJob();
-            System.out.println(lrc.hasError);
         } catch (Exception e) {
             // TODO Auto-generated catch block
 

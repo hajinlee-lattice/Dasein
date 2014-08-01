@@ -17,7 +17,7 @@ public class ModelingResourceLoadTestNG extends PerfLoadTestNGBase {
 
     @Test(groups = "load", enabled = true)
     public void modelingResource() throws Exception {
-        log.info("               info..............." + this.getClass().getSimpleName() + "modeling resource jobs");
+        log.info("               info..............." + this.getClass().getSimpleName() + " modeling resource jobs");
 
         List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
         for (int i = 0; i < numOfRuns; i++) {
@@ -48,7 +48,7 @@ public class ModelingResourceLoadTestNG extends PerfLoadTestNGBase {
 
     @Test(groups = "load", enabled = true, dependsOnMethods = { "modelingResource" })
     public void preemptionSubmit() throws Exception {
-        log.info("               info..............." + this.getClass().getSimpleName() + "submit preemption");
+        log.info("               info..............." + this.getClass().getSimpleName() + " submit preemption");
 
         List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
         for (int i = 0; i < numOfRuns; i++) {

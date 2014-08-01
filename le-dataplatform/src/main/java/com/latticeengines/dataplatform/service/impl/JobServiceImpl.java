@@ -6,7 +6,6 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,7 +14,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TypeConverter;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
-import org.apache.sqoop.Sqoop;
+import org.apache.sqoop.LedpSqoop;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -333,7 +332,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         } catch (InterruptedException e) {
             log.error(e);
         }
-        //Final try
+        // Final try
         appId = getAppIdFromName(jobName);
         if (appId == null) {
             throw new LedpException(LedpCode.LEDP_12002, new String[] { jobName });
@@ -348,7 +347,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             @Override
             public Integer call() throws Exception {
 
-                return Sqoop.runTool(new String[] { //
+                return LedpSqoop.runTool(new String[] { //
                         "import", //
                                 "-Dmapred.job.queue.name=" + queue, //
                                 "--connect", //
@@ -363,7 +362,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
                                 "--split-by", //
                                 StringUtils.join(splitCols, ","), //
                                 "--target-dir", //
-                                targetDir }, yarnConfiguration);
+                                targetDir }, new Configuration(yarnConfiguration));
 
             }
         });
