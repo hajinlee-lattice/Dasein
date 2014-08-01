@@ -49,7 +49,7 @@ public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
 
     @Test(groups = "load", enabled = true, dependsOnMethods = { "onBoard" })
     public void noPreemptionSubmit() throws Exception {
-        log.info("               info..............." + this.getClass().getSimpleName() + "submit");
+        log.info("               info..............." + this.getClass().getSimpleName() + "submit no preemption");
 
         List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
         for (int i = numOfRuns; i < numOfRuns * 2; i++) {
