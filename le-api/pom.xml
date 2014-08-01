@@ -13,7 +13,7 @@
         <component-name>le-api</component-name>
         <le.dataplatform.version>1.0.0-SNAPSHOT</le.dataplatform.version>
         <le.domain.version>1.0.0-SNAPSHOT</le.domain.version>
-        <sqoop.version>1.4.4.2.0.6.1-102</sqoop.version>
+        <sqoop.version>1.4.4.2.1.3.0-563</sqoop.version>
     </properties>
 
     <parent>
