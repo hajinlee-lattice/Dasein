@@ -44,7 +44,7 @@ public class LedpRestClient {
     }
 
     public AppSubmission retryRequest(final String url, final Object config) throws Exception {
-        AppSubmission submission = rtt.execute(new RetryCallback<AppSubmission>() {
+        AppSubmission submission = rtt.execute(new RetryCallback<AppSubmission, Exception>() {
             public AppSubmission doWithRetry(RetryContext context) {
                 return rt.postForObject(url, config, AppSubmission.class, new Object[] {});
             }
