@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -26,6 +27,7 @@ import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProc
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 
@@ -101,6 +103,10 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
     public void cleanup() throws Exception {
         httpServer.stop();
         dlOrchestrationJdbcTemplate.execute("drop table " + TEMP_EVENTTABLE);
+    }
+
+    @AfterMethod(enabled = true, alwaysRun = true)
+    public void afterEachTest() {
         super.clearTables();
     }
 
@@ -112,7 +118,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
         int iterations = 0;
         while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
-                && iterations < 121) {
+                && iterations < 20) {
             iterations++;
             Thread.sleep(15000);
             command = modelCommandEntityMgr.findByKey(command);
@@ -127,9 +133,38 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         assertTrue(command.getCommandStatus() == ModelCommandStatus.SUCCESS, "The actual command state is " + command.getCommandStatus());
 
         List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
-        assertTrue(logs.size() == 14 || logs.size() == 15);
+        assertEquals(logs.size(), 14);
         List<ModelCommandState> states = modelCommandStateEntityMgr.findAll();
         assertEquals(states.size(), 7);
+        List<ModelCommandResult> results = modelCommandResultEntityMgr.findAll();
+        assertEquals(results.size(), 1);
+        assertEquals(results.get(0).getProcessStatus(), ModelCommandStatus.SUCCESS);
+    }
+
+    @Test(groups = "functional")
+    public void testMissingParameters() throws Exception {
+        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE);
+        modelCommandEntityMgr.create(command);
+
+        int iterations = 0;
+        while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
+                && iterations < 20) {
+            iterations++;
+            Thread.sleep(15000);
+            command = modelCommandEntityMgr.findByKey(command);
+        }
+
+        assertTrue(command.getCommandStatus() == ModelCommandStatus.FAIL, "The actual command state is " + command.getCommandStatus());
+
+        List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
+        assertTrue(logs.get(0).getMessage().contains("LEDP_16000"));
+        assertTrue(logs.get(1).getMessage().contains("FAIL"));
+        assertEquals(logs.size(), 2);
+        List<ModelCommandState> states = modelCommandStateEntityMgr.findAll();
+        assertEquals(states.size(), 0);
+        List<ModelCommandResult> results = modelCommandResultEntityMgr.findAll();
+        assertEquals(results.size(), 1);
+        assertEquals(results.get(0).getProcessStatus(), ModelCommandStatus.FAIL);
     }
 
 }
