@@ -118,7 +118,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
         int iterations = 0;
         while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
-                && iterations < 20) {
+                && iterations < 100) {  // Wait maximum of 25 minutes to process this command
             iterations++;
             Thread.sleep(15000);
             command = modelCommandEntityMgr.findByKey(command);
@@ -148,7 +148,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
         int iterations = 0;
         while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
-                && iterations < 20) {
+                && iterations < 20) {  // Wait maximum of 5 minutes to process this command
             iterations++;
             Thread.sleep(15000);
             command = modelCommandEntityMgr.findByKey(command);
