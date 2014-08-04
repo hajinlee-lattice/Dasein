@@ -49,8 +49,8 @@ public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
         log.info("               info..............." + this.getClass().getSimpleName() + " submit no preemption");
 
         List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
-        for (int i = numOfRuns; i < numOfRuns * 2; i++) {
-            for (int j = i * numOfCustomers; j < (i + 1) * numOfCustomers; j++) {
+        for (int i = 0; i < numOfRuns; i++) {
+            for (int j = 0; j < numOfCustomers; j++) {
                 String customer = "c" + j;
                 model = produceAModel(customer);
                 SubmitModel sm = new SubmitModel();
