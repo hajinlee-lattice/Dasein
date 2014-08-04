@@ -25,8 +25,8 @@ public class StringTokenUtils  {
                     sb.append(',');
                 }
                 sb.append(feature);
-                firsttime = false;                
-            }            
+                firsttime = false;
+            }
         } 
         
         String str = (sb == null) ? "" : sb.toString();

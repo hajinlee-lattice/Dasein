@@ -31,7 +31,7 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
             String valueStr = resolvePlaceholder(keyStr, props,
                     springSystemPropertiesMode);
             // Decrypt credentials
-            if (keyStr.contains(CipherUtils.ENCRYPTED)) {           
+            if (keyStr.contains(CipherUtils.ENCRYPTED)) {
                 try {
                     valueStr = CipherUtils.decrypt(valueStr);
                 } catch (Exception e) {

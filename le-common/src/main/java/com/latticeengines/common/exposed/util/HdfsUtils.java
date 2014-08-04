@@ -48,21 +48,22 @@ public class HdfsUtils {
     public static final String getHdfsFileContents(Configuration configuration, String hdfsPath) throws Exception {
         FileSystem fs = FileSystem.get(configuration);
         Path schemaPath = new Path(hdfsPath);
-        InputStream is = fs.open(schemaPath);
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        StreamUtils.copy(is, os);
-        return new String(os.toByteArray());
+        
+        try (InputStream is = fs.open(schemaPath)) {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            StreamUtils.copy(is, os);
+            return new String(os.toByteArray());
+        }
+        
     }
 
     public static final void writeToFile(Configuration configuration, String hdfsPath, String contents)
             throws Exception {
         FileSystem fs = FileSystem.get(configuration);
         Path filePath = new Path(hdfsPath);
-        BufferedWriter br = new BufferedWriter(new OutputStreamWriter(fs.create(filePath, true)));
-        try {
+
+        try (BufferedWriter br = new BufferedWriter(new OutputStreamWriter(fs.create(filePath, true)))) {
             br.write(contents);
-        } finally {
-            br.close();
         }
     }
     

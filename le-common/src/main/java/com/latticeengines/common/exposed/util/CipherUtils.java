@@ -16,7 +16,7 @@ import org.apache.commons.codec.binary.Base64;
 public class CipherUtils {
     public static final String ENCRYPTED = "encrypted";
 
-    // Encrption uses AES algorithm to generate 128-bit hash code
+    // Encryption uses AES algorithm to generate 128-bit hash code
     private static final String CIPHER_METHOD = "AES";
     private static final String CIPHER_OPTS = CIPHER_METHOD + "/CBC/PKCS5Padding";
 

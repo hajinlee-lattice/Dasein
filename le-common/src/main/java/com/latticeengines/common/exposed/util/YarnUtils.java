@@ -15,7 +15,7 @@ public class YarnUtils {
         return ApplicationId.newInstance(Long.parseLong(tokens[1]), Integer.parseInt(tokens[2]));
     }
     
-    public static boolean isPrempted(String diagnostics) {      
+    public static boolean isPrempted(String diagnostics) {
         if (Strings.isNullOrEmpty(diagnostics)) return false;
         
         return (diagnostics.contains("-102") && diagnostics.contains("Container preempted by scheduler"));
