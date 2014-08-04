@@ -20,31 +20,28 @@ public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
     @Test(groups = "load", enabled = true)
     public void onBoard() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + " on board");
-
         List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
-        for (int i = numOfRuns; i < numOfRuns * 2; i++) {
-            for (int j = i * numOfCustomers; j < (i + 1) * numOfCustomers; j++) {
-                String customer = "c" + j;
-                String hdfsPath = customerBaseDir + "/" + customer;
+        for (int i = 0; i < numOfCustomers; i++) {
+            String customer = "c" + i;
+            String hdfsPath = customerBaseDir + "/" + customer;
 
-                while (fs.isDirectory(new Path(hdfsPath))) {
-                    log.info("delete hdfs path for " + customer);
-                    fs.delete(new Path(hdfsPath), true);
-                }
+            while (fs.isDirectory(new Path(hdfsPath))) {
+                log.info("delete hdfs path for " + customer);
+                fs.delete(new Path(hdfsPath), true);
+            }
 
-                OnBoard ob = new OnBoard(yarnConfiguration, hdfsPath);
-                ob.setConfiguration(restEndpointHost, createOnBoardConfiguration(customer));
-                Future<List<String>> future = executor.submit(ob);
-                futures.add(future);
-            }
-            List<String> appIds = new ArrayList<String>();
-            for (Future<List<String>> future : futures) {
-                List<String> appId = future.get();
-                assertNotNull(appId);
-                appIds.addAll(appId);
-            }
-            assertTrue(GetJobStatus.checkStatus(restEndpointHost, appIds));
+            OnBoard ob = new OnBoard(yarnConfiguration, hdfsPath);
+            ob.setConfiguration(restEndpointHost, createOnBoardConfiguration(customer));
+            Future<List<String>> future = executor.submit(ob);
+            futures.add(future);
         }
+        List<String> appIds = new ArrayList<String>();
+        for (Future<List<String>> future : futures) {
+            List<String> appId = future.get();
+            assertNotNull(appId);
+            appIds.addAll(appId);
+        }
+        assertTrue(GetJobStatus.checkStatus(restEndpointHost, appIds));
     }
 
     @Test(groups = "load", enabled = true, dependsOnMethods = { "onBoard" })
