@@ -63,18 +63,19 @@ public class ProgressMonitor {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         Socket connectionSocket = listener.accept();
-                        String update = "0";
+
                         try (BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket
                                 .getInputStream()))) {
-                            update = inFromClient.readLine();
+                            String update = inFromClient.readLine();
+                            float progress = Float.parseFloat(update);
+                            setProgress(progress);
                         }
-                        float progress = Float.parseFloat(update);
-                        setProgress(progress);
+
                         if (log.isDebugEnabled()) {
                             log.debug("Setting application progress to: " + progress);
                         }
                         connectionSocket.close();
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         log.error("Can't recieve progress status due to: " + ExceptionUtils.getStackTrace(e));
                     }
                 }
