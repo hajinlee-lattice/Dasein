@@ -58,14 +58,14 @@ class SummaryGenerator(State, JsonGenBase):
             element["CorrelationSign"] = 1 if record["lift"] > 1 else -1
             element["Count"] = record["count"]
             
-            if record["lift"] != -1:
+            if record["lift"] is not None:
                 element["Lift"] = record["lift"]
 
             if record["Dtype"] == "BND":
                 element["LowerInclusive"] = record["minV"]
             element["Name"] = str(uuid.uuid4())
             
-            if record["uncertaintyCoefficient"] != -1:
+            if record["uncertaintyCoefficient"] is not None:
                 element["UncertaintyCoefficient"] = record["uncertaintyCoefficient"] 
                 attrLevelUncertaintyCoeff += element["UncertaintyCoefficient"]
             if record["Dtype"] == "BND":

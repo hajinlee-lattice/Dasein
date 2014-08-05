@@ -240,7 +240,7 @@ def getCountWhereEventIsOne(valueData, eventData):
 
 def getLift(avgProbability, valueCount, valueVector, eventVector):
     if avgProbability == 0:
-        return -1
+        return None
     return getCountWhereEventIsOne(valueVector, eventVector) / float(avgProbability * valueCount)
 
 def uncertaintyCoefficientXgivenY(x, y):
@@ -249,5 +249,5 @@ def uncertaintyCoefficientXgivenY(x, y):
       In this case, x should be the event column, while y should be the predictor column-value
     '''
     if entropy(x) == 0:
-        return -1
+        return None
     return metrics.mutual_info_score(x, y) / entropy(x)
