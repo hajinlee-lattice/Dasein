@@ -43,10 +43,10 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
 
     @Autowired
     private JobNameService jobNameService;
-  
+
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
-    
+
     @Value("${dataplatform.yarn.job.runtime.config}")
     private String runtimeConfig;
 
@@ -60,7 +60,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         }
         String dir = UUID.randomUUID().toString();
         try {
-            HdfsUtils.mkdir(yarnConfiguration, hdfsJobBaseDir+"/"+dir);
+            HdfsUtils.mkdir(yarnConfiguration, hdfsJobBaseDir + "/" + dir);
             new File("./" + dir).mkdir();
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00000, e, new String[] { dir });
@@ -112,12 +112,13 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     private String createContainerLauncherContextFile(YarnClientCustomization customization,
             Properties appMasterProperties, Properties containerProperties) {
         String contextFileName = customization.getContainerLauncherContextFile(appMasterProperties);
-        InputStream contextFileUrlFromClasspathAsStream = getClass().getResourceAsStream(contextFileName);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        try {
-            FileCopyUtils.copy(contextFileUrlFromClasspathAsStream, stream);
-            String sb = new String(stream.toByteArray());
 
+        try (InputStream contextFileUrlFromClasspathAsStream = getClass().getResourceAsStream(contextFileName)) {
+            String sb = "";
+            try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+                FileCopyUtils.copy(contextFileUrlFromClasspathAsStream, stream);
+                sb = new String(stream.toByteArray());
+            }
             if (containerProperties != null) {
                 for (Map.Entry<Object, Object> entry : containerProperties.entrySet()) {
                     sb = sb.replaceAll("\\$\\$" + entry.getKey().toString() + "\\$\\$", entry.getValue().toString());
@@ -129,7 +130,6 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             File contextFile = new File(dir + "/" + contextFileName);
             FileUtils.write(contextFile, sb);
             return contextFile.getAbsolutePath();
-
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

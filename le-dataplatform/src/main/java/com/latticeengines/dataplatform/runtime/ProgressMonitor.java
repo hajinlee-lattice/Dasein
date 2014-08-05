@@ -24,7 +24,7 @@ public class ProgressMonitor {
     private ServerSocket listener;
 
     private float progress = 0;
-    
+
     private ContainerAllocator allocator;
 
     private ExecutorService executor;
@@ -63,10 +63,11 @@ public class ProgressMonitor {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         Socket connectionSocket = listener.accept();
-                        BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket
-                                .getInputStream()));
-                        String update = inFromClient.readLine();
-
+                        String update = "0";
+                        try (BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket
+                                .getInputStream()))) {
+                            update = inFromClient.readLine();
+                        }
                         float progress = Float.parseFloat(update);
                         setProgress(progress);
                         if (log.isDebugEnabled()) {
@@ -89,7 +90,7 @@ public class ProgressMonitor {
 
         log.info("Shutting down progress monitor");
         executor.shutdownNow();
-       
+
         // Shut down socket
         try {
             listener.close();

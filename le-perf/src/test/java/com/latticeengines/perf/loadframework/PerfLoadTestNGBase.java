@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,7 +16,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
-
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
@@ -117,8 +115,7 @@ public class PerfLoadTestNGBase {
         yarnConfiguration.set(
                 "dfs.client.failover.proxy.provider." + prop.getProperty("dataplatform.dfs.nameservices"),
                 prop.getProperty("dataplatform.dfs.client.failover.proxy.provider"));
-        yarnConfiguration.set("dfs.ha.namenodes." + prop.getProperty("dataplatform.dfs.nameservices"),
-                prop.getProperty("nn1,nn2"));
+        yarnConfiguration.set("dfs.ha.namenodes." + prop.getProperty("dataplatform.dfs.nameservices"), "nn1,nn2");
         yarnConfiguration.set("dfs.namenode.rpc-address." + prop.getProperty("dataplatform.dfs.nameservices") + ".nn1",
                 prop.getProperty("dfs.namenode.rpc-address.nn1"));
         yarnConfiguration.set("dfs.namenode.rpc-address." + prop.getProperty("dataplatform.dfs.nameservices") + ".nn2",
