@@ -27,7 +27,7 @@ class ProfilingTest(TestBase):
         # Functional and end-to-end tests should be done from java
         os.environ["CONTAINER_ID"] = "xyz"
         os.environ["SHDP_HD_FSWEB"] = "localhost:50070"
-        profilinglauncher = Launcher("model-dataprofile.json")
+        profilinglauncher = Launcher("bad-target-dataprofile.json")
         profilinglauncher.execute(False)
         learningExecutor = LearningExecutor()
 

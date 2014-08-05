@@ -77,9 +77,7 @@ class SummaryGenerator(State, JsonGenBase):
             
             element["IsVisible"] = True
             elements.append(element)
-        
-        # Sort elements by UncertaintyCoefficient
-        elements = sorted(elements, key = lambda x: x["UncertaintyCoefficient"], reverse = True)
+
         predictor = OrderedDict()
         predictor["Elements"] = elements
         predictor["Name"] = colname

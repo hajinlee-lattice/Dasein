@@ -51,7 +51,7 @@ class TrainingTest(TestBase):
         # Functional and end-to-end tests should be done from java
         os.environ["CONTAINER_ID"] = "xyz"
         os.environ["SHDP_HD_FSWEB"] = "localhost:50070"
-        traininglauncher = Launcher("model.json")
+        traininglauncher = Launcher("bad-target.json")
         traininglauncher.execute(False)
 
         # Retrieve the pickled model from the json file
