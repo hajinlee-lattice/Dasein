@@ -104,7 +104,7 @@ public class PerfLoadTestNGBase {
 
     protected YarnConfiguration createYarnConfiguration(Properties prop) {
         YarnConfiguration yarnConfiguration = new YarnConfiguration();
-        yarnConfiguration.set("fs.defaultFS", "hdfs://bodcprodvhdp195.prod.lattice.local:8020");
+        yarnConfiguration.set("fs.defaultFS", prop.getProperty("dataplatform.fs.defaultFS"));
         yarnConfiguration.set("yarn.resourcemanager.address",
                 prop.getProperty("dataplatform.yarn.resourcemanager.address"));
         yarnConfiguration.set("yarn.resourcemanager.scheduler.address",
@@ -113,6 +113,16 @@ public class PerfLoadTestNGBase {
                 prop.getProperty("dataplatform.yarn.resourcemanager.webapp.address"));
         yarnConfiguration.set("yarn.nodemanager.remote-app-log-dir",
                 prop.getProperty("dataplatform.yarn.nodemanager.remote-app-log-dir"));
+        yarnConfiguration.set("dfs.nameservices", prop.getProperty("dataplatform.dfs.nameservices"));
+        yarnConfiguration.set(
+                "dfs.client.failover.proxy.provider." + prop.getProperty("dataplatform.dfs.nameservices"),
+                prop.getProperty("dataplatform.dfs.client.failover.proxy.provider"));
+        yarnConfiguration.set("dfs.ha.namenodes." + prop.getProperty("dataplatform.dfs.nameservices"),
+                prop.getProperty("nn1,nn2"));
+        yarnConfiguration.set("dfs.namenode.rpc-address." + prop.getProperty("dataplatform.dfs.nameservices") + ".nn1",
+                prop.getProperty("dfs.namenode.rpc-address.nn1"));
+        yarnConfiguration.set("dfs.namenode.rpc-address." + prop.getProperty("dataplatform.dfs.nameservices") + ".nn2",
+                prop.getProperty("dfs.namenode.rpc-address.nn2"));
         return yarnConfiguration;
     }
 
