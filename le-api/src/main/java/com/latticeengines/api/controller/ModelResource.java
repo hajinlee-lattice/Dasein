@@ -60,6 +60,7 @@ public class ModelResource {
     @RequestMapping(value = "/throttle", method = RequestMethod.POST, headers = "Accept=application/xml, application/json")
     @ResponseBody
     public ThrottleSubmission throttle(@RequestBody ThrottleConfiguration config) {
+        log.info("Throttle request received.");
         modelingService.throttle(config);
         return new ThrottleSubmission(config.isImmediate());
     }
