@@ -239,7 +239,7 @@ def getCountWhereEventIsOne(valueData, eventData):
     return sum(map(counter, valueData, eventData))
 
 def getLift(avgProbability, valueCount, valueVector, eventVector):
-    if avgProbability == 0:
+    if (avgProbability * valueCount) == 0:
         return None
     return getCountWhereEventIsOne(valueVector, eventVector) / float(avgProbability * valueCount)
 
