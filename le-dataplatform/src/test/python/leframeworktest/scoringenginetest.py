@@ -6,14 +6,14 @@ from leframework import scoringengine
 class ScoringEngineTest(TestBase):
     inputFileName = "scoringtestinput.txt"
     outputFileName = "scoringtestoutput.txt"
-    rowId = "736e7a75-b38a-4738-828f-92b698b00806"
+    rowId = "b31d609b-f735-4283-9a33-ff83e7ca3b1f"
     
     def testGetRowToScore(self):
         with open(self.inputFileName) as f:
-            for line in f:
-                rowId, rowDict = scoringengine.getRowToScore(line)
-                self.assertEqual(rowId, self.rowId)
-                self.assertTrue(rowDict.__contains__('BankruptcyFiled'))
+            line = f.readline()
+            rowId, rowDict = scoringengine.getRowToScore(line)
+            self.assertEqual(rowId, self.rowId)
+            self.assertTrue(rowDict.__contains__('BankruptcyFiled'))
         f.close()
         
     def testGenerateScore(self):
@@ -21,10 +21,10 @@ class ScoringEngineTest(TestBase):
         pipeline = pickle.load(open(pickleFile, "rb"))
         scoringengine.generateScore(pipeline, self.inputFileName, self.outputFileName)
         with open(self.outputFileName) as f:
-            for line in f:
-                result = line.split(',')
-                self.assertEqual(result[0], self.rowId)
-                self.assertEqual(len(result), 2)
+           line = f.readline()
+           result = line.split(',')
+           self.assertEqual(result[0], self.rowId)
+           self.assertEqual(len(result), 2) 
         f.close()
         if os.path.exists(self.outputFileName):
             os.remove(self.outputFileName)

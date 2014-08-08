@@ -1,8 +1,8 @@
 from sklearn import tree
 
 def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties = None):
-    X_train = trainingData[:, schema["featureIndex"]]
-    Y_train = trainingData[:, schema["targetIndex"]]
+    X_train = trainingData.as_matrix()[:, schema["featureIndex"]]
+    Y_train = trainingData.as_matrix()[:, schema["targetIndex"]]
     
     clf = tree.DecisionTreeClassifier(criterion = algorithmProperties["criterion"])
     

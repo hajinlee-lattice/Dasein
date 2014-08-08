@@ -33,7 +33,7 @@ class TrainingTest(TestBase):
         # Symbolic links will be cleaned up by testBase
         scriptDir = "../../main/python/algorithm/" 
         for f in os.listdir(scriptDir):
-            fPath = os.path.join(scriptDir,f)
+            fPath = os.path.join(scriptDir, f)
             if os.path.isfile(fPath) and not os.path.exists(f):
                 os.symlink(fPath, f)
 
@@ -83,11 +83,13 @@ class TrainingTest(TestBase):
             typeDict[field['columnName']] = field['sqlType']
 
         lines = self.__getLineToScore(inputColumns, typeDict, value)
-        rowDict1 = se.getRowToScore(lines[0])[1]
-        resultFrame1 = se.predict(pipeline, rowDict1)
-
-        rowDict2 = se.getRowToScore(lines[1])[1]
-        resultFrame2 = se.predict(pipeline, rowDict2)
+        rowDicts = []
+        rowDicts.append(se.getRowToScore(lines[0])[1])
+        resultFrame1 = se.predict(pipeline, rowDicts)
+        
+        rowDicts = []
+        rowDicts.append(se.getRowToScore(lines[1])[1])
+        resultFrame2 = se.predict(pipeline, rowDicts)
         print(lines[0])
         print(lines[1])
         print("Score = " + str(resultFrame1['Score'][0]))
@@ -97,12 +99,12 @@ class TrainingTest(TestBase):
         testcase = 2
         values = []
         values.append(value)
-        for i in range(testcase-1):
+        for i in range(testcase - 1):
             values.append([random() for _ in range(len(inputColumns))])
 
         scores = self.__getPredictScore(pipeline, typeDict, values) 
         for i in range(len(scores)):
-            print str(i+1)+", "+str(scores[i])
+            print str(i + 1) + ", " + str(scores[i])
         self.__createCSV(inputColumns, values)
 
 
@@ -128,23 +130,24 @@ class TrainingTest(TestBase):
             else:
                 line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (columnsWithValue[i][0], columnsWithValue[i][1])
         line += "]"
-        line = '{"key":"%s","value":%s}' % (str(uuid.uuid4()),line)
+        line = '{"key":"%s","value":%s}' % (str(uuid.uuid4()), line)
         return line
 
     def __createCSV(self, inputColumns, values):
         with open('./results/test.csv', 'wb') as csvfile:
             csvWriter = csv.writer(csvfile)
-            csvWriter.writerow(['id']+inputColumns)
+            csvWriter.writerow(['id'] + inputColumns)
             for i in range(len(values)):
-                csvWriter.writerow([i+1]+values[i])
+                csvWriter.writerow([i + 1] + values[i])
 
     def __getPredictScore(self, pipeline, typeDict, values):
         scores = []
         inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
         for value in values:
             row = self.__getLine(zip(inputColumns, value), typeDict)
-            rowDict = se.getRowToScore(row)[1]
-            resultFrame = se.predict(pipeline, rowDict)
+            rowDicts = []
+            rowDicts.append(se.getRowToScore(row)[1])
+            resultFrame = se.predict(pipeline, rowDicts)
             scores.append(resultFrame['Score'][0])
         return scores
 

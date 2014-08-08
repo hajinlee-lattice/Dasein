@@ -33,7 +33,7 @@ class TrainingTest(TestBase):
         # Symbolic links will be cleaned up by testBase
         scriptDir = "../../main/python/algorithm/" 
         for f in os.listdir(scriptDir):
-            fPath = os.path.join(scriptDir,f)
+            fPath = os.path.join(scriptDir, f)
             if os.path.isfile(fPath) and not os.path.exists(f):
                 os.symlink(fPath, f)
 
@@ -46,14 +46,15 @@ class TrainingTest(TestBase):
         if 'launcher' in sys.modules:
             del sys.modules['launcher']
         from launcher import Launcher
-
+        
         # These properties won't really be used since these are just unit tests.
         # Functional and end-to-end tests should be done from java
         os.environ["CONTAINER_ID"] = "xyz"
         os.environ["SHDP_HD_FSWEB"] = "localhost:50070"
         traininglauncher = Launcher("model.json")
         traininglauncher.execute(False)
-
+        t = traininglauncher.training;
+        
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open("./results/model.json").read())
 
@@ -81,13 +82,14 @@ class TrainingTest(TestBase):
         typeDict = {}
         for field in fieldList:
             typeDict[field['columnName']] = field['sqlType']
-
+          
         lines = self.__getLineToScore(inputColumns, typeDict, value)
-        rowDict1 = se.getRowToScore(lines[0])[1]
-        resultFrame1 = se.predict(pipeline, rowDict1)
-
-        rowDict2 = se.getRowToScore(lines[1])[1]
-        resultFrame2 = se.predict(pipeline, rowDict2)
+        rowDicts = []
+        rowDicts.append(se.getRowToScore(lines[0])[1])
+        resultFrame1 = se.predict(pipeline, rowDicts)
+        rowDicts = []
+        rowDicts.append(se.getRowToScore(lines[1])[1])
+        resultFrame2 = se.predict(pipeline, rowDicts)
         print(lines[0])
         print(lines[1])
         print("Score = " + str(resultFrame1['Score'][0]))
@@ -97,14 +99,46 @@ class TrainingTest(TestBase):
         testcase = 2
         values = []
         values.append(value)
-        for i in range(testcase-1):
+        for i in range(testcase - 1):
             values.append([random() for _ in range(len(inputColumns))])
 
         scores = self.__getPredictScore(pipeline, typeDict, values) 
         for i in range(len(scores)):
-            print str(i+1)+", "+str(scores[i])
+            print str(i + 1) + ", " + str(scores[i])
         self.__createCSV(inputColumns, values)
-
+        
+        #self.__generateScoringInput(pipeline, t, inputColumns, typeDict)
+       
+    def __generateScoringInput(self, pipeline, t, inputColumns, typeDict):
+        lines = []
+        w = open("scoringtestinput.txt", 'w')
+        i = 0;
+        values = []
+        dataValues = t.as_matrix(inputColumns)
+        print "size of the inputColumns: " + str(len(inputColumns))
+        print "length of t0 " + str(len(dataValues[0]))
+        for data in dataValues:
+            if len(data) != 100:
+                print "not equal to 100 " + str(data)
+            if i >= 5000:
+                break;
+            line = self.__getLineToScore2(inputColumns, typeDict, data)
+            values.append(data)
+            w.write(line + "\n")
+            lines.append(line)    
+            i = i + 1
+        print i
+        w.close()
+        rowDicts = []
+        for line in lines:
+            rowDicts.append(se.getRowToScore(line)[1])
+        resultFrame = se.predict(pipeline, rowDicts)
+        self.__createCSV(inputColumns, values)
+        
+    def __getLineToScore2(self, inputColumns, typeDict, value):
+        columnWithValue = zip(inputColumns, value)
+        line = self.__getLine(columnWithValue, typeDict)
+        return line
 
     def __getLineToScore(self, inputColumns, typeDict, value):
         columnWithValue = zip(inputColumns, value)
@@ -128,23 +162,24 @@ class TrainingTest(TestBase):
             else:
                 line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|'%s'\"}}" % (columnsWithValue[i][0], columnsWithValue[i][1])
         line += "]"
-        line = '{"key":"%s","value":%s}' % (str(uuid.uuid4()),line)
+        line = '{"key":"%s","value":%s}' % (str(uuid.uuid4()), line)
         return line
 
     def __createCSV(self, inputColumns, values):
         with open('./results/test.csv', 'wb') as csvfile:
             csvWriter = csv.writer(csvfile)
-            csvWriter.writerow(['id']+inputColumns)
+            csvWriter.writerow(['id'] + inputColumns)
             for i in range(len(values)):
-                csvWriter.writerow([i+1]+values[i])
+                csvWriter.writerow([i + 1] + list(values[i]))
 
     def __getPredictScore(self, pipeline, typeDict, values):
         scores = []
         inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
         for value in values:
             row = self.__getLine(zip(inputColumns, value), typeDict)
-            rowDict = se.getRowToScore(row)[1]
-            resultFrame = se.predict(pipeline, rowDict)
+            rowDicts = []
+            rowDicts.append(se.getRowToScore(row)[1])
+            resultFrame = se.predict(pipeline, rowDicts)
             scores.append(resultFrame['Score'][0])
         return scores
 

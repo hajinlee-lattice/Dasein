@@ -35,8 +35,8 @@ class AlgorithmTestBase(object):
             
             steps = [EnumeratedColumnTransformStep(stringCols), ImputationStep(continuousCols)]
             pipeline = Pipeline(steps)
-            training = pipeline.predict(training).as_matrix()
-            test = pipeline.predict(test).as_matrix()
+            training = pipeline.predict(training)
+            test = pipeline.predict(test)
 
         return globals()['train'](training, test, schema, modelDir, algorithmProperties)
         

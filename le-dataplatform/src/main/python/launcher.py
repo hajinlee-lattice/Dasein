@@ -10,14 +10,16 @@ from leframework.executors.learningexecutor import LearningExecutor
 from leframework.webhdfs import WebHDFS
 
 
-logging.basicConfig(level = logging.DEBUG, datefmt = '%m/%d/%Y %I:%M:%S %p',
-                    format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(name = 'launcher')
+logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(name='launcher')
 
 class Launcher(object):
     
-    def __init__(self, modelFileName, propertyFileName = None):
+    def __init__(self, modelFileName, propertyFileName=None):
         self.parser = ArgumentParser(modelFileName, propertyFileName)
+        self.training = {}
+        self.testing = {}
     
     def stripPath(self, fileName):
         return fileName[fileName.rfind('/') + 1:len(fileName)]
@@ -53,8 +55,8 @@ class Launcher(object):
         self.__validateEnvAndParameters(schema)
     
         # Extract data and scripts for execution
-        training = parser.createList(self.stripPath(schema["training_data"]))
-        test = parser.createList(self.stripPath(schema["test_data"]))
+        self.training = parser.createList(self.stripPath(schema["training_data"]))
+        self.test = parser.createList(self.stripPath(schema["test_data"]))
         script = self.stripPath(schema["python_script"])
 
         # Create directory for model result
@@ -78,19 +80,19 @@ class Launcher(object):
         params = dict()
         params["modelLocalDir"] = modelLocalDir
         params["modelHdfsDir"] = modelHdfsDir
-        params["training"] = training
-        params["test"] = test
+        params["training"] = self.training
+        params["test"] = self.test
         params["schema"] = schema
         params["parser"] = parser
 
-        (training, test, metadata) = executor.transformData(params)
+        (self.training, self.test, metadata) = executor.transformData(params)
 
-        params["training"] = training
-        params["test"] = test
+        params["training"] = self.training
+        params["test"] = self.test
         params["metadata"] = metadata
         
         # Currently passes runtime properties to training script to report progress
-        clf = globals()['train'](training, test, schema, modelLocalDir, algorithmProperties, parser.getRuntimeProperties())
+        clf = globals()['train'](self.training, self.test, schema, modelLocalDir, algorithmProperties, parser.getRuntimeProperties())
         
         executor.postProcessClassifier(clf, params)
 

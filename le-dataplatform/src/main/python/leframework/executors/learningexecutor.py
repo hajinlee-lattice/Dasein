@@ -33,7 +33,7 @@ class LearningExecutor(Executor):
     '''
 
 
-    def __init__(self, runtimeProperties = None):
+    def __init__(self, runtimeProperties=None):
         if runtimeProperties is None:
             logger.warn("No runtime properties available")
             self.amHost = None
@@ -107,8 +107,8 @@ class LearningExecutor(Executor):
         pipeline = Pipeline(steps)
         params["pipeline"] = pipeline
         
-        training = pipeline.predict(training).as_matrix()
-        test = pipeline.predict(test).as_matrix()
+        training = pipeline.predict(training)
+        test = pipeline.predict(test)
         return (training, test, metadata)
 
     @overrides(Executor)
@@ -120,7 +120,7 @@ class LearningExecutor(Executor):
             mediator.clf = clf
             mediator.modelLocalDir = params["modelLocalDir"]
             mediator.modelHdfsDir = params["modelHdfsDir"]
-            mediator.data = params["test"]
+            mediator.data = params["test"].as_matrix()
             mediator.schema = params["schema"]
             mediator.target = mediator.data[:, mediator.schema["targetIndex"]]
             mediator.pipeline = params["pipeline"]

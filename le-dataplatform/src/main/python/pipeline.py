@@ -33,13 +33,13 @@ class EnumeratedColumnTransformStep2:
         
     def transform(self, dataFrame):
         outputFrame = dataFrame
-        if self._enumMappings['method']==1:
+        if self._enumMappings['method'] == 1:
             for column, encoder in self._enumMappings['list'].iteritems():
-                outputFrame[column]=outputFrame[column].fillna('missing')
-                df = pd.DataFrame(encoder.transform(dictfreq(d) for d in outputFrame[column]).todense(),columns=(column+'_'+p for p in encoder.feature_names_) )
-                outputFrame=outputFrame.join(df)
-                outputFrame=outputFrame.drop(column,axis=1)
-        elif self._enumMappings['method']==2:
+                outputFrame[column] = outputFrame[column].fillna('missing')
+                df = pd.DataFrame(encoder.transform(dictfreq(d) for d in outputFrame[column]).todense(), columns=(column + '_' + p for p in encoder.feature_names_))
+                outputFrame = outputFrame.join(df)
+                outputFrame = outputFrame.drop(column, axis=1)
+        elif self._enumMappings['method'] == 2:
             for column, encoder in self._enumMappings['list'].iteritems():
                 outputFrame[column] = outputFrame[column].map(lambda s: '__<unknown>__' if s not in encoder.classes_.tolist() else s)
                 encoder.classes_ = np.append(encoder.classes_, '__<unknown>__')
@@ -49,7 +49,7 @@ class EnumeratedColumnTransformStep2:
     
 class ColumnReductionStep:
     outputColumns_ = []
-    def __init__(self, outputColumns = []):
+    def __init__(self, outputColumns=[]):
         self.outputColumns_ = outputColumns
     
     def transform(self, dataFrame):
@@ -86,7 +86,7 @@ class ModelStep:
     def getModelInputColumns(self):
         return self.modelInputColumns_
     
-    def __init__(self, model, modelInputColumns, outputColumns = [], scoreColumnName = "Score"):
+    def __init__(self, model, modelInputColumns, outputColumns=[], scoreColumnName="Score"):
         self.model_ = model
         self.modelInputColumns_ = modelInputColumns
         self.outputColumns_ = outputColumns
@@ -103,7 +103,7 @@ class ModelStep:
         scoreColumn = self.model_.predict_proba(dataFrame[self.modelInputColumns_])
         # Check number of event classes 
         index = 1 if len(scoreColumn[0]) == 2 else 0
-        scoreColumn = scoreColumn[:,index]
+        scoreColumn = scoreColumn[:, index]
         outputFrame = pd.DataFrame(scoreColumn, columns=[self.scoreColumnName_])
         
         for columnName in self.outputColumns_:
@@ -140,7 +140,7 @@ class EVModelStep:
     outputColumns_ = []
     scoreColumnName_ = ''
     
-    def __init__(self, classificationModel, regressionModel, modelInputColumns, outputColumns = [], scoreColumnName = "Score"):
+    def __init__(self, classificationModel, regressionModel, modelInputColumns, outputColumns=[], scoreColumnName="Score"):
         self.classificationModel_ = classificationModel
         self.regressionModel_ = regressionModel
         self.modelInputColumns_ = modelInputColumns
@@ -150,7 +150,7 @@ class EVModelStep:
     def transform(self, dataFrame):
         dataFrame = dataFrame.convert_objects()
         dataFrame.fillna(0, inplace=True)
-        probabilityColumn = self.classificationModel_.predict_proba(dataFrame[self.modelInputColumns_])[:,1]
+        probabilityColumn = self.classificationModel_.predict_proba(dataFrame[self.modelInputColumns_])[:, 1]
         valueColumn = self.regressionModel_.predict(dataFrame[self.modelInputColumns_])
         outputFrame = pd.DataFrame(probabilityColumn, columns=["Probability"])
         outputFrame['Value'] = valueColumn

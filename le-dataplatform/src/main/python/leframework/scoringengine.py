@@ -6,7 +6,6 @@ import sys
 import numpy as np
 import pandas as pd
 
-
 logger = logging.getLogger("scoringengine")
 logger.setLevel(logging.DEBUG)
 
@@ -28,6 +27,10 @@ def decodeDataValue(serializedValueAndType):
     return serializedValue
     
 def main(argv):
+    '''
+    pr = cProfile.Profile()
+    pr.enable()
+    '''
     currentPath = os.path.dirname(argv[0])
     inputFileName = argv[1]
     outputFileName = argv[2]
@@ -41,33 +44,45 @@ def main(argv):
     logger.info("after unpickle")
     
     generateScore(pipeline, inputFileName, outputFileName)
-
+    
+    logger.info("scoring complete!")
+    '''
+    pr.disable()
+    s = StringIO.StringIO()
+    sortby = 'cumulative'
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    w = open("scoringengine_profile.txt", 'w')
+    w.write(s.getvalue())
+    w.close()
+    '''
 def generateScore(pipeline, inputFileName, outputFileName):
     w = open(outputFileName, 'w')
     with open(inputFileName) as f:
+        rowIds = []
+        rowDicts = []
         for line in f:
             rowId, rowDict = getRowToScore(line)
-            try:
-                resultFrame = predict(pipeline, rowDict)
-                logger.info('writing score \r\n')
-                logger.info(str(resultFrame['Score'][0]))
-                writeToFile(w, rowId, resultFrame['Score'][0])
-            except Exception as e:
-                w.close()
-                raise
+            rowIds.append(rowId)
+            rowDicts.append(rowDict)
+    f.close()
+    resultFrame = predict(pipeline, rowDicts)
+    logger.info('writing score \r\n')
+    for index in range(0, len(resultFrame)):
+        writeToFile(w, rowIds[index], resultFrame['Score'][index])
     w.close()
 
 def getRowToScore(line):
-    logger.info(line)
+    #logger.info(line)
     try:
         decoder = json.decoder.JSONDecoder(encoding='Latin1')
         dataRow = decoder.decode(line)
         rowId = dataRow['key']
         colValues = dataRow['value']
     except Exception as e:
-        raise 
+        raise
         
-    logger.info('past decoder\r\n')
+    #logger.info('past decoder\r\n')
     rowDict = {}
         
     try:
@@ -77,12 +92,11 @@ def getRowToScore(line):
     except Exception as e:
         raise
       
-    logger.info('past rowDict \r\n')
+    #logger.info('past rowDict \r\n')
     return (rowId, rowDict)
         
 def predict(pipeline, rowDict):
-    rowsList = [rowDict]
-    dataFrame = pd.DataFrame(rowsList)
+    dataFrame = pd.DataFrame(rowDict)
     return pipeline.predict(dataFrame)
 
 def writeToFile(w, rowId, score):
