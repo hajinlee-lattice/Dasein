@@ -16,16 +16,16 @@ class Finalize(State):
     
     @overrides(State)
     def execute(self):
-        self.writeScoredText(self.getMediator())
         self.writeJson(self.getMediator())
-        
+        self.writeScoredText(self.getMediator())
+
     def writeScoredText(self, mediator):
         scored = mediator.scored
         # add the key data and append the scored data
-        keyData = mediator.data[:, mediator.schema["keyColIndex"]]
-        scored = zip(keyData, scored)
+        keyData = mediator.data[:, mediator.schema["keyColIndex"]].astype(str)
+        scored = numpy.insert(keyData, len(keyData[0]), scored, axis=1)
         # write the scored data to file
-        numpy.savetxt(mediator.modelLocalDir + "scored.txt", scored, delimiter=",")
+        numpy.savetxt(mediator.modelLocalDir + "scored.txt", scored, delimiter=",", fmt="%s")
         
     def writeJson(self, mediator):
         stateMachine = self.getStateMachine()
