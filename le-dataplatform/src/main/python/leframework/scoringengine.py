@@ -27,35 +27,19 @@ def decodeDataValue(serializedValueAndType):
     return serializedValue
     
 def main(argv):
-    '''
-    pr = cProfile.Profile()
-    pr.enable()
-    '''
     currentPath = os.path.dirname(argv[0])
     inputFileName = argv[1]
     outputFileName = argv[2]
     
     pickleFile = currentPath + '/STPipelineBinary.p'
-    
     logger.info(pickleFile)
        
     pipeline = pickle.load(open(pickleFile, "rb"))
-    
     logger.info("after unpickle")
     
     generateScore(pipeline, inputFileName, outputFileName)
-    
-    logger.info("scoring complete!")
-    '''
-    pr.disable()
-    s = StringIO.StringIO()
-    sortby = 'cumulative'
-    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.print_stats()
-    w = open("scoringengine_profile.txt", 'w')
-    w.write(s.getvalue())
-    w.close()
-    '''
+    logger.info("scoring complete")
+
 def generateScore(pipeline, inputFileName, outputFileName):
     w = open(outputFileName, 'w')
     with open(inputFileName) as f:
@@ -73,28 +57,25 @@ def generateScore(pipeline, inputFileName, outputFileName):
     w.close()
 
 def getRowToScore(line):
-    #logger.info(line)
     try:
         decoder = json.decoder.JSONDecoder(encoding='Latin1')
         dataRow = decoder.decode(line)
         rowId = dataRow['key']
         colValues = dataRow['value']
-    except Exception as e:
+    except Exception:
         raise
-        
-    #logger.info('past decoder\r\n')
+
     rowDict = {}
-        
+
     try:
         for i in colValues:
             serializedValue = decodeDataValue(i['Value']['SerializedValueAndType'])
             rowDict[i['Key']] = serializedValue
-    except Exception as e:
+    except Exception:
         raise
-      
-    #logger.info('past rowDict \r\n')
+
     return (rowId, rowDict)
-        
+
 def predict(pipeline, rowDict):
     dataFrame = pd.DataFrame(rowDict)
     return pipeline.predict(dataFrame)

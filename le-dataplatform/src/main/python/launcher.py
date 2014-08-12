@@ -9,18 +9,17 @@ from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
 from leframework.webhdfs import WebHDFS
 
-
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(name='launcher')
 
 class Launcher(object):
-    
+
     def __init__(self, modelFileName, propertyFileName=None):
         self.parser = ArgumentParser(modelFileName, propertyFileName)
         self.training = {}
         self.testing = {}
-    
+
     def stripPath(self, fileName):
         return fileName[fileName.rfind('/') + 1:len(fileName)]
 
@@ -35,7 +34,7 @@ class Launcher(object):
             schema[param]
         except KeyError:
             raise Exception("%s not set in job metadata." % (param))
-    
+
     def __validateEnvAndParameters(self, schema):
         self.__validateEnvVariable('SHDP_HD_FSWEB')
         self.__validateEnvVariable('CONTAINER_ID')
@@ -43,17 +42,17 @@ class Launcher(object):
         self.__validateSchemaParam(schema, "test_data")
         self.__validateSchemaParam(schema, "python_script")
         self.__validateSchemaParam(schema, "model_data_dir")
-    
+
     def getParser(self):
         return self.parser
-    
+
     def execute(self, writeToHdfs):
         parser = self.parser
         schema = parser.getSchema()
-    
+
         # Fail fast if required parameters are not set
         self.__validateEnvAndParameters(schema)
-    
+
         # Extract data and scripts for execution
         self.training = parser.createList(self.stripPath(schema["training_data"]))
         self.test = parser.createList(self.stripPath(schema["test_data"]))
@@ -62,14 +61,14 @@ class Launcher(object):
         # Create directory for model result
         modelLocalDir = os.getcwd() + "/results/"
         os.mkdir(modelLocalDir)
-        
+
         # Get algorithm properties
         algorithmProperties = parser.getAlgorithmProperties()
 
         # Execute the packaged script from the client and get the returned file
         # that contains the generated model data
         execfile(script, globals())
-        
+
         executor = LearningExecutor(parser.getRuntimeProperties())
         if 'getExecutor' in globals():
             executor = globals()['getExecutor']()
@@ -90,10 +89,11 @@ class Launcher(object):
         params["training"] = self.training
         params["test"] = self.test
         params["metadata"] = metadata
-        
-        # Currently passes runtime properties to training script to report progress
+
+        # Passes runtime properties to report progress
+        # training and testing data passed in as Pandas DataFrame
         clf = globals()['train'](self.training, self.test, schema, modelLocalDir, algorithmProperties, parser.getRuntimeProperties())
-        
+
         executor.postProcessClassifier(clf, params)
 
         if writeToHdfs:
@@ -111,7 +111,7 @@ class Launcher(object):
                 if filename == "model.json":
                     modelName = parser.getSchema()["name"]
                     self.__publishToConsumer(hdfs, modelLocalDir + filename, modelHdfsDir, "BARD", modelName)
-    
+
     def __publishToConsumer(self, hdfs, modelLocalPath, modelHdfsDir, consumer, modelName):
         # Id length cap by Bard, 120 for release
         modelIdLengthLimit = 45 
@@ -119,7 +119,7 @@ class Launcher(object):
         modelToConsumerHdfsPath = ""
         for index in range(0, 5):
             modelToConsumerHdfsPath = modelToConsumerHdfsPath + tokens[index] + "/"
-            
+
         modelId = tokens[7] + "-" + modelName 
         if len(modelId) > modelIdLengthLimit:
             modelId = modelId[:modelIdLengthLimit]
@@ -139,9 +139,7 @@ if __name__ == "__main__":
     logger.info("Python script launched with arguments: " + str(sys.argv[1:]))
     if  len(sys.argv) != 3:
         logger.error("Argument length is :" + str(len(sys.argv)) + " which should be three.")
-    
-    l = Launcher(sys.argv[1], sys.argv[2])    
+
+    l = Launcher(sys.argv[1], sys.argv[2])
     l.execute(True)
-    
-     
-    
+

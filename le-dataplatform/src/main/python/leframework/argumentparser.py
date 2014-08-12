@@ -7,7 +7,6 @@ import logging
 import fastavro as avro
 import pandas as pd
 
-
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(name='argumentparser')
@@ -121,7 +120,7 @@ class ArgumentParser(object):
                 k = k+1
             l = l+1
         
-        tmp = []
+        tmpData = []
 
         reader = None 
         filedescriptor = open(dataFileName, 'rb')
@@ -129,35 +128,29 @@ class ArgumentParser(object):
             reader = avro.reader(filedescriptor)
         else:
             reader = csv.reader(filedescriptor)
-            
+
         for row in reader:
             rowlist = []
             if len(row) != len(self.fields):
                 msg = "Data-metadata mismatch. Metadata has %s, while data has %s fields." % (len(self.fields), len(row))
                 raise Exception(msg)
 
-            targetIsNone = False
-            for i in included:
-                try:  
-                    if self.isAvro():
-                        value = row[self.__getField(i)["name"]]
-                        if i == included[self.targetIndex]:
-                            if value is None:
-                                targetIsNone = True
-                            else:
-                                value = float(value)
-                        rowlist.append(value)
-                    else:
-                        rowlist.append(self.__convertType(row[i], self.__getField(i)["type"][0]))
-                except Exception as e:
-                    logger.error("Issue with index " + str(i))
-                    logger.error(str(e))
+            if self.isAvro():
+                targetName = self.__getField(included[self.targetIndex])["name"]
+                if row[targetName] is None:
+                    logger.warn("Target value is None, skipping current row.")
+                    continue
+                else:
+                    row[targetName] = float(row[targetName])
+                rowlist = [row[name] for name in includedNames]
+            else:
+                # CSV format
+                rowlist = [self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]
+            tmpData.append(rowlist)
 
-            if not targetIsNone:
-                tmp.append(rowlist)
         self.__populateSchemaWithMetadata(self.getSchema(), self)
-        return pd.DataFrame(tmp, columns=includedNames)
-    
+        return pd.DataFrame(tmpData, columns=includedNames)
+
     def __populateSchemaWithMetadata(self, schema, parser):
         schema["featureIndex"] = parser.getFeatureTuple()
         schema["features"] = self.metadataSchema["features"]

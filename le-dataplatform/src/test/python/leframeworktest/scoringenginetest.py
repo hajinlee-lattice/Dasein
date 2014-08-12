@@ -21,10 +21,10 @@ class ScoringEngineTest(TestBase):
         pipeline = pickle.load(open(pickleFile, "rb"))
         scoringengine.generateScore(pipeline, self.inputFileName, self.outputFileName)
         with open(self.outputFileName) as f:
-           line = f.readline()
-           result = line.split(',')
-           self.assertEqual(result[0], self.rowId)
-           self.assertEqual(len(result), 2) 
+            line = f.readline()
+            result = line.split(',')
+            self.assertEqual(result[0], self.rowId)
+            self.assertEqual(len(result), 2) 
         f.close()
         if os.path.exists(self.outputFileName):
             os.remove(self.outputFileName)
