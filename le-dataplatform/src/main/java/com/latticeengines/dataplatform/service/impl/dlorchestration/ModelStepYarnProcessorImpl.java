@@ -1,6 +1,5 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,8 +7,6 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,8 +15,6 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
-import com.latticeengines.dataplatform.exposed.exception.LedpCode;
-import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
@@ -105,18 +100,6 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     }
 
     private List<ApplicationId> load(String customer, ModelCommandParameters commandParameters) {
-        String deletePath = customerBaseDir + "/" + customer + "/data";
-        try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
-            if (fs.exists(new Path(deletePath))) {
-                boolean result = fs.delete(new Path(deletePath), true);
-                if (!result) {
-                    throw new LedpException(LedpCode.LEDP_16001, new String[] { deletePath });
-                }
-            }
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_16001, e, new String[] { deletePath });
-        }
-
         List<ApplicationId> appIds = new ArrayList<>();
         ApplicationId unpivotedAppId = modelingService.loadData(generateLoadConfiguration(DataSetType.STANDARD, customer, commandParameters));
         appIds.add(unpivotedAppId);

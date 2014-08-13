@@ -52,9 +52,9 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
  * This is an end-to-end test against a SQL Server database without having to go
  * through the REST API. It allows for an easier development-test cycle without
  * having to either deploy to Jetty or run from le-api.
- *
+ * 
  * @author rgonzalez
- *
+ * 
  */
 @Transactional
 public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunctionalTestNGBase {
@@ -163,8 +163,22 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return config;
     }
 
+    @Test(groups = "functional")
+    public void retrieveMetadataAndWriteToHdfs() throws Exception {
+        httpServer = new StandaloneHttpServer();
+        httpServer.init();
+        Pair<String[], Integer[]> colMetadata = getTableColumnMetadata();
+        httpServer.addServlet(new VisiDBMetadataServlet(colMetadata.getFirst(), colMetadata.getSecond()),
+                "/DLRestService/GetQueryMetaDataColumns");
+        httpServer.start();
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        modelCommandEntityMgr.createOrUpdate(command);
+        List<ModelCommandParameter> commandParameters = command.getCommandParameters();
+        modelStepRetrieveMetadataProcessor.executeStep(command, new ModelCommandParameters(commandParameters));
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "retrieveMetadataAndWriteToHdfs" })
     public void load() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
         ApplicationId appId = modelingService.loadData(loadConfig);
@@ -196,21 +210,8 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "createSamples" })
-    public void retrieveMetadataAndWriteToHdfs() throws Exception {
-        httpServer = new StandaloneHttpServer();
-        httpServer.init();
-        Pair<String[], Integer[]> colMetadata = getTableColumnMetadata();
-        httpServer.addServlet(new VisiDBMetadataServlet(colMetadata.getFirst(), colMetadata.getSecond()), "/DLRestService/GetQueryMetaDataColumns");
-        httpServer.start();
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
-        modelCommandEntityMgr.createOrUpdate(command);
-        List<ModelCommandParameter> commandParameters = command.getCommandParameters();
-        modelStepRetrieveMetadataProcessor.executeStep(command, new ModelCommandParameters(commandParameters));
-    }
-
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "retrieveMetadataAndWriteToHdfs" })
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
     public void profileData() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());

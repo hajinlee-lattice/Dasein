@@ -1,11 +1,14 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -44,11 +47,24 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     @Override
     public void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
+        String customer = modelCommand.getDeploymentExternalId();
+        String deletePath = customerBaseDir + "/" + customer + "/data";
+        try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
+            if (fs.exists(new Path(deletePath))) {
+                boolean result = fs.delete(new Path(deletePath), true);
+                if (!result) {
+                    throw new LedpException(LedpCode.LEDP_16001, new String[] { deletePath });
+                }
+            }
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_16001, e, new String[] { deletePath });
+        }
+
         String queryMetadataUrl = modelCommandParameters.getDlUrl() + queryMetadataUrlSuffix;
         String metadata = null;
         try {
-            GetQueryMetaDataColumnsRequest request = new GetQueryMetaDataColumnsRequest(modelCommandParameters.getDlTenant(),
-                    modelCommandParameters.getDlQuery());
+            GetQueryMetaDataColumnsRequest request = new GetQueryMetaDataColumnsRequest(
+                    modelCommandParameters.getDlTenant(), modelCommandParameters.getDlQuery());
             Map<String, String> headers = new HashMap<String, String>();
             headers.put("MagicAuthentication", "Security through obscurity!");
             metadata = HttpUtils.executePostRequest(queryMetadataUrl, request, headers);
@@ -70,8 +86,8 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     String getHdfsPathForMetadataFile(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
         String customer = modelCommand.getDeploymentExternalId();
-        return customerBaseDir +"/" + customer + "/data/" + modelCommandParameters.getEventTable() + "/"
-                + modelCommandParameters.getMetadataTable() + "/metadata.avsc";
+        return customerBaseDir + "/" + customer + "/data/" + modelCommandParameters.getMetadataTable()
+                + "/metadata.avsc";
     }
 
 }

@@ -121,7 +121,7 @@ public class ModelingServiceImpl implements ModelingService {
         model.setModelHdfsDir(customerBaseDir + "/" + model.getCustomer() + "/models/" + model.getTable() + "/"
                 + model.getId());
         model.setDataHdfsPath(customerBaseDir + "/" + model.getCustomer() + "/data/" + model.getTable());
-        model.setMetadataHdfsPath(model.getDataHdfsPath() + "/" + model.getMetadataTable());
+        model.setMetadataHdfsPath(customerBaseDir + "/" + model.getCustomer() + "/data/" + model.getMetadataTable());
     }
 
     private Classifier createClassifier(Model model, Algorithm algorithm) {
