@@ -3,10 +3,8 @@ package com.latticeengines.common.exposed.util;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Map;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler;
@@ -26,7 +24,7 @@ public class HttpUtils {
     static HttpRequestFactory requestSslFactory;
 
     static {
-        
+
         try {
             HTTP_TRANSPORT = new NetHttpTransport();
             HTTPS_TRANSPORT = new NetHttpTransport.Builder().doNotValidateCertificate().build();
@@ -39,7 +37,8 @@ public class HttpUtils {
             public void initialize(HttpRequest request) throws IOException {
                 request.setConnectTimeout(60000);
                 request.setNumberOfRetries(10);
-
+                request.setReadTimeout(300000);
+                
                 ExponentialBackOff backoff = new ExponentialBackOff.Builder().setInitialIntervalMillis(1000)
                         .setMultiplier(2).setMaxElapsedTimeMillis(180000).build();
                 request.setUnsuccessfulResponseHandler(new HttpBackOffUnsuccessfulResponseHandler(backoff));
@@ -48,7 +47,7 @@ public class HttpUtils {
         requestFactory = HTTP_TRANSPORT.createRequestFactory(initializer);
         requestSslFactory = HTTPS_TRANSPORT.createRequestFactory(initializer);
     }
-    
+
     private static HttpRequestFactory getRequestFactory(String url) {
         if (StringUtils.isEmpty(url)) {
             throw new RuntimeException("Url cannot be empty.");
@@ -77,7 +76,6 @@ public class HttpUtils {
                 request.getHeaders().set(entry.getKey(), entry.getValue());
             }
         }
-
         HttpResponse response = request.execute();
         return IOUtils.toString(response.getContent());
     }
