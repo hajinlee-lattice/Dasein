@@ -10,8 +10,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.ParseException;
-import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.latticeengines.perf.cli.setup.CommandLineSetup;
 import com.latticeengines.perf.cli.setup.factory.CommandLineSetupFactory;
 import com.latticeengines.perf.job.properties.CommandLineProperties;
@@ -22,32 +22,30 @@ public class ModelingResourceCLI {
 
     private static CommandLine cl;
     private static ExecutorService executor;
-    private static List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
+    private static final Log log = LogFactory.getLog(ModelingResourceCLI.class);
 
-    public static void main(String[] args) throws IOException, ParseException, Exception {
+    public static void main(String[] args) throws Exception {
         if (args.length > 0)
             executeJob(args);
         else {
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            String line = null;
-            try {
-                while ((line = br.readLine()) != null) {
-                    String[] command = line.split(" ");
-                    executeJob(command);
-                }
-            } finally {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
+                String line = "";
                 try {
-                    br.close();
+                    while ((line = br.readLine()) != null) {
+                        String[] command = line.split(" ");
+                        executeJob(command);
+                    }
                 } catch (IOException e) {
-                    throw e;
+                    log.error(e.getCause());
                 }
             }
         }
     }
 
-    private static void executeJob(CommandLineSetup cmdlstp) throws Exception {
+    private static void executeJob(CommandLineSetup cmdlstp, String restEndpointHost) throws Exception {
         int numOfCustomers = Integer.parseInt(cl.getOptionValue(CommandLineProperties.CUSTOMER_OPT));
         int customerID = 0;
+        List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
         while (customerID < numOfCustomers) {
             Class<? extends ModelingResourceJob> cls = cmdlstp.getJobClassType();
             Constructor<?> ctor = cls.getConstructor();
@@ -60,7 +58,6 @@ public class ModelingResourceCLI {
         }
 
         List<String> applicationIds = new ArrayList<String>();
-        System.out.println(futures.size());
 
         for (Future<List<String>> future : futures) {
             applicationIds.addAll(future.get());
@@ -68,15 +65,7 @@ public class ModelingResourceCLI {
 
         executor.shutdown();
         Thread.sleep(30000L);
-
-        for (int i = 0; i < 8; i++) {
-            for (String appId : applicationIds) {
-                GetJobStatus gjs = new GetJobStatus();
-                gjs.setConfiguration("localhost:8080", appId);
-                JobStatus js = gjs.getJobStatus();
-                System.out.println(js.getStatus());
-            }
-        }
+        GetJobStatus.checkStatus(restEndpointHost, applicationIds);
         System.out.println(applicationIds);
     }
 
@@ -94,7 +83,7 @@ public class ModelingResourceCLI {
         cl = cmdlstp.getCommandLine();
         // Class<? extends ModelingResourceJob> cls = (Class<? extends
         // ModelingResourceJob>) cmdlstp.getClass();
-        executeJob(cmdlstp);
+        executeJob(cmdlstp, command[2]);
     }
 
 }

@@ -1,9 +1,12 @@
 package com.latticeengines.perf.cli.setup.impl;
 
+import java.util.Arrays;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.perf.cli.setup.CommandLineOption;
 import com.latticeengines.perf.cli.setup.CommandLineSetup;
@@ -44,7 +47,7 @@ public class CommandLineProfileSetup extends CommandLineSetup<Profile> {
         config.setMetadataTable(cl.getOptionValue(METADATA_TABLE_OPT));
         config.setSamplePrefix("all");
         config.setExcludeColumnList(Profile.createExcludeList());
-
+        config.setTargets(Arrays.<String> asList(new String[] { "P1_Event" }));
         pf.setConfiguration(restEndpointHost, config);
     }
 }

@@ -104,7 +104,7 @@ public class CommandLineSubmitModelSetup extends CommandLineSetup<SubmitModel> {
     }
 
     static void configAlgorithm(AlgorithmBase alg, String virtualCores, String memory, String priority) {
-        alg.setSampleName("s" + priority);
+        alg.setSampleName("all");
         alg.setPriority(Integer.parseInt(priority));
         alg.setContainerProperties(new StringBuilder().append("VIRTUALCORES=")//
                 .append(virtualCores).append(" MEMORY=").append(memory)//
