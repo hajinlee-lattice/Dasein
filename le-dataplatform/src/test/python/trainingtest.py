@@ -11,7 +11,6 @@ from random import shuffle
 import shutil
 from sklearn.ensemble import RandomForestClassifier
 import uuid
-
 from testbase import TestBase
 from leframework import scoringengine as se
 

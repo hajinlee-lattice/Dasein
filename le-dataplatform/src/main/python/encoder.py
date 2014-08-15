@@ -23,7 +23,7 @@ def transform(x):
         Collisions are possible especially since we are only getting the first 4 bytes
     '''
     if x is None:
-        x = '__unknown__'
+        x = 'NULL'
     try:
         return int(0xffffffff & reduce(lambda h,c: ord(c) + (h << 6) + (h << 16) - h, x, 0))
     except Exception:

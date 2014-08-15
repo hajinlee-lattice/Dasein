@@ -126,7 +126,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
         # Categorical column
         if colname in stringcols:
             # Impute null value
-            data[colname] = data[colname].fillna('__unknown__')
+            data[colname] = data[colname].fillna('NULL')
             mode = data[colname].value_counts().idxmax()
             index = writeCategoricalValuesToAvro(dataWriter, data[colname], eventVector, mode, colname, index)
         else:

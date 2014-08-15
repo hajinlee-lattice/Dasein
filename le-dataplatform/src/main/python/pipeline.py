@@ -18,8 +18,8 @@ class EnumeratedColumnTransformStep:
         for column, encoder in self._enumMappings.iteritems():
             if hasattr(encoder, 'classes_'):
                 classSet = set(encoder.classes_.flat)
-                outputFrame[column] = outputFrame[column].map(lambda s: '__<unknown>__' if s not in classSet else s)
-                encoder.classes_ = np.append(encoder.classes_, '__<unknown>__')
+                outputFrame[column] = outputFrame[column].map(lambda s: 'NULL' if s not in classSet else s)
+                encoder.classes_ = np.append(encoder.classes_, 'NULL')
             
             if column in outputFrame:
                 outputFrame[column] = encoder.transform(outputFrame[column])
@@ -41,8 +41,8 @@ class EnumeratedColumnTransformStep2:
                 outputFrame = outputFrame.drop(column, axis=1)
         elif self._enumMappings['method'] == 2:
             for column, encoder in self._enumMappings['list'].iteritems():
-                outputFrame[column] = outputFrame[column].map(lambda s: '__<unknown>__' if s not in encoder.classes_.tolist() else s)
-                encoder.classes_ = np.append(encoder.classes_, '__<unknown>__')
+                outputFrame[column] = outputFrame[column].map(lambda s: 'NULL' if s not in encoder.classes_.tolist() else s)
+                encoder.classes_ = np.append(encoder.classes_, 'NULL')
                 outputFrame[column] = encoder.transform(outputFrame[column])
          
         return outputFrame
