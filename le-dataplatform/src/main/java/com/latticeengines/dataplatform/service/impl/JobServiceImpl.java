@@ -237,7 +237,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ApplicationId resubmitPreemptedJob(com.latticeengines.domain.exposed.dataplatform.Job resubmitJob) {
         if (resubmitJob.getChildJobIdList().size() > 0) {
             if (log.isDebugEnabled()) {
