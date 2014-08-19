@@ -1,16 +1,13 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import static org.testng.Assert.assertEquals;
-
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
-
 import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -37,6 +34,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
 
     @Test(groups = "functional.scheduler")
     public void testExecuteYarnSteps() throws Exception {
+        cleanUpHdfs("Nutanix");
         List<ModelCommandParameter> listParameters = ModelingServiceTestUtils.createModelCommandWithCommandParameters()
                 .getCommandParameters();
         ModelCommandParameters commandParameters = new ModelCommandParameters(listParameters);

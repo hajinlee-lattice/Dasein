@@ -46,6 +46,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.dataplatform.entitymanager.BaseEntityMgr;
+import com.latticeengines.dataplatform.exposed.exception.LedpCode;
+import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.Model;
 import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
@@ -193,6 +195,20 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         }
 
         doCopy(fs, copyEntries);
+    }
+
+    protected void cleanUpHdfs(String customer) {
+        String deletePath = customerBaseDir + "/" + customer + "/data";
+        try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
+            if (fs.exists(new Path(deletePath))) {
+                boolean result = fs.delete(new Path(deletePath), true);
+                if (!result) {
+                    throw new LedpException(LedpCode.LEDP_16001, new String[] { deletePath });
+                }
+            }
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_16001, e, new String[] { deletePath });
+        }
     }
 
     @AfterClass(groups = { "functional", "functional.scheduler" })
