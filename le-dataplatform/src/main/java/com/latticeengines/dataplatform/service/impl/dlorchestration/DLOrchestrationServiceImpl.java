@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
@@ -56,11 +54,6 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
     private ModelStepProcessor modelStepRetrieveMetadataProcessor;
 
     private int waitTime = 180;
-
-    @PostConstruct
-    public void init(){
-        log.info("dlOrchestrationJob quartz bean was created.");
-    }
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
