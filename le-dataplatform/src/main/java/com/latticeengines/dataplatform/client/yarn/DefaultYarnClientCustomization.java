@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -26,7 +25,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
     private static final Log log = LogFactory.getLog(DefaultYarnClientCustomization.class);
 
     protected Configuration configuration;
-    
+
     protected String hdfsJobBaseDir;
 
     public DefaultYarnClientCustomization(Configuration configuration, String hdfsJobBaseDir) {
@@ -41,7 +40,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
     }
 
     protected String getJobDir(Properties containerProperties) {
-        return hdfsJobBaseDir+"/"+containerProperties.getProperty(ContainerProperty.JOBDIR.name());
+        return hdfsJobBaseDir + "/" + containerProperties.getProperty(ContainerProperty.JOBDIR.name());
     }
 
     @Override
@@ -60,15 +59,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
         Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = new ArrayList<LocalResourcesFactoryBean.TransferEntry>();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
-                "/lib/*", //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
                 "/app/dataplatform/*.properties", //
-                false));
-        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
-                LocalResourceVisibility.PUBLIC, //
-                "/app/dataplatform/*.jar", //
                 false));
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
@@ -130,7 +121,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
                 "org.springframework.yarn.am.CommandLineAppmasterRunnerForLocalContextFile", //
                 contextFile.getName(), //
                 "yarnAppmaster", //
-                 parameter, //
+                parameter, //
                 "1><LOG_DIR>/Appmaster.stdout", //
                 "2><LOG_DIR>/Appmaster.stderr" });
     }
@@ -146,7 +137,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
     @Override
     public void finalize(Properties appMasterProperties, Properties containerProperties) {
     }
-    
+
     private String setupParameters(Properties containerProperties) {
         Properties prop = new Properties();
         for (Map.Entry<Object, Object> entry : containerProperties.entrySet()) {
@@ -158,5 +149,4 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
         String propStr = prop.toString();
         return propStr.substring(1, propStr.length() - 1).replaceAll(",", " ");
     }
-
 }

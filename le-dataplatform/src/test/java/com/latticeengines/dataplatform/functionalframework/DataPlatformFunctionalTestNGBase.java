@@ -114,10 +114,6 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return true;
     }
 
-    protected boolean doDependencyLibraryCopy() {
-        return true;
-    }
-
     public File[] getAvroFilesForDir(String parentDir) {
         return new File(parentDir).listFiles(new FilenameFilter() {
 
@@ -181,18 +177,9 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir
                 + "/../../../src/main/python/algorithm/data_profile.py", "/app/dataplatform/scripts/algorithm", false));
         String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/*.jar", "/app/dataplatform",
-                false));
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/leframework.tar.gz",
                 "/app/dataplatform/scripts", false));
         copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
-
-        if (doDependencyLibraryCopy()) {
-            fs.delete(new Path("/lib"), true);
-            fs.mkdirs(new Path("/lib"));
-            copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/dependency/*.jar", "/lib",
-                    false));
-        }
 
         doCopy(fs, copyEntries);
     }
