@@ -3,6 +3,10 @@ package com.latticeengines.dataplatform.service.impl;
 import java.util.Collection;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -21,6 +25,8 @@ import com.latticeengines.dataplatform.service.impl.watchdog.WatchdogPlugin;
 @DisallowConcurrentExecution
 public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdogService {
 
+    private static final Log log = LogFactory.getLog(JobWatchdogServiceImpl.class);
+
     private JobService jobService;
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
     private ModelEntityMgr modelEntityMgr;
@@ -28,6 +34,11 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
     private JobEntityMgr jobEntityMgr;
     private int retryWaitTime = 30000;
     private Map<String, WatchdogPlugin> plugins = WatchdogPlugin.getPlugins();
+
+    @PostConstruct
+    public void init(){
+        log.info("dlOrchestrationJob quartz bean was created.");
+    }
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -54,7 +65,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
             public void execute(WatchdogPlugin plugin) {
                 plugin.setJobService(jobService);
             }
-            
+
         }.execute();
     }
 
@@ -70,7 +81,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
             public void execute(WatchdogPlugin plugin) {
                 plugin.setThrottleConfigurationEntityMgr(throttleConfigurationEntityMgr);
             }
-            
+
         }.execute();
     }
 
@@ -86,7 +97,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
             public void execute(WatchdogPlugin plugin) {
                 plugin.setModelEntityMgr(modelEntityMgr);
             }
-            
+
         }.execute();
     }
 
@@ -102,7 +113,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
             public void execute(WatchdogPlugin plugin) {
                 plugin.setYarnService(yarnService);
             }
-            
+
         }.execute();
     }
 
@@ -118,7 +129,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
             public void execute(WatchdogPlugin plugin) {
                 plugin.setJobEntityMgr(jobEntityMgr);
             }
-            
+
         }.execute();
     }
 
@@ -134,23 +145,23 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
             public void execute(WatchdogPlugin plugin) {
                 plugin.setRetryWaitTime(retryWaitTime);
             }
-            
+
         }.execute();
     }
 
     private abstract class DoForAllPlugins {
         private Collection<WatchdogPlugin> plugins;
-        
+
         DoForAllPlugins(Collection<WatchdogPlugin> plugins) {
             this.plugins = plugins;
         }
-        
+
         public void execute() {
             for (WatchdogPlugin plugin : plugins) {
                 execute(plugin);
             }
         }
-        
+
         public abstract void execute(WatchdogPlugin plugin);
     }
 }
