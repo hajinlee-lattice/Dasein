@@ -37,7 +37,7 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
 
     @PostConstruct
     public void init(){
-        log.info("dlOrchestrationJob quartz bean was created.");
+        log.info("JobWatchdogServiceImpl quartz bean was created.");
     }
 
     @Override
