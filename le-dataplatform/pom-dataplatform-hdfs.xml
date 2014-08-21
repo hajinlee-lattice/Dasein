@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>le-dataplatform-no-dependency-rpm</artifactId>
+	<artifactId>le-dataplatform-hdfs</artifactId>
 	<packaging>rpm</packaging>
 	<description>LE DATAPLATFORM NO DEPENDENCY RPM</description>
 
@@ -94,15 +94,6 @@
 							<groupname>hdfs</groupname>
 							<sources>
 								<source>
-									<location>target/le-dataplatform-1.0.0-SNAPSHOT.jar</location>
-								</source>
-								<source>
-									<location>target/le-dataplatform-1.0.0-SNAPSHOT-intf.jar</location>
-								</source>
-								<source>
-									<location>target/le-dataplatform-1.0.0-SNAPSHOT-tests.jar</location>
-								</source>
-								<source>
 									<location>${hadoop-metrics2.properties.path}/hadoop-metrics2.properties</location>
 								</source>
 								<source>
@@ -137,10 +128,10 @@
 						</mapping>
 					</mappings>
 					<preinstallScriptlet>
-						<scriptFile>src/main/resources/rpm/dataplatform-no-dependency/scripts/preinstall</scriptFile>
+						<scriptFile>src/main/resources/rpm/dataplatform-hdfs/scripts/preinstall</scriptFile>
 					</preinstallScriptlet>
 					<postinstallScriptlet>
-						<scriptFile>src/main/resources/rpm/dataplatform-no-dependency/scripts/postinstall</scriptFile>
+						<scriptFile>src/main/resources/rpm/dataplatform-hdfs/scripts/postinstall</scriptFile>
 						<fileEncoding>utf-8</fileEncoding>
 					</postinstallScriptlet>
 				</configuration>
