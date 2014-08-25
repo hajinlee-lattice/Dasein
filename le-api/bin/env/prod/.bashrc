@@ -16,5 +16,5 @@ export HADOOP_MAPRED_HOME=/usr/lib/hadoop
 export HADOOP_CONF=/etc/hadoop/conf.empty
 export SQOOP_HOME=/usr/lib/sqoop
 export JAVA_HOME=/usr/java/default
-export DPQUARTZ_ENABLED=disabled
+export DPQUARTZ_ENABLED=enabled
 export DPDL_QUARTZ_ENABLED=disabled
