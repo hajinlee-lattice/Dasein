@@ -26,6 +26,8 @@
         <property name="password" value="${dataplatform.dao.datasource.password.encrypted}" />
     </bean>
 
+    <bean id="ledpJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" p:dataSource-ref="dataSource" />
+
     <!-- Hibernate session factory -->
     <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="dataSource" />
