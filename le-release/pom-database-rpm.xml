@@ -126,6 +126,9 @@
                                     <location>../le-dataplatform/target/le-dataplatform-1.0.0-SNAPSHOT-tests.jar</location>
                                 </source>
                                 <source>
+                                    <location>../le-dataplatform/target/le-dataplatform-1.0.0-SNAPSHOT.jar</location>
+                                </source>
+                                <source>
                                     <location>../le-domain/target/le-domain-1.0.0-SNAPSHOT.jar</location>
                                 </source>
                                 <!-- drivers and other libraries -->
