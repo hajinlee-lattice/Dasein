@@ -7,6 +7,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class EnableSQLServerSnapshotIsolation {
 
     public static void main(String[] args) throws Exception {
+        String dbPropertiesFilepath = args[1];
+        System.setProperty("DATAPLATFORM_PROPDIR", dbPropertiesFilepath);
+
         @SuppressWarnings("resource")
         ApplicationContext context = new ClassPathXmlApplicationContext("test-dataplatform-context.xml");
 
