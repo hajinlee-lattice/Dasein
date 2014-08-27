@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 public class AvroUtilsUnitTestNG {
 
+    @SuppressWarnings("deprecation")
     @Test(groups = "unit")
     public void testCombineSchemas() throws Exception {
 
