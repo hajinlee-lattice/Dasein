@@ -1,13 +1,11 @@
 package com.latticeengines.sparkdb.exposed.service.impl
 
-import org.apache.hadoop.yarn.conf.YarnConfiguration
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ContextConfiguration
-import org.testng.Assert.assertNotNull
-import org.testng.annotations.Test
-
 import com.latticeengines.sparkdb.exposed.service.SparkLauncherService
 import com.latticeengines.sparkdb.functionalframework.SparkDbFunctionalTestNGBase
+import org.apache.hadoop.yarn.conf.YarnConfiguration
+import org.springframework.beans.factory.annotation.Autowired
+import org.testng.Assert.assertNotNull
+import org.testng.annotations.Test
 
 class SparkLauncherServiceImplTestNG extends SparkDbFunctionalTestNGBase {
 
@@ -19,7 +17,7 @@ class SparkLauncherServiceImplTestNG extends SparkDbFunctionalTestNGBase {
     assertNotNull(sparkLauncherService)
     val conf = new YarnConfiguration()
     conf.setStrings(YarnConfiguration.YARN_APPLICATION_CLASSPATH, YarnConfiguration.DEFAULT_YARN_APPLICATION_CLASSPATH: _*)
-    var appId = sparkLauncherService.runApp(conf, "DataProfileJob", "Priority0")
+    val appId = sparkLauncherService.runApp(conf, "DataProfileJob", "Priority0")
     println(appId)
   }
 }

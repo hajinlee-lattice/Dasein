@@ -7,6 +7,6 @@ import com.esotericsoftware.kryo.Kryo
 
 class LedpKryoRegistrator extends KryoRegistrator {
   override def registerClasses(kryo: Kryo) {
-    kryo.register(classOf[Record], AvroSerializer.asAvroSerializer)
+    //kryo.register(classOf[Record], AvroSerializer.asAvroSerializer)
   }
 }

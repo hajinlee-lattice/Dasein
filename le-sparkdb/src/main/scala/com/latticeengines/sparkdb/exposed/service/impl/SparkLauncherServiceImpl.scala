@@ -17,13 +17,14 @@ import com.latticeengines.sparkdb.exposed.service.SparkLauncherService
 class SparkLauncherServiceImpl extends SparkLauncherService {
   
   override def runApp(conf: Configuration, appName: String, queue: String): ApplicationId = {
+    val ws = SparkLauncherServiceImpl.getWorkspace()
     val params = Array("--class", //
-        "com.latticeengines.sparkdb.operator.impl.DataProfileOperator", //
+        "com.latticeengines.sparkdb.service.impl.AssemblyServiceImpl", //
         "--name", appName, //
         "--queue", queue, //
         "--driver-memory", "1024m", //
-        "--addJars", getListOfDependencyJars("/home/rgonzalez/workspace/ledp/le-sparkdb/target/dependency"), //
-        "--jar", "file:/home/rgonzalez/workspace/ledp/le-sparkdb/target/le-sparkdb-1.0.0-SNAPSHOT.jar")
+        "--addJars", getListOfDependencyJars(s"$ws/ledp/le-sparkdb/target/dependency"), //
+        "--jar", s"file:$ws/ledp/le-sparkdb/target/le-sparkdb-1.0.0-SNAPSHOT.jar")
     System.setProperty("SPARK_YARN_MODE", "true")
     System.setProperty("spark.driver.extraJavaOptions", "-XX:PermSize=128m -XX:MaxPermSize=128m -Dsun.io.serialization.extendedDebugInfo=true")
     val sparkConf = new SparkConf()
@@ -40,6 +41,10 @@ class SparkLauncherServiceImpl extends SparkLauncherService {
 }
 
 object SparkLauncherServiceImpl {
+  def getWorkspace(): String = {
+    "/home/rgonzalez/workspace-nextgen"
+  } 
+  
   def main(args: Array[String]) {
     val conf = new org.apache.hadoop.yarn.conf.YarnConfiguration()
     conf.setStrings(org.apache.hadoop.yarn.conf.YarnConfiguration.YARN_APPLICATION_CLASSPATH, 
