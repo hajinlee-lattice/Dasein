@@ -1,7 +1,6 @@
 package com.latticeengines.dataplatform.fairscheduler;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -2,16 +2,19 @@ package org.apache.sqoop;
 
 import java.io.IOException;
 import java.util.Arrays;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.util.GenericOptionsParser;
-import org.apache.sqoop.Sqoop;
+
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.cli.ToolOptions;
 import com.cloudera.sqoop.tool.SqoopTool;
 import com.cloudera.sqoop.util.OptionsFileUtil;
 
+@SuppressWarnings("deprecation")
 public class LedpSqoop extends Sqoop {
 
+    
     private SqoopTool tool;
     private SqoopOptions options;
     private String[] childPrgmArgs;

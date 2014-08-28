@@ -10,6 +10,7 @@ from random import random
 from random import shuffle
 import shutil
 from sklearn.ensemble import RandomForestClassifier
+import unittest
 import uuid
 from testbase import TestBase
 from leframework import scoringengine as se
@@ -196,3 +197,6 @@ class TrainingTest(TestBase):
         decompressed.close()
 
         return decompressed.name
+    
+if __name__ == '__main__':
+    unittest.main()

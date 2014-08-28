@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+import unittest
 from testbase import TestBase
 from leframework.executors.learningexecutor import LearningExecutor
 
@@ -16,6 +17,8 @@ class ProfilingTest(TestBase):
         results = "./results"
         if os.path.exists(results):
             shutil.rmtree(results)
+
+
 
     def testExecuteProfiling(self):
         # Dynamically import launcher to make sure globals() is clean in launcher
@@ -33,8 +36,11 @@ class ProfilingTest(TestBase):
 
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)
         self.assertTrue(results is not None)
-    
+
     def tearDown(self):
         # Remove launcher module to restore its globals()
-        del sys.modules['launcher'] 
+        del sys.modules['launcher']
 
+
+if __name__ == '__main__':
+    unittest.main()

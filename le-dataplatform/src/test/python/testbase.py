@@ -28,3 +28,4 @@ class TestBase(TestCase):
         for f in os.listdir(curDir):
             if os.path.islink(f):
                 os.unlink(f)
+
