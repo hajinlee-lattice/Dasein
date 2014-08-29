@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-testng</artifactId>
-            <version>${camel-version}</version>
+            <version>${camel.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
