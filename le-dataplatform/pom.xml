@@ -214,6 +214,12 @@
             <classifier>hadoop2</classifier>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-exec</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>net.jpountz.lz4</groupId>
             <artifactId>lz4</artifactId>
             <version>1.2.0</version>
@@ -239,7 +245,7 @@
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-scheduler</artifactId>
             <version>${le.scheduler.version}</version>
