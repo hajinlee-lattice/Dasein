@@ -1,6 +1,5 @@
 package com.latticeengines.dataplatform.infrastructure;
 
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import org.apache.commons.exec.ExecuteException;
@@ -29,39 +28,40 @@ public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTe
         String result = "";
 
         try {
-        // Remove logs from ~/
-        result = executeCommand("rm -rf " + primaryLog);
-        result = executeCommand("rm -rf " + secondaryLog);
+            log.info("Remove logs from ~/");
+            result = executeCommand("rm -rf " + primaryLog);
+            result = executeCommand("rm -rf " + secondaryLog);
 
-        // Force failover from nn2 to nn1
-        result = executeCommand(hdfs + "haadmin -failover nn2 nn1");
+            log.info("Force failover from nn2 to nn1");
+            result = executeCommand(hdfs + "haadmin -failover nn2 nn1");
 
-        // Confirm Active NN is nn1
-        result = executeCommand(hdfs + "haadmin -getServiceState nn1");
-        assertTrue(result.trim().contentEquals(ACTIVE));
-        // Get log from nn1
-        result = executeCommand(hdfs + "dfs -ls -R / > " + primaryLog);
+            log.info("Confirm Active NN is nn1");
+            result = executeCommand(hdfs + "haadmin -getServiceState nn1");
+            assertTrue(result.trim().contains(ACTIVE));
 
-        // Failover nn1 to nn2
-        result = executeCommand(hdfs + "haadmin -failover nn1 nn2");
+            log.info("Get log from nn1");
+            result = executeCommand(hdfs + "dfs -ls -R / > " + primaryLog);
 
-        // Confirm Active NN is nn2
-        result = executeCommand(hdfs + "haadmin -getServiceState nn2");
-        assertTrue(result.trim().contentEquals(ACTIVE));
+            log.info("Failover nn1 to nn2");
+            result = executeCommand(hdfs + "haadmin -failover nn1 nn2");
 
-        // Get log from nn2
-        result = executeCommand(hdfs + "dfs -ls -R / > " + secondaryLog);
+            log.info("Confirm Active NN is nn2");
+            result = executeCommand(hdfs + "haadmin -getServiceState nn2");
+            assertTrue(result.trim().contains(ACTIVE));
 
-        // Failover from nn2 to nn1
-        result = executeCommand(hdfs + "haadmin -failover nn2 nn1");
+            log.info("Get log from nn2");
+            result = executeCommand(hdfs + "dfs -ls -R / > " + secondaryLog);
 
-        // Confirm Active NN is nn1
-        result = executeCommand(hdfs + "haadmin -getServiceState nn1");
-        assertTrue(result.trim().contentEquals(ACTIVE));
+            log.info("Failover from nn2 to nn1");
+            result = executeCommand(hdfs + "haadmin -failover nn2 nn1");
 
-        // Diff logs
-        result = executeCommand("diff " + primaryLog + " " + secondaryLog);
-        assertTrue(Strings.isNullOrEmpty(result));
+            log.info("Confirm Active NN is nn1");
+            result = executeCommand(hdfs + "haadmin -getServiceState nn1");
+            assertTrue(result.trim().contains(ACTIVE));
+
+            log.info("Diff logs");
+            result = executeCommand("diff " + primaryLog + " " + secondaryLog);
+            assertTrue(Strings.isNullOrEmpty(result));
         } catch (ExecuteException e) {
             log.error("Result is (" + result + ")");
             throw e;
