@@ -38,7 +38,7 @@ public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTe
 
         // Confirm Active NN is nn1
         result = executeCommand(hdfs + "haadmin -getServiceState nn1");
-        assertEquals(result, ACTIVE);
+        assertEquals(result.trim(), ACTIVE);
         // Get log from nn1
         result = executeCommand(hdfs + "dfs -ls -R / > " + primaryLog);
 
@@ -47,7 +47,7 @@ public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTe
 
         // Confirm Active NN is nn2
         result = executeCommand(hdfs + "haadmin -getServiceState nn2");
-        assertEquals(result, ACTIVE);
+        assertEquals(result.trim(), ACTIVE);
 
         // Get log from nn2
         result = executeCommand(hdfs + "dfs -ls -R / > " + secondaryLog);
@@ -57,7 +57,7 @@ public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTe
 
         // Confirm Active NN is nn1
         result = executeCommand(hdfs + "haadmin -getServiceState nn1");
-        assertEquals(result, ACTIVE);
+        assertEquals(result.trim(), ACTIVE);
 
         // Diff logs
         result = executeCommand("diff " + primaryLog + " " + secondaryLog);
