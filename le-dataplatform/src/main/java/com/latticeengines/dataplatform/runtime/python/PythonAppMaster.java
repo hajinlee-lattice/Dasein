@@ -19,13 +19,13 @@ import org.springframework.yarn.am.StaticEventingAppmaster;
 import org.springframework.yarn.am.container.AbstractLauncher;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.yarn.ProgressMonitor;
+import com.latticeengines.common.exposed.yarn.RuntimeConfig;
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.dataplatform.runtime.ProgressMonitor;
-import com.latticeengines.dataplatform.runtime.RuntimeConfig;
 import com.latticeengines.dataplatform.runtime.metric.LedpMetricsMgr;
 
 public class PythonAppMaster extends StaticEventingAppmaster implements ContainerLauncherInterceptor {
@@ -142,7 +142,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         if (status.getExitStatus() == ContainerExitStatus.SUCCESS) {
             log.info("Container id = " + status.getContainerId().toString() + " completed.");
             ledpMetricsMgr.setContainerEndTime(System.currentTimeMillis());
-            // immediately publish
+            // Immediately publish
             ledpMetricsMgr.publishMetricsNow();
         }
 
@@ -160,7 +160,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 
         if (status.getExitStatus() == ContainerExitStatus.PREEMPTED) {
             ledpMetricsMgr.incrementNumberPreemptions();
-            // immediately publish
+            // Immediately publish
             ledpMetricsMgr.publishMetricsNow();
             try {
                 Thread.sleep(5000L);
@@ -191,7 +191,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         super.doStop();
         cleanupJobDir();
         ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
-        // immediately publish
+        // Immediately publish
         ledpMetricsMgr.publishMetricsNow();
         // Shut down monitor
         monitor.stop();
