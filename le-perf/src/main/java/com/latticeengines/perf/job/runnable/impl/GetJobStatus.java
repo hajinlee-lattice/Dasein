@@ -50,8 +50,8 @@ public class GetJobStatus extends ModelingResourceJob<String, JobStatus> {
             throws Exception {
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, hdfsPath, new HdfsFilenameFilter() {
             @Override
-            public boolean accept(Path filename) {
-                return filename.toString().endsWith(".avro");
+            public boolean accept(String filename) {
+                return filename.endsWith(".avro");
             }
 
         });
