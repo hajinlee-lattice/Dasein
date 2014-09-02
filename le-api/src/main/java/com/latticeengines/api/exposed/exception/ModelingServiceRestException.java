@@ -6,5 +6,5 @@ public class ModelingServiceRestException extends RuntimeException {
 
     public ModelingServiceRestException(String message) {
         super(message);
-    }        
+    }
 }

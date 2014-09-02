@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.api.Status;
+import com.wordnik.swagger.annotations.Api;
 
+@Api(value = "status", description = "Status of the REST API endpoint")
 @RestController
 public class StatusResource {
 
-    @RequestMapping(value = "/status/{op}/{left}/{right}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{op}/{left}/{right}", method = RequestMethod.GET)
     @ResponseBody
     public Status calculate(@PathVariable("op") String op, @PathVariable("left") Integer left,
             @PathVariable("right") Integer right) {
@@ -27,7 +29,7 @@ public class StatusResource {
         return doCalc(result);
     }
 
-    @RequestMapping(value = "/status", method = RequestMethod.POST)
+    @RequestMapping(value = "/post", method = RequestMethod.POST)
     @ResponseBody
     public Status calculate(@RequestBody Status calc) {
         Assert.notNull(calc);
