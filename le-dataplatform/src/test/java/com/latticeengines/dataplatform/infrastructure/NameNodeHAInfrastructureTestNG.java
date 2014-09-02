@@ -8,8 +8,6 @@ import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.google.common.base.Strings;
-
 public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTestNGBase {
 
     protected static final Log log = LogFactory.getLog(NameNodeHAInfrastructureTestNG.class);
@@ -23,45 +21,48 @@ public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTe
     @Test(groups = "infrastructure", enabled = true)
     public void testConsistentReadFromBothNameNodes() throws Exception {
         String hdfs = "/usr/bin/hdfs ";
-        String primaryLog = "~/dfs-primary-lsr-1.log";
-        String secondaryLog = "~/dfs-secondary-lsr-1.log";
+        String directoryListPrimary = "";
+        String directoryListSecondary = "";
         String result = "";
 
         try {
-            log.info("Remove logs from ~/");
-            result = executeCommand("rm -rf " + primaryLog);
-            result = executeCommand("rm -rf " + secondaryLog);
-
             log.info("Force failover from nn2 to nn1");
             result = executeCommand(hdfs + "haadmin -failover nn2 nn1");
+            log.info(result);
 
             log.info("Confirm Active NN is nn1");
             result = executeCommand(hdfs + "haadmin -getServiceState nn1");
             assertTrue(result.trim().contains(ACTIVE));
 
-            log.info("Get log from nn1");
-            result = executeCommand(hdfs + "dfs -ls -R / > " + primaryLog);
+            log.info("Get directory list from nn1");
+            result = executeCommand(hdfs + "dfs -ls -R /app");
+            directoryListPrimary = result.substring(result.indexOf("/app/dataplatform"));
+            log.info("directoryListPrimary: " + directoryListPrimary);
 
             log.info("Failover nn1 to nn2");
             result = executeCommand(hdfs + "haadmin -failover nn1 nn2");
+            log.info(result);
 
             log.info("Confirm Active NN is nn2");
             result = executeCommand(hdfs + "haadmin -getServiceState nn2");
             assertTrue(result.trim().contains(ACTIVE));
 
-            log.info("Get log from nn2");
-            result = executeCommand(hdfs + "dfs -ls -R / > " + secondaryLog);
+            log.info("Get directory list from nn2");
+            result = executeCommand(hdfs + "dfs -ls -R /app");
+            directoryListSecondary = result.substring(result.indexOf("/app/dataplatform"));
+            log.info("directoryListSecondary: " + directoryListSecondary);
 
             log.info("Failover from nn2 to nn1");
             result = executeCommand(hdfs + "haadmin -failover nn2 nn1");
+            log.info(result);
 
             log.info("Confirm Active NN is nn1");
             result = executeCommand(hdfs + "haadmin -getServiceState nn1");
             assertTrue(result.trim().contains(ACTIVE));
 
-            log.info("Diff logs");
-            result = executeCommand("diff " + primaryLog + " " + secondaryLog);
-            assertTrue(Strings.isNullOrEmpty(result));
+            log.info("Compare directory lists");
+            assertTrue(directoryListPrimary.equals(directoryListSecondary));
+            log.info("Directory lists are equivalent");
         } catch (ExecuteException e) {
             log.error("Result is (" + result + ")");
             throw e;
