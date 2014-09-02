@@ -165,8 +165,8 @@ public class ModelingServiceImpl implements ModelingService {
             files = HdfsUtils.getFilesForDir(yarnConfiguration, path, new HdfsFilenameFilter() {
 
                 @Override
-                public boolean accept(Path filename) {
-                    return filename.toString().endsWith(".avro");
+                public boolean accept(String filename) {
+                    return filename.endsWith(".avro");
                 }
 
             });
@@ -188,8 +188,8 @@ public class ModelingServiceImpl implements ModelingService {
             files = HdfsUtils.getFilesForDir(yarnConfiguration, path, new HdfsFilenameFilter() {
 
                 @Override
-                public boolean accept(Path filename) {
-                    return filename.toString().endsWith(".avsc");
+                public boolean accept(String filename) {
+                    return filename.endsWith(".avsc");
                 }
 
             });
@@ -225,7 +225,7 @@ public class ModelingServiceImpl implements ModelingService {
             files = HdfsUtils.getFilesForDir(yarnConfiguration, baseDir, new HdfsFilenameFilter() {
 
                 @Override
-                public boolean accept(Path filename) {
+                public boolean accept(String filename) {
                     Pattern p = Pattern.compile(".*" + samplePrefix + ".*.avro");
                     Matcher matcher = p.matcher(filename.toString());
                     return matcher.matches();
@@ -322,7 +322,7 @@ public class ModelingServiceImpl implements ModelingService {
                     new HdfsFilenameFilter() {
 
                         @Override
-                        public boolean accept(Path filename) {
+                        public boolean accept(String filename) {
                             Pattern p = Pattern.compile(".*.avro");
                             Matcher matcher = p.matcher(filename.toString());
                             return matcher.matches();
@@ -395,8 +395,8 @@ public class ModelingServiceImpl implements ModelingService {
             HdfsFilenameFilter filter = new HdfsFilenameFilter() {
 
                 @Override
-                public boolean accept(Path path) {
-                    return path.toString().endsWith(".avro");
+                public boolean accept(String path) {
+                    return path.endsWith(".avro");
                 }
 
             };

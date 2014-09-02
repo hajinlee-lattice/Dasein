@@ -29,11 +29,6 @@
         mapreduce.job.queuename=Priority0.MapReduce.0
     </hdp:configuration>
 
-    <hdp:cache create-symlink="true">
-        <hdp:classpath value="/lib/*.jar" />
-        <hdp:classpath value="/app/dataplatform/*.jar" />
-    </hdp:cache>
-
     <!-- Configures the word count job. -->
     <hdp:job id="samplingJob" 
         number-reducers="1"

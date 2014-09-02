@@ -86,8 +86,8 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
                     new HdfsFilenameFilter() {
 
                         @Override
-                        public boolean accept(Path filename) {
-                            return filename.toString().endsWith(".avro");
+                        public boolean accept(String filename) {
+                            return filename.endsWith(".avro");
                         }
                 
             });

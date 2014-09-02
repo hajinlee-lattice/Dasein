@@ -115,7 +115,7 @@ class ArgumentParser(object):
                     self.nameToFeatureIndex[fName] = k
                 if fName in self.keyCols:
                     self.keyColIndex.add(k)
-                if fType == 'string' and fName not in self.targets:
+                if (fType == 'string' or fType == 'boolean' or fType == 'bytes') and fName not in self.targets:
                     self.stringColNames.add(fName)
                 k = k+1
             l = l+1
@@ -142,7 +142,7 @@ class ArgumentParser(object):
                     continue
                 else:
                     row[targetName] = float(row[targetName])
-                rowlist = [row[name] for name in includedNames]
+                rowlist = [str(row[name]) if name in self.stringColNames else row[name] for name in includedNames]
             else:
                 # CSV format
                 rowlist = [self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]

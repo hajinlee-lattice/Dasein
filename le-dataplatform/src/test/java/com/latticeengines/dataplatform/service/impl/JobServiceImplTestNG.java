@@ -273,8 +273,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, outputDir, new HdfsFilenameFilter() {
 
             @Override
-            public boolean accept(Path filename) {
-                return filename.toString().endsWith(".avro");
+            public boolean accept(String filename) {
+                return filename.endsWith(".avro");
             }
 
         });
@@ -303,8 +303,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, "/tmp/import", new HdfsFilenameFilter() {
 
             @Override
-            public boolean accept(Path filename) {
-                return filename.toString().endsWith(".avro");
+            public boolean accept(String filename) {
+                return filename.endsWith(".avro");
             }
 
         });

@@ -10,7 +10,6 @@
 
 	<yarn:environment>
 		<yarn:classpath use-yarn-app-classpath="true" delimiter=":">
-			./*:${dataplatform.appmaster.classpath}
 		</yarn:classpath>
 	</yarn:environment>
 
