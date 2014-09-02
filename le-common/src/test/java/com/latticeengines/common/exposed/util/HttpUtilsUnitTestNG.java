@@ -2,8 +2,9 @@ package com.latticeengines.common.exposed.util;
 
 import static org.testng.Assert.assertTrue;
 
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class HttpUtilsUnitTestNG {
     
