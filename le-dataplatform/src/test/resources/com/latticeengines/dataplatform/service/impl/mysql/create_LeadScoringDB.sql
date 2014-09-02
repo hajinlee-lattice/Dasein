@@ -1,4 +1,4 @@
-#CREATE DATABASE LeadScoringDB;
+CREATE DATABASE LeadScoringDB;
 
 USE LeadScoringDB;
 
