@@ -39,9 +39,9 @@ CREATE TABLE EventMetadata_Nutanix (
   `TargetEventTableName` nvarchar(11)
 );
 
-insert into EventMetadata_Nutanix select * from LeadScoringDB.iris_metadata;
-insert into Q_EventTable_Nutanix select * from LeadScoringDB.iris;
-insert into Q_EventTableDepivot_Nutanix select * from LeadScoringDB.iris;
+insert into EventMetadata_Nutanix select * from dataplatformtest.iris_metadata;
+insert into Q_EventTable_Nutanix select * from dataplatformtest.iris;
+insert into Q_EventTableDepivot_Nutanix select * from dataplatformtest.iris;
 alter table Q_EventTable_Nutanix CHANGE ID Nutanix_EventTable_Clean INT;
 alter table Q_EventTable_Nutanix CHANGE CATEGORY P1_Event INT;
 alter table Q_EventTableDepivot_Nutanix CHANGE ID Nutanix_EventTable_Clean INT;
