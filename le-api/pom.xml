@@ -160,10 +160,5 @@
             <artifactId>swagger-springmvc</artifactId>
             <version>0.8.8</version>
         </dependency>
-        <dependency>
-            <groupId>org.ajar</groupId>
-            <artifactId>swagger-spring-mvc-ui</artifactId>
-            <version>0.2</version>
-        </dependency>
     </dependencies>
 </project>
