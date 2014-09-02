@@ -8,6 +8,10 @@ drop table if exists `Q_EventTableDepivot_Nutanix`;
 
 drop table if exists `EventMetadata_Nutanix`;
 
+drop table if exists `iris`;
+
+drop table if exists `iris_metadata`;
+
 CREATE TABLE Q_EventTable_Nutanix (
   ID INT NOT NULL AUTO_INCREMENT,
   SEPAL_LENGTH FLOAT,
@@ -39,9 +43,42 @@ CREATE TABLE EventMetadata_Nutanix (
   `TargetEventTableName` nvarchar(11)
 );
 
-insert into EventMetadata_Nutanix select * from dataplatformtest.iris_metadata;
-insert into Q_EventTable_Nutanix select * from dataplatformtest.iris;
-insert into Q_EventTableDepivot_Nutanix select * from dataplatformtest.iris;
+CREATE TABLE iris (
+  ID INT NOT NULL AUTO_INCREMENT,
+  SEPAL_LENGTH FLOAT,
+  SEPAL_WIDTH FLOAT,
+  PETAL_LENGTH FLOAT,
+  PETAL_WIDTH FLOAT,
+  CATEGORY INT NOT NULL,
+  PRIMARY KEY(ID)
+);      
+
+CREATE TABLE iris_metadata (
+  `QueryForMacro` INT NOT NULL,
+  barecolumnname nvarchar(510),
+  barecolumnvalue nvarchar(510),
+  `Dtype` nvarchar(6),
+  `maxV` FLOAT,
+  `minV` FLOAT,
+  `EventTableName` nvarchar(11),
+  `TargetEventTableName` nvarchar(11)
+);
+
+LOAD DATA INFILE '/home/hliu/workspace/ledp/le-dataplatform/src/test/resources/com/latticeengines/dataplatform/service/impl/nn_train.dat'
+INTO TABLE iris 
+FIELDS TERMINATED BY ',' 
+LINES TERMINATED BY '\n' 
+(SEPAL_LENGTH, SEPAL_WIDTH, PETAL_LENGTH, PETAL_WIDTH, CATEGORY);
+
+LOAD DATA INFILE '/home/hliu/workspace/ledp/le-dataplatform/src/test/resources/com/latticeengines/dataplatform/service/impl/nn_test.dat'
+INTO TABLE iris 
+FIELDS TERMINATED BY ',' 
+LINES TERMINATED BY '\n' 
+(SEPAL_LENGTH, SEPAL_WIDTH, PETAL_LENGTH, PETAL_WIDTH, CATEGORY);
+
+insert into EventMetadata_Nutanix select * from iris_metadata;
+insert into Q_EventTable_Nutanix select * from iris;
+insert into Q_EventTableDepivot_Nutanix select * from iris;
 alter table Q_EventTable_Nutanix CHANGE ID Nutanix_EventTable_Clean INT;
 alter table Q_EventTable_Nutanix CHANGE CATEGORY P1_Event INT;
 alter table Q_EventTableDepivot_Nutanix CHANGE ID Nutanix_EventTable_Clean INT;
