@@ -19,122 +19,135 @@ import org.springframework.util.StreamUtils;
 
 public class HdfsUtils {
 
-    public static interface HdfsFilenameFilter {
-        boolean accept(Path filename);
-    }
+	public static interface HdfsFilenameFilter {
+		boolean accept(String filename);
+	}
 
-    public static enum LogFileEncodingType {
-        NONE, GZ;
+	public static enum LogFileEncodingType {
+		NONE, GZ;
 
-        public static LogFileEncodingType getEnum(String s) {
-            if (NONE.name().equalsIgnoreCase(s)) {
-                return NONE;
-            } else if (GZ.name().equalsIgnoreCase(s)) {
-                return GZ;
-            }
-            throw new IllegalArgumentException("No Enum specified for this string");
-        }
-    };
+		public static LogFileEncodingType getEnum(String s) {
+			if (NONE.name().equalsIgnoreCase(s)) {
+				return NONE;
+			} else if (GZ.name().equalsIgnoreCase(s)) {
+				return GZ;
+			}
+			throw new IllegalArgumentException(
+					"No Enum specified for this string");
+		}
+	};
 
-    public static final void mkdir(Configuration configuration, String dir) throws Exception {
-        FileSystem fs = FileSystem.get(configuration);
-        fs.mkdirs(new Path(dir));
-    }
+	public static final void mkdir(Configuration configuration, String dir)
+			throws Exception {
+		FileSystem fs = FileSystem.get(configuration);
+		fs.mkdirs(new Path(dir));
+	}
 
-    public static final void rmdir(Configuration configuration, String dir) throws Exception {
-        FileSystem fs = FileSystem.get(configuration);
-        fs.delete(new Path(dir), true);
-    }
+	public static final void rmdir(Configuration configuration, String dir)
+			throws Exception {
+		FileSystem fs = FileSystem.get(configuration);
+		fs.delete(new Path(dir), true);
+	}
 
-    public static final String getHdfsFileContents(Configuration configuration, String hdfsPath) throws Exception {
-        FileSystem fs = FileSystem.get(configuration);
-        Path schemaPath = new Path(hdfsPath);
+	public static final String getHdfsFileContents(Configuration configuration,
+			String hdfsPath) throws Exception {
+		FileSystem fs = FileSystem.get(configuration);
+		Path schemaPath = new Path(hdfsPath);
 
-        try (InputStream is = fs.open(schemaPath)) {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            StreamUtils.copy(is, os);
-            return new String(os.toByteArray());
-        }
+		try (InputStream is = fs.open(schemaPath)) {
+			ByteArrayOutputStream os = new ByteArrayOutputStream();
+			StreamUtils.copy(is, os);
+			return new String(os.toByteArray());
+		}
 
-    }
+	}
 
-    public static final void writeToFile(Configuration configuration, String hdfsPath, String contents)
-            throws Exception {
-        FileSystem fs = FileSystem.get(configuration);
-        Path filePath = new Path(hdfsPath);
+	public static final void writeToFile(Configuration configuration,
+			String hdfsPath, String contents) throws Exception {
+		FileSystem fs = FileSystem.get(configuration);
+		Path filePath = new Path(hdfsPath);
 
-        try (BufferedWriter br = new BufferedWriter(new OutputStreamWriter(fs.create(filePath, true)))) {
-            br.write(contents);
-        }
-    }
+		try (BufferedWriter br = new BufferedWriter(new OutputStreamWriter(
+				fs.create(filePath, true)))) {
+			br.write(contents);
+		}
+	}
 
-    public static final boolean fileExists(Configuration configuration, String hdfsPath) throws Exception {
-        FileSystem fs = FileSystem.get(configuration);
-        return fs.exists(new Path(hdfsPath));
+	public static final boolean fileExists(Configuration configuration,
+			String hdfsPath) throws Exception {
+		FileSystem fs = FileSystem.get(configuration);
+		return fs.exists(new Path(hdfsPath));
 
-    }
+	}
 
-    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir) throws Exception {
-        return getFilesForDir(configuration, hdfsDir, null);
-    }
+	public static final List<String> getFilesForDir(
+			Configuration configuration, String hdfsDir) throws Exception {
+		return getFilesForDir(configuration, hdfsDir, null);
+	}
 
-    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir,
-            HdfsFilenameFilter filter) throws Exception {
-        FileSystem fs = FileSystem.get(configuration);
-        FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
-        List<String> filePaths = new ArrayList<String>();
-        for (FileStatus status : statuses) {
-            Path filename = status.getPath();
-            boolean accept = true;
+	public static final List<String> getFilesForDir(
+			Configuration configuration, String hdfsDir,
+			HdfsFilenameFilter filter) throws Exception {
+		FileSystem fs = FileSystem.get(configuration);
+		FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
+		List<String> filePaths = new ArrayList<String>();
+		for (FileStatus status : statuses) {
+			Path filePath = status.getPath();
+			boolean accept = true;
 
-            if (filter != null) {
-                accept = filter.accept(filename);
-            }
-            if (accept) {
-                filePaths.add(filename.toString());
-            }
-        }
+			if (filter != null) {
+				accept = filter.accept(filePath.getName());
+			}
+			if (accept) {
+				filePaths.add(filePath.toString());
+			}
+		}
 
-        return filePaths;
-    }
+		return filePaths;
+	}
 
-    public static final String getApplicationLog(Configuration configuration, String user, String applicationId)
-            throws Exception {
-        String log = "";
-        try (InputStream is = getInputStream(configuration, user, applicationId)) {
-            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-                StreamUtils.copy(is, os);
-                log = log.concat(new String(os.toByteArray()));
-            } catch (IOException e1) {
-                throw new RuntimeException(e1);
-            }
-        } catch (IOException e2) {
-            throw new RuntimeException(e2);
-        }
-        return log;
-    }
+	public static final String getApplicationLog(Configuration configuration,
+			String user, String applicationId) throws Exception {
+		String log = "";
+		try (InputStream is = getInputStream(configuration, user, applicationId)) {
+			try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+				StreamUtils.copy(is, os);
+				log = log.concat(new String(os.toByteArray()));
+			} catch (IOException e1) {
+				throw new RuntimeException(e1);
+			}
+		} catch (IOException e2) {
+			throw new RuntimeException(e2);
+		}
+		return log;
+	}
 
-    private static InputStream getInputStream(Configuration configuration, String user, String applicationId)
-            throws IOException {
-        FileSystem fs = FileSystem.get(configuration);
-        String hdfsPath = configuration.get("yarn.nodemanager.remote-app-log-dir") + "/" + user + "/logs/"
-                + applicationId;
-        String encoding = configuration.get("yarn.nodemanager.log-aggregation.compression-type");
-        Path schemaPath = new Path(hdfsPath);
-        RemoteIterator<LocatedFileStatus> iterator = fs.listFiles(schemaPath, false);
-        InputStream is = null;
-        while (iterator.hasNext()) {
-            LocatedFileStatus file = iterator.next();
-            Path filePath = file.getPath();
-            switch (LogFileEncodingType.valueOf(encoding.toUpperCase())) {
-            case NONE:
-                is = fs.open(filePath);
-                break;
-            case GZ:
-                is = new GZIPInputStream(fs.open(filePath));
-                break;
-            }
-        }
-        return is;
-    }
+	private static InputStream getInputStream(Configuration configuration,
+			String user, String applicationId) throws IOException {
+		FileSystem fs = FileSystem.get(configuration);
+		String hdfsPath = configuration
+				.get("yarn.nodemanager.remote-app-log-dir")
+				+ "/"
+				+ user
+				+ "/logs/" + applicationId;
+		String encoding = configuration
+				.get("yarn.nodemanager.log-aggregation.compression-type");
+		Path schemaPath = new Path(hdfsPath);
+		RemoteIterator<LocatedFileStatus> iterator = fs.listFiles(schemaPath,
+				false);
+		InputStream is = null;
+		while (iterator.hasNext()) {
+			LocatedFileStatus file = iterator.next();
+			Path filePath = file.getPath();
+			switch (LogFileEncodingType.valueOf(encoding.toUpperCase())) {
+			case NONE:
+				is = fs.open(filePath);
+				break;
+			case GZ:
+				is = new GZIPInputStream(fs.open(filePath));
+				break;
+			}
+		}
+		return is;
+	}
 }
