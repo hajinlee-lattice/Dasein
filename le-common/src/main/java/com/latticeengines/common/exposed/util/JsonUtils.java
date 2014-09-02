@@ -2,7 +2,7 @@ package com.latticeengines.common.exposed.util;
 
 import java.io.StringWriter;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonUtils {
 
