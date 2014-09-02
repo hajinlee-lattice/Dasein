@@ -17,9 +17,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
@@ -75,6 +74,7 @@ public class AlgorithmBase implements Algorithm {
         return modelDefinition;
     }
 
+    @JsonIgnore
     @Override 
     public void setModelDefinition(ModelDefinition modelDefinition) {
         this.modelDefinition = modelDefinition;

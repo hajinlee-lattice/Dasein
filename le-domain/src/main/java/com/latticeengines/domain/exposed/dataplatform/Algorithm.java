@@ -4,9 +4,8 @@ import java.util.Properties;
 
 import javax.persistence.Embeddable;
 
-import org.codehaus.jackson.annotate.JsonSubTypes;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
-
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
 import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;

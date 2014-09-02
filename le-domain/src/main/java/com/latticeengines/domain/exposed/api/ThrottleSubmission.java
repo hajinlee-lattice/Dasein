@@ -1,9 +1,7 @@
 package com.latticeengines.domain.exposed.api;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@XmlRootElement(name = "throttleSubmission")
 public class ThrottleSubmission {
 
     private boolean immediate;
@@ -15,11 +13,12 @@ public class ThrottleSubmission {
         this.immediate = immediate;
     }
 
-    @XmlElement(name = "immediate")
+    @JsonProperty("immediate")
     public boolean isImmediate() {
         return immediate;
     }
     
+    @JsonProperty("immediate")
     public void setImmediate(boolean immediate) {
         this.immediate = immediate;
     }

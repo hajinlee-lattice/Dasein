@@ -3,10 +3,8 @@ package com.latticeengines.domain.exposed.api;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@XmlRootElement(name = "elements")
 public class StringList {
 
     private List<String> elements = new ArrayList<String>();
@@ -18,7 +16,7 @@ public class StringList {
         this.elements = elements;
     }
 
-    @XmlElement(name = "element")
+    @JsonProperty("elements")
     public List<String> getElements() {
         return elements;
     }

@@ -1,9 +1,7 @@
 package com.latticeengines.domain.exposed.api;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@XmlRootElement(name = "result")
 public class SubmissionResult {
 
     private boolean successful;
@@ -15,11 +13,12 @@ public class SubmissionResult {
     	this.successful = successful;
     }
 
-    @XmlElement(name = "success")
+    @JsonProperty("success")
     public boolean isSuccessful() {
         return successful;
     }
 
+    @JsonProperty("success")
     public void setSuccessful(boolean successful) {
     	this.successful = successful;
     }

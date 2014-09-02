@@ -2,7 +2,8 @@ package com.latticeengines.domain.exposed.dataplatform;
 
 import java.util.List;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 public class Field implements HasName {
 

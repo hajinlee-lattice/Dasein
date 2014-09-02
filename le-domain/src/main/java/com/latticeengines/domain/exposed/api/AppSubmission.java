@@ -3,12 +3,11 @@ package com.latticeengines.domain.exposed.api;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
-@XmlRootElement(name = "appSubmission")
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class AppSubmission {
 
     private List<String> applicationIds = new ArrayList<String>();
@@ -17,15 +16,16 @@ public class AppSubmission {
     }
 
     public AppSubmission(List<ApplicationId> applicationIds) {
-        setApplicationIds(applicationIds);
+        setIds(applicationIds);
     }
 
-    @XmlElement(name = "applicationId")
+    @JsonProperty("application_ids")
     public List<String> getApplicationIds() {
         return applicationIds;
     }
 
-    public void setApplicationIds(List<ApplicationId> appIds) {
+    @JsonIgnore
+    public void setIds(List<ApplicationId> appIds) {
         for (ApplicationId appId : appIds) {
             applicationIds.add(appId.toString());
         }

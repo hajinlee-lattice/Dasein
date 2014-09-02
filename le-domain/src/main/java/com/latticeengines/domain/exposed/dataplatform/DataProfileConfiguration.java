@@ -3,8 +3,7 @@ package com.latticeengines.domain.exposed.dataplatform;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class DataProfileConfiguration {

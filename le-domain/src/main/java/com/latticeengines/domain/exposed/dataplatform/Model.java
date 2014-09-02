@@ -18,11 +18,11 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
 
@@ -275,6 +275,7 @@ public class Model implements HasName, HasPid, HasId<String>  {
     }
 
     @Column(name = "KEYCOLS", length = 500)
+    @JsonIgnore
     public String getKeyCols() {
         return StringTokenUtils.listToString(this.keyCols);
     }
@@ -284,6 +285,7 @@ public class Model implements HasName, HasPid, HasId<String>  {
         this.keyCols = keyCols;
     }
 
+    @JsonIgnore
     public void setKeyCols(String keyCols) {
         this.keyCols = StringTokenUtils.stringToList(keyCols);
     }

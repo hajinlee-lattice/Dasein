@@ -11,9 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonProperty;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 @Entity
@@ -82,6 +81,7 @@ public class ThrottleConfiguration implements HasPid {
     }
 
     @Transient
+    @JsonIgnore
     public Long getTimestampLong() {
         if (this.timestamp == null)
             return null;
