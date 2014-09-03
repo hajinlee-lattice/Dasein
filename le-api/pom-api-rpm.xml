@@ -21,7 +21,7 @@
                 <activeByDefault>true</activeByDefault>
                 <property>
                     <name>environment.type</name>
-                    <value>dev</value>
+                    <value>devcluster</value>
                 </property>
             </activation>
             <properties>
@@ -29,23 +29,23 @@
                 <dataplatform.properties.path>
                     ../le-dataplatform/conf/env/devcluster
                 </dataplatform.properties.path>
-                <bin.env.path>bin/env/dev</bin.env.path>
+                <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
         </profile>
         <profile>
-            <id>qe</id>
+            <id>qa</id>
             <activation>
                 <property>
                     <name>environment.type</name>
-                    <value>qe</value>
+                    <value>qacluster</value>
                 </property>
             </activation>
             <properties>
-                <api.properties.path>conf/env/qe</api.properties.path>
+                <api.properties.path>conf/env/qacluster</api.properties.path>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/qe
+                    ../le-dataplatform/conf/env/qacluster
                 </dataplatform.properties.path>
-                <bin.env.path>bin/env/qe</bin.env.path>
+                <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
         <profile>
@@ -53,15 +53,15 @@
             <activation>
                 <property>
                     <name>environment.type</name>
-                    <value>prod</value>
+                    <value>prodcluster</value>
                 </property>
             </activation>
             <properties>
                 <api.properties.path>conf/env/deployment</api.properties.path>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/prod
+                    ../le-dataplatform/conf/env/prodcluster
                 </dataplatform.properties.path>
-                <bin.env.path>bin/env/prod</bin.env.path>
+                <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
     </profiles>
