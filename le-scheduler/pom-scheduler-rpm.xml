@@ -21,7 +21,7 @@
 				<activeByDefault>true</activeByDefault>
 				<property>
 					<name>environment.type</name>
-					<value>dev</value>
+					<value>devcluster</value>
 				</property>
 			</activation>
 			<properties>
@@ -29,15 +29,15 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>qe</id>
+			<id>qa</id>
 			<activation>
 				<property>
 					<name>environment.type</name>
-					<value>qe</value>
+					<value>qacluster</value>
 				</property>
 			</activation>
 			<properties>
-				<fair-scheduler.xml.path>conf/env/qe</fair-scheduler.xml.path>
+				<fair-scheduler.xml.path>conf/env/qacluster</fair-scheduler.xml.path>
 			</properties>
 		</profile>
 		<profile>
@@ -45,11 +45,11 @@
 			<activation>
 				<property>
 					<name>environment.type</name>
-					<value>prod</value>
+					<value>prodcluster</value>
 				</property>
 			</activation>
 			<properties>
-				<fair-scheduler.xml.path>conf/env/prod</fair-scheduler.xml.path>
+				<fair-scheduler.xml.path>conf/env/prodcluster</fair-scheduler.xml.path>
 			</properties>
 		</profile>
 		<profile>

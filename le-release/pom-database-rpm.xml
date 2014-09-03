@@ -35,7 +35,7 @@
                 <activeByDefault>true</activeByDefault>
                 <property>
                     <name>environment.type</name>
-                    <value>dev</value>
+                    <value>devcluster</value>
                 </property>
             </activation>
             <properties>
@@ -45,16 +45,16 @@
             </properties>
         </profile>
         <profile>
-            <id>qe</id>
+            <id>qa</id>
             <activation>
                 <property>
                     <name>environment.type</name>
-                    <value>qe</value>
+                    <value>qacluster</value>
                 </property>
             </activation>
             <properties>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/qe
+                    ../le-dataplatform/conf/env/qacluster
                 </dataplatform.properties.path>
             </properties>
         </profile>
@@ -63,12 +63,12 @@
             <activation>
                 <property>
                     <name>environment.type</name>
-                    <value>prod</value>
+                    <value>prodcluster</value>
                 </property>
             </activation>
             <properties>
                 <dataplatform.properties.path>
-                    ../le-dataplatform/conf/env/prod
+                    ../le-dataplatform/conf/env/prodcluster
                 </dataplatform.properties.path>
             </properties>
         </profile>
