@@ -164,11 +164,15 @@ def retrieveColumnBucketMetadata(columnsMetadata):
     for columnMetadata in columnsMetadata:
         if not columnMetadata.has_key('DisplayDiscretizationStrategy'):
             continue
-        
+
         if columnMetadata['DisplayDiscretizationStrategy'] is None:
             continue
 
-        bucketMetadata = json.loads(columnMetadata['DisplayDiscretizationStrategy'])
+        try :
+            bucketMetadata = json.loads(columnMetadata['DisplayDiscretizationStrategy'])
+        except (ValueError):
+            logger.warn("Invalid json:\'" + columnMetadata['DisplayDiscretizationStrategy'] + "\' for column name:" + columnMetadata['ColumnName'])
+            continue
 
         if len(bucketMetadata) != 1:
             raise RuntimeError("Only one bucketing strategy is allowed.")
