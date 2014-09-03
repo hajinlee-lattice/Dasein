@@ -190,7 +190,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
     }
 
     private void validateAppStatus(ApplicationId appId) {
-        JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getjobstatus/" + appId.toString(),
+        JobStatus status = restTemplate.getForObject("http://localhost:8080/rest/getJobStatus/" + appId.toString(),
                 JobStatus.class, new HashMap<String, Object>());
         assertNotNull(status);
         assertEquals(status.getId(), appId.toString());

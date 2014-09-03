@@ -81,7 +81,7 @@ public class ModelResource {
         return submission;
     }
     
-    @RequestMapping(value = "/getjobstatus/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/getJobStatus/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     public JobStatus getJobStatus(@PathVariable String applicationId) {
         return modelingService.getJobStatus(applicationId);
