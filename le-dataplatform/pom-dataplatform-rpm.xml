@@ -21,7 +21,7 @@
 				<activeByDefault>true</activeByDefault>
 				<property>
 					<name>environment.type</name>
-					<value>dev</value>
+					<value>devcluster</value>
 				</property>
 			</activation>
 			<properties>
@@ -30,16 +30,16 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>qe</id>
+			<id>qa</id>
 			<activation>
 				<property>
 					<name>environment.type</name>
-					<value>qe</value>
+					<value>qacluster</value>
 				</property>
 			</activation>
 			<properties>
-				<dataplatform.properties.path>conf/env/qe</dataplatform.properties.path>
-				<hadoop-metrics2.properties.path>conf/env/qe</hadoop-metrics2.properties.path>
+				<dataplatform.properties.path>conf/env/qacluster</dataplatform.properties.path>
+				<hadoop-metrics2.properties.path>conf/env/qacluster</hadoop-metrics2.properties.path>
 			</properties>
 		</profile>
 		<profile>
@@ -47,12 +47,12 @@
 			<activation>
 				<property>
 					<name>environment.type</name>
-					<value>prod</value>
+					<value>prodcluster</value>
 				</property>
 			</activation>
 			<properties>
-				<dataplatform.properties.path>conf/env/prod</dataplatform.properties.path>
-				<hadoop-metrics2.properties.path>conf/env/prod</hadoop-metrics2.properties.path>
+				<dataplatform.properties.path>conf/env/prodcluster</dataplatform.properties.path>
+				<hadoop-metrics2.properties.path>conf/env/prodcluster</hadoop-metrics2.properties.path>
 			</properties>
 		</profile>
 		<profile>
