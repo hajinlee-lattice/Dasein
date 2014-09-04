@@ -109,6 +109,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             for (SamplingElement samplingElement : samplingConfig.getSamplingElements()) {
                 AvroMultipleOutputs.addNamedOutput(job, samplingElement.getName() + "Training", AvroKeyOutputFormat.class, schema);
                 AvroMultipleOutputs.addNamedOutput(job, samplingElement.getName() + "Test", AvroKeyOutputFormat.class, schema);
+
             }
 
             job.setInputFormatClass(AvroKeyInputFormat.class);
