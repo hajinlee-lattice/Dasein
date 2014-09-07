@@ -41,7 +41,7 @@ public class PropertyUtils extends PropertyPlaceholderConfigurer {
             }
             propertiesMap.put(keyStr, valueStr);
         }
-        
+
         super.processProperties(beanFactory, props);
     }
 

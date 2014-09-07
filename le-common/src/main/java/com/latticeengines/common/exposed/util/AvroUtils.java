@@ -25,8 +25,6 @@ import org.apache.avro.mapred.FsInput;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
-
-
 public class AvroUtils {
 
     public static FileReader<GenericRecord> getAvroFileReader(Configuration config, Path path) {
@@ -66,7 +64,7 @@ public class AvroUtils {
     public static Object[] combineSchemas(Schema s1, Schema s2) {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(s1.getName());
         FieldAssembler<Schema> fieldAssembler = recordBuilder.doc(s1.getDoc()).fields();
-        
+
         FieldBuilder<Schema> fieldBuilder;
         Map<String, String> map = new HashMap<>();
         Set<String> colNames = new HashSet<>();
@@ -81,11 +79,11 @@ public class AvroUtils {
             if (i >= cutoff) {
                 key = s2.getName() + "$2";
             }
-            
+
             if (colNames.contains(colName)) {
                 colName = colName + "_1";
             }
-            
+
             map.put(key + "." + field.name(), colName);
             colNames.add(colName);
             fieldBuilder = fieldAssembler.name(colName);
@@ -95,9 +93,9 @@ public class AvroUtils {
                 String v = entry.getValue();
                 fieldBuilder = fieldBuilder.prop(k, v);
             }
-            
+
             Type type = field.schema().getTypes().get(0).getType();
-            
+
             switch (type) {
             case DOUBLE:
                 fieldAssembler = fieldBuilder.type().unionOf().doubleType().and().nullType().endUnion().noDefault();
@@ -120,13 +118,13 @@ public class AvroUtils {
             default:
                 break;
             }
-            
+
             i++;
         }
         Schema schema = fieldAssembler.endRecord();
         return new Object[] { schema, map };
     }
-    
+
     private static void setValues(GenericRecord r, Schema s, Schema combined, GenericRecordBuilder recordBldr,
             Map<String, String> nameMap, String nameSuffix) {
         for (Field field : s.getFields()) {
@@ -136,7 +134,7 @@ public class AvroUtils {
             recordBldr.set(combined.getField(combinedSchemaFieldName), value);
         }
     }
-    
+
     @SuppressWarnings({ "unchecked", "deprecation" })
     public static GenericRecord combineAvroRecords(GenericRecord r1, GenericRecord r2, Object[] schema) {
         Schema s1 = r1.getSchema();

@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
- 
-public class StringTokenUtils  {
+
+public class StringTokenUtils {
 
     /**
      * convert a List to String with comma-separated values
@@ -21,44 +21,44 @@ public class StringTokenUtils  {
             sb = new StringBuilder(stringInList.size());
             for (Iterator<T> iter = stringInList.iterator(); iter.hasNext();) {
                 T feature = iter.next();
-                if(!firsttime) {
+                if (!firsttime) {
                     sb.append(',');
                 }
                 sb.append(feature);
                 firsttime = false;
             }
-        } 
-        
+        }
+
         String str = (sb == null) ? "" : sb.toString();
         return str;
     }
 
     public static List<String> stringToList(String csv) {
         List<String> strList = new ArrayList<String>();
-        if (csv != null) {            
+        if (csv != null) {
             StringTokenizer sTokenizer = new StringTokenizer(csv, ",");
             while (sTokenizer.hasMoreTokens()) {
                 String id = sTokenizer.nextToken();
                 strList.add(id);
             }
         }
-        
+
         return strList;
     }
 
     public static String propertyToString(Properties p) {
         String serialized = "";
-        if(p.isEmpty()) {
+        if (p.isEmpty()) {
             return serialized;
         }
-            
+
         for (String key : p.stringPropertyNames()) {
-            serialized += key+"="+p.getProperty(key)+" ";
+            serialized += key + "=" + p.getProperty(key) + " ";
         }
 
         return serialized.trim();
     }
-    
+
     public static Properties stringToProperty(String s) {
         Properties p = new Properties();
         if (s == null) {

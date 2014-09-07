@@ -10,14 +10,15 @@ public class YarnUtils {
         if (appId == null) {
             return null;
         }
-            
+
         String[] tokens = appId.split("_");
         return ApplicationId.newInstance(Long.parseLong(tokens[1]), Integer.parseInt(tokens[2]));
     }
-    
+
     public static boolean isPrempted(String diagnostics) {
-        if (Strings.isNullOrEmpty(diagnostics)) return false;
-        
+        if (Strings.isNullOrEmpty(diagnostics))
+            return false;
+
         return (diagnostics.contains("-102") && diagnostics.contains("Container preempted by scheduler"));
     }
 

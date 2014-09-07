@@ -38,7 +38,7 @@ public class HttpUtils {
                 request.setConnectTimeout(60000);
                 request.setNumberOfRetries(10);
                 request.setReadTimeout(300000);
-                
+
                 ExponentialBackOff backoff = new ExponentialBackOff.Builder().setInitialIntervalMillis(1000)
                         .setMultiplier(2).setMaxElapsedTimeMillis(180000).build();
                 request.setUnsuccessfulResponseHandler(new HttpBackOffUnsuccessfulResponseHandler(backoff));
@@ -70,7 +70,7 @@ public class HttpUtils {
         HttpRequest request = getRequestFactory(url).buildPostRequest(new GenericUrl(url),
                 ByteArrayContent.fromString("application/json", jsonString));
         request.setParser(new JacksonFactory().createJsonObjectParser());
-        
+
         if (headers != null) {
             for (Map.Entry<String, String> entry : headers.entrySet()) {
                 request.getHeaders().set(entry.getKey(), entry.getValue());
