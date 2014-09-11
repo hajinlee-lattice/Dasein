@@ -87,7 +87,7 @@ public class LedpRestClient {
     }
 
     public JobStatus getJobStatus(String appId) throws Exception {
-        JobStatus js = rt.getForObject("http://" + restEndpointHost + "/rest/getjobstatus/" + appId, JobStatus.class,
+        JobStatus js = rt.getForObject("http://" + restEndpointHost + "/rest/getJobStatus/" + appId, JobStatus.class,
                 new HashMap<String, Object>());
         return js;
     }
