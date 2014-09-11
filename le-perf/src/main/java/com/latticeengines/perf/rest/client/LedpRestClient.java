@@ -29,110 +29,129 @@ import com.latticeengines.perf.yarn.configuration.dao.YarnConfigurationSettings;
 
 public class LedpRestClient {
 
-    private RestTemplate rt = new RestTemplate();
-    private RetryTemplate rtt = new RetryTemplate();
-    private static final Log log = LogFactory.getLog(LedpRestClient.class);
-    private String restEndpointHost;
+	private RestTemplate rt = new RestTemplate();
+	private RetryTemplate rtt = new RetryTemplate();
+	private static final Log log = LogFactory.getLog(LedpRestClient.class);
+	private String restEndpointHost;
 
-    public LedpRestClient() {
-        rt.setErrorHandler(new ThrowExceptionResponseErrorHandler());
-    }
+	public LedpRestClient() {
+		rt.setErrorHandler(new ThrowExceptionResponseErrorHandler());
+	}
 
-    public LedpRestClient(String restEndpointHost) {
-        this.restEndpointHost = restEndpointHost;
-        rt.setErrorHandler(new ThrowExceptionResponseErrorHandler());
-    }
+	public LedpRestClient(String restEndpointHost) {
+		this.restEndpointHost = restEndpointHost;
+		rt.setErrorHandler(new ThrowExceptionResponseErrorHandler());
+	}
 
-    public AppSubmission retryRequest(final String url, final Object config) throws Exception {
-        AppSubmission submission = rtt.execute(new RetryCallback<AppSubmission, Exception>() {
-            public AppSubmission doWithRetry(RetryContext context) {
-                return rt.postForObject(url, config, AppSubmission.class, new Object[] {});
-            }
-        });
-        return submission;
-    }
+	public AppSubmission retryRequest(final String url, final Object config)
+			throws Exception {
+		AppSubmission submission = rtt
+				.execute(new RetryCallback<AppSubmission, Exception>() {
+					public AppSubmission doWithRetry(RetryContext context) {
+						return rt.postForObject(url, config,
+								AppSubmission.class, new Object[] {});
+					}
+				});
+		return submission;
+	}
 
-    public List<String> loadData(final LoadConfiguration config) throws Exception {
-        AppSubmission submission = retryRequest("http://" + restEndpointHost + "/rest/load", config);
-        List<String> applicationIds = submission.getApplicationIds();
-        log.info(applicationIds);
-        return applicationIds;
-    }
+	public List<String> loadData(final LoadConfiguration config)
+			throws Exception {
+		AppSubmission submission = retryRequest("http://" + restEndpointHost
+				+ "/rest/load", config);
+		List<String> applicationIds = submission.getApplicationIds();
+		log.info(applicationIds);
+		return applicationIds;
+	}
 
-    public List<String> createSamples(SamplingConfiguration config) throws Exception {
-        AppSubmission submission = retryRequest("http://" + restEndpointHost + "/rest/createSamples", config);
-        List<String> applicationIds = submission.getApplicationIds();
-        log.info(applicationIds);
-        return applicationIds;
-    }
+	public List<String> createSamples(SamplingConfiguration config)
+			throws Exception {
+		AppSubmission submission = retryRequest("http://" + restEndpointHost
+				+ "/rest/createSamples", config);
+		List<String> applicationIds = submission.getApplicationIds();
+		log.info(applicationIds);
+		return applicationIds;
+	}
 
-    public List<String> profile(DataProfileConfiguration config) throws Exception {
-        AppSubmission submission = retryRequest("http://" + restEndpointHost + "/rest/profile", config);
-        List<String> applicationIds = submission.getApplicationIds();
-        log.info(applicationIds);
-        return applicationIds;
-    }
+	public List<String> profile(DataProfileConfiguration config)
+			throws Exception {
+		AppSubmission submission = retryRequest("http://" + restEndpointHost
+				+ "/rest/profile", config);
+		List<String> applicationIds = submission.getApplicationIds();
+		log.info(applicationIds);
+		return applicationIds;
+	}
 
-    public List<String> submitModel(Model model) throws Exception {
-        AppSubmission submission = retryRequest("http://" + restEndpointHost + "/rest/submit", model);
-        List<String> applicationIds = submission.getApplicationIds();
-        log.info(applicationIds);
-        return applicationIds;
-    }
+	public List<String> submitModel(Model model) throws Exception {
+		AppSubmission submission = retryRequest("http://" + restEndpointHost
+				+ "/rest/submit", model);
+		List<String> applicationIds = submission.getApplicationIds();
+		log.info(applicationIds);
+		return applicationIds;
+	}
 
-    public List<String> getFeatures(Model model) throws Exception {
-        StringList features = rt.postForObject("http://" + restEndpointHost + "/rest/features", model,
-                StringList.class, new Object[] {});
-        return features.getElements();
-    }
+	public List<String> getFeatures(Model model) throws Exception {
+		StringList features = rt.postForObject("http://" + restEndpointHost
+				+ "/rest/features", model, StringList.class, new Object[] {});
+		return features.getElements();
+	}
 
-    public JobStatus getJobStatus(String appId) throws Exception {
-        JobStatus js = rt.getForObject("http://" + restEndpointHost + "/rest/getJobStatus/" + appId, JobStatus.class,
-                new HashMap<String, Object>());
-        return js;
-    }
+	public JobStatus getJobStatus(final String appId) throws Exception {
+		JobStatus js = rtt.execute(new RetryCallback<JobStatus, Exception>() {
+			public JobStatus doWithRetry(RetryContext context) {
+				return rt.getForObject("http://" + restEndpointHost
+						+ "/rest/getJobStatus/" + appId, JobStatus.class,
+						new HashMap<String, Object>());
+			}
+		});
+		return js;
+	}
 
-    public List<Property> getYarnConfiguration(String RMHostAddress) throws JAXBException {
-        String s = rt.getForObject("http://" + RMHostAddress + "/conf", String.class);
-        YarnConfigurationSettings ycs = (YarnConfigurationSettings) JAXBContext
-                .newInstance(YarnConfigurationSettings.class).createUnmarshaller().unmarshal(new StringReader(s));
-        return ycs.getProperties();
-    }
+	public List<Property> getYarnConfiguration(String RMHostAddress)
+			throws JAXBException {
+		String s = rt.getForObject("http://" + RMHostAddress + "/conf",
+				String.class);
+		YarnConfigurationSettings ycs = (YarnConfigurationSettings) JAXBContext
+				.newInstance(YarnConfigurationSettings.class)
+				.createUnmarshaller().unmarshal(new StringReader(s));
+		return ycs.getProperties();
+	}
 
-    class ThrowExceptionResponseErrorHandler implements ResponseErrorHandler {
+	class ThrowExceptionResponseErrorHandler implements ResponseErrorHandler {
 
-        @Override
-        public boolean hasError(ClientHttpResponse response) throws IOException {
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return false;
-            }
-            return true;
-        }
+		@Override
+		public boolean hasError(ClientHttpResponse response) throws IOException {
+			if (response.getStatusCode() == HttpStatus.OK) {
+				return false;
+			}
+			return true;
+		}
 
-        @Override
-        public void handleError(ClientHttpResponse response) throws IOException {
+		@Override
+		public void handleError(ClientHttpResponse response) throws IOException {
 
-            String responseBody = IOUtils.toString(response.getBody());
+			String responseBody = IOUtils.toString(response.getBody());
 
-            log.info("Error response from rest call: " + response.getStatusCode() + " " + response.getStatusText()
-                    + " " + responseBody);
-            throw new RuntimeException(responseBody);
-        }
-    }
+			log.info("Error response from rest call: "
+					+ response.getStatusCode() + " " + response.getStatusText()
+					+ " " + responseBody);
+			throw new RuntimeException(responseBody);
+		}
+	}
 
-    public static void main(String[] args) {
-        LedpRestClient lrc = new LedpRestClient("localhost:8080");
-        // System.out.println(lrc.getYarnConfiguration("localhost:8088").get(1).getName());
-        try {
-            // List<String> appIds = lrc.loadData(new LoadConfiguration());
-            // System.out.println(appIds.size());
-            LoadData ld = new LoadData();
-            ld.setConfiguration("localhost:8080", new LoadConfiguration());
-            List<String> appIds = ld.executeJob();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
+	public static void main(String[] args) {
+		LedpRestClient lrc = new LedpRestClient("localhost:8080");
+		// System.out.println(lrc.getYarnConfiguration("localhost:8088").get(1).getName());
+		try {
+			// List<String> appIds = lrc.loadData(new LoadConfiguration());
+			// System.out.println(appIds.size());
+			LoadData ld = new LoadData();
+			ld.setConfiguration("localhost:8080", new LoadConfiguration());
+			List<String> appIds = ld.executeJob();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
 
-        }
-        // System.out.println(le.getCode());
-    }
+		}
+		// System.out.println(le.getCode());
+	}
 }
