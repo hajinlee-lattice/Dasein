@@ -81,7 +81,7 @@
                                 <report>
                                     <executiondata>
                                         <fileset dir="${reports.directory}">
-                                            <include name="*" />
+                                            <include>**/jacoco.exec</include>
                                         </fileset>
                                     </executiondata>
                                     <structure name="jacoco-multi Coverage Project">
