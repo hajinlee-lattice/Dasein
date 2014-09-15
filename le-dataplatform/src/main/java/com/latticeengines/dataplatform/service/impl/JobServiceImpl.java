@@ -103,13 +103,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     @Override
     public ApplicationReport getJobReportById(ApplicationId appId) {
-        List<ApplicationReport> reports = getJobReportsAll();
-        for (ApplicationReport report : reports) {
-            if (report != null && report.getApplicationId() != null && report.getApplicationId().equals(appId)) {
-                return report;
-            }
-        }
-        return null;
+        return defaultYarnClient.getApplicationReport(appId);
     }
 
     @Override
