@@ -125,6 +125,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
             continue
         # Categorical column
         if colname in stringcols:
+            data[colname] = data[colname].fillna('NULL')
             mode = data[colname].value_counts().idxmax()
             index = writeCategoricalValuesToAvro(dataWriter, data[colname], eventVector, mode, colname, index)
         else:
@@ -134,6 +135,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
             if math.isnan(median):
                 logger.warn("Median to impute for column name: " + colname + " is null, excluding this column.")
                 continue
+            data[colname] = data[colname].fillna(median)
             if colnameBucketMetadata.has_key(colname):
                 # Apply bucketing with specified type and parameters
                 bands = bucketDispatcher.bucketColumn(data[colname], eventVector, colnameBucketMetadata[colname][0], colnameBucketMetadata[colname][1])
