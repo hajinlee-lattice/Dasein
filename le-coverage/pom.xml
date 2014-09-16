@@ -22,11 +22,18 @@
         <classes.directory.common>../le-common/target/classes</classes.directory.common>
         <classes.directory.api>../le-api/target/classes</classes.directory.api>
         <classes.directory.scoring>../le-scoring/target/classes</classes.directory.scoring>
+        <classes.directory.domain>../le-domain/target/classes</classes.directory.domain>
+        <classes.directory.perf>../le-perf/target/classes</classes.directory.perf>
+        <classes.directory.scheduler>../le-scheduler/target/classes</classes.directory.scheduler>
+                
 
         <sources.directory.dataplatform>../le-dataplatform/src/main/java</sources.directory.dataplatform>
         <sources.directory.common>../le-common/src/main/java</sources.directory.common>
         <sources.directory.api>../le-api/src/main/java</sources.directory.api>
         <sources.directory.scoring>../le-scoring/src/main/java</sources.directory.scoring>
+        <sources.directory.domain>../le-domain/src/main/java</sources.directory.domain>
+        <sources.directory.perf>../le-perf/src/main/java</sources.directory.perf>
+        <sources.directory.scheduler>../le-scheduler/src/main/java</sources.directory.scheduler>
     </properties>
 
     <build>
@@ -81,7 +88,6 @@
                                 <report>
                                     <executiondata>
                                         <fileset dir="${reports.directory}">
-                                            <!-- include dir="**/jacoco.exec" /-->
                                         </fileset>
                                     </executiondata>
                                     <structure name="jacoco-multi Coverage Project">
