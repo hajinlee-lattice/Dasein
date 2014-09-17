@@ -11,14 +11,7 @@ public class EaiMain extends Main {
     private static final Log log = LogFactory.getLog(EaiMain.class);
     
     public EaiMain() {
-        ConfigurableApplicationContext ctx = null;
-        try {
-            ctx = new ClassPathXmlApplicationContext("eai-context.xml");
-        } finally {
-            if (ctx != null) {
-                ctx.close();
-            }
-        }
+        try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("eai-context.xml")) {}
     }
     
     public static void main(String[] args) throws Exception {

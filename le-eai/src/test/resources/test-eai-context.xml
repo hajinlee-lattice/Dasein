@@ -5,7 +5,6 @@
         xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
         xmlns:security="http://www.springframework.org/schema/security"
         xmlns:util="http://www.springframework.org/schema/util"
-        xmlns:camel="http://camel.apache.org/schema/spring"
         xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
       http://www.springframework.org/schema/aop
@@ -19,26 +18,10 @@
       http://www.springframework.org/schema/security
       http://www.springframework.org/schema/security/spring-security-4.0.xsd
       http://www.springframework.org/schema/util
-      http://www.springframework.org/schema/util/spring-util-4.0.xsd
-      http://camel.apache.org/schema/spring
-      http://camel.apache.org/schema/spring/camel-spring.xsd">
+      http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
     
-    <context:component-scan base-package="com.latticeengines.eai"/>
-    
-    <bean id="salesforce" class="org.apache.camel.component.salesforce.SalesforceComponent">
-        <property name="loginConfig">
-            <bean class="org.apache.camel.component.salesforce.SalesforceLoginConfig">
-                <property name="loginUrl" value="${eai.salesforce.loginurl}"/>
-                <property name="clientId" value="${eai.salesforce.clientid}"/>
-                <property name="clientSecret" value="${eai.salesforce.clientsecret}"/>
-                <property name="userName" value="${eai.salesforce.username}"/>
-                <property name="password" value="${eai.salesforce.password}"/>
-            </bean>
-        </property>
-    </bean>
-    
-    <camel:camelContext id="eai">
-        <camel:package>com.latticeengines.eai.routes</camel:package>
-    </camel:camelContext>
-    
+    <import resource="classpath:eai-context.xml"/>
+    <import resource="classpath:eai-properties-context.xml"/> 
+
 </beans>

@@ -21,7 +21,7 @@
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
  
 
-    <bean id="placeholderConfigurer" class="com.latticeengines.dataplatform.exposed.util.PropertiesHelper">
+    <bean id="placeholderConfigurer" class="com.latticeengines.common.exposed.util.PropertyUtils">
         <property name="locations">
             <list>
                 <value>file:${EAI_PROPDIR}/eai.properties</value>
@@ -30,5 +30,5 @@
         <property name="ignoreUnresolvablePlaceholders" value="false" />
         <property name="ignoreResourceNotFound" value="false" />
     </bean>
-        
-</beans>    
+
+</beans>
