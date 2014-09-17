@@ -14,10 +14,10 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
-import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
@@ -32,7 +32,7 @@ public class ModelCommandCallable implements Callable<Long> {
     private static final int SUCCESS = 0;
     private static final int FAIL = -1;
 
-    private JobService jobService;
+    private ModelingJobService modelingJobService;
 
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
@@ -52,13 +52,13 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private ModelCommand modelCommand;
 
-    public ModelCommandCallable(ModelCommand modelCommand, JobService jobService,
+    public ModelCommandCallable(ModelCommand modelCommand, ModelingJobService modelingJobService,
             ModelCommandEntityMgr modelCommandEntityMgr, ModelCommandStateEntityMgr modelCommandStateEntityMgr,
             ModelStepYarnProcessor modelStepYarnProcessor, ModelCommandLogService modelCommandLogService,
             ModelCommandResultEntityMgr modelCommandResultEntityMgr, ModelStepProcessor modelStepFinishProcessor,
             ModelStepProcessor modelStepOutputResultsProcessor, ModelStepProcessor modelStepRetrieveMetadataProcessor) {
         this.modelCommand = modelCommand;
-        this.jobService = jobService;
+        this.modelingJobService = modelingJobService;
         this.modelCommandEntityMgr = modelCommandEntityMgr;
         this.modelCommandStateEntityMgr = modelCommandStateEntityMgr;
         this.modelStepYarnProcessor = modelStepYarnProcessor;
@@ -97,7 +97,8 @@ public class ModelCommandCallable implements Callable<Long> {
     private void executeWorkflow() {
         if (modelCommand.isNew()) {
             Date now = new Date();
-            modelCommandResultEntityMgr.create(new ModelCommandResult(modelCommand, now, now, ModelCommandStatus.IN_PROGRESS));
+            modelCommandResultEntityMgr.create(new ModelCommandResult(modelCommand, now, now,
+                    ModelCommandStatus.IN_PROGRESS));
 
             modelCommand.setModelCommandStep(ModelCommandStep.RETRIEVE_METADATA);
             modelCommand.setCommandStatus(ModelCommandStatus.IN_PROGRESS);
@@ -113,7 +114,7 @@ public class ModelCommandCallable implements Callable<Long> {
             boolean jobFailed = false;
 
             for (ModelCommandState commandState : commandStates) {
-                JobStatus jobStatus = jobService.getJobStatus(commandState.getYarnApplicationId());
+                JobStatus jobStatus = modelingJobService.getJobStatus(commandState.getYarnApplicationId());
                 saveModelCommandStateFromJobStatus(commandState, jobStatus);
 
                 if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
@@ -175,7 +176,8 @@ public class ModelCommandCallable implements Callable<Long> {
         List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep(modelCommand.getDeploymentExternalId(),
                 step, commandParameters);
         for (ApplicationId appId : appIds) {
-            JobStatus jobStatus = jobService.getJobStatus(appId.toString());
+            String s = appId.toString();
+            JobStatus jobStatus = modelingJobService.getJobStatus(s);
 
             ModelCommandState commandState = new ModelCommandState(modelCommand, step);
             commandState.setYarnApplicationId(appId.toString());

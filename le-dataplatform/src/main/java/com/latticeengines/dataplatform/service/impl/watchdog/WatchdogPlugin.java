@@ -10,40 +10,40 @@ import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 
 public abstract class WatchdogPlugin {
 
-    protected JobService jobService;
+    protected ModelingJobService modelingJobService;
     protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
     protected ModelEntityMgr modelEntityMgr;
     protected YarnService yarnService;
     protected JobEntityMgr jobEntityMgr;
     protected int retryWaitTime = 80000;
-    
+
     private static Map<String, WatchdogPlugin> plugins = new HashMap<String, WatchdogPlugin>();
-    
+
     protected static void register(WatchdogPlugin plugin) {
         plugins.put(plugin.getName(), plugin);
     }
-    
+
     public static Map<String, WatchdogPlugin> getPlugins() {
         return plugins;
     }
-    
+
     public abstract void run(JobExecutionContext context) throws JobExecutionException;
-    
+
     public String getName() {
         String fqn = getClass().getName();
         return fqn.substring(fqn.lastIndexOf(".") + 1);
     }
-    
-    public JobService getJobService() {
-        return jobService;
+
+    public ModelingJobService getModelingJobService() {
+        return modelingJobService;
     }
 
-    public void setJobService(final JobService jobService) {
-        this.jobService = jobService;
+    public void setModelingJobService(final ModelingJobService modelingJobService) {
+        this.modelingJobService = modelingJobService;
     }
 
     public ThrottleConfigurationEntityMgr getThrottleConfigurationEntityMgr() {

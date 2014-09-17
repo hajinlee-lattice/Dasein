@@ -20,11 +20,11 @@ import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
-import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.dlorchestration.DLOrchestrationService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 
 @DisallowConcurrentExecution
@@ -37,7 +37,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
-    private JobService jobService;
+    private ModelingJobService modelingJobService;
 
     private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
 
@@ -72,10 +72,10 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
         }
 
         for (ModelCommand modelCommand : modelCommands) {
-            futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(modelCommand, jobService,
-                    modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
-                    modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
-                    modelStepRetrieveMetadataProcessor)));
+            futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(modelCommand,
+                    modelingJobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor,
+                    modelCommandLogService, modelCommandResultEntityMgr, modelStepFinishProcessor,
+                    modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor)));
         }
         for (Future<Long> future : futures) {
             try {
@@ -111,12 +111,12 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
         this.modelCommandEntityMgr = modelCommandEntityMgr;
     }
 
-    public JobService getJobService() {
-        return jobService;
+    public ModelingJobService getModelingJobService() {
+        return modelingJobService;
     }
 
-    public void setJobService(JobService jobService) {
-        this.jobService = jobService;
+    public void setModelingJobService(ModelingJobService modelingJobService) {
+        this.modelingJobService = modelingJobService;
     }
 
     public ModelCommandStateEntityMgr getModelCommandStateEntityMgr() {

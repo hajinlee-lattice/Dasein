@@ -34,7 +34,7 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobNameService;
-import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.Classifier;
 import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
@@ -43,7 +43,7 @@ import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
-    private JobService jobService;
+    private ModelingJobService modelingJobService;
 
     @Autowired
     private Configuration hadoopConfiguration;
@@ -153,7 +153,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Test(groups = "functional", enabled = true)
     public void testGetJobReportsAll() throws Exception {
-        List<ApplicationReport> applications = jobService.getJobReportsAll();
+        List<ApplicationReport> applications = modelingJobService.getJobReportsAll();
         assertNotNull(applications);
     }
 
@@ -163,11 +163,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         Properties containerProperties = createContainerPropertiesForYarnJob();
 
-        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
         assertEquals(status, FinalApplicationStatus.UNDEFINED);
-        jobService.killJob(applicationId);
+        modelingJobService.killJob(applicationId);
         status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
         assertEquals(status, FinalApplicationStatus.KILLED);
     }
@@ -178,28 +178,28 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         Properties containerProperties = createContainerPropertiesForYarnJob();
 
-        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
         assertEquals(status, FinalApplicationStatus.UNDEFINED);
-        jobService.killJob(applicationId);
+        modelingJobService.killJob(applicationId);
         status = waitForStatus(applicationId, FinalApplicationStatus.KILLED);
         assertNotNull(status);
         assertTrue(status.equals(FinalApplicationStatus.KILLED));
 
-        ApplicationReport app = jobService.getJobReportById(applicationId);
+        ApplicationReport app = modelingJobService.getJobReportById(applicationId);
 
-        List<ApplicationReport> reports = jobService.getJobReportByUser(app.getUser());
+        List<ApplicationReport> reports = modelingJobService.getJobReportByUser(app.getUser());
         int numJobs = reports.size();
         assertTrue(numJobs > 0);
 
-        applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
+        applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties, containerProperties);
 
         status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
         assertEquals(status, FinalApplicationStatus.UNDEFINED);
-        reports = jobService.getJobReportByUser(app.getUser());
+        reports = modelingJobService.getJobReportByUser(app.getUser());
         assertTrue(reports.size() > numJobs);
-        jobService.killJob(applicationId);
+        modelingJobService.killJob(applicationId);
     }
 
     @Test(groups = "functional", enabled = true)
@@ -207,13 +207,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
         Properties containerProperties = createContainerPropertiesForYarnJob();
 
-        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.UNDEFINED);
         assertEquals(status, FinalApplicationStatus.UNDEFINED);
-        jobService.killJob(applicationId);
+        modelingJobService.killJob(applicationId);
 
-        ApplicationReport app = jobService.getJobReportById(applicationId);
+        ApplicationReport app = modelingJobService.getJobReportById(applicationId);
         assertEquals(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()),
                 jobNameService.getCustomerFromJobName(app.getName()));
         assertTrue(jobNameService.getDateTimeFromJobName(app.getName()).isBeforeNow());
@@ -240,8 +240,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         Properties containerProperties = createContainerPropertiesForYarnJob();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
 
-        ApplicationId applicationId = jobService
-                .submitYarnJob("pythonClient", appMasterProperties, containerProperties);
+        ApplicationId applicationId = modelingJobService.submitYarnJob("pythonClient", appMasterProperties,
+                containerProperties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
@@ -266,7 +266,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
         properties.setProperty(EventDataSamplingProperty.CUSTOMER.name(), "Dell");
-        ApplicationId applicationId = jobService.submitMRJob("samplingJob", properties);
+        ApplicationId applicationId = modelingJobService.submitMRJob("samplingJob", properties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
@@ -296,8 +296,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
                 .password(dataSourcePasswd).type(dataSourceType);
         DbCreds creds = new DbCreds(builder);
-        ApplicationId appId = jobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0", "Dell",
-                Arrays.<String> asList(new String[] { "ID" }));
+        ApplicationId appId = modelingJobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0",
+                "Dell", Arrays.<String> asList(new String[] { "ID" }));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, "/tmp/import", new HdfsFilenameFilter() {

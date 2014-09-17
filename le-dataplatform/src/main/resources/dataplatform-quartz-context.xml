@@ -9,7 +9,7 @@
         <property name="jobClass" value="com.latticeengines.dataplatform.service.impl.JobWatchdogServiceImpl" />
         <property name="jobDataAsMap">
             <map>
-                <entry key="jobService" value-ref="jobService" />
+                <entry key="modelingJobService" value-ref="modelingJobService" />
                 <entry key="throttleConfigurationEntityMgr" value-ref="throttleConfigurationEntityMgr" />
                 <entry key="modelEntityMgr" value-ref="modelEntityMgr" />   
                 <entry key="yarnService" value-ref="yarnService" /> 

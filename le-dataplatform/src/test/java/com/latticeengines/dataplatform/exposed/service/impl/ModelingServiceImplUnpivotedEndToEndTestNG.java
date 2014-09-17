@@ -28,11 +28,11 @@ import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.functionalframework.StandaloneHttpServer;
 import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataServlet;
-import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelCommandParameters;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelStepRetrieveMetadataProcessorImpl;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.DataSchema;
@@ -60,7 +60,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
-    private JobService jobService;
+    private ModelingJobService modelingJobService;
 
     @Autowired
     private YarnService yarnService;
@@ -87,6 +87,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
     private StandaloneHttpServer httpServer;
 
+    @Override
     protected boolean doYarnClusterSetup() {
         return true;
     }

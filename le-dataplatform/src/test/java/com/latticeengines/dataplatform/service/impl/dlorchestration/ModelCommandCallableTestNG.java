@@ -20,11 +20,11 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.functionalframework.StandaloneHttpServer;
 import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataServlet;
-import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
@@ -37,7 +37,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
     private static final String TEMP_EVENTTABLE = "ModelCommandCallableTestNG_eventtable";
 
     @Autowired
-    private JobService jobService;
+    private ModelingJobService modelingJobService;
 
     @Autowired
     private ModelStepYarnProcessor modelStepYarnProcessor;
@@ -89,12 +89,14 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
         if (dbDriverName.contains("Microsoft")) {
             // Microsoft JDBC Driver 4.0 for SQL Server
-            dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE + "', 'U') IS NOT NULL DROP TABLE " + TEMP_EVENTTABLE);
+            dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE + "', 'U') IS NOT NULL DROP TABLE "
+                    + TEMP_EVENTTABLE);
             dlOrchestrationJdbcTemplate.execute("select * into " + TEMP_EVENTTABLE + " from Q_EventTable_Nutanix");
         } else {
             // MySQL Connector Java
             dlOrchestrationJdbcTemplate.execute("drop table if exists " + TEMP_EVENTTABLE);
-            dlOrchestrationJdbcTemplate.execute("create table " + TEMP_EVENTTABLE + " select * from Q_EventTable_Nutanix");
+            dlOrchestrationJdbcTemplate.execute("create table " + TEMP_EVENTTABLE
+                    + " select * from Q_EventTable_Nutanix");
         }
 
     }
@@ -105,6 +107,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         dlOrchestrationJdbcTemplate.execute("drop table " + TEMP_EVENTTABLE);
     }
 
+    @Override
     @AfterMethod(enabled = true, alwaysRun = true)
     public void afterEachTest() {
         super.clearTables();
@@ -112,13 +115,15 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
     @Test(groups = "functional")
     public void testWorkflow() throws Exception {
-        // Comment out below 2 lines when testing against an integration database
+        // Comment out below 2 lines when testing against an integration
+        // database
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE);
         modelCommandEntityMgr.create(command);
 
         int iterations = 0;
         while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
-                && iterations < 100) {  // Wait maximum of 25 minutes to process this command
+                && iterations < 100) { // Wait maximum of 25 minutes to process
+                                       // this command
             iterations++;
             Thread.sleep(15000);
             command = modelCommandEntityMgr.findByKey(command);
@@ -130,7 +135,8 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
                 System.out.println(modelCommandLog.getMessage());
             }
         }
-        assertTrue(command.getCommandStatus() == ModelCommandStatus.SUCCESS, "The actual command state is " + command.getCommandStatus());
+        assertTrue(command.getCommandStatus() == ModelCommandStatus.SUCCESS,
+                "The actual command state is " + command.getCommandStatus());
 
         List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
         assertEquals(logs.size(), 14);
@@ -148,13 +154,15 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
         int iterations = 0;
         while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
-                && iterations < 20) {  // Wait maximum of 5 minutes to process this command
+                && iterations < 20) { // Wait maximum of 5 minutes to process
+                                      // this command
             iterations++;
             Thread.sleep(15000);
             command = modelCommandEntityMgr.findByKey(command);
         }
 
-        assertTrue(command.getCommandStatus() == ModelCommandStatus.FAIL, "The actual command state is " + command.getCommandStatus());
+        assertTrue(command.getCommandStatus() == ModelCommandStatus.FAIL,
+                "The actual command state is " + command.getCommandStatus());
 
         List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
         assertTrue(logs.get(0).getMessage().contains("LEDP_16000"));

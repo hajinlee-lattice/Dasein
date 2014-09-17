@@ -17,12 +17,12 @@ import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 
 public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
-    private JobService jobService;
+    private ModelingJobService modelingJobService;
 
     @Autowired
     private YarnService yarnService;
@@ -36,7 +36,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void getSchedulerInfo() {
         SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
         assertNotNull(schedulerInfo);
-      
+
     }
 
     @Test(groups = "functional")
@@ -54,7 +54,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "64");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
-        ApplicationId applicationId = jobService.submitYarnJob("defaultYarnClient", appMasterProperties,
+        ApplicationId applicationId = modelingJobService.submitYarnJob("defaultYarnClient", appMasterProperties,
                 containerProperties);
         AppInfo appInfo = yarnService.getApplication(applicationId.toString());
         assertNotNull(appInfo);

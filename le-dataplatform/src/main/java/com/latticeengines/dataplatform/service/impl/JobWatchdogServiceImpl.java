@@ -14,14 +14,14 @@ import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.JobWatchdogService;
 import com.latticeengines.dataplatform.service.impl.watchdog.WatchdogPlugin;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 
 @DisallowConcurrentExecution
 public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdogService {
 
-    private JobService jobService;
+    private ModelingJobService modelingJobService;
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
     private ModelEntityMgr modelEntityMgr;
     private YarnService yarnService;
@@ -42,17 +42,17 @@ public class JobWatchdogServiceImpl extends QuartzJobBean implements JobWatchdog
         }
     }
 
-    public JobService getJobService() {
-        return jobService;
+    public ModelingJobService getModelingJobService() {
+        return modelingJobService;
     }
 
-    public void setJobService(final JobService jobService) {
-        this.jobService = jobService;
+    public void setModelingJobService(final ModelingJobService modelingJobService) {
+        this.modelingJobService = modelingJobService;
         new DoForAllPlugins(plugins.values()) {
 
             @Override
             public void execute(WatchdogPlugin plugin) {
-                plugin.setJobService(jobService);
+                plugin.setModelingJobService(modelingJobService);
             }
 
         }.execute();

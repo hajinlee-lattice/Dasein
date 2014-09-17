@@ -3,10 +3,6 @@ package com.latticeengines.dataplatform.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,53 +11,40 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TypeConverter;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
-import org.apache.sqoop.LedpSqoop;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.hadoop.mapreduce.JobRunner;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
-
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
-import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
-import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
-import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
-import com.latticeengines.domain.exposed.dataplatform.Classifier;
-import com.latticeengines.domain.exposed.dataplatform.DbCreds;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.dataplatform.Model;
-import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
 
-@Component("jobService")
-public class JobServiceImpl implements JobService, ApplicationContextAware {
+public abstract class JobServiceImpl implements JobService, ApplicationContextAware {
 
-    private static final Log log = LogFactory.getLog(JobServiceImpl.class);
-    private static final int MAX_TRIES = 60;
-    private static final long APP_WAIT_TIME = 1000L;
+    protected static final Log log = LogFactory.getLog(JobServiceImpl.class);
+    protected static final int MAX_TRIES = 60;
+    protected static final long APP_WAIT_TIME = 1000L;
 
     private ApplicationContext applicationContext;
 
     @Autowired
-    private YarnClient defaultYarnClient;
+    protected YarnClient defaultYarnClient;
+
+    @Autowired
+    protected Configuration yarnConfiguration;
+
+    @Autowired
+    protected Configuration hadoopConfiguration;
 
     @Autowired
     private MapReduceCustomizationService mapReduceCustomizationService;
@@ -70,31 +53,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     private YarnClientCustomizationService yarnClientCustomizationService;
 
     @Autowired
-    private Configuration yarnConfiguration;
-
-    @Autowired
-    private Configuration hadoopConfiguration;
-
-    @Autowired
-    private ModelEntityMgr modelEntityMgr;
-
-    @Autowired
-    private ModelDefinitionEntityMgr modelDefinitionEntityMgr;
-
-    @Autowired
-    private JobEntityMgr jobEntityMgr;
-
-    @Autowired
-    private MetadataService metadataService;
-
-    @Autowired
-    private AsyncTaskExecutor sqoopJobTaskExecutor;
-
-    @Autowired
     private YarnService yarnService;
-
-    @Autowired
-    private JobNameService jobNameService;
 
     @Override
     public List<ApplicationReport> getJobReportsAll() {
@@ -205,62 +164,23 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
     public ApplicationId submitJob(com.latticeengines.domain.exposed.dataplatform.Job job) {
-        ApplicationId appId = submitYarnJob(job.getClient(), job.getAppMasterPropertiesObject(),
-                job.getContainerPropertiesObject());
-        job.setId(appId.toString());
-        Model model = job.getModel();
-
-        ModelDefinition modelDefinition = model.getModelDefinition();
-        // find the model def. already setup; model def is expected to be
-        // pre-setup by user
-        ModelDefinition predefinedModelDef = modelDefinitionEntityMgr.findByName(modelDefinition.getName());
-        if (predefinedModelDef != null) {
-            // associate persisted model def with model.
-            model.setModelDefinition(predefinedModelDef);
-        } else {
-            // TODO: this should not be needed; since the way how it works is
-            // that model def is already created in persistence
-            modelDefinitionEntityMgr.create(modelDefinition);
-            model.setModelDefinition(modelDefinition);
-        }
-        // create the model given the associated definition
-        modelEntityMgr.createOrUpdate(model);
-
-        return appId;
+        return submitYarnJob(job.getClient(), job.getAppMasterPropertiesObject(), job.getContainerPropertiesObject());
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public ApplicationId resubmitPreemptedJob(com.latticeengines.domain.exposed.dataplatform.Job resubmitJob) {
-        if (resubmitJob.getChildJobIdList().size() > 0) {
-            if (log.isDebugEnabled()) {
-                log.debug("Did not resubmit preempted job " + resubmitJob.getId() + ". Already resubmitted.");
-            }
-            return null;
+    protected void setJobStatus(JobStatus jobStatus, String applicationId) {
+        ApplicationReport appReport = defaultYarnClient.getApplicationReport(YarnUtils
+                .getApplicationIdFromString(applicationId));
+        jobStatus.setId(applicationId);
+        if (appReport != null) {
+            jobStatus.setStatus(appReport.getFinalApplicationStatus());
+            jobStatus.setState(appReport.getYarnApplicationState());
+            jobStatus.setDiagnostics(appReport.getDiagnostics());
+            jobStatus.setFinishTime(appReport.getFinishTime());
+            jobStatus.setProgress(appReport.getProgress());
+            jobStatus.setStartTime(appReport.getStartTime());
+            jobStatus.setTrackingUrl(appReport.getTrackingUrl());
         }
-        Long parentId = resubmitJob.getPid();
-        String metadata = resubmitJob.getContainerPropertiesObject().getProperty(
-                PythonContainerProperty.METADATA_CONTENTS.name());
-
-        com.latticeengines.domain.exposed.dataplatform.Job newJob = new com.latticeengines.domain.exposed.dataplatform.Job();
-        newJob.setParentJobId(parentId);
-        newJob.setModel(resubmitJob.getModel());
-        newJob.setClient(resubmitJob.getClient());
-        newJob.setAppMasterPropertiesObject(resubmitJob.getAppMasterPropertiesObject());
-        newJob.setContainerPropertiesObject(resubmitJob.getContainerPropertiesObject());
-        newJob.getContainerPropertiesObject().setProperty(PythonContainerProperty.METADATA.name(), metadata);
-        // submit job to yarn and persist metadata
-        ApplicationId appId = submitJob(newJob);
-        jobEntityMgr.createOrUpdate(newJob);
-        if (log.isInfoEnabled()) {
-            log.info("Resubmitted job pid(" + parentId + ") and received new appId(" + newJob.getId() + ") in queue "
-                    + newJob.getAppMasterPropertiesObject().getProperty(AppMasterProperty.QUEUE.name()) + ".");
-        }
-        resubmitJob.addChildJobId(newJob.getId());
-        jobEntityMgr.update(resubmitJob);
-        return appId;
     }
 
     @Override
@@ -276,7 +196,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         }
     }
 
-    private ApplicationId getAppIdFromName(String appName) {
+    protected ApplicationId getAppIdFromName(String appName) {
         List<ApplicationReport> apps = defaultYarnClient.listApplications();
         for (ApplicationReport app : apps) {
             if (app.getName().equals(appName)) {
@@ -284,131 +204,5 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             }
         }
         return null;
-    }
-
-    @Override
-    public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
-            List<String> splitCols) {
-        int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 4);
-        return loadData(table, targetDir, creds, queue, customer, splitCols, numDefaultMappers);
-    }
-
-    @Override
-    public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
-            List<String> splitCols, int numMappers) {
-
-        final String jobName = jobNameService.createJobName(customer, "data-load");
-
-        Future<Integer> future = loadAsync(table, targetDir, creds, queue, jobName, splitCols, numMappers);
-
-        int tries = 0;
-        ApplicationId appId = null;
-        while (tries < MAX_TRIES) {
-            try {
-                Thread.sleep(APP_WAIT_TIME);
-            } catch (InterruptedException e) {
-                // do nothing
-                log.warn("Thread.sleep interrupted.", e);
-            }
-            appId = getAppIdFromName(jobName);
-            if (appId != null) {
-                return appId;
-            }
-            tries++;
-        }
-        try {
-            future.get();
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof RuntimeException) {
-                throw (RuntimeException) e.getCause();
-            } else {
-                log.error(e);
-            }
-        } catch (InterruptedException e) {
-            log.error(e);
-        }
-        // Final try
-        appId = getAppIdFromName(jobName);
-        if (appId == null) {
-            throw new LedpException(LedpCode.LEDP_12002, new String[] { jobName });
-        }
-        return appId;
-    }
-
-    private Future<Integer> loadAsync(final String table, final String targetDir, final DbCreds creds,
-            final String queue, final String jobName, final List<String> splitCols, final int numMappers) {
-        return sqoopJobTaskExecutor.submit(new Callable<Integer>() {
-
-            @Override
-            public Integer call() throws Exception {
-
-                return LedpSqoop.runTool(new String[] { //
-                        "import", //
-                                "-Dmapred.job.queue.name=" + queue, //
-                                "--connect", //
-                                metadataService.getJdbcConnectionUrl(creds), //
-                                "--m", //
-                                Integer.toString(numMappers), //
-                                "--table", //
-                                table, //
-                                "--as-avrodatafile", "--compress", //
-                                "--mapreduce-job-name", //
-                                jobName, //
-                                "--split-by", //
-                                StringUtils.join(splitCols, ","), //
-                                "--target-dir", //
-                                targetDir }, new Configuration(yarnConfiguration));
-
-            }
-        });
-    }
-
-    @Override
-    public JobStatus getJobStatus(String applicationId) {
-        com.latticeengines.domain.exposed.dataplatform.Job leafJob = getLeafJob(applicationId);
-        JobStatus jobStatus = new JobStatus();
-        jobStatus.setId(applicationId);
-        if (leafJob != null) {
-            applicationId = leafJob.getId();
-            jobStatus.setId(applicationId);
-            String classifierStr = (String) leafJob.getContainerPropertiesObject().get(
-                    PythonContainerProperty.METADATA_CONTENTS.name());
-            if (classifierStr != null) {
-                Classifier classifier = JsonUtils.deserialize(classifierStr, Classifier.class);
-                if (classifier != null) {
-                    String[] tokens = StringUtils.split(applicationId, "_");
-                    String folder = StringUtils.join(new String[] { tokens[1], tokens[2] }, "_");
-                    jobStatus.setResultDirectory(classifier.getModelHdfsDir() + "/" + folder);
-                }
-            }
-        }
-
-        ApplicationReport appReport = defaultYarnClient.getApplicationReport(YarnUtils
-                .getApplicationIdFromString(applicationId));
-        if (appReport != null) {
-            jobStatus.setStatus(appReport.getFinalApplicationStatus());
-            jobStatus.setState(appReport.getYarnApplicationState());
-            jobStatus.setDiagnostics(appReport.getDiagnostics());
-            jobStatus.setFinishTime(appReport.getFinishTime());
-            jobStatus.setProgress(appReport.getProgress());
-            jobStatus.setStartTime(appReport.getStartTime());
-            jobStatus.setTrackingUrl(appReport.getTrackingUrl());
-        }
-
-        return jobStatus;
-    }
-
-    private com.latticeengines.domain.exposed.dataplatform.Job getLeafJob(String applicationId) {
-        com.latticeengines.domain.exposed.dataplatform.Job job = jobEntityMgr.findByObjectId(applicationId); // /
-                                                                                                             // jobEntityMgr.getById(applicationId);
-
-        if (job != null) {
-            List<String> childIds = job.getChildJobIdList();
-            for (String jobId : childIds) {
-                return getLeafJob(jobId);
-            }
-        }
-        return job;
-
     }
 }

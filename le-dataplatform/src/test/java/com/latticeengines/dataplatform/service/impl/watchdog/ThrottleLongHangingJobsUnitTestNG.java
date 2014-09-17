@@ -18,18 +18,18 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.exposed.service.impl.YarnServiceImpl;
-import com.latticeengines.dataplatform.service.JobService;
-import com.latticeengines.dataplatform.service.impl.JobServiceImpl;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.dataplatform.service.modeling.impl.ModelingJobServiceImpl;
 
 public class ThrottleLongHangingJobsUnitTestNG {
 
-    private JobService jobService;
+    private ModelingJobService modelingJobService;
 
     @BeforeClass(groups = "unit")
     public void beforeClass() throws Exception {
         initMocks(this);
-        jobService = mock(JobServiceImpl.class);
-        doNothing().when(jobService).killJob((ApplicationId) any());
+        modelingJobService = mock(ModelingJobServiceImpl.class);
+        doNothing().when(modelingJobService).killJob((ApplicationId) any());
     }
 
     @Test(groups = "unit", enabled = true)
@@ -46,7 +46,7 @@ public class ThrottleLongHangingJobsUnitTestNG {
                 e.printStackTrace();
             }
         }
-        verify(jobService, times(testCase)).killJob((ApplicationId) any());
+        verify(modelingJobService, times(testCase)).killJob((ApplicationId) any());
     }
 
     @Test(groups = "unit")
@@ -72,13 +72,13 @@ public class ThrottleLongHangingJobsUnitTestNG {
             e.printStackTrace();
         }
 
-        verify(jobService, never()).killJob((ApplicationId) any());
+        verify(modelingJobService, never()).killJob((ApplicationId) any());
     }
 
     private ThrottleLongHangingJobs setupThrottleLongHangingJobs(YarnService yarnService) {
         ThrottleLongHangingJobs throttleLongHangingJobs = new ThrottleLongHangingJobs();
         ReflectionTestUtils.setField(throttleLongHangingJobs, "throttleThreshold", 9000L);
-        throttleLongHangingJobs.setJobService(jobService);
+        throttleLongHangingJobs.setModelingJobService(modelingJobService);
         throttleLongHangingJobs.setYarnService(yarnService);
 
         return throttleLongHangingJobs;
@@ -91,7 +91,7 @@ public class ThrottleLongHangingJobsUnitTestNG {
         for (int i = 0; i < testCase; i++) {
             AppInfo appInfo = mock(AppInfo.class);
             when(appInfo.getAppId()).thenReturn(appPrefix + i);
-            when(appInfo.getProgress()).thenReturn((float) progress);
+            when(appInfo.getProgress()).thenReturn(progress);
             appsInfo.add(appInfo);
         }
 

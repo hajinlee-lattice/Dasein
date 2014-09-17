@@ -80,7 +80,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
         }
         List<Job> jobsToResubmit = jobEntityMgr.findAllByObjectIds(appIds);
         for (Job job : jobsToResubmit) {
-            jobService.resubmitPreemptedJob(job);
+            modelingJobService.resubmitPreemptedJob(job);
         }
 
         return jobsToResubmit.size();
@@ -160,7 +160,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
                 if (runningJobIds.contains(jobId)) {
                     log.info("Killing job " + jobId);
                     try {
-                        jobService.killJob(job.getAppId());
+                        modelingJobService.killJob(job.getAppId());
                         appsKilled.add(jobId);
                     } catch (Exception e) {
                         log.warn("Cannot kill job " + jobId, e);

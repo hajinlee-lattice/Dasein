@@ -11,7 +11,7 @@
             <map>
                 <entry key="dlOrchestrationJobTaskExecutor" value-ref="dlOrchestrationJobTaskExecutor" />
                 <entry key="modelCommandEntityMgr" value-ref="modelCommandEntityMgr" />
-                <entry key="jobService" value-ref="jobService" />
+                <entry key="modelingJobService" value-ref="modelingJobService" />
                 <entry key="modelCommandStateEntityMgr" value-ref="modelCommandStateEntityMgr" />
                 <entry key="modelStepYarnProcessor" value-ref="modelStepYarnProcessor" />
                 <entry key="modelCommandLogService" value-ref="modelCommandLogService" />

@@ -26,7 +26,7 @@ import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.Classifier;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -37,13 +37,13 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
     @Autowired
     private ThrottleLongHangingJobs throttleLongHangingJobs;
-    
+
     @Autowired
     private YarnService yarnService;
-    
+
     @Autowired
-    private JobService jobService;
-    
+    private ModelingJobService modelingJobService;
+
     @Autowired
     private JobEntityMgr jobEntityMgr;
 
@@ -85,15 +85,15 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         copyEntries.add(new CopyEntry(train4MinsScriptPath, "/scheduler", false));
 
         doCopy(fs, copyEntries);
-        
+
         // Timeout set to 10s
         ReflectionTestUtils.setField(throttleLongHangingJobs, "throttleThreshold", 10000L);
-        throttleLongHangingJobs.setJobService(jobService);
+        throttleLongHangingJobs.setModelingJobService(modelingJobService);
         throttleLongHangingJobs.setYarnService(yarnService);
         throttleLongHangingJobs.setJobEntityMgr(jobEntityMgr);
         // Runs every 15 seconds
         this.startQuartzJob(new Runnable() {
-            
+
             @Override
             public void run() {
                 try {
@@ -102,7 +102,7 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
                     e.printStackTrace();
                 }
             }
-        },15L);
+        }, 15L);
     }
 
     @Test(groups = "functional")
@@ -116,15 +116,15 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         for (int i = 0; i < 3; i++) {
             Job p0 = getJob(classifier1Min, "Priority0.0", 0, "DELL");
             model.addJob(p0);
-            appIds.add(jobService.submitJob(p0));
+            appIds.add(modelingJobService.submitJob(p0));
 
             p0 = getJob(classifier2Mins, "Priority0.0", 0, "DELL");
             model.addJob(p0);
-            appIds.add(jobService.submitJob(p0));
+            appIds.add(modelingJobService.submitJob(p0));
 
             p0 = getJob(classifier4Mins, "Priority0.0", 0, "DELL");
             model.addJob(p0);
-            appIds.add(jobService.submitJob(p0));
+            appIds.add(modelingJobService.submitJob(p0));
 
             Thread.sleep(5000L);
         }
@@ -179,7 +179,7 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
         while (!jobStatusToCollect.isEmpty()) {
             ApplicationId appId = jobStatusToCollect.get(0);
-            JobStatus status = jobService.getJobStatus(appId.toString());
+            JobStatus status = modelingJobService.getJobStatus(appId.toString());
             FinalApplicationStatus appStatus = waitForStatus(getApplicationId(status.getId()),
                     FinalApplicationStatus.KILLED);
             System.out.println("===============================ThrottleLongHangingJobTestNG.waitForAllJobsToFinish()");
@@ -191,7 +191,7 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
             // All jobs should be throttled
             assertEquals(appStatus, FinalApplicationStatus.KILLED);
             jobStatusToCollect.remove(appId);
-            jobStatus.put(appId, jobService.getJobReportById(appId));
+            jobStatus.put(appId, modelingJobService.getJobReportById(appId));
         }
         return jobStatus;
     }

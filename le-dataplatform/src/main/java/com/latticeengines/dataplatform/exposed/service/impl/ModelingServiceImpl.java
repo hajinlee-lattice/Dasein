@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -26,6 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
@@ -37,7 +39,7 @@ import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
-import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.Algorithm;
 import com.latticeengines.domain.exposed.dataplatform.Classifier;
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
@@ -61,7 +63,7 @@ public class ModelingServiceImpl implements ModelingService {
     private Configuration yarnConfiguration;
 
     @Autowired
-    private JobService jobService;
+    private ModelingJobService modelingJobService;
 
     @Autowired
     private ModelEntityMgr modelEntityMgr;
@@ -110,7 +112,7 @@ public class ModelingServiceImpl implements ModelingService {
             Job job = createJob(model, algorithm);
             model.addJob(job);
             // JobService is responsible for persistence during submitJob
-            applicationIds.add(jobService.submitJob(job));
+            applicationIds.add(modelingJobService.submitJob(job));
         }
 
         return applicationIds;
@@ -300,7 +302,7 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(EventDataSamplingProperty.CUSTOMER.name(), model.getCustomer());
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         properties.setProperty(EventDataSamplingProperty.QUEUE.name(), assignedQueue);
-        return jobService.submitMRJob("samplingJob", properties);
+        return modelingJobService.submitMRJob("samplingJob", properties);
     }
 
     @Override
@@ -341,7 +343,8 @@ public class ModelingServiceImpl implements ModelingService {
                 String name = field.name();
                 // If an include list is passed, only use the features in the
                 // include list
-                // if the name is part of the schema. If the include list is empty, then
+                // if the name is part of the schema. If the include list is
+                // empty, then
                 // just add all the columns in the schema except for any columns
                 // in the excluded list
                 if (useIncludeList) {
@@ -375,7 +378,7 @@ public class ModelingServiceImpl implements ModelingService {
         m.setModelDefinition(modelDefinition);
         Job job = createJob(m, dataProfileAlgorithm, assignedQueue);
         m.addJob(job);
-        return jobService.submitJob(job);
+        return modelingJobService.submitJob(job);
     }
 
     @Override
@@ -469,12 +472,12 @@ public class ModelingServiceImpl implements ModelingService {
         model.setMetadataTable(config.getMetadataTable());
         setupModelProperties(model);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        return jobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
+        return modelingJobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
                 model.getCustomer(), config.getKeyCols());
     }
 
     @Override
     public JobStatus getJobStatus(String applicationId) {
-        return jobService.getJobStatus(applicationId);
+        return modelingJobService.getJobStatus(applicationId);
     }
 }

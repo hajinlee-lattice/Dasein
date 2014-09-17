@@ -110,7 +110,7 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
         List<String> appsKilled = new ArrayList<String>();
         for (String appId : appsToKill) {
             try {
-                jobService.killJob(YarnUtils.getApplicationIdFromString(appId));
+                modelingJobService.killJob(YarnUtils.getApplicationIdFromString(appId));
                 appsKilled.add(appId);
                 appRecords.remove(appId);
             } catch (Exception e) {

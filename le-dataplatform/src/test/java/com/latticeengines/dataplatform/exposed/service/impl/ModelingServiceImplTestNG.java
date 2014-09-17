@@ -34,9 +34,9 @@ import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntity
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.JobWatchdogService;
 import com.latticeengines.dataplatform.service.impl.JobWatchdogServiceImpl;
+import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.Model;
@@ -49,7 +49,7 @@ import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
 public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
-    private JobService jobService;
+    private ModelingJobService modelingJobService;
 
     @Autowired
     private YarnService yarnService;
@@ -289,7 +289,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         watchDog.setModelEntityMgr(modelEntityMgr);
         watchDog.setYarnService(yarnService);
         watchDog.setThrottleConfigurationEntityMgr(throttleConfigurationEntityMgr);
-        watchDog.setJobService(jobService);
+        watchDog.setModelingJobService(modelingJobService);
         return watchDog;
     }
 
