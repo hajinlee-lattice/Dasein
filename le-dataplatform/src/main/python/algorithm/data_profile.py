@@ -220,8 +220,6 @@ def profileColumn(columnData, colname, stringcols, eventVector, bucketDispatcher
         uniqueValues = len(columnData.unique())
         mode = columnData.value_counts().idxmax()
         diagnostics["UniqueValues"] = uniqueValues
-        # Impute null value
-        columnData = columnData.fillna('NULL')
         if uniqueValues > 200:
             logger.warn("String column name: " + colname + " is discarded due to more than 200 unique values ")
             return (index, diagnostics)
@@ -234,8 +232,8 @@ def profileColumn(columnData, colname, stringcols, eventVector, bucketDispatcher
         if math.isnan(median):
             logger.warn("Median to impute for column name: " + colname + " is null, excluding this column.")
             return (index, diagnostics)
-        # Impute null value
-        columnData = columnData.fillna(median)
+        # Convert all continuous values into a numeric data type
+        columnData = columnData.convert_objects(convert_numeric=True) 
         if bucketingParams is not None:
             # Apply bucketing with specified type and parameters
             bands = bucketDispatcher.bucketColumn(columnData, eventVector, bucketingParams[0], bucketingParams[1])
