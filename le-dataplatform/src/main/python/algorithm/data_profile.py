@@ -1,17 +1,17 @@
-import sys
-import codecs
-import json
-import math
-import logging
-import numpy as np
-from collections import OrderedDict
-from sklearn import metrics
 from avro import schema, datafile, io
+import codecs
+from collections import OrderedDict
+import json
+import logging
+import math
+from sklearn import metrics
 from sklearn.metrics.cluster.supervised import entropy
+import sys
 
 from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 from leframework.progressreporter import ProgressReporter
+import numpy as np
 
 
 reload(sys)
