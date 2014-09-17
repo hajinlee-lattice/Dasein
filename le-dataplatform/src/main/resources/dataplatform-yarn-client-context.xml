@@ -28,5 +28,4 @@
 	<import resource="classpath:default/dataplatform-default-yarn-client-context.xml" />
 	<import resource="classpath:R/dataplatform-R-yarn-client-context.xml" /> 
     <import resource="classpath:python/dataplatform-python-yarn-client-context.xml" />
-    <import resource="classpath:jetty/dataplatform-jetty-yarn-client-context.xml" /> 
 </beans>
