@@ -7,6 +7,6 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
 public interface ModelCommandStateDao extends BaseDao<ModelCommandState> {
- 
+
     List<ModelCommandState> findByModelCommandAndStep(ModelCommand modelCommand, ModelCommandStep modelCommandStep);
 }

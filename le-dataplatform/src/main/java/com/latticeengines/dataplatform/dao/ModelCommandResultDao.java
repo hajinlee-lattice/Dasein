@@ -6,5 +6,5 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 public interface ModelCommandResultDao extends BaseDao<ModelCommandResult> {
 
     ModelCommandResult findByModelCommand(ModelCommand modelCommand);
- 
+
 }

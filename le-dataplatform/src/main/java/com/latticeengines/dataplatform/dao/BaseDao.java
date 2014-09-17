@@ -13,7 +13,7 @@ public interface BaseDao<T> {
     void delete(T entity);
 
     void deleteAll();
-    
+
     boolean containInSession(T entity);
 
     List<T> findAll();
