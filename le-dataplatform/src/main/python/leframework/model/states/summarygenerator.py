@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from datetime import datetime
+import itertools
 import logging
 import time
 import uuid
@@ -7,6 +8,7 @@ import uuid
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
+import numpy as np
 
 
 class SummaryGenerator(State, JsonGenBase):
@@ -32,7 +34,7 @@ class SummaryGenerator(State, JsonGenBase):
         self.summary["SchemaVersion"] = 1
         self.summary["Predictors"] = predictors
         
-        rocScore = self.__getRocScore(zip(self.mediator.scored, self.mediator.target))
+        rocScore = self.getRocScore(zip(self.mediator.scored, self.mediator.target))
         
         if rocScore is not None:
             self.summary["RocScore"] = rocScore 
@@ -128,7 +130,7 @@ class SummaryGenerator(State, JsonGenBase):
         
         return segmentChart
 
-    def __getRocScore(self, score):
+    def getRocScore(self, score):
         # Sort by target
         score.sort(key = lambda rowScore: (rowScore[1], rowScore[0]), reverse = True)
         theoreticalBestCounter = 0
@@ -138,11 +140,12 @@ class SummaryGenerator(State, JsonGenBase):
             theoreticalBestArea += theoreticalBestCounter
         
         # Sort by score
+        weightedEventDict = {k:np.mean(map(lambda x: x[1], rows)) for k, rows in itertools.groupby(score, lambda x: x[0])}
         score.sort(key = lambda rowScore: (rowScore[0], rowScore[1]), reverse = True)
         actualBestCounter = 0
         actualBestArea = 0
         for i in range(len(score)):
-            actualBestCounter += score[i][1]
+            actualBestCounter += weightedEventDict[score[i][0]]
             actualBestArea += actualBestCounter
         
         if theoreticalBestArea == 0:
