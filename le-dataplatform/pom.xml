@@ -47,6 +47,7 @@
                                     <workingDirectory>src/test/python</workingDirectory>
                                     <arguments>
                                         <argument>run</argument>
+                                        <argument>--omit=*test*,*_init_*</argument>
                                         <argument>-m</argument>
                                         <argument>unittest</argument>
                                         <argument>discover</argument>
