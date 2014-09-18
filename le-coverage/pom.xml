@@ -97,12 +97,18 @@
                                                 <fileset dir="${classes.directory.api}" />
                                                 <fileset dir="${classes.directory.common}" />
                                                 <fileset dir="${classes.directory.scoring}" />
+                                                <fileset dir="${classes.directory.domain}" />
+                                                <fileset dir="${classes.directory.perf}" />
+                                                <fileset dir="${classes.directory.scheduler}" />
                                             </classfiles>
                                             <sourcefiles encoding="UTF-8">
                                                 <fileset dir="${sources.directory.dataplatform}" />
                                                 <fileset dir="${sources.directory.api}"/>
                                                 <fileset dir="${sources.directory.common}"/>
                                                 <fileset dir="${sources.directory.scoring}"/>
+                                                <fileset dir="${sources.directory.domain}"/>
+                                                <fileset dir="${sources.directory.perf}"/>
+                                                <fileset dir="${sources.directory.scheduler}"/>
 
                                                 <!-- <fileset dir="${generated-sources.directory.projecta}"></fileset>
                                                 <fileset
