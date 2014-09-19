@@ -14,7 +14,7 @@ public class QuartzJobMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     
     @Test(groups = "functional")
     public void testCheckQuartzJob() {
-        assertTrue(!quartzJobMBean.checkDLQuartzJob().contains("NoSuchBeanDefinitionException"));
-        assertTrue(!quartzJobMBean.checkQuartzJob().contains("NoSuchBeanDefinitionException"));
+        assertTrue(!quartzJobMBean.checkDLQuartzJob().contains("No bean named"));
+        assertTrue(!quartzJobMBean.checkQuartzJob().contains("No bean named"));
     }
 }

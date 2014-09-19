@@ -51,7 +51,7 @@ public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
             String daoMySQLUrl = daoURL + "?user=" + daoUser + "&password=" + "wrongPassword2";
             assertTrue(dbc.getConnectionStatus(daoMySQLUrl).contains("Access denied"));
         } else if (daoType.equals("SQLServer")) {
-            String daoSQLServerUrl = daoURL + "user=" + daoUser + ";password=" + "wrongPassword";
+            String daoSQLServerUrl = daoURL + "user=" + daoUser + ";password=" + "wrongPassword2";
             assertTrue(dbc.getConnectionStatus(daoSQLServerUrl).contains("Login failed"));
         }
     }

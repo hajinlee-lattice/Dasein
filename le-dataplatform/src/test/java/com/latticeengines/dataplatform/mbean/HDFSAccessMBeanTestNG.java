@@ -14,6 +14,6 @@ public class HDFSAccessMBeanTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCheckHDFSStatus() {
-        assertEquals("HDFS is accessable to the dataplatform.", hdfsAcMBean.checkHDFSAccess());
+        assertEquals("HDFS is accessible to dataplatform.", hdfsAcMBean.checkHDFSAccess());
     }
 }

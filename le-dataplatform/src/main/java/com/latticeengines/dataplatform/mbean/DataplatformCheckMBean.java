@@ -23,7 +23,7 @@ public class DataplatformCheckMBean {
     
     @Autowired
     private HTTPFSAccessMBean httpFSMBean;
-    
+
     @Autowired
     private QuartzJobMBean quartzJobMBean;
 
@@ -52,7 +52,7 @@ public class DataplatformCheckMBean {
     }
 
     public boolean checkFailure(String result) {
-        if (result.contains("Failed"))
+        if (result.contains("Failed") || result.contains("disabled"))
             return true;
         return false;
     }
