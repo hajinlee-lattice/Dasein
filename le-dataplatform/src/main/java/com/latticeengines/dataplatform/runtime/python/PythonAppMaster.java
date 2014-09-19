@@ -47,7 +47,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
     private String priority;
 
     private String customer;
-    
+
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
 
