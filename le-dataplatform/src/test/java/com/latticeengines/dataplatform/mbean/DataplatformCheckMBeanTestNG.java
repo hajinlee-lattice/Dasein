@@ -1,12 +1,13 @@
 package com.latticeengines.dataplatform.mbean;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
-
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-
 import static org.testng.Assert.assertTrue;
 
+@ContextConfiguration(locations = { "classpath:dataplatform-dlorchestration-quartz-context.xml",
+        "classpath:dataplatform-quartz-context.xml" })
 public class DataplatformCheckMBeanTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired

@@ -1,7 +1,7 @@
 package com.latticeengines.dataplatform.mbean;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import static org.testng.Assert.assertTrue;
@@ -27,32 +27,28 @@ public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     @Value("${dataplatform.dao.datasource.type}")
     private String daoType;
 
-    private DBConnectionMBean dbc;
-
-    @BeforeClass(groups = "unit")
-    public void beforeClass() throws Exception {
-        dbc = new DBConnectionMBean();
-    }
+    @Autowired
+    private DBConnectionMBean dbcMBean;
 
     @Test(groups = "functional", enabled = true)
-    public void testDataSourceConnectionStatus() throws Exception {
+    public void testDataSourceConnection() throws Exception {
         if (dataSourceType.equals("MySQL")) {
             String dsMySQLUrl = dataSourceURL + "?user=" + dataSourceUser + "&password=" + "wrongPassword";
-            assertTrue(dbc.getConnectionStatus(dsMySQLUrl).contains("Access denied"));
+            assertTrue(dbcMBean.getConnectionStatus(dsMySQLUrl).contains("Access denied"));
         } else if (dataSourceType.equals("SQLServer")) {
             String dsSQLServerUrl = dataSourceURL + "user=" + dataSourceUser + ";password=" + "wrongPassword";
-            assertTrue(dbc.getConnectionStatus(dsSQLServerUrl).contains("Login failed"));
+            assertTrue(dbcMBean.getConnectionStatus(dsSQLServerUrl).contains("Login failed"));
         }
     }
 
     @Test(groups = "functional", enabled = true)
-    public void testDaoConnectionStatus() {
+    public void testDaoConnection() {
         if (daoType.equals("MySQL")) {
             String daoMySQLUrl = daoURL + "?user=" + daoUser + "&password=" + "wrongPassword2";
-            assertTrue(dbc.getConnectionStatus(daoMySQLUrl).contains("Access denied"));
+            assertTrue(dbcMBean.getConnectionStatus(daoMySQLUrl).contains("Access denied"));
         } else if (daoType.equals("SQLServer")) {
             String daoSQLServerUrl = daoURL + "user=" + daoUser + ";password=" + "wrongPassword2";
-            assertTrue(dbc.getConnectionStatus(daoSQLServerUrl).contains("Login failed"));
+            assertTrue(dbcMBean.getConnectionStatus(daoSQLServerUrl).contains("Login failed"));
         }
     }
 }

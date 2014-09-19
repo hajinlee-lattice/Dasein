@@ -3,7 +3,6 @@ package com.latticeengines.dataplatform.mbean;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -72,8 +71,8 @@ public class DBConnectionMBean {
             @SuppressWarnings("unused")
             Connection conn = DriverManager.getConnection(url);
             return "Successfully connected to " + url.substring(0, url.indexOf("password") - 1) + "\n";
-        } catch (SQLException sql) {
-            return "Failed to connect to " + url.substring(0, url.indexOf("password") - 1) + ".\n" + sql.getMessage();
+        } catch (SQLException sqle) {
+            return "Failed to connect to " + url.substring(0, url.indexOf("password") - 1) + ".\n" + sqle.getMessage();
         }
     }
 }
