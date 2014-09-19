@@ -25,7 +25,7 @@ public class HDFSAccessMBean {
             fs.delete(p, false);
             return "HDFS is accessible to dataplatform.";
         } catch (Exception e) {
-            return "Failed to access HDFS from dataplatform.";
+            return "Failed to access HDFS from dataplatform due to: " + e.getMessage();
         }
     }
 }
