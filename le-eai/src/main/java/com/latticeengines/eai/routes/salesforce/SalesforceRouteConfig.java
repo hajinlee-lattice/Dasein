@@ -17,7 +17,7 @@ public class SalesforceRouteConfig extends SpringRouteBuilder {
         to("salesforce:createJob");
 
         from("direct:createBatchQuery"). //
-        to("salesforce:createBatchQuery?sObjectQuery=SELECT Name FROM Lead"). //
+        to("salesforce:createBatchQuery"). //
         to("seda:batchInfo?size=10").transform(constant("OK"));
         
         from("direct:getBatch"). //
@@ -28,6 +28,9 @@ public class SalesforceRouteConfig extends SpringRouteBuilder {
         
         from("direct:getQueryResult"). //
         to("salesforce:getQueryResult");
+        
+        from("direct:getDescription"). //
+        to("salesforce:getDescription");
 
         from("seda:batchInfo").process(new BatchInfoProcessor());
     }

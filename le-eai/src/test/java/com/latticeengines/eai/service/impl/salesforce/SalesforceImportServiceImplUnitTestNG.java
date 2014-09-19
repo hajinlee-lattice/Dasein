@@ -1,22 +1,16 @@
-package com.latticeengines.eai.exposed.service.impl;
+package com.latticeengines.eai.service.impl.salesforce;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.testng.Assert.assertEquals;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 
-public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
-    
-    @Autowired
-    private DataExtractionServiceImpl dataExtractionService;
+public class SalesforceImportServiceImplUnitTestNG {
 
-    @Test(groups = "functional")
-    public void importData() throws Exception {
+    @Test(groups = "unit")
+    public void createQuery() {
         Table table = new Table();
         table.setName("Lead");
         
@@ -34,9 +28,9 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         table.addAttribute(salutation);
         table.addAttribute(email);
         
-        List<Table> tables = new ArrayList<>();
-        tables.add(table);
-        dataExtractionService.extractAndImport(tables);
-        Thread.sleep(20000L);
+        SalesforceImportServiceImpl svc = new SalesforceImportServiceImpl();
+        String query = svc.createQuery(table);
+        assertEquals(query, "SELECT FirstName,LastName,Salutation,Email FROM Lead");
     }
 }
+
