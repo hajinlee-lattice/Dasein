@@ -14,13 +14,14 @@ public class SalesforceRouteConfig extends SpringRouteBuilder {
     @Override
     public void configure() throws Exception {
         
+        PropertySetter propertySetter = new PropertySetter();
         BatchInfoProcessor batchInfoProcessor = new BatchInfoProcessor(getContext().createProducerTemplate());
         
         from("direct:createJob"). //
         to("salesforce:createJob");
 
         from("direct:createBatchQuery"). //
-        bean(batchInfoProcessor, "init"). //
+        process(propertySetter). //
         to("salesforce:createBatchQuery"). //
         to("seda:batchInfo?size=10").transform(constant("OK"));
         

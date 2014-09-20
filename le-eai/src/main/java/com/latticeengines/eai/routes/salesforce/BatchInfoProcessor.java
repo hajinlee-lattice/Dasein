@@ -4,9 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Scanner;
 
-import org.apache.camel.Body;
 import org.apache.camel.Exchange;
-import org.apache.camel.Header;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.salesforce.SalesforceEndpointConfig;
@@ -18,18 +16,11 @@ import com.latticeengines.domain.exposed.eai.Table;
 public class BatchInfoProcessor implements Processor {
     
     private ProducerTemplate producer;
-    private ThreadLocal<Table> tableContext = new ThreadLocal<Table>();
-    private ThreadLocal<JobInfo> jobInfoContext = new ThreadLocal<JobInfo>();
-    
+
     public BatchInfoProcessor(ProducerTemplate producer) {
         this.producer = producer;
     }
     
-    public void init(@Body JobInfo jobInfo, @Header(SalesforceImportHeader.TABLE) Table table) {
-        tableContext.set(table);
-        jobInfoContext.set(jobInfo);
-    }
-
     @Override
     public void process(Exchange exchange) throws Exception {
         Thread.sleep(2000L);
@@ -41,21 +32,27 @@ public class BatchInfoProcessor implements Processor {
         case IN_PROGRESS:
         case QUEUED:
             batchInfo = producer.requestBody("direct:getBatch", batchInfo, BatchInfo.class);
-            producer.sendBody("seda:batchInfo", batchInfo);
+            exchange.getIn().setBody(batchInfo);
+            producer.send("seda:batchInfo", exchange);
             break;
         case NOT_PROCESSED:
             break;
         case FAILED:
             break;
         case COMPLETED:
-            parseAndCreateAvroFile(batchInfo);
+            Table table = (Table) exchange.getProperty(SalesforceImportHeader.TABLE);
+            JobInfo jobInfo = (JobInfo) exchange.getProperty(SalesforceImportHeader.JOBINFO);
+            
+            assert(table != null);
+            assert(jobInfo != null);
+            parseAndCreateAvroFile(jobInfo, batchInfo, table);
             break;
         default:
             break;
         }
     }
     
-    private void parseAndCreateAvroFile(BatchInfo batchInfo) {
+    private void parseAndCreateAvroFile(JobInfo jobInfo, BatchInfo batchInfo, Table table) {
         @SuppressWarnings("unchecked")
         List<String> resultIds = producer.requestBody("direct:getQueryResultIds", batchInfo, List.class);
         
@@ -67,7 +64,7 @@ public class BatchInfoProcessor implements Processor {
                 System.out.println(s);
             }
         } finally {
-            producer.requestBody("salesforce:closeJob", jobInfoContext.get(), JobInfo.class);
+            producer.requestBody("salesforce:closeJob", jobInfo, JobInfo.class);
         }
     }
 
