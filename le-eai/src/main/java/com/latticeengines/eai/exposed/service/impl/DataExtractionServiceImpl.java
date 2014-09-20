@@ -17,10 +17,8 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     
     @Override
     public void extractAndImport(List<Table> tables) {
-        salesforceImportService.init(tables);
-        salesforceImportService.importMetadata();
-        salesforceImportService.importData();
-        salesforceImportService.finalize();
+        List<Table> tableMetadata = salesforceImportService.importMetadata(tables);
+        salesforceImportService.importData(tables);
     }
 
     

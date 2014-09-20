@@ -4,13 +4,31 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.camel.Body;
 import org.apache.camel.Exchange;
+import org.apache.camel.Header;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.salesforce.SalesforceEndpointConfig;
 import org.apache.camel.component.salesforce.api.dto.bulk.BatchInfo;
+import org.apache.camel.component.salesforce.api.dto.bulk.JobInfo;
+
+import com.latticeengines.domain.exposed.eai.Table;
 
 public class BatchInfoProcessor implements Processor {
+    
+    private ProducerTemplate producer;
+    private ThreadLocal<Table> tableContext = new ThreadLocal<Table>();
+    private ThreadLocal<JobInfo> jobInfoContext = new ThreadLocal<JobInfo>();
+    
+    public BatchInfoProcessor(ProducerTemplate producer) {
+        this.producer = producer;
+    }
+    
+    public void init(@Body JobInfo jobInfo, @Header(SalesforceImportHeader.TABLE) Table table) {
+        tableContext.set(table);
+        jobInfoContext.set(jobInfo);
+    }
 
     @Override
     public void process(Exchange exchange) throws Exception {
@@ -30,18 +48,26 @@ public class BatchInfoProcessor implements Processor {
         case FAILED:
             break;
         case COMPLETED:
-            @SuppressWarnings("unchecked")
-            List<String> resultIds = producer.requestBody("direct:getQueryResultIds", batchInfo, List.class);
-            
+            parseAndCreateAvroFile(batchInfo);
+            break;
+        default:
+            break;
+        }
+    }
+    
+    private void parseAndCreateAvroFile(BatchInfo batchInfo) {
+        @SuppressWarnings("unchecked")
+        List<String> resultIds = producer.requestBody("direct:getQueryResultIds", batchInfo, List.class);
+        
+        try {
             for (String resultId : resultIds) {
                 InputStream results = producer.requestBodyAndHeader("direct:getQueryResult", batchInfo,
                         SalesforceEndpointConfig.RESULT_ID, resultId, InputStream.class);
                 String s = convertStreamToString(results);
                 System.out.println(s);
             }
-            break;
-        default:
-            break;
+        } finally {
+            producer.requestBody("salesforce:closeJob", jobInfoContext.get(), JobInfo.class);
         }
     }
 

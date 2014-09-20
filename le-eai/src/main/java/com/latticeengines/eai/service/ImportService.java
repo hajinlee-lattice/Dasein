@@ -6,12 +6,8 @@ import com.latticeengines.domain.exposed.eai.Table;
 
 public interface ImportService {
     
-    void importMetadata();
+    List<Table> importMetadata(List<Table> tables);
 
-    void importData();
-
-    void init(List<Table> tables);
-    
-    void finalize();
+    void importData(List<Table> tables);
 
 }

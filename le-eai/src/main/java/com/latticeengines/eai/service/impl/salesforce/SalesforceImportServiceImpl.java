@@ -1,11 +1,14 @@
 package com.latticeengines.eai.service.impl.salesforce;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.salesforce.SalesforceEndpointConfig;
 import org.apache.camel.component.salesforce.api.dto.SObjectDescription;
+import org.apache.camel.component.salesforce.api.dto.SObjectField;
 import org.apache.camel.component.salesforce.api.dto.bulk.ContentType;
 import org.apache.camel.component.salesforce.api.dto.bulk.JobInfo;
 import org.apache.camel.component.salesforce.api.dto.bulk.OperationEnum;
@@ -13,7 +16,9 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.eai.routes.salesforce.SalesforceImportHeader;
 import com.latticeengines.eai.service.ImportService;
 
 @Component("salesforceImportService")
@@ -22,46 +27,60 @@ public class SalesforceImportServiceImpl implements ImportService {
     @Autowired
     private ProducerTemplate producer;
 
-    private List<Table> tables;
-    private List<JobInfo> jobInfos;
+    private JobInfo setupJob(Table table) {
+        JobInfo jobInfo = new JobInfo();
+        jobInfo.setOperation(OperationEnum.QUERY);
+        jobInfo.setContentType(ContentType.XML);
+        jobInfo.setObject(table.getName());
+        jobInfo = producer.requestBody("direct:createJob", jobInfo, JobInfo.class);
+        return jobInfo;
+    }
 
     @Override
-    public void init(List<Table> tables) {
-        assert (tables != null);
-        this.tables = tables;
-        this.jobInfos = new ArrayList<JobInfo>(tables.size());
+    public List<Table> importMetadata(List<Table> tables) {
+        List<Table> newTables = new ArrayList<>();
         for (Table table : tables) {
-            JobInfo jobInfo = new JobInfo();
-            jobInfo.setOperation(OperationEnum.QUERY);
-            jobInfo.setContentType(ContentType.XML);
-            jobInfo.setObject(table.getName());
-            jobInfo = producer.requestBody("direct:createJob", jobInfo, JobInfo.class);
-            jobInfos.add(jobInfo);
+            JobInfo jobInfo = setupJob(table);
+            try {
+                SObjectDescription desc = producer.requestBodyAndHeader("direct:getDescription", jobInfo,
+                        SalesforceEndpointConfig.SOBJECT_NAME, table.getName(), SObjectDescription.class);
+                List<SObjectField> descFields = desc.getFields();
+                Map<String, Attribute> map = table.getNameAttributeMap();
+                Table newTable = new Table();
+                newTable.setName(table.getName());
+                for (SObjectField descField : descFields) {
+                    if (!map.containsKey(descField.getName())) {
+                        continue;
+                    }
+                    Attribute attr = new Attribute();
+                    attr.setName(descField.getName());
+                    attr.setDisplayName(descField.getLabel());
+                    attr.setLength(descField.getLength());
+                    attr.setPrecision(descField.getPrecision());
+                    attr.setScale(descField.getScale());
+                    attr.setNullable(descField.isNillable());
+                    attr.setPhysicalDataType(descField.getType());
+                    attr.setLogicalDataType(descField.getType());
+                    
+                    newTable.addAttribute(attr);
+                }
+                newTables.add(newTable);
+            } finally {
+                producer.requestBody("salesforce:closeJob", jobInfo, JobInfo.class);
+            }
         }
+        return newTables;
     }
-
+    
     @Override
-    public void importMetadata() {
-        for (JobInfo jobInfo : jobInfos) {
-            SObjectDescription desc = producer.requestBodyAndHeader("direct:getDescription", jobInfo,
-                    SalesforceEndpointConfig.SOBJECT_NAME, jobInfo.getObject(), SObjectDescription.class);
-            System.out.println(desc);
-        }
-    }
-
-    @Override
-    public void finalize() {
-        for (JobInfo jobInfo : jobInfos) {
-            producer.requestBody("salesforce:closeJob", jobInfo, JobInfo.class);
-        }
-    }
-
-    @Override
-    public void importData() {
-        for (int i = 0; i < jobInfos.size(); i++) {
-            String query = createQuery(tables.get(i));
-            producer.sendBodyAndHeader("direct:createBatchQuery", jobInfos.get(i),
-                    SalesforceEndpointConfig.SOBJECT_QUERY, query);
+    public void importData(List<Table> tables) {
+        for (Table table : tables) {
+            JobInfo jobInfo = setupJob(table);
+            String query = createQuery(table);
+            Map<String, Object> headers = new HashMap<String, Object>();
+            headers.put(SalesforceEndpointConfig.SOBJECT_QUERY, query);
+            headers.put(SalesforceImportHeader.TABLE, table);
+            producer.sendBodyAndHeaders("direct:createBatchQuery", jobInfo, headers);
         }
     }
 
