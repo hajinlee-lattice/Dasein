@@ -7,8 +7,8 @@ public class PropertySetter implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        exchange.setProperty(SalesforceImportHeader.TABLE, exchange.getIn().getHeader(SalesforceImportHeader.TABLE));
-        exchange.setProperty(SalesforceImportHeader.JOBINFO, exchange.getIn().getBody());
+        exchange.setProperty(SalesforceImportProperty.TABLE, exchange.getIn().getHeader(SalesforceImportProperty.TABLE));
+        exchange.setProperty(SalesforceImportProperty.JOBINFO, exchange.getIn().getBody());
     }
 
 }

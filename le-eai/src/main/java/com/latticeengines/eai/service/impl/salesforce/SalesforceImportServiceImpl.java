@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.routes.salesforce.SalesforceImportHeader;
+import com.latticeengines.eai.routes.salesforce.SalesforceImportProperty;
 import com.latticeengines.eai.service.ImportService;
 
 @Component("salesforceImportService")
@@ -79,7 +79,7 @@ public class SalesforceImportServiceImpl implements ImportService {
             String query = createQuery(table);
             Map<String, Object> headers = new HashMap<String, Object>();
             headers.put(SalesforceEndpointConfig.SOBJECT_QUERY, query);
-            headers.put(SalesforceImportHeader.TABLE, table);
+            headers.put(SalesforceImportProperty.TABLE, table);
             producer.sendBodyAndHeaders("direct:createBatchQuery", jobInfo, headers);
         }
     }

@@ -1,6 +1,6 @@
 package com.latticeengines.eai.routes.salesforce;
 
-public class SalesforceImportHeader {
+public class SalesforceImportProperty {
 
     public static final String TABLE = "table";
     public static final String JOBINFO = "jobInfo";

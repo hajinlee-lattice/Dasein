@@ -40,8 +40,8 @@ public class BatchInfoProcessor implements Processor {
         case FAILED:
             break;
         case COMPLETED:
-            Table table = (Table) exchange.getProperty(SalesforceImportHeader.TABLE);
-            JobInfo jobInfo = (JobInfo) exchange.getProperty(SalesforceImportHeader.JOBINFO);
+            Table table = (Table) exchange.getProperty(SalesforceImportProperty.TABLE);
+            JobInfo jobInfo = (JobInfo) exchange.getProperty(SalesforceImportProperty.JOBINFO);
             
             assert(table != null);
             assert(jobInfo != null);
