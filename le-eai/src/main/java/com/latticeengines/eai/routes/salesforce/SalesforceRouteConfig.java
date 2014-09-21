@@ -29,11 +29,11 @@ public class SalesforceRouteConfig extends SpringRouteBuilder {
         split(body()). //
         process(new SetupForQueryResultsProcessor()). //
         to("salesforce:getQueryResult"). //
-        process(new InputStreamToStringConverter()). //
+        process(new XmlHandlerProcessor(getContext())). //
+        to("stax:#extractDataXmlHandler"). //
         end(). //
         process(new CloseJobProcessor());
 
-        
         from("direct:getDescription"). //
         to("salesforce:getDescription");
 
