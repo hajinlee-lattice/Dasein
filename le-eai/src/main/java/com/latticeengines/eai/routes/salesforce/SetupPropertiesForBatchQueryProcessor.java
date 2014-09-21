@@ -3,7 +3,7 @@ package com.latticeengines.eai.routes.salesforce;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 
-public class PropertySetter implements Processor {
+public class SetupPropertiesForBatchQueryProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
