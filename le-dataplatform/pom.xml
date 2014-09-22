@@ -70,9 +70,9 @@
                                     <executable>/usr/local/bin/coverage</executable>
                                     <workingDirectory>src/test/python</workingDirectory>
                                     <arguments>
-                                        <argument>html</argument>
-                                        <argument>-d</argument>
-                                        <argument>../../../target/pythonhtmlcov</argument>
+                                        <argument>xml</argument>
+                                        <!-- argument>-d</argument>
+                                        <argument>../../../target/pythonhtmlcov</argument-->
                                     </arguments>
                                     <environmentVariables>
                                         <PYTHONPATH>../../main/python:$PYTHONPATH</PYTHONPATH>
