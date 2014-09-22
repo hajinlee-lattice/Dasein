@@ -1,25 +1,16 @@
 package com.latticeengines.db.dao.cassandra.impl;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
 
 import org.springframework.data.cassandra.core.CassandraOperations;
 
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.datastax.driver.core.querybuilder.Select;
 import com.latticeengines.db.dao.cassandra.CassandraDao;
-import com.latticeengines.db.dao.cassandra.CassandraGenericDao;
 
 public class CassandraDaoImpl<T, ID extends Serializable> implements
 		CassandraDao<T, ID> {
 
 	private Class<T> type;
 	private CassandraOperations template;
-
-	public CassandraDaoImpl() {
-		super();
-	}
 
 	public CassandraDaoImpl(CassandraOperations template) {
 		this.template = template;
