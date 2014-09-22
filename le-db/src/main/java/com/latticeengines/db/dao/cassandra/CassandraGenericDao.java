@@ -3,9 +3,13 @@ package com.latticeengines.db.dao.cassandra;
 import java.util.List;
 import java.util.Map;
 
+import com.datastax.driver.core.ResultSet;
+import com.latticeengines.db.dao.cassandra.data.Column;
+import com.latticeengines.db.dao.cassandra.data.Table;
+
 public interface CassandraGenericDao {
 
-	void createTable(String table);
+	void createTable(Table table);
 
 	void dropTable(String table);
 
@@ -13,12 +17,16 @@ public interface CassandraGenericDao {
 
 	void dropIndex(String table, String index);
 
+	void addColumn(String table, Column column);
+
+	void dropColumn(String table, String column);
+
 	void save(String table, Map<String, Object> map);
 
 	void save(String table, List<Map<String, Object>> list);
 
-	void update(String table, String column, Object value, String key,
-			Object keyValue);
+	void update(String table, String column, Object value, String whereColumn,
+			Object whereColumnValue);
 
 	void delete(String table, String column, Object value);
 
@@ -31,8 +39,13 @@ public interface CassandraGenericDao {
 	List<Map<String, Object>> queryForListOfMap(String cql);
 
 	List<Map<String, Object>> queryForListOfMapByTableColumn(String table,
-			String column, Object value);
+			String column, Object value, int limit);
 
 	long count(String table);
+
+	ResultSet query(String cql);
+
+	Map<String, Object> findByKey2(String table, String whereColumn,
+			String value);
 
 }
