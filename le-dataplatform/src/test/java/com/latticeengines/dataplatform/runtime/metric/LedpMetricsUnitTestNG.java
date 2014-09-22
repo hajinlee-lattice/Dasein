@@ -20,7 +20,7 @@ import com.latticeengines.perf.exposed.test.PerfFunctionalTestBase;
 public class LedpMetricsUnitTestNG {
 
     private PerfFunctionalTestBase testBase = null;
-    private static final String METRICFILE  = "/tmp/ledpjob-metrics.out";
+    private static final String METRICFILE = System.getProperty("user.home") + "/ledpjob-metrics.out";
 
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
