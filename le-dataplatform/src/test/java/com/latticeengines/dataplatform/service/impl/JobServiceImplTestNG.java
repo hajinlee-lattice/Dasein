@@ -4,7 +4,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-
 import java.io.File;
 import java.net.URL;
 import java.text.NumberFormat;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -21,11 +19,9 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
@@ -50,24 +46,6 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private JobNameService jobNameService;
-
-    @Value("${dataplatform.dlorchestration.datasource.host}")
-    protected String dataSourceHost;
-
-    @Value("${dataplatform.dlorchestration.datasource.port}")
-    protected int dataSourcePort;
-
-    @Value("${dataplatform.dlorchestration.datasource.dbname}")
-    protected String dataSourceDB;
-
-    @Value("${dataplatform.dlorchestration.datasource.user}")
-    protected String dataSourceUser;
-
-    @Value("${dataplatform.dlorchestration.datasource.password.encrypted}")
-    protected String dataSourcePasswd;
-
-    @Value("${dataplatform.dlorchestration.datasource.type}")
-    protected String dataSourceType;
 
     private String inputDir = null;
     private String outputDir = null;
@@ -294,7 +272,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void testLoadData() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
-                .password(dataSourcePasswd).type(dataSourceType);
+                .password(dataSourcePasswd).type(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = modelingJobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0",
                 "Dell", Arrays.<String> asList(new String[] { "ID" }));

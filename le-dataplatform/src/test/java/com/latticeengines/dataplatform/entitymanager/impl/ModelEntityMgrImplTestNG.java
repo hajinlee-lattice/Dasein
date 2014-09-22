@@ -55,7 +55,8 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         modelDef.addAlgorithm(logisticRegressionAlgorithm);
         modelDef.addAlgorithm(decisionTreeAlgorithm);
         //
-        // in the application, it is assumed that the model definition is defined in the metadata db
+        // in the application, it is assumed that the model definition is
+        // defined in the metadata db
         // also, modelDef 'name' should be unique
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
 
@@ -117,6 +118,5 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void testDelete() {
         modelEntityMgr.delete(model);
     }
-
 
 }

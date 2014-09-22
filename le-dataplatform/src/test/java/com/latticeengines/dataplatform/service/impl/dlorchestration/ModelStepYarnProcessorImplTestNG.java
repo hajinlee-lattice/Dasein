@@ -23,7 +23,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
     private static final int NUM_ALGORITHMS = 1; // No LR; only RF for now.
 
     @Autowired
-    private ModelStepYarnProcessor modelStepYarnProcessor;
+    private ModelStepYarnProcessorImpl modelStepYarnProcessor;
 
     @Autowired
     private ModelingService modelingService;
@@ -35,6 +35,7 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
     @Test(groups = "functional.scheduler")
     public void testExecuteYarnSteps() throws Exception {
         cleanUpHdfs("Nutanix");
+        setupDBConfig();
         List<ModelCommandParameter> listParameters = ModelingServiceTestUtils.createModelCommandWithCommandParameters()
                 .getCommandParameters();
         ModelCommandParameters commandParameters = new ModelCommandParameters(listParameters);
@@ -52,6 +53,11 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
 
         appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.SUBMIT_MODELS, commandParameters);
         waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
+    }
+
+    private void setupDBConfig() {
+        modelStepYarnProcessor.setDBConfig(dataSourceHost, dataSourcePort, dataSourceDB, dataSourceUser,
+                dataSourcePasswd, dataSourceDBType);
     }
 
     private void waitForSuccess(int expectedNumAppIds, List<ApplicationId> appIds, ModelCommandStep step)

@@ -70,23 +70,23 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     @Autowired
     private OrderedEntityMgrListForDbClean orderedEntityMgrListForDbClean;
 
-    @Value("${dataplatform.dlorchestration.datasource.host}")
-    protected String dbDlOrchestrationHost;
+    @Value("${dataplatform.test.datasource.host}")
+    protected String dataSourceHost;
 
-    @Value("${dataplatform.dlorchestration.datasource.port}")
-    protected int dbDlOrchestrationPort;
+    @Value("${dataplatform.test.datasource.port}")
+    protected int dataSourcePort;
 
-    @Value("${dataplatform.dlorchestration.datasource.dbname}")
-    protected String dbDlOrchestrationName;
+    @Value("${dataplatform.test.datasource.dbname}")
+    protected String dataSourceDB;
 
-    @Value("${dataplatform.dlorchestration.datasource.user}")
-    protected String dbDlOrchestrationUser;
+    @Value("${dataplatform.test.datasource.user}")
+    protected String dataSourceUser;
 
-    @Value("${dataplatform.dlorchestration.datasource.password.encrypted}")
-    protected String dbDlOrchestrationPassword;
+    @Value("${dataplatform.test.datasource.password.encrypted}")
+    protected String dataSourcePasswd;
 
-    @Value("${dataplatform.dlorchestration.datasource.type}")
-    protected String dbDlOrchestrationType;
+    @Value("${dataplatform.test.datasource.type}")
+    protected String dataSourceDBType;
 
     @Value("${dataplatform.container.virtualcores}")
     protected int virtualCores;

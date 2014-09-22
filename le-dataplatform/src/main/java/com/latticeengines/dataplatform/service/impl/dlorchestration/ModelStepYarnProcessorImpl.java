@@ -5,13 +5,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
@@ -73,9 +71,19 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
     @Value("${dataplatform.container.memory}")
     private int memory;
-    
+
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
+
+    @VisibleForTesting
+    void setDBConfig(String dbHost, int dbPort, String dbName, String dbUser, String dbPassword, String dbType) {
+        this.dbHost = dbHost;
+        this.dbPort = dbPort;
+        this.dbName = dbName;
+        this.dbUser = dbUser;
+        this.dbPassword = dbPassword;
+        this.dbType = dbType;
+    }
 
     @Override
     @SuppressWarnings("incomplete-switch")
@@ -104,8 +112,10 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         ApplicationId unpivotedAppId = modelingService.loadData(generateLoadConfiguration(DataSetType.STANDARD, customer, commandParameters));
         appIds.add(unpivotedAppId);
         // No LR for now.
-//        ApplicationId pivotedAppId = modelingService.loadData(generateLoadConfiguration(DataSetType.PIVOTED, customer, commandParameters));
-//        appIds.add(pivotedAppIds);
+        // ApplicationId pivotedAppId =
+        // modelingService.loadData(generateLoadConfiguration(DataSetType.PIVOTED,
+        // customer, commandParameters));
+        // appIds.add(pivotedAppIds);
 
         return appIds;
     }
@@ -130,13 +140,14 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
     @VisibleForTesting
     List<Integer> calculateSamplePercentages(int numSamples) {
-        if (numSamples < 1) return Collections.emptyList();
+        if (numSamples < 1)
+            return Collections.emptyList();
 
         List<Integer> list = new ArrayList<>();
 
-        int interval = 100/numSamples;
+        int interval = 100 / numSamples;
         int sum = interval;
-        while (sum <= (100-interval)) {
+        while (sum <= (100 - interval)) {
             list.add(sum);
             sum += interval;
         }
@@ -147,10 +158,12 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
     private List<ApplicationId> generateSamples(String customer, ModelCommandParameters commandParameters) {
         // No LR for now.
-//        ApplicationId lrAppId = modelingService.createSamples(generateSamplingConfiguration(AlgorithmType.LOGISTIC_REGRESSION, customer, commandParameters));
+        // ApplicationId lrAppId =
+        // modelingService.createSamples(generateSamplingConfiguration(AlgorithmType.LOGISTIC_REGRESSION,
+        // customer, commandParameters));
         ApplicationId unpivotedAppId = modelingService.createSamples(generateSamplingConfiguration(DataSetType.STANDARD, customer, commandParameters));
 
-        return Arrays.asList(/*lrAppId, */unpivotedAppId);
+        return Arrays.asList(/* lrAppId, */unpivotedAppId);
     }
 
     private String constructSampleName(int percentage) {
@@ -189,7 +202,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         config.setTable(commandParameters.getEventTable());
         config.setMetadataTable(commandParameters.getMetadataTable());
         config.setExcludeColumnList(commandParameters.getExcludeColumns());
-        config.setSamplePrefix(SAMPLENAME_PREFIX+"100");
+        config.setSamplePrefix(SAMPLENAME_PREFIX + "100");
         config.setTargets(commandParameters.getModelTargets());
         ApplicationId appId = modelingService.profileData(config);
 
@@ -200,10 +213,12 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         List<ApplicationId> appIds = new ArrayList<>();
         // No LR for now.
         List<ApplicationId> unpivotedModelAppIds = modelingService.submitModel(generateModel(DataSetType.STANDARD, customer, commandParameters));
-//        List<ApplicationId> lrAppIds = modelingService.submitModel(generateModel(AlgorithmType.LOGISTIC_REGRESSION, customer, commandParameters));
+        // List<ApplicationId> lrAppIds =
+        // modelingService.submitModel(generateModel(AlgorithmType.LOGISTIC_REGRESSION,
+        // customer, commandParameters));
 
         appIds.addAll(unpivotedModelAppIds);
-//        appIds.addAll(lrAppIds);
+        // appIds.addAll(lrAppIds);
 
         return appIds;
     }
