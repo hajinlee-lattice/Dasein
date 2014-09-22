@@ -12,11 +12,4 @@
 
 	<import resource="classpath:db-cassandra-context.xml" />
 
-	<task:executor id="executorPool" pool-size="5"
-		queue-capacity="5" rejection-policy="CALLER_RUNS" />
-	<bean id="poolService"
-		class="org.springframework.core.task.support.ExecutorServiceAdapter">
-		<constructor-arg ref="executorPool" />
-	</bean>
-
 </beans>
