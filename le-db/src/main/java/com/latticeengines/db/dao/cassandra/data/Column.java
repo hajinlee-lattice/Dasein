@@ -1,66 +1,64 @@
 package com.latticeengines.db.dao.cassandra.data;
 
 public class Column {
-	private String columnName;
-	private ColumnType columnType;
-	private Object value;
-	private Integer precision;
-	private Integer scale;
-	
-	public Column(String columnName, ColumnType columnType) {
-		super();
-		this.columnName = columnName;
-		this.columnType = columnType;
-	}
+    private String columnName;
+    private ColumnType columnType;
+    private Object value;
+    private Integer precision;
+    private Integer scale;
 
-	public Column(String columnName, ColumnType columnType, Integer precision,
-			Integer scale) {
-		super();
-		this.columnName = columnName;
-		this.columnType = columnType;
-		this.precision = precision;
-		this.scale = scale;
-	}
+    public Column(String columnName, ColumnType columnType) {
+        super();
+        this.columnName = columnName;
+        this.columnType = columnType;
+    }
 
-	public String getColumnName() {
-		return columnName;
-	}
+    public Column(String columnName, ColumnType columnType, Integer precision, Integer scale) {
+        super();
+        this.columnName = columnName;
+        this.columnType = columnType;
+        this.precision = precision;
+        this.scale = scale;
+    }
 
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
-	}
+    public String getColumnName() {
+        return columnName;
+    }
 
-	public ColumnType getColumnType() {
-		return columnType;
-	}
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
 
-	public void setColumnType(ColumnType columnType) {
-		this.columnType = columnType;
-	}
+    public ColumnType getColumnType() {
+        return columnType;
+    }
 
-	public Object getValue() {
-		return value;
-	}
+    public void setColumnType(ColumnType columnType) {
+        this.columnType = columnType;
+    }
 
-	public void setValue(Object value) {
-		this.value = value;
-	}
+    public Object getValue() {
+        return value;
+    }
 
-	public Integer getPrecision() {
-		return precision;
-	}
+    public void setValue(Object value) {
+        this.value = value;
+    }
 
-	public void setPrecision(Integer precision) {
-		this.precision = precision;
-	}
+    public Integer getPrecision() {
+        return precision;
+    }
 
-	public Integer getScale() {
-		return scale;
-	}
+    public void setPrecision(Integer precision) {
+        this.precision = precision;
+    }
 
-	public void setScale(Integer scale) {
-		this.scale = scale;
-	}
-	
-	
+    public Integer getScale() {
+        return scale;
+    }
+
+    public void setScale(Integer scale) {
+        this.scale = scale;
+    }
+
 }

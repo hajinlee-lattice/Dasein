@@ -9,43 +9,40 @@ import com.latticeengines.db.dao.cassandra.data.Table;
 
 public interface CassandraGenericDao {
 
-	void createTable(Table table);
+    void createTable(Table table);
 
-	void dropTable(String table);
+    void dropTable(String table);
 
-	void createIndex(String table, String column, String index);
+    void createIndex(String table, String column, String index);
 
-	void dropIndex(String table, String index);
+    void dropIndex(String table, String index);
 
-	void addColumn(String table, Column column);
+    void addColumn(String table, Column column);
 
-	void dropColumn(String table, String column);
+    void dropColumn(String table, String column);
 
-	void save(String table, Map<String, Object> map);
+    void save(String table, Map<String, Object> map);
 
-	void save(String table, List<Map<String, Object>> list);
+    void save(String table, List<Map<String, Object>> list);
 
-	void update(String table, String column, Object value, String whereColumn,
-			Object whereColumnValue);
+    void update(String table, String column, Object value, String whereColumn, Object whereColumnValue);
 
-	void delete(String table, String column, Object value);
+    void delete(String table, String column, Object value);
 
-	void deleteAll(String table);
+    void deleteAll(String table);
 
-	Map<String, Object> findByKey(String table, String column, String value);
+    Map<String, Object> findByKey(String table, String column, String value);
 
-	List<Map<String, Object>> findAll(String table);
+    List<Map<String, Object>> findAll(String table);
 
-	List<Map<String, Object>> queryForListOfMap(String cql);
+    List<Map<String, Object>> queryForListOfMap(String cql);
 
-	List<Map<String, Object>> queryForListOfMapByTableColumn(String table,
-			String column, Object value, int limit);
+    List<Map<String, Object>> queryForListOfMapByTableColumn(String table, String column, Object value, int limit);
 
-	long count(String table);
+    long count(String table);
 
-	ResultSet query(String cql);
+    ResultSet query(String cql);
 
-	Map<String, Object> findByKey2(String table, String whereColumn,
-			String value);
+    Map<String, Object> findByKey2(String table, String whereColumn, String value);
 
 }

@@ -8,9 +8,8 @@ import org.springframework.stereotype.Component;
 @Component("propDataCassandraGenericDao")
 public class PropDataCassandraGenericDaoImpl extends CassandraGenericDaoImpl {
 
-	@Autowired
-	public PropDataCassandraGenericDaoImpl(
-			@Qualifier("propDataCassandraTemplate") CassandraOperations template) {
-		super(template);
-	}
+    @Autowired
+    public PropDataCassandraGenericDaoImpl(@Qualifier("propDataCassandraTemplate") CassandraOperations template) {
+        super(template);
+    }
 }
