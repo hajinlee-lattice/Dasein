@@ -30,7 +30,7 @@ public class SalesforceRouteConfig extends SpringRouteBuilder {
         process(new SetupForQueryResultsProcessor()). //
         to("salesforce:getQueryResult"). //
         process(new XmlHandlerProcessor(getContext())). //
-        to("stax:#extractDataXmlHandler"). //
+        recipientList(header("staxUri")). //
         end(). //
         process(new CloseJobProcessor());
 
