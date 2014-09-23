@@ -45,6 +45,10 @@ public class ModelingServiceTestUtils {
     }
 
     public static ModelCommand createModelCommandWithCommandParameters(String eventTable) {
+        return createModelCommandWithCommandParameters(eventTable, false);
+    }
+
+    public static ModelCommand createModelCommandWithCommandParameters(String eventTable, boolean debug) {
         List<ModelCommandParameter> parameters = new ArrayList<>();
         ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, parameters, ModelCommand.TAHOE);
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE, "Q_EventTableDepivot_Nutanix"));
@@ -58,7 +62,9 @@ public class ModelingServiceTestUtils {
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://localhost:8082/DLRestService"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_QUERY, "Q_DataForModeling"));
-
+        if (debug) {
+            parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEBUG, "true"));
+        }
         return command;
     }
 }

@@ -48,7 +48,9 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private ModelStepProcessor modelStepOutputResultsProcessor;
 
-    ModelStepProcessor modelStepRetrieveMetadataProcessor;
+    private ModelStepProcessor modelStepRetrieveMetadataProcessor;
+
+    private DebugProcessorImpl debugProcessorImpl;
 
     private ModelCommand modelCommand;
 
@@ -56,7 +58,7 @@ public class ModelCommandCallable implements Callable<Long> {
             ModelCommandEntityMgr modelCommandEntityMgr, ModelCommandStateEntityMgr modelCommandStateEntityMgr,
             ModelStepYarnProcessor modelStepYarnProcessor, ModelCommandLogService modelCommandLogService,
             ModelCommandResultEntityMgr modelCommandResultEntityMgr, ModelStepProcessor modelStepFinishProcessor,
-            ModelStepProcessor modelStepOutputResultsProcessor, ModelStepProcessor modelStepRetrieveMetadataProcessor) {
+            ModelStepProcessor modelStepOutputResultsProcessor, ModelStepProcessor modelStepRetrieveMetadataProcessor, DebugProcessorImpl debugProcessorImpl) {
         this.modelCommand = modelCommand;
         this.modelingJobService = modelingJobService;
         this.modelCommandEntityMgr = modelCommandEntityMgr;
@@ -67,6 +69,7 @@ public class ModelCommandCallable implements Callable<Long> {
         this.modelStepOutputResultsProcessor = modelStepOutputResultsProcessor;
         this.modelStepFinishProcessor = modelStepFinishProcessor;
         this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
+        this.debugProcessorImpl = debugProcessorImpl;
     }
 
     @Override
@@ -105,6 +108,11 @@ public class ModelCommandCallable implements Callable<Long> {
             modelCommandEntityMgr.update(modelCommand);
 
             ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
+
+            if (commandParameters.isDebug()) {
+                debugProcessorImpl.execute(modelCommand, commandParameters);
+            }
+
             executeStep(modelStepRetrieveMetadataProcessor, ModelCommandStep.RETRIEVE_METADATA, commandParameters);
             executeYarnStep(ModelCommandStep.LOAD_DATA, commandParameters);
         } else { // modelCommand IN_PROGRESS

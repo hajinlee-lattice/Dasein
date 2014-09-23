@@ -19,6 +19,7 @@
                 <entry key="modelStepOutputResultsProcessor" value-ref="modelStepOutputResultsProcessor" />
                 <entry key="modelStepFinishProcessor" value-ref="modelStepFinishProcessor" />
                 <entry key="modelStepRetrieveMetadataProcessor" value-ref="modelStepRetrieveMetadataProcessor" />
+                <entry key="debugProcessorImpl" value-ref="debugProcessorImpl" />
                 <entry key="waitTime" value="${dataplatform.dlorchestrationjob.wait.time}" />
             </map>
         </property>

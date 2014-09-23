@@ -32,6 +32,7 @@ public class ModelCommandParameters {
     public static final String DEPIVOTED_EVENT_TABLE = "DepivotedEventTable";
     public static final String ALGORITHM_PROPERTIES = "AlgorithmProperties";
     public static final String ALGORITHM_SCRIPT = "AlgorithmScript";
+    public static final String DEBUG = "Debug";
 
     private String eventTable = null;
     private String depivotedEventTable = null;
@@ -46,6 +47,7 @@ public class ModelCommandParameters {
     private String dlUrl = null;
     private String dlTenant = null;
     private String dlQuery = null;
+    private boolean debug = false;
 
     public ModelCommandParameters (List<ModelCommandParameter> commandParameters) {
         super();
@@ -85,6 +87,10 @@ public class ModelCommandParameters {
             case ModelCommandParameters.DL_URL:
                 this.setDlUrl(parameter.getValue());
                 break;
+            case ModelCommandParameters.DEBUG:
+                this.setDebug(Boolean.parseBoolean(parameter.getValue()));
+                break;
+
             case ModelCommandParameters.DL_QUERY:
                 this.setDlQuery(parameter.getValue());
             }
@@ -233,6 +239,14 @@ public class ModelCommandParameters {
 
     public void setDlQuery(String dlQuery) {
         this.dlQuery = dlQuery;
+    }
+
+    public boolean isDebug() {
+        return debug;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
 }

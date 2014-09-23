@@ -53,6 +53,8 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     private ModelStepProcessor modelStepRetrieveMetadataProcessor;
 
+    private DebugProcessorImpl debugProcessorImpl;
+
     private int waitTime = 180;
 
     @Override
@@ -75,7 +77,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
             futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(modelCommand,
                     modelingJobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor,
                     modelCommandLogService, modelCommandResultEntityMgr, modelStepFinishProcessor,
-                    modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor)));
+                    modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor, debugProcessorImpl)));
         }
         for (Future<Long> future : futures) {
             try {
@@ -181,6 +183,14 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     public void setWaitTime(int waitTime) {
         this.waitTime = waitTime;
+    }
+
+    public DebugProcessorImpl getDebugProcessorImpl() {
+        return debugProcessorImpl;
+    }
+
+    public void setDebugProcessorImpl(DebugProcessorImpl debugProcessorImpl) {
+        this.debugProcessorImpl = debugProcessorImpl;
     }
 
 }
