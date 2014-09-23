@@ -1,7 +1,6 @@
 from leframework.model.states.summarygenerator import SummaryGenerator
+import numpy as np 
 from testbase import TestBase
-
-import numpy as np
 
 
 class SummaryGeneratorTest(TestBase):
