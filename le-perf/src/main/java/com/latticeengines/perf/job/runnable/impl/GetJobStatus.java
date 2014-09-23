@@ -2,7 +2,6 @@ package com.latticeengines.perf.job.runnable.impl;
 
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import com.latticeengines.common.exposed.util.HdfsUtils;

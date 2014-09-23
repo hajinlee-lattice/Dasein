@@ -159,16 +159,16 @@ public class PerfLoadTestNGBase {
         // dataplatform.dlorchestration.datasource.port=1433
         // dataplatform.dlorchestration.datasource.dbname=LeadScoringDB_buildmachine
 
-        String host = prop.getProperty("dataplatform.dlorchestration.datasource.host");
+        String host = prop.getProperty("dataplatform.test.datasource.host");
         // String host = "10.41.1.250";
-        int port = Integer.parseInt(prop.getProperty("dataplatform.dlorchestration.datasource.port"));
+        int port = Integer.parseInt(prop.getProperty("dataplatform.test.datasource.port"));
         // int port = 1433;
-        String database = prop.getProperty("dataplatform.dlorchestration.datasource.dbname");
+        String database = prop.getProperty("dataplatform.test.datasource.dbname");
         // String database = "LeadScoringDB_qe";
-        String user = prop.getProperty("dataplatform.dlorchestration.datasource.user");
-        String password = CipherUtils.decrypt(prop
-                .getProperty("dataplatform.dlorchestration.datasource.password.encrypted"));
-        builder.host(host).port(port).db(database).user(user).password(password);
+        String user = prop.getProperty("dataplatform.test.datasource.user");
+        String password = CipherUtils.decrypt(prop.getProperty("dataplatform.test.datasource.password.encrypted"));
+        String type = prop.getProperty("dataplatform.test.datasource.type");
+        builder.host(host).port(port).db(database).user(user).password(password).type(type);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer(customer);
