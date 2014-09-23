@@ -158,13 +158,11 @@ public final class LoggerAdapter {
 			@Override
 			public void run() {
 				while (iter.hasNext()) {
-					while (iter.hasNext()) {
-						IAppender a = iter.next();
-						try {
-							a.warn(name, message);
-						}
-						catch (Exception e) {}
+					IAppender a = iter.next();
+					try {
+						a.warn(name, message);
 					}
+					catch (Exception e) {}
 				}
 			}
 		});
