@@ -23,5 +23,5 @@ class SummaryGeneratorTest(TestBase):
         scoreData = np.loadtxt("scored.txt", delimiter=",")[:,1]
         
         rocScore = self.sg.getRocScore(zip(scoreData, eventData))
-        print("ROC score = %f" % rocScore)
+        self.assertFalse(rocScore == 0)
      
