@@ -140,8 +140,9 @@ class SummaryGenerator(State, JsonGenBase):
             theoreticalBestArea += theoreticalBestCounter
         
         # Sort by score
-        weightedEventDict = {k : np.mean(map(lambda x: x[1], rows)) for k, rows in itertools.groupby(score, lambda x: x[0])}
         score.sort(key = lambda rowScore: (rowScore[0], rowScore[1]), reverse = True)
+        weightedEventDict = {k : np.mean(map(lambda x: x[1], rows)) for k, rows in itertools.groupby(score, lambda x: x[0])}
+        
         actualBestCounter = 0
         actualBestArea = 0
         for i in range(len(score)):
