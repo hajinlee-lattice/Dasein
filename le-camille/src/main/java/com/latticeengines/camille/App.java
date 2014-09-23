@@ -14,7 +14,7 @@ import com.latticeengines.logging.LoggerAdapter;
 
 public class App
 {
-	// copy and paste safe
+	// copy / paste safe
 	private static final Logger log = LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 	
     public static void main(String[] args)
