@@ -140,7 +140,7 @@ class SummaryGenerator(State, JsonGenBase):
             theoreticalBestArea += theoreticalBestCounter
         
         # Sort by score
-        weightedEventDict = {k:np.mean(map(lambda x: x[1], rows)) for k, rows in itertools.groupby(score, lambda x: x[0])}
+        weightedEventDict = {k : np.mean(map(lambda x: x[1], rows)) for k, rows in itertools.groupby(score, lambda x: x[0])}
         score.sort(key = lambda rowScore: (rowScore[0], rowScore[1]), reverse = True)
         actualBestCounter = 0
         actualBestArea = 0
@@ -151,6 +151,9 @@ class SummaryGenerator(State, JsonGenBase):
         if theoreticalBestArea == 0:
             self.logger.warn("All events are 0, could not calculate ROC score.")
             return None
+        
+        self.logger.info("Actual best area = %f" % actualBestArea)
+        self.logger.info("Theoretical best area = %f" % theoreticalBestArea)
         return actualBestArea / float(theoreticalBestArea)
         
     def __getDLEventTableData(self, provenanceProperties):
