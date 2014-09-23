@@ -17,4 +17,6 @@ public interface ModelCommandLogService {
     void logLedpException(ModelCommand modelCommand, LedpException e);
 
     void logException(ModelCommand modelCommand, Exception e);
+
+    void logException(ModelCommand modelCommand, String message, Exception e);
 }

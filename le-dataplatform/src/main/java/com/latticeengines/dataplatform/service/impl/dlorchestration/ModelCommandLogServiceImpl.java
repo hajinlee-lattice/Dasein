@@ -28,7 +28,7 @@ public class ModelCommandLogServiceImpl implements ModelCommandLogService {
 
     @Autowired
     private ModelCommandLogEntityMgr modelCommandLogEntityMgr;
-    
+
     @Override
     public void log(ModelCommand modelCommand, String message) {
         log.info(MODELCOMMAND_ID_LOG_PREFIX + ":" + modelCommand.getPid() + " " + message);
@@ -65,9 +65,14 @@ public class ModelCommandLogServiceImpl implements ModelCommandLogService {
 
     @Override
     public void logException(ModelCommand modelCommand, Exception e) {
+        logException(modelCommand, "", e);
+    }
+
+    @Override
+    public void logException(ModelCommand modelCommand, String message, Exception e) {
         String stackTrace = e != null ? ExceptionUtils.getFullStackTrace(e) : "";
-        StringBuffer sb = new StringBuffer();
-        sb.append("errorMessage:").append(e.getMessage()).append(LINE_SEPARATOR).append(stackTrace);
+        StringBuffer sb = new StringBuffer(message);
+        sb.append(" errorMessage:").append(e.getMessage()).append(LINE_SEPARATOR).append(stackTrace);
         log(modelCommand, sb.toString());
     }
 }

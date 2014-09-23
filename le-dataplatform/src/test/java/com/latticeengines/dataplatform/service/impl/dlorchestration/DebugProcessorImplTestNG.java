@@ -9,6 +9,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
@@ -17,11 +18,15 @@ public class DebugProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private static final String TEMP_EVENTTABLE = "DebugProcessorImplTestNG_eventtable";
     private static final String TEMP_EVENTTABLE_COPY = TEMP_EVENTTABLE + DebugProcessorImpl.COPY_SUFFIX;
+
     @Autowired
     private DebugProcessorImpl debugProcessorImpl;
 
     @Autowired
     private JdbcTemplate dlOrchestrationJdbcTemplate;
+
+    @Autowired
+    private ModelCommandEntityMgr modelCommandEntityMgr;
 
     protected boolean doYarnClusterSetup() {
         return false;
@@ -36,12 +41,9 @@ public class DebugProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
             // Microsoft JDBC Driver 4.0 for SQL Server
             dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE + "', 'U') IS NOT NULL DROP TABLE "
                     + TEMP_EVENTTABLE);
-            dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE_COPY
-                    + "', 'U') IS NOT NULL DROP TABLE " + TEMP_EVENTTABLE_COPY);
         } else {
             // MySQL Connector Java
             dlOrchestrationJdbcTemplate.execute("drop table if exists " + TEMP_EVENTTABLE);
-            dlOrchestrationJdbcTemplate.execute("drop table if exists " + TEMP_EVENTTABLE_COPY);
         }
         dlOrchestrationJdbcTemplate.execute("create table " + TEMP_EVENTTABLE + " (Id int)");
     }
@@ -56,6 +58,7 @@ public class DebugProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testExecute() throws Exception {
         ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE, true);
+        modelCommandEntityMgr.create(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
         debugProcessorImpl.execute(command, commandParameters);
