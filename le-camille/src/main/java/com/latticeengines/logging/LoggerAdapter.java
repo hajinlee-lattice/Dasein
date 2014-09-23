@@ -94,8 +94,9 @@ public final class LoggerAdapter {
 			@Override
 			public void run() {
 				while (iter.hasNext()) {
+					IAppender a = iter.next();
 					try {
-						iter.next().debug(name, message);
+						a.debug(name, message);
 					}
 					catch (Exception e) {}
 				}
@@ -109,8 +110,9 @@ public final class LoggerAdapter {
 			@Override
 			public void run() {
 				while (iter.hasNext()) {
+					IAppender a = iter.next();
 					try {
-						iter.next().error(name, message);
+						a.error(name, message);
 					}
 					catch (Exception e) {}
 				}
@@ -124,8 +126,9 @@ public final class LoggerAdapter {
 			@Override
 			public void run() {
 				while (iter.hasNext()) {
+					IAppender a = iter.next();
 					try {
-						iter.next().info(name, message);
+						a.info(name, message);
 					}
 					catch (Exception e) {}
 				}
@@ -139,8 +142,9 @@ public final class LoggerAdapter {
 			@Override
 			public void run() {
 				while (iter.hasNext()) {
+					IAppender a = iter.next();
 					try {
-						iter.next().trace(name, message);
+						a.trace(name, message);
 					}
 					catch (Exception e) {}
 				}
@@ -155,8 +159,9 @@ public final class LoggerAdapter {
 			public void run() {
 				while (iter.hasNext()) {
 					while (iter.hasNext()) {
+						IAppender a = iter.next();
 						try {
-							iter.next().warn(name, message);
+							a.warn(name, message);
 						}
 						catch (Exception e) {}
 					}
