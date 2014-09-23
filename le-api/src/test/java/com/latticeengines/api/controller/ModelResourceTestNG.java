@@ -174,7 +174,7 @@ public class ModelResourceTestNG extends ApiFunctionalTestNGBase {
                 .db(dataSourceDB) //
                 .user(dataSourceUser) //
                 .password(dataSourcePasswd)//
-                .type(dataSourceType);
+                .type(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("INTERNAL");

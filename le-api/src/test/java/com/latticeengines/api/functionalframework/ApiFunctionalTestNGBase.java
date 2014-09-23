@@ -50,27 +50,6 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
 
     protected DataPlatformFunctionalTestNGBase platformTestBase;
 
-    @Value("${dataplatform.dlorchestration.datasource.host}")
-    protected String dataSourceHost;
-
-    @Value("${dataplatform.dlorchestration.datasource.port}")
-    protected int dataSourcePort;
-
-    @Value("${dataplatform.dlorchestration.datasource.dbname}")
-    protected String dataSourceDB;
-
-    @Value("${dataplatform.dlorchestration.datasource.user}")
-    protected String dataSourceUser;
-
-    @Value("${dataplatform.dlorchestration.datasource.password.encrypted}")
-    protected String dataSourcePasswd;
-
-    @Value("${dataplatform.dlorchestration.datasource.type}")
-    protected String dataSourceType;
-
-    @Value("${dataplatform.customer.basedir}")
-    protected String customerBaseDir;
-
     @Value("${api.rest.endpoint.hostport}")
     protected String restEndpointHost;
 

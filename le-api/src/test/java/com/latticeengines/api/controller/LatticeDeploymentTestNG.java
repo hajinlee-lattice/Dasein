@@ -57,7 +57,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
         randomForestAlgorithm.setSampleName("all");
         randomForestAlgorithm
-                .setAlgorithmProperties("criterion=gini n_estimators=10 n_jobs=4 min_samples_split=25 min_samples_leaf=10 bootstrap=True");
+                .setAlgorithmProperties("criterion=gini n_estimators=50 n_jobs=4 min_samples_split=25 min_samples_leaf=10 bootstrap=True");
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Random Forest against all");
@@ -95,7 +95,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
-                .password(dataSourcePasswd).type(dataSourceType);
+                .password(dataSourcePasswd).type(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("Lattice");
