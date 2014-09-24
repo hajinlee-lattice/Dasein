@@ -57,6 +57,11 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
         return true;
     }
 
+    @Override
+    public boolean doClearDbTables() {
+        return false;
+    }
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setupRunEnvironment() throws Exception {
         restTemplate.setErrorHandler(new ThrowExceptionResponseErrorHandler());

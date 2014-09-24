@@ -114,6 +114,10 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return true;
     }
 
+    protected boolean doClearDbTables() {
+        return true;
+    }
+
     public File[] getAvroFilesForDir(String parentDir) {
         return new File(parentDir).listFiles(new FilenameFilter() {
 
@@ -200,6 +204,9 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
     @AfterClass(groups = { "functional", "functional.scheduler" })
     public void clearTables() {
+        if (!doClearDbTables()) {
+            return;
+        }
         try {
             for (BaseEntityMgr<?> entityMgr : orderedEntityMgrListForDbClean.entityMgrs()) {
                 entityMgr.deleteAll();
