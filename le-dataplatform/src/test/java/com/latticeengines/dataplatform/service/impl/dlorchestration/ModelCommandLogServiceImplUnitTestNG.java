@@ -33,12 +33,13 @@ public class ModelCommandLogServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testLogBeginStep() {    // This test just confirms execution with no exceptions raised
-        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, new ArrayList<ModelCommandParameter>(), ModelCommand.TAHOE);        
-        modelCommandLogServiceImpl.logBeginStep(command, ModelCommandStep.LOAD_DATA);    
+        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, new ArrayList<ModelCommandParameter>(), ModelCommand.TAHOE);
+        modelCommandLogServiceImpl.logBeginStep(command, ModelCommandStep.LOAD_DATA);
         modelCommandLogServiceImpl.logCompleteStep(command, ModelCommandStep.LOAD_DATA, ModelCommandStatus.SUCCESS);
         modelCommandLogServiceImpl.logLedpException(command, new LedpException(LedpCode.LEDP_16000, new IllegalArgumentException(
                 "Some test exception message"), new String[] { "sometext" }));
-        
+
         modelCommandLogServiceImpl.logException(command, new IllegalArgumentException("Some test exception message"));
+        modelCommandLogServiceImpl.logException(command, "Some message", new IllegalArgumentException("Some test exception message"));
     }
 }
