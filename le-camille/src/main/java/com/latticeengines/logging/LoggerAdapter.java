@@ -206,7 +206,7 @@ public final class LoggerAdapter {
 			if (format == null)
 				return null;
 			try {
-				return String.format(format, args);
+				return org.slf4j.helpers.MessageFormatter.arrayFormat(format, args).getMessage();
 			}
 			catch (Exception e) {
 				return stackTraceToString(e);

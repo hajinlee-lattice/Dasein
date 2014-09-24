@@ -46,6 +46,8 @@ public class App
 			log.error(e.getMessage(), e);
 		}
         
+        log.debug("Debug @ {}", new java.util.Date());
+        
         log.error("Something is horribly wrong!", new Exception("Not really, just a test."));
         
         System.exit(0); // required to kill the logging thread
