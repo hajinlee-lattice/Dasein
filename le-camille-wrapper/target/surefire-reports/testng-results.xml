@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="0" passed="0">
+  <reporter-output>
+  </reporter-output>
+  <suite name="com.latticeengines.le_camille_wrapper.AppTest" duration-ms="2" started-at="2014-09-25T14:59:24Z" finished-at="2014-09-25T14:59:24Z">
+    <groups>
+    </groups>
+    <test name="Command line test" duration-ms="2" started-at="2014-09-25T14:59:24Z" finished-at="2014-09-25T14:59:24Z">
+    </test> <!-- Command line test -->
+  </suite> <!-- com.latticeengines.le_camille_wrapper.AppTest -->
+</testng-results>

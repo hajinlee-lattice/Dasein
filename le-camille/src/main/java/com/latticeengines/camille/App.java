@@ -16,11 +16,12 @@ public class App
 {
 	// copy / paste safe
 	private static final Logger log = LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
+	static {
+		LoggerAdapter.addAppender(new DefaultAppender(System.out));
+	}
 	
     public static void main(String[] args)
     {
-    	LoggerAdapter.addAppender(new DefaultAppender(System.out));
-    	
         ArgumentParser parser = ArgumentParsers.newArgumentParser("prog");
         parser.addArgument("-foo");
         try {
