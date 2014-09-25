@@ -6,7 +6,11 @@
     <artifactId>le-api-rpm</artifactId>
     <packaging>rpm</packaging>
     <description>LE API RPM</description>
-
+	
+	<properties>
+		<le.rpm.version>1.0.0-SNAPSHOT</le.rpm.version>
+	</properties>
+	
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
@@ -88,7 +92,7 @@
                             <groupname>yarn</groupname>
                             <sources>
                                 <source>
-                                    <location>target/le-api-1.0.0-SNAPSHOT.war</location>
+                                    <location>target/le-api-${le.rpm.version}.war</location>
                                 </source>
                             </sources>
                         </mapping>

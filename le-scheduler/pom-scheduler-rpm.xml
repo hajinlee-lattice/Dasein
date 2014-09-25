@@ -6,6 +6,10 @@
 	<artifactId>le-scheduler-rpm</artifactId>
 	<packaging>rpm</packaging>
 	<description>LE SCHEDULER RPM</description>
+	
+	<properties>
+		<le.rpm.version>1.0.0-SNAPSHOT</le.rpm.version>
+	</properties>
 
 	<parent>
 		<groupId>com.latticeengines</groupId>
@@ -87,7 +91,7 @@
 							<groupname>root</groupname>
 							<sources>
 								<source>
-									<location>target/le-scheduler-1.0.0-SNAPSHOT.jar</location>
+									<location>target/le-scheduler-${le.rpm.version}.jar</location>
 								</source>
 							</sources>
 						</mapping>

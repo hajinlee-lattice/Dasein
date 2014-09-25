@@ -6,6 +6,10 @@
 	<artifactId>le-dataplatform-java-dependencies</artifactId>
 	<packaging>rpm</packaging>
 	<description>LE DATAPLATFORM RPM</description>
+	
+	<properties>
+		<le.rpm.version>1.0.0-SNAPSHOT</le.rpm.version>
+	</properties>
 
 	<parent>
 		<groupId>com.latticeengines</groupId>
@@ -34,13 +38,13 @@
 							<groupname>hadoop</groupname>
 							<sources>
 								<source>
-									<location>target/le-dataplatform-1.0.0-SNAPSHOT.jar</location>
+									<location>target/le-dataplatform-${le.rpm.version}.jar</location>
 								</source>
 								<source>
-									<location>target/le-dataplatform-1.0.0-SNAPSHOT-intf.jar</location>
+									<location>target/le-dataplatform-${le.rpm.version}-intf.jar</location>
 								</source>
 								<source>
-									<location>target/le-dataplatform-1.0.0-SNAPSHOT-tests.jar</location>
+									<location>target/le-dataplatform-${le.rpm.version}-tests.jar</location>
 								</source>
 								<source>
 									<location>target/dependency</location>
