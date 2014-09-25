@@ -20,12 +20,12 @@ public class LoggerAdapterUnitTestNG {
 	private static final Marker marker = MarkerFactory.getMarker("TestMarker");
 	
     @Test(groups = "unit")
-    public void testTrace1() {
+    public void testTraceIsEnabled() {
     	Assert.assertTrue(log.isTraceEnabled());
     }
 	
     @Test(groups = "unit")
-    public void testTrace2() {
+    public void testTraceMessage() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -40,7 +40,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testTrace3() {
+    public void testTraceFormat1Arg() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -56,7 +56,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testTrace4() {
+    public void testTraceFormat2Args() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -73,7 +73,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testTrace5() {
+    public void testTraceFormatArgArray() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -91,7 +91,7 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testTrace6() {
+    public void testTraceMessageThrowable() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -107,12 +107,12 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testTrace7() {
+    public void testTraceIsEnabledWithMarker() {
     	Assert.assertTrue(log.isTraceEnabled(marker));
     }
     
     @Test(groups = "unit")
-    public void testTrace8() {
+    public void testTraceMessageWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -127,7 +127,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testTrace9() {
+    public void testTraceFormat1ArgWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -143,7 +143,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testTrace10() {
+    public void testTraceFormat2ArgsWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -160,12 +160,12 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testTrace11() {
+    public void testTraceFormatArgArrayWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
     	
-    	log.trace(format, argArray);
+    	log.trace(marker, format, argArray);
     	
     	LoggerAdapter.removeAppender(a);
     	LoggerAdapter.sync();
@@ -178,7 +178,7 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testTrace12() {
+    public void testTraceMessageThrowableWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -196,12 +196,12 @@ public class LoggerAdapterUnitTestNG {
     /////////////////////////////////////////////////////////////////////////////////
     
     @Test(groups = "unit")
-    public void testDebug1() {
+    public void testDebugIsEnabled() {
     	Assert.assertTrue(log.isDebugEnabled());
     }
 	
     @Test(groups = "unit")
-    public void testDebug2() {
+    public void testDebugMessage() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -216,7 +216,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testDebug3() {
+    public void testDebugFormat1Arg() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -232,7 +232,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testDebug4() {
+    public void testDebugFormat2Args() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -249,7 +249,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testDebug5() {
+    public void testDebugFormatArgArray() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -267,7 +267,7 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testDebug6() {
+    public void testDebugMessageThrowable() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -283,12 +283,12 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testDebug7() {
+    public void testDebugIsEnabledWithMarker() {
     	Assert.assertTrue(log.isDebugEnabled(marker));
     }
     
     @Test(groups = "unit")
-    public void testDebug8() {
+    public void testDebugMessageWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -303,7 +303,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testDebug9() {
+    public void testDebugFormat1ArgWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -319,7 +319,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testDebug10() {
+    public void testDebugFormat2ArgsWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -336,12 +336,12 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testDebug11() {
+    public void testDebugFormatArgArrayWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
     	
-    	log.debug(format, argArray);
+    	log.debug(marker, format, argArray);
     	
     	LoggerAdapter.removeAppender(a);
     	LoggerAdapter.sync();
@@ -354,7 +354,7 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testDebug12() {
+    public void testDebugMessageThrowableWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -372,12 +372,12 @@ public class LoggerAdapterUnitTestNG {
     /////////////////////////////////////////////////////////////////////////////////
     
     @Test(groups = "unit")
-    public void testInfo1() {
+    public void testInfoIsEnabled() {
     	Assert.assertTrue(log.isDebugEnabled());
     }
 	
     @Test(groups = "unit")
-    public void testInfo2() {
+    public void testInfoMessage() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -392,7 +392,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testInfo3() {
+    public void testInfoFormat1Arg() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -408,7 +408,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testInfo4() {
+    public void testInfoFormat2Args() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -425,7 +425,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testInfo5() {
+    public void testInfoFormatArgArray() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -443,7 +443,7 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testInfo6() {
+    public void testInfoMessageThrowable() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -459,12 +459,12 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testInfo7() {
+    public void testInfoIsEnabledWithMarker() {
     	Assert.assertTrue(log.isInfoEnabled(marker));
     }
     
     @Test(groups = "unit")
-    public void testInfo8() {
+    public void testInfoMessageWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -479,7 +479,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testInfo9() {
+    public void testInfoFormat1ArgWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -495,7 +495,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testInfo10() {
+    public void testInfoFormat2ArgsWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -512,12 +512,12 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testInfo11() {
+    public void testInfoFormatArgArrayWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
     	
-    	log.info(format, argArray);
+    	log.info(marker, format, argArray);
     	
     	LoggerAdapter.removeAppender(a);
     	LoggerAdapter.sync();
@@ -530,7 +530,7 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testInfo12() {
+    public void testInfoMessageThrowableWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -548,12 +548,12 @@ public class LoggerAdapterUnitTestNG {
     /////////////////////////////////////////////////////////////////////////////////
     
     @Test(groups = "unit")
-    public void testWarn1() {
+    public void testWarnIsEnabled() {
     	Assert.assertTrue(log.isWarnEnabled());
     }
 	
     @Test(groups = "unit")
-    public void testWarn2() {
+    public void testWarnMessage() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -568,7 +568,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testWarn3() {
+    public void testWarnFormat1Arg() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -584,7 +584,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testWarn4() {
+    public void testWarnFormat2Args() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -601,7 +601,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testWarn5() {
+    public void testWarnFormatArgArray() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -619,7 +619,7 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testWarn6() {
+    public void testWarnMessageThrowable() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -635,12 +635,12 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testWarn7() {
+    public void testWarnIsEnabledWithMarker() {
     	Assert.assertTrue(log.isWarnEnabled(marker));
     }
     
     @Test(groups = "unit")
-    public void testWarn8() {
+    public void testWarnMessageWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -655,7 +655,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testWarn9() {
+    public void testWarnFormat1ArgWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -671,7 +671,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testWarn10() {
+    public void testWarnFormat2ArgsWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -688,12 +688,12 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testWarn11() {
+    public void testWarnFormatArgArrayWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
     	
-    	log.warn(format, argArray);
+    	log.warn(marker, format, argArray);
     	
     	LoggerAdapter.removeAppender(a);
     	LoggerAdapter.sync();
@@ -706,7 +706,7 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testWarn12() {
+    public void testWarnMessageThrowableWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -724,12 +724,12 @@ public class LoggerAdapterUnitTestNG {
     /////////////////////////////////////////////////////////////////////////////////
     
     @Test(groups = "unit")
-    public void testError1() {
+    public void testErrorIsEnabled() {
     	Assert.assertTrue(log.isErrorEnabled());
     }
 	
     @Test(groups = "unit")
-    public void testError2() {
+    public void testErrorMessage() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -744,7 +744,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testError3() {
+    public void testErrorFormat1Arg() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -760,7 +760,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testError4() {
+    public void testErrorFormat2Args() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -777,7 +777,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testError5() {
+    public void testErrorFormatArgArray() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -795,7 +795,7 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testError6() {
+    public void testErrorMessageThrowable() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -811,12 +811,12 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testError7() {
+    public void testErrorIsEnabledWithMarker() {
     	Assert.assertTrue(log.isErrorEnabled(marker));
     }
     
     @Test(groups = "unit")
-    public void testError8() {
+    public void testErrorMessageWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -831,7 +831,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testError9() {
+    public void testErrorFormat1ArgWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -847,7 +847,7 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testError10() {
+    public void testErrorFormat2ArgsWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
@@ -864,12 +864,12 @@ public class LoggerAdapterUnitTestNG {
     }
 	
     @Test(groups = "unit")
-    public void testError11() {
+    public void testErrorFormatArgArrayWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
     	
-    	log.error(format, argArray);
+    	log.error(marker, format, argArray);
     	
     	LoggerAdapter.removeAppender(a);
     	LoggerAdapter.sync();
@@ -882,7 +882,7 @@ public class LoggerAdapterUnitTestNG {
     }
     
     @Test(groups = "unit")
-    public void testError12() {
+    public void testErrorMessageThrowableWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
     	LoggerAdapter.addAppender(a);
