@@ -14,7 +14,7 @@ public class Wrapper
     {
     	LoggerAdapter.addAppender(new DefaultAppender(System.out));
     	
-    	log.info("This is {} saying hello!", new Object(){}.getClass().getEnclosingClass().getName());
+    	log.info("This is {} saying hello!", new Object(){}.getClass().getEnclosingClass().getSimpleName());
     	
     	com.latticeengines.camille.App.main(new String[]{"-foo", "bar"});
     	

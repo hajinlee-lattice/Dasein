@@ -41,9 +41,5 @@ public class App
         catch (JsonProcessingException e) {
 			log.error(e.getMessage(), e);
 		}
-        
-        log.debug("Debug @ {}", new java.util.Date());
-        
-        log.error("Something is horribly wrong!", new Exception("Not really, just a test."));
     }
 }

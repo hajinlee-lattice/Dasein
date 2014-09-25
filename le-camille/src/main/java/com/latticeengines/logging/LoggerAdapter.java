@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -16,10 +17,16 @@ import org.slf4j.Logger;
 import org.slf4j.Marker;
 
 public final class LoggerAdapter {
-	private static final Collection<IAppender> appenders = new CopyOnWriteArrayList<IAppender>();
+	// for fast, thread safe iteration
+	private static final Collection<Appender> appendersList = new CopyOnWriteArrayList<Appender>();
 	
+	// to ensure uniqueness
+	private static final Collection<Appender> appendersSet = new HashSet<Appender>();
+	
+	// single logging thread ensures log ordering
 	private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 	
+	// at system shutdown, kill the logging thread and await its' termination
 	static {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
@@ -35,6 +42,7 @@ public final class LoggerAdapter {
 		});
 	}
 	
+	// prevent instantiation
 	private LoggerAdapter() {}
 	
 	public static String stackTraceToString(Throwable t) {
@@ -52,18 +60,18 @@ public final class LoggerAdapter {
             	Logger logger;
             	synchronized (loggerMap) {
 	                if ((logger = loggerMap.get(name)) == null) {
-    					// Logging is not supported in IAppender(s) as that could cause infinite loops.
-	                	// Before creating a logger that makes callbacks to IAppenders we should be sure
-	                	// it's attempted use is not in an IAppender.
-	                	// If IAppender is implemented, return a logger that does not make the callbacks
+    					// Logging is not supported in Appender(s) as that could cause infinite loops.
+	                	// Before creating a logger that makes callbacks to Appenders we should be sure
+	                	// it's attempted use is not in an Appender.
+	                	// If Appender is implemented, return a logger that does not make the callbacks
 	                	// (NoOpLogger) to prevent runtime exceptions.
 	                	
-	                	boolean foundIAppender = false;
+	                	boolean foundAppender = false;
 	                	
 	                	try {
 							for (Class<?> c = Class.forName(name); c != null; c = c.getEnclosingClass()) {
-			    				if (IAppender.class.isAssignableFrom(c)) {
-			    					foundIAppender = true;
+			    				if (Appender.class.isAssignableFrom(c)) {
+			    					foundAppender = true;
 			    					break;
 			    				}
 							}
@@ -71,8 +79,8 @@ public final class LoggerAdapter {
 	                	catch (ClassNotFoundException e0) { // non-class naming is OK (e.g., "ROOT")
 	            			for (StackTraceElement e : new Throwable().getStackTrace()) {
 								try {
-									if (IAppender.class.isAssignableFrom(Class.forName(e.getClassName()))) {
-										foundIAppender = true;
+									if (Appender.class.isAssignableFrom(Class.forName(e.getClassName()))) {
+										foundAppender = true;
 										break;
 									}
 								}
@@ -80,7 +88,7 @@ public final class LoggerAdapter {
 	            			}
 	                	}
 	                	
-	                	loggerMap.put(name, logger = foundIAppender ? new NoOpLogger(name) : new LoggerImpl(name));
+	                	loggerMap.put(name, logger = foundAppender ? new NoOpLogger(name) : new LoggerImpl(name));
 	                }
             	}
 	            return logger;
@@ -89,12 +97,12 @@ public final class LoggerAdapter {
     }
 	
 	private static void fireDebug(final String name, final String message) {
-		final Iterator<IAppender> iter = appenders.iterator();
+		final Iterator<Appender> iter = appendersList.iterator();
 		executor.submit(new Runnable() {
 			@Override
 			public void run() {
 				while (iter.hasNext()) {
-					IAppender a = iter.next();
+					Appender a = iter.next();
 					try {
 						a.debug(name, message);
 					}
@@ -105,12 +113,12 @@ public final class LoggerAdapter {
 	}
 	
 	private static void fireError(final String name, final String message) {
-		final Iterator<IAppender> iter = appenders.iterator();
+		final Iterator<Appender> iter = appendersList.iterator();
 		executor.submit(new Runnable() {
 			@Override
 			public void run() {
 				while (iter.hasNext()) {
-					IAppender a = iter.next();
+					Appender a = iter.next();
 					try {
 						a.error(name, message);
 					}
@@ -121,12 +129,12 @@ public final class LoggerAdapter {
 	}
 	
 	private static void fireInfo(final String name, final String message) {
-		final Iterator<IAppender> iter = appenders.iterator();
+		final Iterator<Appender> iter = appendersList.iterator();
 		executor.submit(new Runnable() {
 			@Override
 			public void run() {
 				while (iter.hasNext()) {
-					IAppender a = iter.next();
+					Appender a = iter.next();
 					try {
 						a.info(name, message);
 					}
@@ -137,12 +145,12 @@ public final class LoggerAdapter {
 	}
 	
 	private static void fireTrace(final String name, final String message) {
-		final Iterator<IAppender> iter = appenders.iterator();
+		final Iterator<Appender> iter = appendersList.iterator();
 		executor.submit(new Runnable() {
 			@Override
 			public void run() {
 				while (iter.hasNext()) {
-					IAppender a = iter.next();
+					Appender a = iter.next();
 					try {
 						a.trace(name, message);
 					}
@@ -153,12 +161,12 @@ public final class LoggerAdapter {
 	}
 	
 	private static void fireWarn(final String name, final String message) {
-		final Iterator<IAppender> iter = appenders.iterator();
+		final Iterator<Appender> iter = appendersList.iterator();
 		executor.submit(new Runnable() {
 			@Override
 			public void run() {
 				while (iter.hasNext()) {
-					IAppender a = iter.next();
+					Appender a = iter.next();
 					try {
 						a.warn(name, message);
 					}
@@ -168,14 +176,34 @@ public final class LoggerAdapter {
 		});
 	}
 	
-	public static boolean addAppender(IAppender appender) {
+	public static boolean addAppender(Appender appender) {
 		if (appender == null)
-			throw new NullPointerException("null IAppenders are not supported");
-		return appenders.add(appender);
+			return false;
+			
+		synchronized (appendersSet) {
+			if (appendersSet.contains(appender)) {
+				return false;
+			}
+			appendersList.add(appender);
+			appendersSet.add(appender);
+		}
+		
+		return true;
 	}
 	
-	public static boolean removeAppender(IAppender appender) {
-		return appenders.remove(appender);
+	public static boolean removeAppender(Appender appender) {
+		if (appender == null)
+			return false;
+		
+		synchronized (appendersSet) {
+			if (appendersSet.contains(appender)) {
+				appendersList.remove(appender);
+				appendersSet.remove(appender);
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	private static class LoggerImpl implements Logger {
