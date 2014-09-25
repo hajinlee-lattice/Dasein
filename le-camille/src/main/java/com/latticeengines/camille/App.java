@@ -15,6 +15,7 @@ import com.latticeengines.logging.LoggerAdapter;
 public class App {
 	private static final Logger log = LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 	
+	// TODO: remove
     public static void main(String[] args) {
     	LoggerAdapter.addAppender(new DefaultAppender(System.out));
     	
