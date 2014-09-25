@@ -11,7 +11,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
@@ -32,13 +31,8 @@ public final class LoggerAdapter {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				executor.shutdown();
-				try {
-					executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-				}
-				catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				sync();
+				executor.shutdownNow();
 			}
 		});
 	}

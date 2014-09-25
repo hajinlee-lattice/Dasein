@@ -9,14 +9,15 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.logging.DefaultAppender;
+import com.latticeengines.logging.LoggerAdapter;
 
-public class App
-{
-	// copy / paste safe
+public class App {
 	private static final Logger log = LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 	
-    public static void main(String[] args)
-    {   	
+    public static void main(String[] args) {
+    	LoggerAdapter.addAppender(new DefaultAppender(System.out));
+    	
         ArgumentParser parser = ArgumentParsers.newArgumentParser("prog");
         parser.addArgument("-foo");
         try {
@@ -41,5 +42,7 @@ public class App
         catch (JsonProcessingException e) {
 			log.error(e.getMessage(), e);
 		}
+        
+        System.exit(0);
     }
 }
