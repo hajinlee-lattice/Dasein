@@ -9,23 +9,18 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.logging.DefaultAppender;
-import com.latticeengines.logging.LoggerAdapter;
 
 public class App
 {
 	// copy / paste safe
 	private static final Logger log = LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
-	static {
-		LoggerAdapter.addAppender(new DefaultAppender(System.out));
-	}
 	
     public static void main(String[] args)
     {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("prog");
         parser.addArgument("-foo");
         try {
-			System.out.println(parser.parseArgs(args).getString("foo"));
+        	log.info("foo = {}", parser.parseArgs(args).getString("foo"));
 		}
         catch (ArgumentParserException e) {
 			log.error(e.getMessage(), e);
@@ -50,7 +45,5 @@ public class App
         log.debug("Debug @ {}", new java.util.Date());
         
         log.error("Something is horribly wrong!", new Exception("Not really, just a test."));
-        
-        System.exit(0); // required to kill the logging thread
     }
 }
