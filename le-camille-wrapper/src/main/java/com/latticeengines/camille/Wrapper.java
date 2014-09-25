@@ -1,6 +1,6 @@
-package com.latticeengines.le_camille_wrapper;
+package com.latticeengines.camille;
 
-public class App 
+public class Wrapper 
 {
     public static void main( String[] args )
     {
