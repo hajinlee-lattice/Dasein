@@ -16,7 +16,7 @@ public class App
 	private static final Logger log = LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 	
     public static void main(String[] args)
-    {
+    {   	
         ArgumentParser parser = ArgumentParsers.newArgumentParser("prog");
         parser.addArgument("-foo");
         try {

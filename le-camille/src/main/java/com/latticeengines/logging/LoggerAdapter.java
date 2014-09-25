@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -96,6 +97,25 @@ public final class LoggerAdapter {
         };
     }
 	
+    /**
+     * Blocks until the logging thread is done.
+     */
+    public static void sync() {
+    	try {
+    		// submit an empty job and wait for it to finish
+        	executor.submit(new Runnable() {
+    			@Override
+    			public void run() { }
+        	}).get();
+		}
+    	catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    	catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+    }
+    
 	private static void fireDebug(final String name, final String message) {
 		final Iterator<Appender> iter = appendersList.iterator();
 		executor.submit(new Runnable() {

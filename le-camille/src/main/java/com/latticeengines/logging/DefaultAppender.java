@@ -22,7 +22,8 @@ public class DefaultAppender implements Appender {
 			catch (IOException e0) {
 				try {
 					out.append(LoggerAdapter.stackTraceToString(e0));
-				} catch (IOException e1) {
+				}
+				catch (IOException e1) {
 					e1.printStackTrace();
 				}
 			}
