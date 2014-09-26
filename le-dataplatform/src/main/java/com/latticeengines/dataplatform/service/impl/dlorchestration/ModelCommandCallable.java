@@ -1,18 +1,25 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
+import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
@@ -53,6 +60,12 @@ public class ModelCommandCallable implements Callable<Long> {
     private DebugProcessorImpl debugProcessorImpl;
 
     private ModelCommand modelCommand;
+    
+    @Autowired
+    private Configuration yarnConfiguration;
+    
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
 
     public ModelCommandCallable(ModelCommand modelCommand, ModelingJobService modelingJobService,
             ModelCommandEntityMgr modelCommandEntityMgr, ModelCommandStateEntityMgr modelCommandStateEntityMgr,
@@ -124,8 +137,18 @@ public class ModelCommandCallable implements Callable<Long> {
             for (ModelCommandState commandState : commandStates) {
                 JobStatus jobStatus = modelingJobService.getJobStatus(commandState.getYarnApplicationId());
                 saveModelCommandStateFromJobStatus(commandState, jobStatus);
-
+                
                 if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
+                	if(commandState.getModelCommandStep().equals(ModelCommandStep.LOAD_DATA)){
+                		ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
+                		String customer = modelCommand.getDeploymentExternalId();
+                		String filePath = customerBaseDir + "/" + customer + "/data/"+ commandParameters.getEventTable() + "/part-m-00000.avro";
+                		try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
+                	        log.info("_____Job is "+ jobStatus.getState() + "," + jobStatus.getStatus() + " file status " + filePath + " is :"+ fs.exists(new Path(filePath))); 
+                	    } catch (IOException e) {
+                	        throw new LedpException(LedpCode.LEDP_16001, e, new String[] { filePath });
+                	    }
+                	}
                     successCount++;
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
                         || YarnUtils.isPrempted(jobStatus.getDiagnostics())) {
