@@ -14,6 +14,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
+@Component("modelCommandCallable")
 public class ModelCommandCallable implements Callable<Long> {
 
     private static final Log log = LogFactory.getLog(ModelCommandCallable.class);
