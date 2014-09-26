@@ -1,10 +1,10 @@
-package com.latticeengines.camille.initialization;
+package com.latticeengines.camille;
 
-public abstract class Initializer {
+class ConfigJson {
 	private String podId = null;
 	private String connectionString = null;
 	
-	protected Initializer() { }
+	protected ConfigJson() { }
 	
 	public String getPodId() {
 		return podId;
