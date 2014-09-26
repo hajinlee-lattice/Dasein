@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
-@Component("modelCommandCallable")
 public class ModelCommandCallable implements Callable<Long> {
 
     private static final Log log = LogFactory.getLog(ModelCommandCallable.class);
@@ -68,6 +67,8 @@ public class ModelCommandCallable implements Callable<Long> {
     
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
+    
+    public ModelCommandCallable() {}
 
     public ModelCommandCallable(ModelCommand modelCommand, ModelingJobService modelingJobService,
             ModelCommandEntityMgr modelCommandEntityMgr, ModelCommandStateEntityMgr modelCommandStateEntityMgr,
