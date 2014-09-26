@@ -4,14 +4,17 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
@@ -56,14 +59,15 @@ public class ModelCommandCallable implements Callable<Long> {
     private DebugProcessorImpl debugProcessorImpl;
 
     private ModelCommand modelCommand;
-    
-    public ModelCommandCallable() {}
+
+    public ModelCommandCallable() {
+    }
 
     public ModelCommandCallable(ModelCommand modelCommand, ModelingJobService modelingJobService,
             ModelCommandEntityMgr modelCommandEntityMgr, ModelCommandStateEntityMgr modelCommandStateEntityMgr,
             ModelStepYarnProcessor modelStepYarnProcessor, ModelCommandLogService modelCommandLogService,
             ModelCommandResultEntityMgr modelCommandResultEntityMgr, ModelStepProcessor modelStepFinishProcessor,
-            ModelStepProcessor modelStepOutputResultsProcessor, ModelStepProcessor modelStepRetrieveMetadataProcessor, 
+            ModelStepProcessor modelStepOutputResultsProcessor, ModelStepProcessor modelStepRetrieveMetadataProcessor,
             DebugProcessorImpl debugProcessorImpl) {
         this.modelCommand = modelCommand;
         this.modelingJobService = modelingJobService;
@@ -104,7 +108,7 @@ public class ModelCommandCallable implements Callable<Long> {
         return modelCommand.getPid();
     }
 
-    private void executeWorkflow() {
+    private void executeWorkflow() throws Exception {
         if (modelCommand.isNew()) {
             Date now = new Date();
             modelCommandResultEntityMgr.create(new ModelCommandResult(modelCommand, now, now,
@@ -131,18 +135,28 @@ public class ModelCommandCallable implements Callable<Long> {
             for (ModelCommandState commandState : commandStates) {
                 JobStatus jobStatus = modelingJobService.getJobStatus(commandState.getYarnApplicationId());
                 saveModelCommandStateFromJobStatus(commandState, jobStatus);
-                
+
                 if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
-                	if(commandState.getModelCommandStep().equals(ModelCommandStep.LOAD_DATA)){
-                		ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
-                		String customer = modelCommand.getDeploymentExternalId();
-                		String filePath = modelStepRetrieveMetadataProcessor.getCustomerBaseDir() + "/" + customer + "/data/"+ commandParameters.getEventTable() + "/part-m-00000.avro";
-                		try (FileSystem fs = FileSystem.get(modelStepRetrieveMetadataProcessor.getConfiguration())) {
-                	        log.info("_____Job is "+ jobStatus.getState() + "," + jobStatus.getStatus() + " file status " + filePath + " is :"+ fs.exists(new Path(filePath))); 
-                	    } catch (IOException e) {
-                	        throw new LedpException(LedpCode.LEDP_16001, e, new String[] { filePath });
-                	    }
-                	}
+                    if (commandState.getModelCommandStep().equals(ModelCommandStep.LOAD_DATA)) {
+                        ModelCommandParameters commandParameters = new ModelCommandParameters(
+                                modelCommand.getCommandParameters());
+                        String customer = modelCommand.getDeploymentExternalId();
+                        String filePath = modelStepRetrieveMetadataProcessor.getCustomerBaseDir() + "/" + customer
+                                + "/data/" + commandParameters.getEventTable();
+                        List<String> files = HdfsUtils.getFilesForDir(
+                                modelStepRetrieveMetadataProcessor.getConfiguration(), filePath,
+                                new HdfsFilenameFilter() {
+
+                                    @Override
+                                    public boolean accept(String filename) {
+                                        return filename.endsWith(".avro");
+                                    }
+
+                                });
+                        log.info("_____Job is " + jobStatus.getState() + "," + jobStatus.getStatus() + " file status "
+                                + filePath + " is : \n");
+                        log.info(files);
+                    }
                     successCount++;
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
                         || YarnUtils.isPrempted(jobStatus.getDiagnostics())) {

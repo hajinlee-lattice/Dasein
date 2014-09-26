@@ -24,93 +24,81 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsRequest;
 
 @Component("modelStepRetrieveMetadataProcessor")
-public class ModelStepRetrieveMetadataProcessorImpl implements
-		ModelStepProcessor {
-	private static final Log log = LogFactory
-			.getLog(ModelStepRetrieveMetadataProcessorImpl.class);
+public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcessor {
+    private static final Log log = LogFactory.getLog(ModelStepRetrieveMetadataProcessorImpl.class);
 
-	@Autowired
-	private Configuration yarnConfiguration;
+    @Autowired
+    private Configuration yarnConfiguration;
 
-	@Autowired
-	private ModelCommandLogService modelCommandLogService;
+    @Autowired
+    private ModelCommandLogService modelCommandLogService;
 
-	@Value("${dataplatform.customer.basedir}")
-	private String customerBaseDir;
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
 
-	private static final String DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS = "/GetQueryMetaDataColumns";
+    private static final String DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS = "/GetQueryMetaDataColumns";
 
-	// Make this settable for easier testing
-	private String queryMetadataUrlSuffix = DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS;
+    // Make this settable for easier testing
+    private String queryMetadataUrlSuffix = DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS;
 
-	public void setQueryMetadataUrlSuffix(String queryMetadataUrlSuffix) {
-		this.queryMetadataUrlSuffix = queryMetadataUrlSuffix;
-	}
+    public void setQueryMetadataUrlSuffix(String queryMetadataUrlSuffix) {
+        this.queryMetadataUrlSuffix = queryMetadataUrlSuffix;
+    }
 
-	@Override
-	public void executeStep(ModelCommand modelCommand,
-			ModelCommandParameters modelCommandParameters) {
-		String customer = modelCommand.getDeploymentExternalId();
-		String deletePath = customerBaseDir + "/" + customer + "/data";
-		try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
-			if (fs.exists(new Path(deletePath))) {
-				boolean result = fs.delete(new Path(deletePath), true);
-				if (!result) {
-					throw new LedpException(LedpCode.LEDP_16001,
-							new String[] { deletePath });
-				}
-			}
-		} catch (IOException e) {
-			throw new LedpException(LedpCode.LEDP_16001, e,
-					new String[] { deletePath });
-		}
+    @Override
+    public void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
+        String customer = modelCommand.getDeploymentExternalId();
+        String deletePath = customerBaseDir + "/" + customer + "/data";
+        try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
+            if (fs.exists(new Path(deletePath))) {
+                boolean result = fs.delete(new Path(deletePath), true);
+                if (!result) {
+                    throw new LedpException(LedpCode.LEDP_16001, new String[] { deletePath });
+                }
+            }
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_16001, e, new String[] { deletePath });
+        }
 
-		String queryMetadataUrl = modelCommandParameters.getDlUrl()
-				+ queryMetadataUrlSuffix;
-		String metadata = null;
-		try {
-			GetQueryMetaDataColumnsRequest request = new GetQueryMetaDataColumnsRequest(
-					modelCommandParameters.getDlTenant(),
-					modelCommandParameters.getDlQuery());
-			Map<String, String> headers = new HashMap<String, String>();
-			headers.put("MagicAuthentication", "Security through obscurity!");
-			metadata = HttpUtils.executePostRequest(queryMetadataUrl, request,
-					headers);
-			if (Strings.isNullOrEmpty(metadata)) {
-				throw new LedpException(LedpCode.LEDP_16006,
-						new String[] { String.valueOf(modelCommand.getPid()),
-								queryMetadataUrl });
-			} else if (!metadata.contains("\"ErrorMessage\":null")) {
-				modelCommandLogService.log(modelCommand,
-						"Problem with metadata:" + metadata);
-			}
-			log.info(metadata);
+        String queryMetadataUrl = modelCommandParameters.getDlUrl() + queryMetadataUrlSuffix;
+        String metadata = null;
+        try {
+            GetQueryMetaDataColumnsRequest request = new GetQueryMetaDataColumnsRequest(
+                    modelCommandParameters.getDlTenant(), modelCommandParameters.getDlQuery());
+            Map<String, String> headers = new HashMap<String, String>();
+            headers.put("MagicAuthentication", "Security through obscurity!");
+            metadata = HttpUtils.executePostRequest(queryMetadataUrl, request, headers);
+            if (Strings.isNullOrEmpty(metadata)) {
+                throw new LedpException(LedpCode.LEDP_16006, new String[] { String.valueOf(modelCommand.getPid()),
+                        queryMetadataUrl });
+            } else if (!metadata.contains("\"ErrorMessage\":null")) {
+                modelCommandLogService.log(modelCommand, "Problem with metadata:" + metadata);
+            }
+            log.info(metadata);
 
-			String hdfsPath = getHdfsPathForMetadataFile(modelCommand,
-					modelCommandParameters);
-			HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, metadata);
-		} catch (Exception e) {
-			throw new LedpException(LedpCode.LEDP_16005, e, new String[] {
-					String.valueOf(modelCommand.getPid()), queryMetadataUrl });
-		}
-	}
+            String hdfsPath = getHdfsPathForMetadataFile(modelCommand, modelCommandParameters);
+            HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, metadata);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_16005, e, new String[] { String.valueOf(modelCommand.getPid()),
+                    queryMetadataUrl });
+        }
+    }
 
-	String getHdfsPathForMetadataFile(ModelCommand modelCommand,
-			ModelCommandParameters modelCommandParameters) {
-		String customer = modelCommand.getDeploymentExternalId();
-		return customerBaseDir + "/" + customer + "/data/"
-				+ modelCommandParameters.getMetadataTable() + "/metadata.avsc";
-	}
+    String getHdfsPathForMetadataFile(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
+        String customer = modelCommand.getDeploymentExternalId();
+        return customerBaseDir + "/" + customer + "/data/" + modelCommandParameters.getMetadataTable()
+                + "/metadata.avsc";
+    }
 
-	@Override
-	public Configuration getConfiguration() {
-		return yarnConfiguration;
-	}
+    @Override
+    public Configuration getConfiguration() {
+        return yarnConfiguration;
+    }
 
-	@Override
-	public String getCustomerBaseDir() {
-		// TODO Auto-generated method stub
-		return customerBaseDir;
-	}
+    @Override
+    public String getCustomerBaseDir() {
+        // TODO Auto-generated method stub
+        return customerBaseDir;
+    }
 
 }

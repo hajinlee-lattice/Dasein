@@ -32,195 +32,174 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 
 @DisallowConcurrentExecution
 @Component("dlOrchestrationJob")
-public class DLOrchestrationServiceImpl extends QuartzJobBean implements
-		DLOrchestrationService {
+public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrchestrationService {
 
-	private static final Log log = LogFactory
-			.getLog(DLOrchestrationServiceImpl.class);
+    private static final Log log = LogFactory.getLog(DLOrchestrationServiceImpl.class);
 
-	private AsyncTaskExecutor dlOrchestrationJobTaskExecutor;
+    private AsyncTaskExecutor dlOrchestrationJobTaskExecutor;
 
-	private ModelCommandEntityMgr modelCommandEntityMgr;
+    private ModelCommandEntityMgr modelCommandEntityMgr;
 
-	private ModelingJobService modelingJobService;
+    private ModelingJobService modelingJobService;
 
-	private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
+    private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
 
-	private ModelStepYarnProcessor modelStepYarnProcessor;
+    private ModelStepYarnProcessor modelStepYarnProcessor;
 
-	private ModelCommandLogService modelCommandLogService;
+    private ModelCommandLogService modelCommandLogService;
 
-	private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
+    private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
 
-	private ModelStepProcessor modelStepFinishProcessor;
+    private ModelStepProcessor modelStepFinishProcessor;
 
-	private ModelStepProcessor modelStepOutputResultsProcessor;
+    private ModelStepProcessor modelStepOutputResultsProcessor;
 
-	private ModelStepProcessor modelStepRetrieveMetadataProcessor;
+    private ModelStepProcessor modelStepRetrieveMetadataProcessor;
 
-	private DebugProcessorImpl debugProcessorImpl;
+    private DebugProcessorImpl debugProcessorImpl;
 
-	private int waitTime = 180;
+    private int waitTime = 180;
 
-	@Autowired
-	private Configuration yarnConfiguration;
+    @Autowired
+    private Configuration yarnConfiguration;
 
-	@Value("${dataplatform.customer.basedir}")
-	private String customerBaseDir;
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
 
-	@Override
-	protected void executeInternal(JobExecutionContext context)
-			throws JobExecutionException {
-		run(context);
-	}
+    @Override
+    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        run(context);
+    }
 
-	@Override
-	@Transactional(value = "dlorchestration", propagation = Propagation.REQUIRED)
-	public void run(JobExecutionContext context) throws JobExecutionException {
-		List<Future<Long>> futures = new ArrayList<>();
-		List<ModelCommand> modelCommands = modelCommandEntityMgr
-				.getNewAndInProgress();
-		String modelCommandsStr = Joiner.on(",").join(modelCommands);
+    @Override
+    @Transactional(value = "dlorchestration", propagation = Propagation.REQUIRED)
+    public void run(JobExecutionContext context) throws JobExecutionException {
+        List<Future<Long>> futures = new ArrayList<>();
+        List<ModelCommand> modelCommands = modelCommandEntityMgr.getNewAndInProgress();
+        String modelCommandsStr = Joiner.on(",").join(modelCommands);
 
-		if (log.isDebugEnabled()) {
-			log.debug("Begin processing " + modelCommands.size()
-					+ " model commands: " + modelCommandsStr);
-		}
+        if (log.isDebugEnabled()) {
+            log.debug("Begin processing " + modelCommands.size() + " model commands: " + modelCommandsStr);
+        }
 
-		for (ModelCommand modelCommand : modelCommands) {
-			futures.add(dlOrchestrationJobTaskExecutor
-					.submit(new ModelCommandCallable(modelCommand,
-							modelingJobService, modelCommandEntityMgr,
-							modelCommandStateEntityMgr, modelStepYarnProcessor,
-							modelCommandLogService,
-							modelCommandResultEntityMgr,
-							modelStepFinishProcessor,
-							modelStepOutputResultsProcessor,
-							modelStepRetrieveMetadataProcessor,
-							debugProcessorImpl)));
-		}
-		for (Future<Long> future : futures) {
-			try {
-				future.get(waitTime, TimeUnit.SECONDS);
-			} catch (Exception e) {
-				// ModelCommandCallable is responsible for consuming any
-				// exceptions while processing
-				// An exception here indicates a problem outside of the
-				// workflow.
-				log.error(e.getMessage(), e);
-			}
-		}
+        for (ModelCommand modelCommand : modelCommands) {
+            futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(modelCommand,
+                    modelingJobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor,
+                    modelCommandLogService, modelCommandResultEntityMgr, modelStepFinishProcessor,
+                    modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor, debugProcessorImpl)));
+        }
+        for (Future<Long> future : futures) {
+            try {
+                future.get(waitTime, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                // ModelCommandCallable is responsible for consuming any
+                // exceptions while processing
+                // An exception here indicates a problem outside of the
+                // workflow.
+                log.error(e.getMessage(), e);
+            }
+        }
 
-		if (log.isDebugEnabled()) {
-			log.debug("Finished processing " + modelCommands.size()
-					+ " model commands: " + modelCommandsStr);
-		}
+        if (log.isDebugEnabled()) {
+            log.debug("Finished processing " + modelCommands.size() + " model commands: " + modelCommandsStr);
+        }
 
-	}
+    }
 
-	public AsyncTaskExecutor getDlOrchestrationJobTaskExecutor() {
-		return dlOrchestrationJobTaskExecutor;
-	}
+    public AsyncTaskExecutor getDlOrchestrationJobTaskExecutor() {
+        return dlOrchestrationJobTaskExecutor;
+    }
 
-	public void setDlOrchestrationJobTaskExecutor(
-			AsyncTaskExecutor dlOrchestrationJobTaskExecutor) {
-		this.dlOrchestrationJobTaskExecutor = dlOrchestrationJobTaskExecutor;
-	}
+    public void setDlOrchestrationJobTaskExecutor(AsyncTaskExecutor dlOrchestrationJobTaskExecutor) {
+        this.dlOrchestrationJobTaskExecutor = dlOrchestrationJobTaskExecutor;
+    }
 
-	public ModelCommandEntityMgr getModelCommandEntityMgr() {
-		return modelCommandEntityMgr;
-	}
+    public ModelCommandEntityMgr getModelCommandEntityMgr() {
+        return modelCommandEntityMgr;
+    }
 
-	public void setModelCommandEntityMgr(
-			ModelCommandEntityMgr modelCommandEntityMgr) {
-		this.modelCommandEntityMgr = modelCommandEntityMgr;
-	}
+    public void setModelCommandEntityMgr(ModelCommandEntityMgr modelCommandEntityMgr) {
+        this.modelCommandEntityMgr = modelCommandEntityMgr;
+    }
 
-	public ModelingJobService getModelingJobService() {
-		return modelingJobService;
-	}
+    public ModelingJobService getModelingJobService() {
+        return modelingJobService;
+    }
 
-	public void setModelingJobService(ModelingJobService modelingJobService) {
-		this.modelingJobService = modelingJobService;
-	}
+    public void setModelingJobService(ModelingJobService modelingJobService) {
+        this.modelingJobService = modelingJobService;
+    }
 
-	public ModelCommandStateEntityMgr getModelCommandStateEntityMgr() {
-		return modelCommandStateEntityMgr;
-	}
+    public ModelCommandStateEntityMgr getModelCommandStateEntityMgr() {
+        return modelCommandStateEntityMgr;
+    }
 
-	public void setModelCommandStateEntityMgr(
-			ModelCommandStateEntityMgr modelCommandStateEntityMgr) {
-		this.modelCommandStateEntityMgr = modelCommandStateEntityMgr;
-	}
+    public void setModelCommandStateEntityMgr(ModelCommandStateEntityMgr modelCommandStateEntityMgr) {
+        this.modelCommandStateEntityMgr = modelCommandStateEntityMgr;
+    }
 
-	public ModelStepYarnProcessor getModelStepYarnProcessor() {
-		return modelStepYarnProcessor;
-	}
+    public ModelStepYarnProcessor getModelStepYarnProcessor() {
+        return modelStepYarnProcessor;
+    }
 
-	public void setModelStepYarnProcessor(
-			ModelStepYarnProcessor modelStepYarnProcessor) {
-		this.modelStepYarnProcessor = modelStepYarnProcessor;
-	}
+    public void setModelStepYarnProcessor(ModelStepYarnProcessor modelStepYarnProcessor) {
+        this.modelStepYarnProcessor = modelStepYarnProcessor;
+    }
 
-	public ModelCommandLogService getModelCommandLogService() {
-		return modelCommandLogService;
-	}
+    public ModelCommandLogService getModelCommandLogService() {
+        return modelCommandLogService;
+    }
 
-	public void setModelCommandLogService(
-			ModelCommandLogService modelCommandLogService) {
-		this.modelCommandLogService = modelCommandLogService;
-	}
+    public void setModelCommandLogService(ModelCommandLogService modelCommandLogService) {
+        this.modelCommandLogService = modelCommandLogService;
+    }
 
-	public ModelCommandResultEntityMgr getModelCommandResultEntityMgr() {
-		return modelCommandResultEntityMgr;
-	}
+    public ModelCommandResultEntityMgr getModelCommandResultEntityMgr() {
+        return modelCommandResultEntityMgr;
+    }
 
-	public void setModelCommandResultEntityMgr(
-			ModelCommandResultEntityMgr modelCommandResultEntityMgr) {
-		this.modelCommandResultEntityMgr = modelCommandResultEntityMgr;
-	}
+    public void setModelCommandResultEntityMgr(ModelCommandResultEntityMgr modelCommandResultEntityMgr) {
+        this.modelCommandResultEntityMgr = modelCommandResultEntityMgr;
+    }
 
-	public ModelStepProcessor getModelStepFinishProcessor() {
-		return modelStepFinishProcessor;
-	}
+    public ModelStepProcessor getModelStepFinishProcessor() {
+        return modelStepFinishProcessor;
+    }
 
-	public void setModelStepFinishProcessor(
-			ModelStepProcessor modelStepFinishProcessor) {
-		this.modelStepFinishProcessor = modelStepFinishProcessor;
-	}
+    public void setModelStepFinishProcessor(ModelStepProcessor modelStepFinishProcessor) {
+        this.modelStepFinishProcessor = modelStepFinishProcessor;
+    }
 
-	public ModelStepProcessor getModelStepOutputResultsProcessor() {
-		return modelStepOutputResultsProcessor;
-	}
+    public ModelStepProcessor getModelStepOutputResultsProcessor() {
+        return modelStepOutputResultsProcessor;
+    }
 
-	public void setModelStepOutputResultsProcessor(
-			ModelStepProcessor modelStepOutputResultsProcessor) {
-		this.modelStepOutputResultsProcessor = modelStepOutputResultsProcessor;
-	}
+    public void setModelStepOutputResultsProcessor(ModelStepProcessor modelStepOutputResultsProcessor) {
+        this.modelStepOutputResultsProcessor = modelStepOutputResultsProcessor;
+    }
 
-	public ModelStepProcessor getModelStepRetrieveMetadataProcessor() {
-		return modelStepRetrieveMetadataProcessor;
-	}
+    public ModelStepProcessor getModelStepRetrieveMetadataProcessor() {
+        return modelStepRetrieveMetadataProcessor;
+    }
 
-	public void setModelStepRetrieveMetadataProcessor(
-			ModelStepProcessor modelStepRetrieveMetadataProcessor) {
-		this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
-	}
+    public void setModelStepRetrieveMetadataProcessor(ModelStepProcessor modelStepRetrieveMetadataProcessor) {
+        this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
+    }
 
-	public int getWaitTime() {
-		return waitTime;
-	}
+    public int getWaitTime() {
+        return waitTime;
+    }
 
-	public void setWaitTime(int waitTime) {
-		this.waitTime = waitTime;
-	}
+    public void setWaitTime(int waitTime) {
+        this.waitTime = waitTime;
+    }
 
-	public DebugProcessorImpl getDebugProcessorImpl() {
-		return debugProcessorImpl;
-	}
+    public DebugProcessorImpl getDebugProcessorImpl() {
+        return debugProcessorImpl;
+    }
 
-	public void setDebugProcessorImpl(DebugProcessorImpl debugProcessorImpl) {
-		this.debugProcessorImpl = debugProcessorImpl;
-	}
+    public void setDebugProcessorImpl(DebugProcessorImpl debugProcessorImpl) {
+        this.debugProcessorImpl = debugProcessorImpl;
+    }
 
 }
