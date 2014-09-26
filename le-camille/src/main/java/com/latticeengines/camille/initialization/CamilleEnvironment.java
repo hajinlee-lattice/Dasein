@@ -6,7 +6,7 @@ import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 
 public class CamilleEnvironment {
-
+	
 	// singleton instance
 	private static CuratorFramework client;
 	
@@ -37,7 +37,9 @@ public class CamilleEnvironment {
 	}
 	
 	public static void stop() {
-		client.close();
+		if (client != null && client.getState().equals(CuratorFrameworkState.STARTED)) {
+			client.close();
+		}
 	}
 	
 	public static CuratorFramework getCuratorClient() {
