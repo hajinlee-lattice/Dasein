@@ -1,38 +1,37 @@
 package com.latticeengines.domain.exposed.camille;
 
-import java.util.Properties;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
-
 
 public class PathUnitTestNG {
 
     @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
     public void testInvalidPath1() {
+        @SuppressWarnings("unused")
         Path p = new Path("badpath");
     }
     
     @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
     public void testInvalidPath2() {
+        @SuppressWarnings("unused")
         Path p = new Path("//badpath");
     }
     
     @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
     public void testInvalidPath3() {
+        @SuppressWarnings("unused")
         Path p = new Path("/badpath*");
     }
     
     @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
     public void testInvalidPath4() {
+        @SuppressWarnings("unused")
         Path p = new Path("C:\\Windows\\badpath");
     }
     
     @Test(groups = "unit")
     public void testValidPath() {
+        @SuppressWarnings("unused")
         Path p = new Path("/foo/bar");
     }
     
