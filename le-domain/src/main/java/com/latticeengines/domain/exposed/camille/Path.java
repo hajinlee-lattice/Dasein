@@ -1,40 +1,49 @@
 package com.latticeengines.domain.exposed.camille;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.base.Joiner;
+
+/**
+ * Represents an absolute path used by Camille.
+ * Valid paths must start with / and contain word characters or .'s.
+ */
 public class Path {
-    public Path(String rawPath) {
-        parts = new ArrayList<String>();
-        // TODO
-        // Validate well-formed path (must start with a /, etc...)
+    public Path(String rawPath) throws IllegalArgumentException {
+        if (!rawPath.startsWith("/")) {
+            throw new IllegalArgumentException("Path " + rawPath + " is invalid.  Paths must start with a /.");
+        }
+        
+        if (!rawPath.matches("^(/[\\w.]+)+$")) {
+            throw new IllegalArgumentException("Path " + rawPath + " is invalid.  A path must contain only word characters or .'s");
+        }
+        
+        parts = Arrays.asList(rawPath.split("/"));
     }
     
-    public Path(List<String> parts) {
-        // TODO Validation
+    public Path(List<String> parts) throws IllegalArgumentException {
+        for (String part : parts) {
+            if (!part.matches("^\\w+$")) {
+                throw new IllegalArgumentException("Provided path part " + part + " is invalid.");
+            }
+        }
+        if (parts.size() == 0) {
+            throw new IllegalArgumentException("Paths with length 0 are not allowed");
+        }
+        
         this.parts = parts;
     }
 
     public String getSuffix() {
-        // TODO
-        return null;
+        return this.parts.get(this.parts.size()-1);
     }
 
     @Override
     public String toString() {
-        // TODO
-        return null;
-    }
-    
-    public Path prefix(Path p) {
-        // TODO
-        return new Path("");
+        return Joiner.on("/").join(parts);
     }
 
-    public Path append(Path p) {
-        // TODO
-        return new Path("");
-    }
-    
     private List<String> parts;
 }
