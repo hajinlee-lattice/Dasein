@@ -97,15 +97,9 @@ public final class LoggerAdapter {
     public static void sync() {
     	try {
     		// submit an empty job and wait for it to finish
-        	executor.submit(new Runnable() {
-    			@Override
-    			public void run() { }
-        	}).get();
+        	executor.submit(new Runnable(){@Override public void run(){}}).get();
 		}
-    	catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-    	catch (ExecutionException e) {
+    	catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
     }
