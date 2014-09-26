@@ -4,7 +4,7 @@ class ConfigJson {
 	private String podId = null;
 	private String connectionString = null;
 	
-	protected ConfigJson() { }
+	ConfigJson() { }
 	
 	public String getPodId() {
 		return podId;

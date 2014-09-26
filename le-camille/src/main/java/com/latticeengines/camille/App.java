@@ -14,7 +14,7 @@ public class App {
 	
     public static void main(String[] args) {
     	LoggerAdapter.addAppender(new DefaultAppender(System.out));
-    		
+    	
     	
 		try {
 			CamilleEnvironment.start(Mode.RUNTIME);
