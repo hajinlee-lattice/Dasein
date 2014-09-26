@@ -35,6 +35,19 @@ public class Path {
         this.parts = parts;
     }
 
+    public Path(String ... parts) throws IllegalArgumentException {
+        for (String part : parts) {
+            if (!part.matches("^\\w+$")) {
+                throw new IllegalArgumentException("Provided path part " + part + " is invalid.");
+            }
+        }
+        if (parts.length == 0) {
+            throw new IllegalArgumentException("Paths with length 0 are not allowed");
+        }
+        
+        this.parts = Arrays.asList(parts);
+    }
+
     public String getSuffix() {
         return this.parts.get(this.parts.size()-1);
     }
