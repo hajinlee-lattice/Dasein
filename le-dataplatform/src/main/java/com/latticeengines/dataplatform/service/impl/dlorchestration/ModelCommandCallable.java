@@ -127,12 +127,12 @@ public class ModelCommandCallable implements Callable<Long> {
 
                 if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
                     successCount++;
-                } else if (jobStatus.getStatus().equals(FinalApplicationStatus.KILLED)
-                        || jobStatus.getStatus().equals(FinalApplicationStatus.FAILED)) {
-                    jobFailed = true;
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
                         || YarnUtils.isPrempted(jobStatus.getDiagnostics())) {
                     // Job in progress.
+                } else if (jobStatus.getStatus().equals(FinalApplicationStatus.KILLED)
+                        || jobStatus.getStatus().equals(FinalApplicationStatus.FAILED)) {
+                    jobFailed = true;
                 }
             }
 
