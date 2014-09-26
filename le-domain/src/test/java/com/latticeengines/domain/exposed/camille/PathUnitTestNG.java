@@ -58,4 +58,11 @@ public class PathUnitTestNG {
         Path p = new Path("/foo/bar/baz");
         Assert.assertEquals(p.toString(), "/foo/bar/baz");
     }
+    
+    @Test(groups = "unit")
+    public void testAppend() {
+        Path p = new Path("/foo/bar/baz");
+        p = p.append("goo");
+        Assert.assertEquals(p.toString(), "/foo/bar/baz/goo");
+    }
 }

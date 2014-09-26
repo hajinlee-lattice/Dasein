@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.camille;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,17 +20,19 @@ public class Path {
             throw new IllegalArgumentException("Path " + rawPath + " is invalid.  A path must contain only word characters or .'s");
         }
         
-        parts = Arrays.asList(rawPath.split("/"));
+        String path = rawPath.substring(1, rawPath.length());
+        
+        parts = Arrays.asList(path.split("/"));
     }
     
     public Path(List<String> parts) throws IllegalArgumentException {
         for (String part : parts) {
             if (!part.matches("^\\w+$")) {
-                throw new IllegalArgumentException("Provided path part " + part + " is invalid.");
+                throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
             }
         }
         if (parts.size() == 0) {
-            throw new IllegalArgumentException("Paths with length 0 are not allowed");
+            throw new IllegalArgumentException("Path arrays with length 0 are not allowed");
         }
         
         this.parts = parts;
@@ -38,23 +41,37 @@ public class Path {
     public Path(String ... parts) throws IllegalArgumentException {
         for (String part : parts) {
             if (!part.matches("^\\w+$")) {
-                throw new IllegalArgumentException("Provided path part " + part + " is invalid.");
+                throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
             }
         }
         if (parts.length == 0) {
-            throw new IllegalArgumentException("Paths with length 0 are not allowed");
+            throw new IllegalArgumentException("Path arrays with length 0 are not allowed");
         }
         
         this.parts = Arrays.asList(parts);
     }
 
+    public Path append(String part) {
+        List<String> concat = new ArrayList<String>();
+        concat.addAll(this.parts);
+        concat.add(part);
+        return new Path(concat);
+    }
+    
+    public Path prefix(String part) {
+        List<String> concat = new ArrayList<String>();
+        concat.add(part);
+        concat.addAll(this.parts);
+        return new Path(concat);
+    }
+    
     public String getSuffix() {
         return this.parts.get(this.parts.size()-1);
     }
 
     @Override
     public String toString() {
-        return Joiner.on("/").join(parts);
+        return "/" + Joiner.on("/").join(parts);
     }
 
     private List<String> parts;
