@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class Camille {
@@ -83,7 +84,7 @@ public class Camille {
 		return out;
 	}
 	
-	public Object getHierarchy(Path path) {
+	public DocumentHierarchy getHierarchy(Path path) {
 		// TODO: code DocumentHierarchy class, then do this
 		throw new UnsupportedOperationException();
 	}
