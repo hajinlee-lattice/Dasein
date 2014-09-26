@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import java.util.Date;
 
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,5 +32,17 @@ public class ModelStepFinishProcessorImpl implements ModelStepProcessor {
         modelCommand.setCommandStatus(ModelCommandStatus.SUCCESS);
         modelCommandEntityMgr.update(modelCommand);
     }
+
+	@Override
+	public Configuration getConfiguration() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getCustomerBaseDir() {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
 }

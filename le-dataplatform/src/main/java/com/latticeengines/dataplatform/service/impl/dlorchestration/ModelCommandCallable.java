@@ -57,10 +57,6 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private ModelCommand modelCommand;
     
-    private Configuration yarnConfiguration;
-    
-    private String customerBaseDir;
-    
     public ModelCommandCallable() {}
 
     public ModelCommandCallable(ModelCommand modelCommand, ModelingJobService modelingJobService,
@@ -68,7 +64,7 @@ public class ModelCommandCallable implements Callable<Long> {
             ModelStepYarnProcessor modelStepYarnProcessor, ModelCommandLogService modelCommandLogService,
             ModelCommandResultEntityMgr modelCommandResultEntityMgr, ModelStepProcessor modelStepFinishProcessor,
             ModelStepProcessor modelStepOutputResultsProcessor, ModelStepProcessor modelStepRetrieveMetadataProcessor, 
-            DebugProcessorImpl debugProcessorImpl,Configuration yarnConfiguration,String customerBaseDir) {
+            DebugProcessorImpl debugProcessorImpl) {
         this.modelCommand = modelCommand;
         this.modelingJobService = modelingJobService;
         this.modelCommandEntityMgr = modelCommandEntityMgr;
@@ -80,8 +76,7 @@ public class ModelCommandCallable implements Callable<Long> {
         this.modelStepFinishProcessor = modelStepFinishProcessor;
         this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
         this.debugProcessorImpl = debugProcessorImpl;
-        this.yarnConfiguration = yarnConfiguration;
-        this.customerBaseDir = customerBaseDir;
+
     }
 
     @Override
@@ -141,8 +136,8 @@ public class ModelCommandCallable implements Callable<Long> {
                 	if(commandState.getModelCommandStep().equals(ModelCommandStep.LOAD_DATA)){
                 		ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
                 		String customer = modelCommand.getDeploymentExternalId();
-                		String filePath = customerBaseDir + "/" + customer + "/data/"+ commandParameters.getEventTable() + "/part-m-00000.avro";
-                		try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
+                		String filePath = modelStepRetrieveMetadataProcessor.getCustomerBaseDir() + "/" + customer + "/data/"+ commandParameters.getEventTable() + "/part-m-00000.avro";
+                		try (FileSystem fs = FileSystem.get(modelStepRetrieveMetadataProcessor.getConfiguration())) {
                 	        log.info("_____Job is "+ jobStatus.getState() + "," + jobStatus.getStatus() + " file status " + filePath + " is :"+ fs.exists(new Path(filePath))); 
                 	    } catch (IOException e) {
                 	        throw new LedpException(LedpCode.LEDP_16001, e, new String[] { filePath });

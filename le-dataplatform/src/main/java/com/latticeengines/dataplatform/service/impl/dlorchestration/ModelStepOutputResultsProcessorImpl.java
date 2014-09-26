@@ -73,5 +73,17 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                 output.getId(), output.getCommandId(), output.getSampleSize(), output.getAlgorithm(), output.getJsonPath(), output.getTimestamp());
     }
 
+	@Override
+	public Configuration getConfiguration() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getCustomerBaseDir() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
 
