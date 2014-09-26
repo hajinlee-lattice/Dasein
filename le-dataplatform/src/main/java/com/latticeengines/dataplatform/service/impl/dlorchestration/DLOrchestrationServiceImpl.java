@@ -7,9 +7,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
@@ -56,6 +59,12 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
     private DebugProcessorImpl debugProcessorImpl;
 
     private int waitTime = 180;
+    
+    @Autowired
+    private Configuration yarnConfiguration;
+    
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -77,7 +86,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
             futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(modelCommand,
                     modelingJobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor,
                     modelCommandLogService, modelCommandResultEntityMgr, modelStepFinishProcessor,
-                    modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor, debugProcessorImpl)));
+                    modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor, debugProcessorImpl, yarnConfiguration, customerBaseDir)));
         }
         for (Future<Long> future : futures) {
             try {

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -12,10 +11,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
@@ -62,10 +57,8 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private ModelCommand modelCommand;
     
-    @Autowired
     private Configuration yarnConfiguration;
     
-    @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
     
     public ModelCommandCallable() {}
@@ -74,7 +67,8 @@ public class ModelCommandCallable implements Callable<Long> {
             ModelCommandEntityMgr modelCommandEntityMgr, ModelCommandStateEntityMgr modelCommandStateEntityMgr,
             ModelStepYarnProcessor modelStepYarnProcessor, ModelCommandLogService modelCommandLogService,
             ModelCommandResultEntityMgr modelCommandResultEntityMgr, ModelStepProcessor modelStepFinishProcessor,
-            ModelStepProcessor modelStepOutputResultsProcessor, ModelStepProcessor modelStepRetrieveMetadataProcessor, DebugProcessorImpl debugProcessorImpl) {
+            ModelStepProcessor modelStepOutputResultsProcessor, ModelStepProcessor modelStepRetrieveMetadataProcessor, 
+            DebugProcessorImpl debugProcessorImpl,Configuration yarnConfiguration,String customerBaseDir) {
         this.modelCommand = modelCommand;
         this.modelingJobService = modelingJobService;
         this.modelCommandEntityMgr = modelCommandEntityMgr;
@@ -86,6 +80,8 @@ public class ModelCommandCallable implements Callable<Long> {
         this.modelStepFinishProcessor = modelStepFinishProcessor;
         this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
         this.debugProcessorImpl = debugProcessorImpl;
+        this.yarnConfiguration = yarnConfiguration;
+        this.customerBaseDir = customerBaseDir;
     }
 
     @Override
