@@ -28,6 +28,7 @@ public class CamilleEnvironment {
 	// singleton instance
 	private static Camille camille = null;
 	
+	// TODO: accept inputstream with camille.json
 	public static void start(Mode mode) throws IllegalStateException, IOException, InterruptedException {
 		if (camille != null &&
 			camille.getCuratorClient() != null &&

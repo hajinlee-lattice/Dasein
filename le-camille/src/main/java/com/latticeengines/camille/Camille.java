@@ -1,5 +1,7 @@
 package com.latticeengines.camille;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,43 +24,75 @@ public class Camille {
 		this.client = client;
 	}
 	
-	public CuratorFramework getCuratorClient() {
+	CuratorFramework getCuratorClient() {
 		return client;
 	}
 	
-	public void create(Path path, Document doc, ACL acl) {
-		
+	public void create(Path path, Document doc, List<ACL> acls) throws Exception {
+		client.inTransaction()
+			.create().withACL(acls).forPath(path.toString()).and()
+			.setData().forPath(path.toString(), doc.getData().getBytes()).and()
+			.commit();
 	}
 	
-	public void set(Path path, Document doc) {
+	public void set(Path path, Document doc) throws Exception {
 		set(path, doc, false);
 	}
 	
-	public void set(Path path, Document doc, boolean force) {
+	public void set(Path path, Document doc, boolean force) throws Exception {
+		if (force) {
+			// TODO: catch version exception and retry with backoff
+			throw new UnsupportedOperationException();
+		}
+		else {
+			client.inTransaction()
+				.setData().forPath(path.toString(), doc.getData().getBytes()).and()
+				.commit();
+		}
+	}
+	
+	public Document get(Path path) throws Exception {
+		// TODO: do something about DocumentMetadata
+		return new Document(
+				new String(client.getData().forPath(path.toString())),
+				null);
+	}
+	
+	public Document get(Path path, CuratorWatcher watcher) throws Exception {
+		// TODO: do something about DocumentMetadata
+		return new Document(
+				new String(client.getData().usingWatcher(watcher).forPath(path.toString())),
+				null);
+	}
+	
+	/**
+	 * Gets direct children only (not a fully hierarchy).
+	 * @throws Exception 
+	 */
+	public List<Pair<Document, Path>> getChildren(Path path) throws Exception {
+		List<String> childPaths = client.getChildren().forPath(path.toString());
 		
-	}
-	
-	public void get(Path path) {
+		List<Pair<Document, Path>> out = new ArrayList<Pair<Document, Path>>(childPaths.size());
 		
-	}
-	
-	public Document get(Path path, CuratorWatcher watcher) {
-		return null;
-	}
-	
-	public List<Pair<Document, Path>> getChildren() {
-		return null;
+		for (String childPath : childPaths) {
+			out.add(Pair.of(
+				new Document(new String(client.getData().forPath(childPath)), null),
+				new Path(childPath)));
+		}
+		
+		return out;
 	}
 	
 	public Object getHierarchy(Path path) {
-		return null; // TODO: return DocumentHierarchy instead of Object
+		// TODO: code DocumentHierarchy class, then do this
+		throw new UnsupportedOperationException();
 	}
 	
-	public void delete(Path path) {
-		
+	public void delete(Path path) throws Exception {
+		client.delete().forPath(path.toString());
 	}
 	
-	public boolean exists(Path path) {
-		return false;
+	public boolean exists(Path path) throws Exception {
+		return client.checkExists().forPath(path.toString()) != null;
 	}
 }
