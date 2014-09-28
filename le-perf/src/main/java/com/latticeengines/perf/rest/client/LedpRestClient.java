@@ -66,8 +66,9 @@ public class LedpRestClient {
 
 	public List<String> createSamples(SamplingConfiguration config)
 			throws Exception {
-		AppSubmission submission = retryRequest("http://" + restEndpointHost
-				+ "/rest/createSamples", config);
+		AppSubmission submission = rt.postForObject("http://"
+				+ restEndpointHost + "/rest/createSamples", config,
+				AppSubmission.class, new Object[] {});
 		List<String> applicationIds = submission.getApplicationIds();
 		log.info(applicationIds);
 		return applicationIds;
@@ -75,16 +76,18 @@ public class LedpRestClient {
 
 	public List<String> profile(DataProfileConfiguration config)
 			throws Exception {
-		AppSubmission submission = retryRequest("http://" + restEndpointHost
-				+ "/rest/profile", config);
+		AppSubmission submission = rt.postForObject("http://"
+				+ restEndpointHost + "/rest/profile", config,
+				AppSubmission.class, new Object[] {});
 		List<String> applicationIds = submission.getApplicationIds();
 		log.info(applicationIds);
 		return applicationIds;
 	}
 
 	public List<String> submitModel(Model model) throws Exception {
-		AppSubmission submission = retryRequest("http://" + restEndpointHost
-				+ "/rest/submit", model);
+		AppSubmission submission = rt.postForObject("http://"
+				+ restEndpointHost + "/rest/submit", model,
+				AppSubmission.class, new Object[] {});
 		List<String> applicationIds = submission.getApplicationIds();
 		log.info(applicationIds);
 		return applicationIds;
