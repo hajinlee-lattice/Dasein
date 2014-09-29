@@ -1,6 +1,7 @@
 package com.latticeengines.logging;
 
-import org.testng.Assert;
+import static org.testng.Assert.assertTrue;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
@@ -21,7 +22,7 @@ public class LoggerAdapterUnitTestNG {
 	
     @Test(groups = "unit")
     public void testTraceIsEnabled() {
-    	Assert.assertTrue(log.isTraceEnabled());
+    	assertTrue(log.isTraceEnabled());
     }
 	
     @Test(groups = "unit")
@@ -36,7 +37,7 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
+    	assertTrue(out.contains(message));
     }
 	
     @Test(groups = "unit")
@@ -51,8 +52,8 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
     }
 	
     @Test(groups = "unit")
@@ -67,9 +68,9 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
     }
 	
     @Test(groups = "unit")
@@ -84,10 +85,10 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
-    	Assert.assertTrue(out.contains(arg3));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(arg3));
     }
     
     @Test(groups = "unit")
@@ -102,13 +103,13 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
     }
     
     @Test(groups = "unit")
     public void testTraceIsEnabledWithMarker() {
-    	Assert.assertTrue(log.isTraceEnabled(marker));
+    	assertTrue(log.isTraceEnabled(marker));
     }
     
     @Test(groups = "unit")
@@ -123,7 +124,7 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
+    	assertTrue(out.contains(message));
     }
 	
     @Test(groups = "unit")
@@ -138,8 +139,8 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
     }
 	
     @Test(groups = "unit")
@@ -154,9 +155,9 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
     }
 	
     @Test(groups = "unit")
@@ -171,10 +172,10 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
-    	Assert.assertTrue(out.contains(arg3));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(arg3));
     }
     
     @Test(groups = "unit")
@@ -189,15 +190,15 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
     }
     
     /////////////////////////////////////////////////////////////////////////////////
     
     @Test(groups = "unit")
     public void testDebugIsEnabled() {
-    	Assert.assertTrue(log.isDebugEnabled());
+    	assertTrue(log.isDebugEnabled());
     }
 	
     @Test(groups = "unit")
@@ -212,7 +213,7 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
+    	assertTrue(out.contains(message));
     }
 	
     @Test(groups = "unit")
@@ -227,8 +228,8 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
     }
 	
     @Test(groups = "unit")
@@ -243,9 +244,9 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
     }
 	
     @Test(groups = "unit")
@@ -260,10 +261,10 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
-    	Assert.assertTrue(out.contains(arg3));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(arg3));
     }
     
     @Test(groups = "unit")
@@ -278,13 +279,13 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
     }
     
     @Test(groups = "unit")
     public void testDebugIsEnabledWithMarker() {
-    	Assert.assertTrue(log.isDebugEnabled(marker));
+    	assertTrue(log.isDebugEnabled(marker));
     }
     
     @Test(groups = "unit")
@@ -299,7 +300,7 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
+    	assertTrue(out.contains(message));
     }
 	
     @Test(groups = "unit")
@@ -314,8 +315,8 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
     }
 	
     @Test(groups = "unit")
@@ -330,9 +331,9 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
     }
 	
     @Test(groups = "unit")
@@ -347,10 +348,10 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
-    	Assert.assertTrue(out.contains(arg3));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(arg3));
     }
     
     @Test(groups = "unit")
@@ -365,15 +366,15 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
     }
     
     /////////////////////////////////////////////////////////////////////////////////
     
     @Test(groups = "unit")
     public void testInfoIsEnabled() {
-    	Assert.assertTrue(log.isDebugEnabled());
+    	assertTrue(log.isDebugEnabled());
     }
 	
     @Test(groups = "unit")
@@ -388,7 +389,7 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
+    	assertTrue(out.contains(message));
     }
 	
     @Test(groups = "unit")
@@ -403,8 +404,8 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
     }
 	
     @Test(groups = "unit")
@@ -419,9 +420,9 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
     }
 	
     @Test(groups = "unit")
@@ -436,10 +437,10 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
-    	Assert.assertTrue(out.contains(arg3));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(arg3));
     }
     
     @Test(groups = "unit")
@@ -454,13 +455,13 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
     }
     
     @Test(groups = "unit")
     public void testInfoIsEnabledWithMarker() {
-    	Assert.assertTrue(log.isInfoEnabled(marker));
+    	assertTrue(log.isInfoEnabled(marker));
     }
     
     @Test(groups = "unit")
@@ -475,7 +476,7 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
+    	assertTrue(out.contains(message));
     }
 	
     @Test(groups = "unit")
@@ -490,8 +491,8 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
     }
 	
     @Test(groups = "unit")
@@ -506,9 +507,9 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
     }
 	
     @Test(groups = "unit")
@@ -523,10 +524,10 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
-    	Assert.assertTrue(out.contains(arg3));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(arg3));
     }
     
     @Test(groups = "unit")
@@ -541,15 +542,15 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
     }
     
     /////////////////////////////////////////////////////////////////////////////////
     
     @Test(groups = "unit")
     public void testWarnIsEnabled() {
-    	Assert.assertTrue(log.isWarnEnabled());
+    	assertTrue(log.isWarnEnabled());
     }
 	
     @Test(groups = "unit")
@@ -564,7 +565,7 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
+    	assertTrue(out.contains(message));
     }
 	
     @Test(groups = "unit")
@@ -579,8 +580,8 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
     }
 	
     @Test(groups = "unit")
@@ -595,9 +596,9 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
     }
 	
     @Test(groups = "unit")
@@ -612,10 +613,10 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
-    	Assert.assertTrue(out.contains(arg3));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(arg3));
     }
     
     @Test(groups = "unit")
@@ -630,13 +631,13 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
     }
     
     @Test(groups = "unit")
     public void testWarnIsEnabledWithMarker() {
-    	Assert.assertTrue(log.isWarnEnabled(marker));
+    	assertTrue(log.isWarnEnabled(marker));
     }
     
     @Test(groups = "unit")
@@ -651,7 +652,7 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
+    	assertTrue(out.contains(message));
     }
 	
     @Test(groups = "unit")
@@ -666,8 +667,8 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
     }
 	
     @Test(groups = "unit")
@@ -682,9 +683,9 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
     }
 	
     @Test(groups = "unit")
@@ -699,10 +700,10 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
-    	Assert.assertTrue(out.contains(arg3));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(arg3));
     }
     
     @Test(groups = "unit")
@@ -717,15 +718,15 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
     }
     
     /////////////////////////////////////////////////////////////////////////////////
     
     @Test(groups = "unit")
     public void testErrorIsEnabled() {
-    	Assert.assertTrue(log.isErrorEnabled());
+    	assertTrue(log.isErrorEnabled());
     }
 	
     @Test(groups = "unit")
@@ -740,7 +741,7 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
+    	assertTrue(out.contains(message));
     }
 	
     @Test(groups = "unit")
@@ -755,8 +756,8 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
     }
 	
     @Test(groups = "unit")
@@ -771,9 +772,9 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
     }
 	
     @Test(groups = "unit")
@@ -788,10 +789,10 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
-    	Assert.assertTrue(out.contains(arg3));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(arg3));
     }
     
     @Test(groups = "unit")
@@ -806,13 +807,13 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
     }
     
     @Test(groups = "unit")
     public void testErrorIsEnabledWithMarker() {
-    	Assert.assertTrue(log.isErrorEnabled(marker));
+    	assertTrue(log.isErrorEnabled(marker));
     }
     
     @Test(groups = "unit")
@@ -827,7 +828,7 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
+    	assertTrue(out.contains(message));
     }
 	
     @Test(groups = "unit")
@@ -842,8 +843,8 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
     }
 	
     @Test(groups = "unit")
@@ -858,9 +859,9 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
     }
 	
     @Test(groups = "unit")
@@ -875,10 +876,10 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(arg1));
-    	Assert.assertTrue(out.contains(arg2));
-    	Assert.assertTrue(out.contains(arg3));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(arg1));
+    	assertTrue(out.contains(arg2));
+    	assertTrue(out.contains(arg3));
     }
     
     @Test(groups = "unit")
@@ -893,7 +894,7 @@ public class LoggerAdapterUnitTestNG {
     	LoggerAdapter.sync();
     	String out = sb.toString();
     	
-    	Assert.assertTrue(out.contains(message));
-    	Assert.assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
+    	assertTrue(out.contains(message));
+    	assertTrue(out.contains(LoggerAdapter.stackTraceToString(throwable)));
     }
 }

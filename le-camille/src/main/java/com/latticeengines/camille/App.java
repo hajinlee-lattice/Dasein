@@ -10,9 +10,7 @@ import com.latticeengines.camille.CamilleEnvironment.Mode;
 public class App {
 	private static final Logger log = LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 	
-    public static void main(String[] args) {
-    	//LoggerAdapter.addAppender(new DefaultAppender(System.out));
-    	
+    public static void main(String[] args) {	
     	
 		try {
 			CamilleEnvironment.start(Mode.RUNTIME);
