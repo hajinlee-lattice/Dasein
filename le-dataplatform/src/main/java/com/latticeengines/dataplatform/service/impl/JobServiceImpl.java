@@ -11,16 +11,20 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TypeConverter;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.hadoop.mapreduce.JobRunner;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
+
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
@@ -54,6 +58,9 @@ public abstract class JobServiceImpl implements JobService, ApplicationContextAw
 
     @Autowired
     private YarnService yarnService;
+
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
 
     @Override
     public List<ApplicationReport> getJobReportsAll() {
@@ -180,6 +187,39 @@ public abstract class JobServiceImpl implements JobService, ApplicationContextAw
             jobStatus.setProgress(appReport.getProgress());
             jobStatus.setStartTime(appReport.getStartTime());
             jobStatus.setTrackingUrl(appReport.getTrackingUrl());
+        }
+    }
+
+    protected void setJobStatus(JobStatus jobStatus, String applicationId, String hdfsPath) throws Exception {
+        ApplicationReport appReport = defaultYarnClient.getApplicationReport(YarnUtils
+                .getApplicationIdFromString(applicationId));
+        jobStatus.setId(applicationId);
+        if (appReport != null) {
+            jobStatus.setStatus(appReport.getFinalApplicationStatus());
+            jobStatus.setState(appReport.getYarnApplicationState());
+            jobStatus.setDiagnostics(appReport.getDiagnostics());
+            jobStatus.setFinishTime(appReport.getFinishTime());
+            jobStatus.setProgress(appReport.getProgress());
+            jobStatus.setStartTime(appReport.getStartTime());
+            jobStatus.setTrackingUrl(appReport.getTrackingUrl());
+        }
+        if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
+            if (appReport.getName().contains("load")) {
+                List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsPath, new HdfsFilenameFilter() {
+                    @Override
+                    public boolean accept(String filename) {
+                        return filename.endsWith(".avro");
+                    }
+                });
+                log.info("_____Job " + appReport.getName() + " appId: " + applicationId + " status is "
+                        + jobStatus.getState() + "," + jobStatus.getStatus() + " file status " + hdfsPath + " is : \n");
+                log.info(files);
+                String yarnStatus = yarnService.getApplication(applicationId).getFinalStatus();
+                log.info("Status from RM API is: " + yarnStatus);
+                if (!yarnStatus.equals("SUCCEEDED")) {
+                    log.info(applicationId + "***" + yarnStatus + " Final status DOES NOT MATCH !!!");
+                }
+            }
         }
     }
 

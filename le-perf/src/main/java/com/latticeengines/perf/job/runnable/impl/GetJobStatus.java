@@ -16,6 +16,12 @@ public class GetJobStatus extends ModelingResourceJob<String, JobStatus> {
         return getJobStatus();
     }
 
+    public JobStatus getJobStatus(String hdfsPath) throws Exception {
+        JobStatus js = rc.getJobStatus(config, hdfsPath);
+        log.info("Application " + js.getId() + " is in progress " + js.getProgress());
+        return js;
+    }
+
     public JobStatus getJobStatus() throws Exception {
         JobStatus js = rc.getJobStatus(config);
         log.info("Application " + js.getId() + " is in progress " + js.getProgress());
@@ -29,6 +35,29 @@ public class GetJobStatus extends ModelingResourceJob<String, JobStatus> {
                 GetJobStatus gjs = new GetJobStatus();
                 gjs.setConfiguration(restEndpointHost, appId);
                 JobStatus gs = gjs.getJobStatus();
+                FinalApplicationStatus status = gs.getStatus();
+                YarnApplicationState state = gs.getState();
+                if ((state.equals(YarnApplicationState.FINISHED) && status.equals(FinalApplicationStatus.SUCCEEDED))
+                        || (state.equals(YarnApplicationState.FAILED) && status.equals(FinalApplicationStatus.FAILED))) {
+                    appIds.remove(appId);
+                    i--;
+                } else if (state.equals(YarnApplicationState.FINISHED) && status.equals(FinalApplicationStatus.FAILED)) {
+                    return false;
+                }
+            }
+            Thread.sleep(5000L);
+        }
+        Thread.sleep(2000L);
+        return true;
+    }
+
+    public static boolean checkStatus(String restEndpointHost, List<String> appIds, String hdfsPath) throws Exception {
+        while (appIds.size() > 0) {
+            for (int i = 0; i < appIds.size(); i++) {
+                String appId = appIds.get(i);
+                GetJobStatus gjs = new GetJobStatus();
+                gjs.setConfiguration(restEndpointHost, appId);
+                JobStatus gs = gjs.getJobStatus(hdfsPath);
                 FinalApplicationStatus status = gs.getStatus();
                 YarnApplicationState state = gs.getState();
                 if ((state.equals(YarnApplicationState.FINISHED) && status.equals(FinalApplicationStatus.SUCCEEDED))

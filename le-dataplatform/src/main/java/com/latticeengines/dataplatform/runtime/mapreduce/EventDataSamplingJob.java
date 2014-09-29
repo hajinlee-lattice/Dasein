@@ -35,10 +35,10 @@ import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
 
 public class EventDataSamplingJob extends Configured implements Tool, MRJobCustomization {
-    
+
     public static final String LEDP_SAMPLE_CONFIG = "ledp.sample.config";
     private static final String SAMPLE_JOB_TYPE = "samplingJob";
-    
+
     public EventDataSamplingJob(Configuration config) {
         setConf(config);
     }
@@ -82,14 +82,13 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             AvroKeyOutputFormat.setOutputPath(job,
                     new Path(properties.getProperty(EventDataSamplingProperty.OUTPUT.name())));
 
-            List<String> files = HdfsUtils.getFilesForDir(job.getConfiguration(), inputDir,
-                    new HdfsFilenameFilter() {
+            List<String> files = HdfsUtils.getFilesForDir(job.getConfiguration(), inputDir, new HdfsFilenameFilter() {
 
-                        @Override
-                        public boolean accept(String filename) {
-                            return filename.endsWith(".avro");
-                        }
-                
+                @Override
+                public boolean accept(String filename) {
+                    return filename.endsWith(".avro");
+                }
+
             });
             String filename = files.size() > 0 ? files.get(0) : null;
             if (filename == null) {
@@ -104,11 +103,14 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             AvroKeyOutputFormat.setCompressOutput(job,
                     Boolean.valueOf(properties.getProperty(EventDataSamplingProperty.COMPRESS_SAMPLE.name(), "true")));
 
-            SamplingConfiguration samplingConfig = JsonUtils.deserialize(samplingConfigStr, SamplingConfiguration.class);
-            
+            SamplingConfiguration samplingConfig = JsonUtils
+                    .deserialize(samplingConfigStr, SamplingConfiguration.class);
+
             for (SamplingElement samplingElement : samplingConfig.getSamplingElements()) {
-                AvroMultipleOutputs.addNamedOutput(job, samplingElement.getName() + "Training", AvroKeyOutputFormat.class, schema);
-                AvroMultipleOutputs.addNamedOutput(job, samplingElement.getName() + "Test", AvroKeyOutputFormat.class, schema);
+                AvroMultipleOutputs.addNamedOutput(job, samplingElement.getName() + "Training",
+                        AvroKeyOutputFormat.class, schema);
+                AvroMultipleOutputs.addNamedOutput(job, samplingElement.getName() + "Test", AvroKeyOutputFormat.class,
+                        schema);
 
             }
 
@@ -128,10 +130,10 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
     public String getJobType() {
         return SAMPLE_JOB_TYPE;
     }
-    
+
     static class IgnoreDirectoriesAndSupportOnlyAvroFilesFilter extends Configured implements PathFilter {
         private FileSystem fs;
-        
+
         public IgnoreDirectoriesAndSupportOnlyAvroFilesFilter() {
             super();
         }
@@ -143,7 +145,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
         @Override
         public boolean accept(Path path) {
             try {
-                
+
                 if (this.getConf().get(FileInputFormat.INPUT_DIR).contains(path.toString())) {
                     return true;
                 }
@@ -155,7 +157,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             }
             return false;
         }
-        
+
         @Override
         public void setConf(Configuration config) {
             try {
@@ -163,7 +165,7 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
                     fs = FileSystem.get(config);
                     super.setConf(config);
                 }
-                
+
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_00002, e);
             }

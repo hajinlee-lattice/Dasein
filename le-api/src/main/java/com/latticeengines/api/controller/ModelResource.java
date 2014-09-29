@@ -32,9 +32,10 @@ public class ModelResource {
 
     @Autowired
     private ModelingService modelingService;
-    
+
     public ModelResource() {
-        // Need to set java.class.path in order for the Sqoop dynamic java compilation to work
+        // Need to set java.class.path in order for the Sqoop dynamic java
+        // compilation to work
         log.info("Java Home = " + System.getProperty("java.home"));
         System.setProperty("java.class.path", System.getProperty("java.class.path") + addToClassPath());
         log.info("Class path = " + System.getProperty("java.class.path"));
@@ -70,30 +71,36 @@ public class ModelResource {
     @RequestMapping(value = "/resetThrottle", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     public ThrottleSubmission resetThrottle() {
-        modelingService.resetThrottle();  
+        modelingService.resetThrottle();
         return new ThrottleSubmission();
     }
-    
+
     @RequestMapping(value = "/load", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     public AppSubmission loadData(@RequestBody LoadConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId>asList(modelingService.loadData(config)));
+        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.loadData(config)));
         return submission;
     }
-    
+
     @RequestMapping(value = "/getJobStatus/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     public JobStatus getJobStatus(@PathVariable String applicationId) {
         return modelingService.getJobStatus(applicationId);
     }
-    
+
+    @RequestMapping(value = "/getJobStatus/{applicationId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    public JobStatus getJobStatus(@PathVariable String applicationId, @RequestBody String hdfsPath) throws Exception {
+        return modelingService.getJobStatus(applicationId, hdfsPath);
+    }
+
     @RequestMapping(value = "/profile", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     public AppSubmission profile(@RequestBody DataProfileConfiguration config) {
-        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId>asList(modelingService.profileData(config)));
+        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(modelingService.profileData(config)));
         return submission;
     }
-    
+
     @RequestMapping(value = "/features", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     public StringList getFeatures(@RequestBody Model model) {

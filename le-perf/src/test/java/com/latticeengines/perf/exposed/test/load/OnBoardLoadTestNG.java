@@ -30,7 +30,7 @@ public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
                 fs.delete(new Path(hdfsPath), true);
             }
 
-            OnBoard ob = new OnBoard(yarnConfiguration, hdfsPath);
+            OnBoard ob = new OnBoard(yarnConfiguration, hdfsPath + "/data/Q_EventTable_Nutanix");
             ob.setConfiguration(restEndpointHost, createOnBoardConfiguration(customer));
             Future<List<String>> future = executor.submit(ob);
             futures.add(future);

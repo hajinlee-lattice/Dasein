@@ -16,12 +16,14 @@ public interface ModelingService {
     void throttle(ThrottleConfiguration config);
 
     void resetThrottle();
-    
+
     ApplicationId createSamples(SamplingConfiguration config);
 
     ApplicationId loadData(LoadConfiguration config);
-    
+
     JobStatus getJobStatus(String applicationId);
+
+    JobStatus getJobStatus(String applicationId, String hdfsPath) throws Exception;
 
     List<String> getFeatures(Model model, boolean depivoted);
 

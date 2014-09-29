@@ -38,9 +38,10 @@ public class OnBoard extends ModelingResourceJob<OnBoardConfiguration, List<Stri
 
     public List<String> onBoard() throws Exception {
         List<String> appIds = ld.executeJob();
-        GetJobStatus.checkStatus(restEndpointHost, appIds);
-      //  while (!GetJobStatus.validateFiles(hadoopConfiguration, hdfsPath + "/data/Q_EventTable_Nutanix", 4)) {
-     //   }
+        GetJobStatus.checkStatus(restEndpointHost, appIds, hdfsPath);
+        // while (!GetJobStatus.validateFiles(hadoopConfiguration, hdfsPath +
+        // "/data/Q_EventTable_Nutanix", 4)) {
+        // }
         appIds = cs.executeJob();
         GetJobStatus.checkStatus(restEndpointHost, appIds);
         appIds = pf.executeJob();

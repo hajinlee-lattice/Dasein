@@ -480,4 +480,8 @@ public class ModelingServiceImpl implements ModelingService {
     public JobStatus getJobStatus(String applicationId) {
         return modelingJobService.getJobStatus(applicationId);
     }
+
+    public JobStatus getJobStatus(String applicationId, String hdfsPath) throws Exception {
+        return modelingJobService.getJobStatus(applicationId, hdfsPath);
+    }
 }

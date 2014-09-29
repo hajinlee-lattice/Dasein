@@ -223,4 +223,25 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
         return job;
 
     }
+
+    @Override
+    public JobStatus getJobStatus(String applicationId, String hdfs) throws Exception {
+        com.latticeengines.domain.exposed.dataplatform.Job leafJob = getLeafJob(applicationId);
+        JobStatus jobStatus = new JobStatus();
+        if (leafJob != null) {
+            applicationId = leafJob.getId();
+            String classifierStr = (String) leafJob.getContainerPropertiesObject().get(
+                    PythonContainerProperty.METADATA_CONTENTS.name());
+            if (classifierStr != null) {
+                Classifier classifier = JsonUtils.deserialize(classifierStr, Classifier.class);
+                if (classifier != null) {
+                    String[] tokens = StringUtils.split(applicationId, "_");
+                    String folder = StringUtils.join(new String[] { tokens[1], tokens[2] }, "_");
+                    jobStatus.setResultDirectory(classifier.getModelHdfsDir() + "/" + folder);
+                }
+            }
+        }
+        super.setJobStatus(jobStatus, applicationId, hdfs);
+        return jobStatus;
+    }
 }

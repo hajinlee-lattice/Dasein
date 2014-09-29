@@ -31,7 +31,7 @@ public class ModelingResourceLoadTestNG extends PerfLoadTestNGBase {
                 }
 
                 ConstructModelConfiguration cmc = createConstructModelConfiguration(customer);
-                ConstructModel cm = new ConstructModel(yarnConfiguration, hdfsPath);
+                ConstructModel cm = new ConstructModel(yarnConfiguration, hdfsPath + "/data/Q_EventTable_Nutanix");
                 cm.setConfiguration(restEndpointHost, cmc);
                 Future<List<String>> future = executor.submit(cm);
                 futures.add(future);

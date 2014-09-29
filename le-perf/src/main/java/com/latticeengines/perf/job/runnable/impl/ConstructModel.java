@@ -31,9 +31,8 @@ public class ConstructModel extends ModelingResourceJob<ConstructModelConfigurat
     }
 
     public List<String> constructModel() throws Exception {
-        List<String> appIds = ob.executeJob();
-        GetJobStatus.checkStatus(restEndpointHost, appIds);
-        appIds = sm.executeJob();
+        ob.executeJob();
+        List<String> appIds = sm.executeJob();
         GetJobStatus.checkStatus(restEndpointHost, appIds);
         return appIds;
     }

@@ -99,14 +99,18 @@ public class LedpRestClient {
 		return features.getElements();
 	}
 
+	public JobStatus getJobStatus(final String appId, String hdfsPath)
+			throws Exception {
+		JobStatus js = rt.postForObject("http://" + restEndpointHost
+				+ "/rest/getJobStatus/" + appId, hdfsPath, JobStatus.class,
+				new HashMap<String, Object>());
+		return js;
+    }
+
 	public JobStatus getJobStatus(final String appId) throws Exception {
-		JobStatus js = rtt.execute(new RetryCallback<JobStatus, Exception>() {
-			public JobStatus doWithRetry(RetryContext context) {
-				return rt.getForObject("http://" + restEndpointHost
-						+ "/rest/getJobStatus/" + appId, JobStatus.class,
-						new HashMap<String, Object>());
-			}
-		});
+		JobStatus js = rt.getForObject("http://" + restEndpointHost
+				+ "/rest/getJobStatus/" + appId, JobStatus.class,
+				new HashMap<String, Object>());
 		return js;
 	}
 
