@@ -30,7 +30,7 @@ public class ScoringServiceImplRFUnitTestNG {
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
         InputStream pmmlInputStream = ClassLoader
-                .getSystemResourceAsStream("com/latticeengines/scoring/rfOutput.xml");
+                .getSystemResourceAsStream("com/latticeengines/scoring/RFPMML.xml");
         Source source = ImportFilter.apply(new InputSource(pmmlInputStream));
         pmml = JAXBUtil.unmarshalPMML(source); 
     }
