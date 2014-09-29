@@ -1,12 +1,16 @@
 package com.latticeengines.eai.service.impl.salesforce;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.salesforce.SalesforceEndpointConfig;
+import org.apache.camel.component.salesforce.api.dto.PickListValue;
 import org.apache.camel.component.salesforce.api.dto.SObjectDescription;
 import org.apache.camel.component.salesforce.api.dto.SObjectField;
 import org.apache.camel.component.salesforce.api.dto.bulk.ContentType;
@@ -16,8 +20,13 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.eai.routes.converter.AvroSchemaBuilder;
+import com.latticeengines.eai.routes.converter.AvroTypeConverter;
 import com.latticeengines.eai.routes.salesforce.SalesforceImportProperty;
 import com.latticeengines.eai.service.ImportService;
 
@@ -26,6 +35,27 @@ public class SalesforceImportServiceImpl implements ImportService {
 
     @Autowired
     private ProducerTemplate producer;
+    
+    @Autowired
+    private AvroTypeConverter salesforceToAvroTypeConverter;
+    
+    @Autowired
+    private AvroSchemaBuilder avroSchemaBuilder;
+    
+    private enum ToStringFunction implements Function<PickListValue, String> {
+        INSTANCE;
+
+        @Override 
+        public String toString() {
+          return "toString";
+        }
+
+		@Override
+		public String apply(PickListValue input) {
+			checkNotNull(input);
+			return AvroUtils.getAvroFriendlyString(input.getValue());
+		}
+      }
 
     private JobInfo setupJob(Table table) {
         JobInfo jobInfo = new JobInfo();
@@ -53,17 +83,25 @@ public class SalesforceImportServiceImpl implements ImportService {
                         continue;
                     }
                     Attribute attr = new Attribute();
+                    String type = descField.getType();
                     attr.setName(descField.getName());
                     attr.setDisplayName(descField.getLabel());
                     attr.setLength(descField.getLength());
                     attr.setPrecision(descField.getPrecision());
                     attr.setScale(descField.getScale());
                     attr.setNullable(descField.isNillable());
-                    attr.setPhysicalDataType(descField.getType());
-                    attr.setLogicalDataType(descField.getType());
+                    attr.setPhysicalDataType(salesforceToAvroTypeConverter.convertTypeToAvro(type).name());
+                    attr.setLogicalDataType(type);
+                    
+                    if (type.equals("picklist")) {
+                    	List<String> enumValues = Lists.transform(descField.getPicklistValues(), ToStringFunction.INSTANCE);
+                    	attr.setEnumValues(enumValues);
+                    }
                     
                     newTable.addAttribute(attr);
                 }
+                Schema schema = avroSchemaBuilder.createSchema(newTable);
+                newTable.setSchema(schema);
                 newTables.add(newTable);
             } finally {
                 producer.requestBody("salesforce:closeJob", jobInfo, JobInfo.class);

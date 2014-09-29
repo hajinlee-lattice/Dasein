@@ -28,11 +28,38 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         salutation.setName("Salutation");
         Attribute email = new Attribute();
         email.setName("Email");
-        
+        Attribute status = new Attribute();
+        status.setName("Status");
+        Attribute company = new Attribute();
+        company.setName("Company");
+        Attribute leadSource = new Attribute();
+        leadSource.setName("LeadSource");
+        Attribute industry = new Attribute();
+        industry.setName("Industry");
+        Attribute annualRevenue = new Attribute();
+        annualRevenue.setName("AnnualRevenue");
+        Attribute numEmployees = new Attribute();
+        numEmployees.setName("NumberOfEmployees");
+        Attribute converted = new Attribute();
+        converted.setName("IsConverted");
+        Attribute convertedDate = new Attribute();
+        converted.setName("ConvertedDate");
+        Attribute createdDate = new Attribute();
+        createdDate.setName("CreatedDate");
+
         table.addAttribute(firstName);
         table.addAttribute(lastName);
         table.addAttribute(salutation);
         table.addAttribute(email);
+        table.addAttribute(status);
+        table.addAttribute(company);
+        table.addAttribute(leadSource);
+        table.addAttribute(industry);
+        table.addAttribute(annualRevenue);
+        table.addAttribute(numEmployees);
+        table.addAttribute(converted);
+        table.addAttribute(convertedDate);
+        table.addAttribute(createdDate);
         
         List<Table> tables = new ArrayList<>();
         tables.add(table);

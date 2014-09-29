@@ -11,5 +11,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 @ContextConfiguration(locations = { "classpath:test-eai-context.xml" })
 public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    private static final Log log = LogFactory.getLog(EaiFunctionalTestNGBase.class);
+    @SuppressWarnings("unused")
+	private static final Log log = LogFactory.getLog(EaiFunctionalTestNGBase.class);
 }

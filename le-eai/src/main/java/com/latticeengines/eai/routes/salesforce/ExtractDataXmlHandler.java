@@ -12,21 +12,22 @@ import com.latticeengines.domain.exposed.eai.Table;
 
 public class ExtractDataXmlHandler extends DefaultHandler {
 
-    private Map<String, Attribute> table;
+    private Map<String, Attribute> tableAttributeMap;
     private Schema schema;
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        System.out.println("Start element " + qName);
+        //System.out.println("Start element " + qName);
     }
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        System.out.println("End element " + qName);
+        //System.out.println("End element " + qName);
     }
 
     public void initialize(Table table) {
-        this.table = table.getNameAttributeMap();
+        this.tableAttributeMap = table.getNameAttributeMap();
+        this.schema = table.getSchema();
     }
 
 }

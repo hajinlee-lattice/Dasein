@@ -6,7 +6,8 @@ import org.apache.commons.logging.LogFactory;
 
 public class SalesforceRouteConfig extends SpringRouteBuilder {
     
-    private static final Log log = LogFactory.getLog(SalesforceRouteConfig.class);
+    @SuppressWarnings("unused")
+	private static final Log log = LogFactory.getLog(SalesforceRouteConfig.class);
     
     public SalesforceRouteConfig() {
     }
