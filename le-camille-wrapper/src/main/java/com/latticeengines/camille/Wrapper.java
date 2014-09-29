@@ -6,7 +6,7 @@ import com.latticeengines.logging.LoggerAdapter;
 public class Wrapper {
     public static void main(String[] args) {
     	LoggerAdapter.addAppender(new DefaultAppender(System.out));
-    	App.main(null);
+    	App.main(new String[]{});
         System.exit(0);
     }
 }
