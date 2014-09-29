@@ -19,7 +19,8 @@ public class ModelDefinitionDaoImpl extends BaseDaoImpl<ModelDefinition> impleme
         return ModelDefinition.class;
     }
 
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     /**
      * return 'null' if model definition is not found by name
      */
