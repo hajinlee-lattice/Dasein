@@ -5,12 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.avro.Schema;
+
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
 public class Table implements HasName {
     
     private String name;
+    private String displayName;
     private List<Attribute> attributes = new ArrayList<>();
+    private Schema schema;
 
     @Override
     public String getName() {
@@ -38,6 +42,20 @@ public class Table implements HasName {
         }
         return map;
     }
-    
 
+	public Schema getSchema() {
+		return schema;
+	}
+
+	public void setSchema(Schema schema) {
+		this.schema = schema;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+	
+	public String getDisplayName() {
+		return displayName;
+	}
 }

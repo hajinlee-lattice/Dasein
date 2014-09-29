@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.eai;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
 public class Attribute implements HasName {
@@ -12,6 +15,7 @@ public class Attribute implements HasName {
     private String logicalDataType;
     private Integer precision;
     private Integer scale;
+    private List<String> enumValues = new ArrayList<String>();
     
 
     @Override
@@ -84,4 +88,12 @@ public class Attribute implements HasName {
     public void setScale(Integer scale) {
         this.scale = scale;
     }
+
+	public List<String> getEnumValues() {
+		return enumValues;
+	}
+
+	public void setEnumValues(List<String> enumValues) {
+		this.enumValues = enumValues;
+	}
 }
