@@ -78,6 +78,8 @@ public class SalesforceImportServiceImpl implements ImportService {
                 Map<String, Attribute> map = table.getNameAttributeMap();
                 Table newTable = new Table();
                 newTable.setName(table.getName());
+                newTable.setDisplayName(desc.getLabel());
+                
                 for (SObjectField descField : descFields) {
                     if (!map.containsKey(descField.getName())) {
                         continue;
@@ -94,6 +96,10 @@ public class SalesforceImportServiceImpl implements ImportService {
                     attr.setLogicalDataType(type);
                     
                     if (type.equals("picklist")) {
+                        List<PickListValue> values = descField.getPicklistValues();
+                        PickListValue emptyValue = new PickListValue();
+                        emptyValue.setValue(" ");
+                        values.add(emptyValue);
                     	List<String> enumValues = Lists.transform(descField.getPicklistValues(), ToStringFunction.INSTANCE);
                     	attr.setEnumValues(enumValues);
                     }

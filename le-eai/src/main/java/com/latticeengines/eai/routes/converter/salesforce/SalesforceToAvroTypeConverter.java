@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.eai.routes.converter.AvroTypeConverter;
 
 @Component("salesforceToAvroTypeConverter")
-public class SalesforceToAvroTypeConverter implements AvroTypeConverter {
+public class SalesforceToAvroTypeConverter extends AvroTypeConverter {
 
 	private Map<String, Type> typeMap = new HashMap<String, Type>();
 	
