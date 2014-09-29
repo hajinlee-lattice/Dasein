@@ -45,11 +45,8 @@ public class CamilleUnitTestNG {
 	}
 	
     @Test(groups = "unit")
-    public void testCreate() throws Exception {
-    	TestingServer server = null;
-        try {
-        	server = initTestServerAndCamille();
-	        
+    public void testCreateExistsAndGet() throws Exception {
+        try (TestingServer server = initTestServerAndCamille()) {
 	        Camille c = CamilleEnvironment.getCamille();
 	        
 	        Path path = new Path("/testPath");
@@ -63,7 +60,6 @@ public class CamilleUnitTestNG {
         }
         finally {
         	CamilleEnvironment.stop();
-        	if (server != null) server.close();
         }
     }
 }
