@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
+import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -52,9 +53,9 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
  * This is an end-to-end test against a SQL Server database without having to go
  * through the REST API. It allows for an easier development-test cycle without
  * having to either deploy to Jetty or run from le-api.
- * 
+ *
  * @author rgonzalez
- * 
+ *
  */
 @Transactional
 public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunctionalTestNGBase {
@@ -163,6 +164,14 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         config.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         return config;
     }
+
+    @Test(groups = "functional", enabled = true, expectedExceptions = LedpException.class)
+    public void loadBadTableInput() throws Exception {
+        LoadConfiguration loadConfig = getLoadConfig();
+        loadConfig.setTable("SomeBogusTableName");
+        modelingService.loadData(loadConfig);
+    }
+
 
     @Test(groups = "functional")
     public void retrieveMetadataAndWriteToHdfs() throws Exception {

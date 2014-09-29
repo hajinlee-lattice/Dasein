@@ -27,6 +27,7 @@ public enum LedpCode {
     LEDP_12005("Model definition must not be null."), //
     LEDP_12006("Parameter QUEUE undefined for analytics job."), //
     LEDP_12007("Parameter CUSTOMER undefined for analytics job."), //
+    LEDP_12008("Table {0} does not exist for analytics load job."), //
     // Metric system: 13000-13999
     LEDP_13000("Tag {0} does not have a value."), //
     // Persistence service: 14000-14999

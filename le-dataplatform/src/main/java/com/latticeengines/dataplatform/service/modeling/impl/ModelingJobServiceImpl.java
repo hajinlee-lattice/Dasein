@@ -88,7 +88,11 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
             future.get();
         } catch (ExecutionException e) {
             if (e.getCause() instanceof RuntimeException) {
-                throw (RuntimeException) e.getCause();
+                if (e.getCause().getMessage().contains("No columns to generate for ClassWriter")) {
+                    throw new LedpException(LedpCode.LEDP_12008, new String[] { table });
+                } else {
+                    throw (RuntimeException) e.getCause();
+                }
             } else {
                 log.error(e);
             }
