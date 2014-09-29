@@ -2,6 +2,7 @@ package com.latticeengines.camille;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -29,7 +30,7 @@ public class CamilleEnvironment {
 	private static Camille camille = null;
 	
 	// TODO: accept inputstream with camille.json
-	public static void start(Mode mode) throws IllegalStateException, IOException, InterruptedException {
+	public static void start(Mode mode, Reader configJsonReader) throws IllegalStateException, IOException, InterruptedException {
 		if (camille != null &&
 			camille.getCuratorClient() != null &&
 			camille.getCuratorClient().getState().equals(CuratorFrameworkState.STARTED)) {
@@ -49,7 +50,7 @@ public class CamilleEnvironment {
 		
     	ConfigJson config = null;
 		try {
-			config = new ObjectMapper().readValue(new File("camille.json"), ConfigJson.class);
+			config = new ObjectMapper().readValue(configJsonReader, ConfigJson.class);
 		}
 		catch (IOException ioe) {
 			log.error("An error occurred reading camille.json.", ioe);
