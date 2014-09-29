@@ -43,7 +43,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         Attribute converted = new Attribute();
         converted.setName("IsConverted");
         Attribute convertedDate = new Attribute();
-        converted.setName("ConvertedDate");
+        convertedDate.setName("ConvertedDate");
         Attribute createdDate = new Attribute();
         createdDate.setName("CreatedDate");
 
