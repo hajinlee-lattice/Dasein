@@ -1,8 +1,8 @@
 package com.latticeengines.logging;
 
 /**
- * IAppenders implement logging callback methods.
- * IAppenders should not use loggers themselves.
+ * Appenders implement logging callback methods.
+ * Appenders should not use loggers themselves.
  */
 public interface Appender {
 	public void info (String logger, String message);

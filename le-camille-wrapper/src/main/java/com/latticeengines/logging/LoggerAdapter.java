@@ -31,8 +31,10 @@ public final class LoggerAdapter {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
-				sync();
-				executor.shutdownNow();
+				synchronized (appendersSet) {
+					sync();
+					executor.shutdownNow();
+				}
 			}
 		});
 	}
