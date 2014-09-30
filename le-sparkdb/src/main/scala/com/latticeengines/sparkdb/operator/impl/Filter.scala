@@ -21,7 +21,8 @@ object Filter {
   val FilterCondition = "FilterCondition"
     
   def filterFunction(record: GenericRecord, condition: String): Boolean = {
-    val value = record.get("SEPAL_WIDTH").asInstanceOf[Float]
-    value > 3.0f
+    //val value = record.get("SEPAL_WIDTH").asInstanceOf[Float]
+    //value > 3.0f
+    true
   }
 }

@@ -18,11 +18,11 @@ class Join(val df: DataFlow) extends DataOperator(df) {
     val joinCondition = getPropertyValue(Join.JoinCondition)
 
     val rdd1 = rdds(0).map {
-      p => (p.get(Join.parseJoinCondition(joinCondition)(0)).asInstanceOf[Int], p)
+      p => (p.get(Join.parseJoinCondition(joinCondition)(0)).asInstanceOf[String], p)
     }
 
     val rdd2 = rdds(1).map {
-      p => (p.get(Join.parseJoinCondition(joinCondition)(1)).asInstanceOf[Int], p)
+      p => (p.get(Join.parseJoinCondition(joinCondition)(1)).asInstanceOf[String], p)
     }
     
     val rdd1Broadcast = dataFlow.sc.broadcast(rdd1.collectAsMap())
@@ -44,7 +44,7 @@ object Join {
   val JoinCondition = "JoinCondition"
 
   def parseJoinCondition(expr: String) = {
-    List("Nutanix_EventTable_Clean", "Nutanix_EventTable_Clean")
+    List("ConvertedOpportunityId", "Id")
   }
 
   def combineRecords(u: GenericRecord, v: GenericRecord, s: Array[java.lang.Object]): GenericRecord = {
