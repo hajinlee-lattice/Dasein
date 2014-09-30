@@ -15,8 +15,8 @@ public class Attribute implements HasName {
     private String logicalDataType;
     private Integer precision;
     private Integer scale;
+    private List<String> cleanedUpEnumValues = new ArrayList<String>();
     private List<String> enumValues = new ArrayList<String>();
-    
 
     @Override
     public String getName() {
@@ -89,11 +89,19 @@ public class Attribute implements HasName {
         this.scale = scale;
     }
 
-	public List<String> getEnumValues() {
-		return enumValues;
-	}
+    public List<String> getEnumValues() {
+        return enumValues;
+    }
 
-	public void setEnumValues(List<String> enumValues) {
-		this.enumValues = enumValues;
-	}
+    public void setEnumValues(List<String> enumValues) {
+        this.enumValues = enumValues;
+    }
+
+    public List<String> getCleanedUpEnumValues() {
+        return cleanedUpEnumValues;
+    }
+
+    public void setCleanedUpEnumValues(List<String> cleanedUpEnumValues) {
+        this.cleanedUpEnumValues = cleanedUpEnumValues;
+    }
 }
