@@ -9,6 +9,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 
 import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.eai.routes.HdfsUriGenerator;
+import com.latticeengines.eai.routes.ImportProperty;
 
 public class XmlHandlerProcessor implements Processor {
 
@@ -20,7 +22,8 @@ public class XmlHandlerProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        Table table = (Table) exchange.getProperty(SalesforceImportProperty.TABLE);
+        Table table = exchange.getProperty(ImportProperty.TABLE, Table.class);
+
         String beanName = "extractDataXmlHandlerFor" + table.getName();
         AutowireCapableBeanFactory factory = context.getApplicationContext().getAutowireCapableBeanFactory();
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) factory;
@@ -31,9 +34,10 @@ public class XmlHandlerProcessor implements Processor {
         factory.autowireBeanProperties(this, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
 
         ExtractDataXmlHandler handler = context.getApplicationContext().getBean(beanName, ExtractDataXmlHandler.class);
-        handler.initialize(context.getTypeConverterRegistry(), table);
+        String fileName = handler.initialize(context.getTypeConverterRegistry(), table);
         exchange.getIn().setHeader("staxUri", "stax:#" + beanName);
-        // System.out.println(IOUtils.toString(exchange.getIn().getBody(InputStream.class)));
+        exchange.getIn().setHeader("hdfsUri", new HdfsUriGenerator().getHdfsUri(exchange, table, fileName));
+        //System.out.println(IOUtils.toString(exchange.getIn().getBody(InputStream.class)));
     }
 
 }

@@ -1,13 +1,14 @@
 package com.latticeengines.eai.routes.salesforce;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
 
-public class SetupPropertiesForBatchQueryProcessor implements Processor {
+import com.latticeengines.eai.routes.PropertySetter;
+
+public class SetupPropertiesForBatchQueryProcessor extends PropertySetter {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        exchange.setProperty(SalesforceImportProperty.TABLE, exchange.getIn().getHeader(SalesforceImportProperty.TABLE));
+        super.process(exchange);
         exchange.setProperty(SalesforceImportProperty.JOBINFO, exchange.getIn().getBody());
     }
 

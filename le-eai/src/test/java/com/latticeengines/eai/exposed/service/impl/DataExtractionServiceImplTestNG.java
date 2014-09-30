@@ -3,12 +3,16 @@ package com.latticeengines.eai.exposed.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
+import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
+import com.latticeengines.eai.routes.ImportProperty;
 
 public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
@@ -63,7 +67,11 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
         List<Table> tables = new ArrayList<>();
         tables.add(table);
-        dataExtractionService.extractAndImport(tables);
+        Configuration config = new YarnConfiguration();
+        ImportContext context = new ImportContext();
+        context.setProperty(ImportProperty.HADOOPCONFIG, config);
+        context.setProperty(ImportProperty.TARGETPATH, "/tmp");
+        dataExtractionService.extractAndImport(tables, context);
         Thread.sleep(20000L);
     }
 }

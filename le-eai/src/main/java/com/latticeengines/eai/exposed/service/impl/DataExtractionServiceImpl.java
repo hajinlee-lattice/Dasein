@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
+import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.exposed.service.DataExtractionService;
 import com.latticeengines.eai.service.ImportService;
@@ -21,7 +22,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
     private ImportService salesforceImportService;
 
     @Override
-    public void extractAndImport(List<Table> tables) {
+    public void extractAndImport(List<Table> tables, ImportContext context) {
         List<Table> tableMetadata = salesforceImportService.importMetadata(tables);
 
         for (Table table : tableMetadata) {
@@ -31,7 +32,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
                 log.info("Attribute " + attribute.getDisplayName() + " : " + attribute.getPhysicalDataType());
             }
         }
-        salesforceImportService.importData(tableMetadata);
+        salesforceImportService.importDataAndWriteToHdfs(tableMetadata, context);
     }
 
 }

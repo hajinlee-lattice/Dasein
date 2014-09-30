@@ -24,14 +24,14 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.eai.Attribute;
+import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.routes.converter.AvroSchemaBuilder;
 import com.latticeengines.eai.routes.converter.AvroTypeConverter;
-import com.latticeengines.eai.routes.salesforce.SalesforceImportProperty;
 import com.latticeengines.eai.service.ImportService;
 
 @Component("salesforceImportService")
-public class SalesforceImportServiceImpl implements ImportService {
+public class SalesforceImportServiceImpl extends ImportService {
 
     @Autowired
     private ProducerTemplate producer;
@@ -118,13 +118,13 @@ public class SalesforceImportServiceImpl implements ImportService {
     }
 
     @Override
-    public void importData(List<Table> tables) {
+    public void importDataAndWriteToHdfs(List<Table> tables, ImportContext context) {
         for (Table table : tables) {
             JobInfo jobInfo = setupJob(table);
             String query = createQuery(table);
             Map<String, Object> headers = new HashMap<String, Object>();
             headers.put(SalesforceEndpointConfig.SOBJECT_QUERY, query);
-            headers.put(SalesforceImportProperty.TABLE, table);
+            super.setHeaders(headers, table, context);
             producer.sendBodyAndHeaders("direct:createBatchQuery", jobInfo, headers);
         }
     }

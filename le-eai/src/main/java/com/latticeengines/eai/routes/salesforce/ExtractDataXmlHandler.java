@@ -24,8 +24,6 @@ import com.latticeengines.eai.routes.converter.AvroTypeConverter;
 
 public class ExtractDataXmlHandler extends DefaultHandler {
 
-    private static final SimpleDateFormat DATEFORMAT = new SimpleDateFormat("dd-MM-yyyy");
-
     private Table table;
     private TypeConverterRegistry typeConverterRegistry;
     private Map<String, Attribute> tableAttributeMap;
@@ -37,12 +35,12 @@ public class ExtractDataXmlHandler extends DefaultHandler {
     private int processedRecords = 0;
     private int errorRecords = 0;
     private int totalRecords = 0;
+    private File file;
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (qName.equals("queryResult")) {
-            String date = DATEFORMAT.format(new Date());
-            File file = new File(table.getName() + "_" + date + ".avro");
+            
             DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
             dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter);
             try {
@@ -110,11 +108,19 @@ public class ExtractDataXmlHandler extends DefaultHandler {
         record.put(currentQname, AvroTypeConverter.convertIntoJavaValueForAvroType(typeConverterRegistry, type, value));
     }
 
-    public void initialize(TypeConverterRegistry typeConverterRegistry, Table table) {
+    public String initialize(TypeConverterRegistry typeConverterRegistry, Table table) {
         this.table = table;
         this.typeConverterRegistry = typeConverterRegistry;
         this.tableAttributeMap = table.getNameAttributeMap();
         this.schema = table.getSchema();
+        String fileName = table.getName() + "_" + new SimpleDateFormat("dd-MM-yyyy").format(new Date()) + ".avro";
+        this.file = new File(fileName);
+        return fileName;
     }
+    
+    public File getFile() {
+        return file;
+    }
+    
 
 }

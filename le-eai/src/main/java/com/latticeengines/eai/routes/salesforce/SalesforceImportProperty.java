@@ -4,6 +4,5 @@ public class SalesforceImportProperty {
 
     public static final String BATCHINFO = "batchInfo";
     public static final String JOBINFO = "jobInfo";
-    public static final String TABLE = "table";
 
 }
