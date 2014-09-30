@@ -27,6 +27,8 @@ public class CamilleUnitTestNG {
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
+    
+    private static final int timeOutMs = 2000;
 
     private static TestingServer initTestServerAndCamille() throws Exception {
         try {
@@ -51,7 +53,7 @@ public class CamilleUnitTestNG {
         }
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testCreateGetWatchAndDelete() throws Exception {
         try (TestingServer server = initTestServerAndCamille()) {
             Camille c = CamilleEnvironment.getCamille();
@@ -68,12 +70,12 @@ public class CamilleUnitTestNG {
             // another thread
             final CountDownLatch latch = new CountDownLatch(1);
 
-            final boolean[] watchEventFired = { false };
+            final boolean[] dataChangedEventFired = { false };
             CuratorWatcher watcher = new CuratorWatcher() {
                 @Override
                 public void process(WatchedEvent event) throws Exception {
                     if (event.getType().equals(Watcher.Event.EventType.NodeDataChanged)) {
-                        watchEventFired[0] = true;
+                        dataChangedEventFired[0] = true;
                     }
                     latch.countDown();
                 }
@@ -83,8 +85,8 @@ public class CamilleUnitTestNG {
 
             Document doc1 = new Document("testData1", null);
             c.set(path, doc1);
-            latch.await();
-            Assert.assertTrue(watchEventFired[0]);
+            latch.await(); // wait for the process callback to be called
+            Assert.assertTrue(dataChangedEventFired[0]);
 
             Assert.assertEquals(c.get(path).getData(), doc1.getData());
 
@@ -123,7 +125,6 @@ public class CamilleUnitTestNG {
 
             Assert.assertTrue(actualChildren.contains(Pair.of(childDoc0.getData(), childPath0.toString())));
             Assert.assertTrue(actualChildren.contains(Pair.of(childDoc1.getData(), childPath1.toString())));
-
         } finally {
             CamilleEnvironment.stop();
         }

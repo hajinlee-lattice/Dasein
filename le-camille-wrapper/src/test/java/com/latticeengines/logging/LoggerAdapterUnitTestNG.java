@@ -20,12 +20,14 @@ public class LoggerAdapterUnitTestNG {
 	private static final Throwable throwable = new Exception("TestException");
 	private static final Marker marker = MarkerFactory.getMarker("TestMarker");
 	
+	private static final int timeOutMs = 2000;
+	
     @Test(groups = "unit")
     public void testTraceIsEnabled() {
     	assertTrue(log.isTraceEnabled());
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testTraceMessage() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -40,7 +42,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(message));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testTraceFormat1Arg() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -56,7 +58,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg1));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testTraceFormat2Args() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -73,7 +75,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg2));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testTraceFormatArgArray() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -91,7 +93,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg3));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testTraceMessageThrowable() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -112,7 +114,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(log.isTraceEnabled(marker));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testTraceMessageWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -127,7 +129,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(message));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testTraceFormat1ArgWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -143,7 +145,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg1));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testTraceFormat2ArgsWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -160,7 +162,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg2));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testTraceFormatArgArrayWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -178,7 +180,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg3));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testTraceMessageThrowableWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -201,7 +203,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(log.isDebugEnabled());
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testDebugMessage() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -216,7 +218,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(message));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testDebugFormat1Arg() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -232,7 +234,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg1));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testDebugFormat2Args() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -249,7 +251,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg2));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testDebugFormatArgArray() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -267,7 +269,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg3));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testDebugMessageThrowable() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -288,7 +290,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(log.isDebugEnabled(marker));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testDebugMessageWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -303,7 +305,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(message));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testDebugFormat1ArgWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -319,7 +321,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg1));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testDebugFormat2ArgsWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -336,7 +338,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg2));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testDebugFormatArgArrayWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -354,7 +356,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg3));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testDebugMessageThrowableWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -377,7 +379,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(log.isDebugEnabled());
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testInfoMessage() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -392,7 +394,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(message));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testInfoFormat1Arg() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -408,7 +410,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg1));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testInfoFormat2Args() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -425,7 +427,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg2));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testInfoFormatArgArray() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -443,7 +445,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg3));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testInfoMessageThrowable() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -464,7 +466,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(log.isInfoEnabled(marker));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testInfoMessageWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -479,7 +481,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(message));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testInfoFormat1ArgWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -495,7 +497,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg1));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testInfoFormat2ArgsWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -512,7 +514,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg2));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testInfoFormatArgArrayWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -530,7 +532,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg3));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testInfoMessageThrowableWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -553,7 +555,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(log.isWarnEnabled());
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testWarnMessage() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -568,7 +570,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(message));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testWarnFormat1Arg() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -584,7 +586,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg1));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testWarnFormat2Args() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -601,7 +603,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg2));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testWarnFormatArgArray() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -619,7 +621,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg3));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testWarnMessageThrowable() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -640,7 +642,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(log.isWarnEnabled(marker));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testWarnMessageWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -655,7 +657,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(message));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testWarnFormat1ArgWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -671,7 +673,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg1));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testWarnFormat2ArgsWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -688,7 +690,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg2));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testWarnFormatArgArrayWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -706,7 +708,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg3));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testWarnMessageThrowableWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -729,7 +731,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(log.isErrorEnabled());
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testErrorMessage() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -744,7 +746,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(message));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testErrorFormat1Arg() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -760,7 +762,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg1));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testErrorFormat2Args() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -777,7 +779,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg2));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testErrorFormatArgArray() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -795,7 +797,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg3));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testErrorMessageThrowable() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -816,7 +818,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(log.isErrorEnabled(marker));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testErrorMessageWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -831,7 +833,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(message));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testErrorFormat1ArgWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -847,7 +849,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg1));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testErrorFormat2ArgsWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -864,7 +866,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg2));
     }
 	
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testErrorFormatArgArrayWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
@@ -882,7 +884,7 @@ public class LoggerAdapterUnitTestNG {
     	assertTrue(out.contains(arg3));
     }
     
-    @Test(groups = "unit")
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testErrorMessageThrowableWithMarker() {
     	StringBuilder sb = new StringBuilder();
     	Appender a = new DefaultAppender(sb);
