@@ -34,7 +34,7 @@ public class Camille {
     }
 
     public void set(Path path, Document doc) throws Exception {
-        client.inTransaction().setData().forPath(path.toString(), doc.getData().getBytes()).and().commit();
+        client.setData().forPath(path.toString(), doc.getData().getBytes());
     }
 
     public Document get(Path path) throws Exception {

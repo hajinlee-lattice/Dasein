@@ -130,51 +130,51 @@ public class CamilleUnitTestNG {
         }
     }
     
-//    @Test(groups = "unit")
-//    public void testDocumentHierarchy() throws Exception {
-//        try (TestingServer server = initTestServerAndCamille()) {
-//            Camille c = CamilleEnvironment.getCamille();
-//
-//            Path p0 = new Path("/parentPath");
-//            Document d0 = new Document("d0", null);
-//            c.create(p0, d0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-//            Assert.assertTrue(c.exists(p0));
-//            
-//            Path p1 = new Path(String.format("%s/%s", p0, "p1"));
-//            Document d1 = new Document("d1", null);
-//            c.create(p1, d1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-//            Assert.assertTrue(c.exists(p1));
-//            
-//            Path p2 = new Path(String.format("%s/%s", p0, "p2"));
-//            Document d2 = new Document("d2", null);
-//            c.create(p2, d2, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-//            Assert.assertTrue(c.exists(p2));
-//            
-//            Path p3 = new Path(String.format("%s/%s", p1, "p3"));
-//            Document d3 = new Document("d3", null);
-//            c.create(p3, d3, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-//            Assert.assertTrue(c.exists(p3));
-//            
-//            Path p4 = new Path(String.format("%s/%s", p1, "p4"));
-//            Document d4 = new Document("d4", null);
-//            c.create(p4, d4, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-//            Assert.assertTrue(c.exists(p4));
-//            
-//            Path p5 = new Path(String.format("%s/%s", p2, "p5"));
-//            Document d5 = new Document("d5", null);
-//            c.create(p5, d5, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-//            Assert.assertTrue(c.exists(p5));
-//            
-//            Path p6 = new Path(String.format("%s/%s", p2, "p6"));
-//            Document d6 = new Document("d6", null);
-//            c.create(p6, d6, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-//            Assert.assertTrue(c.exists(p6));
-//            
-//            Assert.assertEquals(c.getHierarchy(p0).getRoot().getChildren().size(), 2);
-//
-//            
-//        } finally {
-//            CamilleEnvironment.stop();
-//        }
-//    }
+    @Test(groups = "unit")
+    public void testDocumentHierarchy() throws Exception {
+        try (TestingServer server = initTestServerAndCamille()) {
+            Camille c = CamilleEnvironment.getCamille();
+
+            Path p0 = new Path("/parentPath");
+            Document d0 = new Document("d0", null);
+            c.create(p0, d0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            Assert.assertTrue(c.exists(p0));
+            
+            Path p1 = new Path(String.format("%s/%s", p0, "p1"));
+            Document d1 = new Document("d1", null);
+            c.create(p1, d1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            Assert.assertTrue(c.exists(p1));
+            
+            Path p2 = new Path(String.format("%s/%s", p0, "p2"));
+            Document d2 = new Document("d2", null);
+            c.create(p2, d2, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            Assert.assertTrue(c.exists(p2));
+            
+            Path p3 = new Path(String.format("%s/%s", p1, "p3"));
+            Document d3 = new Document("d3", null);
+            c.create(p3, d3, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            Assert.assertTrue(c.exists(p3));
+            
+            Path p4 = new Path(String.format("%s/%s", p1, "p4"));
+            Document d4 = new Document("d4", null);
+            c.create(p4, d4, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            Assert.assertTrue(c.exists(p4));
+            
+            Path p5 = new Path(String.format("%s/%s", p2, "p5"));
+            Document d5 = new Document("d5", null);
+            c.create(p5, d5, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            Assert.assertTrue(c.exists(p5));
+            
+            Path p6 = new Path(String.format("%s/%s", p2, "p6"));
+            Document d6 = new Document("d6", null);
+            c.create(p6, d6, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            Assert.assertTrue(c.exists(p6));
+            
+            Assert.assertEquals(c.getHierarchy(p0).getRoot().getChildren().size(), 2);
+
+            
+        } finally {
+            CamilleEnvironment.stop();
+        }
+    }
 }
