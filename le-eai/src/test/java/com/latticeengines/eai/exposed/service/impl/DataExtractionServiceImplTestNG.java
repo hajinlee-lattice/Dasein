@@ -21,6 +21,22 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void importData() throws Exception {
+        List<Table> tables = new ArrayList<>();
+        Table lead = createLead();
+        Table opportunity = createOpportunity();
+        Table contact = createContact();
+        tables.add(lead);
+        tables.add(opportunity);
+        tables.add(contact);
+        Configuration config = new YarnConfiguration();
+        ImportContext context = new ImportContext();
+        context.setProperty(ImportProperty.HADOOPCONFIG, config);
+        context.setProperty(ImportProperty.TARGETPATH, "/tmp");
+        dataExtractionService.extractAndImport(tables, context);
+        Thread.sleep(20000L);
+    }
+    
+    private Table createLead() {
         Table table = new Table();
         table.setName("Lead");
 
@@ -46,10 +62,14 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         numEmployees.setName("NumberOfEmployees");
         Attribute converted = new Attribute();
         converted.setName("IsConverted");
-        Attribute convertedDate = new Attribute();
-        convertedDate.setName("ConvertedDate");
+        Attribute lastModifiedDate = new Attribute();
+        lastModifiedDate.setName("LastModifiedDate");
         Attribute createdDate = new Attribute();
         createdDate.setName("CreatedDate");
+        Attribute convertedOpportunityId = new Attribute();
+        convertedOpportunityId.setName("ConvertedOpportunityId");
+        Attribute ownerId = new Attribute();
+        ownerId.setName("OwnerId");
 
         table.addAttribute(firstName);
         table.addAttribute(lastName);
@@ -62,16 +82,63 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         table.addAttribute(annualRevenue);
         table.addAttribute(numEmployees);
         table.addAttribute(converted);
-        table.addAttribute(convertedDate);
+        table.addAttribute(lastModifiedDate);
+        table.addAttribute(createdDate);
+        table.addAttribute(convertedOpportunityId);
+        table.addAttribute(ownerId);
+
+        return table;
+    }
+
+    private Table createOpportunity() {
+        Table table = new Table();
+        table.setName("Opportunity");
+
+        Attribute accountId = new Attribute();
+        accountId.setName("AccountId");
+        Attribute won = new Attribute();
+        won.setName("IsWon");
+        Attribute createdDate = new Attribute();
+        createdDate.setName("CreatedDate");
+        Attribute stageName = new Attribute();
+        stageName.setName("StageName");
+        Attribute amount = new Attribute();
+        amount.setName("Amount");
+        Attribute leadSource = new Attribute();
+        leadSource.setName("LeadSource");
+        Attribute closed = new Attribute();
+        closed.setName("IsClosed");
+        Attribute lastModifiedDate = new Attribute();
+        lastModifiedDate.setName("LastModifiedDate");
+
+        table.addAttribute(accountId);
+        table.addAttribute(won);
+        table.addAttribute(stageName);
+        table.addAttribute(amount);
+        table.addAttribute(closed);
+        table.addAttribute(leadSource);
+        table.addAttribute(lastModifiedDate);
         table.addAttribute(createdDate);
 
-        List<Table> tables = new ArrayList<>();
-        tables.add(table);
-        Configuration config = new YarnConfiguration();
-        ImportContext context = new ImportContext();
-        context.setProperty(ImportProperty.HADOOPCONFIG, config);
-        context.setProperty(ImportProperty.TARGETPATH, "/tmp");
-        dataExtractionService.extractAndImport(tables, context);
-        Thread.sleep(20000L);
+        return table;
+    }
+
+    private Table createContact() {
+        Table table = new Table();
+        table.setName("Contact");
+
+        Attribute accountId = new Attribute();
+        accountId.setName("AccountId");
+        Attribute email = new Attribute();
+        email.setName("Email");
+        Attribute lastModifiedDate = new Attribute();
+        lastModifiedDate.setName("LastModifiedDate");
+
+        table.addAttribute(accountId);
+        table.addAttribute(email);
+        table.addAttribute(lastModifiedDate);
+
+
+        return table;
     }
 }

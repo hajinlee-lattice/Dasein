@@ -6,6 +6,7 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
@@ -27,6 +28,10 @@ public class AvroSchemaBuilder {
             fieldBuilder = fieldBuilder.prop("precision", attr.getPrecision().toString());
             fieldBuilder = fieldBuilder.prop("scale", attr.getScale().toString());
             fieldBuilder = fieldBuilder.prop("logicalType", attr.getLogicalDataType());
+            
+            if (attr.getEnumValues().size() > 0) {
+                fieldBuilder = fieldBuilder.prop("enumValues", StringUtils.join(attr.getEnumValues().toArray(), ","));    
+            }
 
             Type type = Type.valueOf(attr.getPhysicalDataType());
 

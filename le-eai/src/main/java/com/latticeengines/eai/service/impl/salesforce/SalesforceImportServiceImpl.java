@@ -42,7 +42,7 @@ public class SalesforceImportServiceImpl extends ImportService {
     @Autowired
     private AvroSchemaBuilder avroSchemaBuilder;
 
-    private enum ToStringFunction implements Function<PickListValue, String> {
+    private enum ToStringFunctionWithCleanup implements Function<PickListValue, String> {
         INSTANCE;
 
         @Override
@@ -54,6 +54,21 @@ public class SalesforceImportServiceImpl extends ImportService {
         public String apply(PickListValue input) {
             checkNotNull(input);
             return AvroUtils.getAvroFriendlyString(input.getValue());
+        }
+    }
+
+    private enum ToStringFunction implements Function<PickListValue, String> {
+        INSTANCE;
+
+        @Override
+        public String toString() {
+            return "toString";
+        }
+
+        @Override
+        public String apply(PickListValue input) {
+            checkNotNull(input);
+            return input.getValue();
         }
     }
 
@@ -92,7 +107,12 @@ public class SalesforceImportServiceImpl extends ImportService {
                     attr.setPrecision(descField.getPrecision());
                     attr.setScale(descField.getScale());
                     attr.setNullable(descField.isNillable());
-                    attr.setPhysicalDataType(salesforceToAvroTypeConverter.convertTypeToAvro(type).name());
+                    Schema.Type avroType = salesforceToAvroTypeConverter.convertTypeToAvro(type);
+                    
+                    if (avroType == null) {
+                        throw new RuntimeException("Could not find avro type for sfdc type " + type);
+                    }
+                    attr.setPhysicalDataType(avroType.name());
                     attr.setLogicalDataType(type);
 
                     if (type.equals("picklist")) {
@@ -100,8 +120,11 @@ public class SalesforceImportServiceImpl extends ImportService {
                         PickListValue emptyValue = new PickListValue();
                         emptyValue.setValue(" ");
                         values.add(emptyValue);
+                        List<String> cleanedUpEnumValues = Lists.transform(descField.getPicklistValues(),
+                                ToStringFunctionWithCleanup.INSTANCE);
                         List<String> enumValues = Lists.transform(descField.getPicklistValues(),
                                 ToStringFunction.INSTANCE);
+                        attr.setCleanedUpEnumValues(cleanedUpEnumValues);
                         attr.setEnumValues(enumValues);
                     }
 

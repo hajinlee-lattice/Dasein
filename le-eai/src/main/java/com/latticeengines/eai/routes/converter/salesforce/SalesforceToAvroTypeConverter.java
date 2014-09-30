@@ -15,12 +15,13 @@ public class SalesforceToAvroTypeConverter extends AvroTypeConverter {
 
     public SalesforceToAvroTypeConverter() {
         typeMap.put("string", Type.STRING);
+        typeMap.put("reference", Type.STRING);
         typeMap.put("email", Type.STRING);
         typeMap.put("phone", Type.STRING);
         typeMap.put("url", Type.STRING);
         typeMap.put("textarea", Type.STRING);
         typeMap.put("id", Type.STRING);
-        typeMap.put("picklist", Type.ENUM);
+        typeMap.put("picklist", Type.STRING);
         typeMap.put("int", Type.INT);
         typeMap.put("currency", Type.DOUBLE);
         typeMap.put("percent", Type.DOUBLE);
