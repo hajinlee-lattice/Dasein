@@ -37,8 +37,7 @@ public class GetJobStatus extends ModelingResourceJob<String, JobStatus> {
                 JobStatus gs = gjs.getJobStatus();
                 FinalApplicationStatus status = gs.getStatus();
                 YarnApplicationState state = gs.getState();
-                if ((state.equals(YarnApplicationState.FINISHED) && status.equals(FinalApplicationStatus.SUCCEEDED))
-                        || (state.equals(YarnApplicationState.FAILED) && status.equals(FinalApplicationStatus.FAILED))) {
+                if ((state.equals(YarnApplicationState.FINISHED) && status.equals(FinalApplicationStatus.SUCCEEDED))) {
                     appIds.remove(appId);
                     i--;
                 } else if (state.equals(YarnApplicationState.FINISHED) && status.equals(FinalApplicationStatus.FAILED)) {
