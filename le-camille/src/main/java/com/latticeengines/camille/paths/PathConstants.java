@@ -1,6 +1,6 @@
 package com.latticeengines.camille.paths;
 
-public final class DirectoryConstants {
+public final class PathConstants {
     public static final String PODS = "Pods";
     public static final String INTERFACES = "Interfaces";
     public static final String DATA = "Data";
