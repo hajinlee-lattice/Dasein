@@ -30,7 +30,7 @@ public class Camille {
     }
 
     public void create(Path path, Document doc, List<ACL> acls) throws Exception {
-        client.inTransaction().create().withACL(acls).forPath(path.toString(), doc.getData().getBytes()).and().commit();
+        client.create().withACL(acls).forPath(path.toString(), doc.getData().getBytes());
     }
 
     public void set(Path path, Document doc) throws Exception {
