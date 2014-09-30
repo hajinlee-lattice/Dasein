@@ -14,6 +14,8 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.camel.spi.TypeConverterRegistry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -23,8 +25,8 @@ import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.routes.converter.AvroTypeConverter;
 
 public class ExtractDataXmlHandler extends DefaultHandler {
-
-    private Table table;
+    private static final Log log = LogFactory.getLog(ExtractDataXmlHandler.class);
+    
     private TypeConverterRegistry typeConverterRegistry;
     private Map<String, Attribute> tableAttributeMap;
     private Schema schema;
@@ -40,6 +42,7 @@ public class ExtractDataXmlHandler extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (qName.equals("queryResult")) {
+            log.info("Thread id = " + Thread.currentThread().getName());
             
             DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
             dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter);
@@ -109,7 +112,6 @@ public class ExtractDataXmlHandler extends DefaultHandler {
     }
 
     public String initialize(TypeConverterRegistry typeConverterRegistry, Table table) {
-        this.table = table;
         this.typeConverterRegistry = typeConverterRegistry;
         this.tableAttributeMap = table.getNameAttributeMap();
         this.schema = table.getSchema();
