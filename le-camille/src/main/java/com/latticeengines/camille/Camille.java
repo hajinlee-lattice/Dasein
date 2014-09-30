@@ -6,7 +6,9 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CuratorWatcher;
+import org.apache.curator.framework.api.SetDataBuilder;
 import org.apache.zookeeper.data.ACL;
+import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,15 +35,15 @@ public class Camille {
         client.create().withACL(acls).forPath(path.toString(), doc.getData().getBytes());
     }
 
-    public void set(Path path, Document doc) throws Exception {
-        set(path, doc, false);
+    public Stat set(Path path, Document doc) throws Exception {
+        return set(path, doc, false);
     }
-    
-    public void set(Path path, Document doc, boolean force) throws Exception {
-        if (force)
-            throw new UnsupportedOperationException(); // TODO
-        
-        client.setData().forPath(path.toString(), doc.getData().getBytes());
+
+    public Stat set(Path path, Document doc, boolean force) throws Exception {
+        SetDataBuilder builder = client.setData();
+        if (!force)
+            builder.withVersion(doc.getVersion());
+        return builder.forPath(path.toString(), doc.getData().getBytes());
     }
 
     public Document get(Path path) throws Exception {
@@ -90,7 +92,10 @@ public class Camille {
         client.delete().forPath(path.toString());
     }
 
-    public boolean exists(Path path) throws Exception {
-        return client.checkExists().forPath(path.toString()) != null;
+    /**
+     * Returns a Stat object if exists, otherwise returns null.
+     */
+    public Stat exists(Path path) throws Exception {
+        return client.checkExists().forPath(path.toString());
     }
 }

@@ -65,8 +65,8 @@ public class CamilleUnitTestNG {
 
             c.create(path, doc0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
-            Assert.assertTrue(c.exists(path));
-            Assert.assertFalse(c.exists(new Path("/testWrongPath")));
+            Assert.assertNotNull(c.exists(path));
+            Assert.assertNull(c.exists(new Path("/testWrongPath")));
 
             // we need a CountDownLatch because the callback is called from
             // another thread
@@ -94,7 +94,7 @@ public class CamilleUnitTestNG {
 
             c.delete(path);
 
-            Assert.assertFalse(c.exists(path));
+            Assert.assertNull(c.exists(path));
         } finally {
             CamilleEnvironment.stop();
         }
@@ -108,17 +108,17 @@ public class CamilleUnitTestNG {
             Path parentPath = new Path("/parentPath");
             Document parentDoc = new Document("parentData", null);
             c.create(parentPath, parentDoc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            Assert.assertTrue(c.exists(parentPath));
+            Assert.assertNotNull(c.exists(parentPath));
 
             Path childPath0 = new Path(String.format("%s/%s", parentPath, "childPath0"));
             Document childDoc0 = new Document("child0Data", null);
             c.create(childPath0, childDoc0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            Assert.assertTrue(c.exists(childPath0));
+            Assert.assertNotNull(c.exists(childPath0));
 
             Path childPath1 = new Path(String.format("%s/%s", parentPath, "childPath1"));
             Document childDoc1 = new Document("child1Data", null);
             c.create(childPath1, childDoc1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            Assert.assertTrue(c.exists(childPath1));
+            Assert.assertNotNull(c.exists(childPath1));
 
             Set<Pair<String, String>> actualChildren = new HashSet<Pair<String, String>>();
             for (Pair<Document, Path> childPair : c.getChildren(parentPath)) {
@@ -140,37 +140,37 @@ public class CamilleUnitTestNG {
             Path p0 = new Path("/parentPath");
             Document d0 = new Document("d0", null);
             c.create(p0, d0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            Assert.assertTrue(c.exists(p0));
+            Assert.assertNotNull(c.exists(p0));
 
             Path p1 = new Path(String.format("%s/%s", p0, "p1"));
             Document d1 = new Document("d1", null);
             c.create(p1, d1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            Assert.assertTrue(c.exists(p1));
+            Assert.assertNotNull(c.exists(p1));
 
             Path p2 = new Path(String.format("%s/%s", p0, "p2"));
             Document d2 = new Document("d2", null);
             c.create(p2, d2, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            Assert.assertTrue(c.exists(p2));
+            Assert.assertNotNull(c.exists(p2));
 
             Path p3 = new Path(String.format("%s/%s", p1, "p3"));
             Document d3 = new Document("d3", null);
             c.create(p3, d3, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            Assert.assertTrue(c.exists(p3));
+            Assert.assertNotNull(c.exists(p3));
 
             Path p4 = new Path(String.format("%s/%s", p1, "p4"));
             Document d4 = new Document("d4", null);
             c.create(p4, d4, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            Assert.assertTrue(c.exists(p4));
+            Assert.assertNotNull(c.exists(p4));
 
             Path p5 = new Path(String.format("%s/%s", p2, "p5"));
             Document d5 = new Document("d5", null);
             c.create(p5, d5, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            Assert.assertTrue(c.exists(p5));
+            Assert.assertNotNull(c.exists(p5));
 
             Path p6 = new Path(String.format("%s/%s", p2, "p6"));
             Document d6 = new Document("d6", null);
             c.create(p6, d6, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            Assert.assertTrue(c.exists(p6));
+            Assert.assertNotNull(c.exists(p6));
 
             DocumentHierarchy h = c.getHierarchy(p0);
 
