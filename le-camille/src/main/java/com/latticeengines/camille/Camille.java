@@ -34,6 +34,13 @@ public class Camille {
     }
 
     public void set(Path path, Document doc) throws Exception {
+        set(path, doc, false);
+    }
+    
+    public void set(Path path, Document doc, boolean force) throws Exception {
+        if (force)
+            throw new UnsupportedOperationException(); // TODO
+        
         client.setData().forPath(path.toString(), doc.getData().getBytes());
     }
 
