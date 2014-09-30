@@ -62,12 +62,13 @@ public class Camille {
      * @throws Exception
      */
     public List<Pair<Document, Path>> getChildren(Path path) throws Exception {
-        List<String> childPaths = client.getChildren().forPath(path.toString());
+        List<String> relativeChildPaths = client.getChildren().forPath(path.toString());
 
-        List<Pair<Document, Path>> out = new ArrayList<Pair<Document, Path>>(childPaths.size());
+        List<Pair<Document, Path>> out = new ArrayList<Pair<Document, Path>>(relativeChildPaths.size());
 
-        for (String childPath : childPaths) {
-            out.add(Pair.of(new Document(new String(client.getData().forPath(childPath)), null), new Path(childPath)));
+        for (String relativePath : relativeChildPaths) {
+            Path childPath = new Path(String.format("%s/%s", path, relativePath));
+            out.add(Pair.of(new Document(new String(client.getData().forPath(childPath.toString())), null), childPath));
         }
 
         return out;

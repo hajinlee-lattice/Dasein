@@ -3,7 +3,11 @@ package com.latticeengines.camille;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -60,6 +64,10 @@ public class CamilleUnitTestNG {
             Assert.assertTrue(c.exists(path));
             Assert.assertFalse(c.exists(new Path("/testWrongPath")));
 
+            // we need a CountDownLatch because the callback is called from
+            // another thread
+            final CountDownLatch latch = new CountDownLatch(1);
+
             final boolean[] watchEventFired = { false };
             CuratorWatcher watcher = new CuratorWatcher() {
                 @Override
@@ -67,6 +75,7 @@ public class CamilleUnitTestNG {
                     if (event.getType().equals(Watcher.Event.EventType.NodeDataChanged)) {
                         watchEventFired[0] = true;
                     }
+                    latch.countDown();
                 }
             };
 
@@ -74,7 +83,7 @@ public class CamilleUnitTestNG {
 
             Document doc1 = new Document("testData1", null);
             c.set(path, doc1);
-
+            latch.await();
             Assert.assertTrue(watchEventFired[0]);
 
             Assert.assertEquals(c.get(path).getData(), doc1.getData());
@@ -82,6 +91,39 @@ public class CamilleUnitTestNG {
             c.delete(path);
 
             Assert.assertFalse(c.exists(path));
+        } finally {
+            CamilleEnvironment.stop();
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testGetChildren() throws Exception {
+        try (TestingServer server = initTestServerAndCamille()) {
+            Camille c = CamilleEnvironment.getCamille();
+
+            Path parentPath = new Path("/parentPath");
+            Document parentDoc = new Document("parentData", null);
+            c.create(parentPath, parentDoc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            Assert.assertTrue(c.exists(parentPath));
+
+            Path childPath0 = new Path(String.format("%s/%s", parentPath, "childPath0"));
+            Document childDoc0 = new Document("child0Data", null);
+            c.create(childPath0, childDoc0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            Assert.assertTrue(c.exists(childPath0));
+
+            Path childPath1 = new Path(String.format("%s/%s", parentPath, "childPath1"));
+            Document childDoc1 = new Document("child1Data", null);
+            c.create(childPath1, childDoc1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            Assert.assertTrue(c.exists(childPath1));
+
+            Set<Pair<String, String>> actualChildren = new HashSet<Pair<String, String>>();
+            for (Pair<Document, Path> childPair : c.getChildren(new Path(String.format("%s", parentPath.toString())))) {
+                actualChildren.add(Pair.of(childPair.getLeft().getData(), childPair.getRight().toString()));
+            }
+
+            Assert.assertTrue(actualChildren.contains(Pair.of(childDoc0.getData(), childPath0.toString())));
+            Assert.assertTrue(actualChildren.contains(Pair.of(childDoc1.getData(), childPath1.toString())));
+
         } finally {
             CamilleEnvironment.stop();
         }
