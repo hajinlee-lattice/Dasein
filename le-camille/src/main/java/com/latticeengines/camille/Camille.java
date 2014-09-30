@@ -34,16 +34,7 @@ public class Camille {
     }
 
     public void set(Path path, Document doc) throws Exception {
-        set(path, doc, false);
-    }
-
-    public void set(Path path, Document doc, boolean force) throws Exception {
-        if (force) {
-            // TODO: catch version exception and retry with backoff
-            throw new UnsupportedOperationException();
-        } else {
-            client.inTransaction().setData().forPath(path.toString(), doc.getData().getBytes()).and().commit();
-        }
+        client.inTransaction().setData().forPath(path.toString(), doc.getData().getBytes()).and().commit();
     }
 
     public Document get(Path path) throws Exception {
@@ -74,9 +65,18 @@ public class Camille {
         return out;
     }
 
-    public DocumentHierarchy getHierarchy(Path path) {
-        // TODO: code DocumentHierarchy class, then do this
-        throw new UnsupportedOperationException();
+    public DocumentHierarchy getHierarchy(Path path) throws Exception {
+        DocumentHierarchy h = new DocumentHierarchy(get(path));
+        addChildren(h.getRoot(), path);
+        return h;
+    }
+
+    private void addChildren(DocumentHierarchy.Node parentNode, Path parentPath) throws Exception {
+        for (Pair<Document, Path> child : getChildren(parentPath)) {
+            DocumentHierarchy.Node n = new DocumentHierarchy.Node(child.getLeft());
+            parentNode.getChildren().add(n);
+            addChildren(n, child.getRight());
+        }
     }
 
     public void delete(Path path) throws Exception {
