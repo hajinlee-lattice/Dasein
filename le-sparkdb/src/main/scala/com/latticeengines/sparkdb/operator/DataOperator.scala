@@ -1,8 +1,10 @@
 package com.latticeengines.sparkdb.operator
 
+import com.latticeengines.common.exposed.graph.GraphNode
 import org.apache.avro.Schema.Field
 import org.apache.avro.generic.GenericRecord
 import org.apache.spark.rdd.RDD
+
 
 abstract class DataOperator(val dataFlow: DataFlow) extends HasName with HasProperty {
   
