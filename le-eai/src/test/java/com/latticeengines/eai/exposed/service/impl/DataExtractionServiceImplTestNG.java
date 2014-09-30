@@ -40,6 +40,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         Table table = new Table();
         table.setName("Lead");
 
+        Attribute id = new Attribute();
+        id.setName("Id");
         Attribute firstName = new Attribute();
         firstName.setName("FirstName");
         Attribute lastName = new Attribute();
@@ -71,6 +73,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         Attribute ownerId = new Attribute();
         ownerId.setName("OwnerId");
 
+        table.addAttribute(id);
         table.addAttribute(firstName);
         table.addAttribute(lastName);
         table.addAttribute(salutation);
@@ -94,6 +97,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         Table table = new Table();
         table.setName("Opportunity");
 
+        Attribute id = new Attribute();
+        id.setName("Id");
         Attribute accountId = new Attribute();
         accountId.setName("AccountId");
         Attribute won = new Attribute();
@@ -111,6 +116,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         Attribute lastModifiedDate = new Attribute();
         lastModifiedDate.setName("LastModifiedDate");
 
+        table.addAttribute(id);
         table.addAttribute(accountId);
         table.addAttribute(won);
         table.addAttribute(stageName);
@@ -127,6 +133,8 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         Table table = new Table();
         table.setName("Contact");
 
+        Attribute id = new Attribute();
+        id.setName("Id");
         Attribute accountId = new Attribute();
         accountId.setName("AccountId");
         Attribute email = new Attribute();
@@ -134,6 +142,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         Attribute lastModifiedDate = new Attribute();
         lastModifiedDate.setName("LastModifiedDate");
 
+        table.addAttribute(id);
         table.addAttribute(accountId);
         table.addAttribute(email);
         table.addAttribute(lastModifiedDate);
