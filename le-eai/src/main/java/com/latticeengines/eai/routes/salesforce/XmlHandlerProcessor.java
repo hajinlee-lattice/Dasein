@@ -1,7 +1,5 @@
 package com.latticeengines.eai.routes.salesforce;
 
-import java.io.InputStream;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
@@ -34,9 +32,8 @@ public class XmlHandlerProcessor implements Processor {
 
         ExtractDataXmlHandler handler = context.getApplicationContext().getBean(beanName, ExtractDataXmlHandler.class);
         handler.initialize(context.getTypeConverterRegistry(), table);
-        InputStream is = exchange.getIn().getBody(InputStream.class);
-        //System.out.println(StreamUtils.copyToString(is, Charset.defaultCharset()));
         exchange.getIn().setHeader("staxUri", "stax:#" + beanName);
+        // System.out.println(IOUtils.toString(exchange.getIn().getBody(InputStream.class)));
     }
 
 }

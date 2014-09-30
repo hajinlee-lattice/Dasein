@@ -13,7 +13,7 @@ public class SalesforceImportServiceImplUnitTestNG {
     public void createQuery() {
         Table table = new Table();
         table.setName("Lead");
-        
+
         Attribute firstName = new Attribute();
         firstName.setName("FirstName");
         Attribute lastName = new Attribute();
@@ -22,15 +22,14 @@ public class SalesforceImportServiceImplUnitTestNG {
         salutation.setName("Salutation");
         Attribute email = new Attribute();
         email.setName("Email");
-        
+
         table.addAttribute(firstName);
         table.addAttribute(lastName);
         table.addAttribute(salutation);
         table.addAttribute(email);
-        
+
         SalesforceImportServiceImpl svc = new SalesforceImportServiceImpl();
         String query = svc.createQuery(table);
         assertEquals(query, "SELECT FirstName,LastName,Salutation,Email FROM Lead");
     }
 }
-

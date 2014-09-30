@@ -9,11 +9,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class EaiMain extends Main {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(EaiMain.class);
-    
+
     public EaiMain() {
-        try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("eai-context.xml")) {}
+        try (ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext("eai-context.xml")) {
+        }
     }
-    
+
     public static void main(String[] args) throws Exception {
         EaiMain main = new EaiMain();
         main.enableHangupSupport();

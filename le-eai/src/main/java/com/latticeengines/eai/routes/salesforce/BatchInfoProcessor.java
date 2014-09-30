@@ -6,15 +6,15 @@ import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.salesforce.api.dto.bulk.BatchInfo;
 
 public class BatchInfoProcessor implements Processor {
-    
+
     @Override
     public void process(Exchange exchange) throws Exception {
         Thread.sleep(2000L);
         BatchInfo batchInfo = exchange.getIn().getBody(BatchInfo.class);
         ProducerTemplate producer = exchange.getContext().createProducerTemplate();
-        
+
         switch (batchInfo.getState()) {
-        
+
         case IN_PROGRESS:
         case QUEUED:
             batchInfo = producer.requestBody("direct:getBatch", batchInfo, BatchInfo.class);
@@ -33,5 +33,5 @@ public class BatchInfoProcessor implements Processor {
             break;
         }
     }
-    
+
 }

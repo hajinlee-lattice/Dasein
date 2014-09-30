@@ -13,8 +13,8 @@ import com.latticeengines.domain.exposed.eai.Table;
 
 @Component("avroSchemaBuilder")
 public class AvroSchemaBuilder {
-	
-	public Schema createSchema(Table table) {
+
+    public Schema createSchema(Table table) {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(table.getName());
         FieldAssembler<Schema> fieldAssembler = recordBuilder.doc("").fields();
         FieldBuilder<Schema> fieldBuilder;
@@ -27,7 +27,7 @@ public class AvroSchemaBuilder {
             fieldBuilder = fieldBuilder.prop("precision", attr.getPrecision().toString());
             fieldBuilder = fieldBuilder.prop("scale", attr.getScale().toString());
             fieldBuilder = fieldBuilder.prop("logicalType", attr.getLogicalDataType());
-            
+
             Type type = Type.valueOf(attr.getPhysicalDataType());
 
             switch (type) {
@@ -50,8 +50,8 @@ public class AvroSchemaBuilder {
                 fieldAssembler = fieldBuilder.type().unionOf().booleanType().and().nullType().endUnion().noDefault();
                 break;
             case ENUM:
-            	String[] enumValues = new String[attr.getEnumValues().size()];
-            	attr.getEnumValues().toArray(enumValues);
+                String[] enumValues = new String[attr.getEnumValues().size()];
+                attr.getEnumValues().toArray(enumValues);
                 fieldAssembler = fieldBuilder.type().enumeration(attr.getName()).symbols(enumValues).noDefault();
                 break;
             default:
@@ -59,6 +59,6 @@ public class AvroSchemaBuilder {
             }
         }
         return fieldAssembler.endRecord();
-	}
+    }
 
 }

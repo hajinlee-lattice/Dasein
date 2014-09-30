@@ -12,5 +12,5 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 public class EaiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @SuppressWarnings("unused")
-	private static final Log log = LogFactory.getLog(EaiFunctionalTestNGBase.class);
+    private static final Log log = LogFactory.getLog(EaiFunctionalTestNGBase.class);
 }

@@ -14,25 +14,24 @@ import com.latticeengines.eai.service.ImportService;
 
 @Component("dataExtractionService")
 public class DataExtractionServiceImpl implements DataExtractionService {
-	
-	private static final Log log = LogFactory.getLog(DataExtractionServiceImpl.class);
+
+    private static final Log log = LogFactory.getLog(DataExtractionServiceImpl.class);
 
     @Autowired
     private ImportService salesforceImportService;
-    
+
     @Override
     public void extractAndImport(List<Table> tables) {
         List<Table> tableMetadata = salesforceImportService.importMetadata(tables);
-        
+
         for (Table table : tableMetadata) {
-        	List<Attribute> attributes = table.getAttributes();
-        	
-        	for (Attribute attribute : attributes) {
-        		log.info("Attribute " + attribute.getDisplayName() + " : " + attribute.getPhysicalDataType());
-        	}
+            List<Attribute> attributes = table.getAttributes();
+
+            for (Attribute attribute : attributes) {
+                log.info("Attribute " + attribute.getDisplayName() + " : " + attribute.getPhysicalDataType());
+            }
         }
         salesforceImportService.importData(tableMetadata);
     }
 
-    
 }

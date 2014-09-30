@@ -35,27 +35,27 @@ public class SalesforceImportServiceImpl implements ImportService {
 
     @Autowired
     private ProducerTemplate producer;
-    
+
     @Autowired
     private AvroTypeConverter salesforceToAvroTypeConverter;
-    
+
     @Autowired
     private AvroSchemaBuilder avroSchemaBuilder;
-    
+
     private enum ToStringFunction implements Function<PickListValue, String> {
         INSTANCE;
 
-        @Override 
+        @Override
         public String toString() {
-          return "toString";
+            return "toString";
         }
 
-		@Override
-		public String apply(PickListValue input) {
-			checkNotNull(input);
-			return AvroUtils.getAvroFriendlyString(input.getValue());
-		}
-      }
+        @Override
+        public String apply(PickListValue input) {
+            checkNotNull(input);
+            return AvroUtils.getAvroFriendlyString(input.getValue());
+        }
+    }
 
     private JobInfo setupJob(Table table) {
         JobInfo jobInfo = new JobInfo();
@@ -79,7 +79,7 @@ public class SalesforceImportServiceImpl implements ImportService {
                 Table newTable = new Table();
                 newTable.setName(table.getName());
                 newTable.setDisplayName(desc.getLabel());
-                
+
                 for (SObjectField descField : descFields) {
                     if (!map.containsKey(descField.getName())) {
                         continue;
@@ -94,16 +94,17 @@ public class SalesforceImportServiceImpl implements ImportService {
                     attr.setNullable(descField.isNillable());
                     attr.setPhysicalDataType(salesforceToAvroTypeConverter.convertTypeToAvro(type).name());
                     attr.setLogicalDataType(type);
-                    
+
                     if (type.equals("picklist")) {
                         List<PickListValue> values = descField.getPicklistValues();
                         PickListValue emptyValue = new PickListValue();
                         emptyValue.setValue(" ");
                         values.add(emptyValue);
-                    	List<String> enumValues = Lists.transform(descField.getPicklistValues(), ToStringFunction.INSTANCE);
-                    	attr.setEnumValues(enumValues);
+                        List<String> enumValues = Lists.transform(descField.getPicklistValues(),
+                                ToStringFunction.INSTANCE);
+                        attr.setEnumValues(enumValues);
                     }
-                    
+
                     newTable.addAttribute(attr);
                 }
                 Schema schema = avroSchemaBuilder.createSchema(newTable);
@@ -115,7 +116,7 @@ public class SalesforceImportServiceImpl implements ImportService {
         }
         return newTables;
     }
-    
+
     @Override
     public void importData(List<Table> tables) {
         for (Table table : tables) {

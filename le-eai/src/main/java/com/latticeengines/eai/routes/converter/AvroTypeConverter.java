@@ -8,10 +8,10 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 
 public abstract class AvroTypeConverter {
 
-	public abstract Type convertTypeToAvro(String type);
-	
-	public static Object convertIntoJavaValueForAvroType(TypeConverterRegistry typeRegistry, Type avroType, Object value) {
-	    Class<?> targetType = null;
+    public abstract Type convertTypeToAvro(String type);
+
+    public static Object convertIntoJavaValueForAvroType(TypeConverterRegistry typeRegistry, Type avroType, Object value) {
+        Class<?> targetType = null;
         switch (avroType) {
         case DOUBLE:
             targetType = Double.class;
@@ -37,22 +37,21 @@ public abstract class AvroTypeConverter {
         default:
             break;
         }
-        
+
         if (avroType == Type.ENUM) {
             value = AvroUtils.getAvroFriendlyString((String) value);
         }
-        
+
         if (value.getClass().equals(targetType)) {
             return value;
         }
-        
+
         TypeConverter converter = typeRegistry.lookup(targetType, value.getClass());
-        
-        
+
         return converter.convertTo(targetType, value);
-	}
-	
-	public static Object getEmptyValue(Type avroType) {
+    }
+
+    public static Object getEmptyValue(Type avroType) {
         switch (avroType) {
         case DOUBLE:
             return 0d;
@@ -72,6 +71,6 @@ public abstract class AvroTypeConverter {
             break;
         }
         return new Object();
-	}
-	
+    }
+
 }

@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 
 public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
-    
+
     @Autowired
     private DataExtractionServiceImpl dataExtractionService;
 
@@ -19,7 +19,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     public void importData() throws Exception {
         Table table = new Table();
         table.setName("Lead");
-        
+
         Attribute firstName = new Attribute();
         firstName.setName("FirstName");
         Attribute lastName = new Attribute();
@@ -60,7 +60,7 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         table.addAttribute(converted);
         table.addAttribute(convertedDate);
         table.addAttribute(createdDate);
-        
+
         List<Table> tables = new ArrayList<>();
         tables.add(table);
         dataExtractionService.extractAndImport(tables);
