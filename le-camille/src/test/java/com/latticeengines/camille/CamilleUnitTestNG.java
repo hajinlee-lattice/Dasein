@@ -117,7 +117,7 @@ public class CamilleUnitTestNG {
             Assert.assertTrue(c.exists(childPath1));
 
             Set<Pair<String, String>> actualChildren = new HashSet<Pair<String, String>>();
-            for (Pair<Document, Path> childPair : c.getChildren(new Path(String.format("%s", parentPath.toString())))) {
+            for (Pair<Document, Path> childPair : c.getChildren(parentPath)) {
                 actualChildren.add(Pair.of(childPair.getLeft().getData(), childPair.getRight().toString()));
             }
 
