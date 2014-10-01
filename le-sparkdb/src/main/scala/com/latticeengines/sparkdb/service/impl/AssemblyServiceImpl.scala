@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component
 
 import com.latticeengines.sparkdb.operator.DataFlow
 import com.latticeengines.sparkdb.operator.impl.AvroSourceTable
-import com.latticeengines.sparkdb.operator.impl.AvroTargetTable
+import com.latticeengines.sparkdb.operator.impl.AvroTargetTableWithParquet
 import com.latticeengines.sparkdb.operator.impl.DataProfileOperator
 import com.latticeengines.sparkdb.operator.impl.Filter
 import com.latticeengines.sparkdb.operator.impl.Join
@@ -38,8 +38,8 @@ class AssemblyServiceImpl extends AssemblyService {
 
       val profiler = new DataProfileOperator(dataFlow)
 
-      val target = new AvroTargetTable(dataFlow)
-      target.setPropertyValue(AvroTargetTable.DataPath, "/tmp/result")
+      val target = new AvroTargetTableWithParquet(dataFlow)
+      target.setPropertyValue(AvroTargetTableWithParquet.DataPath, "/tmp/result")
 
       //profiler.run(filter.run(join.run(Array(source1.run(null), source2.run(null)))))
       target.run(filter.run(join.run(Array(lead.run(null), opportunity.run(null)))))

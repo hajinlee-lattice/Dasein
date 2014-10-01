@@ -20,7 +20,7 @@ class Join(val df: DataFlow) extends DataOperator(df) {
     val rdd1 = rdds(0).map {
       p => (p.get(Join.parseJoinCondition(joinCondition)(0)).asInstanceOf[String], p)
     }
-
+    
     val rdd2 = rdds(1).map {
       p => (p.get(Join.parseJoinCondition(joinCondition)(1)).asInstanceOf[String], p)
     }
@@ -48,6 +48,8 @@ object Join {
   }
 
   def combineRecords(u: GenericRecord, v: GenericRecord, s: Array[java.lang.Object]): GenericRecord = {
-    AvroUtils.combineAvroRecords(u, v, s)
+    val combinedRecord = AvroUtils.combineAvroRecords(u, v, s)
+    println(combinedRecord)
+    combinedRecord
   }
 }
