@@ -56,7 +56,7 @@ public class GetJobStatus extends ModelingResourceJob<String, JobStatus> {
                 String appId = appIds.get(i);
                 GetJobStatus gjs = new GetJobStatus();
                 gjs.setConfiguration(restEndpointHost, appId);
-                JobStatus gs = gjs.getJobStatus();
+                JobStatus gs = gjs.getJobStatus(hdfsPath);
                 FinalApplicationStatus status = gs.getStatus();
                 YarnApplicationState state = gs.getState();
                 if ((state.equals(YarnApplicationState.FINISHED) && status.equals(FinalApplicationStatus.SUCCEEDED))) {
