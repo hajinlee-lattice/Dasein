@@ -22,9 +22,9 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.NEVER)
     public Job findByObjectId(String id) {
-        Session session = sessionFactory.getCurrentSession();
+        Session session = sessionFactory.openSession();
         Query query = session.createQuery("from " + Job.class.getSimpleName() + " J where J.id=:aJobId");
         query.setString("aJobId", id);
         Job job = (Job) query.uniqueResult();
