@@ -49,7 +49,7 @@ public class DocumentHierarchy {
         private final Iterator<DocumentHierarchy.Node> iter;
 
         IteratorWrapper(List<DocumentHierarchy.Node> list) {
-            this.iter = list.iterator();
+            iter = list.iterator();
         }
 
         @Override
