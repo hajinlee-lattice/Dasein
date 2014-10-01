@@ -44,9 +44,9 @@ public class GetJobStatus extends ModelingResourceJob<String, JobStatus> {
                     return false;
                 }
             }
-            Thread.sleep(2000L);
+            Thread.sleep(6000L);
         }
-        Thread.sleep(2000L);
+        Thread.sleep(6000L);
         return true;
     }
 
@@ -66,9 +66,9 @@ public class GetJobStatus extends ModelingResourceJob<String, JobStatus> {
                     return false;
                 }
             }
-            Thread.sleep(2000L);
+            Thread.sleep(6000L);
         }
-        Thread.sleep(2000L);
+        Thread.sleep(6000L);
         return true;
     }
 
