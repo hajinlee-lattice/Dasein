@@ -18,7 +18,7 @@ public class DocumentSerializer {
         public DocumentMetadata metadata;
     }
     
-    public static Document fromZNode(byte[] data, Stat stat) throws DocumentSerializationException {
+    public static Document toDocument(byte[] data) throws DocumentSerializationException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         
@@ -27,15 +27,15 @@ public class DocumentSerializer {
             String string = new String(data, "UTF-8");
             node = mapper.readValue(string, Node.class);
         } catch (Exception e) {
-            String msg = "Error deserializing from data " + data + " and stat " + stat;
+            String msg = "Error deserializing from data " + data;
             log.error(msg, e);
             throw new DocumentSerializationException(msg, e);
         }
 
-        return new Document(node.data, node.metadata, stat.getVersion());
+        return new Document(node.data, node.metadata);
     }
     
-    public static byte[] toZNode(Document document) throws DocumentSerializationException {
+    public static byte[] toByteArray(Document document) throws DocumentSerializationException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         
