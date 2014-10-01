@@ -1,41 +1,86 @@
 package com.latticeengines.domain.exposed.camille;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
-public class DocumentHierarchy implements Iterable<DocumentHierarchy.Node> {
+public class DocumentHierarchy {
 
     private Node root;
-    
+
     public DocumentHierarchy(Document rootDocument) {
         root = new Node(rootDocument);
     }
-    
+
     public Node getRoot() {
         return root;
     }
-    
-    public static class Node {
-        private Document document;
-        List<Node> children = new ArrayList<Node>();
-        
-        public Node(Document document) {
-            this.document = document;
+
+    public Iterator<DocumentHierarchy.Node> breadthFirstIterator() {
+        List<DocumentHierarchy.Node> out = new ArrayList<DocumentHierarchy.Node>();
+        Queue<DocumentHierarchy.Node> q = new LinkedList<DocumentHierarchy.Node>(Arrays.asList(root));
+        while (!q.isEmpty()) {
+            Node n = q.poll();
+            out.add(n);
+            q.addAll(n.getChildren());
         }
-        
-        public Document getDocument() {
-            return document;
-        }
-        
-        public List<Node> getChildren() {
-            return children;
+        return new IteratorWrapper(out);
+    }
+
+    public Iterator<DocumentHierarchy.Node> depthFirstIterator() {
+        List<DocumentHierarchy.Node> out = new ArrayList<DocumentHierarchy.Node>();
+        traverse(root, out);
+        return new IteratorWrapper(out);
+    }
+
+    private static void traverse(Node parent, List<DocumentHierarchy.Node> out) {
+        out.add(parent);
+        for (Node child : parent.getChildren()) {
+            traverse(child, out);
         }
     }
 
-    @Override
-    public Iterator<DocumentHierarchy.Node> iterator() {
-        // TODO
-        return null;
+    private static class IteratorWrapper implements Iterator<DocumentHierarchy.Node> {
+        private final Iterator<DocumentHierarchy.Node> iter;
+
+        IteratorWrapper(List<DocumentHierarchy.Node> list) {
+            this.iter = list.iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iter.hasNext();
+        }
+
+        @Override
+        public Node next() {
+            return iter.next();
+        }
+
+        @Override
+        public void remove() {
+            // we can support this by having each node keep track of its' parent
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    public static class Node {
+        private Document document;
+        private List<Node> children = new ArrayList<Node>();
+
+        public Node(Document document) {
+            this.document = document;
+        }
+
+        public Document getDocument() {
+            return document;
+        }
+
+        public List<Node> getChildren() {
+            return children;
+        }
     }
 }

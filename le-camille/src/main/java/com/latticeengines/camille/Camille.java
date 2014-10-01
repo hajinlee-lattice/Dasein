@@ -1,6 +1,8 @@
 package com.latticeengines.camille;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -77,11 +79,19 @@ public class Camille {
     public DocumentHierarchy getHierarchy(Path path) throws Exception {
         DocumentHierarchy h = new DocumentHierarchy(get(path));
         addChildren(h.getRoot(), path);
+        h.depthFirstIterator();
         return h;
     }
 
     private void addChildren(DocumentHierarchy.Node parentNode, Path parentPath) throws Exception {
-        for (Pair<Document, Path> child : getChildren(parentPath)) {
+        List<Pair<Document, Path>> children = getChildren(parentPath);
+        Collections.sort(children, new Comparator<Pair<Document, Path>>() {
+            @Override
+            public int compare(Pair<Document, Path> p0, Pair<Document, Path> p1) {
+                return p0.getRight().toString().compareTo(p1.getRight().toString());
+            }
+        });
+        for (Pair<Document, Path> child : children) {
             DocumentHierarchy.Node n = new DocumentHierarchy.Node(child.getLeft());
             parentNode.getChildren().add(n);
             addChildren(n, child.getRight());

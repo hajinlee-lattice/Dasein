@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -183,6 +184,45 @@ public class CamilleUnitTestNG {
             for (Node node : h.getRoot().getChildren().get(1).getChildren()) {
                 Assert.assertTrue(node.getChildren().isEmpty());
             }
+
+            int i = 0;
+            Iterator<Node> iter = h.breadthFirstIterator();
+            while (iter.hasNext()) {
+                Assert.assertEquals(iter.next().getDocument().getData(), String.format("d%d", i));
+                ++i;
+            }
+            Assert.assertEquals(i, 7);
+
+            i = 0;
+            iter = h.depthFirstIterator();
+            while (iter.hasNext()) {
+                switch (iter.next().getDocument().getData()) {
+                case "d0":
+                    Assert.assertEquals(i, 0);
+                    break;
+                case "d1":
+                    Assert.assertEquals(i, 1);
+                    break;
+                case "d2":
+                    Assert.assertEquals(i, 4);
+                    break;
+                case "d3":
+                    Assert.assertEquals(i, 2);
+                    break;
+                case "d4":
+                    Assert.assertEquals(i, 3);
+                    break;
+                case "d5":
+                    Assert.assertEquals(i, 5);
+                    break;
+                case "d6":
+                    Assert.assertEquals(i, 6);
+                    break;
+                }
+
+                ++i;
+            }
+            Assert.assertEquals(i, 7);
 
         } finally {
             CamilleEnvironment.stop();
