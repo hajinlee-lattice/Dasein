@@ -124,7 +124,7 @@ public class AvroUtils {
         Schema schema = fieldAssembler.endRecord();
         return new Object[] { schema, map };
     }
-    
+
     private static void setValues(GenericRecord r, Schema s, Schema combined, GenericRecordBuilder recordBldr,
             Map<String, String> nameMap, String nameSuffix) {
         for (Field field : s.getFields()) {
@@ -142,14 +142,12 @@ public class AvroUtils {
         Schema combinedSchema = Schema.parse((String) schema[0]);
         GenericRecordBuilder recordBldr = new GenericRecordBuilder(combinedSchema);
         Map<String, String> nameMap = (Map<String, String>) schema[1];
-        System.out.println("Setting for $2");
         setValues(r1, s1, combinedSchema, recordBldr, nameMap, "$2");
-        System.out.println("Setting for $1");
         setValues(r2, s2, combinedSchema, recordBldr, nameMap, "$1");
         return recordBldr.build();
     }
-    
+
     public static String getAvroFriendlyString(String value) {
-    	return value.replaceAll("[^A-Za-z0-9()\\[\\]]", "_");
+        return value.replaceAll("[^A-Za-z0-9()\\[\\]]", "_");
     }
 }
