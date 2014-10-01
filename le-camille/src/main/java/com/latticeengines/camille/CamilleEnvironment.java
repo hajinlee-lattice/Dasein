@@ -29,7 +29,7 @@ public class CamilleEnvironment {
     private static Camille camille = null;
 
     // TODO: accept inputstream with camille.json
-    public static void start(Mode mode, Reader configJsonReader) throws IllegalStateException, IOException,
+    public static synchronized void start(Mode mode, Reader configJsonReader) throws IllegalStateException, IOException,
             InterruptedException {
         if (camille != null && camille.getCuratorClient() != null
                 && camille.getCuratorClient().getState().equals(CuratorFrameworkState.STARTED)) {
@@ -79,7 +79,7 @@ public class CamilleEnvironment {
         camille = new Camille(client);
     }
 
-    public static void stop() {
+    public static synchronized void stop() {
         if (camille != null && camille.getCuratorClient() != null
                 && camille.getCuratorClient().getState().equals(CuratorFrameworkState.STARTED)) {
             camille.getCuratorClient().close();
