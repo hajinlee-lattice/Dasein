@@ -18,7 +18,6 @@
 		<groupId>com.latticeengines</groupId>
 		<artifactId>le-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
-		<relativePath>../le-parent</relativePath>
 	</parent>
 
 	<dependencies>

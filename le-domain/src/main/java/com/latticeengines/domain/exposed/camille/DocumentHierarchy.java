@@ -25,8 +25,7 @@ public class DocumentHierarchy {
     public Iterator<DocumentHierarchy.Node> breadthFirstIterator() {
         List<DocumentHierarchy.Node> out = new ArrayList<DocumentHierarchy.Node>();
         Queue<DocumentHierarchy.Node> q = new LinkedList<DocumentHierarchy.Node>(Arrays.asList(root));
-        while (!q.isEmpty()) {
-            Node n = q.poll();
+        for (Node n = q.poll(); n != null; n = q.poll()) {
             out.add(n);
             q.addAll(n.getChildren());
         }
