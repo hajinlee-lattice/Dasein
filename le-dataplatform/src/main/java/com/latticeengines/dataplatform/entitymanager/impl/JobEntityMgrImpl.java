@@ -27,7 +27,7 @@ public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntit
     }
 
     @Override
-    @Transactional(propagation = Propagation.NEVER)
+    @Transactional(propagation = Propagation.REQUIRED)
     public Job findByObjectId(String id) {
         return jobDao.findByObjectId(id);
     }

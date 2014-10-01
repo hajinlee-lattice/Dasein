@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.dao.impl;
 
 import java.util.List;
 import org.hibernate.Criteria;
+import org.hibernate.LockMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -22,11 +23,12 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
     }
 
     @Override
-    @Transactional(propagation = Propagation.NEVER)
+    @Transactional(propagation = Propagation.REQUIRED)
     public Job findByObjectId(String id) {
-        Session session = sessionFactory.openSession();
+        Session session = sessionFactory.getCurrentSession();
         Query query = session.createQuery("from " + Job.class.getSimpleName() + " J where J.id=:aJobId");
         query.setString("aJobId", id);
+        query.setLockMode("J", LockMode.READ);
         Job job = (Job) query.uniqueResult();
         return job;
     }
@@ -38,6 +40,7 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
         Session session = sessionFactory.getCurrentSession();
         Criteria criteria = session.createCriteria(Job.class, "listAllByObjectIds");
         criteria.add(Restrictions.in("id", jobIds));
+        criteria.setLockMode(LockMode.READ);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         List<Job> jobs = criteria.list();
 
