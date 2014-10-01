@@ -3,8 +3,10 @@ package com.latticeengines.common.exposed.util;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Map;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler;
@@ -77,7 +79,9 @@ public class HttpUtils {
             }
         }
         HttpResponse response = request.execute();
-        return IOUtils.toString(response.getContent());
+        String value = IOUtils.toString(response.getContent());
+        System.out.println(value);
+        return value;
     }
 
     /*
