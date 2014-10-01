@@ -79,7 +79,6 @@ public class Camille {
     public DocumentHierarchy getHierarchy(Path path) throws Exception {
         DocumentHierarchy h = new DocumentHierarchy(get(path));
         addChildren(h.getRoot(), path);
-        h.depthFirstIterator();
         return h;
     }
 
