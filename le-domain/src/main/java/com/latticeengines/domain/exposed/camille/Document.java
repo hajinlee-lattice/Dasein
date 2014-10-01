@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.camille;
 
 public class Document {
     private String data;
-    private int version;
+    private int version = -1;
     private DocumentMetadata metadata;
     
     public Document(String data, DocumentMetadata metadata) {
@@ -11,6 +11,10 @@ public class Document {
     }
     
     public Document(String data, DocumentMetadata metadata, int version) {
+        if (version < 0) {
+            throw new IllegalArgumentException("version must be greater or equal to 0");
+        }        
+        
         this.data = data;
         this.metadata = metadata;
         this.version = version;
@@ -40,6 +44,10 @@ public class Document {
         this.metadata = metadata;
     }
     
+    public boolean versionSpecified() {
+        return this.version >= 0;
+    }
+    
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof Document)) {
@@ -47,18 +55,18 @@ public class Document {
         }
         
         Document otherDoc = (Document)other;
-        return data.equals(otherDoc.data) &&
-               metadata.equals(otherDoc.metadata) &&
-               version == otherDoc.version;
+        return this.data.equals(otherDoc.data) &&
+               this.metadata.equals(otherDoc.metadata) &&
+               this.version == otherDoc.version;
     }
     
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime*result + data.hashCode();
-        result = prime*result + metadata.hashCode();
-        result = prime*result + version;
+        result = prime*result + this.data.hashCode();
+        result = prime*result + this.metadata.hashCode();
+        result = prime*result + this.version;
         return result;
     }
     
