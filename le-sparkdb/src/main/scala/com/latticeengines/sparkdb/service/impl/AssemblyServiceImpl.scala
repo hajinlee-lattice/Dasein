@@ -54,10 +54,9 @@ object AssemblyServiceImpl extends App {
 
   override def main(args: Array[String]) = {
     val assemblyService = new AssemblyServiceImpl()
-    assemblyService.local = true
-    
-
-
+    if (args.length > 0) {
+      assemblyService.local = true
+    }
     assemblyService.run()
   }
 

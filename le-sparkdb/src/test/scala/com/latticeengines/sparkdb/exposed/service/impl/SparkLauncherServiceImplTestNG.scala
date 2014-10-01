@@ -1,16 +1,25 @@
 package com.latticeengines.sparkdb.exposed.service.impl
 
+import com.latticeengines.common.exposed.util.HdfsUtils
 import com.latticeengines.sparkdb.exposed.service.SparkLauncherService
 import com.latticeengines.sparkdb.functionalframework.SparkDbFunctionalTestNGBase
 import org.apache.hadoop.yarn.conf.YarnConfiguration
 import org.springframework.beans.factory.annotation.Autowired
 import org.testng.Assert.assertNotNull
+import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
 
 class SparkLauncherServiceImplTestNG extends SparkDbFunctionalTestNGBase {
 
   @Autowired
   var sparkLauncherService: SparkLauncherService = null
+  
+  var conf = new YarnConfiguration()
+  
+  @BeforeClass(groups = Array("functional"))
+  def setup() = {
+    HdfsUtils.rmdir(conf, "/tmp/result")
+  }
 
   @Test(groups = Array("functional"))
   def test() = {
