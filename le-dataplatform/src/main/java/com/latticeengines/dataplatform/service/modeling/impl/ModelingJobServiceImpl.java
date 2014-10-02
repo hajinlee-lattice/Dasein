@@ -211,27 +211,8 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
         }
         resubmitJob.addChildJobId(newJob.getId());
         jobEntityMgr.update(resubmitJob);
+
         return appId;
-    }
-
-    protected com.latticeengines.domain.exposed.dataplatform.Job getLeafJob(String applicationId) {
-        com.latticeengines.domain.exposed.dataplatform.Job job = jobEntityMgr.findByObjectId(applicationId); // /
-        // jobEntityMgr.getById(applicationId);
-
-        while (job != null && job.getChildJobIdList().size() > 0) {
-            applicationId = job.getChildJobIdList().get(0);
-            job = jobEntityMgr.findByObjectId(applicationId);
-        }
-        return job;
-
-        // if (job != null) {
-        // List<String> childIds = job.getChildJobIdList();
-        // for (String jobId : childIds) {
-        // return getLeafJob(jobId);
-        // }
-        // }
-        // return job;
-
     }
 
     @Override
@@ -253,5 +234,16 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
         }
         super.setJobStatus(jobStatus, applicationId, hdfs);
         return jobStatus;
+    }
+
+    protected com.latticeengines.domain.exposed.dataplatform.Job getLeafJob(String applicationId) {
+        com.latticeengines.domain.exposed.dataplatform.Job job = jobEntityMgr.findByObjectId(applicationId); // /
+        // jobEntityMgr.getById(applicationId);
+
+        while (job != null && job.getChildJobIdList().size() > 0) {
+            applicationId = job.getChildJobIdList().get(0);
+            job = jobEntityMgr.findByObjectId(applicationId);
+        }
+        return job;
     }
 }

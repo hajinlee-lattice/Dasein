@@ -26,7 +26,7 @@ public class ModelEntityMgrImpl extends BaseEntityMgrImpl<Model> implements Mode
     }
     
     @Override
-    @Transactional(propagation = Propagation.NEVER)
+    @Transactional(propagation = Propagation.REQUIRED)
     public Model findByObjectId(String id) {
         return modelDao.findByObjectId(id);
     }
