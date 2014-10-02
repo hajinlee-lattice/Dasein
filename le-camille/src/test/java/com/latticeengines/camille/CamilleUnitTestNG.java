@@ -46,7 +46,7 @@ public class CamilleUnitTestNG {
     }
 
     @Test(groups = "unit", timeOut = timeOutMs)
-    public void testCreateGetWatchAndDelete() throws Exception {
+    public void testCreateGetSetWatchAndDelete() throws Exception {
         Camille c = CamilleEnvironment.getCamille();
 
         Path path = new Path("/testPath");
@@ -54,6 +54,8 @@ public class CamilleUnitTestNG {
 
         c.create(path, doc0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
+        Assert.assertEquals(doc0.getVersion(), 0);
+        
         Assert.assertNotNull(c.exists(path));
         Assert.assertNull(c.exists(new Path("/testWrongPath")));
 
@@ -78,8 +80,12 @@ public class CamilleUnitTestNG {
         c.set(path, doc1);
         latch.await(); // wait for the process callback to be called
         Assert.assertTrue(dataChangedEventFired[0]);
+        
+        Assert.assertEquals(doc1.getVersion(), 1);
 
         Assert.assertEquals(c.get(path).getData(), doc1.getData());
+        
+        Assert.assertEquals(c.get(path).getVersion(), 1);
 
         c.delete(path);
 

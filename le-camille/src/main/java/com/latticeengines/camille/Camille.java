@@ -35,6 +35,7 @@ public class Camille {
 
     public void create(Path path, Document doc, List<ACL> acls) throws Exception {
         client.create().withACL(acls).forPath(path.toString(), doc.getData().getBytes());
+        doc.setVersion(0);
     }
 
     public Stat set(Path path, Document doc) throws Exception {
@@ -45,17 +46,26 @@ public class Camille {
         SetDataBuilder builder = client.setData();
         if (!force)
             builder.withVersion(doc.getVersion());
-        return builder.forPath(path.toString(), doc.getData().getBytes());
+        Stat stat = builder.forPath(path.toString(), doc.getData().getBytes());
+        doc.setVersion(stat.getVersion());
+        return stat;
     }
 
     public Document get(Path path) throws Exception {
         // TODO: do something about DocumentMetadata
-        return new Document(new String(client.getData().forPath(path.toString())), null);
+        Stat stat = new Stat();
+        Document doc = new Document(new String(client.getData().storingStatIn(stat).forPath(path.toString())), null);
+        doc.setVersion(stat.getVersion());
+        return doc;
     }
 
     public Document get(Path path, CuratorWatcher watcher) throws Exception {
         // TODO: do something about DocumentMetadata
-        return new Document(new String(client.getData().usingWatcher(watcher).forPath(path.toString())), null);
+        Stat stat = new Stat();
+        Document doc = new Document(new String(client.getData().storingStatIn(stat).usingWatcher(watcher)
+                .forPath(path.toString())), null);
+        doc.setVersion(stat.getVersion());
+        return doc;
     }
 
     /**
@@ -70,7 +80,7 @@ public class Camille {
 
         for (String relativePath : relativeChildPaths) {
             Path childPath = new Path(String.format("%s/%s", path, relativePath));
-            out.add(Pair.of(new Document(new String(client.getData().forPath(childPath.toString())), null), childPath));
+            out.add(Pair.of(get(childPath), childPath));
         }
 
         return out;
