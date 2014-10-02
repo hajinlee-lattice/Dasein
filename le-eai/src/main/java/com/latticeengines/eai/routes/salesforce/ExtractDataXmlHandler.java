@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
+import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -47,6 +48,7 @@ public class ExtractDataXmlHandler extends DefaultHandler {
             DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
             dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter);
             try {
+                dataFileWriter.setCodec(CodecFactory.snappyCodec());
                 dataFileWriter.create(schema, file);
                 return;
             } catch (IOException e) {
