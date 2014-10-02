@@ -1,9 +1,14 @@
 package com.latticeengines.camille;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.transaction.CuratorTransaction;
+import org.apache.curator.framework.api.transaction.CuratorTransactionBridge;
+import org.apache.curator.framework.api.transaction.CuratorTransactionResult;
+import org.apache.curator.framework.api.transaction.OperationType;
 import org.apache.zookeeper.data.ACL;
 
 import com.latticeengines.domain.exposed.camille.Document;
@@ -14,29 +19,200 @@ import com.latticeengines.domain.exposed.camille.Path;
  */
 public class CamilleTransaction {
     private CuratorTransaction transaction;
+    private List<Operation> operations;
+
+    private abstract static class Operation {
+        protected Path path;
+        public Operation(Path path) {
+            this.path = path;
+        }
+
+        public abstract CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception;
+
+        public abstract CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception;
+
+        public abstract void updateWithResult(CuratorTransactionResult result);
+
+        public abstract OperationType getOperationType();
+       
+        public Path getPath() {
+            return path;
+        }
+        
+    }
+
+    private static class DeleteOperation extends Operation {
+        public DeleteOperation(Path path) {
+            super(path);
+        }
+
+        public CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception {
+            return transaction.delete().forPath(path.toString());
+        }
+        
+        public CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception {
+            return bridge.and().delete().forPath(path.toString());
+        }
+        
+        public void updateWithResult(CuratorTransactionResult result) {
+            // nothing to do
+        }
+        
+        public OperationType getOperationType() {
+            return OperationType.DELETE;
+        }
+    }
+    
+    private static class CheckOperation extends Operation {
+        private Document document;
+        
+        public CheckOperation(Path path, Document document) {
+            super(path);
+            this.document = document;
+        }
+        
+        public CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception {
+            return transaction.check().withVersion(document.getVersion()).forPath(path.toString());
+        }
+        
+        public CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception {
+            return bridge.and().check().withVersion(document.getVersion()).forPath(path.toString());
+        }
+        
+        public void updateWithResult(CuratorTransactionResult result) {
+            // nothing to do
+        }
+        
+        public OperationType getOperationType() {
+            return OperationType.CHECK;
+        }
+    }
+    
+    private static class CreateOperation extends Operation {
+        private Document document;
+        private List<ACL> acl;
+        private byte[] data;
+        
+        public CreateOperation(Path path, Document document, List<ACL> acl) throws DocumentSerializationException {
+            super(path);
+            this.document = document;
+            this.acl = acl;
+            this.data = DocumentSerializer.toByteArray(document);
+        }
+        
+        public CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception {
+            return transaction.create().withACL(acl).forPath(path.toString(), data);
+        }
+        
+        public CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception {
+            return bridge.and().create().withACL(acl).forPath(path.toString(), data);
+        }
+        
+        public void updateWithResult(CuratorTransactionResult result) {
+            this.document.setVersion(0);
+        }
+        
+        public OperationType getOperationType() {
+            return OperationType.CREATE;
+        }
+    }
+    
+    private static class SetOperation extends Operation {
+        private Document document;
+        private byte[] data;
+        
+        public SetOperation(Path path, Document document) throws DocumentSerializationException {
+            super(path);
+            this.document = document;
+            this.data = DocumentSerializer.toByteArray(document);
+        }
+        
+        public CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception {
+            return transaction.setData().withVersion(document.getVersion()).forPath(path.toString());
+        }
+        
+        public CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception {
+            return bridge.and().setData().withVersion(document.getVersion()).forPath(path.toString());
+        }
+        
+        public void updateWithResult(CuratorTransactionResult result) {
+            this.document.setVersion(result.getResultStat().getVersion());
+        }
+        
+        public OperationType getOperationType() {
+            return OperationType.SET_DATA;
+        }
+    }
+    
+    
 
     public CamilleTransaction() {
         CuratorFramework curator = CamilleEnvironment.getCamille().getCuratorClient();
-        this.transaction = curator.inTransaction();
+        transaction = curator.inTransaction();
+        operations = new ArrayList<Operation>();
     }
 
+    /**
+     * Performs a transactional check, which asserts that the provided document
+     * is up-to-date relative to what's in the repository.
+     */
     public void check(Path path, Document document) {
-        // TODO
+        operations.add(new CheckOperation(path, document));
     }
 
-    public void create(Path path, Document document, List<ACL> acl) {
-        // TODO
+    /**
+     * Performs a transactional create. This creates the provided document with
+     * the provided ACL at the provided path within a transactional context.
+     */
+    public void create(Path path, Document document, List<ACL> acl) throws DocumentSerializationException {
+        operations.add(new CreateOperation(path, document, acl));
     }
 
-    public void set(Path path, Document document) {
-        // TODO
+    /**
+     * Performs a transactional set operation. All set operations send document
+     * versions and so will result in an exception if the version in the
+     * repository doesn't match the version of the document.
+     */
+    public void set(Path path, Document document) throws DocumentSerializationException {
+        operations.add(new SetOperation(path, document));
     }
 
+    /**
+     * Performs a transactional delete operation. Does not care about document
+     * versions.
+     */
     public void delete(Path path) {
-        // TODO
+        operations.add(new DeleteOperation(path));
     }
 
-    public void commit() {
-        // TODO
+    /**
+     * Commits the pending operations. Note that as a side-effect, upon success,
+     * document versions will be updated to reflect what's in the repository.
+     */
+    public void commit() throws Exception {
+        CuratorTransactionBridge built = null;
+        for (Operation operation : operations) {
+            if (built == null) {
+                built = operation.getCuratorEquivalent(transaction);
+            }
+            else {
+                built = operation.getCuratorEquivalent(built);
+            }
+        }
+        
+        Collection<CuratorTransactionResult> results = built.and().commit();
+        for (CuratorTransactionResult result : results) {
+            Operation operation = lookupOperation(result.getType(), new Path(result.getForPath()));
+            operation.updateWithResult(result);
+        }
+    }
+
+    private Operation lookupOperation(OperationType type, Path path) {
+        for (Operation operation : operations) {
+            if (operation.getOperationType() == type && operation.getPath().equals(path)) {
+                return operation;
+            }
+        }
+        return null;
     }
 }
