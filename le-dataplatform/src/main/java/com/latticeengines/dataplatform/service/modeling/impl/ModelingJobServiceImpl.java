@@ -216,15 +216,21 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
 
     protected com.latticeengines.domain.exposed.dataplatform.Job getLeafJob(String applicationId) {
         com.latticeengines.domain.exposed.dataplatform.Job job = jobEntityMgr.findByObjectId(applicationId); // /
-                                                                                                             // jobEntityMgr.getById(applicationId);
+        // jobEntityMgr.getById(applicationId);
 
-        if (job != null) {
-            List<String> childIds = job.getChildJobIdList();
-            for (String jobId : childIds) {
-                return getLeafJob(jobId);
-            }
+        while (job.getChildJobIdList().size() > 0) {
+            applicationId = job.getChildJobIdList().get(0);
+            job = jobEntityMgr.findByObjectId(applicationId);
         }
         return job;
+
+        // if (job != null) {
+        // List<String> childIds = job.getChildJobIdList();
+        // for (String jobId : childIds) {
+        // return getLeafJob(jobId);
+        // }
+        // }
+        // return job;
 
     }
 
