@@ -15,14 +15,14 @@ class Join(val df: DataFlow) extends DataOperator(df) {
   }
 
   override def run(rdds: Array[RDD[GenericRecord]]): RDD[GenericRecord] = {
-    val joinCondition = getPropertyValue(Join.JoinCondition).asInstanceOf[String]
+    val joinCondition = getPropertyValue(Join.JoinCondition)
 
     val rdd1 = rdds(0).map {
-      p => (p.get(Join.parseJoinCondition(joinCondition)(0)).asInstanceOf[String], p)
+      p => (p.get(Join.parseJoinCondition(joinCondition)(0)), p)
     }
     
     val rdd2 = rdds(1).map {
-      p => (p.get(Join.parseJoinCondition(joinCondition)(1)).asInstanceOf[String], p)
+      p => (p.get(Join.parseJoinCondition(joinCondition)(1)), p)
     }
     
     val rdd1Broadcast = dataFlow.sc.broadcast(rdd1.collectAsMap())

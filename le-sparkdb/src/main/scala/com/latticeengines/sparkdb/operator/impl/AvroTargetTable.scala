@@ -15,14 +15,16 @@ import parquet.avro.AvroParquetOutputFormat
 import parquet.hadoop.ParquetOutputFormat
 import parquet.hadoop.metadata.CompressionCodecName;
 
+import com.latticeengines.sparkdb.conversion.Implicits._
+
 
 class AvroTargetTable(val df: DataFlow) extends DataOperator(df) {
   override def run(rdd: RDD[GenericRecord]): RDD[GenericRecord] = {
     val schema = rdd.first().getSchema()
-    val path = new Path(getPropertyValue(AvroTargetTable.DataPath).asInstanceOf[String])
+    val path = new Path(getPropertyValue(AvroTargetTable.DataPath))
     val job = dataFlow.job
     
-    if (getPropertyValue(AvroTargetTable.ParquetFile).asInstanceOf[Boolean]) {
+    if (getPropertyValue(AvroTargetTable.ParquetFile)) {
       AvroParquetOutputFormat.setSchema(job, schema)
       ParquetOutputFormat.setCompression(job, CompressionCodecName.SNAPPY)
       ParquetOutputFormat.setBlockSize(job, 500 * 1024 * 1024) 

@@ -11,6 +11,8 @@ import com.latticeengines.sparkdb.operator.impl.Filter
 import com.latticeengines.sparkdb.operator.impl.Join
 import com.latticeengines.sparkdb.operator.impl.Sampler
 import com.latticeengines.sparkdb.service.AssemblyService
+import com.latticeengines.sparkdb.conversion.Implicits._
+
 
 @Component("assemblyService")
 class AssemblyServiceImpl extends AssemblyService {
@@ -39,17 +41,25 @@ class AssemblyServiceImpl extends AssemblyService {
 
       val profiler = new DataProfileOperator(dataFlow)
 
-      val sampler = new Sampler(dataFlow)
-      sampler.setPropertyValue(Sampler.WithReplacement, false)
-      sampler.setPropertyValue(Sampler.SamplingRate, 0.90)
+      val trainingSampler = new Sampler(dataFlow)
+      trainingSampler.setPropertyValue(Sampler.WithReplacement, "false")
+      trainingSampler.setPropertyValue(Sampler.SamplingRate, "0.80")
+      val testSampler = new Sampler(dataFlow)
+      testSampler.setPropertyValue(Sampler.WithReplacement, "false")
+      testSampler.setPropertyValue(Sampler.SamplingRate, "0.20")
       
-      val target = new AvroTargetTable(dataFlow)
-      target.setPropertyValue(AvroTargetTable.DataPath, "/tmp/result")
-      target.setPropertyValue(AvroTargetTable.ParquetFile, false)
+      val filtered = filter.run(join.run(Array(lead.run(), opportunity.run())))
+      
+      val training = new AvroTargetTable(dataFlow)
+      training.setPropertyValue(AvroTargetTable.DataPath, "/tmp/training")
+      training.setPropertyValue(AvroTargetTable.ParquetFile, "true")
 
-      //profiler.run(filter.run(join.run(Array(source1.run(null), source2.run(null)))))
-      target.run(sampler.run(filter.run(join.run(Array(lead.run(), opportunity.run())))))
-      //target.run(source3.run(null))
+      val test = new AvroTargetTable(dataFlow)
+      test.setPropertyValue(AvroTargetTable.DataPath, "/tmp/test")
+      test.setPropertyValue(AvroTargetTable.ParquetFile, "true")
+
+      training.run(trainingSampler.run(filtered))
+      test.run(testSampler.run(filtered))
     } finally {
       dataFlow.sc.stop()
     }

@@ -4,7 +4,6 @@ import org.apache.avro.Schema.Field
 import org.apache.avro.generic.GenericRecord
 import org.apache.spark.rdd.RDD
 
-
 abstract class DataOperator(val dataFlow: DataFlow) extends HasName with HasProperty {
   
   dataFlow.addOperator(this)
@@ -26,3 +25,4 @@ abstract class DataOperator(val dataFlow: DataFlow) extends HasName with HasProp
   def getPropertyNames(): Set[String]
   
 }
+
