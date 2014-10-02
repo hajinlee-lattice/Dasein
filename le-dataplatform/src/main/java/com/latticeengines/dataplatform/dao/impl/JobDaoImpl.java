@@ -28,6 +28,7 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
         Session session = sessionFactory.getCurrentSession();
         Query query = session.createQuery("from " + Job.class.getSimpleName() + " J where J.id=:aJobId");
         query.setString("aJobId", id);
+        query.setLockMode("J", LockMode.OPTIMISTIC);
         Job job = (Job) query.uniqueResult();
         return job;
     }
@@ -40,6 +41,7 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
         Criteria criteria = session.createCriteria(Job.class, "listAllByObjectIds");
         criteria.add(Restrictions.in("id", jobIds));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        criteria.setLockMode(LockMode.OPTIMISTIC);
         List<Job> jobs = criteria.list();
         return jobs;
     }
