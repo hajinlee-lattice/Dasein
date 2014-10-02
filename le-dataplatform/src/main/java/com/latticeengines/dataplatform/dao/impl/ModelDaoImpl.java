@@ -25,7 +25,6 @@ public class ModelDaoImpl extends BaseDaoImpl<Model> implements ModelDao {
         Session session = sessionFactory.getCurrentSession();
         Query query = session.createQuery("from " + Model.class.getSimpleName() + " model where model.id=:aModelId");
         query.setString("aModelId", id);
-        query.setLockMode("model", LockMode.OPTIMISTIC);
         Model model = (Model) query.uniqueResult();
 
         return model;
