@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentMetadata;
 
-public class DocumentUnitSerializerTestNG {
+public class DocumentSerializerUnitTestNG {
     
     @Test(groups = "unit")
     public void testSerializeDocument() {
