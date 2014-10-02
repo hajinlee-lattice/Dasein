@@ -9,6 +9,10 @@ abstract class DataOperator(val dataFlow: DataFlow) extends HasName with HasProp
   
   dataFlow.addOperator(this)
   
+  def run(): RDD[GenericRecord] = {
+    run(null.asInstanceOf[RDD[GenericRecord]])
+  }
+  
   def run(rdd: RDD[GenericRecord]): RDD[GenericRecord]
   
   def run(rdds: Array[RDD[GenericRecord]]): RDD[GenericRecord] = {
@@ -18,5 +22,7 @@ abstract class DataOperator(val dataFlow: DataFlow) extends HasName with HasProp
   def getFields(record: GenericRecord): java.util.List[Field] = {
     record.getSchema().getFields()
   }
+  
+  def getPropertyNames(): Set[String]
   
 }

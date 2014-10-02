@@ -9,10 +9,13 @@ import com.latticeengines.sparkdb.operator.DataOperator
 
 class Filter(val df: DataFlow) extends DataOperator(df) {
   override def run(rdd: RDD[GenericRecord]): RDD[GenericRecord] = {
-    val filterCondition = getPropertyValue(Filter.FilterCondition)
+    val filterCondition = getPropertyValue(Filter.FilterCondition).asInstanceOf[String]
     val filtered = rdd.filter(record => Filter.filterFunction(record, filterCondition)).asInstanceOf[RDD[GenericRecord]]
-    println("Count = " + filtered.count())
     filtered
+  }
+
+  override def getPropertyNames(): Set[String] = {
+    return Set(Filter.FilterCondition)
   }
 
 }

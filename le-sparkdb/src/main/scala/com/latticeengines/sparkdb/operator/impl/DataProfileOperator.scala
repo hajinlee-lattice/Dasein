@@ -34,4 +34,8 @@ class DataProfileOperator(val df: DataFlow) extends DataOperator(df) {
     }
     null
   }
+
+  override def getPropertyNames(): Set[String] = {
+    return Set()
+  }
 }

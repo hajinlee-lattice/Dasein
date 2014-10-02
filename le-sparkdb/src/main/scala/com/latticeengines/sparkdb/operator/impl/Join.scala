@@ -15,7 +15,7 @@ class Join(val df: DataFlow) extends DataOperator(df) {
   }
 
   override def run(rdds: Array[RDD[GenericRecord]]): RDD[GenericRecord] = {
-    val joinCondition = getPropertyValue(Join.JoinCondition)
+    val joinCondition = getPropertyValue(Join.JoinCondition).asInstanceOf[String]
 
     val rdd1 = rdds(0).map {
       p => (p.get(Join.parseJoinCondition(joinCondition)(0)).asInstanceOf[String], p)
@@ -35,6 +35,10 @@ class Join(val df: DataFlow) extends DataOperator(df) {
       } yield (Join.combineRecords(u, m.get(t).get, schemaAndMap))
     }, preservesPartitioning = true)
     joined
+  }
+
+  override def getPropertyNames(): Set[String] = {
+    return Set(Join.JoinCondition)
   }
 
 }

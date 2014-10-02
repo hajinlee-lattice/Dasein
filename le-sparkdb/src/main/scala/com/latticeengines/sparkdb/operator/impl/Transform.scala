@@ -10,4 +10,11 @@ class Transform(val df: DataFlow)  extends DataOperator(df) {
     null
   }
 
+  override def getPropertyNames(): Set[String] = {
+    return Set(Transform.TransformationMap)
+  }
+}
+
+object Transform {
+  val TransformationMap = "TransformationMap"
 }
