@@ -27,7 +27,7 @@ public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntit
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.NEVER)
     public Job findByObjectId(String id) {
         return jobDao.findByObjectId(id);
     }
@@ -44,7 +44,7 @@ public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntit
      * 
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.NEVER)
     public List<Job> findAllByObjectIds(List<String> jobIds) {
         if (jobIds == null || jobIds.isEmpty()) {
             return new ArrayList<Job>();

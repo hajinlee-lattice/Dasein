@@ -23,24 +23,24 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.NEVER)
     public Job findByObjectId(String id) {
         Session session = sessionFactory.getCurrentSession();
         Query query = session.createQuery("from " + Job.class.getSimpleName() + " J where J.id=:aJobId");
         query.setString("aJobId", id);
-        query.setLockMode("J", LockMode.READ);
+        query.setLockMode("J", LockMode.NONE);
         Job job = (Job) query.uniqueResult();
         return job;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.NEVER)
     public List<Job> findAllByObjectIds(List<String> jobIds) {
         Session session = sessionFactory.getCurrentSession();
         Criteria criteria = session.createCriteria(Job.class, "listAllByObjectIds");
         criteria.add(Restrictions.in("id", jobIds));
-        criteria.setLockMode(LockMode.READ);
+        criteria.setLockMode(LockMode.NONE);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         List<Job> jobs = criteria.list();
 
