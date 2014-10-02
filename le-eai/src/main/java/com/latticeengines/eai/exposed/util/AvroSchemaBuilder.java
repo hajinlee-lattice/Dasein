@@ -1,4 +1,6 @@
-package com.latticeengines.eai.routes.converter;
+package com.latticeengines.eai.exposed.util;
+
+import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
@@ -15,8 +17,9 @@ import com.latticeengines.domain.exposed.eai.Table;
 @Component("avroSchemaBuilder")
 public class AvroSchemaBuilder {
 
-    public Schema createSchema(Table table) {
+    public static Schema createSchema(Table table) {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(table.getName());
+        recordBuilder.prop("uuid", UUID.randomUUID().toString());
         FieldAssembler<Schema> fieldAssembler = recordBuilder.doc("").fields();
         FieldBuilder<Schema> fieldBuilder;
 
@@ -28,9 +31,10 @@ public class AvroSchemaBuilder {
             fieldBuilder = fieldBuilder.prop("precision", attr.getPrecision().toString());
             fieldBuilder = fieldBuilder.prop("scale", attr.getScale().toString());
             fieldBuilder = fieldBuilder.prop("logicalType", attr.getLogicalDataType());
+            fieldBuilder = fieldBuilder.prop("uuid", UUID.randomUUID().toString());
             
             if (attr.getEnumValues().size() > 0) {
-                fieldBuilder = fieldBuilder.prop("enumValues", StringUtils.join(attr.getEnumValues().toArray(), ","));    
+                fieldBuilder = fieldBuilder.prop("enumValues", StringUtils.join(attr.getEnumValues().toArray(), ","));
             }
 
             Type type = Type.valueOf(attr.getPhysicalDataType());

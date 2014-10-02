@@ -26,7 +26,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.routes.converter.AvroSchemaBuilder;
+import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
 import com.latticeengines.eai.routes.converter.AvroTypeConverter;
 import com.latticeengines.eai.service.ImportService;
 
@@ -38,9 +38,6 @@ public class SalesforceImportServiceImpl extends ImportService {
 
     @Autowired
     private AvroTypeConverter salesforceToAvroTypeConverter;
-
-    @Autowired
-    private AvroSchemaBuilder avroSchemaBuilder;
 
     private enum ToStringFunctionWithCleanup implements Function<PickListValue, String> {
         INSTANCE;
@@ -130,7 +127,7 @@ public class SalesforceImportServiceImpl extends ImportService {
 
                     newTable.addAttribute(attr);
                 }
-                Schema schema = avroSchemaBuilder.createSchema(newTable);
+                Schema schema = AvroSchemaBuilder.createSchema(newTable);
                 newTable.setSchema(schema);
                 newTables.add(newTable);
             } finally {
