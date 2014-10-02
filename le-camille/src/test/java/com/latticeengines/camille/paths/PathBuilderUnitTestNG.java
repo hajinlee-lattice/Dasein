@@ -9,7 +9,7 @@ public class PathBuilderUnitTestNG {
 
     @Test(groups = "unit")
     public void testBuildTenantServicePath() {
-        Path p = PathBuilder.buildTenantServicePath("podID", "contractID", "tenantID", "spaceID", "serviceName");
+        Path p = PathBuilder.buildCustomerSpaceServicePath("podID", "contractID", "tenantID", "spaceID", "serviceName");
         String correct = "/" +
                 PathConstants.PODS + "/podID/" + 
                 PathConstants.CONTRACTS + "/contractID/" + 
