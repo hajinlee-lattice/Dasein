@@ -15,7 +15,7 @@ import com.latticeengines.perf.loadframework.PerfLoadTestNGBase;
 
 public class ModelingResourceLoadTestNG extends PerfLoadTestNGBase {
 
-    @Test(groups = "load", enabled = true)
+    @Test(groups = "load", enabled = false)
     public void modelingResource() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + " modeling resource jobs");
 
@@ -46,7 +46,7 @@ public class ModelingResourceLoadTestNG extends PerfLoadTestNGBase {
         }
     }
 
-    @Test(groups = "load", enabled = true, dependsOnMethods = { "modelingResource" })
+    @Test(groups = "load", enabled = true)
     public void preemptionSubmit() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + " submit preemption");
 
