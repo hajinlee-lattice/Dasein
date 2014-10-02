@@ -65,4 +65,31 @@ public class PathUnitTestNG {
         p = p.append("goo");
         Assert.assertEquals(p.toString(), "/foo/bar/baz/goo");
     }
+    
+    @Test(groups = "unit")
+    public void testEquals() {
+        Path p1 = new Path("/foo/bar/baz");
+        Path p2 = new Path("/foo/bar/baz");
+        Assert.assertEquals(p1, p2);
+    }
+    
+    @Test(groups = "unit")
+    public void testNonequalPathsDifferentLengths() {
+        Path p1 = new Path("/foo/bar/baz");
+        Path p2 = new Path("/foo/bar/baz/d");
+        Assert.assertNotEquals(p1,  p2);
+    }
+
+    @Test(groups = "unit")
+    public void testNonequalPathsSameLengths() {
+        Path p1 = new Path("/foo/bar/baz");
+        Path p2 = new Path("/foo/bar/bar");
+        Assert.assertNotEquals(p1,  p2);
+    }
+    
+    @Test(groups = "unit")
+    public void testPathNotEqualsNull() {
+        Path p = new Path("/foo/bar/baz");
+        Assert.assertNotEquals(p,  null);
+    }
 }

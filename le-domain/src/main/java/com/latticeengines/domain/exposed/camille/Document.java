@@ -50,9 +50,12 @@ public class Document {
     
     @Override
     public boolean equals(Object other) {
-        if (!(other instanceof Document)) {
+        if (this == other)
+            return true;
+        if (other == null)
             return false;
-        }
+        if (getClass() != other.getClass())
+            return false;
         
         Document otherDoc = (Document)other;
         return this.data.equals(otherDoc.data) &&
