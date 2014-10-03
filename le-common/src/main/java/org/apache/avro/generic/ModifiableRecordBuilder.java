@@ -6,25 +6,29 @@ import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.data.RecordBuilderBase;
-import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericModifiableData.ModifiableRecord;
 
 /**
  * A RecordBuilder for generic records. ModifiableRecordBuilder fills in default
  * values for fields if they are not specified.
  */
-public class ModifiableRecordBuilder extends RecordBuilderBase<Record> {
+public class ModifiableRecordBuilder extends RecordBuilderBase<ModifiableRecord> {
     private GenericModifiableData.ModifiableRecord record;
 
-    /**
-     * Creates a ModifiableRecordBuilder for building Record instances.
-     * 
-     * @param schema
-     *            the schema associated with the record class.
-     */
     public ModifiableRecordBuilder(Schema schema) {
-        super(schema, GenericData.get());
-        record = new ModifiableRecord(schema);
+        this(schema, new ModifiableRecord(schema));
+    }
+    
+    public ModifiableRecordBuilder(Schema schema, GenericRecord record) {
+        this(schema, record, null);
+    }
+
+    public ModifiableRecordBuilder(Schema schema, GenericRecord record, GenericRecord recordToAdd) {
+        super(schema, GenericModifiableData.get());
+        assert(record instanceof ModifiableRecord);
+        this.record = (ModifiableRecord) record;
+        this.record.setSchema(schema);
+        this.record.addOtherRecord(recordToAdd);
     }
 
     /**
@@ -185,12 +189,17 @@ public class ModifiableRecordBuilder extends RecordBuilderBase<Record> {
         fieldSetFlags()[pos] = false;
         return this;
     }
-
+    
+   
+    public ModifiableRecord buildCombinedRecord() {
+        return record;
+    }
+    
     @Override
-    public Record build() {
-        Record record;
+    public ModifiableRecord build() {
+        ModifiableRecord record;
         try {
-            record = new GenericData.Record(schema());
+            record = new GenericModifiableData.ModifiableRecord(schema());
         } catch (Exception e) {
             throw new AvroRuntimeException(e);
         }

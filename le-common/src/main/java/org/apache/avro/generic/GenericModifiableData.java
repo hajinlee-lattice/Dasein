@@ -50,8 +50,7 @@ public class GenericModifiableData extends GenericData {
      * only string schemas and map schemas (for the keys).
      */
     public static void setStringType(Schema s, StringType stringType) {
-        // Utf8 is the default and implements CharSequence, so we only need to
-        // add
+        // Utf8 is the default and implements CharSequence, so we only need to add
         // a property when the type is String
         if (stringType == StringType.String) {
             s.addProp(GenericData.STRING_PROP, GenericData.STRING_TYPE_STRING);
@@ -101,6 +100,14 @@ public class GenericModifiableData extends GenericData {
             
             for (int ii = 0; ii < size; ii++) {
                 values.add(INSTANCE.deepCopy(schema.getFields().get(ii).schema(), other.get(ii)));
+            }
+        }
+        
+        public void addOtherRecord(GenericRecord other) {
+            int size = other.getSchema().getFields().size();
+            
+            for (int i = 0; i < size; i++) {
+                values.add(new Object());
             }
         }
 

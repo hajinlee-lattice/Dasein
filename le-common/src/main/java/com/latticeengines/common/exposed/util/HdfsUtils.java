@@ -57,6 +57,11 @@ public class HdfsUtils {
         }
 
     }
+    
+    public static final void copyLocalToHdfs(Configuration configuration, String localPath, String hdfsPath) throws Exception {
+        FileSystem fs = FileSystem.get(configuration);
+        fs.copyFromLocalFile(new Path(localPath), new Path(hdfsPath));
+    }
 
     public static final void writeToFile(Configuration configuration, String hdfsPath, String contents)
             throws Exception {

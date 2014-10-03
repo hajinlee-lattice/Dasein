@@ -163,14 +163,12 @@ public class AvroUtils {
 
     @SuppressWarnings({ "unchecked", "deprecation" })
     public static GenericRecord combineAvroRecords(GenericRecord r1, GenericRecord r2, Object[] schema) {
-        Schema s1 = r1.getSchema();
         Schema s2 = r2.getSchema();
         Schema combinedSchema = Schema.parse((String) schema[0]);
-        ModifiableRecordBuilder recordBldr = new ModifiableRecordBuilder(combinedSchema);
+        ModifiableRecordBuilder recordBldr = new ModifiableRecordBuilder(combinedSchema, r1, r2);
         Map<String, String> nameMap = (Map<String, String>) schema[1];
-        setValues(r1, s1, combinedSchema, recordBldr, nameMap, "$1");
         setValues(r2, s2, combinedSchema, recordBldr, nameMap, "$2");
-        return recordBldr.build();
+        return recordBldr.buildCombinedRecord();
     }
 
     public static String getAvroFriendlyString(String value) {
