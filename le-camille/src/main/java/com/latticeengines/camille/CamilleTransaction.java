@@ -128,11 +128,11 @@ public class CamilleTransaction {
         }
         
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception {
-            return transaction.setData().withVersion(document.getVersion()).forPath(path.toString());
+            return transaction.setData().withVersion(document.getVersion()).forPath(path.toString(), data);
         }
         
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception {
-            return bridge.and().setData().withVersion(document.getVersion()).forPath(path.toString());
+            return bridge.and().setData().withVersion(document.getVersion()).forPath(path.toString(), data);
         }
         
         public void updateWithResult(CuratorTransactionResult result) {
