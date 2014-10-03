@@ -12,24 +12,31 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
-import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.domain.exposed.eai.AttributeOwner;
 
 @Component("avroSchemaBuilder")
 public class AvroSchemaBuilder {
 
-    public static Schema createSchema(Table table) {
-        RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(table.getName());
+    public static Schema createSchema(String name, AttributeOwner attributeOwner) {
+        RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(name);
         recordBuilder.prop("uuid", UUID.randomUUID().toString());
         FieldAssembler<Schema> fieldAssembler = recordBuilder.doc("").fields();
         FieldBuilder<Schema> fieldBuilder;
 
-        for (Attribute attr : table.getAttributes()) {
+        for (Attribute attr : attributeOwner.getAttributes()) {
             fieldBuilder = fieldAssembler.name(attr.getName());
 
             fieldBuilder = fieldBuilder.prop("displayName", attr.getDisplayName());
-            fieldBuilder = fieldBuilder.prop("length", attr.getLength().toString());
-            fieldBuilder = fieldBuilder.prop("precision", attr.getPrecision().toString());
-            fieldBuilder = fieldBuilder.prop("scale", attr.getScale().toString());
+            
+            if (attr.getLength() != null) {
+                fieldBuilder = fieldBuilder.prop("length", attr.getLength().toString());
+            }
+            if (attr.getPrecision() != null) {
+                fieldBuilder = fieldBuilder.prop("precision", attr.getPrecision().toString());
+            }
+            if (attr.getScale() != null) {
+                fieldBuilder = fieldBuilder.prop("scale", attr.getScale().toString());
+            }
             fieldBuilder = fieldBuilder.prop("logicalType", attr.getLogicalDataType());
             fieldBuilder = fieldBuilder.prop("uuid", UUID.randomUUID().toString());
             

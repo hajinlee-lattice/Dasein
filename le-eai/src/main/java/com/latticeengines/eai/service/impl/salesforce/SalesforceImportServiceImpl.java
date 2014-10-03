@@ -127,7 +127,7 @@ public class SalesforceImportServiceImpl extends ImportService {
 
                     newTable.addAttribute(attr);
                 }
-                Schema schema = AvroSchemaBuilder.createSchema(newTable);
+                Schema schema = AvroSchemaBuilder.createSchema(newTable.getName(), newTable);
                 newTable.setSchema(schema);
                 newTables.add(newTable);
             } finally {
