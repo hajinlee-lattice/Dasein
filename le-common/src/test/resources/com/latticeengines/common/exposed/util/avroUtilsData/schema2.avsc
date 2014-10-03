@@ -718,5 +718,6 @@
     "columnName" : "Score",
     "sqlType" : "4"
   } ],
-  "tableName" : "T1"
+  "tableName" : "T1",
+  "uuid" : "xyz"
 }

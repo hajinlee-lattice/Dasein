@@ -1,6 +1,8 @@
 package com.latticeengines.common.exposed.util;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.io.File;
 import java.net.URL;
@@ -26,5 +28,16 @@ public class AvroUtilsUnitTestNG {
 
         assertEquals(((Schema) combinedSchema[0]).getFields().size(), s1.getFields().size()
                 + s2.getFields().size());
+        
+        String uuid = ((Schema) combinedSchema[0]).getProp("uuid");
+        assertNotEquals("abc", uuid);
+        String uuids = ((Schema) combinedSchema[0]).getProp("uuids");
+        assertNotNull(uuids);
+        assertEquals("abc,xyz", uuids);
+        
+        combinedSchema = AvroUtils.combineSchemas(s1, ((Schema) combinedSchema[0]));
+        uuids = ((Schema) combinedSchema[0]).getProp("uuids");
+        assertNotNull(uuids);
+        assertEquals("abc,abc,xyz", uuids);
     }
 }

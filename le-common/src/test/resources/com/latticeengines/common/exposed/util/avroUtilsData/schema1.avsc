@@ -53,5 +53,6 @@
     "columnName" : "AwardYear",
     "sqlType" : "-5"
   }],
-  "tableName" : "T1"
+  "tableName" : "T1",
+  "uuid" : "abc"
 }

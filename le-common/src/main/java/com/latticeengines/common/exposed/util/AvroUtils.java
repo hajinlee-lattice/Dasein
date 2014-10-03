@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
@@ -63,6 +64,31 @@ public class AvroUtils {
     @SuppressWarnings("deprecation")
     public static Object[] combineSchemas(Schema s1, Schema s2) {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record(s1.getName());
+        
+        for (Map.Entry<String, String> entry : s1.getProps().entrySet()) {
+            String k = entry.getKey();
+            String v = entry.getValue();
+            
+            if (k.equals("uuid")) {
+                recordBuilder = recordBuilder.prop("uuid", UUID.randomUUID().toString());
+            } else {
+                recordBuilder = recordBuilder.prop(k, v);
+            }
+        }
+        String s1uuid = s1.getProp("uuids");
+        if (s1uuid == null) {
+            s1uuid = s1.getProp("uuid");
+        }
+        
+        String s2uuid = s2.getProp("uuids");
+        if (s2uuid == null) {
+            s2uuid = s2.getProp("uuid");
+        }
+        
+        if (s2uuid != null) {
+            recordBuilder = recordBuilder.prop("uuids", s1uuid + "," + s2uuid);
+        }
+        
         FieldAssembler<Schema> fieldAssembler = recordBuilder.doc(s1.getDoc()).fields();
 
         FieldBuilder<Schema> fieldBuilder;
@@ -142,8 +168,8 @@ public class AvroUtils {
         Schema combinedSchema = Schema.parse((String) schema[0]);
         GenericRecordBuilder recordBldr = new GenericRecordBuilder(combinedSchema);
         Map<String, String> nameMap = (Map<String, String>) schema[1];
-        setValues(r1, s1, combinedSchema, recordBldr, nameMap, "$2");
-        setValues(r2, s2, combinedSchema, recordBldr, nameMap, "$1");
+        setValues(r1, s1, combinedSchema, recordBldr, nameMap, "$1");
+        setValues(r2, s2, combinedSchema, recordBldr, nameMap, "$2");
         return recordBldr.build();
     }
 
