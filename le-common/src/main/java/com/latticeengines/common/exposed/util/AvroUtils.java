@@ -21,7 +21,7 @@ import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.avro.generic.ModifiableRecordBuilder;
 import org.apache.avro.mapred.FsInput;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -151,7 +151,7 @@ public class AvroUtils {
         return new Object[] { schema, map };
     }
 
-    private static void setValues(GenericRecord r, Schema s, Schema combined, GenericRecordBuilder recordBldr,
+    private static void setValues(GenericRecord r, Schema s, Schema combined, ModifiableRecordBuilder recordBldr,
             Map<String, String> nameMap, String nameSuffix) {
         for (Field field : s.getFields()) {
             String key = s.getName() + nameSuffix + "." + field.name();
@@ -166,7 +166,7 @@ public class AvroUtils {
         Schema s1 = r1.getSchema();
         Schema s2 = r2.getSchema();
         Schema combinedSchema = Schema.parse((String) schema[0]);
-        GenericRecordBuilder recordBldr = new GenericRecordBuilder(combinedSchema);
+        ModifiableRecordBuilder recordBldr = new ModifiableRecordBuilder(combinedSchema);
         Map<String, String> nameMap = (Map<String, String>) schema[1];
         setValues(r1, s1, combinedSchema, recordBldr, nameMap, "$1");
         setValues(r2, s2, combinedSchema, recordBldr, nameMap, "$2");
