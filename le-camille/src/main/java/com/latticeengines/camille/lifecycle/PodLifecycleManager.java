@@ -58,7 +58,7 @@ public class PodLifecycleManager {
             CamilleEnvironment.getCamille().delete(podPath);
             log.debug("deleted Pod @ {}", podPath);
         } catch (KeeperException.NoNodeException e) {
-            log.debug("No Node Existed @ {}, ignoring delete", podPath);
+            log.debug("No Pod Existed @ {}, ignoring delete", podPath);
         }
     }
 
