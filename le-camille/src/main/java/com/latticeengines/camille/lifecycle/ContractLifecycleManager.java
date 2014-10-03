@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.paths.PathBuilder;
-import com.latticeengines.camille.paths.PathConstants;
 import com.latticeengines.domain.exposed.camille.Contract;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentMetadata;
@@ -72,7 +71,7 @@ public class ContractLifecycleManager {
 
     public static List<Contract> getAll(String podId) throws IllegalArgumentException, Exception {
         List<Pair<Document, Path>> childPairs = CamilleEnvironment.getCamille().getChildren(
-                new Path("/" + PathConstants.PODS + "/" + podId + "/" + PathConstants.CONTRACTS));
+                PathBuilder.buildContractsPath(podId));
         Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {
             @Override
             public int compare(Pair<Document, Path> o1, Pair<Document, Path> o2) {

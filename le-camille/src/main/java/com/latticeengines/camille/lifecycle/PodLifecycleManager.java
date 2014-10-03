@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.paths.PathBuilder;
-import com.latticeengines.camille.paths.PathConstants;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentMetadata;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -71,8 +70,8 @@ public class PodLifecycleManager {
     }
 
     public static List<Pod> getAll() throws IllegalArgumentException, Exception {
-        List<Pair<Document, Path>> childPairs = CamilleEnvironment.getCamille().getChildren(
-                new Path("/" + PathConstants.PODS));
+        List<Pair<Document, Path>> childPairs = CamilleEnvironment.getCamille()
+                .getChildren(PathBuilder.buildPodsPath());
         Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {
             @Override
             public int compare(Pair<Document, Path> o1, Pair<Document, Path> o2) {

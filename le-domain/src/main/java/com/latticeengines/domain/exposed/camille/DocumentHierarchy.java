@@ -22,7 +22,7 @@ public class DocumentHierarchy {
         return root;
     }
 
-    public Iterator<DocumentHierarchy.Node> breadthFirstIterator() {
+    public Iterator<Node> breadthFirstIterator() {
         Queue<DocumentHierarchy.Node> q = new LinkedList<DocumentHierarchy.Node>(Arrays.asList(root));
         Set<Node> visited = new LinkedHashSet<Node>();
         for (Node n = q.poll(); n != null; n = q.poll()) {
@@ -34,7 +34,7 @@ public class DocumentHierarchy {
         return new IteratorWrapper(visited);
     }
 
-    public Iterator<DocumentHierarchy.Node> depthFirstIterator() {
+    public Iterator<Node> depthFirstIterator() {
         Set<Node> visited = new LinkedHashSet<Node>();
         traverse(root, visited);
         return new IteratorWrapper(visited);
@@ -49,10 +49,10 @@ public class DocumentHierarchy {
         }
     }
 
-    private static class IteratorWrapper implements Iterator<DocumentHierarchy.Node> {
-        private final Iterator<DocumentHierarchy.Node> iter;
+    private static class IteratorWrapper implements Iterator<Node> {
+        private final Iterator<Node> iter;
 
-        IteratorWrapper(Collection<DocumentHierarchy.Node> list) {
+        IteratorWrapper(Collection<Node> list) {
             iter = list.iterator();
         }
 
