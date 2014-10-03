@@ -19,6 +19,8 @@ class SparkLauncherServiceImplTestNG extends SparkDbFunctionalTestNGBase {
   @BeforeClass(groups = Array("functional"))
   def setup() = {
     HdfsUtils.rmdir(conf, "/tmp/result")
+    HdfsUtils.rmdir(conf, "/tmp/training")
+    HdfsUtils.rmdir(conf, "/tmp/test")
   }
 
   @Test(groups = Array("functional"))

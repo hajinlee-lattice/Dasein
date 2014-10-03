@@ -6,6 +6,8 @@ import org.apache.spark.rdd.RDD
 import com.latticeengines.sparkdb.operator.DataFlow
 import com.latticeengines.sparkdb.operator.DataOperator
 
+import com.latticeengines.sparkdb.conversion.Implicits._
+
 class Filter(val df: DataFlow) extends DataOperator(df) {
   override def run(rdd: RDD[GenericRecord]): RDD[GenericRecord] = {
     val filterCondition = getPropertyValue(Filter.FilterCondition)

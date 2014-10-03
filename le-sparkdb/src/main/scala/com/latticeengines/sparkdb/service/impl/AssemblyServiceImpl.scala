@@ -42,21 +42,21 @@ class AssemblyServiceImpl extends AssemblyService {
       val profiler = new DataProfileOperator(dataFlow)
 
       val trainingSampler = new Sampler(dataFlow)
-      trainingSampler.setPropertyValue(Sampler.WithReplacement, "false")
-      trainingSampler.setPropertyValue(Sampler.SamplingRate, "0.80")
+      trainingSampler.setPropertyValue(Sampler.WithReplacement, false)
+      trainingSampler.setPropertyValue(Sampler.SamplingRate, 0.80)
       val testSampler = new Sampler(dataFlow)
-      testSampler.setPropertyValue(Sampler.WithReplacement, "false")
-      testSampler.setPropertyValue(Sampler.SamplingRate, "0.20")
+      testSampler.setPropertyValue(Sampler.WithReplacement, false)
+      testSampler.setPropertyValue(Sampler.SamplingRate, 0.20)
       
       val filtered = filter.run(join.run(Array(lead.run(), opportunity.run())))
       
       val training = new AvroTargetTable(dataFlow)
       training.setPropertyValue(AvroTargetTable.DataPath, "/tmp/training")
-      training.setPropertyValue(AvroTargetTable.ParquetFile, "true")
+      training.setPropertyValue(AvroTargetTable.ParquetFile, true)
 
       val test = new AvroTargetTable(dataFlow)
       test.setPropertyValue(AvroTargetTable.DataPath, "/tmp/test")
-      test.setPropertyValue(AvroTargetTable.ParquetFile, "true")
+      test.setPropertyValue(AvroTargetTable.ParquetFile, true)
 
       training.run(trainingSampler.run(filtered))
       test.run(testSampler.run(filtered))

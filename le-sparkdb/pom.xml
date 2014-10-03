@@ -16,6 +16,7 @@
         <parquet.avro.version>1.4.3</parquet.avro.version>
         <le.domain.version>1.0.0-SNAPSHOT</le.domain.version>
         <le.common.version>1.0.0-SNAPSHOT</le.common.version>
+        <le.eai.version>1.0.0-SNAPSHOT</le.eai.version>
     </properties>
  
     <parent>
@@ -109,6 +110,17 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
             <version>${le.common.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-eai</artifactId>
+            <version>${le.eai.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>

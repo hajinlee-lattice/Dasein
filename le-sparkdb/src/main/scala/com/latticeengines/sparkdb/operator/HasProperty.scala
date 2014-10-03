@@ -7,10 +7,10 @@ import com.latticeengines.domain.exposed.dataplatform.{HasProperty => DomainHasP
 
 trait HasProperty extends DomainHasProperty {
 
-  private var map: Map[String, String] = new HashMap[String, String]()
+  private var map: Map[String, Any] = new HashMap[String, Any]()
   
-  override def getPropertyValue(key: String): String = map.get(key)
+  override def getPropertyValue(key: String): Object = map.get(key).asInstanceOf[Object]
   
-  override def setPropertyValue(key: String, value: String) = map.put(key, value)
+  override def setPropertyValue(key: String, value: Any) = map.put(key, value)
 
 }
