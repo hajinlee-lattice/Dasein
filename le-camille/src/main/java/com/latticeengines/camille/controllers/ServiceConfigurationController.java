@@ -9,31 +9,31 @@ import com.latticeengines.camille.ConfigurationController;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 
 public class ServiceConfigurationController extends ConfigurationController {
     private ServiceScope scope;
-    
+
     public ServiceConfigurationController(ServiceScope scope) {
         this.scope = scope;
     }
-    
-    
+
     @Override
     public void create(Path path, Document document) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void set(Path path, Document document) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void set(Path path, Document document, boolean force) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ServiceConfigurationController extends ConfigurationController {
     @Override
     public void delete(Path path) {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override

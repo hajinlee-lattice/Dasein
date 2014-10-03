@@ -2,10 +2,13 @@ package com.latticeengines.domain.exposed.camille;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 public class DocumentHierarchy {
 
@@ -20,32 +23,36 @@ public class DocumentHierarchy {
     }
 
     public Iterator<DocumentHierarchy.Node> breadthFirstIterator() {
-        List<DocumentHierarchy.Node> out = new ArrayList<DocumentHierarchy.Node>();
         Queue<DocumentHierarchy.Node> q = new LinkedList<DocumentHierarchy.Node>(Arrays.asList(root));
+        Set<Node> visited = new LinkedHashSet<Node>();
         for (Node n = q.poll(); n != null; n = q.poll()) {
-            out.add(n);
-            q.addAll(n.getChildren());
+            if (!visited.contains(n)) {
+                visited.add(n);
+                q.addAll(n.getChildren());
+            }
         }
-        return new IteratorWrapper(out);
+        return new IteratorWrapper(visited);
     }
 
     public Iterator<DocumentHierarchy.Node> depthFirstIterator() {
-        List<DocumentHierarchy.Node> out = new ArrayList<DocumentHierarchy.Node>();
-        traverse(root, out);
-        return new IteratorWrapper(out);
+        Set<Node> visited = new LinkedHashSet<Node>();
+        traverse(root, visited);
+        return new IteratorWrapper(visited);
     }
 
-    private static void traverse(Node parent, List<DocumentHierarchy.Node> out) {
-        out.add(parent);
-        for (Node child : parent.getChildren()) {
-            traverse(child, out);
+    private static void traverse(Node parent, Set<Node> visited) {
+        if (!visited.contains(parent)) {
+            visited.add(parent);
+            for (Node child : parent.getChildren()) {
+                traverse(child, visited);
+            }
         }
     }
 
     private static class IteratorWrapper implements Iterator<DocumentHierarchy.Node> {
         private final Iterator<DocumentHierarchy.Node> iter;
 
-        IteratorWrapper(List<DocumentHierarchy.Node> list) {
+        IteratorWrapper(Collection<DocumentHierarchy.Node> list) {
             iter = list.iterator();
         }
 
