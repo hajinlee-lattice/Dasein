@@ -2,20 +2,25 @@ package com.latticeengines.camille.lifecycle;
 
 import java.util.List;
 
+import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.camille.Camille;
+import com.latticeengines.camille.CamilleEnvironment;
+import com.latticeengines.camille.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Pod;
 
 public class PodLifecycleManager {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    public static void create(Pod pod) {
-        // final Camille camille = CamilleEnvironment.getCamille();
+    public static void create(Pod pod) throws Exception {
+        Camille camille = CamilleEnvironment.getCamille();
 
-        // camille.create(path, doc, acls)
+        camille.create(PathBuilder.buildPodPath(pod.getPodId()), ZooDefs.Ids.READ_ACL_UNSAFE);
     }
 
     public static void delete(String podId) {

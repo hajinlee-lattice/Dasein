@@ -1,8 +1,5 @@
 package com.latticeengines.camille;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -20,21 +17,19 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.camille.CamilleEnvironment.Mode;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
 import com.latticeengines.domain.exposed.camille.DocumentHierarchy.Node;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.netflix.curator.test.TestingServer;
 
 public class CamilleUnitTestNG {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
     private static final int timeOutMs = 2000;
-    
+
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
         CamilleTestEnvironment.start();
@@ -55,9 +50,9 @@ public class CamilleUnitTestNG {
         c.create(path, doc0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         Assert.assertEquals(doc0.getVersion(), 0);
-        
-        Assert.assertNotNull(c.exists(path));
-        Assert.assertNull(c.exists(new Path("/testWrongPath")));
+
+        Assert.assertTrue(c.exists(path));
+        Assert.assertFalse(c.exists(new Path("/testWrongPath")));
 
         // we need a CountDownLatch because the callback is called from
         // another thread
@@ -80,16 +75,16 @@ public class CamilleUnitTestNG {
         c.set(path, doc1);
         latch.await(); // wait for the process callback to be called
         Assert.assertTrue(dataChangedEventFired[0]);
-        
+
         Assert.assertEquals(doc1.getVersion(), 1);
 
         Assert.assertEquals(c.get(path).getData(), doc1.getData());
-        
+
         Assert.assertEquals(c.get(path).getVersion(), 1);
 
         c.delete(path);
 
-        Assert.assertNull(c.exists(path));
+        Assert.assertFalse(c.exists(path));
     }
 
     @Test(groups = "unit")
@@ -99,17 +94,17 @@ public class CamilleUnitTestNG {
         Path parentPath = new Path("/parentPath");
         Document parentDoc = new Document("parentData", null);
         c.create(parentPath, parentDoc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-        Assert.assertNotNull(c.exists(parentPath));
+        Assert.assertTrue(c.exists(parentPath));
 
         Path childPath0 = new Path(String.format("%s/%s", parentPath, "childPath0"));
         Document childDoc0 = new Document("child0Data", null);
         c.create(childPath0, childDoc0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-        Assert.assertNotNull(c.exists(childPath0));
+        Assert.assertTrue(c.exists(childPath0));
 
         Path childPath1 = new Path(String.format("%s/%s", parentPath, "childPath1"));
         Document childDoc1 = new Document("child1Data", null);
         c.create(childPath1, childDoc1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-        Assert.assertNotNull(c.exists(childPath1));
+        Assert.assertTrue(c.exists(childPath1));
 
         Set<Pair<String, String>> actualChildren = new HashSet<Pair<String, String>>();
         for (Pair<Document, Path> childPair : c.getChildren(parentPath)) {

@@ -19,10 +19,11 @@ import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class Camille {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    private CuratorFramework client;
+    private final CuratorFramework client;
 
     // package visibility is deliberate
     Camille(CuratorFramework client) {
@@ -31,6 +32,10 @@ public class Camille {
 
     CuratorFramework getCuratorClient() {
         return client;
+    }
+
+    public void create(Path path, List<ACL> acls) throws Exception {
+        client.create().withACL(acls).forPath(path.toString(), DocumentSerializer.toByteArray(new Document()));
     }
 
     public void create(Path path, Document doc, List<ACL> acls) throws Exception {
@@ -43,24 +48,25 @@ public class Camille {
     }
 
     public Stat set(Path path, Document doc, boolean force) throws Exception {
-        SetDataBuilder builder = client.setData();
+        final SetDataBuilder builder = client.setData();
         if (!force)
             builder.withVersion(doc.getVersion());
-        Stat stat = builder.forPath(path.toString(), DocumentSerializer.toByteArray(doc));
+        final Stat stat = builder.forPath(path.toString(), DocumentSerializer.toByteArray(doc));
         doc.setVersion(stat.getVersion());
         return stat;
     }
 
     public Document get(Path path) throws Exception {
-        Stat stat = new Stat();
-        Document doc = DocumentSerializer.toDocument(client.getData().storingStatIn(stat).forPath(path.toString()));
+        final Stat stat = new Stat();
+        final Document doc = DocumentSerializer.toDocument(client.getData().storingStatIn(stat)
+                .forPath(path.toString()));
         doc.setVersion(stat.getVersion());
         return doc;
     }
 
     public Document get(Path path, CuratorWatcher watcher) throws Exception {
-        Stat stat = new Stat();
-        Document doc = DocumentSerializer.toDocument(client.getData().storingStatIn(stat).usingWatcher(watcher)
+        final Stat stat = new Stat();
+        final Document doc = DocumentSerializer.toDocument(client.getData().storingStatIn(stat).usingWatcher(watcher)
                 .forPath(path.toString()));
         doc.setVersion(stat.getVersion());
         return doc;
@@ -72,12 +78,12 @@ public class Camille {
      * @throws Exception
      */
     public List<Pair<Document, Path>> getChildren(Path path) throws Exception {
-        List<String> relativeChildPaths = client.getChildren().forPath(path.toString());
+        final List<String> relativeChildPaths = client.getChildren().forPath(path.toString());
 
-        List<Pair<Document, Path>> out = new ArrayList<Pair<Document, Path>>(relativeChildPaths.size());
+        final List<Pair<Document, Path>> out = new ArrayList<Pair<Document, Path>>(relativeChildPaths.size());
 
-        for (String relativePath : relativeChildPaths) {
-            Path childPath = new Path(String.format("%s/%s", path, relativePath));
+        for (final String relativePath : relativeChildPaths) {
+            final Path childPath = new Path(String.format("%s/%s", path, relativePath));
             out.add(Pair.of(get(childPath), childPath));
         }
 
@@ -85,21 +91,21 @@ public class Camille {
     }
 
     public DocumentHierarchy getHierarchy(Path path) throws Exception {
-        DocumentHierarchy h = new DocumentHierarchy(get(path));
+        final DocumentHierarchy h = new DocumentHierarchy(get(path));
         addChildren(h.getRoot(), path);
         return h;
     }
 
     private void addChildren(DocumentHierarchy.Node parentNode, Path parentPath) throws Exception {
-        List<Pair<Document, Path>> children = getChildren(parentPath);
+        final List<Pair<Document, Path>> children = getChildren(parentPath);
         Collections.sort(children, new Comparator<Pair<Document, Path>>() {
             @Override
             public int compare(Pair<Document, Path> p0, Pair<Document, Path> p1) {
                 return p0.getRight().toString().compareTo(p1.getRight().toString());
             }
         });
-        for (Pair<Document, Path> child : children) {
-            DocumentHierarchy.Node n = new DocumentHierarchy.Node(child.getLeft());
+        for (final Pair<Document, Path> child : children) {
+            final DocumentHierarchy.Node n = new DocumentHierarchy.Node(child.getLeft());
             parentNode.getChildren().add(n);
             addChildren(n, child.getRight());
         }
@@ -112,7 +118,7 @@ public class Camille {
     /**
      * Returns a Stat object if exists, otherwise returns null.
      */
-    public Stat exists(Path path) throws Exception {
-        return client.checkExists().forPath(path.toString());
+    public boolean exists(Path path) throws Exception {
+        return client.checkExists().forPath(path.toString()) != null;
     }
 }

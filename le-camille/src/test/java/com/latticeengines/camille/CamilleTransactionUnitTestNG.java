@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 
 public class CamilleTransactionUnitTestNG {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
@@ -58,6 +59,7 @@ public class CamilleTransactionUnitTestNG {
 
         Assert.assertEquals(document.getVersion(), 2);
     }
-    
-    // TODO more tests involving Camille to check whether documents exist, etc...
+
+    // TODO more tests involving Camille to check whether documents exist,
+    // etc...
 }

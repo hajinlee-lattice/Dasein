@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 public class Pod {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
