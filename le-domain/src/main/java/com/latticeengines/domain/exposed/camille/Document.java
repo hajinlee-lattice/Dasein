@@ -6,8 +6,6 @@ public class Document {
     private DocumentMetadata metadata;
 
     public Document() {
-        data = null;
-        metadata = null;
     }
 
     public Document(String data, DocumentMetadata metadata) {
@@ -51,6 +49,11 @@ public class Document {
 
     public boolean versionSpecified() {
         return this.version >= 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Document [data=" + data + ", version=" + version + ", metadata=" + metadata + "]";
     }
 
     @Override

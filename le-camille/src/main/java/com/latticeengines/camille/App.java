@@ -12,7 +12,7 @@ public class App {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("prog");
         parser.addArgument("-name");
 
@@ -25,7 +25,5 @@ public class App {
         }
 
         log.info("Hello, {}!", namespace.get("name"));
-
-        System.exit(0);
     }
 }

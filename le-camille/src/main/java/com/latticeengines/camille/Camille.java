@@ -101,7 +101,7 @@ public class Camille {
         Collections.sort(children, new Comparator<Pair<Document, Path>>() {
             @Override
             public int compare(Pair<Document, Path> p0, Pair<Document, Path> p1) {
-                return p0.getRight().toString().compareTo(p1.getRight().toString());
+                return p0.getRight().toString().compareToIgnoreCase(p1.getRight().toString());
             }
         });
         for (final Pair<Document, Path> child : children) {
