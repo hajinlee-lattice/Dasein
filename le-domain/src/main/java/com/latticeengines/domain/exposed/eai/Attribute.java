@@ -1,11 +1,14 @@
 package com.latticeengines.domain.exposed.eai;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.dataplatform.HasName;
+import com.latticeengines.domain.exposed.dataplatform.HasProperty;
 
-public class Attribute implements HasName {
+public class Attribute implements HasName, HasProperty {
 
     private String name;
     private String displayName;
@@ -17,6 +20,7 @@ public class Attribute implements HasName {
     private Integer scale;
     private List<String> cleanedUpEnumValues = new ArrayList<String>();
     private List<String> enumValues = new ArrayList<String>();
+    private Map<String, Object> properties = new HashMap<>();
 
     @Override
     public String getName() {
@@ -103,5 +107,15 @@ public class Attribute implements HasName {
 
     public void setCleanedUpEnumValues(List<String> cleanedUpEnumValues) {
         this.cleanedUpEnumValues = cleanedUpEnumValues;
+    }
+
+    @Override
+    public Object getPropertyValue(String key) {
+        return properties.get(key);
+    }
+
+    @Override
+    public void setPropertyValue(String key, Object value) {
+        properties.put(key, value);
     }
 }
