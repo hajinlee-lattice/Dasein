@@ -60,6 +60,11 @@ class AssemblyServiceImpl extends AssemblyService {
 
       training.run(trainingSampler.run(filtered))
       test.run(testSampler.run(filtered))
+      
+      val total = new AvroTargetTable(dataFlow)
+      total.setPropertyValue(AvroTargetTable.DataPath, "/tmp/result")
+      total.setPropertyValue(AvroTargetTable.ParquetFile, true)
+      total.run(filtered)
     } finally {
       dataFlow.sc.stop()
     }

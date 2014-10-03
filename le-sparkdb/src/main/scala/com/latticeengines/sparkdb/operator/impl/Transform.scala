@@ -32,6 +32,8 @@ class Transform(val df: DataFlow) extends DataOperator(df) {
         if (!expression.isNew()) {
           val name = expression.getAttributeToActOn().getName()
           p.put(name, expression.getFunction()(p.get(name)))
+        } else {
+          
         }
       }
       p

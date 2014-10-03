@@ -1,27 +1,24 @@
-package com.latticeengines.sparkdb.exposed.service.impl
+package com.latticeengines.sparkdb.service.impl;
 
 import java.io.File
 
 import scala.Array.canBuildFrom
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration
-import org.springframework.beans.factory.annotation.Autowired
+import org.apache.spark._
+import org.apache.spark.sql._
 import org.springframework.test.context.ContextConfiguration
-import org.testng.Assert.assertNotNull
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
+import org.testng.Assert.assertTrue
 
 import com.latticeengines.common.exposed.util.HdfsUtils
-import com.latticeengines.sparkdb.exposed.service.SparkLauncherService
 import com.latticeengines.sparkdb.functionalframework.SparkDbFunctionalTestNGBase
 
-class SparkLauncherServiceImplTestNG extends SparkDbFunctionalTestNGBase {
-
-  @Autowired
-  var sparkLauncherService: SparkLauncherService = null
+class AssemblyServiceImplTestNG extends SparkDbFunctionalTestNGBase {
   
   var conf = new YarnConfiguration()
-  
+
   @BeforeClass(groups = Array("functional"))
   def setup() = {
     println(getClass.getResource(".").getPath())
@@ -40,13 +37,25 @@ class SparkLauncherServiceImplTestNG extends SparkDbFunctionalTestNGBase {
   }
   
   def filter(fileName: File) = fileName.getAbsolutePath().endsWith(".avro")
-
+  
   @Test(groups = Array("functional"))
-  def test() = {
-    assertNotNull(sparkLauncherService)
-    val conf = new YarnConfiguration()
-    conf.setStrings(YarnConfiguration.YARN_APPLICATION_CLASSPATH, YarnConfiguration.DEFAULT_YARN_APPLICATION_CLASSPATH: _*)
-    val appId = sparkLauncherService.runApp(conf, "ModelingDataFlowJob", "Priority0")
-    println(appId)
+  def run() {
+    AssemblyServiceImpl.main(Array("1"))
+    
+    val sparkConf = new SparkConf(true) //
+    .setMaster("local") //
+    .setAppName("ParquetAvro")
+    val sqc = new SQLContext(new SparkContext(sparkConf))
+
+    val resultRdd = sqc.parquetFile("/tmp/result/part-r-00000.snappy.parquet")
+
+    resultRdd.registerAsTable("Result")
+    
+    val count = sqc.sql("SELECT * FROM Result").collect().count(p=>true)
+    
+    println(s"Number of rows of Result parquet table = $count")
+    assertTrue(count > 0)
   }
+
+
 }
