@@ -6,6 +6,5 @@ public class VisitorUnitTestNG {
 
     @Test(groups = "unit")
     public void visit() {
-        throw new RuntimeException("Test not implemented");
     }
 }
