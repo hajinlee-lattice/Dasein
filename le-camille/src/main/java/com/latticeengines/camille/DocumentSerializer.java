@@ -1,6 +1,5 @@
 package com.latticeengines.camille;
-import org.apache.zookeeper.data.Stat;
-import org.codehaus.jackson.map.SerializationConfig;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,18 +9,19 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentMetadata;
 
 public class DocumentSerializer {
-    private static final Logger log = LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
-    
+    private static final Logger log = LoggerFactory.getLogger(new Object() {
+    }.getClass().getEnclosingClass());
+
     // To be stored in an individual zookeeper znode
-    private static class Node {   
+    private static class Node {
         public String data;
         public DocumentMetadata metadata;
     }
-    
+
     public static Document toDocument(byte[] data) throws DocumentSerializationException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        
+
         Node node;
         try {
             String string = new String(data, "UTF-8");
@@ -34,11 +34,11 @@ public class DocumentSerializer {
 
         return new Document(node.data, node.metadata);
     }
-    
+
     public static byte[] toByteArray(Document document) throws DocumentSerializationException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        
+
         Node node = new Node();
         node.data = document.getData();
         node.metadata = document.getMetadata();

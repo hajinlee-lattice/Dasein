@@ -11,9 +11,6 @@ public class DocumentHierarchy {
 
     private Node root;
 
-    // we could prevent exposing the internal node structure by building the
-    // tree here which would require passing in a Function<Path,
-    // List<Pair<Document, Path>>> getChildrenFuncnction
     public DocumentHierarchy(Document rootDocument) {
         root = new Node(rootDocument);
     }
@@ -64,7 +61,6 @@ public class DocumentHierarchy {
 
         @Override
         public void remove() {
-            // we can support this by having each node keep track of its' parent
             throw new UnsupportedOperationException();
         }
     }
