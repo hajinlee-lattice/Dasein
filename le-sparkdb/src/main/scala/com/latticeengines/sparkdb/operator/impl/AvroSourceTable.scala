@@ -1,5 +1,6 @@
 package com.latticeengines.sparkdb.operator.impl
 
+import org.apache.avro.generic.GenericModifiableData.ModifiableRecord
 import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.mapred.AvroKey
@@ -30,7 +31,7 @@ class AvroSourceTable(val df: DataFlow) extends DataOperator(df) {
       path.toString(),
       classOf[AvroKeyInputFormat[GenericRecord]],
       classOf[AvroKey[GenericRecord]],
-      classOf[NullWritable], conf).map(x => { new Record(x._1.datum().asInstanceOf[Record], true) }).persist()
+      classOf[NullWritable], conf).map(x => { new ModifiableRecord(x._1.datum().asInstanceOf[Record]) }).persist()
   }
   
   override def getPropertyNames(): Set[String] = {

@@ -48,10 +48,6 @@ class Transform(val df: DataFlow) extends DataOperator(df) {
 object Transform {
   val ExpressionList = "ExpressionList"
     
-  def extractDomain(domain: String): String = {
-    domain
-  }
-  
   def combineAndTransformRecords(u: GenericRecord, v: GenericRecord, s: Array[java.lang.Object]): GenericRecord = {
     val combinedRecord = AvroUtils.combineAvroRecords(u, v, s)
     println(combinedRecord)

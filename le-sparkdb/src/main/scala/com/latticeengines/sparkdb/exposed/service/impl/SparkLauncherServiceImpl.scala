@@ -42,7 +42,7 @@ class SparkLauncherServiceImpl extends SparkLauncherService {
 
 object SparkLauncherServiceImpl {
   def getWorkspace(): String = {
-    "/Users/zandrogonzalez/Documents/workspace"
+    "/home/rgonzalez/workspace"
   } 
   
   def main(args: Array[String]) {
