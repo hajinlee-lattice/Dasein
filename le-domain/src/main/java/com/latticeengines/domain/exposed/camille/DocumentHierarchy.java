@@ -72,7 +72,7 @@ public class DocumentHierarchy {
         }
     }
 
-    public static class Node {
+    public static final class Node {
         private Document document;
         private List<Node> children = new ArrayList<Node>();
 
