@@ -10,51 +10,15 @@ import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
-public class ConfigurationController<T extends ConfigurationScope> {
-    private T scope;
+public abstract class ConfigurationController {
     
-    public ConfigurationController(T scope) {
-        this.scope = scope;
-    }
-    
-    public void create(Path path, Document document) {
-        // TODO
-    }
-
-    public void set(Path path, Document document) {
-        set(path, document, false);
-    }
-    
-    public void set(Path path, Document document, boolean force) {
-        // TODO
-    }
-    
-    public Document get(Path path) {
-        // TODO
-        return null;
-    }
-    
-    public Document get(Path path, CuratorWatcher watcher) {
-        // TODO
-        return null;
-    }
-    
-    public List<Pair<Document,Path>> getChildren(Path path) {
-        // TODO
-        return null;
-    }
-    
-    public DocumentHierarchy getHierarchy(Path path) {
-        // TODO
-        return null;
-    }
-    
-    public void delete(Path path) {
-        // TODO
-    }
-    
-    public boolean exists(Path path) {
-        // TODO
-        return false;
-    }
+    public abstract void create(Path path, Document document);
+    public abstract void set(Path path, Document document);
+    public abstract void set(Path path, Document document, boolean force);
+    public abstract Document get(Path path);
+    public abstract Document get(Path path, CuratorWatcher watcher);
+    public abstract List<Pair<Document,Path>> getChildren(Path path);
+    public abstract DocumentHierarchy getHierarchy(Path path);
+    public abstract void delete(Path path);
+    public abstract boolean exists(Path path);
 }
