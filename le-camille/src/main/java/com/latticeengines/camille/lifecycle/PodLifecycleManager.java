@@ -76,7 +76,7 @@ public class PodLifecycleManager {
         Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {
             @Override
             public int compare(Pair<Document, Path> o1, Pair<Document, Path> o2) {
-                return o1.getRight().toString().compareToIgnoreCase(o2.getRight().toString());
+                return o1.getRight().toString().compareTo(o2.getRight().toString());
             }
         });
         List<Pod> out = new ArrayList<Pod>(childPairs.size());
