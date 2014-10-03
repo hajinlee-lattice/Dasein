@@ -37,8 +37,7 @@ public class ContractLifecycleManager {
         Camille camille = CamilleEnvironment.getCamille();
 
         try {
-            Path contractsPath = new Path("/" + PathConstants.PODS + "/" + contract.getPodId() + "/"
-                    + PathConstants.CONTRACTS);
+            Path contractsPath = PathBuilder.buildContractsPath(contract.getPodId());
             camille.create(contractsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             log.debug("created Contracts path @ {}", contractsPath);
         } catch (KeeperException.NodeExistsException e) {

@@ -37,7 +37,7 @@ public class PodLifecycleManager {
         Camille camille = CamilleEnvironment.getCamille();
 
         try {
-            Path podsPath = new Path("/" + PathConstants.PODS);
+            Path podsPath = PathBuilder.buildPodsPath();
             camille.create(podsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             log.debug("created Pods path @ {}", podsPath);
         } catch (KeeperException.NodeExistsException e) {
