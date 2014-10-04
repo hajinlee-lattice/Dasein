@@ -1,15 +1,13 @@
 package com.latticeengines.sparkdb.operator.impl
 
 import org.apache.avro.generic.GenericRecord
-
 import org.apache.spark.SparkContext.rddToPairRDDFunctions
 import org.apache.spark.rdd.RDD
 
 import com.latticeengines.common.exposed.util.AvroUtils
+import com.latticeengines.sparkdb.conversion.Implicits.objectToString
 import com.latticeengines.sparkdb.operator.DataFlow
 import com.latticeengines.sparkdb.operator.DataOperator
-
-import com.latticeengines.sparkdb.conversion.Implicits._
 
 class Join(val df: DataFlow) extends DataOperator(df) {
 

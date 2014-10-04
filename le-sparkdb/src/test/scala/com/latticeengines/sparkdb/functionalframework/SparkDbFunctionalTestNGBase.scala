@@ -1,11 +1,10 @@
 package com.latticeengines.sparkdb.functionalframework
 
-import com.latticeengines.common.exposed.util.HdfsUtils
 import org.apache.hadoop.conf.Configuration
-import org.springframework.util.StringUtils
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
 import org.springframework.test.context.ContextConfiguration
-import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests
+
+import com.latticeengines.common.exposed.util.HdfsUtils
 
 
 @ContextConfiguration(locations = Array("classpath:test-sparkdb-context.xml"))

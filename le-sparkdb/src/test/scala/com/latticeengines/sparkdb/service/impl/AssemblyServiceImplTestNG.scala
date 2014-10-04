@@ -5,12 +5,12 @@ import java.io.File
 import scala.Array.canBuildFrom
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration
-import org.apache.spark._
-import org.apache.spark.sql._
-import org.springframework.test.context.ContextConfiguration
+import org.apache.spark.SparkConf
+import org.apache.spark.SparkContext
+import org.apache.spark.sql.SQLContext
+import org.testng.Assert.assertTrue
 import org.testng.annotations.BeforeClass
 import org.testng.annotations.Test
-import org.testng.Assert.assertTrue
 
 import com.latticeengines.common.exposed.util.HdfsUtils
 import com.latticeengines.sparkdb.functionalframework.SparkDbFunctionalTestNGBase

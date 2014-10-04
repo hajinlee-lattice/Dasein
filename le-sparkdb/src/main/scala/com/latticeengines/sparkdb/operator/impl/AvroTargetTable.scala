@@ -9,13 +9,14 @@ import org.apache.hadoop.io.NullWritable
 import org.apache.spark.SparkContext.rddToPairRDDFunctions
 import org.apache.spark.rdd.RDD
 
+import com.latticeengines.sparkdb.conversion.Implicits.objectToBoolean
+import com.latticeengines.sparkdb.conversion.Implicits.objectToString
 import com.latticeengines.sparkdb.operator.DataFlow
 import com.latticeengines.sparkdb.operator.DataOperator
+
 import parquet.avro.AvroParquetOutputFormat
 import parquet.hadoop.ParquetOutputFormat
-import parquet.hadoop.metadata.CompressionCodecName;
-
-import com.latticeengines.sparkdb.conversion.Implicits._
+import parquet.hadoop.metadata.CompressionCodecName
 
 
 class AvroTargetTable(val df: DataFlow) extends DataOperator(df) {

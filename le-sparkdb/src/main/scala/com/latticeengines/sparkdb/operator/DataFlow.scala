@@ -1,11 +1,11 @@
 package com.latticeengines.sparkdb.operator
 
 import java.util.ArrayList
-import java.util.List
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.mapreduce.Job
-import org.apache.spark._
+import org.apache.spark.SparkConf
+import org.apache.spark.SparkContext
 
 class DataFlow(private var name: String, private var conf: Configuration, private var local: Boolean = true) extends HasName {
 

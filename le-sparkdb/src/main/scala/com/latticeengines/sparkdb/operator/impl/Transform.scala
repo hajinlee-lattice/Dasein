@@ -1,14 +1,14 @@
 package com.latticeengines.sparkdb.operator.impl
 
-import com.latticeengines.domain.exposed.eai.AttributeOwner
-import com.latticeengines.domain.exposed.sparkdb.FunctionExpression
-import com.latticeengines.sparkdb.operator.{DataFlow, DataOperator}
 import org.apache.avro.generic.GenericRecord
 import org.apache.spark.rdd.RDD
 
 import com.latticeengines.common.exposed.util.AvroUtils
+import com.latticeengines.domain.exposed.eai.AttributeOwner
 import com.latticeengines.eai.exposed.util.AvroSchemaBuilder
-import com.latticeengines.sparkdb.conversion.Implicits._
+import com.latticeengines.sparkdb.conversion.Implicits.objectToExpressionList
+import com.latticeengines.sparkdb.operator.DataFlow
+import com.latticeengines.sparkdb.operator.DataOperator
 
 class Transform(val df: DataFlow) extends DataOperator(df) {
   

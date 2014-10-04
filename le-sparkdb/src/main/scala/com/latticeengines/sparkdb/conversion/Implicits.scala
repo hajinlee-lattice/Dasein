@@ -1,8 +1,8 @@
 package com.latticeengines.sparkdb.conversion
 
-import org.apache.spark.rdd._
-import org.apache.avro.generic.GenericData.Record
 import org.apache.avro.generic.GenericRecord
+import org.apache.spark.rdd.RDD
+
 import com.latticeengines.domain.exposed.sparkdb.FunctionExpression
 
 object Implicits {

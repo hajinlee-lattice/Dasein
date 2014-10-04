@@ -3,7 +3,6 @@ package com.latticeengines.sparkdb.operator.impl
 import scala.collection.JavaConversions.asScalaBuffer
 
 import org.apache.avro.generic.GenericRecord
-import org.apache.hadoop.conf.Configuration
 import org.apache.spark.rdd.RDD
 
 import com.latticeengines.sparkdb.operator.DataFlow

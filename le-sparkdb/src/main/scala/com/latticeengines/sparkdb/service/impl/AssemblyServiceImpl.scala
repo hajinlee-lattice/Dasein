@@ -11,7 +11,6 @@ import com.latticeengines.sparkdb.operator.impl.Filter
 import com.latticeengines.sparkdb.operator.impl.Join
 import com.latticeengines.sparkdb.operator.impl.Sampler
 import com.latticeengines.sparkdb.service.AssemblyService
-import com.latticeengines.sparkdb.conversion.Implicits._
 
 
 @Component("assemblyService")
