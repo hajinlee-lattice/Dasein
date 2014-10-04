@@ -78,7 +78,15 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
                 appIds.add(appId);
             }
         }
-        List<Job> jobsToResubmit = jobEntityMgr.findAllByObjectIds(appIds);
+
+        List<Job> jobsToResubmit = new ArrayList<>();
+        while (appIds.size() > 2100) {
+            List<String> subIdList = appIds.subList(0, 2100);
+            jobsToResubmit.addAll(jobEntityMgr.findAllByObjectIds(subIdList));
+            appIds = appIds.subList(2101, appIds.size());
+        }
+        jobsToResubmit.addAll(jobEntityMgr.findAllByObjectIds(appIds));
+
         for (Job job : jobsToResubmit) {
             modelingJobService.resubmitPreemptedJob(job);
         }
