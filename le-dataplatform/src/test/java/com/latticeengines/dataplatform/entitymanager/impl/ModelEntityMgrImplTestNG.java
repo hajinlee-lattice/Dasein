@@ -2,11 +2,9 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
@@ -37,6 +35,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         Job job1 = new Job();
         job1.setId("application_12345_00001");
         job1.setClient("CLIENT 1");
+
         Job job2 = new Job();
         job2.setId("application_12345_00002");
         job2.setClient("CLIENT 2");
@@ -76,7 +75,6 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(model.getDataFormat(), retrievedModel.getDataFormat());
         assertEquals(model.getDataHdfsPath(), retrievedModel.getDataHdfsPath());
         assertEquals(model.getFeatures(), retrievedModel.getFeatures());
-        assertEquals(model.getJobs(), retrievedModel.getJobs());
         assertEquals(model.getKeyCols(), retrievedModel.getKeyCols());
         assertEquals(model.getMetadataHdfsPath(), retrievedModel.getMetadataHdfsPath());
         assertEquals(model.getMetadataTable(), retrievedModel.getMetadataTable());
@@ -101,7 +99,6 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         retrievedModel = modelEntityMgr.findByKey(retrievedModel);
         // assert for correctness
         assertModelsEqual(model, retrievedModel);
-        assertEquals(2, model.getJobs().size());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testPersist" })

@@ -157,7 +157,7 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
         }
         // create the model given the associated definition
         modelEntityMgr.createOrUpdate(model);
-
+        jobEntityMgr.create(job);
         return appId;
     }
 

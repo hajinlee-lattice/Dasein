@@ -28,7 +28,7 @@ import com.latticeengines.common.exposed.util.StringTokenUtils;
 
 @Entity
 @Table(name = "MODEL")
-public class Model implements HasName, HasPid, HasId<String>  {
+public class Model implements HasName, HasPid, HasId<String> {
 
     private Long pid;
     private String id;
@@ -200,18 +200,6 @@ public class Model implements HasName, HasPid, HasId<String>  {
     @JsonIgnore
     public void setId(String id) {
         this.id = id;
-    }
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "model", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @LazyCollection(LazyCollectionOption.FALSE)
-    public List<Job> getJobs() {
-        return this.jobs;
-    }
-
-    @JsonIgnore
-    public void setJobs(List<Job> jobs) {
-        this.jobs = jobs;
     }
 
     public void addJob(Job job) {

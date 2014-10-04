@@ -11,6 +11,7 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -23,6 +24,8 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -32,9 +35,9 @@ import com.latticeengines.common.exposed.util.YarnUtils;
 @Entity
 @Table(name = "JOB")
 public class Job implements HasPid, HasId<String> {
-    
+
     private static final Log log = LogFactory.getLog(Job.class);
-    
+
     private Long pid;
     private String id;
     private String client;
@@ -43,7 +46,7 @@ public class Job implements HasPid, HasId<String> {
     private Properties containerProperties = new Properties();
     private Long parentJobId;
     private List<String> childJobIds = new ArrayList<String>();
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -78,7 +81,7 @@ public class Job implements HasPid, HasId<String> {
     }
 
     @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE })
+    @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
     @JoinColumn(name = "FK_MODEL_ID")
     public Model getModel() {
         return model;
@@ -89,7 +92,8 @@ public class Job implements HasPid, HasId<String> {
         this.model = model;
     }
 
-    @JsonIgnore  /** string representation is ignored; json uses getAppMasterPropertiesObject() **/
+    @JsonIgnore
+    /** string representation is ignored; json uses getAppMasterPropertiesObject() **/
     @Column(name = "APPMASTER_PROPERTIES", length = 65535)
     public String getAppMasterProperties() {
         String propstr = "";
@@ -103,28 +107,33 @@ public class Job implements HasPid, HasId<String> {
             log.error("Error serializing the properties value", e);
         }
 
-        return propstr;       
-    }    
-    @JsonIgnore /** string representation is ignored; json uses setAppMasterPropertiesObject() **/
+        return propstr;
+    }
+
+    @JsonIgnore
+    /** string representation is ignored; json uses setAppMasterPropertiesObject() **/
     /** data store has string / varchar as persistence type **/
     public void setAppMasterProperties(String appMasterPropertiesStr) throws IOException {
         this.appMasterProperties = new Properties();
-        if (appMasterPropertiesStr != null && !appMasterPropertiesStr.equalsIgnoreCase("")) {            
+        if (appMasterPropertiesStr != null && !appMasterPropertiesStr.equalsIgnoreCase("")) {
             this.appMasterProperties.load(new StringReader(appMasterPropertiesStr));
         }
-    }    
+    }
+
     @Transient
     public Properties getAppMasterPropertiesObject() {
         return appMasterProperties;
     }
+
     public void setAppMasterPropertiesObject(Properties appMasterPropertiesObject) {
         this.appMasterProperties = appMasterPropertiesObject;
         if (this.appMasterProperties == null) {
             this.appMasterProperties = new Properties();
         }
     }
-      
-    @JsonIgnore /** string representation is ignored; json uses getContainerPropertiesObject() **/
+
+    @JsonIgnore
+    /** string representation is ignored; json uses getContainerPropertiesObject() **/
     @Column(name = "CONTAINER_PROPERTIES", length = 65535)
     public String getContainerProperties() {
         String propstr = "";
@@ -140,17 +149,21 @@ public class Job implements HasPid, HasId<String> {
 
         return propstr;
     }
-    @JsonIgnore /** string representation is ignored; json uses setContainerPropertiesObject() **/
+
+    @JsonIgnore
+    /** string representation is ignored; json uses setContainerPropertiesObject() **/
     public void setContainerProperties(String containerPropertiesStr) throws IOException {
         this.containerProperties = new Properties();
         if (containerPropertiesStr != null && !containerPropertiesStr.equalsIgnoreCase("")) {
             this.containerProperties.load(new StringReader(containerPropertiesStr));
         }
     }
+
     @Transient
     public Properties getContainerPropertiesObject() {
         return this.containerProperties;
     }
+
     public void setContainerPropertiesObject(Properties containerPropertiesObject) {
         this.containerProperties = containerPropertiesObject;
         if (this.containerProperties == null) {
@@ -239,9 +252,12 @@ public class Job implements HasPid, HasId<String> {
 
         Job job = (Job) obj;
 
-        return new EqualsBuilder().append(pid, job.getPid()).append(id, job.getId()).append(client, job.getClient()) //
-                .append(model, job.getModel()).append(appMasterProperties, job.getAppMasterPropertiesObject()) //
-                .append(containerProperties, job.getContainerPropertiesObject()) //
+        return new EqualsBuilder().append(pid, job.getPid()).append(id, job.getId()).append(client, job.getClient())
+        //
+                .append(model, job.getModel()).append(appMasterProperties, job.getAppMasterPropertiesObject())
+                //
+                .append(containerProperties, job.getContainerPropertiesObject())
+                //
                 .append(parentJobId, job.getParentJobId()).append(childJobIds, job.getChildJobIdList()).isEquals();
     }
 
