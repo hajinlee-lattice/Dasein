@@ -155,16 +155,9 @@ public class PerfLoadTestNGBase {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
 
-        // dataplatform.dlorchestration.datasource.host=10.41.1.250
-        // dataplatform.dlorchestration.datasource.port=1433
-        // dataplatform.dlorchestration.datasource.dbname=LeadScoringDB_buildmachine
-
         String host = prop.getProperty("dataplatform.test.datasource.host");
-        // String host = "10.41.1.250";
         int port = Integer.parseInt(prop.getProperty("dataplatform.test.datasource.port"));
-        // int port = 1433;
         String database = prop.getProperty("dataplatform.test.datasource.dbname");
-        // String database = "LeadScoringDB_qe";
         String user = prop.getProperty("dataplatform.test.datasource.user");
         String password = CipherUtils.decrypt(prop.getProperty("dataplatform.test.datasource.password.encrypted"));
         String type = prop.getProperty("dataplatform.test.datasource.type");

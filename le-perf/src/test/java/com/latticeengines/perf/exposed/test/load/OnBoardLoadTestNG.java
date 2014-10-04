@@ -17,7 +17,7 @@ import static org.testng.Assert.assertNotNull;
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
 
-    @Test(groups = "load", enabled = false)
+    @Test(groups = "load", enabled = true)
     public void onBoard() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + " on board");
         List<Future<List<String>>> futures = new ArrayList<Future<List<String>>>();
@@ -44,7 +44,7 @@ public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
         assertTrue(GetJobStatus.checkStatus(restEndpointHost, appIds));
     }
 
-    @Test(groups = "load", enabled = false, dependsOnMethods = { "onBoard" })
+    @Test(groups = "load", enabled = true, dependsOnMethods = { "onBoard" })
     public void noPreemptionSubmit() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + " submit no preemption");
 
