@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -14,7 +13,6 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
@@ -213,27 +211,6 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
         jobEntityMgr.update(resubmitJob);
 
         return appId;
-    }
-
-    @Override
-    public JobStatus getJobStatus(String applicationId, String hdfs) throws Exception {
-        com.latticeengines.domain.exposed.dataplatform.Job leafJob = getLeafJob(applicationId);
-        JobStatus jobStatus = new JobStatus();
-        if (leafJob != null) {
-            applicationId = leafJob.getId();
-            String classifierStr = (String) leafJob.getContainerPropertiesObject().get(
-                    PythonContainerProperty.METADATA_CONTENTS.name());
-            if (classifierStr != null) {
-                Classifier classifier = JsonUtils.deserialize(classifierStr, Classifier.class);
-                if (classifier != null) {
-                    String[] tokens = StringUtils.split(applicationId, "_");
-                    String folder = StringUtils.join(new String[] { tokens[1], tokens[2] }, "_");
-                    jobStatus.setResultDirectory(classifier.getModelHdfsDir() + "/" + folder);
-                }
-            }
-        }
-        super.setJobStatus(jobStatus, applicationId, hdfs);
-        return jobStatus;
     }
 
     protected com.latticeengines.domain.exposed.dataplatform.Job getLeafJob(String applicationId) {

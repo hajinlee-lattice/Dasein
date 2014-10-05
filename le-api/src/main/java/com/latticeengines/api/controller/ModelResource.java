@@ -1,7 +1,6 @@
 package com.latticeengines.api.controller;
 
 import java.util.Arrays;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
@@ -86,12 +84,6 @@ public class ModelResource {
     @ResponseBody
     public JobStatus getJobStatus(@PathVariable String applicationId) {
         return modelingService.getJobStatus(applicationId);
-    }
-
-    @RequestMapping(value = "/getJobStatus/{applicationId}", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    public JobStatus getJobStatus(@PathVariable String applicationId, @RequestBody String hdfsPath) throws Exception {
-        return modelingService.getJobStatus(applicationId, hdfsPath);
     }
 
     @RequestMapping(value = "/profile", method = RequestMethod.POST, headers = "Accept=application/json")

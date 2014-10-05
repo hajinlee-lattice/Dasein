@@ -1,9 +1,7 @@
 package com.latticeengines.perf.job.runnable.impl;
 
 import java.util.List;
-
 import org.apache.hadoop.conf.Configuration;
-
 import com.latticeengines.perf.job.configuration.OnBoardConfiguration;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 
@@ -38,7 +36,7 @@ public class OnBoard extends ModelingResourceJob<OnBoardConfiguration, List<Stri
 
     public List<String> onBoard() throws Exception {
         List<String> appIds = ld.executeJob();
-        GetJobStatus.checkStatus(restEndpointHost, appIds, hdfsPath);
+        GetJobStatus.checkStatus(restEndpointHost, appIds);
         // while (!GetJobStatus.validateFiles(hadoopConfiguration, hdfsPath +
         // "/data/Q_EventTable_Nutanix", 4)) {
         // }

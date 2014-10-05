@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
@@ -27,7 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
@@ -479,9 +477,5 @@ public class ModelingServiceImpl implements ModelingService {
     @Override
     public JobStatus getJobStatus(String applicationId) {
         return modelingJobService.getJobStatus(applicationId);
-    }
-
-    public JobStatus getJobStatus(String applicationId, String hdfsPath) throws Exception {
-        return modelingJobService.getJobStatus(applicationId, hdfsPath);
     }
 }

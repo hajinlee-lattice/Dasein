@@ -2,9 +2,7 @@ package com.latticeengines.domain.exposed.dataplatform;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,14 +11,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -202,6 +195,11 @@ public class Model implements HasName, HasPid, HasId<String> {
         this.id = id;
     }
 
+    @JsonIgnore
+    public List<Job> retrieveJobs() {
+        return jobs;
+    }
+    
     public void addJob(Job job) {
         job.setModel(this);
         jobs.add(job);

@@ -23,8 +23,6 @@ public interface ModelingService {
 
     JobStatus getJobStatus(String applicationId);
 
-    JobStatus getJobStatus(String applicationId, String hdfsPath) throws Exception;
-
     List<String> getFeatures(Model model, boolean depivoted);
 
     ApplicationId profileData(DataProfileConfiguration dataProfileConfig);
