@@ -1,4 +1,4 @@
-package com.latticeengines.camille;
+package com.latticeengines.camille.config;
 
 import java.util.List;
 

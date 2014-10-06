@@ -1,4 +1,4 @@
-package com.latticeengines.camille;
+package com.latticeengines.camille.config;
 
 import java.util.List;
 
@@ -6,6 +6,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.ZooDefs;
 
+import com.latticeengines.camille.Camille;
+import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.translators.PathTranslator;
 import com.latticeengines.camille.translators.PathTranslatorFactory;
 import com.latticeengines.domain.exposed.camille.Document;

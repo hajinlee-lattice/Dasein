@@ -1,4 +1,4 @@
-package com.latticeengines.camille;
+package com.latticeengines.camille.config;
 
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 

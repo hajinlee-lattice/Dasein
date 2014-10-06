@@ -1,7 +1,9 @@
-package com.latticeengines.camille;
+package com.latticeengines.camille.config;
 
 import org.apache.zookeeper.ZooDefs;
 
+import com.latticeengines.camille.CamilleTransaction;
+import com.latticeengines.camille.DocumentSerializationException;
 import com.latticeengines.camille.translators.PathTranslator;
 import com.latticeengines.camille.translators.PathTranslatorFactory;
 import com.latticeengines.domain.exposed.camille.Document;
