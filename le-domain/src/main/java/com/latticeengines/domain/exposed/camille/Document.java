@@ -10,7 +10,6 @@ public class Document {
 
     public Document(String data) {
         this.data = data;
-        this.metadata = new DocumentMetadata();
     }
 
     public Document(String data, DocumentMetadata metadata) {
