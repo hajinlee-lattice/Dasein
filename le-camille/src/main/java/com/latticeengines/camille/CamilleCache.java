@@ -7,11 +7,16 @@ import java.util.Map;
 import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.zookeeper.KeeperException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class CamilleCache {
+    private static final Logger log = LoggerFactory.getLogger(new Object() {
+    }.getClass().getEnclosingClass());
+
     private Map<Path, NodeCache> caches;
     private Camille camille;
 
@@ -31,14 +36,16 @@ public class CamilleCache {
     }
 
     /**
-     * Retrieve the latest version of a document from the cache.
-     * If the specified path is not currently being cached, it will be added.
+     * Retrieve the latest version of a document from the cache. If the
+     * specified path is not currently being cached, it will be added.
      * 
-     * Will throw if the document doesn't exist as far as this cache is aware, 
-     * since the usage pattern for this cache is for all cached documents to exist.
+     * Will throw if the document doesn't exist as far as this cache is aware,
+     * since the usage pattern for this cache is for all cached documents to
+     * exist.
      */
     public synchronized Document get(Path path) throws Exception {
         if (!caches.containsKey(path)) {
+            log.debug("Not caching " + path + ". Adding an entry for it.");
             NodeCache cache = new NodeCache(camille.getCuratorClient(), path.toString());
             cache.start(true);
             caches.put(path, cache);
