@@ -8,4 +8,6 @@ public final class PathConstants {
     public static final String TENANTS = "Tenants";
     public static final String SPACES = "Spaces";
     public static final String SERVICES = "Services";
+    
+    public static final String DEFAULT_SPACE_FILE = ".default-space";
 }

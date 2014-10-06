@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.paths.PathBuilder;
+import com.latticeengines.camille.paths.PathConstants;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
@@ -25,8 +26,6 @@ public class TenantLifecycleManager {
     }.getClass().getEnclosingClass());
 
     private static final ObjectMapper mapper = new ObjectMapper();
-
-    private static final String defaultSpaceFile = ".default-space";
 
     private static class DefaultSpace {
         private String spaceId = null;
@@ -72,7 +71,7 @@ public class TenantLifecycleManager {
         }
 
         // create default space file
-        Path defaultSpacePath = tenantPath.append(defaultSpaceFile);
+        Path defaultSpacePath = tenantPath.append(PathConstants.DEFAULT_SPACE_FILE);
         Document doc = new Document(mapper.writeValueAsString(new DefaultSpace(defaultSpaceId)));
         try {
             camille.create(defaultSpacePath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
@@ -86,7 +85,7 @@ public class TenantLifecycleManager {
             throws JsonProcessingException, Exception {
         CamilleEnvironment.getCamille().set(
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
-                        defaultSpaceFile), new Document(mapper.writeValueAsString(new DefaultSpace(defaultSpaceId))));
+                        PathConstants.DEFAULT_SPACE_FILE), new Document(mapper.writeValueAsString(new DefaultSpace(defaultSpaceId))));
     }
 
     public static String getDefaultSpaceId(String contractId, String tenantId) throws Exception {
@@ -94,7 +93,7 @@ public class TenantLifecycleManager {
                 CamilleEnvironment
                         .getCamille()
                         .get(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
-                                defaultSpaceFile)).getData(), DefaultSpace.class).getSpaceId();
+                                PathConstants.DEFAULT_SPACE_FILE)).getData(), DefaultSpace.class).getSpaceId();
     }
 
     public static void delete(String contractId, String tenantId) throws Exception {
