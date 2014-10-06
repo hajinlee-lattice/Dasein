@@ -35,24 +35,32 @@ public class TenantLifecycleManagerUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testCreateNullDefaultSpace() throws Exception {
+    public void testCreateNullDefaultSpaceAndSetDefaultSpace() throws Exception {
         String tenantId = "testTenant";
         TenantLifecycleManager.create(contractId, tenantId);
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)));
         TenantLifecycleManager.create(contractId, tenantId);
         Assert.assertNull(TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId));
+
+        String defaultSpaceId = "testDefaultSpaceId";
+        TenantLifecycleManager.setDefaultSpaceId(contractId, tenantId, defaultSpaceId);
+        Assert.assertEquals(TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId), defaultSpaceId);
     }
 
     @Test(groups = "unit")
-    public void testCreateNotNullDefaultSpace() throws Exception {
+    public void testCreateNotNullDefaultSpaceAndSetDefaultSpace() throws Exception {
         String tenantId = "testTenant";
-        String defaultSpaceId = "testDefaultSpaceId";
-        TenantLifecycleManager.create(contractId, tenantId, defaultSpaceId);
+        String defaultSpaceId1 = "testDefaultSpaceId1";
+        TenantLifecycleManager.create(contractId, tenantId, defaultSpaceId1);
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)));
         TenantLifecycleManager.create(contractId, tenantId);
-        Assert.assertEquals(defaultSpaceId, TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId));
+        Assert.assertEquals(defaultSpaceId1, TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId));
+
+        String defaultSpaceId2 = "testDefaultSpaceId2";
+        TenantLifecycleManager.setDefaultSpaceId(contractId, tenantId, defaultSpaceId2);
+        Assert.assertEquals(TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId), defaultSpaceId2);
     }
 
     @Test(groups = "unit")

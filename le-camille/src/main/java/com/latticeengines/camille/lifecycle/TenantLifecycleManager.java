@@ -11,6 +11,7 @@ import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
@@ -79,6 +80,13 @@ public class TenantLifecycleManager {
         } catch (KeeperException.NodeExistsException e) {
             log.debug(".default-space already existed @ {}, ignoring create", defaultSpacePath);
         }
+    }
+
+    public static void setDefaultSpaceId(String contractId, String tenantId, String defaultSpaceId)
+            throws JsonProcessingException, Exception {
+        CamilleEnvironment.getCamille().set(
+                PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
+                        defaultSpaceFile), new Document(mapper.writeValueAsString(new DefaultSpace(defaultSpaceId))));
     }
 
     public static String getDefaultSpaceId(String contractId, String tenantId) throws Exception {
