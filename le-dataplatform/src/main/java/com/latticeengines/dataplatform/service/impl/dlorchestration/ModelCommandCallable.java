@@ -1,18 +1,26 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
+import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
@@ -31,6 +39,9 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private static final int SUCCESS = 0;
     private static final int FAIL = -1;
+    private static final String HTTPFS_SUFFIX = "?op=OPEN&user.name=yarn";
+
+    private Configuration yarnConfiguration;
 
     private ModelingJobService modelingJobService;
 
@@ -54,16 +65,20 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private ModelCommand modelCommand;
 
+    private String httpFsPrefix;
+
     public ModelCommandCallable() {
     }
 
-    public ModelCommandCallable(ModelCommand modelCommand, ModelingJobService modelingJobService,
-            ModelCommandEntityMgr modelCommandEntityMgr, ModelCommandStateEntityMgr modelCommandStateEntityMgr,
-            ModelStepYarnProcessor modelStepYarnProcessor, ModelCommandLogService modelCommandLogService,
-            ModelCommandResultEntityMgr modelCommandResultEntityMgr, ModelStepProcessor modelStepFinishProcessor,
-            ModelStepProcessor modelStepOutputResultsProcessor, ModelStepProcessor modelStepRetrieveMetadataProcessor,
-            DebugProcessorImpl debugProcessorImpl) {
+    public ModelCommandCallable(ModelCommand modelCommand, Configuration yarnConfiguration,
+            ModelingJobService modelingJobService, ModelCommandEntityMgr modelCommandEntityMgr,
+            ModelCommandStateEntityMgr modelCommandStateEntityMgr, ModelStepYarnProcessor modelStepYarnProcessor,
+            ModelCommandLogService modelCommandLogService, ModelCommandResultEntityMgr modelCommandResultEntityMgr,
+            ModelStepProcessor modelStepFinishProcessor, ModelStepProcessor modelStepOutputResultsProcessor,
+            ModelStepProcessor modelStepRetrieveMetadataProcessor, DebugProcessorImpl debugProcessorImpl,
+            String httpFsPrefix) {
         this.modelCommand = modelCommand;
+        this.yarnConfiguration = yarnConfiguration;
         this.modelingJobService = modelingJobService;
         this.modelCommandEntityMgr = modelCommandEntityMgr;
         this.modelCommandStateEntityMgr = modelCommandStateEntityMgr;
@@ -74,7 +89,7 @@ public class ModelCommandCallable implements Callable<Long> {
         this.modelStepFinishProcessor = modelStepFinishProcessor;
         this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
         this.debugProcessorImpl = debugProcessorImpl;
-
+        this.httpFsPrefix = httpFsPrefix;
     }
 
     @Override
@@ -150,6 +165,8 @@ public class ModelCommandCallable implements Callable<Long> {
                         log.info("_____Job is " + jobStatus.getState() + "," + jobStatus.getStatus() + " file status "
                                 + filePath + " is : \n");
                         log.info(files);
+                    } else if (commandState.getModelCommandStep().equals(ModelCommandStep.PROFILE_DATA)) {
+                        generateDataDiagnostics(commandState, jobStatus);
                     }
                     successCount++;
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
@@ -245,4 +262,67 @@ public class ModelCommandCallable implements Callable<Long> {
         modelCommandStateEntityMgr.createOrUpdate(commandState);
     }
 
+    private void generateDataDiagnostics(ModelCommandState commandState, JobStatus jobStatus) throws Exception {
+        String diagnosticsPath = "";
+        try {
+            for (String filePath : HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getDataDiagnosticsDirectory())) {
+                if (filePath.endsWith("diagnostics.json")) {
+                    diagnosticsPath = filePath;
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_16002, e, new String[] { String.valueOf(modelCommand.getPid()),
+                    commandState.getYarnApplicationId() });
+        }
+
+        if (diagnosticsPath.isEmpty()) {
+            modelCommandLogService.log(modelCommand, "No data diagnostics generated.");
+            log.warn("No data diagnostics generated for command " + modelCommand.getPid() + "with application id "
+                    + commandState.getYarnApplicationId());
+            return;
+        }
+
+        // Parse file
+        String warnings = "";
+        diagnosticsPath = jobStatus.getDataDiagnosticsDirectory() + "/" + StringTokenUtils.stripPath(diagnosticsPath); // full
+                                                                                                                       // hdfs
+                                                                                                                       // path
+        String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
+        TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
+        };
+        HashMap<String, Object> diagnostics = new ObjectMapper().readValue(content.getBytes(), typeRef);
+
+        // Check positive event rate between arbitrary range
+        double[] positiveEventRateThresh = { 1, 50 }; // 1% to 50%
+        @SuppressWarnings("unchecked")
+        double positiveEventRate = (double) ((LinkedHashMap<String, Object>) diagnostics.get("Summary"))
+                .get("PositiveEventRate");
+        positiveEventRate *= 100;
+        if (positiveEventRate < positiveEventRateThresh[0] || positiveEventRate > positiveEventRateThresh[1]) {
+            warnings += "Detected abnormal positive event rate " + positiveEventRate + "% from event table (below "
+                    + positiveEventRateThresh[0] + "% or above " + positiveEventRateThresh[1] + "%).\n";
+        }
+        // Check any invalid column bucketing metadata
+        @SuppressWarnings("unchecked")
+        LinkedHashMap<String, Object> metadataDiagnostics = ((LinkedHashMap<String, Object>) diagnostics
+                .get("MetadataDiagnostics"));
+        List<String> columns = new ArrayList<String>();
+        for (Object key : metadataDiagnostics.keySet()) {
+            columns.add((String) key);
+        }
+        if (!columns.isEmpty()) {
+            warnings += "Detected invalid bucketing metadata for columns: " + columns.toString() + "\n";
+        }
+
+        // Generate warnings
+        if (!warnings.isEmpty()) {
+            modelCommandLogService.log(modelCommand, "Data dignostics:\n" + warnings);
+        }
+
+        // Provide link to full diagnostics file
+        modelCommandLogService.log(modelCommand, "Data diagnostics json file download link: " + httpFsPrefix
+                + diagnosticsPath + HTTPFS_SUFFIX);
+
+    }
 }

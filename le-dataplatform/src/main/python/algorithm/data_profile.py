@@ -1,6 +1,8 @@
 from avro import schema, datafile, io
 import codecs
 from collections import OrderedDict
+import os
+import pwd
 import json
 import logging
 import math
@@ -217,6 +219,7 @@ def profileColumn(columnData, colname, stringcols, eventVector, bucketDispatcher
 
     if colname in stringcols:
         # Categorical column
+        diagnostics["Type"] = "Categorical"
         uniqueValues = len(columnData.unique())
         mode = columnData.value_counts().idxmax()
         diagnostics["UniqueValues"] = uniqueValues
@@ -227,6 +230,7 @@ def profileColumn(columnData, colname, stringcols, eventVector, bucketDispatcher
         index = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colname, index)
     else:
         # Band column
+        diagnostics["Type"] = "Band"
         mean = columnData.mean()
         median = columnData.median()
         if math.isnan(median):

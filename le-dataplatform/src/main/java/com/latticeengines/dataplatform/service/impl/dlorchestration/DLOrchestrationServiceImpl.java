@@ -11,8 +11,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
@@ -60,11 +58,9 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     private int waitTime = 180;
 
-    @Autowired
     private Configuration yarnConfiguration;
 
-    @Value("${dataplatform.customer.basedir}")
-    private String customerBaseDir;
+    private String httpFsPrefix;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -83,10 +79,11 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
         }
 
         for (ModelCommand modelCommand : modelCommands) {
-            futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(modelCommand,
+            futures.add(dlOrchestrationJobTaskExecutor.submit(new ModelCommandCallable(modelCommand, yarnConfiguration,
                     modelingJobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor,
                     modelCommandLogService, modelCommandResultEntityMgr, modelStepFinishProcessor,
-                    modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor, debugProcessorImpl)));
+                    modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor, debugProcessorImpl,
+                    httpFsPrefix)));
         }
         for (Future<Long> future : futures) {
             try {
@@ -202,4 +199,19 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
         this.debugProcessorImpl = debugProcessorImpl;
     }
 
+    public Configuration getYarnConfiguration() {
+        return yarnConfiguration;
+    }
+
+    public void setYarnConfiguration(Configuration yarnConfiguration) {
+        this.yarnConfiguration = yarnConfiguration;
+    }
+
+    public String getHttpFsPrefix() {
+        return httpFsPrefix;
+    }
+
+    public void setHttpFsPrefix(String httpFsPrefix) {
+        this.httpFsPrefix = httpFsPrefix;
+    }
 }

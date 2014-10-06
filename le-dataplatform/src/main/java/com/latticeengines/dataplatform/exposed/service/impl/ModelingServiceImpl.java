@@ -142,6 +142,7 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setProvenanceProperties(model.getProvenanceProperties());
         classifier.setDataProfileHdfsPath(getDataProfileAvroPathInHdfs(model.getMetadataHdfsPath()));
         classifier.setConfigMetadataHdfsPath(getConfigMetadataPathInHdfs(model.getMetadataHdfsPath()));
+        classifier.setDataDiagnosticsDirectory(model.getMetadataHdfsPath());
 
         String samplePrefix = algorithm.getSampleName();
         String trainingPath = getAvroFileHdfsPath(samplePrefix + "Training", model.getSampleHdfsPath());

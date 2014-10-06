@@ -173,6 +173,7 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
                     String[] tokens = StringUtils.split(applicationId, "_");
                     String folder = StringUtils.join(new String[] { tokens[1], tokens[2] }, "_");
                     jobStatus.setResultDirectory(classifier.getModelHdfsDir() + "/" + folder);
+                    jobStatus.setDataDiagnosticsDirectory(classifier.getDataDiagnosticsDirectory());
                 }
             }
         }

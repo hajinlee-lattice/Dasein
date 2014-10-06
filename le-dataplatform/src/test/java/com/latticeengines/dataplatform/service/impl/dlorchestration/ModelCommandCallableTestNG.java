@@ -139,7 +139,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
                 "The actual command state is " + command.getCommandStatus());
 
         List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
-        assertEquals(logs.size(), 14);
+        assertTrue(logs.size() >= 15);
         List<ModelCommandState> states = modelCommandStateEntityMgr.findAll();
         assertEquals(states.size(), 7);
         List<ModelCommandResult> results = modelCommandResultEntityMgr.findAll();

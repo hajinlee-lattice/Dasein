@@ -20,7 +20,9 @@
                 <entry key="modelStepFinishProcessor" value-ref="modelStepFinishProcessor" />
                 <entry key="modelStepRetrieveMetadataProcessor" value-ref="modelStepRetrieveMetadataProcessor" />
                 <entry key="debugProcessorImpl" value-ref="debugProcessorImpl" />
+                <entry key="yarnConfiguration" value-ref="yarnConfiguration" />
                 <entry key="waitTime" value="${dataplatform.dlorchestrationjob.wait.time}" />
+                <entry key="httpFsPrefix" value="${dataplatform.fs.web.defaultFS}" />
             </map>
         </property>
     </bean>

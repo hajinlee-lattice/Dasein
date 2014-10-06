@@ -1,5 +1,6 @@
 package com.latticeengines.common.exposed.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -70,5 +71,14 @@ public class StringTokenUtils {
             p.setProperty(kv[0], kv[1]);
         }
         return p;
+    }
+    
+    public static String stripPath (String path) {
+        if (path.indexOf(File.separatorChar) < 0) {
+            return path;
+        }
+        int index = path.lastIndexOf(File.separatorChar);
+        // returns file name
+        return path.substring(index + 1);
     }
 }
