@@ -65,7 +65,7 @@ public class ContractLifecycleManager {
         Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {
             @Override
             public int compare(Pair<Document, Path> o1, Pair<Document, Path> o2) {
-                return o1.getRight().toString().compareTo(o2.getRight().toString());
+                return o1.getRight().getSuffix().compareTo(o2.getRight().getSuffix());
             }
         });
         List<String> out = new ArrayList<String>(childPairs.size());
