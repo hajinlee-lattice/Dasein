@@ -2,14 +2,11 @@ package com.latticeengines.camille;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.KeeperException.NoNodeException;
 
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -34,26 +31,17 @@ public class CamilleCache {
     }
 
     /**
-     * Add a path to the cache.
+     * Retrieve the latest version of a document from the cache.
+     * If the specified path is not currently being cached, it will be added.
+     * 
+     * Will throw if the document doesn't exist as far as this cache is aware, 
+     * since the usage pattern for this cache is for all cached documents to exist.
      */
-    public synchronized void add(Path path) throws Exception {
-        if (caches.containsKey(path)) {
-            throw new IllegalArgumentException("Already caching path " + path);
-        }
-        NodeCache cache = new NodeCache(camille.getCuratorClient(), path.toString());
-        cache.start(true);
-        caches.put(path, cache);
-    }
-
-    /**
-     * Retrieve the latest version of a document from the cache. Will throw if
-     * the document doesn't exist in the cache, since the usage pattern for this
-     * cache is for all cached documents to exist.
-     */
-    public synchronized Document get(Path path) throws IllegalArgumentException, DocumentSerializationException,
-            NoNodeException {
+    public synchronized Document get(Path path) throws Exception {
         if (!caches.containsKey(path)) {
-            throw new IllegalArgumentException("Not caching path " + path);
+            NodeCache cache = new NodeCache(camille.getCuratorClient(), path.toString());
+            cache.start(true);
+            caches.put(path, cache);
         }
 
         NodeCache cache = caches.get(path);
