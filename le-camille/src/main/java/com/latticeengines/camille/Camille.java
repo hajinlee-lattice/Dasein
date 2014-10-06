@@ -43,17 +43,16 @@ public class Camille {
         doc.setVersion(0);
     }
 
-    public Stat set(Path path, Document doc) throws Exception {
-        return set(path, doc, false);
+    public void set(Path path, Document doc) throws Exception {
+        set(path, doc, false);
     }
 
-    public Stat set(Path path, Document doc, boolean force) throws Exception {
+    public void set(Path path, Document doc, boolean force) throws Exception {
         SetDataBuilder builder = client.setData();
         if (!force)
             builder.withVersion(doc.getVersion());
         Stat stat = builder.forPath(path.toString(), DocumentSerializer.toByteArray(doc));
         doc.setVersion(stat.getVersion());
-        return stat;
     }
 
     public Document get(Path path) throws Exception {
