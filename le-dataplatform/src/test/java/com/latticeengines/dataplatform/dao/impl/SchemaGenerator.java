@@ -272,7 +272,7 @@ public class SchemaGenerator {
                     }
                     
                     // deal with the classes within jar files
-                    // url=jar:file:/tmp/dataplatform/database/lib/le-domain-1.0.0-SNAPSHOT.jar!/com/latticeengines/domain/exposed/dataplatform
+                    // url=jar:file:/tmp/dataplatform/database/lib/le-domain-1.0.1-SNAPSHOT.jar!/com/latticeengines/domain/exposed/dataplatform
                     String[] paths = directory.getPath().split("!");
                     // strip off file:
                     File jarFilepath = new File(paths[0].substring(5));
