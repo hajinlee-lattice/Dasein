@@ -39,4 +39,9 @@ public class PodScope extends ConfigurationScope {
             return false;
         return true;
     }
+
+    @Override
+    public Type getType() {
+        return Type.POD;
+    }
 }

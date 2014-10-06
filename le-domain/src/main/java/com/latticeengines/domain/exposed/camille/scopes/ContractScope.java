@@ -39,5 +39,10 @@ public class ContractScope extends ConfigurationScope {
     public void setContractID(String contractID) {
         this.contractID = contractID;
     }
+
+    @Override
+    public Type getType() {
+        return Type.CONTRACT;
+    }
     
 }

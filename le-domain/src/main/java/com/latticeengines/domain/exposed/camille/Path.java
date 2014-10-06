@@ -65,6 +65,20 @@ public class Path {
         concat.addAll(this.parts);
         return new Path(concat);
     }
+    
+    public Path append(Path path) {
+        List<String> concat = new ArrayList<String>();
+        concat.addAll(parts);
+        concat.addAll(path.parts);
+        return new Path(concat);
+    }
+    
+    public Path prefix(Path path) {
+        List<String> concat = new ArrayList<String>();
+        concat.addAll(path.parts);
+        concat.addAll(parts);
+        return new Path(concat);
+    }
 
     public String getSuffix() {
         return this.parts.get(this.parts.size() - 1);

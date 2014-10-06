@@ -109,4 +109,9 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
         this.dataVersion = dataVersion;
     }
 
+    @Override
+    public Type getType() {
+        return Type.CUSTOMER_SPACE_SERVICE;
+    }
+
 }

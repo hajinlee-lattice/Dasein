@@ -72,6 +72,11 @@ public class CustomerSpaceScope extends ConfigurationScope {
     public void setSpaceID(String spaceID) {
         this.spaceID = spaceID;
     }
+
+    @Override
+    public Type getType() {
+        return Type.CUSTOMER_SPACE;
+    }
     
     
 }

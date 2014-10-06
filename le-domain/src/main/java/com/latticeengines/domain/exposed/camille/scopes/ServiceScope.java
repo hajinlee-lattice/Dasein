@@ -52,4 +52,9 @@ public class ServiceScope extends ConfigurationScope {
             return false;
         return true;
     }
+
+    @Override
+    public Type getType() {
+        return Type.SERVICE;
+    }
 }
