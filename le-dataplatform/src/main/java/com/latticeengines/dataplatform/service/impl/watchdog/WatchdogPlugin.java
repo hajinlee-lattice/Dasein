@@ -2,10 +2,8 @@ package com.latticeengines.dataplatform.service.impl.watchdog;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
@@ -20,6 +18,7 @@ public abstract class WatchdogPlugin {
     protected YarnService yarnService;
     protected JobEntityMgr jobEntityMgr;
     protected int retryWaitTime = 80000;
+    protected int maxRetryTimeThreshold = 5400000;
 
     private static Map<String, WatchdogPlugin> plugins = new HashMap<String, WatchdogPlugin>();
 

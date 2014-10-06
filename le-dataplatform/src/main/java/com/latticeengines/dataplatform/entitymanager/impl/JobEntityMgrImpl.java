@@ -43,11 +43,18 @@ public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntit
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<Job> findAllByObjectIds(List<String> jobIds) {
-        if (jobIds == null || jobIds.isEmpty()) {
-            return new ArrayList<Job>();
+    public List<Job> findAllByObjectIds(List<String> appIds) {
+        List<Job> jobs = new ArrayList<>();
+        if (appIds == null || appIds.isEmpty()) {
+            return jobs;
         }
-                    
-        return jobDao.findAllByObjectIds(jobIds);
+        
+        while (appIds.size() > maxJobsMapping) {
+            List<String> subIdList = appIds.subList(0, maxJobsMapping);
+            jobs.addAll(jobDao.findAllByObjectIds(subIdList));
+            appIds = appIds.subList(maxJobsMapping, appIds.size());
+        }
+        jobs.addAll(jobDao.findAllByObjectIds(appIds));          
+        return jobs;
     }
 }

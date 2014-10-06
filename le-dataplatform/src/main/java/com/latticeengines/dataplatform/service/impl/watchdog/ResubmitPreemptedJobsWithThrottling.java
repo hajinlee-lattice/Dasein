@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +20,6 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
@@ -74,23 +72,16 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
             // priorities, delay by some latency
             if (!jobIdsToExcludeFromResubmission.contains(appId)
                     && (appInfo.getQueue().contains("Priority0") || System.currentTimeMillis()
-                            - appInfo.getFinishTime() > retryWaitTime)) {
+                            - appInfo.getFinishTime() > retryWaitTime)//
+                    && System.currentTimeMillis() - appInfo.getFinishTime() < maxRetryTimeThreshold) {
                 appIds.add(appId);
             }
         }
 
-        List<Job> jobsToResubmit = new ArrayList<>();
-        while (appIds.size() > 2000) {
-            List<String> subIdList = appIds.subList(0, 2000);
-            jobsToResubmit.addAll(jobEntityMgr.findAllByObjectIds(subIdList));
-            appIds = appIds.subList(2000, appIds.size());
-        }
-        jobsToResubmit.addAll(jobEntityMgr.findAllByObjectIds(appIds));
-
+        List<Job> jobsToResubmit = jobEntityMgr.findAllByObjectIds(appIds);
         for (Job job : jobsToResubmit) {
             modelingJobService.resubmitPreemptedJob(job);
         }
-
         return jobsToResubmit.size();
     }
 

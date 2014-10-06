@@ -6,6 +6,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 
@@ -35,7 +36,9 @@ public class GetJobStatus extends ModelingResourceJob<String, JobStatus> {
                 if ((state.equals(YarnApplicationState.FINISHED) && status.equals(FinalApplicationStatus.SUCCEEDED))) {
                     appIds.remove(appId);
                     i--;
-                } else if (state.equals(YarnApplicationState.FINISHED) && status.equals(FinalApplicationStatus.FAILED)) {
+                } else if (state.equals(YarnApplicationState.FINISHED) && status.equals(FinalApplicationStatus.FAILED)
+                        || state.equals(YarnApplicationState.FAILED) && state.equals(FinalApplicationStatus.FAILED)
+                        && !YarnUtils.isPrempted(gs.getDiagnostics())) {
                     return false;
                 }
             }
