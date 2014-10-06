@@ -11,6 +11,7 @@ import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.paths.PathBuilder;
@@ -22,7 +23,36 @@ public class TenantLifecycleManager {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    private static final String defaultSpaceFile = ".default-space";
+
+    private static class DefaultSpace {
+        private String spaceId = null;
+
+        @SuppressWarnings("unused")
+        public DefaultSpace() {
+        }
+
+        public DefaultSpace(String spaceId) {
+            this.spaceId = spaceId;
+        }
+
+        public String getSpaceId() {
+            return spaceId;
+        }
+
+        @SuppressWarnings("unused")
+        public void setSpaceId(String spaceId) {
+            this.spaceId = spaceId;
+        }
+    }
+
     public static void create(String contractId, String tenantId) throws Exception {
+        create(contractId, tenantId, null);
+    }
+
+    public static void create(String contractId, String tenantId, String defaultSpaceId) throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
 
         try {
@@ -39,10 +69,39 @@ public class TenantLifecycleManager {
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Tenant already existed @ {}, ignoring create", tenantPath);
         }
+
+        // create default space file
+        Path defaultSpacePath = tenantPath.append(defaultSpaceFile);
+        Document doc = new Document(mapper.writeValueAsString(new DefaultSpace(defaultSpaceId)));
+        try {
+            camille.create(defaultSpacePath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            log.debug("created .default-space @ {}", defaultSpacePath);
+        } catch (KeeperException.NodeExistsException e) {
+            log.debug(".default-space already existed @ {}, ignoring create", defaultSpacePath);
+        }
+    }
+
+    public static String getDefaultSpaceId(String contractId, String tenantId) throws Exception {
+        return mapper.readValue(
+                CamilleEnvironment
+                        .getCamille()
+                        .get(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
+                                defaultSpaceFile)).getData(), DefaultSpace.class).getSpaceId();
     }
 
     public static void delete(String contractId, String tenantId) throws Exception {
+        Camille camille = CamilleEnvironment.getCamille();
+
         Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
+        Path defaultSpacePath = tenantPath.append(defaultSpaceFile);
+
+        try {
+            camille.delete(defaultSpacePath);
+            log.debug("deleted Tenant .default-space @ {}", defaultSpacePath);
+        } catch (KeeperException.NoNodeException e) {
+            log.debug("No Tenant .default-space Existed @ {}, ignoring delete", defaultSpacePath);
+        }
+
         try {
             CamilleEnvironment.getCamille().delete(tenantPath);
             log.debug("deleted Tenant @ {}", tenantPath);

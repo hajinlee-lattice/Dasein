@@ -35,12 +35,24 @@ public class TenantLifecycleManagerUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testCreate() throws Exception {
+    public void testCreateNullDefaultSpace() throws Exception {
         String tenantId = "testTenant";
         TenantLifecycleManager.create(contractId, tenantId);
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)));
         TenantLifecycleManager.create(contractId, tenantId);
+        Assert.assertNull(TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId));
+    }
+
+    @Test(groups = "unit")
+    public void testCreateNotNullDefaultSpace() throws Exception {
+        String tenantId = "testTenant";
+        String defaultSpaceId = "testDefaultSpaceId";
+        TenantLifecycleManager.create(contractId, tenantId, defaultSpaceId);
+        Assert.assertTrue(CamilleEnvironment.getCamille().exists(
+                PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)));
+        TenantLifecycleManager.create(contractId, tenantId);
+        Assert.assertEquals(defaultSpaceId, TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId));
     }
 
     @Test(groups = "unit")
