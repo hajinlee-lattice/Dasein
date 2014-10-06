@@ -57,27 +57,37 @@ public class Document {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other)
-            return true;
-        if (other == null)
-            return false;
-        if (getClass() != other.getClass())
-            return false;
-
-        Document otherDoc = (Document) other;
-        return this.data.equals(otherDoc.data) && this.metadata.equals(otherDoc.metadata)
-                && this.version == otherDoc.version;
-    }
-
-    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + this.data.hashCode();
-        result = prime * result + this.metadata.hashCode();
-        result = prime * result + this.version;
+        result = prime * result + ((data == null) ? 0 : data.hashCode());
+        result = prime * result + ((metadata == null) ? 0 : metadata.hashCode());
+        result = prime * result + version;
         return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Document other = (Document) obj;
+        if (data == null) {
+            if (other.data != null)
+                return false;
+        } else if (!data.equals(other.data))
+            return false;
+        if (metadata == null) {
+            if (other.metadata != null)
+                return false;
+        } else if (!metadata.equals(other.metadata))
+            return false;
+        if (version != other.version)
+            return false;
+        return true;
     }
 
 }
