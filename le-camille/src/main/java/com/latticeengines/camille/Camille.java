@@ -110,7 +110,7 @@ public class Camille {
     }
 
     public void delete(Path path) throws Exception {
-        client.delete().forPath(path.toString());
+        client.delete().deletingChildrenIfNeeded().forPath(path.toString());
     }
 
     public boolean exists(Path path) throws Exception {

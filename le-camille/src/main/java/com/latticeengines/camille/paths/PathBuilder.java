@@ -33,6 +33,11 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS, tenantID);
     }
 
+    public static Path buildCustomerSpacesPath(String podID, String contractID, String tenantID) {
+        return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS,
+                tenantID, PathConstants.SPACES);
+    }
+
     public static Path buildCustomerSpacePath(String podID, String contractID, String tenantID, String spaceID) {
         return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS,
                 tenantID, PathConstants.SPACES, spaceID);

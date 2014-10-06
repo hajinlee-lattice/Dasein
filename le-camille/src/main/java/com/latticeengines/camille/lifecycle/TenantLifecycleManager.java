@@ -98,18 +98,7 @@ public class TenantLifecycleManager {
     }
 
     public static void delete(String contractId, String tenantId) throws Exception {
-        Camille camille = CamilleEnvironment.getCamille();
-
         Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
-        Path defaultSpacePath = tenantPath.append(defaultSpaceFile);
-
-        try {
-            camille.delete(defaultSpacePath);
-            log.debug("deleted Tenant .default-space @ {}", defaultSpacePath);
-        } catch (KeeperException.NoNodeException e) {
-            log.debug("No Tenant .default-space Existed @ {}, ignoring delete", defaultSpacePath);
-        }
-
         try {
             CamilleEnvironment.getCamille().delete(tenantPath);
             log.debug("deleted Tenant @ {}", tenantPath);
