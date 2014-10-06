@@ -72,9 +72,9 @@ public class TenantLifecycleManager {
 
         // create default space file
         Path defaultSpacePath = tenantPath.append(PathConstants.DEFAULT_SPACE_FILE);
-        Document doc = new Document(mapper.writeValueAsString(new DefaultSpace(defaultSpaceId)));
         try {
-            camille.create(defaultSpacePath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(defaultSpacePath, new Document(mapper.writeValueAsString(new DefaultSpace(defaultSpaceId))),
+                    ZooDefs.Ids.OPEN_ACL_UNSAFE);
             log.debug("created .default-space @ {}", defaultSpacePath);
         } catch (KeeperException.NodeExistsException e) {
             log.debug(".default-space already existed @ {}, ignoring create", defaultSpacePath);

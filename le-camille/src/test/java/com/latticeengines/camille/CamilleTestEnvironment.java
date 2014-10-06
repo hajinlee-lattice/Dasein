@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.CamilleEnvironment.Mode;
-import com.netflix.curator.test.TestingCluster;
+import com.netflix.curator.test.TestingServer;
 
 public class CamilleTestEnvironment {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
@@ -17,7 +17,7 @@ public class CamilleTestEnvironment {
 
     public static final int NUMBER_OF_SERVERS_IN_CLUSTER = 5;
 
-    private static TestingCluster cluster;
+    private static TestingServer server;
 
     /**
      * Starts a testing cluster and the camille environment.
@@ -25,17 +25,16 @@ public class CamilleTestEnvironment {
     public synchronized static void start() throws Exception {
         try {
 
-            if (cluster != null) {
-                cluster.close();
+            if (server != null) {
+                server.close();
             }
 
-            cluster = new TestingCluster(NUMBER_OF_SERVERS_IN_CLUSTER);
-            cluster.start();
+            server = new TestingServer();
 
             CamilleEnvironment.stop();
 
             ConfigJson config = new ConfigJson();
-            config.setConnectionString(cluster.getConnectString());
+            config.setConnectionString(server.getConnectString());
             config.setPodId("ignored");
 
             OutputStream stream = new ByteArrayOutputStream();
@@ -56,8 +55,8 @@ public class CamilleTestEnvironment {
         try {
             CamilleEnvironment.stop();
 
-            if (cluster != null) {
-                cluster.close();
+            if (server != null) {
+                server.close();
             }
         } catch (Exception e) {
             log.error("Error stopping Camille test environment", e);

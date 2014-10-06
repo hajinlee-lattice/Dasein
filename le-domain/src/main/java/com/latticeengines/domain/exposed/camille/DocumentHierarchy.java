@@ -23,7 +23,7 @@ public class DocumentHierarchy {
     }
 
     public Iterator<Node> breadthFirstIterator() {
-        Queue<DocumentHierarchy.Node> q = new LinkedList<DocumentHierarchy.Node>(Arrays.asList(root));
+        Queue<Node> q = new LinkedList<Node>(Arrays.asList(root));
         Set<Node> visited = new LinkedHashSet<Node>();
         for (Node n = q.poll(); n != null; n = q.poll()) {
             if (!visited.contains(n)) {
