@@ -52,8 +52,8 @@ public class DocumentHierarchy {
     private static class IteratorWrapper implements Iterator<Node> {
         private final Iterator<Node> iter;
 
-        IteratorWrapper(Collection<Node> list) {
-            iter = list.iterator();
+        IteratorWrapper(Collection<Node> c) {
+            iter = c.iterator();
         }
 
         @Override

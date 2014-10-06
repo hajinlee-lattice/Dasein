@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.camille.scopes.PodScope;
 
 public class PodPathTranslator extends PathTranslator {
     private PodScope scope;
-    
+
     public PodPathTranslator(PodScope scope) {
         this.scope = scope;
     }

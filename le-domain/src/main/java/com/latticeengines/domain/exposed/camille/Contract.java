@@ -9,23 +9,13 @@ public class Contract {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    private String podId;
     private String contractId;
 
     public Contract() {
     }
 
-    public Contract(String podId, String contractId) {
-        this.podId = podId;
+    public Contract(String contractId) {
         this.contractId = contractId;
-    }
-
-    public String getPodId() {
-        return podId;
-    }
-
-    public void setPodId(String podId) {
-        this.podId = podId;
     }
 
     public String getContractId() {
@@ -46,7 +36,6 @@ public class Contract {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((contractId == null) ? 0 : contractId.hashCode());
-        result = prime * result + ((podId == null) ? 0 : podId.hashCode());
         return result;
     }
 
@@ -63,11 +52,6 @@ public class Contract {
             if (other.contractId != null)
                 return false;
         } else if (!contractId.equals(other.contractId))
-            return false;
-        if (podId == null) {
-            if (other.podId != null)
-                return false;
-        } else if (!podId.equals(other.podId))
             return false;
         return true;
     }

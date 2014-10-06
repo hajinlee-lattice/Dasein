@@ -22,12 +22,10 @@ public class ContractLifecycleManagerUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    private static final String podId = "testPod";
-
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
         CamilleTestEnvironment.start();
-        PodLifecycleManager.create(new Pod(podId));
+        PodLifecycleManager.create(new Pod(CamilleEnvironment.getPodId()));
     }
 
     @AfterMethod(groups = "unit")
@@ -37,40 +35,40 @@ public class ContractLifecycleManagerUnitTestNG {
 
     @Test(groups = "unit")
     public void testCreate() throws Exception {
-        Contract contract = new Contract(podId, "testContract");
+        Contract contract = new Contract("testContract");
         ContractLifecycleManager.create(contract);
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildContractPath(podId, contract.getContractId())));
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contract.getContractId())));
         ContractLifecycleManager.create(contract);
     }
 
     @Test(groups = "unit")
     public void testDelete() throws Exception {
-        ContractLifecycleManager.delete(podId, "testContract");
-        Contract contract = new Contract(podId, "testContract");
+        ContractLifecycleManager.delete("testContract");
+        Contract contract = new Contract("testContract");
         ContractLifecycleManager.create(contract);
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildContractPath(podId, contract.getContractId())));
-        ContractLifecycleManager.delete(podId, "testContract");
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contract.getContractId())));
+        ContractLifecycleManager.delete("testContract");
         Assert.assertFalse(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildContractPath(podId, contract.getContractId())));
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contract.getContractId())));
     }
 
     @Test(groups = "unit")
     public void testExists() throws Exception {
-        Assert.assertFalse(ContractLifecycleManager.exists(podId, "testContract"));
-        Contract contract = new Contract(podId, "testContract");
+        Assert.assertFalse(ContractLifecycleManager.exists("testContract"));
+        Contract contract = new Contract("testContract");
         ContractLifecycleManager.create(contract);
-        Assert.assertTrue(ContractLifecycleManager.exists(podId, "testContract"));
-        ContractLifecycleManager.delete(podId, "testContract");
-        Assert.assertFalse(ContractLifecycleManager.exists(podId, "testContract"));
+        Assert.assertTrue(ContractLifecycleManager.exists("testContract"));
+        ContractLifecycleManager.delete("testContract");
+        Assert.assertFalse(ContractLifecycleManager.exists("testContract"));
     }
 
     @Test(groups = "unit")
     public void testGet() throws Exception {
-        Contract in = new Contract(podId, "testContract");
+        Contract in = new Contract("testContract");
         ContractLifecycleManager.create(in);
-        Contract out = ContractLifecycleManager.get(in.getPodId(), in.getContractId());
+        Contract out = ContractLifecycleManager.get(in.getContractId());
         Assert.assertEquals(in, out);
     }
 
@@ -78,10 +76,10 @@ public class ContractLifecycleManagerUnitTestNG {
     public void testGetAll() throws Exception {
         Set<Contract> in = new HashSet<Contract>();
         for (int i = 0; i < 10; ++i) {
-            Contract c = new Contract(podId, Integer.toString(i));
+            Contract c = new Contract(Integer.toString(i));
             in.add(c);
             ContractLifecycleManager.create(c);
         }
-        Assert.assertTrue(in.containsAll(ContractLifecycleManager.getAll(podId)));
+        Assert.assertTrue(in.containsAll(ContractLifecycleManager.getAll()));
     }
 }

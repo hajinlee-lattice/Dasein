@@ -30,8 +30,8 @@ public class CamilleEnvironment {
     private static ConfigJson config = null;
 
     // TODO: accept inputstream with camille.json
-    public static synchronized void start(Mode mode, Reader configJsonReader) throws IllegalStateException, IOException,
-            InterruptedException {
+    public static synchronized void start(Mode mode, Reader configJsonReader) throws IllegalStateException,
+            IOException, InterruptedException {
         if (camille != null && camille.getCuratorClient() != null
                 && camille.getCuratorClient().getState().equals(CuratorFrameworkState.STARTED)) {
 
@@ -79,8 +79,8 @@ public class CamilleEnvironment {
 
         camille = new Camille(client);
     }
-    
-    public static String getPodId() {
+
+    public synchronized static String getPodId() {
         if (config == null) {
             throw new IllegalStateException("CamilleEnvironment has not been started");
         }

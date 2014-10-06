@@ -36,13 +36,13 @@ public class ContractLifecycleManager {
         Camille camille = CamilleEnvironment.getCamille();
 
         try {
-            Path contractsPath = PathBuilder.buildContractsPath(contract.getPodId());
+            Path contractsPath = PathBuilder.buildContractsPath(CamilleEnvironment.getPodId());
             camille.create(contractsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             log.debug("created Contracts path @ {}", contractsPath);
         } catch (KeeperException.NodeExistsException e) {
         }
 
-        Path contractPath = PathBuilder.buildContractPath(contract.getPodId(), contract.getContractId());
+        Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contract.getContractId());
         try {
             camille.create(contractPath, toDocument(contract), ZooDefs.Ids.OPEN_ACL_UNSAFE);
             log.debug("created Pod @ {}", contractPath);
@@ -51,8 +51,8 @@ public class ContractLifecycleManager {
         }
     }
 
-    public static void delete(String podId, String contractId) throws Exception {
-        Path contractPath = PathBuilder.buildContractPath(podId, contractId);
+    public static void delete(String contractId) throws Exception {
+        Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
         try {
             CamilleEnvironment.getCamille().delete(contractPath);
             log.debug("deleted Contract @ {}", contractPath);
@@ -61,17 +61,19 @@ public class ContractLifecycleManager {
         }
     }
 
-    public static boolean exists(String podId, String contractId) throws Exception {
-        return CamilleEnvironment.getCamille().exists(PathBuilder.buildContractPath(podId, contractId));
+    public static boolean exists(String contractId) throws Exception {
+        return CamilleEnvironment.getCamille().exists(
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId));
     }
 
-    public static Contract get(String podId, String contractId) throws Exception {
-        return toContract(CamilleEnvironment.getCamille().get(PathBuilder.buildContractPath(podId, contractId)));
+    public static Contract get(String contractId) throws Exception {
+        return toContract(CamilleEnvironment.getCamille().get(
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId)));
     }
 
-    public static List<Contract> getAll(String podId) throws IllegalArgumentException, Exception {
+    public static List<Contract> getAll() throws IllegalArgumentException, Exception {
         List<Pair<Document, Path>> childPairs = CamilleEnvironment.getCamille().getChildren(
-                PathBuilder.buildContractsPath(podId));
+                PathBuilder.buildContractsPath(CamilleEnvironment.getPodId()));
         Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {
             @Override
             public int compare(Pair<Document, Path> o1, Pair<Document, Path> o2) {
