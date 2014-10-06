@@ -21,22 +21,22 @@ public class StandardConfigurationTransactionImpl<T extends ConfigurationScope> 
         this.transaction = new CamilleTransaction();
     }
     
-    public void check(Path path, Document document) {
+    public void check(Path path, Document document) throws Exception {
         Path absolute = translator.getAbsolutePath(path);
         transaction.check(absolute,  document);
     }
     
-    public void create(Path path, Document document) throws DocumentSerializationException {
+    public void create(Path path, Document document) throws Exception {
         Path absolute = translator.getAbsolutePath(path);
         transaction.create(absolute, document, ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
     
-    public void set(Path path, Document document) throws DocumentSerializationException {
+    public void set(Path path, Document document) throws Exception {
         Path absolute = translator.getAbsolutePath(path);
         transaction.set(absolute, document);
     }
     
-    public void delete(Path path) {
+    public void delete(Path path) throws Exception {
         Path absolute = translator.getAbsolutePath(path);
         transaction.delete(absolute);
     }

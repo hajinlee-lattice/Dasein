@@ -25,29 +25,6 @@ public class TenantLifecycleManager {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    private static class DefaultSpace {
-        private String spaceId = null;
-
-        @SuppressWarnings("unused")
-        public DefaultSpace() {
-        }
-
-        public DefaultSpace(String spaceId) {
-            this.spaceId = spaceId;
-        }
-
-        public String getSpaceId() {
-            return spaceId;
-        }
-
-        @SuppressWarnings("unused")
-        public void setSpaceId(String spaceId) {
-            this.spaceId = spaceId;
-        }
-    }
-
     public static void create(String contractId, String tenantId) throws Exception {
         create(contractId, tenantId, null);
     }
@@ -72,9 +49,9 @@ public class TenantLifecycleManager {
 
         // create default space file
         Path defaultSpacePath = tenantPath.append(PathConstants.DEFAULT_SPACE_FILE);
+        Document doc = new Document(defaultSpaceId);
         try {
-            camille.create(defaultSpacePath, new Document(mapper.writeValueAsString(new DefaultSpace(defaultSpaceId))),
-                    ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(defaultSpacePath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             log.debug("created .default-space @ {}", defaultSpacePath);
         } catch (KeeperException.NodeExistsException e) {
             log.debug(".default-space already existed @ {}, ignoring create", defaultSpacePath);
@@ -85,15 +62,14 @@ public class TenantLifecycleManager {
             throws JsonProcessingException, Exception {
         CamilleEnvironment.getCamille().set(
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
-                        PathConstants.DEFAULT_SPACE_FILE), new Document(mapper.writeValueAsString(new DefaultSpace(defaultSpaceId))));
+                        PathConstants.DEFAULT_SPACE_FILE), new Document(defaultSpaceId));
     }
 
     public static String getDefaultSpaceId(String contractId, String tenantId) throws Exception {
-        return mapper.readValue(
-                CamilleEnvironment
+        return CamilleEnvironment
                         .getCamille()
                         .get(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
-                                PathConstants.DEFAULT_SPACE_FILE)).getData(), DefaultSpace.class).getSpaceId();
+                                PathConstants.DEFAULT_SPACE_FILE)).getData();
     }
 
     public static void delete(String contractId, String tenantId) throws Exception {

@@ -11,10 +11,15 @@ import com.latticeengines.camille.config.ConfigurationController;
 import com.latticeengines.camille.config.ConfigurationTransaction;
 import com.latticeengines.camille.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.lifecycle.PodLifecycleManager;
+import com.latticeengines.camille.lifecycle.SpaceLifecycleManager;
+import com.latticeengines.camille.lifecycle.TenantLifecycleManager;
+import com.latticeengines.camille.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ContractScope;
+import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.camille.scopes.PodScope;
+import com.latticeengines.domain.exposed.camille.scopes.TenantScope;
 
 public class ConfigurationTransactionUnitTestNG {
 
@@ -57,6 +62,65 @@ public class ConfigurationTransactionUnitTestNG {
         transaction.commit();
 
         ConfigurationController<ContractScope> controller = new ConfigurationController<ContractScope>(scope);
+        Assert.assertTrue(controller.exists(path));
+    }
+
+    @Test(groups = "unit")
+    public void testTenantTransaction() throws Exception {
+        TenantScope scope = new TenantScope("MyContract", "MyTenant");
+        PodLifecycleManager.create(CamilleEnvironment.getPodId());
+        ContractLifecycleManager.create(scope.getContractID());
+        TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "MySpace");
+        Path path = new Path("/foo");
+
+        ConfigurationTransaction<TenantScope> transaction = new ConfigurationTransaction<TenantScope>(scope);
+        transaction.create(path, new Document("foo"));
+        transaction.commit();
+
+        ConfigurationController<TenantScope> controller = new ConfigurationController<TenantScope>(scope);
+        Assert.assertTrue(controller.exists(path));
+    }
+
+    /**
+     * Test when specifying an explicit space that's different from the default
+     * space
+     */
+    @Test(groups = "unit")
+    public void testSpaceTransaction() throws Exception {
+        CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant", "MySpace");
+        PodLifecycleManager.create(CamilleEnvironment.getPodId());
+        ContractLifecycleManager.create(scope.getContractID());
+        TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "DefaultSpace");
+        SpaceLifecycleManager.create(scope.getContractID(), scope.getTenantID(), scope.getSpaceID());
+        Path path = new Path("/foo");
+
+        ConfigurationTransaction<CustomerSpaceScope> transaction = new ConfigurationTransaction<CustomerSpaceScope>(
+                scope);
+        transaction.create(path, new Document("foo"));
+        transaction.commit();
+
+        ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);
+        Assert.assertTrue(controller.exists(path));
+    }
+
+    /**
+     * Test when using the default space
+     */
+    @Test(groups = "unit")
+    public void testSpaceCreateDeleteDocumentUsingDefaultSpace() throws Exception {
+        CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant");
+        PodLifecycleManager.create(CamilleEnvironment.getPodId());
+        ContractLifecycleManager.create(scope.getContractID());
+        TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "MySpace");
+        SpaceLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "MySpace");
+        Path path = new Path("/foo");
+
+        ConfigurationTransaction<CustomerSpaceScope> transaction = new ConfigurationTransaction<CustomerSpaceScope>(
+                scope);
+        transaction.create(path, new Document("foo"));
+        transaction.commit();
+
+        ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);
         Assert.assertTrue(controller.exists(path));
     }
 }

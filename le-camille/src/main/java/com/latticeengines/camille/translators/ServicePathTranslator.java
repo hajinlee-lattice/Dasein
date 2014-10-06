@@ -13,7 +13,7 @@ public class ServicePathTranslator extends PathTranslator {
     }
 
     @Override
-    public Path getAbsolutePath(Path p) {
+    public Path getAbsolutePath(Path p) throws Exception {
         return PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), scope.getServiceName()).append(p);
     }
 }

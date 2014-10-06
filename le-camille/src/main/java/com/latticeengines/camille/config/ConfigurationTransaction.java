@@ -13,22 +13,22 @@ public class ConfigurationTransaction<T extends ConfigurationScope> implements C
     }
     
     @Override
-    public void check(Path path, Document document) {
+    public void check(Path path, Document document) throws Exception {
         impl.check(path,  document);
     }
 
     @Override
-    public void create(Path path, Document document) throws DocumentSerializationException {
+    public void create(Path path, Document document) throws Exception {
         impl.create(path,  document);
     }
 
     @Override
-    public void set(Path path, Document document) throws DocumentSerializationException {
+    public void set(Path path, Document document) throws Exception {
         impl.set(path, document);
     }
 
     @Override
-    public void delete(Path path) {
+    public void delete(Path path) throws Exception {
         impl.delete(path);
     }
 

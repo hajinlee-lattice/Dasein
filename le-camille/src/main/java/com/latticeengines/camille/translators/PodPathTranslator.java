@@ -12,7 +12,7 @@ public class PodPathTranslator extends PathTranslator {
     }
 
     @Override
-    public Path getAbsolutePath(Path p) {
+    public Path getAbsolutePath(Path p) throws Exception {
         return PathBuilder.buildPodPath(scope.getPodID()).append(p);
     }
 }
