@@ -17,51 +17,51 @@ import com.latticeengines.camille.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
-public class ContractLifecycleManager {
+public class TenantLifecycleManager {
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    public static void create(String contractId) throws Exception {
+    public static void create(String contractId, String tenantId) throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
 
         try {
-            Path contractsPath = PathBuilder.buildContractsPath(CamilleEnvironment.getPodId());
-            camille.create(contractsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            log.debug("created Contracts path @ {}", contractsPath);
+            Path tenantsPath = PathBuilder.buildTenantsPath(CamilleEnvironment.getPodId(), contractId);
+            camille.create(tenantsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            log.debug("created Tenants path @ {}", tenantsPath);
         } catch (KeeperException.NodeExistsException e) {
         }
 
-        Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
+        Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
         try {
-            camille.create(contractPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            log.debug("created Contract @ {}", contractPath);
+            camille.create(tenantPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            log.debug("created Tenant @ {}", tenantPath);
         } catch (KeeperException.NodeExistsException e) {
-            log.debug("Contract already existed @ {}, ignoring create", contractPath);
+            log.debug("Tenant already existed @ {}, ignoring create", tenantPath);
         }
     }
 
-    public static void delete(String contractId) throws Exception {
-        Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
+    public static void delete(String contractId, String tenantId) throws Exception {
+        Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
         try {
-            CamilleEnvironment.getCamille().delete(contractPath);
-            log.debug("deleted Contract @ {}", contractPath);
+            CamilleEnvironment.getCamille().delete(tenantPath);
+            log.debug("deleted Tenant @ {}", tenantPath);
         } catch (KeeperException.NoNodeException e) {
-            log.debug("No Contract Existed @ {}, ignoring delete", contractPath);
+            log.debug("No Tenant Existed @ {}, ignoring delete", tenantPath);
         }
     }
 
-    public static boolean exists(String contractId) throws Exception {
+    public static boolean exists(String contractId, String tenantId) throws Exception {
         return CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId));
+                PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId));
     }
 
     /**
-     * @return A list of contractIds
+     * @return A list of tenantIds
      */
-    public static List<String> getAll() throws IllegalArgumentException, Exception {
+    public static List<String> getAll(String contractId) throws IllegalArgumentException, Exception {
         List<Pair<Document, Path>> childPairs = CamilleEnvironment.getCamille().getChildren(
-                PathBuilder.buildContractsPath(CamilleEnvironment.getPodId()));
+                PathBuilder.buildTenantsPath(CamilleEnvironment.getPodId(), contractId));
         Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {
             @Override
             public int compare(Pair<Document, Path> o1, Pair<Document, Path> o2) {

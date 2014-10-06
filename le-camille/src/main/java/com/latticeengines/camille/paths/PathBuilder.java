@@ -25,6 +25,10 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID);
     }
 
+    public static Path buildTenantsPath(String podID, String contractID) {
+        return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS);
+    }
+
     public static Path buildTenantPath(String podID, String contractID, String tenantID) {
         return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS, tenantID);
     }
