@@ -27,6 +27,7 @@ public class CamilleEnvironment {
 
     // singleton instance
     private static Camille camille = null;
+    private static ConfigJson config = null;
 
     // TODO: accept inputstream with camille.json
     public static synchronized void start(Mode mode, Reader configJsonReader) throws IllegalStateException, IOException,
@@ -47,7 +48,7 @@ public class CamilleEnvironment {
             throw npe;
         }
 
-        ConfigJson config = null;
+        config = null;
         try {
             config = new ObjectMapper().readValue(configJsonReader, ConfigJson.class);
         } catch (IOException ioe) {
@@ -78,12 +79,20 @@ public class CamilleEnvironment {
 
         camille = new Camille(client);
     }
+    
+    public static String getPodId() {
+        if (config == null) {
+            throw new IllegalStateException("CamilleEnvironment has not been started");
+        }
+        return config.getPodId();
+    }
 
     public static synchronized void stop() {
         if (camille != null && camille.getCuratorClient() != null
                 && camille.getCuratorClient().getState().equals(CuratorFrameworkState.STARTED)) {
             camille.getCuratorClient().close();
             camille = null;
+            config = null;
         }
     }
 

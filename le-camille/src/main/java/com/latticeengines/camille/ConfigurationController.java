@@ -10,15 +10,55 @@ import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
-public abstract class ConfigurationController {
-    
-    public abstract void create(Path path, Document document);
-    public abstract void set(Path path, Document document);
-    public abstract void set(Path path, Document document, boolean force);
-    public abstract Document get(Path path);
-    public abstract Document get(Path path, CuratorWatcher watcher);
-    public abstract List<Pair<Document,Path>> getChildren(Path path);
-    public abstract DocumentHierarchy getHierarchy(Path path);
-    public abstract void delete(Path path);
-    public abstract boolean exists(Path path);
+public class ConfigurationController<T extends ConfigurationScope> implements ConfigurationControllerImpl<T> {
+    private ConfigurationControllerImpl<T> impl;
+
+    public ConfigurationController(T scope) {
+        impl = ConfigurationControllerImplFactory.getImplementation(scope);
+    }
+
+    @Override
+    public void create(Path path, Document document) throws Exception {
+        impl.create(path, document);
+    }
+
+    @Override
+    public void set(Path path, Document document) throws Exception {
+        impl.set(path, document);
+    }
+
+    @Override
+    public void set(Path path, Document document, boolean force) throws Exception {
+        impl.set(path, document, force);
+    }
+
+    @Override
+    public Document get(Path path) throws Exception {
+        return impl.get(path);
+    }
+
+    @Override
+    public Document get(Path path, CuratorWatcher watcher) throws Exception {
+        return impl.get(path, watcher);
+    }
+
+    @Override
+    public List<Pair<Document, Path>> getChildren(Path path) throws Exception {
+        return impl.getChildren(path);
+    }
+
+    @Override
+    public DocumentHierarchy getHierarchy(Path path) throws Exception {
+        return impl.getHierarchy(path);
+    }
+
+    @Override
+    public void delete(Path path) throws Exception {
+        impl.delete(path);
+    }
+
+    @Override
+    public boolean exists(Path path) throws Exception {
+        return impl.exists(path);
+    }
 }
