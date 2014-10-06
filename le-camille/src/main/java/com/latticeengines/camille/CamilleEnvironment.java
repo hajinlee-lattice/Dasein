@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.camille.lifecycle.PodLifecycleManager;
 
 public class CamilleEnvironment {
     public enum Mode {
@@ -30,8 +31,7 @@ public class CamilleEnvironment {
     private static ConfigJson config = null;
 
     // TODO: accept inputstream with camille.json
-    public static synchronized void start(Mode mode, Reader configJsonReader) throws IllegalStateException,
-            IOException, InterruptedException {
+    public static synchronized void start(Mode mode, Reader configJsonReader) throws Exception {
         if (camille != null && camille.getCuratorClient() != null
                 && camille.getCuratorClient().getState().equals(CuratorFrameworkState.STARTED)) {
 
@@ -67,14 +67,11 @@ public class CamilleEnvironment {
             throw ie;
         }
 
-        // TODO: do something useful in this case statement
-        switch (mode) {
-        case BOOTSTRAP: // ignore Pod ID
-
-            break;
-        case RUNTIME: // use Pod ID
-
-            break;
+        if (Mode.RUNTIME.equals(mode) && !PodLifecycleManager.exists(config.getPodId())) {
+            Exception e = new RuntimeException(String.format("Runtime mode requires an existing pod with Id=%s",
+                    config.getPodId()));
+            log.error(e.getMessage(), e);
+            throw e;
         }
 
         camille = new Camille(client);
