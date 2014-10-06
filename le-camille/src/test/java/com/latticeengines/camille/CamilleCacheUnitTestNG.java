@@ -37,12 +37,14 @@ public class CamilleCacheUnitTestNG {
         camille.create(path, document, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertTrue(camille.exists(new Path("/foo")));
         cache.add(path);
-        
+
         Document cached = cache.get(path);
         Assert.assertEquals(cached, document);
-        
+
         document.setData("bar");
         camille.set(path, document);
+        cache.rebuild();
+
         cached = cache.get(path);
         Assert.assertEquals(cached, document);
     }
