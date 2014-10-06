@@ -14,8 +14,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.CamilleTestEnvironment;
 import com.latticeengines.camille.paths.PathBuilder;
-import com.latticeengines.domain.exposed.camille.Contract;
-import com.latticeengines.domain.exposed.camille.Pod;
 
 public class ContractLifecycleManagerUnitTestNG {
     @SuppressWarnings("unused")
@@ -25,7 +23,7 @@ public class ContractLifecycleManagerUnitTestNG {
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
         CamilleTestEnvironment.start();
-        PodLifecycleManager.create(new Pod(CamilleEnvironment.getPodId()));
+        PodLifecycleManager.create(CamilleEnvironment.getPodId());
     }
 
     @AfterMethod(groups = "unit")
@@ -35,50 +33,42 @@ public class ContractLifecycleManagerUnitTestNG {
 
     @Test(groups = "unit")
     public void testCreate() throws Exception {
-        Contract contract = new Contract("testContract");
-        ContractLifecycleManager.create(contract);
+        String contractId = "testContract";
+        ContractLifecycleManager.create(contractId);
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contract.getContractId())));
-        ContractLifecycleManager.create(contract);
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId)));
+        ContractLifecycleManager.create(contractId);
     }
 
     @Test(groups = "unit")
     public void testDelete() throws Exception {
-        ContractLifecycleManager.delete("testContract");
-        Contract contract = new Contract("testContract");
-        ContractLifecycleManager.create(contract);
+        String contractId = "testContract";
+        ContractLifecycleManager.delete(contractId);
+        ContractLifecycleManager.create(contractId);
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contract.getContractId())));
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId)));
         ContractLifecycleManager.delete("testContract");
         Assert.assertFalse(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contract.getContractId())));
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId)));
     }
 
     @Test(groups = "unit")
     public void testExists() throws Exception {
-        Assert.assertFalse(ContractLifecycleManager.exists("testContract"));
-        Contract contract = new Contract("testContract");
-        ContractLifecycleManager.create(contract);
-        Assert.assertTrue(ContractLifecycleManager.exists("testContract"));
-        ContractLifecycleManager.delete("testContract");
-        Assert.assertFalse(ContractLifecycleManager.exists("testContract"));
-    }
-
-    @Test(groups = "unit")
-    public void testGet() throws Exception {
-        Contract in = new Contract("testContract");
-        ContractLifecycleManager.create(in);
-        Contract out = ContractLifecycleManager.get(in.getContractId());
-        Assert.assertEquals(in, out);
+        String contractId = "testContract";
+        Assert.assertFalse(ContractLifecycleManager.exists(contractId));
+        ContractLifecycleManager.create(contractId);
+        Assert.assertTrue(ContractLifecycleManager.exists(contractId));
+        ContractLifecycleManager.delete(contractId);
+        Assert.assertFalse(ContractLifecycleManager.exists(contractId));
     }
 
     @Test(groups = "unit")
     public void testGetAll() throws Exception {
-        Set<Contract> in = new HashSet<Contract>();
+        Set<String> in = new HashSet<String>();
         for (int i = 0; i < 10; ++i) {
-            Contract c = new Contract(Integer.toString(i));
-            in.add(c);
-            ContractLifecycleManager.create(c);
+            String contractId = Integer.toString(i);
+            in.add(contractId);
+            ContractLifecycleManager.create(contractId);
         }
         Assert.assertTrue(in.containsAll(ContractLifecycleManager.getAll()));
     }

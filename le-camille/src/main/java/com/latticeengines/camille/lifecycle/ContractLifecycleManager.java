@@ -1,6 +1,5 @@
 package com.latticeengines.camille.lifecycle;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,16 +11,10 @@ import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.paths.PathBuilder;
-import com.latticeengines.domain.exposed.camille.Contract;
 import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentMetadata;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class ContractLifecycleManager {
@@ -29,10 +22,7 @@ public class ContractLifecycleManager {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    // thread safe per http://wiki.fasterxml.com/JacksonBestPracticesPerformance
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    public static void create(Contract contract) throws Exception {
+    public static void create(String contractId) throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
 
         try {
@@ -42,9 +32,9 @@ public class ContractLifecycleManager {
         } catch (KeeperException.NodeExistsException e) {
         }
 
-        Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contract.getContractId());
+        Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
         try {
-            camille.create(contractPath, toDocument(contract), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(contractPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             log.debug("created Pod @ {}", contractPath);
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Contract already existed @ {}, ignoring create", contractPath);
@@ -66,12 +56,10 @@ public class ContractLifecycleManager {
                 PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId));
     }
 
-    public static Contract get(String contractId) throws Exception {
-        return toContract(CamilleEnvironment.getCamille().get(
-                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId)));
-    }
-
-    public static List<Contract> getAll() throws IllegalArgumentException, Exception {
+    /**
+     * @return A list of contractIds
+     */
+    public static List<String> getAll() throws IllegalArgumentException, Exception {
         List<Pair<Document, Path>> childPairs = CamilleEnvironment.getCamille().getChildren(
                 PathBuilder.buildContractsPath(CamilleEnvironment.getPodId()));
         Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {
@@ -80,18 +68,10 @@ public class ContractLifecycleManager {
                 return o1.getRight().toString().compareTo(o2.getRight().toString());
             }
         });
-        List<Contract> out = new ArrayList<Contract>(childPairs.size());
+        List<String> out = new ArrayList<String>(childPairs.size());
         for (Pair<Document, Path> childPair : childPairs) {
-            out.add(toContract(childPair.getLeft()));
+            out.add(childPair.getRight().getSuffix());
         }
         return out;
-    }
-
-    private static Document toDocument(Contract contract) throws JsonProcessingException {
-        return new Document(mapper.writeValueAsString(contract), new DocumentMetadata());
-    }
-
-    private static Contract toContract(Document doc) throws JsonParseException, JsonMappingException, IOException {
-        return mapper.readValue(doc.getData(), Contract.class);
     }
 }

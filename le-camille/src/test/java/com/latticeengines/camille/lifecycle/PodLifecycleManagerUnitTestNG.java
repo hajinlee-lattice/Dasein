@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.CamilleTestEnvironment;
 import com.latticeengines.camille.paths.PathBuilder;
-import com.latticeengines.domain.exposed.camille.Pod;
 
 public class PodLifecycleManagerUnitTestNG {
     @SuppressWarnings("unused")
@@ -33,47 +32,39 @@ public class PodLifecycleManagerUnitTestNG {
 
     @Test(groups = "unit")
     public void testCreate() throws Exception {
-        Pod pod = new Pod("testPod");
-        PodLifecycleManager.create(pod);
-        Assert.assertTrue(CamilleEnvironment.getCamille().exists(PathBuilder.buildPodPath(pod.getPodId())));
-        PodLifecycleManager.create(pod);
+        String podId = "testPod";
+        PodLifecycleManager.create(podId);
+        Assert.assertTrue(CamilleEnvironment.getCamille().exists(PathBuilder.buildPodPath(podId)));
+        PodLifecycleManager.create(podId);
     }
 
     @Test(groups = "unit")
     public void testDelete() throws Exception {
-        PodLifecycleManager.delete("testPod");
-        Pod pod = new Pod("testPod");
-        PodLifecycleManager.create(pod);
-        Assert.assertTrue(CamilleEnvironment.getCamille().exists(PathBuilder.buildPodPath(pod.getPodId())));
-        PodLifecycleManager.delete("testPod");
-        Assert.assertFalse(CamilleEnvironment.getCamille().exists(PathBuilder.buildPodPath(pod.getPodId())));
+        String podId = "testPod";
+        PodLifecycleManager.delete(podId);
+        PodLifecycleManager.create(podId);
+        Assert.assertTrue(CamilleEnvironment.getCamille().exists(PathBuilder.buildPodPath(podId)));
+        PodLifecycleManager.delete(podId);
+        Assert.assertFalse(CamilleEnvironment.getCamille().exists(PathBuilder.buildPodPath(podId)));
     }
 
     @Test(groups = "unit")
     public void testExists() throws Exception {
-        Assert.assertFalse(PodLifecycleManager.exists("testPod"));
-        Pod pod = new Pod("testPod");
-        PodLifecycleManager.create(pod);
-        Assert.assertTrue(PodLifecycleManager.exists("testPod"));
+        String podId = "testPod";
+        Assert.assertFalse(PodLifecycleManager.exists(podId));
+        PodLifecycleManager.create(podId);
+        Assert.assertTrue(PodLifecycleManager.exists(podId));
         PodLifecycleManager.delete("testPod");
-        Assert.assertFalse(PodLifecycleManager.exists("testPod"));
-    }
-
-    @Test(groups = "unit")
-    public void testGet() throws Exception {
-        Pod in = new Pod("testPod");
-        PodLifecycleManager.create(in);
-        Pod out = PodLifecycleManager.get(in.getPodId());
-        Assert.assertEquals(in, out);
+        Assert.assertFalse(PodLifecycleManager.exists(podId));
     }
 
     @Test(groups = "unit")
     public void testGetAll() throws Exception {
-        Set<Pod> in = new HashSet<Pod>();
+        Set<String> in = new HashSet<String>();
         for (int i = 0; i < 10; ++i) {
-            Pod p = new Pod(Integer.toString(i));
-            in.add(p);
-            PodLifecycleManager.create(p);
+            String podId = Integer.toString(i);
+            in.add(podId);
+            PodLifecycleManager.create(podId);
         }
         Assert.assertTrue(in.containsAll(PodLifecycleManager.getAll()));
     }

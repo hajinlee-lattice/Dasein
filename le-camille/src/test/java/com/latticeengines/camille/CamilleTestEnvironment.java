@@ -1,7 +1,6 @@
 package com.latticeengines.camille;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringReader;
 
@@ -9,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.util.concurrent.TimeLimiter;
 import com.latticeengines.camille.CamilleEnvironment.Mode;
 import com.netflix.curator.test.TestingCluster;
 

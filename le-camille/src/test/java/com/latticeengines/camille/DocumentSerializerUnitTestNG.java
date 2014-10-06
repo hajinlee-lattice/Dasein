@@ -1,5 +1,5 @@
 package com.latticeengines.camille;
-import org.apache.zookeeper.data.Stat;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentMetadata;
 
 public class DocumentSerializerUnitTestNG {
-    
+
     @Test(groups = "unit")
     public void testSerializeDocument() {
         Document d = new Document(new String("foo"), new DocumentMetadata());
@@ -19,5 +19,5 @@ public class DocumentSerializerUnitTestNG {
             Assert.fail("Serialization failed: " + e);
         }
     }
- 
+
 }
