@@ -16,7 +16,7 @@ public class Path {
             throw new IllegalArgumentException("Path " + rawPath + " is invalid.  Paths must start with a /.");
         }
 
-        if (!rawPath.matches("^(/[\\w.]+)+$")) {
+        if (!rawPath.matches("^(/[\\w\\-.]+)+$")) {
             throw new IllegalArgumentException("Path " + rawPath
                     + " is invalid.  A path must contain only word characters or .'s");
         }
@@ -28,7 +28,7 @@ public class Path {
 
     public Path(List<String> parts) throws IllegalArgumentException {
         for (String part : parts) {
-            if (!part.matches("^\\w+$")) {
+            if (!part.matches("^[\\w\\-.]+$")) {
                 throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
             }
         }
@@ -41,7 +41,7 @@ public class Path {
 
     public Path(String... parts) throws IllegalArgumentException {
         for (String part : parts) {
-            if (!part.matches("^\\w+$")) {
+            if (!part.matches("^[\\w\\-.]+$")) {
                 throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
             }
         }

@@ -107,4 +107,10 @@ public class PathUnitTestNG {
         Assert.assertNotEquals(p, null);
     }
 
+    @Test(groups = "unit")
+    public void testDefaultSpaceFile() {
+        @SuppressWarnings("unused")
+        Path p = new Path("foo", ".default-space");
+    }
+
 }
