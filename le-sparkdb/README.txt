@@ -1,7 +1,7 @@
 In order to get this to run:
 
 mvn clean package
-scala -classpath target/le-sparkdb-1.0.1-SNAPSHOT.jar:$SPARK_YARN_APP_JAR:$HADOOP_HOME/etc/hadoop com.latticeengines.sparkdb.exposed.service.impl.SparkLauncherServiceImpl
+scala -classpath target/le-sparkdb-1.0.2-SNAPSHOT.jar:$SPARK_YARN_APP_JAR:$HADOOP_HOME/etc/hadoop com.latticeengines.sparkdb.exposed.service.impl.SparkLauncherServiceImpl
 
 The following env variables need to be defined if running from Eclipse:
 
@@ -19,5 +19,5 @@ $SPARK_HOME/bin/spark-submit --class com.latticeengines.sparkdb.ABCount \
     --executor-memory 2g  \
     --queue Priority0 \
     --executor-cores 1 \
-    target/le-sparkdb-1.0.1-SNAPSHOT.jar
+    target/le-sparkdb-1.0.2-SNAPSHOT.jar
 
