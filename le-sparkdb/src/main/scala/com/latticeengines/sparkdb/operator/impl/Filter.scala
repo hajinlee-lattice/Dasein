@@ -28,6 +28,6 @@ object Filter {
     
   def filterFunction(record: GenericRecord, condition: FunctionExpression): Boolean = {
     val values = condition.getSourceAttributes().map(x => record.get(x.getName()))
-    condition.getFunction().apply(values).asInstanceOf[Boolean]
+    condition.getFunction().apply(values: _*).asInstanceOf[Boolean]
   }
 }

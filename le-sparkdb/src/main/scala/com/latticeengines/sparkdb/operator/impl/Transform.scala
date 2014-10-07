@@ -63,7 +63,7 @@ class Transform(val df: DataFlow) extends DataOperator(df) {
               combinedRecord.get(x.getName())
             })
             combinedRecord.put(functionExpression.getTargetAttribute().getName(),
-                functionExpression.getFunction().apply(values))
+                functionExpression.getFunction().apply(values: _*))
         }
       }
       combinedRecord
