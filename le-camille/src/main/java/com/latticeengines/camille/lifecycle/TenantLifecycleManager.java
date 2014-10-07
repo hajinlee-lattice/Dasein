@@ -60,6 +60,12 @@ public class TenantLifecycleManager {
             }
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Tenant already existed @ {}, ignoring create", tenantPath);
+
+            if (defaultSpaceId != null) {
+                log.debug("updating default space Id to {}", defaultSpaceId);
+                SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId);
+                setDefaultSpaceId(contractId, tenantId, defaultSpaceId);
+            }
         }
     }
 
