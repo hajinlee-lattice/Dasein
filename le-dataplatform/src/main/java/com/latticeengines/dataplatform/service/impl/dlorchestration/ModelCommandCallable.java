@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -13,6 +14,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
@@ -317,7 +319,7 @@ public class ModelCommandCallable implements Callable<Long> {
 
         // Generate warnings
         if (!warnings.isEmpty()) {
-            modelCommandLogService.log(modelCommand, "Data dignostics:\n" + warnings);
+            modelCommandLogService.log(modelCommand, "Data diagnostics:\n" + warnings);
         }
 
         // Provide link to full diagnostics file
