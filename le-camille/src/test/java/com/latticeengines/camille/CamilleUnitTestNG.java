@@ -41,6 +41,37 @@ public class CamilleUnitTestNG {
     }
 
     @Test(groups = "unit", timeOut = timeOutMs)
+    public void createWithEmptyIntermediateNodesNoDoc() throws Exception {
+        Camille c = CamilleEnvironment.getCamille();
+        Path fullPath = new Path("/0/1/2");
+        c.createWithEmptyIntermediateNodes(fullPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        int i = 0;
+        for (Path p : fullPath) {
+            Assert.assertTrue(c.exists(p));
+            ++i;
+        }
+        Assert.assertEquals(i, 3);
+    }
+
+    @Test(groups = "unit", timeOut = timeOutMs)
+    public void createWithEmptyIntermediateNodesWithDoc() throws Exception {
+        Camille c = CamilleEnvironment.getCamille();
+        Path fullPath = new Path("/0/1/2");
+        Document doc = new Document("testData");
+        c.createWithEmptyIntermediateNodes(fullPath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        int i = 0;
+        for (Path p : fullPath) {
+            Assert.assertTrue(c.exists(p));
+            ++i;
+        }
+        Assert.assertEquals(i, 3);
+
+        Assert.assertEquals(c.get(fullPath), doc);
+    }
+
+    @Test(groups = "unit", timeOut = timeOutMs)
     public void testCreateGetSetWatchAndDelete() throws Exception {
         Camille c = CamilleEnvironment.getCamille();
 

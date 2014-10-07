@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.camille;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.base.Joiner;
@@ -10,7 +11,61 @@ import com.google.common.base.Joiner;
  * Represents an absolute path used by Camille. Valid paths must start with /
  * and contain word characters or .'s.
  */
-public class Path {
+public class Path implements Iterable<Path> {
+    /**
+     * Iterates through all the parent paths and this path. Uses a copy of this
+     * object as it exists when this method is called.
+     */
+    @Override
+    public Iterator<Path> iterator() {
+        return new Iterator<Path>() {
+            private final Iterator<Path> iter;
+
+            {
+                List<Path> paths = getParentPaths();
+                paths.add(Path.this);
+                iter = paths.iterator();
+            }
+
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public Path next() {
+                return iter.next();
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException("remove is not supported");
+            }
+        };
+    }
+
+    /**
+     * @return The parent paths in order.Uses a copy of this object as it exists
+     *         when this method is called.
+     */
+    public List<Path> getParentPaths() {
+        Iterator<String> iter = parts.iterator();
+
+        List<String> pathStrings = new ArrayList<String>(parts.size());
+        pathStrings.add(iter.next());
+
+        final List<Path> out = new ArrayList<Path>(parts.size());
+        out.add(new Path(new ArrayList<String>(pathStrings)));
+
+        while (iter.hasNext()) {
+            pathStrings.add(iter.next());
+            out.add(new Path(new ArrayList<String>(pathStrings)));
+        }
+
+        out.remove(out.size() - 1);
+        return out;
+    }
+
     public Path(String rawPath) throws IllegalArgumentException {
         if (!rawPath.startsWith("/")) {
             throw new IllegalArgumentException("Path " + rawPath + " is invalid.  Paths must start with a /.");
@@ -52,6 +107,10 @@ public class Path {
         this.parts = Arrays.asList(parts);
     }
 
+    public int numParts() {
+        return parts.size();
+    }
+
     public Path append(String part) {
         List<String> concat = new ArrayList<String>();
         concat.addAll(this.parts);
@@ -65,14 +124,14 @@ public class Path {
         concat.addAll(this.parts);
         return new Path(concat);
     }
-    
+
     public Path append(Path path) {
         List<String> concat = new ArrayList<String>();
         concat.addAll(parts);
         concat.addAll(path.parts);
         return new Path(concat);
     }
-    
+
     public Path prefix(Path path) {
         List<String> concat = new ArrayList<String>();
         concat.addAll(path.parts);
@@ -97,7 +156,7 @@ public class Path {
             return false;
         if (getClass() != other.getClass())
             return false;
-        
+
         Path otherPath = (Path) other;
 
         if (otherPath.parts.size() != parts.size())

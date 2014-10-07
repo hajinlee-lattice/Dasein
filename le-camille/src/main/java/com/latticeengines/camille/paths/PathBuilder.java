@@ -48,4 +48,8 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS,
                 tenantID, PathConstants.SPACES, spaceID, PathConstants.SERVICES, serviceName);
     }
+
+    public static Path buildDataInterfacePath(String podID, String interfaceName, Long version) {
+        return new Path(PathConstants.PODS, podID, PathConstants.INTERFACES, PathConstants.DATA, interfaceName);
+    }
 }

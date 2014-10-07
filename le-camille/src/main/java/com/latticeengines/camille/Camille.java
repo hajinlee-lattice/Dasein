@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.api.SetDataBuilder;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
@@ -19,7 +20,6 @@ import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class Camille {
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
@@ -34,8 +34,23 @@ public class Camille {
         return client;
     }
 
+    public void createWithEmptyIntermediateNodes(Path path, List<ACL> acls) throws Exception {
+        createWithEmptyIntermediateNodes(path, new Document(), acls);
+    }
+
+    public void createWithEmptyIntermediateNodes(Path path, Document doc, List<ACL> acls) throws Exception {
+        for (Path p : path.getParentPaths()) {
+            try {
+                create(p, acls);
+            } catch (KeeperException.NodeExistsException e) {
+                log.debug("Path {} already existed, ignoring.", p);
+            }
+        }
+        create(path, doc, acls);
+    }
+
     public void create(Path path, List<ACL> acls) throws Exception {
-        client.create().withACL(acls).forPath(path.toString(), DocumentSerializer.toByteArray(new Document()));
+        create(path, new Document(), acls);
     }
 
     public void create(Path path, Document doc, List<ACL> acls) throws Exception {
