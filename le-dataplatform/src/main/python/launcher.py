@@ -60,7 +60,9 @@ class Launcher(object):
 
         # Create directory for model result
         modelLocalDir = os.getcwd() + "/results/"
-        os.mkdir(modelLocalDir)
+        
+        if not os.path.exists(modelLocalDir):
+            os.mkdir(modelLocalDir)
 
         # Get algorithm properties
         algorithmProperties = parser.getAlgorithmProperties()

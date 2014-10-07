@@ -1,4 +1,3 @@
-from avro import schema, datafile, io
 import codecs
 from collections import OrderedDict
 import os
@@ -6,9 +5,11 @@ import pwd
 import json
 import logging
 import math
+import sys
+
+from avro import schema, datafile, io
 from sklearn import metrics
 from sklearn.metrics.cluster.supervised import entropy
-import sys
 
 from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
@@ -85,7 +86,7 @@ def getSchema():
         "name" : "median",
         "type" : [ "double", "null" ],
         "columnName" : "median",
-        "sqlType" : "4"
+        "sqlType" : "8"
       }, {
         "name" : "count",
         "type" : [ "int", "null" ],
@@ -95,11 +96,26 @@ def getSchema():
         "name" : "lift",
         "type" : [ "double", "null" ],
         "columnName" : "lift",
-        "sqlType" : "4"
+        "sqlType" : "8"
       }, {
         "name" : "uncertaintyCoefficient",
         "type" : [ "double", "null" ],
         "columnName" : "uncertaintyCoefficient",
+        "sqlType" : "8"
+      }, {
+        "name" : "discreteNullBucket",
+        "type" : [ "boolean", "null" ],
+        "columnName" : "discreteNullBucket",
+        "sqlType" : "16"
+      }, {
+        "name" : "continuousNullBucket",
+        "type" : [ "boolean", "null" ],
+        "columnName" : "continuousNullBucket",
+        "sqlType" : "16"
+      }, {
+        "name" : "nullCount",
+        "type" : [ "int", "null" ],
+        "columnName" : "nullCount",
         "sqlType" : "4"
       }  ],
       "tableName" : "EventMetadata"
@@ -193,6 +209,10 @@ def retrieveColumnBucketMetadata(columnsMetadata):
 
     return (bucketsMetadata, diagnostics)
 
+def getPopulatedRowCount(columnData, continuous):
+    if continuous:
+        return columnData.count()
+    return sum(map(lambda x: 1 if x is not None else 0, columnData))
 
 def profileColumn(columnData, colname, stringcols, eventVector, bucketDispatcher, dataWriter, index, bucketingParams = None):
     '''
@@ -215,7 +235,10 @@ def profileColumn(columnData, colname, stringcols, eventVector, bucketDispatcher
     '''
     diagnostics = OrderedDict()
     diagnostics["Colname"] = colname
-    diagnostics["PopulationRate"] = columnData.count()/float(len(columnData))
+    diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colname not in stringcols)/float(len(columnData))
+    
+    if diagnostics["PopulationRate"] == 0.0:
+        return (index, diagnostics)
 
     if colname in stringcols:
         # Categorical column
@@ -224,7 +247,7 @@ def profileColumn(columnData, colname, stringcols, eventVector, bucketDispatcher
         mode = columnData.value_counts().idxmax()
         diagnostics["UniqueValues"] = uniqueValues
         if uniqueValues > 200:
-            logger.warn("String column name: " + colname + " is discarded due to more than 200 unique values ")
+            logger.warn("String column name: " + colname + " is discarded due to more than 200 unique values.")
             return (index, diagnostics)
 
         index = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colname, index)
@@ -234,7 +257,7 @@ def profileColumn(columnData, colname, stringcols, eventVector, bucketDispatcher
         mean = columnData.mean()
         median = columnData.median()
         if math.isnan(median):
-            logger.warn("Median to impute for column name: " + colname + " is null, excluding this column.")
+            logger.warn("Median to impute for column name: " + colname + " is null; excluding this column.")
             return (index, diagnostics)
         # Convert all continuous values into a numeric data type
         columnData = columnData.convert_objects(convert_numeric=True) 
@@ -282,9 +305,13 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         datum["count"] = valueCount
         datum["lift"] = getLift(avgProbability, valueCount, valueVector, eventVector)
         datum["uncertaintyCoefficient"] = uncertaintyCoefficientXgivenY(eventVector, valueVector)
+        datum["discreteNullBucket"] = False
+        datum["continuousNullBucket"] = False
         index = index + 1
         dataWriter.append(datum)
 
+    # Create bucket for nulls if applicable
+    index = writeNullBucket(index, colname, columnVector, eventVector, avgProbability, dataWriter, False)
     return index
 
 def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, colname, index):
@@ -323,9 +350,43 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         datum["count"] = bandCount
         datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)
         datum["uncertaintyCoefficient"] = uncertaintyCoefficientXgivenY(eventVector, bandVector)
+        datum["discreteNullBucket"] = False
+        datum["continuousNullBucket"] = False
         index = index + 1
         dataWriter.append(datum)
 
+    # Create bucket for nulls if applicable
+    index = writeNullBucket(index, colname, columnVector, eventVector, avgProbability, dataWriter, True)
+    return index
+
+def writeNullBucket(index, colname, columnVector, eventVector, avgProbability, dataWriter, continuous):
+    bandVector = []
+    
+    if continuous:
+        bandVector = map(lambda x: 1 if np.isnan(x) else 0, columnVector)
+    else:
+        bandVector = map(lambda x: 1 if x is None else 0, columnVector)
+    bandCount = sum(bandVector)
+    if bandCount == 0:
+        return index
+    
+    datum = {}
+    datum["id"] = index
+    datum["barecolumnname"] = colname
+    datum["columnvalue"] = None
+    datum["Dtype"] = "BND" if continuous else "STR"
+    datum["minV"] = None
+    datum["maxV"] = None
+    datum["mean"] = None
+    datum["median"] = None
+    datum["mode"] = None
+    datum["count"] = bandCount
+    datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)
+    datum["uncertaintyCoefficient"] = uncertaintyCoefficientXgivenY(eventVector, bandVector)
+    datum["discreteNullBucket"] = not continuous
+    datum["continuousNullBucket"] = continuous
+    index = index + 1
+    dataWriter.append(datum)
     return index
 
 def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir):

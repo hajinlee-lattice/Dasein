@@ -100,6 +100,14 @@ class LearningExecutor(Executor):
     def transformData(self, params):
         metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
         (stringColumns, continuousColumns) = self.getDecoratedColumns(metadata[0])
+        
+        for stringColumn in stringColumns:
+            print('"%s",' % stringColumn)
+        
+        print("")
+        for continuousColumn in continuousColumns:
+            print('"%s",' % continuousColumn)
+        
         training = params["training"]
         test = params["test"]
         

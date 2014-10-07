@@ -60,22 +60,35 @@ class SummaryGenerator(State, JsonGenBase):
             element["CorrelationSign"] = 1 if record["lift"] > 1 else -1
             element["Count"] = record["count"]
             
+            # Lift value
             if record["lift"] is not None:
                 element["Lift"] = record["lift"]
 
+            # Band values
             if record["Dtype"] == "BND":
                 element["LowerInclusive"] = record["minV"]
+            if record["Dtype"] == "BND":
+                element["UpperExclusive"] = record["maxV"]
+
+            # Name
             element["Name"] = str(uuid.uuid4())
             
+            # Uncertainty coefficient
             if record["uncertaintyCoefficient"] is not None:
                 element["UncertaintyCoefficient"] = record["uncertaintyCoefficient"] 
                 attrLevelUncertaintyCoeff += element["UncertaintyCoefficient"]
-            if record["Dtype"] == "BND":
-                element["UpperExclusive"] = record["maxV"]
+
+            # Discrete value
             if record["Dtype"] == "BND":
                 element["Values"] = []
             else:
                 element["Values"] = [record["columnvalue"]]
+
+            # Handle null buckets for both continuous and discrete
+            if "continuousNullBucket" in record and record["continuousNullBucket"] == True:
+                element["Values"] = [None]
+            if "discreteNullBucket" in record and record["discreteNullBucket"] == True:
+                element["Values"] = ["null"]
             
             element["IsVisible"] = True
             elements.append(element)

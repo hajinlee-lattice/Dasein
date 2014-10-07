@@ -4,16 +4,19 @@ import filecmp
 import gzip
 import json
 import os
-import sys
 import pickle
 from random import random
 from random import shuffle
 import shutil
-from sklearn.ensemble import RandomForestClassifier
+import sys
 import unittest
 import uuid
-from testbase import TestBase
+
+from sklearn.ensemble import RandomForestClassifier
+
 from leframework import scoringengine as se
+from testbase import TestBase
+
 
 class TrainingTest(TestBase):
 
@@ -53,7 +56,6 @@ class TrainingTest(TestBase):
         os.environ["SHDP_HD_FSWEB"] = "localhost:50070"
         traininglauncher = Launcher("model.json")
         traininglauncher.execute(False)
-        t = traininglauncher.training;
         
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open("./results/model.json").read())
@@ -132,7 +134,7 @@ class TrainingTest(TestBase):
         rowDicts = []
         for line in lines:
             rowDicts.append(se.getRowToScore(line)[1])
-        resultFrame = se.predict(pipeline, rowDicts)
+        se.predict(pipeline, rowDicts)
         self.__createCSV(inputColumns, values)
         
     def __getLineToScore2(self, inputColumns, typeDict, value):
