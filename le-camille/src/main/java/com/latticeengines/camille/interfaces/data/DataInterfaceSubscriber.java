@@ -22,6 +22,7 @@ public class DataInterfaceSubscriber extends DataInterfaceBase {
             log.error(e.getMessage(), e);
             throw e;
         }
+        // PS: catch KeeperException.NoNodeException and return null?
         return CamilleEnvironment.getCamille().get(getBasePath().append(relativePath));
     }
 }
