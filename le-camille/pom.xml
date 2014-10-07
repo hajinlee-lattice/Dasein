@@ -23,12 +23,12 @@
 	<distributionManagement>
 		<repository>
 			<id>deployment</id>
-			<name>Lattice Engines Internal Repository</name>
+			<name>Lattice Engines Release Repository</name>
 			<url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/releases/</url>
 		</repository>
 		<snapshotRepository>
 			<id>deployment</id>
-			<name>Lattice Engines Internal Repository</name>
+			<name>Lattice Engines Snapshot Repository</name>
 			<url>http://bodcdevvmvn63.lattice.local:8081/nexus/content/repositories/snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
@@ -88,6 +88,7 @@
 			<version>1.7.7</version>
 			<optional>true</optional>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.apache.curator</groupId>
 			<artifactId>curator-recipes</artifactId>
