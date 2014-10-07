@@ -33,6 +33,19 @@
 			</properties>
 		</profile>
 		<profile>
+			<id>integration</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>environment.type</name>
+					<value>intcluster</value>
+				</property>
+			</activation>
+			<properties>
+				<fair-scheduler.xml.path>conf/env/intcluster</fair-scheduler.xml.path>
+			</properties>
+		</profile>
+		<profile>
 			<id>qa</id>
 			<activation>
 				<property>
