@@ -946,7 +946,7 @@ public class GenericModifiableData extends GenericData {
      * Comparison implementation. When equals is true, only checks for equality,
      * not for order.
      */
-    @SuppressWarnings(value = "unchecked")
+    @SuppressWarnings(value = { "unchecked", "rawtypes" })
     protected int compare(Object o1, Object o2, Schema s, boolean equals) {
         if (o1 == o2)
             return 0;
@@ -1005,7 +1005,7 @@ public class GenericModifiableData extends GenericData {
      * @return the default value associated with the given field, or null if
      *         none is specified in the schema.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     public Object getDefaultValue(Field field) {
         JsonNode json = field.defaultValue();
         if (json == null)
