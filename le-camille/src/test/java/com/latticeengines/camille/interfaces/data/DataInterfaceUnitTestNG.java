@@ -1,6 +1,5 @@
 package com.latticeengines.camille.interfaces.data;
 
-import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -44,10 +43,6 @@ public class DataInterfaceUnitTestNG {
         Assert.assertEquals(sub.get(relativePath).getData(), doc.getData());
 
         pub.remove(relativePath);
-        try {
-            sub.get(relativePath);
-            Assert.fail(String.format("path %s should not exist", relativePath));
-        } catch (KeeperException.NoNodeException e) {
-        }
+        Assert.assertNull(sub.get(relativePath));
     }
 }

@@ -16,13 +16,20 @@ public class DataInterfaceSubscriber extends DataInterfaceBase {
         super(interfaceName);
     }
 
-    public Document get(Path relativePath) throws KeeperException.NoNodeException, Exception {
+    /**
+     * @return The corresponding Document, or null if no such Document exists.
+     */
+    public Document get(Path relativePath) throws Exception {
         if (relativePath.numParts() > 1) {
             IllegalArgumentException e = new IllegalArgumentException("relativePath cannot have more than 1 part");
             log.error(e.getMessage(), e);
             throw e;
         }
-        // PS: catch KeeperException.NoNodeException and return null?
-        return CamilleEnvironment.getCamille().get(getBasePath().append(relativePath));
+
+        try {
+            return CamilleEnvironment.getCamille().get(getBasePath().append(relativePath));
+        } catch (KeeperException.NoNodeException e) {
+            return null;
+        }
     }
 }
