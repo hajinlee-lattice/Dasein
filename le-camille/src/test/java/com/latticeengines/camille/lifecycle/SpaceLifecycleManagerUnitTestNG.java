@@ -37,6 +37,18 @@ public class SpaceLifecycleManagerUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testCreateDefault() throws Exception {
+        SpaceLifecycleManager.createDefault(contractId, tenantId);
+        Assert.assertEquals(
+                1,
+                CamilleEnvironment
+                        .getCamille()
+                        .getChildren(
+                                PathBuilder.buildCustomerSpacesPath(CamilleEnvironment.getPodId(), contractId, tenantId))
+                        .size());
+    }
+
+    @Test(groups = "unit")
     public void testCreate() throws Exception {
         String spaceId = "testSpace";
         SpaceLifecycleManager.create(contractId, tenantId, spaceId);
@@ -75,6 +87,6 @@ public class SpaceLifecycleManagerUnitTestNG {
             in.add(spaceId);
             SpaceLifecycleManager.create(contractId, tenantId, spaceId);
         }
-        Assert.assertTrue(in.containsAll(SpaceLifecycleManager.getAll(contractId, tenantId)));
+        Assert.assertTrue(SpaceLifecycleManager.getAll(contractId, tenantId).containsAll(in));
     }
 }

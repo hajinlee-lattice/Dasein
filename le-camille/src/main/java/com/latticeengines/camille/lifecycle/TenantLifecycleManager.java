@@ -11,8 +11,6 @@ import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.paths.PathBuilder;
@@ -47,29 +45,44 @@ public class TenantLifecycleManager {
             log.debug("Tenant already existed @ {}, ignoring create", tenantPath);
         }
 
+        if (defaultSpaceId == null) {
+            defaultSpaceId = SpaceLifecycleManager.createDefault(contractId, tenantId);
+        } else {
+            SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId);
+        }
+
         // create default space file
         Path defaultSpacePath = tenantPath.append(PathConstants.DEFAULT_SPACE_FILE);
-        Document doc = new Document(defaultSpaceId);
         try {
-            camille.create(defaultSpacePath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(defaultSpacePath, new Document(defaultSpaceId), ZooDefs.Ids.OPEN_ACL_UNSAFE);
             log.debug("created .default-space @ {}", defaultSpacePath);
         } catch (KeeperException.NodeExistsException e) {
             log.debug(".default-space already existed @ {}, ignoring create", defaultSpacePath);
         }
     }
 
-    public static void setDefaultSpaceId(String contractId, String tenantId, String defaultSpaceId)
-            throws JsonProcessingException, Exception {
-        CamilleEnvironment.getCamille().set(
-                PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
-                        PathConstants.DEFAULT_SPACE_FILE), new Document(defaultSpaceId));
+    public static void setDefaultSpaceId(String contractId, String tenantId, String defaultSpaceId) throws Exception {
+        if (defaultSpaceId == null) {
+            IllegalArgumentException e = new IllegalArgumentException("defaultSpaceId cannot be null");
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+        if (SpaceLifecycleManager.exists(contractId, tenantId, defaultSpaceId)) {
+            CamilleEnvironment.getCamille().set(
+                    PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
+                            PathConstants.DEFAULT_SPACE_FILE), new Document(defaultSpaceId));
+        } else {
+            RuntimeException e = new RuntimeException(String.format("No Space exists with spaceId=%s", defaultSpaceId));
+            log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
     public static String getDefaultSpaceId(String contractId, String tenantId) throws Exception {
         return CamilleEnvironment
-                        .getCamille()
-                        .get(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
-                                PathConstants.DEFAULT_SPACE_FILE)).getData();
+                .getCamille()
+                .get(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
+                        PathConstants.DEFAULT_SPACE_FILE)).getData();
     }
 
     public static void delete(String contractId, String tenantId) throws Exception {

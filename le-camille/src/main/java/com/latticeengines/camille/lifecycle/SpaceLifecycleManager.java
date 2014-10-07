@@ -22,7 +22,23 @@ public class SpaceLifecycleManager {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
+    private static final String defaultSpaceId = "default";
+
+    /**
+     * @return defaultSpaceId
+     */
+    public static String createDefault(String contractId, String tenantId) throws Exception {
+        create(contractId, tenantId, defaultSpaceId);
+        return defaultSpaceId;
+    }
+
     public static void create(String contractId, String tenantId, String spaceId) throws Exception {
+        if (spaceId == null) {
+            IllegalArgumentException e = new IllegalArgumentException("spaceId cannot be null");
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+
         Camille camille = CamilleEnvironment.getCamille();
 
         try {
