@@ -30,6 +30,20 @@
 			</properties>
 		</profile>
 		<profile>
+			<id>integration</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>environment.type</name>
+					<value>intcluster</value>
+				</property>
+			</activation>
+			<properties>
+				<dataplatform.properties.path>conf/env/intcluster</dataplatform.properties.path>
+				<hadoop-metrics2.properties.path>conf/env/intcluster</hadoop-metrics2.properties.path>
+			</properties>
+		</profile>
+		<profile>
 			<id>qa</id>
 			<activation>
 				<property>
