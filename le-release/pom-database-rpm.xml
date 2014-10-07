@@ -49,6 +49,21 @@
 			</properties>
 		</profile>
 		<profile>
+			<id>integration</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<property>
+					<name>environment.type</name>
+					<value>intcluster</value>
+				</property>
+			</activation>
+			<properties>
+				<dataplatform.properties.path>
+					../le-dataplatform/conf/env/intcluster
+				</dataplatform.properties.path>
+			</properties>
+		</profile>
+		<profile>
 			<id>qa</id>
 			<activation>
 				<property>
