@@ -24,6 +24,7 @@ public class CustomerSpaceScope extends ConfigurationScope {
         result = prime * result + ((contractID == null) ? 0 : contractID.hashCode());
         result = prime * result + ((spaceID == null) ? 0 : spaceID.hashCode());
         result = prime * result + ((tenantID == null) ? 0 : tenantID.hashCode());
+        result = prime * result + getType().hashCode();
         return result;
     }
 

@@ -39,14 +39,14 @@ public class ConfigurationControllerUnitTestNG {
 
     @Test(groups = "unit")
     public void testPodCreateDeleteDocument() throws Exception {
-        PodScope scope = new PodScope("MyPod");
-        PodLifecycleManager.create(scope.getPodID());
+        PodScope scope = new PodScope();
+        PodLifecycleManager.create(CamilleEnvironment.getPodId());
         Path path = new Path("/foo");
         ConfigurationController<PodScope> controller = new ConfigurationController<PodScope>(scope);
         controller.create(path, new Document("foo"));
         Assert.assertTrue(controller.exists(path));
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildPodPath(scope.getPodID()).append(path)));
+                PathBuilder.buildPodPath(CamilleEnvironment.getPodId()).append(path)));
         controller.delete(path);
         Assert.assertFalse(controller.exists(path));
     }

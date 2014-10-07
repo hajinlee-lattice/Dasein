@@ -12,6 +12,7 @@ public class ContractScope extends ConfigurationScope {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((contractID == null) ? 0 : contractID.hashCode());
+        result = prime * result + getType().hashCode();
         return result;
     }
 

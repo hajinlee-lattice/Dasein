@@ -32,6 +32,7 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
         result = prime * result + ((serviceName == null) ? 0 : serviceName.hashCode());
         result = prime * result + ((spaceID == null) ? 0 : spaceID.hashCode());
         result = prime * result + ((tenantID == null) ? 0 : tenantID.hashCode());
+        result = prime * result + getType().hashCode();
         return result;
     }
 

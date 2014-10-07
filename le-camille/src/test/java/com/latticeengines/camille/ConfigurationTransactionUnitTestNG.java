@@ -39,8 +39,8 @@ public class ConfigurationTransactionUnitTestNG {
 
     @Test(groups = "unit")
     public void testPodTransaction() throws Exception {
-        PodScope scope = new PodScope("MyPod");
-        PodLifecycleManager.create(scope.getPodID());
+        PodScope scope = new PodScope();
+        PodLifecycleManager.create(CamilleEnvironment.getPodId());
         Path path = new Path("/foo");
         ConfigurationTransaction<PodScope> transaction = new ConfigurationTransaction<PodScope>(scope);
         transaction.create(path, new Document("foo"));

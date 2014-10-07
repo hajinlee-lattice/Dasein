@@ -31,6 +31,7 @@ public class ServiceScope extends ConfigurationScope {
         int result = 1;
         result = prime * result + dataVersion;
         result = prime * result + ((serviceName == null) ? 0 : serviceName.hashCode());
+        result = prime * result + getType().hashCode();
         return result;
     }
 
