@@ -70,7 +70,7 @@ public class TenantLifecycleManagerUnitTestNG {
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)));
 
         // should fail gracefully without modifying .default-space
-        // TenantLifecycleManager.create(contractId, tenantId);
+        TenantLifecycleManager.create(contractId, tenantId);
 
         Assert.assertEquals(defaultSpaceId1, TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId));
         String defaultSpaceId2 = "testDefaultSpaceId2";
