@@ -17,6 +17,8 @@ import com.latticeengines.sparkdb.operator.DataFlow
 import com.latticeengines.sparkdb.operator.DataOperator
 
 class AvroSourceTable(val df: DataFlow) extends DataOperator(df) {
+  df.addSourceOperator(this)
+  
   override def run(rdd: RDD[GenericRecord]): RDD[GenericRecord] = {
     val conf = dataFlow.job.getConfiguration()
     val path = new Path(getPropertyValue(AvroSourceTable.DataPath))

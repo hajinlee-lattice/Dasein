@@ -55,6 +55,8 @@ class AssemblyServiceImplTestNG extends SparkDbFunctionalTestNGBase {
     
     println(s"Number of rows of Result parquet table = $count")
     assertTrue(count > 0)
+    
+    sqc.sql("SELECT IsWon, Domain FROM Result").collect().foreach(println(_))
   }
 
 

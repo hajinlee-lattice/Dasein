@@ -1,7 +1,11 @@
 package com.latticeengines.sparkdb.service.impl
 
+import org.apache.avro.Schema.Type
 import org.apache.hadoop.conf.Configuration
 import org.springframework.stereotype.Component
+
+import com.latticeengines.domain.exposed.eai._
+import com.latticeengines.domain.exposed.sparkdb.FunctionExpression
 
 import com.latticeengines.sparkdb.operator.DataFlow
 import com.latticeengines.sparkdb.operator.impl.AvroSourceTable
@@ -10,8 +14,8 @@ import com.latticeengines.sparkdb.operator.impl.DataProfileOperator
 import com.latticeengines.sparkdb.operator.impl.Filter
 import com.latticeengines.sparkdb.operator.impl.Join
 import com.latticeengines.sparkdb.operator.impl.Sampler
+import com.latticeengines.sparkdb.operator.impl.Transform
 import com.latticeengines.sparkdb.service.AssemblyService
-
 
 @Component("assemblyService")
 class AssemblyServiceImpl extends AssemblyService {
@@ -46,9 +50,8 @@ class AssemblyServiceImpl extends AssemblyService {
       val testSampler = new Sampler(dataFlow)
       testSampler.setPropertyValue(Sampler.WithReplacement, false)
       testSampler.setPropertyValue(Sampler.SamplingRate, 0.20)
-      
+
       val filtered = filter.run(join.run(Array(lead.run(), opportunity.run())))
-      
       val training = new AvroTargetTable(dataFlow)
       training.setPropertyValue(AvroTargetTable.DataPath, "/tmp/training")
       training.setPropertyValue(AvroTargetTable.ParquetFile, true)
@@ -59,11 +62,38 @@ class AssemblyServiceImpl extends AssemblyService {
 
       training.run(trainingSampler.run(filtered))
       test.run(testSampler.run(filtered))
+
+      val transform = new Transform(dataFlow)
+
+      val email = new Attribute()
+      email.setName("Email")
+      val domain = new Attribute()
+      domain.setName("Domain")
+      domain.setDisplayName("Domain")
+      domain.setPhysicalDataType(Type.STRING.name())
+      domain.setLogicalDataType("domain")
+      val f1 = new FunctionExpression("com.latticeengines.sparkdb.operator.impl.SampleFunctions$PassThroughFunction",
+        true, domain, email)
+
+      val isWon = new Attribute()
+      isWon.setName("IsWon")
+      isWon.setPhysicalDataType(Type.BOOLEAN.name())
+      val isWonDouble = new Attribute()
+      isWonDouble.setName("IsWon")
+      isWonDouble.setDisplayName("IsWon")
+      isWonDouble.setPhysicalDataType(Type.DOUBLE.name())
+      isWonDouble.setLogicalDataType("double")
+      val f2 = new FunctionExpression("com.latticeengines.sparkdb.operator.impl.SampleFunctions$ConvertBooleanToDouble",
+        false, isWonDouble, isWon)
       
+      val list = List(f1, f2)
+      
+      transform.setPropertyValue(Transform.ExpressionList, list)
+
       val total = new AvroTargetTable(dataFlow)
       total.setPropertyValue(AvroTargetTable.DataPath, "/tmp/result")
       total.setPropertyValue(AvroTargetTable.ParquetFile, true)
-      total.run(filtered)
+      total.run(transform.run(filtered))
     } finally {
       dataFlow.sc.stop()
     }
