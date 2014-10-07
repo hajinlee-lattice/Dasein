@@ -1,9 +1,13 @@
 package com.latticeengines.sparkdb.operator.impl
 
+import scala.Array.canBuildFrom
+import scala.collection.JavaConversions._
+
 import org.apache.avro.generic.GenericRecord
 import org.apache.spark.rdd.RDD
 
-import com.latticeengines.sparkdb.conversion.Implicits.objectToString
+import com.latticeengines.domain.exposed.sparkdb.FunctionExpression
+import com.latticeengines.sparkdb.conversion.Implicits.objectToExpression
 import com.latticeengines.sparkdb.operator.DataFlow
 import com.latticeengines.sparkdb.operator.DataOperator
 
@@ -22,7 +26,8 @@ class Filter(val df: DataFlow) extends DataOperator(df) {
 object Filter {
   val FilterCondition = "FilterCondition"
     
-  def filterFunction(record: GenericRecord, condition: String): Boolean = {
-    true
+  def filterFunction(record: GenericRecord, condition: FunctionExpression): Boolean = {
+    val values = condition.getSourceAttributes().map(x => record.get(x.getName()))
+    condition.getFunction().apply(values).asInstanceOf[Boolean]
   }
 }

@@ -1,7 +1,7 @@
 package com.latticeengines.sparkdb.operator.impl
 
 import scala.Array.canBuildFrom
-import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions._
 import scala.collection.mutable.Map
 
 import org.apache.avro.Schema

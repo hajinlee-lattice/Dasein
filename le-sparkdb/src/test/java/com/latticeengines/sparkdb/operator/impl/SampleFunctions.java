@@ -11,7 +11,7 @@ public class SampleFunctions {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public Object apply(Object[] params) {
+        public Object apply(Object... params) {
             if (params != null) {
                 return params[0];
             }
@@ -25,7 +25,7 @@ public class SampleFunctions {
         private static final long serialVersionUID = 1L;
 
         @Override
-        public Object apply(Object[] params) {
+        public Object apply(Object... params) {
             if (params != null) {
                 Boolean boolValue = (Boolean) params[0];
                 if (boolValue) {
@@ -35,6 +35,20 @@ public class SampleFunctions {
                 }
             }
             return 0.0;
+        }
+        
+    }
+
+    public static class FilterFunction implements Function, Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Object apply(Object... params) {
+            if (params != null) {
+                return (Boolean) params[0];
+            }
+            return false;
         }
         
     }

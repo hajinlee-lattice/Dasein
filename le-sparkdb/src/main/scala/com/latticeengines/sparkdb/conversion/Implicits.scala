@@ -13,7 +13,9 @@ object Implicits {
   
   implicit def objectToString(value: Object): String = value.asInstanceOf[String]
   
-  implicit def objectToExpressionList[T1, R](value: Object): List[FunctionExpression] = value.asInstanceOf[List[FunctionExpression]]
+  implicit def objectToExpression(value: Object): FunctionExpression = value.asInstanceOf[FunctionExpression]
+  
+  implicit def objectToExpressionList(value: Object): List[FunctionExpression] = value.asInstanceOf[List[FunctionExpression]]
   
   implicit def anyRDDToGenericRecordRDD(rdd: RDD[_]): RDD[GenericRecord] = rdd.asInstanceOf[RDD[GenericRecord]]
 }

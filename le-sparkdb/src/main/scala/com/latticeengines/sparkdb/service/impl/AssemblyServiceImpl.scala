@@ -39,6 +39,11 @@ class AssemblyServiceImpl extends AssemblyService {
       contact.setPropertyValue(AvroSourceTable.UniqueKeyCol, "Id")
 
       val filter = new Filter(dataFlow)
+      val isConverted = new Attribute()
+      isConverted.setName("IsConverted")
+      val filterExpr = new FunctionExpression("com.latticeengines.sparkdb.operator.impl.SampleFunctions$FilterFunction",
+        true, null, isConverted)
+      filter.setPropertyValue(Filter.FilterCondition, filterExpr)
 
       val join = new Join(dataFlow)
 
