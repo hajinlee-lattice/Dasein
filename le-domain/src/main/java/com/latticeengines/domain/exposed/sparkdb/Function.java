@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.sparkdb;
 
-public interface Function<T> {
+public interface Function {
     
-    T apply(Object... params);
+    Object apply(Object... params);
 
 }

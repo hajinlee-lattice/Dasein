@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.eai;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,7 +9,9 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasProperty;
 
-public class Attribute implements HasName, HasProperty {
+public class Attribute implements HasName, HasProperty, Serializable {
+
+    private static final long serialVersionUID = -4779448415471374224L;
 
     private String name;
     private String displayName;

@@ -1,44 +1,51 @@
 package com.latticeengines.domain.exposed.sparkdb;
 
+import java.io.Serializable;
+
 import com.latticeengines.domain.exposed.eai.Attribute;
 
-public class FunctionExpression {
+public class FunctionExpression implements Serializable {
 
-    private Attribute attributeToActOn;
-    private Attribute attributeToCreate;
-    private Function<?> function;
+    private static final long serialVersionUID = 602459174530312057L;
+
+    private Attribute[] sourceAttributes;
+    private Attribute targetAttribute;
+    private Function function;
     private boolean isNew = true;
     
-    public FunctionExpression(Attribute attributeToActOn, Function<?> function) {
-        this(attributeToActOn, null, function);
-        isNew = false;
-    }
-    
-    public FunctionExpression(Attribute attributeToActOn, Attribute attributeToCreate, Function<?> function) {
-        this.setAttributeToActOn(attributeToActOn);
-        this.setFunction(function);
-    }
-
-    public Attribute getAttributeToActOn() {
-        return attributeToActOn;
-    }
-    public void setAttributeToActOn(Attribute attributToActOn) {
-        this.attributeToActOn = attributToActOn;
+    public FunctionExpression(String functionName, boolean isNew, Attribute targetAttribute, Attribute... sourceAttributes) {
+        try {
+            Class<?> functionClass = Class.forName(functionName);
+            this.setFunction((Function) functionClass.newInstance());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        this.isNew = isNew;
+        this.sourceAttributes = sourceAttributes;
+        this.setTargetAttribute(targetAttribute);
+        
     }
 
-    public Attribute getAttributeToCreate() {
-        return attributeToCreate;
+    public Attribute[] getSourceAttributes() {
+        return sourceAttributes;
+    }
+    public void setSourceAttributes(Attribute[] sourceAttributes) {
+        this.sourceAttributes = sourceAttributes;
     }
 
-    public void setAttributeToCreate(Attribute attributeToCreate) {
-        this.attributeToCreate = attributeToCreate;
+    public Attribute getTargetAttribute() {
+        return targetAttribute;
     }
 
-    public Function<?> getFunction() {
+    public void setTargetAttribute(Attribute targetAttribute) {
+        this.targetAttribute = targetAttribute;
+    }
+
+    public Function getFunction() {
         return function;
     }
 
-    public void setFunction(Function<?> function) {
+    public void setFunction(Function function) {
         this.function = function;
     }
 
