@@ -63,10 +63,15 @@ public class TenantLifecycleManagerUnitTestNG {
     public void testCreateNotNullDefaultSpaceAndSetDefaultSpace() throws Exception {
         String tenantId = "testTenant";
         String defaultSpaceId1 = "testDefaultSpaceId1";
+
         TenantLifecycleManager.create(contractId, tenantId, defaultSpaceId1);
+
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)));
-        TenantLifecycleManager.create(contractId, tenantId);
+
+        // should fail gracefully without modifying .default-space
+        // TenantLifecycleManager.create(contractId, tenantId);
+
         Assert.assertEquals(defaultSpaceId1, TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId));
         String defaultSpaceId2 = "testDefaultSpaceId2";
         try {

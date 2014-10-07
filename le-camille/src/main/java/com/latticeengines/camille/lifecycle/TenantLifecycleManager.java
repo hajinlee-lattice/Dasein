@@ -41,23 +41,25 @@ public class TenantLifecycleManager {
         try {
             camille.create(tenantPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             log.debug("created Tenant @ {}", tenantPath);
+
+            if (defaultSpaceId == null) {
+                defaultSpaceId = SpaceLifecycleManager.createDefault(contractId, tenantId);
+            } else {
+                SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId);
+            }
+
+            // create default space file
+            Path defaultSpacePath = tenantPath.append(PathConstants.DEFAULT_SPACE_FILE);
+            Document defaultSpaceDoc = new Document(defaultSpaceId);
+            try {
+                camille.create(defaultSpacePath, defaultSpaceDoc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                log.debug("created .default-space @ {}", defaultSpacePath);
+            } catch (KeeperException.NodeExistsException e) {
+                log.debug(".default-space already existed @ {}, forcing update", defaultSpacePath);
+                camille.set(defaultSpacePath, defaultSpaceDoc, true);
+            }
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Tenant already existed @ {}, ignoring create", tenantPath);
-        }
-
-        if (defaultSpaceId == null) {
-            defaultSpaceId = SpaceLifecycleManager.createDefault(contractId, tenantId);
-        } else {
-            SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId);
-        }
-
-        // create default space file
-        Path defaultSpacePath = tenantPath.append(PathConstants.DEFAULT_SPACE_FILE);
-        try {
-            camille.create(defaultSpacePath, new Document(defaultSpaceId), ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            log.debug("created .default-space @ {}", defaultSpacePath);
-        } catch (KeeperException.NodeExistsException e) {
-            log.debug(".default-space already existed @ {}, ignoring create", defaultSpacePath);
         }
     }
 
