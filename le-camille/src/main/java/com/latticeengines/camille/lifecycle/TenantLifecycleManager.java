@@ -64,7 +64,11 @@ public class TenantLifecycleManager {
             if (defaultSpaceId != null) {
                 log.debug("updating default space Id to {}", defaultSpaceId);
                 SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId);
-                setDefaultSpaceId(contractId, tenantId, defaultSpaceId);
+                if (SpaceLifecycleManager.exists(contractId, tenantId, defaultSpaceId)) {
+                    setDefaultSpaceId(contractId, tenantId, defaultSpaceId);
+                } else {
+                    log.debug("No Space Exists with Id={}, ignoring.", defaultSpaceId);
+                }
             }
         }
     }
