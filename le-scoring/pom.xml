@@ -9,7 +9,7 @@
 
     <properties>
         <component-name>le-scoring</component-name>
-        <le.dataplatform.version>1.0.2-SNAPSHOT</le.dataplatform.version>
+        <le.dataplatform.version>1.0.3-SNAPSHOT</le.dataplatform.version>
     </properties>
 
     <parent>
