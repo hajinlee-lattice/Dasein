@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import com.google.common.base.Joiner;
 
@@ -49,20 +50,21 @@ public class Path implements Iterable<Path> {
      *         when this method is called.
      */
     public List<Path> getParentPaths() {
-        Iterator<String> iter = parts.iterator();
+        ListIterator<String> iter = parts.listIterator();
 
-        List<String> pathStrings = new ArrayList<String>(parts.size());
+        int size = parts.size();
+
+        List<String> pathStrings = new ArrayList<String>(size);
         pathStrings.add(iter.next());
 
-        final List<Path> out = new ArrayList<Path>(parts.size());
+        List<Path> out = new ArrayList<Path>(size);
         out.add(new Path(new ArrayList<String>(pathStrings)));
 
-        while (iter.hasNext()) {
+        while (iter.nextIndex() < size - 1) {
             pathStrings.add(iter.next());
             out.add(new Path(new ArrayList<String>(pathStrings)));
         }
 
-        out.remove(out.size() - 1);
         return out;
     }
 
