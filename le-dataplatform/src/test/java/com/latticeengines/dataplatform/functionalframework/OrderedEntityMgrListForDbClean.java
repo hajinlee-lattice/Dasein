@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableList;
-import com.latticeengines.dataplatform.entitymanager.AlgorithmEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.BaseEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
@@ -17,9 +16,11 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandParameterEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.jetty.JettyHostEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.modeling.AlgorithmEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Configuration
@@ -55,13 +56,14 @@ public class OrderedEntityMgrListForDbClean {
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
+    @Autowired
+    private JettyHostEntityMgr jettyHostEntityMgr;
+
     private List<BaseEntityMgr<? extends HasPid>> entityMgrs;
 
     @PostConstruct
     public void init() {
-        entityMgrs = ImmutableList.of(algorithmEntityMgr, throttleConfigurationEntityMgr, jobEntityMgr, modelEntityMgr,
-                modelDefinitionEntityMgr, modelCommandLogEntityMgr, modelCommandStateEntityMgr,
-                modelCommandParameterEntityMgr, modelCommandResultEntityMgr, modelCommandEntityMgr);
+        entityMgrs = ImmutableList.of(algorithmEntityMgr, throttleConfigurationEntityMgr, jobEntityMgr, modelEntityMgr, modelDefinitionEntityMgr, jettyHostEntityMgr, modelCommandLogEntityMgr, modelCommandStateEntityMgr, modelCommandParameterEntityMgr, modelCommandResultEntityMgr, modelCommandEntityMgr);
     }
 
     @Bean

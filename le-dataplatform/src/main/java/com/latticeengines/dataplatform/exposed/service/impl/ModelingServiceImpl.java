@@ -31,25 +31,26 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
-import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ThrottleConfigurationEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
+import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
-import com.latticeengines.domain.exposed.dataplatform.Algorithm;
-import com.latticeengines.domain.exposed.dataplatform.Classifier;
-import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.Model;
-import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
-import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.AlgorithmBase;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.DataProfilingAlgorithm;
+import com.latticeengines.domain.exposed.modeling.Algorithm;
+import com.latticeengines.domain.exposed.modeling.Classifier;
+import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
+import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.ModelDefinition;
+import com.latticeengines.domain.exposed.modeling.ModelingJob;
+import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
+import com.latticeengines.domain.exposed.modeling.algorithm.DataProfilingAlgorithm;
 import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 @Component("modelingService")
@@ -107,10 +108,10 @@ public class ModelingServiceImpl implements ModelingService {
                 continue;
             }
 
-            Job job = createJob(model, algorithm);
-            model.addJob(job);
+            ModelingJob modelingJob = createJob(model, algorithm);
+            model.addModelingJob(modelingJob);
             // JobService is responsible for persistence during submitJob
-            applicationIds.add(modelingJobService.submitJob(job));
+            applicationIds.add(modelingJobService.submitJob(modelingJob));
         }
 
         return applicationIds;
@@ -118,8 +119,7 @@ public class ModelingServiceImpl implements ModelingService {
 
     private void setupModelProperties(Model model) {
         model.setId(UUID.randomUUID().toString());
-        model.setModelHdfsDir(customerBaseDir + "/" + model.getCustomer() + "/models/" + model.getTable() + "/"
-                + model.getId());
+        model.setModelHdfsDir(customerBaseDir + "/" + model.getCustomer() + "/models/" + model.getTable() + "/" + model.getId());
         model.setDataHdfsPath(customerBaseDir + "/" + model.getCustomer() + "/data/" + model.getTable());
         model.setMetadataHdfsPath(customerBaseDir + "/" + model.getCustomer() + "/data/" + model.getMetadataTable());
     }
@@ -244,24 +244,25 @@ public class ModelingServiceImpl implements ModelingService {
         return null;
     }
 
-    private Job createJob(Model model, Algorithm algorithm) {
+    private ModelingJob createJob(Model model, Algorithm algorithm) {
         String assignedQueue = LedpQueueAssigner.getNonMRQueueNameForSubmission(algorithm.getPriority());
         return createJob(model, algorithm, assignedQueue);
     }
 
-    private Job createJob(Model model, Algorithm algorithm, String assignedQueue) {
-        Job job = new Job();
+    private ModelingJob createJob(Model model, Algorithm algorithm, String assignedQueue) {
+        ModelingJob modelingJob = new ModelingJob();
         Classifier classifier = createClassifier(model, algorithm);
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), model.getCustomer());
-        appMasterProperties.put(AppMasterProperty.TABLE.name(), model.getTable());
+
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
-        job.setClient("pythonClient");
-        job.setAppMasterPropertiesObject(appMasterProperties);
-        job.setContainerPropertiesObject(containerProperties);
-        return job;
+        //containerProperties.put(PythonContainerProperty.TABLE.name(), model.getTable());
+        modelingJob.setClient("pythonClient");
+        modelingJob.setAppMasterPropertiesObject(appMasterProperties);
+        modelingJob.setContainerPropertiesObject(containerProperties);
+        return modelingJob;
     }
 
     boolean doThrottling(ThrottleConfiguration config, Algorithm algorithm, int index) {
@@ -319,17 +320,16 @@ public class ModelingServiceImpl implements ModelingService {
         m.setMetadataTable(dataProfileConfig.getMetadataTable());
         setupModelProperties(m);
         try {
-            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, m.getDataHdfsPath() + "/samples",
-                    new HdfsFilenameFilter() {
+            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, m.getDataHdfsPath() + "/samples", new HdfsFilenameFilter() {
 
-                        @Override
-                        public boolean accept(String filename) {
-                            Pattern p = Pattern.compile(".*.avro");
-                            Matcher matcher = p.matcher(filename.toString());
-                            return matcher.matches();
-                        }
+                @Override
+                public boolean accept(String filename) {
+                    Pattern p = Pattern.compile(".*.avro");
+                    Matcher matcher = p.matcher(filename.toString());
+                    return matcher.matches();
+                }
 
-                    });
+            });
 
             if (paths.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_00002);
@@ -375,9 +375,9 @@ public class ModelingServiceImpl implements ModelingService {
         modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataProfileAlgorithm }));
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         m.setModelDefinition(modelDefinition);
-        Job job = createJob(m, dataProfileAlgorithm, assignedQueue);
-        m.addJob(job);
-        return modelingJobService.submitJob(job);
+        ModelingJob modelingJob = createJob(m, dataProfileAlgorithm, assignedQueue);
+        m.addModelingJob(modelingJob);
+        return modelingJobService.submitJob(modelingJob);
     }
 
     @Override
@@ -471,8 +471,7 @@ public class ModelingServiceImpl implements ModelingService {
         model.setMetadataTable(config.getMetadataTable());
         setupModelProperties(model);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        return modelingJobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
-                model.getCustomer(), config.getKeyCols());
+        return modelingJobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue, model.getCustomer(), config.getKeyCols());
     }
 
     @Override

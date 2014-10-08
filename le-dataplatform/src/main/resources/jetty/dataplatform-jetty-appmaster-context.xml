@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:yarn="http://www.springframework.org/schema/yarn"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/yarn http://www.springframework.org/schema/yarn/spring-yarn.xsd
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<bean id="taskScheduler"
+		class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler" />
+	<bean id="taskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
+	<bean id="yarnEventPublisher"
+		class="org.springframework.yarn.event.DefaultYarnEventPublisher" />
+	<bean class="org.springframework.yarn.event.LoggingListener">
+		<constructor-arg value="info" />
+	</bean>
+
+	<context:property-placeholder location="file:dataplatform.properties" />
+	<import resource="classpath:dataplatform-yarn-config-context.xml" />
+
+	<yarn:localresources>
+		<yarn:hdfs path="/app/dataplatform/hadoop-metrics2.properties" />
+		<yarn:hdfs path="${dataplatform.yarn.job.basedir}/$$JOBDIR$$/*" />
+		<yarn:hdfs path="/app/dataplatform/jetty/$$WAR_FILE$$" />
+	</yarn:localresources>
+
+	<yarn:environment />
+
+	<yarn:master
+		appmaster-class="com.latticeengines.dataplatform.runtime.jetty.JettyAppMaster">
+		<yarn:container-allocator virtualcores="$$VIRTUALCORES$$"
+			memory="$$MEMORY$$" priority="$$PRIORITY$$" />
+
+		<yarn:container-command>
+                        <![CDATA[
+                        /usr/bin/java -jar /usr/lib/ledp/jetty-runner-8.1.9.v20130131.jar $$WAR_FILE$$
+                        1><LOG_DIR>/JettyContainer.stdout
+                        2><LOG_DIR>/JettyContainer.stderr
+                        ]]>
+		</yarn:container-command>
+
+		<!-- <yarn:container-command> <![CDATA[ cat launch_container.sh 1><LOG_DIR>/Container.stdout 
+			2><LOG_DIR>/Container.stderr ]]> </yarn:container-command> -->
+
+	</yarn:master>
+
+	<context:component-scan base-package="com.latticeengines.dataplatform.runtime.jetty" />
+	<bean id="yarnService"
+		class="com.latticeengines.dataplatform.exposed.service.impl.YarnServiceImpl" />
+
+</beans>

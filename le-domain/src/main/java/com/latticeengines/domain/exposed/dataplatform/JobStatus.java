@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class JobStatus implements HasId<String> {
 
-    private String id;
+    private String jobId;
     private String resultDirectory;
     private String dataDiagnosticsDirectory;
     private FinalApplicationStatus status;
@@ -20,12 +20,12 @@ public class JobStatus implements HasId<String> {
 
     @Override
     public String getId() {
-        return id;
+        return jobId;
     }
 
     @Override
-    public void setId(String id) {
-        this.id = id;
+    public void setId(String jobId) {
+        this.jobId = jobId;
     }
 
     

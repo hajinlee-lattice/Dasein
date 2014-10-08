@@ -13,8 +13,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceImpl;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
-import com.latticeengines.domain.exposed.dataplatform.Model;
-import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
 public class ModelStepYarnProcessorImplUnitTestNG {
 

@@ -2,7 +2,8 @@ package com.latticeengines.perf.job.runnable.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
+
+import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 
 public class Profile extends ModelingResourceJob<DataProfileConfiguration, List<String>> {

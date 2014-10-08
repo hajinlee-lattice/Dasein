@@ -3,50 +3,42 @@ package com.latticeengines.domain.exposed.dataplatform;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.Inheritance;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import javax.persistence.InheritanceType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 
 @Entity
 @Table(name = "JOB")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Job implements HasPid, HasId<String> {
 
     private static final Log log = LogFactory.getLog(Job.class);
-
-    private Long pid;
-    private String id;
-    private String client;
-    private Model model;
-    private Properties appMasterProperties = new Properties();
-    private Properties containerProperties = new Properties();
-    private Long parentJobId;
-    private List<String> childJobIds = new ArrayList<String>();
+    protected Long pid;
+    protected String id;
+    protected String client;
+    protected Properties appMasterProperties = new Properties();
+    protected Properties containerProperties = new Properties();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
-    @Column(name = "PID", unique = true, nullable = false)
+    @Column(name = "JOB_PID", unique = true, nullable = false)
     @Override
     public Long getPid() {
         return this.pid;
@@ -54,8 +46,8 @@ public class Job implements HasPid, HasId<String> {
 
     @JsonIgnore
     @Override
-    public void setPid(Long id) {
-        this.pid = id;
+    public void setPid(Long pid) {
+        this.pid = pid;
     }
 
     @Override
@@ -73,18 +65,6 @@ public class Job implements HasPid, HasId<String> {
     @Transient
     public ApplicationId getAppId() {
         return YarnUtils.getApplicationIdFromString(id);
-    }
-
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE })
-    @JoinColumn(name = "FK_MODEL_ID")
-    public Model getModel() {
-        return model;
-    }
-
-    @JsonIgnore
-    public void setModel(Model model) {
-        this.model = model;
     }
 
     @JsonIgnore
@@ -182,35 +162,6 @@ public class Job implements HasPid, HasId<String> {
         this.client = client;
     }
 
-    @Column(name = "PARENT_JOB_ID")
-    public Long getParentJobId() {
-        return parentJobId;
-    }
-
-    public void setParentJobId(Long parentJobId) {
-        this.parentJobId = parentJobId;
-    }
-
-    @Column(name = "CHILD_JOB_IDS")
-    public String getChildJobIds() {
-        // convert list to csv string
-        return StringTokenUtils.listToString(this.childJobIds);
-    }
-
-    public void setChildJobIds(String listOfIds) {
-        // convert csv string to list
-        this.childJobIds = StringTokenUtils.stringToList(listOfIds);
-    }
-
-    @Transient
-    public List<String> getChildJobIdList() {
-        return this.childJobIds;
-    }
-
-    public void addChildJobId(String jobId) {
-        childJobIds.add(jobId);
-    }
-
     /**
      * http://docs.jboss.org/hibernate/core/4.0/manual/en-US/html/persistent-
      * classes.html#persistent-classes-equalshashcode
@@ -247,13 +198,9 @@ public class Job implements HasPid, HasId<String> {
 
         Job job = (Job) obj;
 
-        return new EqualsBuilder().append(pid, job.getPid()).append(id, job.getId()).append(client, job.getClient())
-        //
-                .append(model, job.getModel()).append(appMasterProperties, job.getAppMasterPropertiesObject())
-                //
-                .append(containerProperties, job.getContainerPropertiesObject())
-                //
-                .append(parentJobId, job.getParentJobId()).append(childJobIds, job.getChildJobIdList()).isEquals();
-    }
+        return new EqualsBuilder().append(pid, job.getPid()).append(id, job.getId()).append(client, job.getClient()) //
+                .append(appMasterProperties, job.getAppMasterPropertiesObject()) //
+                .append(containerProperties, job.getContainerPropertiesObject()).isEquals();
 
+    }
 }

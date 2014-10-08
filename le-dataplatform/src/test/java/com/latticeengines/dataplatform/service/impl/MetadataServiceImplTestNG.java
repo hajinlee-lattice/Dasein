@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.MetadataService;
-import com.latticeengines.domain.exposed.dataplatform.DbCreds;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 

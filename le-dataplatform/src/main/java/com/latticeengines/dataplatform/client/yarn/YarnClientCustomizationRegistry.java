@@ -14,7 +14,7 @@ public class YarnClientCustomizationRegistry implements InitializingBean {
 
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
 
@@ -36,6 +36,7 @@ public class YarnClientCustomizationRegistry implements InitializingBean {
         register(new DefaultYarnClientCustomization(yarnConfiguration, hdfsJobBaseDir));
         register(new PythonClientCustomization(yarnConfiguration, hdfsJobBaseDir));
         register(new RClientCustomization(yarnConfiguration, hdfsJobBaseDir));
+        register(new JettyClientCustomization(yarnConfiguration, hdfsJobBaseDir));
     }
 
 }

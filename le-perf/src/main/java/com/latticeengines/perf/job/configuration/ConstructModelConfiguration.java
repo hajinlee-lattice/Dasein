@@ -1,6 +1,6 @@
 package com.latticeengines.perf.job.configuration;
 
-import com.latticeengines.domain.exposed.dataplatform.Model;
+import com.latticeengines.domain.exposed.modeling.Model;
 
 public class ConstructModelConfiguration {
     OnBoardConfiguration obc;

@@ -5,29 +5,31 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
-import com.latticeengines.domain.exposed.dataplatform.Algorithm;
-import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.DbCreds;
-import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.Model;
-import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
-import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.AlgorithmBase;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
+import com.latticeengines.domain.exposed.modeling.Algorithm;
+import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
+import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.ModelDefinition;
+import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.SamplingElement;
+import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
+import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
 @Component("modelStepYarnProcessor")
 public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {

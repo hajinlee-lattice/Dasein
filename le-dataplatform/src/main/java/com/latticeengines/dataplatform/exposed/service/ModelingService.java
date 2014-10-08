@@ -2,12 +2,12 @@ package com.latticeengines.dataplatform.exposed.service;
 
 import java.util.List;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.Model;
-import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
+import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 
 public interface ModelingService {
 

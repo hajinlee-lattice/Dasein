@@ -26,11 +26,11 @@ public class SchemaGenerator {
     private DBDialect dialect;
 
     /**
-     * an new instance is only good for one dialect. It seems that Hibernate configuration cannot be reused by other
-     * dialect.
+     * an new instance is only good for one dialect. It seems that Hibernate configuration cannot be reused by other dialect.
      *
      * @param name
-     * @param packages  - specific packages,  not sub-package
+     * @param packages
+     *            - specific packages, not sub-package
      * @throws Exception
      */
     public SchemaGenerator(String name, DBDialect dialect, String... packages) throws Exception {
@@ -42,12 +42,12 @@ public class SchemaGenerator {
 
     /**
      *
-     * @param dbProp properties for database settings
+     * @param dbProp
+     *            properties for database settings
      * @param packages
      * @throws Exception
      */
-    public SchemaGenerator(String schemaName, Properties dbProp, DBDialect dialect, String... packages)
-            throws Exception {
+    public SchemaGenerator(String schemaName, Properties dbProp, DBDialect dialect, String... packages) throws Exception {
         cfg = new Configuration();
         cfg.setProperties(dbProp);
         this.dialect = dialect;
@@ -66,7 +66,7 @@ public class SchemaGenerator {
         }
         // error checking
         if (classes.isEmpty()) {
-            throw new ClassNotFoundException("class not found for package: "+packages);
+            throw new ClassNotFoundException("class not found for package: " + packages);
         }
 
         for (Class<?> clazz : classes) {
@@ -81,9 +81,9 @@ public class SchemaGenerator {
         export.setDelimiter(";");
         export.setFormat(true);
         if (outputFileName != null) {
-            export.setOutputFile(outputFileName); 
+            export.setOutputFile(outputFileName);
         }
-           
+
         export.execute(bScript, bExportToDb, false, false);
     }
 
@@ -97,14 +97,11 @@ public class SchemaGenerator {
 
     /**
      * SchemaGenerator - arguments[] <br>
-     * [0] script only? - true (or empty) to indicate to generate script only, false indicating to generate tables in
-     * database directly. <br>
-     * [1] database configuration properties file path - this leverages the dataplatform.properties for reusable
-     * settings <br>
+     * [0] script only? - true (or empty) to indicate to generate script only, false indicating to generate tables in database directly. <br>
+     * [1] database configuration properties file path - this leverages the dataplatform.properties for reusable settings <br>
      *
-     * hibernate.connection.driver_class - JDBC driver class hibernate.connection.url - JDBC URL
-     * hibernate.connection.username - database user hibernate.connection.password - database user password
-     * hibernate.connection.pool_size - maximum number of pooled connections
+     * hibernate.connection.driver_class - JDBC driver class hibernate.connection.url - JDBC URL hibernate.connection.username - database user
+     * hibernate.connection.password - database user password hibernate.connection.pool_size - maximum number of pooled connections
      *
      * @param args
      *            - [0]: scriptOnly - [1]: db properties (dataplatform.properties) file path
@@ -123,46 +120,33 @@ public class SchemaGenerator {
         }
 
         if (scriptOnly) {
-            gen = new SchemaGenerator("ledp", DBDialect.MYSQL, "com.latticeengines.domain.exposed.dataplatform",
-                    "com.latticeengines.domain.exposed.dataplatform.algorithm");
+            gen = new SchemaGenerator("ledp", DBDialect.MYSQL, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling", "com.latticeengines.domain.exposed.jetty", "com.latticeengines.domain.exposed.modeling.algorithm");
             gen.generateToScript();
 
-            gen = new SchemaGenerator("ledp", DBDialect.SQLSERVER, "com.latticeengines.domain.exposed.dataplatform",
-                    "com.latticeengines.domain.exposed.dataplatform.algorithm");
+            gen = new SchemaGenerator("ledp", DBDialect.SQLSERVER, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling", "com.latticeengines.domain.exposed.jetty", "com.latticeengines.domain.exposed.modeling.algorithm");
             gen.generateToScript();
 
-            gen = new SchemaGenerator("ledp", DBDialect.HSQL, "com.latticeengines.domain.exposed.dataplatform",
-                    "com.latticeengines.domain.exposed.dataplatform.algorithm");
+            gen = new SchemaGenerator("ledp", DBDialect.HSQL, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling", "com.latticeengines.domain.exposed.jetty", "com.latticeengines.domain.exposed.modeling.algorithm");
             gen.generateToScript();
 
-            genDlOrchestration = new SchemaGenerator("dlOrchestration", DBDialect.MYSQL,
-                    "com.latticeengines.domain.exposed.dataplatform.dlorchestration",
-                    "com.latticeengines.domain.exposed.dataplatform.dlorchestration.hibernate");
+            genDlOrchestration = new SchemaGenerator("dlOrchestration", DBDialect.MYSQL, "com.latticeengines.domain.exposed.dataplatform.dlorchestration", "com.latticeengines.domain.exposed.dataplatform.dlorchestration.hibernate");
             genDlOrchestration.generateToScript();
 
-            genDlOrchestration = new SchemaGenerator("dlOrchestration", DBDialect.SQLSERVER,
-                    "com.latticeengines.domain.exposed.dataplatform.dlorchestration",
-                    "com.latticeengines.domain.exposed.dataplatform.dlorchestration.hibernate");
+            genDlOrchestration = new SchemaGenerator("dlOrchestration", DBDialect.SQLSERVER, "com.latticeengines.domain.exposed.dataplatform.dlorchestration", "com.latticeengines.domain.exposed.dataplatform.dlorchestration.hibernate");
             genDlOrchestration.generateToScript();
 
-            genDlOrchestration = new SchemaGenerator("dlOrchestration", DBDialect.HSQL,
-                    "com.latticeengines.domain.exposed.dataplatform.dlorchestration",
-                    "com.latticeengines.domain.exposed.dataplatform.dlorchestration.hibernate");
+            genDlOrchestration = new SchemaGenerator("dlOrchestration", DBDialect.HSQL, "com.latticeengines.domain.exposed.dataplatform.dlorchestration", "com.latticeengines.domain.exposed.dataplatform.dlorchestration.hibernate");
             genDlOrchestration.generateToScript();
         } else {
             /** this option will be database specific **/
             Properties[] dbProperties = SchemaGenerator.convertDataplatformDbProperties(dbPropertiesFilepath);
             /** schema generation for ledp **/
             DBDialect dialectToGen = (DBDialect) dbProperties[0].get("local.dbdialect");
-            gen = new SchemaGenerator("ledp", dbProperties[0], dialectToGen,
-                    "com.latticeengines.domain.exposed.dataplatform",
-                    "com.latticeengines.domain.exposed.dataplatform.algorithm");
+            gen = new SchemaGenerator("ledp", dbProperties[0], dialectToGen, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling", "com.latticeengines.domain.exposed.jetty", "com.latticeengines.domain.exposed.modeling.algorithm");
             gen.generateToDatabase();
             /** schema generation for dlOrchestration **/
             dialectToGen = (DBDialect) dbProperties[1].get("local.dbdialect");
-            genDlOrchestration = new SchemaGenerator("dlOrchestration", dbProperties[1], dialectToGen,
-                    "com.latticeengines.domain.exposed.dataplatform.dlorchestration",
-                    "com.latticeengines.domain.exposed.dataplatform.hibernate");
+            genDlOrchestration = new SchemaGenerator("dlOrchestration", dbProperties[1], dialectToGen, "com.latticeengines.domain.exposed.dataplatform.dlorchestration", "com.latticeengines.domain.exposed.dataplatform.hibernate");
             genDlOrchestration.generateToDatabase();
 
         }
@@ -172,13 +156,11 @@ public class SchemaGenerator {
     /**
      * Convert from dataplatform.properties to hibernate.properties
      *
-     * from: dataplatform.dao.datasource.driver=com.microsoft.sqlserver.jdbc. SQLServerDriver
-     * dataplatform.dao.datasource.user=root dataplatform.dao.datasource.password.encrypted=welcome
-     * dataplatform.dao.datasource.url =jdbc:sqlserver://10.41.1.250:1433;databaseName=ledp_buildmachine;
+     * from: dataplatform.dao.datasource.driver=com.microsoft.sqlserver.jdbc. SQLServerDriver dataplatform.dao.datasource.user=root
+     * dataplatform.dao.datasource.password.encrypted=welcome dataplatform.dao.datasource.url =jdbc:sqlserver://10.41.1.250:1433;databaseName=ledp_buildmachine;
      *
-     * to: hibernate.connection.driver_class - JDBC driver class hibernate.connection.url - JDBC URL
-     * hibernate.connection.username - database user hibernate.connection.password - database user password
-     * hibernate.connection.pool_size - maximum number of pooled connections
+     * to: hibernate.connection.driver_class - JDBC driver class hibernate.connection.url - JDBC URL hibernate.connection.username - database user
+     * hibernate.connection.password - database user password hibernate.connection.pool_size - maximum number of pooled connections
      *
      * @param dbPropFilepath
      * @return [0] ledp db properies [1] dlOrchestration db properties
@@ -191,23 +173,18 @@ public class SchemaGenerator {
         prop.load(fis);
 
         Properties hibernatePropertiesLEDP = new Properties();
-        hibernatePropertiesLEDP
-                .put("hibernate.connection.driver_class", prop.get("dataplatform.dao.datasource.driver"));
+        hibernatePropertiesLEDP.put("hibernate.connection.driver_class", prop.get("dataplatform.dao.datasource.driver"));
         hibernatePropertiesLEDP.put("hibernate.connection.url", prop.get("dataplatform.dao.datasource.url"));
         hibernatePropertiesLEDP.put("hibernate.connection.username", prop.get("dataplatform.dao.datasource.user"));
-        hibernatePropertiesLEDP.put("hibernate.connection.password", CipherUtils.decrypt((String)prop.get("dataplatform.dao.datasource.password.encrypted")));
+        hibernatePropertiesLEDP.put("hibernate.connection.password", CipherUtils.decrypt((String) prop.get("dataplatform.dao.datasource.password.encrypted")));
         DBDialect dbDialect = convertDbDialect(prop.getProperty("dataplatform.dao.datasource.dialect"));
         hibernatePropertiesLEDP.put("local.dbdialect", dbDialect);
 
         Properties hibernatePropertiesDlOrchestration = new Properties();
-        hibernatePropertiesDlOrchestration.put("hibernate.connection.driver_class",
-                prop.get("dataplatform.dlorchestration.datasource.driver"));
-        hibernatePropertiesDlOrchestration.put("hibernate.connection.url",
-                prop.get("dataplatform.dlorchestration.datasource.url"));
-        hibernatePropertiesDlOrchestration.put("hibernate.connection.username",
-                prop.get("dataplatform.dlorchestration.datasource.user"));
-        hibernatePropertiesDlOrchestration.put("hibernate.connection.password",
-                CipherUtils.decrypt((String)prop.get("dataplatform.dlorchestration.datasource.password.encrypted")));
+        hibernatePropertiesDlOrchestration.put("hibernate.connection.driver_class", prop.get("dataplatform.dlorchestration.datasource.driver"));
+        hibernatePropertiesDlOrchestration.put("hibernate.connection.url", prop.get("dataplatform.dlorchestration.datasource.url"));
+        hibernatePropertiesDlOrchestration.put("hibernate.connection.username", prop.get("dataplatform.dlorchestration.datasource.user"));
+        hibernatePropertiesDlOrchestration.put("hibernate.connection.password", CipherUtils.decrypt((String) prop.get("dataplatform.dlorchestration.datasource.password.encrypted")));
         dbDialect = convertDbDialect(prop.getProperty("dataplatform.dlorchestration.datasource.dialect"));
         hibernatePropertiesDlOrchestration.put("local.dbdialect", dbDialect);
 
@@ -235,7 +212,7 @@ public class SchemaGenerator {
         List<Class<?>> classes = new ArrayList<>();
         File directory = null;
         try {
-            log.info("retreiving classes for package name:"+packageName);
+            log.info("retreiving classes for package name:" + packageName);
             ClassLoader cld = Thread.currentThread().getContextClassLoader();
             if (cld == null) {
                 throw new ClassNotFoundException("Can't get class loader.");
@@ -255,7 +232,7 @@ public class SchemaGenerator {
                     if (log.isDebugEnabled()) {
                         log.debug("   classes directory mode");
                     }
-                    
+
                     // deal with filesystem with classes case
                     String[] files = directory.list();
                     for (int i = 0; i < files.length; i++) {
@@ -263,14 +240,14 @@ public class SchemaGenerator {
                             // removes the .class extension
                             String className = packageName + '.' + files[i].substring(0, files[i].length() - 6);
                             classes.add(Class.forName(className));
-                            log.debug("adding class:"+className);
+                            log.debug("adding class:" + className);
                         }
                     }
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("   jar classes mode");
                     }
-                    
+
                     // deal with the classes within jar files
                     // url=jar:file:/tmp/dataplatform/database/lib/le-domain-1.0.3-SNAPSHOT.jar!/com/latticeengines/domain/exposed/dataplatform
                     String[] paths = directory.getPath().split("!");
@@ -293,7 +270,7 @@ public class SchemaGenerator {
                                 if (log.isDebugEnabled()) {
                                     log.debug("adding class: " + fullyClassname);
                                 }
-                                
+
                             }
                         }
                     } finally {
@@ -304,7 +281,6 @@ public class SchemaGenerator {
         } catch (NullPointerException x) {
             throw new ClassNotFoundException(packageName + " (" + directory + ") does not appear to be a valid package");
         }
-
 
         return classes;
     }

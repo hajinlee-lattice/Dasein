@@ -21,15 +21,15 @@ import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
-import com.latticeengines.domain.exposed.dataplatform.Algorithm;
-import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.DbCreds;
-import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.Model;
-import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
-import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
+import com.latticeengines.domain.exposed.modeling.Algorithm;
+import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
+import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.ModelDefinition;
+import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.SamplingElement;
+import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
 public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 

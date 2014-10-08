@@ -114,7 +114,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
                     + " does not exist.");
         }
         String parameter = setupParameters(containerProperties);
-
+        
         return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
                 // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
                 // //

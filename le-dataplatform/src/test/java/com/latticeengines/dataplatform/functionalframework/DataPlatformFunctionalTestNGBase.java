@@ -48,20 +48,19 @@ import org.testng.annotations.BeforeMethod;
 import com.latticeengines.dataplatform.entitymanager.BaseEntityMgr;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.dataplatform.Algorithm;
-import com.latticeengines.domain.exposed.dataplatform.Model;
-import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
+import com.latticeengines.domain.exposed.modeling.Algorithm;
+import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.ModelDefinition;
+import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
+import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(DataPlatformFunctionalTestNGBase.class);
-    public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
-            FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
+    public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED, FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 20;
 
     @Autowired
@@ -157,7 +156,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         // Make directories
         fs.mkdirs(new Path("/app/dataplatform/scripts"));
         fs.mkdirs(new Path("/app/dataplatform/scripts/leframework"));
-
+        fs.mkdirs(new Path("/app/dataplatform/jetty"));
         // Copy jars from build to hdfs
         String dataplatformPropDir = System.getProperty("DATAPLATFORM_PROPDIR");
         if (StringUtils.isEmpty(dataplatformPropDir)) {
@@ -184,7 +183,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/leframework.tar.gz",
                 "/app/dataplatform/scripts", false));
         copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
-
+        //copyEntries.add(new CopyEntry("file:/home/hliu/Downloads/helloworld.war", "/app/dataplatform/jetty", false));
         doCopy(fs, copyEntries);
     }
 
@@ -239,15 +238,13 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model-" + System.currentTimeMillis());
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
-                randomForestAlgorithm, logisticRegressionAlgorithm }));
+        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm, randomForestAlgorithm, logisticRegressionAlgorithm }));
 
         return modelDef;
     }
 
     /**
-     * this helper method produces a Model for unit / functional test (note:
-     * ModelDefinition still needs to be set)
+     * this helper method produces a Model for unit / functional test (note: ModelDefinition still needs to be set)
      *
      * @param appIdStr
      * @return
@@ -260,9 +257,9 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         model.setTable("iris");
         model.setMetadataTable("iris_metadata");
         model.setFeaturesList(Arrays.<String> asList(new String[] { "SEPAL_LENGTH", //
-                "SEPAL_WIDTH", //
-                "PETAL_LENGTH", //
-                "PETAL_WIDTH" }));
+        "SEPAL_WIDTH", //
+        "PETAL_LENGTH", //
+        "PETAL_WIDTH" }));
         model.setTargetsList(Arrays.<String> asList(new String[] { "CATEGORY" }));
         model.setCustomer("INTERNAL");
         model.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
@@ -356,10 +353,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     }
 
     /**
-     * Submits application and wait status. Returned status is <code>NULL</code>
-     * if something failed or final known status after the wait/poll operations.
-     * Array of application statuses can be used to return immediately from wait
-     * loop if status is matched.
+     * Submits application and wait status. Returned status is <code>NULL</code> if something failed or final known status after the wait/poll operations. Array
+     * of application statuses can be used to return immediately from wait loop if status is matched.
      *
      * @param applicationStatuses
      *            the application statuses to wait
@@ -368,8 +363,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
      *             if exception occurred
      * @see ApplicationInfo
      */
-    protected ApplicationId submitApplicationAndWaitStatus(FinalApplicationStatus... applicationStatuses)
-            throws Exception {
+    protected ApplicationId submitApplicationAndWaitStatus(FinalApplicationStatus... applicationStatuses) throws Exception {
         Assert.notEmpty(applicationStatuses, "Need to have at least one status");
 
         ApplicationId applicationId = submitApplication();
@@ -391,8 +385,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return applicationId;
     }
 
-    public FinalApplicationStatus waitForStatus(ApplicationId applicationId,
-            FinalApplicationStatus... applicationStatuses) throws Exception {
+    public FinalApplicationStatus waitForStatus(ApplicationId applicationId, FinalApplicationStatus... applicationStatuses) throws Exception {
         Assert.notNull(yarnClient, "Yarn client must be set");
         Assert.notNull(applicationId, "ApplicationId must not be null");
 

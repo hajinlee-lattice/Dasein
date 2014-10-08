@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.metadata.MetadataProvider;
-import com.latticeengines.domain.exposed.dataplatform.DataSchema;
-import com.latticeengines.domain.exposed.dataplatform.DbCreds;
+import com.latticeengines.domain.exposed.modeling.DataSchema;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 @Component("metadataService")
 public class MetadataServiceImpl implements MetadataService {

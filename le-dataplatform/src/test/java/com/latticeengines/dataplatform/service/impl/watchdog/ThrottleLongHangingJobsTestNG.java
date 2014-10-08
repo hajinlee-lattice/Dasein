@@ -27,11 +27,12 @@ import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
-import com.latticeengines.domain.exposed.dataplatform.Classifier;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.dataplatform.Model;
-import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
+import com.latticeengines.domain.exposed.modeling.Classifier;
+import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.ModelDefinition;
+import com.latticeengines.domain.exposed.modeling.ModelingJob;
 
 public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -114,16 +115,16 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         List<ApplicationId> appIds = new ArrayList<ApplicationId>();
 
         for (int i = 0; i < 3; i++) {
-            Job p0 = getJob(classifier1Min, "Priority0.0", 0, "DELL");
-            model.addJob(p0);
+            ModelingJob p0 = getJob(classifier1Min, "Priority0.0", 0, "DELL");
+            model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
             p0 = getJob(classifier2Mins, "Priority0.0", 0, "DELL");
-            model.addJob(p0);
+            model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
             p0 = getJob(classifier4Mins, "Priority0.0", 0, "DELL");
-            model.addJob(p0);
+            model.addModelingJob(p0);
             appIds.add(modelingJobService.submitJob(p0));
 
             Thread.sleep(5000L);
@@ -150,13 +151,13 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         return classifier;
     }
 
-    private Job getJob(Classifier classifier, String queue, int priority, String customer) {
-        Job job = new Job();
-        job.setClient("pythonClient");
+    private ModelingJob getJob(Classifier classifier, String queue, int priority, String customer) {
+        ModelingJob modelingJob = new ModelingJob();
+        modelingJob.setClient("pythonClient");
         Properties[] properties = getPropertiesPair(classifier, queue, priority, customer);
-        job.setAppMasterPropertiesObject(properties[0]);
-        job.setContainerPropertiesObject(properties[1]);
-        return job;
+        modelingJob.setAppMasterPropertiesObject(properties[0]);
+        modelingJob.setContainerPropertiesObject(properties[1]);
+        return modelingJob;
     }
 
     private Properties[] getPropertiesPair(Classifier classifier, String queue, int priority, String customer) {

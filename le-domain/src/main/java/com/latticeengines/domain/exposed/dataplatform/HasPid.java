@@ -4,6 +4,6 @@ public interface HasPid {
 
     Long getPid();
     
-    void setPid(Long id);
+    void setPid(Long pid);
     
 }

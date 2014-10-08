@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.yarn.am.AppmasterConstants;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
@@ -51,8 +52,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     private String runtimeConfig;
 
     @Override
-    public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties,
-            Properties containerProperties) {
+    public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties, Properties containerProperties) {
 
         YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
         if (customization == null) {
@@ -70,10 +70,12 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         String fileName = createContainerLauncherContextFile(customization, appMasterProperties, containerProperties);
         containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
         containerProperties.put(ContainerProperty.RUNTIME_CONFIG.name(), runtimeConfig);
-        containerProperties.setProperty(AppMasterProperty.QUEUE.name(),
-                appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()));
-        containerProperties.setProperty(AppMasterProperty.CUSTOMER.name(),
-                appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()));
+        String container_count = appMasterProperties.getProperty(AppMasterProperty.CONTAINER_COUNT.name());
+        if (container_count == null)
+            container_count = "1";
+        containerProperties.put(AppmasterConstants.CONTAINER_COUNT, container_count);
+        containerProperties.setProperty(AppMasterProperty.QUEUE.name(), appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()));
+        containerProperties.setProperty(AppMasterProperty.CUSTOMER.name(), appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()));
         ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer(containerProperties);
         int memory = customization.getMemory(appMasterProperties);
         int virtualCores = customization.getVirtualcores(appMasterProperties);
@@ -81,8 +83,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         String queue = customization.getQueue(appMasterProperties);
         List<String> commands = customization.getCommands(containerProperties);
 
-        client.setAppName(jobNameService.createJobName(
-                appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()), clientName));
+        client.setAppName(jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()), clientName));
         if (resourceLocalizer != null) {
             client.setResourceLocalizer(resourceLocalizer);
         }
@@ -109,8 +110,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
 
     }
 
-    private String createContainerLauncherContextFile(YarnClientCustomization customization,
-            Properties appMasterProperties, Properties containerProperties) {
+    private String createContainerLauncherContextFile(YarnClientCustomization customization, Properties appMasterProperties, Properties containerProperties) {
         String contextFileName = customization.getContainerLauncherContextFile(appMasterProperties);
 
         try (InputStream contextFileUrlFromClasspathAsStream = getClass().getResourceAsStream(contextFileName)) {
@@ -136,8 +136,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     }
 
     @Override
-    public void validate(CommandYarnClient client, String clientName, Properties appMasterProperties,
-            Properties containerProperties) {
+    public void validate(CommandYarnClient client, String clientName, Properties appMasterProperties, Properties containerProperties) {
         YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
         if (customization == null) {
             return;

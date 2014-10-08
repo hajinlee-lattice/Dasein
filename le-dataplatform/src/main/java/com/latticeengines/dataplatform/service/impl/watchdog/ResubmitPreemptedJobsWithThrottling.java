@@ -23,7 +23,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
-import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.modeling.ModelingJob;
+import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 
 @Component("resubmitPreemptedJobsWithThrottling")
 public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
@@ -42,7 +43,7 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     @Override
     public void run(JobExecutionContext context) throws JobExecutionException {
         ThrottleConfiguration latestConfig = throttleConfigurationEntityMgr.getLatestConfig();
-        List<Job> jobsToKill = getJobsToKill(latestConfig);
+        List<ModelingJob> jobsToKill = getJobsToKill(latestConfig);
         if (jobsToKill.size() != 0) {
             log.info("Received request to kill " + jobsToKill.size() + " applications");
         }
@@ -60,10 +61,10 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
         }
     }
 
-    private int resubmitPreemptedJobs(List<Job> jobsToExcludeFromResubmission) {
+    private int resubmitPreemptedJobs(List<ModelingJob> jobsToExcludeFromResubmission) {
         Set<String> jobIdsToExcludeFromResubmission = new HashSet<String>();
-        for (Job job : jobsToExcludeFromResubmission) {
-            jobIdsToExcludeFromResubmission.add(job.getId());
+        for (ModelingJob modelingJob : jobsToExcludeFromResubmission) {
+            jobIdsToExcludeFromResubmission.add(modelingJob.getId());
         }
         List<String> appIds = new ArrayList<String>();
         for (AppInfo appInfo : yarnService.getPreemptedApps()) {
@@ -79,22 +80,22 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
         }
 
         List<Job> jobsToResubmit = jobEntityMgr.findAllByObjectIds(appIds);
-        for (Job job : jobsToResubmit) {
-            modelingJobService.resubmitPreemptedJob(job);
+        for (Job modelingJob : jobsToResubmit) {
+            modelingJobService.resubmitPreemptedJob((ModelingJob) modelingJob);
         }
         return jobsToResubmit.size();
     }
 
-    private List<Job> getJobsToKill(ThrottleConfiguration config) {
-        List<Job> jobsToKill = new ArrayList<Job>();
+    private List<ModelingJob> getJobsToKill(ThrottleConfiguration config) {
+        List<ModelingJob> jobsToKill = new ArrayList<>();
 
         if (config != null) {
             int cutoffIndex = config.getJobRankCutoff();
             List<Job> runningJobs = jobEntityMgr.findAllByObjectIds(getRunningJobIds());
             Map<Long, Integer> modelToJobCounter = new HashMap<>();
 
-            for (Job job : runningJobs) {
-                Long modelId = job.getModel().getPid();
+            for (Job modelingJob : runningJobs) {
+                Long modelId = ((ModelingJob) modelingJob).getModel().getPid();
                 Integer jobCounter = modelToJobCounter.get(modelId);
                 if (jobCounter == null) {
                     jobCounter = 0;
@@ -103,9 +104,10 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
                 modelToJobCounter.put(modelId, jobCounter);
                 if (jobCounter >= cutoffIndex) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Finding job [over the rank cutoff]: " + job.getId() + " for model " + modelId);
+                        log.debug("Finding job [over the rank cutoff]: " + modelingJob.getId() + " for model "
+                                + modelId);
                     }
-                    jobsToKill.add(job);
+                    jobsToKill.add(((ModelingJob) modelingJob));
                 }
             }
         }
@@ -148,18 +150,18 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
     }
 
     // kill jobs specified
-    private int throttle(ThrottleConfiguration config, List<Job> jobs) {
+    private int throttle(ThrottleConfiguration config, List<ModelingJob> jobs) {
         Set<String> runningJobIds = new HashSet<String>(getRunningJobIds());
 
         List<String> appsKilled = new ArrayList<String>();
 
         if (config != null && config.isEnabled() && config.isImmediate()) {
-            for (Job job : jobs) {
-                String jobId = job.getId();
+            for (ModelingJob modelingJob : jobs) {
+                String jobId = modelingJob.getId();
                 if (runningJobIds.contains(jobId)) {
                     log.info("Killing job " + jobId);
                     try {
-                        modelingJobService.killJob(job.getAppId());
+                        modelingJobService.killJob(modelingJob.getAppId());
                         appsKilled.add(jobId);
                     } catch (Exception e) {
                         log.warn("Cannot kill job " + jobId, e);
@@ -170,15 +172,15 @@ public class ResubmitPreemptedJobsWithThrottling extends WatchdogPlugin {
 
         // clean up job directories
         List<Job> jobsKilled = jobEntityMgr.findAllByObjectIds(appsKilled);
-        for (Job job : jobsKilled) {
-            String dir = hdfsJobBaseDir + "/" + job.getContainerPropertiesObject().get(ContainerProperty.JOBDIR.name());
+        for (Job modelingJob : jobsKilled) {
+            String dir = hdfsJobBaseDir + "/"
+                    + modelingJob.getContainerPropertiesObject().get(ContainerProperty.JOBDIR.name());
             try {
                 HdfsUtils.rmdir(yarnConfiguration, dir);
             } catch (Exception e) {
                 log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
             }
         }
-
         return appsKilled.size();
     }
 }

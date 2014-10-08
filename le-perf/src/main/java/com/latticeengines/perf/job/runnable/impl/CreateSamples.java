@@ -1,7 +1,8 @@
 package com.latticeengines.perf.job.runnable.impl;
 
 import java.util.List;
-import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+
+import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 
 public class CreateSamples extends ModelingResourceJob<SamplingConfiguration, List<String>> {

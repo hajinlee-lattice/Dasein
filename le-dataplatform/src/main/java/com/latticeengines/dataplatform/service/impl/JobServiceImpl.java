@@ -82,12 +82,10 @@ public abstract class JobServiceImpl implements JobService, ApplicationContextAw
     }
 
     @Override
-    public ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties,
-            Properties containerProperties) {
+    public ApplicationId submitYarnJob(String yarnClientName, Properties appMasterProperties, Properties containerProperties) {
         CommandYarnClient client = (CommandYarnClient) getYarnClient(yarnClientName);
         yarnClientCustomizationService.validate(client, yarnClientName, appMasterProperties, containerProperties);
-        yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties,
-                containerProperties);
+        yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties, containerProperties);
 
         try {
             ApplicationId applicationId = client.submitApplication();
@@ -173,8 +171,7 @@ public abstract class JobServiceImpl implements JobService, ApplicationContextAw
     }
 
     protected void setJobStatus(JobStatus jobStatus, String applicationId) {
-        ApplicationReport appReport = defaultYarnClient.getApplicationReport(YarnUtils
-                .getApplicationIdFromString(applicationId));
+        ApplicationReport appReport = defaultYarnClient.getApplicationReport(YarnUtils.getApplicationIdFromString(applicationId));
         jobStatus.setId(applicationId);
         if (appReport != null) {
             jobStatus.setStatus(appReport.getFinalApplicationStatus());

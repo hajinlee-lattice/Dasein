@@ -20,10 +20,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
-import com.latticeengines.domain.exposed.dataplatform.Classifier;
-import com.latticeengines.domain.exposed.dataplatform.DataSchema;
-import com.latticeengines.domain.exposed.dataplatform.Field;
-
+import com.latticeengines.domain.exposed.modeling.Classifier;
+import com.latticeengines.domain.exposed.modeling.DataSchema;
+import com.latticeengines.domain.exposed.modeling.Field;
 
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
@@ -31,7 +30,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
 
     public PythonClientCustomization(Configuration configuration, String hdfsJobBaseDir) {
-        super(configuration,hdfsJobBaseDir);
+        super(configuration, hdfsJobBaseDir);
     }
 
     @Override
@@ -57,7 +56,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.DATAPROFILE.name(), classifier.getDataProfileHdfsPath());
             properties.put(PythonContainerProperty.CONFIGMETADATA.name(), classifier.getConfigMetadataHdfsPath());
 
-            File metadataFile = new File(dir  + "/metadata.json");
+            File metadataFile = new File(dir + "/metadata.json");
             FileUtils.writeStringToFile(metadataFile, metadata);
             properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
@@ -84,7 +83,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
         List<String> targets = classifier.getTargets();
         String schemaHdfsPath = classifier.getSchemaHdfsPath();
         String name = classifier.getName();
-        
+
         if (StringUtils.isEmpty(name)) {
             throw new LedpException(LedpCode.LEDP_10006);
         }

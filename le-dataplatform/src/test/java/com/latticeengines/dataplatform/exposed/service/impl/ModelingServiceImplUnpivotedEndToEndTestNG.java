@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
@@ -34,20 +34,20 @@ import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelCommandParameters;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelStepRetrieveMetadataProcessorImpl;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
-import com.latticeengines.domain.exposed.dataplatform.Algorithm;
-import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.DataSchema;
-import com.latticeengines.domain.exposed.dataplatform.DbCreds;
-import com.latticeengines.domain.exposed.dataplatform.Field;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.Model;
-import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
-import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
+import com.latticeengines.domain.exposed.modeling.Algorithm;
+import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.DataSchema;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.Field;
+import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
+import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.ModelDefinition;
+import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.SamplingElement;
+import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
 /**
  * This is an end-to-end test against a SQL Server database without having to go
@@ -165,7 +165,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         return config;
     }
 
-    @Test(groups = "functional", enabled = true, expectedExceptions = LedpException.class)
+    @Test(groups = "functional", enabled = false, expectedExceptions = LedpException.class)
     public void loadBadTableInput() throws Exception {
         LoadConfiguration loadConfig = getLoadConfig();
         loadConfig.setTable("SomeBogusTableName");

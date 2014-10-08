@@ -8,5 +8,5 @@ public interface JobDao extends BaseDao<Job> {
     // Set<Job> getByJobIds(Set<String> jobIds);
     Job findByObjectId(String id);
 
-    List<Job> findAllByObjectIds(List<String> jobIds);
+    List<Job> findAllByObjectIds(List<String> ids);
 }

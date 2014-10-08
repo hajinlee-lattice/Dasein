@@ -26,8 +26,8 @@ import org.apache.hadoop.util.ToolRunner;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
+import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
 public class EventDataSamplingJobUnitTestNG {
     

@@ -5,7 +5,7 @@ import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.MySQLManager;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.dataplatform.DbCreds;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 @SuppressWarnings("deprecation")
 public class MySQLServerMetadataProvider extends MetadataProvider {

@@ -5,14 +5,15 @@ import static org.testng.Assert.assertNotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import com.latticeengines.dataplatform.entitymanager.ModelDefinitionEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ModelEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
+import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataplatform.Job;
-import com.latticeengines.domain.exposed.dataplatform.Model;
-import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.ModelDefinition;
+import com.latticeengines.domain.exposed.modeling.ModelingJob;
+import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
+import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
 
 public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -32,11 +33,10 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        Job job1 = new Job();
+        ModelingJob job1 = new ModelingJob();
         job1.setId("application_12345_00001");
         job1.setClient("CLIENT 1");
-
-        Job job2 = new Job();
+        ModelingJob job2 = new ModelingJob();
         job2.setId("application_12345_00002");
         job2.setClient("CLIENT 2");
 
@@ -60,8 +60,8 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
 
         model = new Model();
-        model.addJob(job1);
-        model.addJob(job2);
+        model.addModelingJob(job1);
+        model.addModelingJob(job2);
 
         model.setId("model_12345_0001");
         model.setName("MODEL TEST NAME");

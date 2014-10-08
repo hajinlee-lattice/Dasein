@@ -1,8 +1,8 @@
 package com.latticeengines.perf.job.configuration;
 
-import com.latticeengines.domain.exposed.dataplatform.DataProfileConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.LoadConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
+import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
 public class OnBoardConfiguration {
 

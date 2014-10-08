@@ -6,9 +6,9 @@ import static org.testng.Assert.assertTrue;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.dataplatform.Algorithm;
-import com.latticeengines.domain.exposed.dataplatform.ThrottleConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.AlgorithmBase;
+import com.latticeengines.domain.exposed.modeling.Algorithm;
+import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
+import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
 
 public class ModelingServiceImplUnitTestNG {
 

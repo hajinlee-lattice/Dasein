@@ -3,17 +3,19 @@ package com.latticeengines.perf.cli.setup.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import com.latticeengines.domain.exposed.dataplatform.Algorithm;
-import com.latticeengines.domain.exposed.dataplatform.Model;
-import com.latticeengines.domain.exposed.dataplatform.ModelDefinition;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.AlgorithmBase;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.DecisionTreeAlgorithm;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.LogisticRegressionAlgorithm;
-import com.latticeengines.domain.exposed.dataplatform.algorithm.RandomForestAlgorithm;
+
+import com.latticeengines.domain.exposed.modeling.Algorithm;
+import com.latticeengines.domain.exposed.modeling.Model;
+import com.latticeengines.domain.exposed.modeling.ModelDefinition;
+import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
+import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
+import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
+import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.perf.cli.setup.CommandLineOption;
 import com.latticeengines.perf.cli.setup.CommandLineSetup;
 import com.latticeengines.perf.job.properties.CommandLineProperties;

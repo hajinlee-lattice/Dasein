@@ -32,29 +32,30 @@ public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntit
         return jobDao.findByObjectId(id);
     }
 
-    
     /**
      * find all Jobs by its object id (JobId)
      * 
-     * @param <a> jobIds - job ids to find by.   If argument is empty or null, a empty set is returned.
-     * @return - jobs satisfying the jobids querying condition;  empty Set if nothing is found.
+     * @param <a>
+     *            jobIds - job ids to find by. If argument is empty or null, a
+     *            empty set is returned.
+     * @return - jobs satisfying the jobids querying condition; empty Set if
+     *         nothing is found.
      * 
-     *  
+     * 
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<Job> findAllByObjectIds(List<String> appIds) {
+    public List<Job> findAllByObjectIds(List<String> ids) {
         List<Job> jobs = new ArrayList<>();
-        if (appIds == null || appIds.isEmpty()) {
+        if (ids == null || ids.isEmpty()) {
             return jobs;
         }
-        
-        while (appIds.size() > maxJobsMapping) {
-            List<String> subIdList = appIds.subList(0, maxJobsMapping);
+        while (ids.size() > maxJobsMapping) {
+            List<String> subIdList = ids.subList(0, maxJobsMapping);
             jobs.addAll(jobDao.findAllByObjectIds(subIdList));
-            appIds = appIds.subList(maxJobsMapping, appIds.size());
+            ids = ids.subList(maxJobsMapping, ids.size());
         }
-        jobs.addAll(jobDao.findAllByObjectIds(appIds));          
+        jobs.addAll(jobDao.findAllByObjectIds(ids));
         return jobs;
     }
 }

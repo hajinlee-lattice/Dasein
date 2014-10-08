@@ -34,10 +34,10 @@ public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {
     @SuppressWarnings("unchecked")
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<Job> findAllByObjectIds(List<String> jobIds) {
+    public List<Job> findAllByObjectIds(List<String> ids) {
         Session session = sessionFactory.getCurrentSession();
         Criteria criteria = session.createCriteria(Job.class, "listAllByObjectIds");
-        criteria.add(Restrictions.in("id", jobIds));
+        criteria.add(Restrictions.in("id", ids));
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
         List<Job> jobs = criteria.list();
         return jobs;

@@ -31,8 +31,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
+import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
 public class EventDataSamplingJob extends Configured implements Tool, MRJobCustomization {
 

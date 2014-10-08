@@ -5,8 +5,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import com.latticeengines.domain.exposed.dataplatform.SamplingConfiguration;
-import com.latticeengines.domain.exposed.dataplatform.SamplingElement;
+import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
+import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.perf.cli.setup.CommandLineOption;
 import com.latticeengines.perf.cli.setup.CommandLineSetup;
 import com.latticeengines.perf.job.runnable.impl.CreateSamples;
