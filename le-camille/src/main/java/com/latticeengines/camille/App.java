@@ -25,5 +25,7 @@ public class App {
         }
 
         log.info("Hello, {}!", namespace.get("name"));
+
+        System.out.println(new java.util.Date());
     }
 }

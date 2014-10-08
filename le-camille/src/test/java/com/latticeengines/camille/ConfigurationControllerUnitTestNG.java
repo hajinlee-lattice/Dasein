@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ContractScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
-import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 import com.latticeengines.domain.exposed.camille.scopes.PodScope;
 import com.latticeengines.domain.exposed.camille.scopes.TenantScope;
 
