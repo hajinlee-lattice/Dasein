@@ -15,9 +15,4 @@ public class EaiMain extends Main {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        EaiMain main = new EaiMain();
-        main.enableHangupSupport();
-        main.run(args);
-    }
 }
