@@ -36,10 +36,11 @@ def insertBeforeLast(text, insert, pattern):
 def jarUrl(nexusUrl, repository, metadata):
     return '{0}/content/repositories/{1}/{2}'.format(nexusUrl, repository, insertBeforeLast(tagValue(metadata, 'repositoryPath'), '-jar-with-dependencies', '.jar'))
 
-def deploy(jarUrl, manifest):
-    fileName = jarUrl.split('/')[-1]
+def deploy(nexusUrl, repoName, metadata, manifest):
+    url = jarUrl(nexusUrl, repoName, metadata)
+    fileName = url.split('/')[-1]
     output = open(fileName,'wb')
-    output.write(get(jarUrl))
+    output.write(get(url))
     output.close()
     
     dll = r"{0}\{1}".format(sys.path[0], "Camille.dll")
@@ -51,8 +52,7 @@ def deploy(jarUrl, manifest):
     p = subprocess.Popen(r"ikvmc -out:{0} -target:library {1}".format(dll, fileName), shell=True)
     p.communicate()
     if p.returncode:
-        print >> sys.stderr, "IKVM failed."
-        return p.returncode
+        sys.exit("IKVM failed.")
     
     try:
         os.remove(fileName)
@@ -83,17 +83,17 @@ def main(argv):
         if snapshotVersion > releaseVersion:
             m.version = snapshotVersion
             m.isRelease = False
-            deploy(jarUrl(nexusUrl, snapshotsRepoName, snapshotMetadata), m)
+            deploy(nexusUrl, snapshotsRepoName, snapshotMetadata, m)
         else:
             m.version = releaseVersion
             m.isRelease = True
-            deploy(jarUrl(nexusUrl, releasesRepoName, releaseMetadata), m)
+            deploy(nexusUrl, releasesRepoName, releaseMetadata, m)
     elif releaseVersion == m.version and not m.isRelease:
         m.version = releaseVersion
         m.isRelease = True
-        deploy(jarUrl(nexusUrl, releasesRepoName, releaseMetadata), m)
+        deploy(nexusUrl, releasesRepoName, releaseMetadata, m)
     else:
-        print "No rebuild of Camille was required."
+        print "A rebuild of Camille was not required."
     
     return 0
 
