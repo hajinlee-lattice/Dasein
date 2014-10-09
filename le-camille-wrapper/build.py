@@ -28,13 +28,13 @@ def get(url):
 def metadataUrl(nexusUrl, repository, groupId, artifactId, version):
     return '{0}/service/local/artifact/maven/resolve?r={1}&g={2}&a={3}&v={4}'.format(nexusUrl, repository, groupId, artifactId, version)
 
-def insertBefore(text, insert, before):
-    for match in re.finditer(before, text):
+def insertBeforeLast(text, insert, pattern):
+    for match in re.finditer(pattern, text):
         pass
     return text[1:match.start()] + insert + text[(match.start()):]
 
 def jarUrl(nexusUrl, repository, metadata):
-    return '{0}/content/repositories/{1}/{2}'.format(nexusUrl, repository, insertBefore(tagValue(metadata, 'repositoryPath'), '-jar-with-dependencies', '.jar'))
+    return '{0}/content/repositories/{1}/{2}'.format(nexusUrl, repository, insertBeforeLast(tagValue(metadata, 'repositoryPath'), '-jar-with-dependencies', '.jar'))
 
 def deploy(jarUrl, manifest):
     fileName = jarUrl.split('/')[-1]
