@@ -59,8 +59,7 @@ public class CamilleCache {
             throw new KeeperException.NoNodeException(path.toString());
         }
 
-        Document document = DocumentSerializer.toDocument(data.getData());
-        document.setVersion(data.getStat().getVersion());
+        Document document = new Document(data.getData(), null, data.getStat().getVersion());
         return document;
     }
 

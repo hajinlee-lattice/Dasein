@@ -91,21 +91,19 @@ public class CamilleTransaction {
     private static class CreateOperation extends Operation {
         private Document document;
         private List<ACL> acl;
-        private byte[] data;
         
-        public CreateOperation(Path path, Document document, List<ACL> acl) throws DocumentSerializationException {
+        public CreateOperation(Path path, Document document, List<ACL> acl) {
             super(path);
             this.document = document;
             this.acl = acl;
-            this.data = DocumentSerializer.toByteArray(document);
         }
         
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception {
-            return transaction.create().withACL(acl).forPath(path.toString(), data);
+            return transaction.create().withACL(acl).forPath(path.toString(), document.getData());
         }
         
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception {
-            return bridge.and().create().withACL(acl).forPath(path.toString(), data);
+            return bridge.and().create().withACL(acl).forPath(path.toString(), document.getData());
         }
         
         public void updateWithResult(CuratorTransactionResult result) {
@@ -119,20 +117,18 @@ public class CamilleTransaction {
     
     private static class SetOperation extends Operation {
         private Document document;
-        private byte[] data;
         
-        public SetOperation(Path path, Document document) throws DocumentSerializationException {
+        public SetOperation(Path path, Document document) {
             super(path);
             this.document = document;
-            this.data = DocumentSerializer.toByteArray(document);
         }
         
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception {
-            return transaction.setData().withVersion(document.getVersion()).forPath(path.toString(), data);
+            return transaction.setData().withVersion(document.getVersion()).forPath(path.toString(), document.getData());
         }
         
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception {
-            return bridge.and().setData().withVersion(document.getVersion()).forPath(path.toString(), data);
+            return bridge.and().setData().withVersion(document.getVersion()).forPath(path.toString(), document.getData());
         }
         
         public void updateWithResult(CuratorTransactionResult result) {
@@ -164,7 +160,7 @@ public class CamilleTransaction {
      * Performs a transactional create. This creates the provided document with
      * the provided ACL at the provided path within a transactional context.
      */
-    public void create(Path path, Document document, List<ACL> acl) throws DocumentSerializationException {
+    public void create(Path path, Document document, List<ACL> acl) {
         operations.add(new CreateOperation(path, document, acl));
     }
 
@@ -173,7 +169,7 @@ public class CamilleTransaction {
      * versions and so will result in an exception if the version in the
      * repository doesn't match the version of the document.
      */
-    public void set(Path path, Document document) throws DocumentSerializationException {
+    public void set(Path path, Document document) {
         operations.add(new SetOperation(path, document));
     }
 

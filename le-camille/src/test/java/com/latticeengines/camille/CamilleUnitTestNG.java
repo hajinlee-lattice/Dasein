@@ -139,11 +139,11 @@ public class CamilleUnitTestNG {
 
         Set<Pair<String, String>> actualChildren = new HashSet<Pair<String, String>>();
         for (Pair<Document, Path> childPair : c.getChildren(parentPath)) {
-            actualChildren.add(Pair.of(childPair.getLeft().getData(), childPair.getRight().toString()));
+            actualChildren.add(Pair.of(childPair.getLeft().getString(), childPair.getRight().toString()));
         }
 
-        Assert.assertTrue(actualChildren.contains(Pair.of(childDoc0.getData(), childPath0.toString())));
-        Assert.assertTrue(actualChildren.contains(Pair.of(childDoc1.getData(), childPath1.toString())));
+        Assert.assertTrue(actualChildren.contains(Pair.of(childDoc0.getString(), childPath0.toString())));
+        Assert.assertTrue(actualChildren.contains(Pair.of(childDoc1.getString(), childPath1.toString())));
     }
 
     @Test(groups = "unit")
@@ -200,7 +200,7 @@ public class CamilleUnitTestNG {
         int i = 0;
         Iterator<Node> iter = h.breadthFirstIterator();
         while (iter.hasNext()) {
-            Assert.assertEquals(iter.next().getDocument().getData(), String.format("d%d", i));
+            Assert.assertEquals(iter.next().getDocument().getString(), String.format("d%d", i));
             ++i;
         }
         Assert.assertEquals(i, 7);
@@ -208,7 +208,7 @@ public class CamilleUnitTestNG {
         i = 0;
         iter = h.depthFirstIterator();
         while (iter.hasNext()) {
-            switch (iter.next().getDocument().getData()) {
+            switch (iter.next().getDocument().getString()) {
             case "d0":
                 Assert.assertEquals(i, 0);
                 break;
