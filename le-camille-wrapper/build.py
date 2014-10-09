@@ -1,4 +1,4 @@
-import json, os, re, subprocess, sys, urllib2
+import argparse, json, os, re, subprocess, sys, urllib2
 
 class Manifest:
     def __init__(self, version, isRelease):
@@ -38,13 +38,18 @@ def insertBeforeLast(text, insert, pattern):
 def jarUrl(nexusUrl, repository, metadata):
     return '{0}/content/repositories/{1}/{2}'.format(nexusUrl, repository, insertBeforeLast(tagValue(metadata, 'repositoryPath'), '-jar-with-dependencies', '.jar'))
 
-def build(nexusUrl, repoName, metadata, manifest):
+def majorVersion(snapshotVersion):
+    try:
+        return snapshotVersion.split('-')[0]
+    except:
+        return None
+    
+def build(nexusUrl, repoName, metadata, manifest, dll):
     url = jarUrl(nexusUrl, repoName, metadata)
     fileName = url.split('/')[-1]
     with open(fileName,'wb') as output:
         output.write(get(url))
     
-    dll = r"{0}\{1}".format(sys.path[0], "Camille.dll")
     try:
         os.remove(dll)
     except OSError:
@@ -65,13 +70,14 @@ def build(nexusUrl, repoName, metadata, manifest):
     print 'Camille was updated to {0}.'.format(manifest)
     return 0
 
-def majorVersion(snapshotVersion):
-    try:
-        return snapshotVersion.split('-')[0]
-    except:
-        return None
-
-def main(argv):    
+def main(argv):   
+    parser = argparse.ArgumentParser(add_help=True)
+    parser.add_argument("camilleDestinationPath", help="where Camille.dll will be deposited after this script is run")
+    args = parser.parse_args()
+    
+    camilleDestinationPath = args.camilleDestinationPath.rstrip("\\")
+    dll = r'{0}\{1}'.format(camilleDestinationPath, "Camille.dll")
+ 
     m = Manifest.read()
     
     nexusUrl = 'http://bodcdevvmvn63.lattice.local:8081/nexus'
@@ -95,13 +101,13 @@ def main(argv):
         if (majorVersion(snapshotVersion) > m.version and not m.isRelease) or m.isRelease:
             m.version = snapshotVersion
             m.isRelease = False
-            return build(nexusUrl, snapshotsRepoName, snapshotMetadata, m)
+            return build(nexusUrl, snapshotsRepoName, snapshotMetadata, m, dll)
     else:
         # release controls
         if (releaseVersion > m.version and m.isRelease) or not m.isRelease:
             m.version = releaseVersion
             m.isRelease = True
-            return build(nexusUrl, releasesRepoName, releaseMetadata, m)        
+            return build(nexusUrl, releasesRepoName, releaseMetadata, m, dll)  
     
     print 'Camille {0} is up to date.'.format(m)
     return 0
