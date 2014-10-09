@@ -96,10 +96,6 @@
     <bean id="throttleConfigurationDao" class="com.latticeengines.dataplatform.dao.impl.modeling.ThrottleConfigurationDaoImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
-    
-    <bean id="jettyHostDao" class="com.latticeengines.dataplatform.dao.impl.jetty.JettyHostDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
-    </bean>
 
     <!--  DAOs for LeadScoring database  -->
     <bean id="modelCommandDao" class="com.latticeengines.dataplatform.dao.impl.ModelCommandDaoImpl">

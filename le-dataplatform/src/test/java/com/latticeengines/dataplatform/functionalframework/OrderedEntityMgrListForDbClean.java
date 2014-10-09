@@ -16,7 +16,6 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandParameterEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.jetty.JettyHostEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.AlgorithmEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
@@ -56,14 +55,13 @@ public class OrderedEntityMgrListForDbClean {
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
-    @Autowired
-    private JettyHostEntityMgr jettyHostEntityMgr;
-
     private List<BaseEntityMgr<? extends HasPid>> entityMgrs;
 
     @PostConstruct
     public void init() {
-        entityMgrs = ImmutableList.of(algorithmEntityMgr, throttleConfigurationEntityMgr, jobEntityMgr, modelEntityMgr, modelDefinitionEntityMgr, jettyHostEntityMgr, modelCommandLogEntityMgr, modelCommandStateEntityMgr, modelCommandParameterEntityMgr, modelCommandResultEntityMgr, modelCommandEntityMgr);
+        entityMgrs = ImmutableList.of(algorithmEntityMgr, throttleConfigurationEntityMgr, jobEntityMgr, modelEntityMgr,
+                modelDefinitionEntityMgr, modelCommandLogEntityMgr, modelCommandStateEntityMgr,
+                modelCommandParameterEntityMgr, modelCommandResultEntityMgr, modelCommandEntityMgr);
     }
 
     @Bean
