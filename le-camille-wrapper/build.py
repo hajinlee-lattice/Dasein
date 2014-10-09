@@ -62,7 +62,7 @@ def build(nexusUrl, repoName, metadata, manifest):
         pass
     
     manifest.write()
-    print 'Updated Camille to {0}'.format(manifest)
+    print 'Camille was updated to {0}.'.format(manifest)
     return 0
 
 def majorVersion(snapshotVersion):
@@ -103,7 +103,7 @@ def main(argv):
             m.isRelease = True
             return build(nexusUrl, releasesRepoName, releaseMetadata, m)        
     
-    print "A rebuild of Camille was not required."
+    print 'Camille {0} is up to date.'.format(m)
     return 0
 
 if __name__ == '__main__':
