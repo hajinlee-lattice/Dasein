@@ -3,30 +3,30 @@
     <queue name="Priority0.MapReduce">
         <weight>1000</weight>
         <queue name="0">
-            <minResources>6144 mb,4 vcores</minResources>
+            <minResources>4096 mb,6 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
     </queue>
     <queue name="Priority0">
     <weight>100</weight>
         <queue name="0">
-            <minResources>3072 mb,2 vcores</minResources>
+            <minResources>2048 mb,2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="1">
-            <minResources>3072 mb,2 vcores</minResources>
+            <minResources>2048 mb,2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="2">
-            <minResources>3072 mb,2 vcores</minResources>
+            <minResources>2048 mb,2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="3">
-            <minResources>3072 mb,2 vcores</minResources>
+            <minResources>2048 mb,2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
         <queue name="4">
-            <minResources>3072 mb,2 vcores</minResources>
+            <minResources>2048 mb,2 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
     </queue>
