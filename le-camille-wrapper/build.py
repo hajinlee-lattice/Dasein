@@ -15,6 +15,8 @@ class Manifest:
     def write(self):
         with open('camille.mf', 'w') as file:
             print >> file, json.dumps(self.__dict__)
+    def __str__(self):
+        return '{0} version {1}'.format('Release' if self.isRelease else 'Snapshot', self.version)
 
 def tagValue(xml, tag):
     return re.search(re.compile(r"<({0})\b[^>]*>(.*?)</\1>".format(tag), re.IGNORECASE | re.DOTALL), xml).group(2)
@@ -36,7 +38,7 @@ def insertBeforeLast(text, insert, pattern):
 def jarUrl(nexusUrl, repository, metadata):
     return '{0}/content/repositories/{1}/{2}'.format(nexusUrl, repository, insertBeforeLast(tagValue(metadata, 'repositoryPath'), '-jar-with-dependencies', '.jar'))
 
-def deploy(nexusUrl, repoName, metadata, manifest):
+def build(nexusUrl, repoName, metadata, manifest):
     url = jarUrl(nexusUrl, repoName, metadata)
     fileName = url.split('/')[-1]
     with open(fileName,'wb') as output:
@@ -60,12 +62,12 @@ def deploy(nexusUrl, repoName, metadata, manifest):
         pass
     
     manifest.write()
-    print "The build completed successfully."
+    print 'Updated Camille to {0}'.format(manifest)
     return 0
 
-def majorVersion(version):
+def majorVersion(snapshotVersion):
     try:
-        return version.split('-')[0]
+        return snapshotVersion.split('-')[0]
     except:
         return None
 
@@ -84,18 +86,22 @@ def main(argv):
     snapshotVersion = tagValue(snapshotMetadata, 'version')
     
     releaseMetadata = get(metadataUrl(nexusUrl, releasesRepoName, groupId, artifactId, 'LATEST'))
-    releaseVersion = tagValue(snapshotMetadata, 'version') if releaseMetadata else None
+    if not releaseMetadata:
+        sys.exit('Error getting release metadata.')
+    releaseVersion = tagValue(releaseMetadata, 'version')
     
-    if (majorVersion(snapshotVersion) > majorVersion(releaseVersion)):
-        if snapshotVersion > m.version:
+    if (majorVersion(snapshotVersion) > releaseVersion):
+        # snapshot controls
+        if (majorVersion(snapshotVersion) > m.version and not m.isRelease) or m.isRelease:
             m.version = snapshotVersion
             m.isRelease = False
-            return deploy(nexusUrl, snapshotsRepoName, snapshotMetadata, m)
+            return build(nexusUrl, snapshotsRepoName, snapshotMetadata, m)
     else:
-        if releaseVersion > m.version or not m.isRelease:
+        # release controls
+        if (releaseVersion > m.version and m.isRelease) or not m.isRelease:
             m.version = releaseVersion
             m.isRelease = True
-            return deploy(nexusUrl, releasesRepoName, releaseMetadata, m)        
+            return build(nexusUrl, releasesRepoName, releaseMetadata, m)        
     
     print "A rebuild of Camille was not required."
     return 0
