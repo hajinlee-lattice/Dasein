@@ -27,7 +27,6 @@ import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
-import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.Model;

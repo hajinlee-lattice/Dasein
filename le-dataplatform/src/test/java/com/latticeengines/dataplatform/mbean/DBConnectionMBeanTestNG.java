@@ -1,10 +1,12 @@
 package com.latticeengines.dataplatform.mbean;
 
+import static org.testng.Assert.assertTrue;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
+
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import static org.testng.Assert.assertTrue;
 
 
 public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {

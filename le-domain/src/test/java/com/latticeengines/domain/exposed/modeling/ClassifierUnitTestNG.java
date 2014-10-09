@@ -7,8 +7,6 @@ import java.util.Arrays;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.modeling.Classifier;
-import com.latticeengines.domain.exposed.modeling.Field;
 
 public class ClassifierUnitTestNG {
 

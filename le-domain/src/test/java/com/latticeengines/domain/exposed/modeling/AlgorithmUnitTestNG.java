@@ -7,7 +7,6 @@ import java.util.Properties;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
 
 

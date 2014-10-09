@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.modeling;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,7 +11,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.domain.exposed.dataplatform.Job;

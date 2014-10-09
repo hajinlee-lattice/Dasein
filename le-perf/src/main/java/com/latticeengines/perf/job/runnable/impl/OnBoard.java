@@ -1,7 +1,9 @@
 package com.latticeengines.perf.job.runnable.impl;
 
 import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
+
 import com.latticeengines.perf.job.configuration.OnBoardConfiguration;
 import com.latticeengines.perf.job.runnable.ModelingResourceJob;
 

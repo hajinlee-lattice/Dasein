@@ -7,9 +7,6 @@ import java.util.Arrays;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.modeling.Algorithm;
-import com.latticeengines.domain.exposed.modeling.Model;
-import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
 

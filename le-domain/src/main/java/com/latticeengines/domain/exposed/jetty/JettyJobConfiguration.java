@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.jetty;
 
 import java.util.Properties;
 
-import javax.persistence.Column;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

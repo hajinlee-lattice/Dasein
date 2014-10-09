@@ -1,21 +1,12 @@
 package com.latticeengines.perf.exposed.test.unit;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.configuration.SubsetConfiguration;
 import org.apache.commons.io.FileUtils;
-import org.apache.hadoop.metrics2.AbstractMetric;
 import org.apache.hadoop.metrics2.MetricsRecord;
-import org.apache.hadoop.metrics2.MetricsTag;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

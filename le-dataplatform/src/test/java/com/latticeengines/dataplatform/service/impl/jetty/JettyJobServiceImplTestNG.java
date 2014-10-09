@@ -1,45 +1,20 @@
 package com.latticeengines.dataplatform.service.impl.jetty;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
-import java.io.File;
-import java.net.URL;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.ApplicationReport;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
-import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.jetty.JettyJobService;
-import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.jetty.JettyJob;
-import com.latticeengines.domain.exposed.modeling.Classifier;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
-import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
 public class JettyJobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 

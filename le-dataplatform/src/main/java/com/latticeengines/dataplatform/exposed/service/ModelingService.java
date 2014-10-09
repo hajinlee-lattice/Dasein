@@ -1,7 +1,9 @@
 package com.latticeengines.dataplatform.exposed.service;
 
 import java.util.List;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;

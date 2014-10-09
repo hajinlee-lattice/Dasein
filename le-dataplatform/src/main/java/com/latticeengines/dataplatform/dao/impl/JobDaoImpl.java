@@ -1,12 +1,14 @@
 package com.latticeengines.dataplatform.dao.impl;
 
 import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.latticeengines.dataplatform.dao.JobDao;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 

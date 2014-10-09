@@ -9,7 +9,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 

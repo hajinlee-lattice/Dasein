@@ -1,17 +1,19 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import static org.testng.Assert.assertEquals;
+
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
+
 import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;

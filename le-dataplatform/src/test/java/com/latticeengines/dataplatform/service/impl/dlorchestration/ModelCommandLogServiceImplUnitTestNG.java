@@ -13,7 +13,6 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.impl.ModelCommandLogEntityMgrImpl;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
-import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelCommandLogServiceImpl;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;

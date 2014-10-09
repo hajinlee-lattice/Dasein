@@ -1,9 +1,12 @@
 package com.latticeengines.domain.exposed.dataplatform;
 
 import static org.testng.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.Properties;
+
 import org.testng.annotations.Test;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.Field;

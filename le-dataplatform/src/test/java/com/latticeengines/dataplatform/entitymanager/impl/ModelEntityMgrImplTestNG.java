@@ -2,13 +2,14 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;

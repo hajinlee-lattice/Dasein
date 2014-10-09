@@ -2,9 +2,10 @@ package com.latticeengines.domain.exposed.modeling;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+
 import org.testng.annotations.Test;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 
 public class ThrottleConfigurationUnitTestNG {
     

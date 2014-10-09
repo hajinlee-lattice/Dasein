@@ -2,8 +2,10 @@ package com.latticeengines.dataplatform.service.impl.watchdog;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+
 import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;

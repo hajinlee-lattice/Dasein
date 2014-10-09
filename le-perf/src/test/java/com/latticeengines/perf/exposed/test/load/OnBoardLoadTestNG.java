@@ -1,18 +1,21 @@
 package com.latticeengines.perf.exposed.test.load;
 
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
+
 import org.apache.hadoop.fs.Path;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.testng.annotations.Test;
+
 import com.latticeengines.perf.job.runnable.impl.GetJobStatus;
 import com.latticeengines.perf.job.runnable.impl.OnBoard;
 import com.latticeengines.perf.job.runnable.impl.SubmitModel;
 import com.latticeengines.perf.loadframework.PerfLoadTestNGBase;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertNotNull;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 public class OnBoardLoadTestNG extends PerfLoadTestNGBase {
