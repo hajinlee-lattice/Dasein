@@ -39,9 +39,8 @@ def jarUrl(nexusUrl, repository, metadata):
 def deploy(nexusUrl, repoName, metadata, manifest):
     url = jarUrl(nexusUrl, repoName, metadata)
     fileName = url.split('/')[-1]
-    output = open(fileName,'wb')
-    output.write(get(url))
-    output.close()
+    with open(fileName,'wb') as output:
+        output.write(get(url))
     
     dll = r"{0}\{1}".format(sys.path[0], "Camille.dll")
     try:
