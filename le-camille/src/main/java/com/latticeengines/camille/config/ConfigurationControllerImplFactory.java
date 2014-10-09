@@ -8,6 +8,6 @@ public class ConfigurationControllerImplFactory {
             // TODO
             return null;
         }
-        return new StandardConfigurationControllerImpl<T>(scope);      
+        return new StandardConfigurationControllerImpl<T>(scope);
     }
 }
