@@ -435,18 +435,18 @@ public class GenericModifiableData extends GenericData {
     }
 
     /** Returns a {@link DatumReader} for this kind of data. */
-    public DatumReader createDatumReader(Schema schema) {
-        return new GenericDatumReader(schema, schema, this);
+    public DatumReader<?> createDatumReader(Schema schema) {
+        return new GenericDatumReader<>(schema, schema, this);
     }
 
     /** Returns a {@link DatumReader} for this kind of data. */
-    public DatumReader createDatumReader(Schema writer, Schema reader) {
-        return new GenericDatumReader(writer, reader, this);
+    public DatumReader<?> createDatumReader(Schema writer, Schema reader) {
+        return new GenericDatumReader<>(writer, reader, this);
     }
 
     /** Returns a {@link DatumWriter} for this kind of data. */
-    public DatumWriter createDatumWriter(Schema schema) {
-        return new GenericDatumWriter(schema, this);
+    public DatumWriter<?> createDatumWriter(Schema schema) {
+        return new GenericDatumWriter<>(schema, this);
     }
 
     /** Returns true if a Java datum matches a schema. */
@@ -1005,7 +1005,6 @@ public class GenericModifiableData extends GenericData {
      * @return the default value associated with the given field, or null if
      *         none is specified in the schema.
      */
-    @SuppressWarnings({ "unchecked" })
     public Object getDefaultValue(Field field) {
         JsonNode json = field.defaultValue();
         if (json == null)
