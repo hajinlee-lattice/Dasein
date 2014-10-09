@@ -52,7 +52,8 @@ def deploy(nexusUrl, repoName, metadata, manifest):
     p = subprocess.Popen(r"ikvmc -out:{0} -target:library {1}".format(dll, fileName), shell=True)
     p.communicate()
     if p.returncode:
-        sys.exit("IKVM failed.")
+        print >> sys.stderr, "IKVM failed."
+        return p.returncode
     
     try:
         os.remove(fileName)
@@ -61,8 +62,15 @@ def deploy(nexusUrl, repoName, metadata, manifest):
     
     manifest.write()
     print "The build completed successfully."
+    return 0
 
-def main(argv):
+def majorVersion(version):
+    try:
+        return version.split('-')[0]
+    except:
+        return None
+
+def main(argv):    
     m = Manifest.read()
     
     nexusUrl = 'http://bodcdevvmvn63.lattice.local:8081/nexus'
@@ -79,22 +87,18 @@ def main(argv):
     releaseMetadata = get(metadataUrl(nexusUrl, releasesRepoName, groupId, artifactId, 'LATEST'))
     releaseVersion = tagValue(snapshotMetadata, 'version') if releaseMetadata else None
     
-    if max(snapshotVersion, releaseVersion) > m.version:
-        if snapshotVersion > releaseVersion:
+    if (majorVersion(snapshotVersion) > majorVersion(releaseVersion)):
+        if snapshotVersion > m.version:
             m.version = snapshotVersion
             m.isRelease = False
-            deploy(nexusUrl, snapshotsRepoName, snapshotMetadata, m)
-        else:
+            return deploy(nexusUrl, snapshotsRepoName, snapshotMetadata, m)
+    else:
+        if releaseVersion > m.version or not m.isRelease:
             m.version = releaseVersion
             m.isRelease = True
-            deploy(nexusUrl, releasesRepoName, releaseMetadata, m)
-    elif releaseVersion == m.version and not m.isRelease:
-        m.version = releaseVersion
-        m.isRelease = True
-        deploy(nexusUrl, releasesRepoName, releaseMetadata, m)
-    else:
-        print "A rebuild of Camille was not required."
+            return deploy(nexusUrl, releasesRepoName, releaseMetadata, m)        
     
+    print "A rebuild of Camille was not required."
     return 0
 
 if __name__ == '__main__':
