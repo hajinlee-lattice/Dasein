@@ -36,7 +36,6 @@ public class YarnClientCustomizationRegistry implements InitializingBean {
         register(new DefaultYarnClientCustomization(yarnConfiguration, hdfsJobBaseDir));
         register(new PythonClientCustomization(yarnConfiguration, hdfsJobBaseDir));
         register(new RClientCustomization(yarnConfiguration, hdfsJobBaseDir));
-        register(new JettyClientCustomization(yarnConfiguration, hdfsJobBaseDir));
     }
 
 }

@@ -124,7 +124,8 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
                                 Integer.toString(numMappers), //
                                 "--table", //
                                 table, //
-                                "--as-avrodatafile", "--compress", //
+                                "--as-avrodatafile", //
+                                "--compress", //
                                 "--mapreduce-job-name", //
                                 jobName, //
                                 "--split-by", //

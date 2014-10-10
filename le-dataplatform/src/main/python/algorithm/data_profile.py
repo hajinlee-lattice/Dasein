@@ -154,7 +154,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     colnames = list(data.columns.values)
     stringcols = set(schema["stringColumns"])
     features = set(schema["features"])
-    eventVector = data.iloc[:,schema["targetIndex"]]
+    eventVector = data.iloc[:, schema["targetIndex"]]
     colnameBucketMetadata, metadataDiagnostics = retrieveColumnBucketMetadata(schema["config_metadata"])
     progressReporter.setTotalState(len(colnames))
 

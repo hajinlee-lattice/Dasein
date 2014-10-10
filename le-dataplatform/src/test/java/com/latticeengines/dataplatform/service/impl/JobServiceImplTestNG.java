@@ -215,6 +215,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         classifier.setDataFormat("csv");
         classifier.setDataProfileHdfsPath("/datascientist1/EventMetadata");
         classifier.setConfigMetadataHdfsPath("/datascientist1/EventMetadata");
+        classifier.setPythonPipelineLibHdfsPath("/app/dataplatform/scripts/lepipeline.tar.gz");
+        classifier.setPythonPipelineScriptHdfsPath("/app/dataplatform/scripts/pipeline.py");
 
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 

@@ -8,12 +8,9 @@ import pickle
 from random import random
 from random import shuffle
 import shutil
+from sklearn.ensemble import RandomForestClassifier 
 import sys
-import unittest
 import uuid
-
-from sklearn.ensemble import RandomForestClassifier
-
 from leframework import scoringengine as se
 from testbase import TestBase
 
@@ -23,15 +20,24 @@ class TrainingTest(TestBase):
     def setUp(self):
         # Simulate what happens in yarn when it copies the framework code over
         # before running the python script
-        fwkdir = "./leframework.tar.gz"
+        self.fwkdir = "./leframework.tar.gz"
+        self.pipelinefwkdir = "./lepipeline.tar.gz"
+        fwkdir = self.fwkdir
+        pipelinefwkdir = self.pipelinefwkdir
+
         if os.path.exists(fwkdir):
             shutil.rmtree(fwkdir)
+        if os.path.exists(pipelinefwkdir):
+            shutil.rmtree(pipelinefwkdir)
 
         os.makedirs(fwkdir + "/leframework")
+        os.makedirs(pipelinefwkdir)
+
         enginedir = "/leframework/scoringengine.py"
         shutil.copyfile("../../main/python" + enginedir, fwkdir + enginedir)
-        shutil.copyfile("../../main/python/pipeline.py", fwkdir + "/pipeline.py")
-        shutil.copyfile("../../main/python/encoder.py", fwkdir + "/encoder.py")
+        shutil.copyfile("../../main/python/pipeline/pipeline.py", "./pipeline.py")
+        shutil.copyfile("../../main/python/pipeline/encoder.py", pipelinefwkdir + "/encoder.py")
+        sys.path.append(pipelinefwkdir)
 
         # Symbolic links will be cleaned up by testBase
         scriptDir = "../../main/python/algorithm/" 
@@ -43,6 +49,15 @@ class TrainingTest(TestBase):
         results = "./results"
         if os.path.exists(results):
             shutil.rmtree(results)
+    
+    def tearDown(self):
+        if os.path.exists(self.fwkdir):
+            shutil.rmtree(self.fwkdir)
+        if os.path.exists(self.pipelinefwkdir):
+            shutil.rmtree(self.pipelinefwkdir)
+        if os.path.exists("./pipeline.py"):
+            os.remove("./pipeline.py")
+        
 
     def testExecuteLearning(self):
         # Dynamically import launcher to make sure globals() is clean in launcher
@@ -60,19 +75,19 @@ class TrainingTest(TestBase):
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open("./results/model.json").read())
 
+        pipelineScript = "./results/pipeline.py.gz"
+        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][0]["Value"], pipelineScript)
+        self.assertTrue(filecmp.cmp(pipelineScript + ".decompressed", './pipeline.py'))
+
         payload = "./results/STPipelineBinary.p.gz"
-        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][2]["Value"], payload)
+        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][1]["Value"], payload)
         # Load from the file system and deserialize into the model
         pipeline = pickle.load(open(payload + ".decompressed", "r"))
         self.assertTrue(isinstance(pipeline.getPipeline()[2].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
 
-        pipelineScript = "./results/pipeline.py.gz"
-        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][1]["Value"], pipelineScript)
-        self.assertTrue(filecmp.cmp(pipelineScript + ".decompressed", './leframework.tar.gz/pipeline.py'))
-
         encoderScript = "./results/encoder.py.gz"
-        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][0]["Value"], encoderScript)
-        self.assertTrue(filecmp.cmp(encoderScript + ".decompressed", './leframework.tar.gz/encoder.py'))
+        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][2]["Value"], encoderScript)
+        self.assertTrue(filecmp.cmp(encoderScript + ".decompressed", './lepipeline.tar.gz/encoder.py'))
 
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
 
@@ -80,7 +95,7 @@ class TrainingTest(TestBase):
         inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
         value = [ random() for _ in range(len(inputColumns))]
 
-        fieldList = traininglauncher.getParser().fields       
+        fieldList = traininglauncher.getParser().fields
         typeDict = {}
         for field in fieldList:
             typeDict[field['columnName']] = field['sqlType']
@@ -200,5 +215,3 @@ class TrainingTest(TestBase):
 
         return decompressed.name
     
-if __name__ == '__main__':
-    unittest.main()

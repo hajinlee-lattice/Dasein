@@ -1,18 +1,13 @@
-import os
 import json
-import shutil
-from testbase import TestBase
+import os
+
 from algorithmtestbase import AlgorithmTestBase
 
-class DataProfileTest(TestBase, AlgorithmTestBase):
 
-    def setUp(self):
-        if os.path.exists("./results"):
-            shutil.rmtree("./results")
-
+class DataProfileTest(AlgorithmTestBase):
 
     def testTrain(self):
-        clf = self.execute("data_profile.py", dict(), False)
+        clf = self.execute("data_profile.py", "")
         self.assertTrue(clf is None)
         self.assertTrue(os.path.exists("./results/profile.avro"))
         self.assertTrue(os.path.exists("./results/diagnostics.json"))

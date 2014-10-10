@@ -242,5 +242,7 @@
   "algorithm_properties": null,
   "provenance_properties": null,
   "data_profile": "/user/s-analytics/customers/BD_ADEDTBDd69061522nF26061040r1/data/EventMetadata",
-  "config_metadata": "/user/s-analytics/customers/BD_ADEDTBDd69061522nF26061040r1/data/EventMetadata/metadata-badlift.avsc"
-}
+  "config_metadata": "/user/s-analytics/customers/BD_ADEDTBDd69061522nF26061040r1/data/EventMetadata/metadata-badlift.avsc",
+  "python_pipeline_script":"/app/dataplatform/scripts/pipeline/pipeline.py",
+  "python_pipeline_lib":"/app/dataplatform/scripts/lepipeline.tar.gz"
+ }

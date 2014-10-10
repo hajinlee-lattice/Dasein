@@ -4,6 +4,9 @@ public enum PythonContainerProperty {
 
    // TABLE, //
     PYTHONSCRIPT, //
+    PYTHONPIPELINELIBFQDN, //
+    PYTHONPIPELINELIB, //
+    PYTHONPIPELINESCRIPT, //
     TRAINING, //
     TEST, //
     SCHEMA, //

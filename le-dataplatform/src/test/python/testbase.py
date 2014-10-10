@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from unittest import TestCase
 
 
@@ -13,12 +14,13 @@ class TestBase(TestCase):
     def setUpClass(cls):
         logger.info("=========Current test: " + str(cls) + " ===========")
         baseDir = os.path.dirname(os.path.abspath(__file__))
-        dataDir = baseDir+ "/data/"
+        dataDir = baseDir + "/data/"
         # Creates symbolic links from data directory to current directory
         for f in os.listdir(dataDir):
             fPath = os.path.join(dataDir,f)
             if os.path.isfile(fPath) and not os.path.exists(f):
                 os.symlink(fPath, f)
+        sys.path.append(baseDir + "../../main/python/pipeline")
 
     @classmethod
     def tearDownClass(cls):

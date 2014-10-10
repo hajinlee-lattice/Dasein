@@ -4,16 +4,17 @@ import filecmp
 import gzip
 import json
 import os
-import sys
 import pickle
 from random import random
 from random import shuffle
 import shutil
 from sklearn.ensemble import RandomForestClassifier
+import sys 
 import uuid
 
-from testbase import TestBase
 from leframework import scoringengine as se
+from testbase import TestBase
+
 
 class TrainingTest(TestBase):
 
@@ -21,14 +22,20 @@ class TrainingTest(TestBase):
         # Simulate what happens in yarn when it copies the framework code over
         # before running the python script
         fwkdir = "./leframework.tar.gz"
+        pipelinefwkdir = "./lepipeline.tar.gz"
         if os.path.exists(fwkdir):
             shutil.rmtree(fwkdir)
+        if os.path.exists(pipelinefwkdir):
+            shutil.rmtree(pipelinefwkdir)
 
         os.makedirs(fwkdir + "/leframework")
+        os.makedirs(pipelinefwkdir)
+        
         enginedir = "/leframework/scoringengine.py"
         shutil.copyfile("../../main/python" + enginedir, fwkdir + enginedir)
-        shutil.copyfile("../../main/python/pipeline.py", fwkdir + "/pipeline.py")
-        shutil.copyfile("../../main/python/encoder.py", fwkdir + "/encoder.py")
+        shutil.copyfile("../../main/python/pipeline/pipeline.py", "./pipeline.py")
+        shutil.copyfile("../../main/python/pipeline/encoder.py", pipelinefwkdir + "/encoder.py")
+        sys.path.append(pipelinefwkdir)
 
         # Symbolic links will be cleaned up by testBase
         scriptDir = "../../main/python/algorithm/" 
@@ -56,20 +63,20 @@ class TrainingTest(TestBase):
 
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open("./results/model.json").read())
+        
+        pipelineScript = "./results/pipeline.py.gz"
+        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][0]["Value"], pipelineScript)
+        self.assertTrue(filecmp.cmp(pipelineScript + ".decompressed", './pipeline.py'))
 
         payload = "./results/STPipelineBinary.p.gz"
-        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][2]["Value"], payload)
+        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][1]["Value"], payload)
         # Load from the file system and deserialize into the model
         pipeline = pickle.load(open(payload + ".decompressed", "r"))
         self.assertTrue(isinstance(pipeline.getPipeline()[2].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
 
-        pipelineScript = "./results/pipeline.py.gz"
-        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][1]["Value"], pipelineScript)
-        self.assertTrue(filecmp.cmp(pipelineScript + ".decompressed", './leframework.tar.gz/pipeline.py'))
-
         encoderScript = "./results/encoder.py.gz"
-        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][0]["Value"], encoderScript)
-        self.assertTrue(filecmp.cmp(encoderScript + ".decompressed", './leframework.tar.gz/encoder.py'))
+        self.__decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][2]["Value"], encoderScript)
+        self.assertTrue(filecmp.cmp(encoderScript + ".decompressed", './lepipeline.tar.gz/encoder.py'))
 
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
 

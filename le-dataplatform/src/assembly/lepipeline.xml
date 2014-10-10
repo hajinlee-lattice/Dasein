@@ -6,11 +6,14 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>src/main/python/leframework</directory>
-            <outputDirectory>leframework</outputDirectory>
+            <directory>src/main/python/pipeline</directory>
+            <outputDirectory>.</outputDirectory>
             <includes>
                 <include>**/*.py</include>
             </includes>
+            <excludes>
+                <exclude>pipeline.py</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
 </assembly>

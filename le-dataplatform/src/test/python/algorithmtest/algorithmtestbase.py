@@ -1,43 +1,38 @@
+import json
 import os
-from encoder import HashEncoder
-from leframework.argumentparser import ArgumentParser
-from pipeline import EnumeratedColumnTransformStep
-from pipeline import ImputationStep
-from pipeline import Pipeline
+import shutil
+import sys
+ 
+from testbase import TestBase
 
+class AlgorithmTestBase(TestBase):
 
-class AlgorithmTestBase(object):
-    
-    def getDecoratedColumns(self, parser):
-        stringColumns = parser.getStringColumns()
-        allFeatures = parser.getNameToFeatureIndex()
-        continuousColumns = set(allFeatures.keys()) - stringColumns
-        stringCols = dict()
-        transform = HashEncoder()
-        for stringColumn in stringColumns:
-            stringCols[stringColumn] = transform
-        continuousCols = dict()
-        for continuousCol in continuousColumns:
-            continuousCols[continuousCol] = 0.0
-        return (stringCols, continuousCols)
-    
-    def execute(self, algorithmFileName, algorithmProperties, doTransformation=True):
-        parser = ArgumentParser("model.json")
-        schema = parser.getSchema()
-        training = parser.createList(parser.stripPath(schema["training_data"]))
-        test = parser.createList(parser.stripPath(schema["test_data"]))
-        modelDir = "./results/"
-        os.mkdir(modelDir)
-        execfile("../../main/python/algorithm/" + algorithmFileName, globals())
+    def setUp(self):
+        if os.path.exists("./results"):
+            shutil.rmtree("./results")
         
-        if doTransformation:
-            (stringCols, continuousCols) = self.getDecoratedColumns(parser)
+    def tearDown(self):
+        os.remove(self.algorithmFileName)
+        os.remove(self.algorithmJsonFileName)
+        
             
-            steps = [EnumeratedColumnTransformStep(stringCols), ImputationStep(continuousCols)]
-            pipeline = Pipeline(steps)
-            training = pipeline.predict(training)
-            test = pipeline.predict(test)
+    def execute(self, algorithmFileName, algorithmProperties):
+        if 'launcher' in sys.modules:
+            del sys.modules['launcher']
+        from launcher import Launcher
 
-        return globals()['train'](training, test, schema, modelDir, algorithmProperties)
+        model = json.loads(open("model.json").read())
+        model["algorithm_properties"] = algorithmProperties
+        model["python_script"] = algorithmFileName
+        algorithmJsonFileName = algorithmFileName + ".json"
+        with open(algorithmJsonFileName, "w") as outfile:
+            json.dump(model, outfile)
+        os.environ["CONTAINER_ID"] = "xyz"
+        os.environ["SHDP_HD_FSWEB"] = "localhost:50070"
+        shutil.copyfile("../../main/python/algorithm/" + algorithmFileName, algorithmFileName)
         
-        
+        self.algorithmFileName = algorithmFileName
+        self.algorithmJsonFileName = algorithmJsonFileName 
+        launcher = Launcher(algorithmJsonFileName)
+        launcher.execute(False)
+        return launcher.getClassifier()

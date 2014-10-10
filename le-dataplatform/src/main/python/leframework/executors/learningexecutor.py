@@ -1,7 +1,6 @@
 import logging
 import os
 
-import encoder
 import fastavro as avro
 from leframework.codestyle import overrides
 from leframework.executor import Executor
@@ -16,9 +15,6 @@ from leframework.model.states.modelgenerator import ModelGenerator
 from leframework.model.states.namegenerator import NameGenerator
 from leframework.model.states.percentilebucketgenerator import PercentileBucketGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
-from pipeline import EnumeratedColumnTransformStep
-from pipeline import ImputationStep
-from pipeline import Pipeline
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -73,7 +69,7 @@ class LearningExecutor(Executor):
                         sqlcolname = colname + "_" + record["columnvalue"]
                     else:
                         sqlcolname = colname
-                        record["hashValue"] = encoder.transform(record["columnvalue"])
+                        record["hashValue"] = record["columnvalue"]
                 
                     if colname in metadata:
                         metadata[colname].append(record)
@@ -83,40 +79,25 @@ class LearningExecutor(Executor):
                     realColNameToRecord[sqlcolname] = [record]
         return (metadata, realColNameToRecord)
     
-    def getDecoratedColumns(self, metadata):
-        stringColumns = dict()
-        continuousColumns = dict()
-        transform = encoder.HashEncoder()
-        
-        for key, value in metadata.iteritems():
-            if value[0]["Dtype"] == "STR":
-                stringColumns[key] = transform
-            else:
-                continuousColumns[key] = value[0]["median"]
-        
-        return (stringColumns, continuousColumns)
-
     @overrides(Executor)
     def transformData(self, params):
         metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
-        (stringColumns, continuousColumns) = self.getDecoratedColumns(metadata[0])
         
-        for stringColumn in stringColumns:
-            print('"%s",' % stringColumn)
+        # Execute the packaged script from the client and get the returned file
+        # that contains the generated data pipeline
+        script = params["pipelineScript"]
+        execfile(script, globals())
         
-        print("")
-        for continuousColumn in continuousColumns:
-            print('"%s",' % continuousColumn)
+        # Transform the categorical values in the metadata file into numerical values
+        globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
         
-        training = params["training"]
-        test = params["test"]
-        
-        steps = [EnumeratedColumnTransformStep(stringColumns), ImputationStep(continuousColumns)]
-        pipeline = Pipeline(steps)
+        # Create the data pipeline
+        pipeline = globals()["setupPipeline"](metadata[0])
         params["pipeline"] = pipeline
         
-        training = pipeline.predict(training)
-        test = pipeline.predict(test)
+        training = pipeline.predict(params["training"])
+        test = pipeline.predict(params["test"])
+        
         return (training, test, metadata)
 
     @overrides(Executor)
@@ -137,13 +118,16 @@ class LearningExecutor(Executor):
             mediator.metadata = params["metadata"]
             stateMachine.run()
         else:
-            logger.error("Generated classifier is null!")
+            logger.warn("Generated classifier is null.")
     
     @overrides(Executor)
     def getModelDirPath(self, schema):
-        appIdList = os.environ['CONTAINER_ID'].split("_")[1:3]
-        modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
-        return modelDirPath
+        if "CONTAINER_ID" in os.environ:
+            appIdList = os.environ['CONTAINER_ID'].split("_")[1:3]
+            modelDirPath = "%s/%s" % (schema["model_data_dir"], "_".join(appIdList))
+            return modelDirPath
+        else:
+            return ""
     
     @overrides(Executor)
     def accept(self, filename):

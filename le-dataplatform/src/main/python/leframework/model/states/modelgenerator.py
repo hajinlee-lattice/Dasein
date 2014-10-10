@@ -2,13 +2,13 @@ import base64
 from collections import OrderedDict
 import gzip
 import logging
+import os
 import pickle
 
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
-from pipeline import ModelStep
-
+from leframework.modelpipelinestep import ModelStep
 
 class ModelGenerator(State, JsonGenBase):
     
@@ -37,9 +37,17 @@ class ModelGenerator(State, JsonGenBase):
         pickle.dump(pipeline, open(filename, "w"), pickle.HIGHEST_PROTOCOL)
         filename = self.__compressFile(filename)
         pipelineBinaryPkl = self.__getSerializedFile(filename)
-        pipelinePkl = self.__getSerializedFile(self.__compressFile("leframework.tar.gz/pipeline.py"))
-        encoderPkl = self.__getSerializedFile(self.__compressFile("leframework.tar.gz/encoder.py"))
-        model["CompressedSupportFiles"] = [{ "Value": encoderPkl, "Key": "encoder.py" }, { "Value": pipelinePkl, "Key": "pipeline.py" }, { "Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" }]
+        pipelinePkl = self.__getSerializedFile(self.__compressFile(self.mediator.schema["python_pipeline_script"]))
+        model["CompressedSupportFiles"] = [{ "Value": pipelinePkl, "Key": "pipeline.py" }, { "Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" }]
+        
+        (dirpath, _, filenames) = os.walk(self.mediator.schema["python_pipeline_lib"]).next()
+        
+        for filename in filenames:
+            if filename.endswith(".pyc"):
+                continue
+            filePkl = self.__getSerializedFile(self.__compressFile(dirpath + "/" + filename))
+            model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": filename })
+            
         self.model = model
     
     def __compressFile(self, filename):

@@ -1,7 +1,9 @@
-import pickle
 import os
-from testbase import TestBase
+import pickle
+
 from leframework import scoringengine
+from testbase import TestBase
+
 
 class ScoringEngineTest(TestBase):
     inputFileName = "scoringtestinput.txt"

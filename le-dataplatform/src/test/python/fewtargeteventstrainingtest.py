@@ -10,15 +10,24 @@ class TrainingTest(TestBase):
     def setUp(self):
         # Simulate what happens in yarn when it copies the framework code over
         # before running the python script
-        fwkdir = "./leframework.tar.gz"
+        self.fwkdir = "./leframework.tar.gz"
+        self.pipelinefwkdir = "./lepipeline.tar.gz"
+        fwkdir = self.fwkdir
+        pipelinefwkdir = self.pipelinefwkdir
+
         if os.path.exists(fwkdir):
             shutil.rmtree(fwkdir)
+        if os.path.exists(pipelinefwkdir):
+            shutil.rmtree(pipelinefwkdir)
 
         os.makedirs(fwkdir + "/leframework")
+        os.makedirs(pipelinefwkdir)
+
         enginedir = "/leframework/scoringengine.py"
         shutil.copyfile("../../main/python" + enginedir, fwkdir + enginedir)
-        shutil.copyfile("../../main/python/pipeline.py", fwkdir + "/pipeline.py")
-        shutil.copyfile("../../main/python/encoder.py", fwkdir + "/encoder.py")
+        shutil.copyfile("../../main/python/pipeline/pipeline.py", "./pipeline.py")
+        shutil.copyfile("../../main/python/pipeline/encoder.py", pipelinefwkdir + "/encoder.py")
+        sys.path.append(pipelinefwkdir)
 
         # Symbolic links will be cleaned up by testBase
         scriptDir = "../../main/python/algorithm/" 

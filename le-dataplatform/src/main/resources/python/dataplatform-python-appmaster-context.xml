@@ -28,13 +28,15 @@
         <yarn:hdfs path="$$DATAPROFILE$$" />
         <yarn:hdfs path="$$CONFIGMETADATA$$" />
         <yarn:hdfs path="$$PYTHONSCRIPT$$" />
+        <yarn:hdfs path="$$PYTHONPIPELINESCRIPT$$" />
+        <yarn:hdfs path="$$PYTHONPIPELINELIBFQDN$$" type="ARCHIVE"/>
     </yarn:localresources>
 
     <yarn:environment>
         <yarn:classpath />
         SHDP_HD_FSWEB=${dataplatform.fs.web.defaultFS}
         PYTHONIOENCODING=UTF-8
-        PYTHONPATH=leframework.tar.gz
+        PYTHONPATH=leframework.tar.gz:$$PYTHONPIPELINELIB$$
     </yarn:environment>
 
     <yarn:master appmaster-class="com.latticeengines.dataplatform.runtime.python.PythonAppMaster">

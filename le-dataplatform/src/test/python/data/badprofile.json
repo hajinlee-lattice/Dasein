@@ -238,5 +238,7 @@
   "algorithm_properties": null,
   "provenance_properties": null,
   "data_profile": "/user/s-analytics/customers/PLS13_Training/data/EventMetadata",
-  "config_metadata": "/user/s-analytics/customers/PLS13_Training/data/EventMetadata/metadata.avsc"
+  "config_metadata": "/user/s-analytics/customers/PLS13_Training/data/EventMetadata/metadata.avsc",
+  "python_pipeline_script":"/app/dataplatform/scripts/pipeline/pipeline.py",
+  "python_pipeline_lib":"/app/dataplatform/scripts/lepipeline.tar.gz"
 }

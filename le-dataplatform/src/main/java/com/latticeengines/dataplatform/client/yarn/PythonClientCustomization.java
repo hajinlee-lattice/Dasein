@@ -52,6 +52,12 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             properties.put(PythonContainerProperty.TRAINING.name(), classifier.getTrainingDataHdfsPath());
             properties.put(PythonContainerProperty.TEST.name(), classifier.getTestDataHdfsPath());
             properties.put(PythonContainerProperty.PYTHONSCRIPT.name(), classifier.getPythonScriptHdfsPath());
+            String pipelineScript = classifier.getPythonPipelineScriptHdfsPath();
+            String pipelineLibScript = classifier.getPythonPipelineLibHdfsPath();
+            properties.put(PythonContainerProperty.PYTHONPIPELINESCRIPT.name(), pipelineScript);
+            properties.put(PythonContainerProperty.PYTHONPIPELINELIBFQDN.name(), pipelineLibScript);
+            String[] tokens = pipelineLibScript.split("/");
+            properties.put(PythonContainerProperty.PYTHONPIPELINELIB.name(), tokens[tokens.length - 1]);
             properties.put(PythonContainerProperty.SCHEMA.name(), classifier.getSchemaHdfsPath());
             properties.put(PythonContainerProperty.DATAPROFILE.name(), classifier.getDataProfileHdfsPath());
             properties.put(PythonContainerProperty.CONFIGMETADATA.name(), classifier.getConfigMetadataHdfsPath());

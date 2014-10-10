@@ -16,6 +16,7 @@ logger = logging.getLogger(name='launcher')
 class Launcher(object):
 
     def __init__(self, modelFileName, propertyFileName=None):
+        logger.info("Model file name = %s" % modelFileName)
         self.parser = ArgumentParser(modelFileName, propertyFileName)
         self.training = {}
         self.testing = {}
@@ -35,9 +36,11 @@ class Launcher(object):
         except KeyError:
             raise Exception("%s not set in job metadata." % (param))
 
-    def __validateEnvAndParameters(self, schema):
+    def __validateEnv(self):
         self.__validateEnvVariable('SHDP_HD_FSWEB')
         self.__validateEnvVariable('CONTAINER_ID')
+        
+    def __validateParameters(self, schema):
         self.__validateSchemaParam(schema, "training_data")
         self.__validateSchemaParam(schema, "test_data")
         self.__validateSchemaParam(schema, "python_script")
@@ -45,13 +48,18 @@ class Launcher(object):
 
     def getParser(self):
         return self.parser
+    
+    def getClassifier(self):
+        return self.clf;
 
-    def execute(self, writeToHdfs):
+    def execute(self, writeToHdfs, validateEnv=True, postProcessClf=True):
         parser = self.parser
         schema = parser.getSchema()
 
         # Fail fast if required parameters are not set
-        self.__validateEnvAndParameters(schema)
+        if validateEnv:
+            self.__validateEnv()
+        self.__validateParameters(schema)
 
         # Extract data and scripts for execution
         self.training = parser.createList(self.stripPath(schema["training_data"]))
@@ -73,7 +81,7 @@ class Launcher(object):
 
         executor = LearningExecutor(parser.getRuntimeProperties())
         if 'getExecutor' in globals():
-            executor = globals()['getExecutor']()
+            executor = globals()["getExecutor"]()
 
         # Get hdfs model dir
         modelHdfsDir = executor.getModelDirPath(schema)
@@ -85,6 +93,9 @@ class Launcher(object):
         params["test"] = self.test
         params["schema"] = schema
         params["parser"] = parser
+        params["pipelineScript"] = self.stripPath(schema["python_pipeline_script"])
+        schema["python_pipeline_script"] = params["pipelineScript"]
+        schema["python_pipeline_lib"] = self.stripPath(schema["python_pipeline_lib"])
 
         (self.training, self.test, metadata) = executor.transformData(params)
 
@@ -94,9 +105,10 @@ class Launcher(object):
 
         # Passes runtime properties to report progress
         # training and testing data passed in as Pandas DataFrame
-        clf = globals()['train'](self.training, self.test, schema, modelLocalDir, algorithmProperties, parser.getRuntimeProperties())
+        self.clf = globals()["train"](self.training, self.test, schema, modelLocalDir, algorithmProperties, parser.getRuntimeProperties())
 
-        executor.postProcessClassifier(clf, params)
+        if postProcessClf:
+            executor.postProcessClassifier(self.clf, params)
 
         if writeToHdfs:
             # Create webhdfs instance for writing to hdfs
@@ -128,6 +140,16 @@ class Launcher(object):
         modelToConsumerHdfsPath = modelToConsumerHdfsPath + consumer + "/" + modelId
         hdfs.rmdir(modelToConsumerHdfsPath + "/1.json")
         hdfs.copyFromLocal(modelLocalPath, "%s/%s" % (modelToConsumerHdfsPath, "1.json"))
+        
+
+def traverse(directory):
+    (dirpath, directories, filenames) = os.walk(directory).next()
+    
+    for filename in filenames:
+        logger.info(dirpath + "/" + filename)
+    
+    for d in directories:
+        traverse(dirpath + "/" + d)
 
 if __name__ == "__main__":
     """
@@ -139,8 +161,11 @@ if __name__ == "__main__":
     """
 
     logger.info("Python script launched with arguments: " + str(sys.argv[1:]))
-    if  len(sys.argv) != 3:
+    if len(sys.argv) != 3:
         logger.error("Argument length is :" + str(len(sys.argv)) + " which should be three.")
+
+    logger.info("Files local to container")
+    traverse(os.environ["PWD"])
 
     l = Launcher(sys.argv[1], sys.argv[2])
     l.execute(True)

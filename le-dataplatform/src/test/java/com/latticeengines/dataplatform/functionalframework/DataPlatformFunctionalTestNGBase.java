@@ -168,6 +168,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
                 "/app/dataplatform", false));
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/launcher.py",
                 "/app/dataplatform/scripts", false));
+        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/pipeline/pipeline.py",
+                "/app/dataplatform/scripts", false));
         copyEntries.add(new CopyEntry(
                 "file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/lr_train.py",
                 "/app/dataplatform/scripts/algorithm", false));
@@ -181,6 +183,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
                 + "/../../../src/main/python/algorithm/data_profile.py", "/app/dataplatform/scripts/algorithm", false));
         String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/leframework.tar.gz",
+                "/app/dataplatform/scripts", false));
+        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/lepipeline.tar.gz",
                 "/app/dataplatform/scripts", false));
         copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
         //copyEntries.add(new CopyEntry("file:/home/hliu/Downloads/helloworld.war", "/app/dataplatform/jetty", false));

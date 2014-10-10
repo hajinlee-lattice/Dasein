@@ -140,5 +140,7 @@
   "python_script": "/app/dataplatform/scripts/algorithm/data_profile.py",
   "data_profile": "/user/s-analytics/customers/BD_ADEBDd68060698nX25160587c/data/DataForModelingBD_ADEBDd68060698nX25160587c/EventMetadata",
   "config_metadata": "/user/s-analytics/customers/BD_ADEBDd68060698nX25160587c/data/DataForModelingBD_ADEBDd68060698nX25160587c/EventMetadata",
+  "python_pipeline_script":"/app/dataplatform/scripts/pipeline/pipeline.py",
+  "python_pipeline_lib":"/app/dataplatform/scripts/lepipeline.tar.gz",
   "name": "DataProfile-1406664645251"
 }

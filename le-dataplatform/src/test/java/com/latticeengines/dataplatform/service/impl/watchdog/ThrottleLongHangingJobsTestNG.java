@@ -146,6 +146,8 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         classifier.setTestDataHdfsPath("/test/nn_test.dat");
         classifier.setDataProfileHdfsPath("/training/a.avro");
         classifier.setConfigMetadataHdfsPath("/training/a.avsc");
+        classifier.setPythonPipelineLibHdfsPath("/app/dataplatform/scripts/lepipeline.tar.gz");
+        classifier.setPythonPipelineScriptHdfsPath("/app/dataplatform/scripts/pipeline.py");
 
         return classifier;
     }

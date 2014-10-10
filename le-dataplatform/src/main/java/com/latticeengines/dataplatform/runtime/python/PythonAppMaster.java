@@ -1,8 +1,12 @@
 package com.latticeengines.dataplatform.runtime.python;
 
+import java.io.File;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -120,6 +124,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 
     @Override
     public ContainerLaunchContext preLaunch(Container container, ContainerLaunchContext context) {
+    	logFilesInLocalFilesystem();
         pythonContainerId = container.getId().toString();
         log.info("Container id = " + pythonContainerId);
         // Start monitoring process
@@ -221,5 +226,28 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
             log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
         }
 
+    }
+    
+    private void logFilesInLocalFilesystem() {
+        
+        IOFileFilter filter = new IOFileFilter() {
+
+			@Override
+			public boolean accept(File file) {
+				return true;
+			}
+
+			@Override
+			public boolean accept(File dir, String name) {
+				return true;
+			}
+        };
+        Iterator<File> it = FileUtils.iterateFilesAndDirs(new File("."), filter, filter);
+        
+        while (it.hasNext()) {
+        	log.info(it.next().getAbsolutePath());
+        }
+
+    	
     }
 }

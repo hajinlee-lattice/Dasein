@@ -157,7 +157,9 @@ class ArgumentParser(object):
         schema["targetIndex"] = parser.getTargetIndex()
         schema["keyColIndex"] = parser.getKeyColumns()
         schema["nameToFeatureIndex"] = parser.getNameToFeatureIndex()
-        schema["data_profile"] = self.stripPath(self.metadataSchema["data_profile"])
+        
+        if "data_profile" in self.metadataSchema:
+            schema["data_profile"] = self.stripPath(self.metadataSchema["data_profile"]) 
         schema["config_metadata"] = parser.getConfigMetadata()
         schema["targets"] = self.targets
         schema["stringColumns"] = self.stringColNames
