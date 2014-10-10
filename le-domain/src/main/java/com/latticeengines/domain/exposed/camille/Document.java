@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.camille;
 
+
 public class Document {
     private String data;
     private int version = -1;
