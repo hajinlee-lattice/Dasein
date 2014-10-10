@@ -1,26 +1,23 @@
 package com.latticeengines.domain.exposed.camille;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-
 public class Document {
-    private byte[] data;
+    private String data;
     private int version = -1;
     private DocumentMetadata metadata;
 
     public Document() {
     }
 
-    public Document(byte[] data) {
+    public Document(String data) {
         this.data = data;
     }
 
-    public Document(byte[] data, DocumentMetadata metadata) {
+    public Document(String data, DocumentMetadata metadata) {
         this.data = data;
         this.metadata = metadata;
     }
 
-    public Document(byte[] data, DocumentMetadata metadata, int version) {
+    public Document(String data, DocumentMetadata metadata, int version) {
         if (version < 0) {
             throw new IllegalArgumentException("version must be greater or equal to 0");
         }
@@ -29,33 +26,13 @@ public class Document {
         this.metadata = metadata;
         this.version = version;
     }
-    
-    public Document(String data) throws Exception {
-        this(data == null ? null : data.getBytes("UTF-8"));
-    }
-    
-    public Document(String data, DocumentMetadata metadata) throws Exception {
-        this(data == null ? null : data.getBytes("UTF-8"), metadata);
-    }
-    
-    public Document(String data, DocumentMetadata metadata, int version) throws Exception {
-        this(data == null ? null : data.getBytes("UTF-8"), metadata, version);
-    }
 
-    public byte[] getData() {
+    public String getData() {
         return this.data;
     }
 
-    public void setData(byte[] data) {
+    public void setData(String data) {
         this.data = data;
-    }
-    
-    public String getString() throws Exception {
-        return data == null ? null : new String(this.data, "UTF-8");
-    }
-
-    public void setString(String data) throws Exception{
-        this.data = data == null ? null : data.getBytes("UTF-8");
     }
 
     public int getVersion() {
@@ -105,7 +82,7 @@ public class Document {
         if (data == null) {
             if (other.data != null)
                 return false;
-        } else if (!Arrays.equals(data, other.data))
+        } else if (!data.equals(other.data))
             return false;
         if (metadata == null) {
             if (other.metadata != null)

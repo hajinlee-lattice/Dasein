@@ -92,10 +92,9 @@ public class TenantLifecycleManager {
 
     public static String getDefaultSpaceId(String contractId, String tenantId) throws Exception {
         return CamilleEnvironment
-                        .getCamille()
-                        .get(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
-                                PathConstants.DEFAULT_SPACE_FILE)).getString();
-
+                .getCamille()
+                .get(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
+                        PathConstants.DEFAULT_SPACE_FILE)).getData();
     }
 
     public static void delete(String contractId, String tenantId) throws Exception {

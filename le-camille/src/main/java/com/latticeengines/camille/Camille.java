@@ -54,7 +54,7 @@ public class Camille {
     }
 
     public void create(Path path, Document doc, List<ACL> acls) throws Exception {
-        client.create().withACL(acls).forPath(path.toString(), doc.getData());
+        client.create().withACL(acls).forPath(path.toString(), DocumentSerializer.toByteArray(doc));
         doc.setVersion(0);
     }
 
@@ -66,22 +66,20 @@ public class Camille {
         SetDataBuilder builder = client.setData();
         if (!force)
             builder.withVersion(doc.getVersion());
-        Stat stat = builder.forPath(path.toString(), doc.getData());
+        Stat stat = builder.forPath(path.toString(), DocumentSerializer.toByteArray(doc));
         doc.setVersion(stat.getVersion());
     }
 
     public Document get(Path path) throws Exception {
         Stat stat = new Stat();
-        Document doc = new Document();
-        doc.setData(client.getData().storingStatIn(stat).forPath(path.toString()));
+        Document doc = DocumentSerializer.toDocument(client.getData().storingStatIn(stat).forPath(path.toString()));
         doc.setVersion(stat.getVersion());
         return doc;
     }
 
     public Document get(Path path, CuratorWatcher watcher) throws Exception {
         Stat stat = new Stat();
-        Document doc = new Document();
-        doc.setData(client.getData().storingStatIn(stat).usingWatcher(watcher)
+        Document doc = DocumentSerializer.toDocument(client.getData().storingStatIn(stat).usingWatcher(watcher)
                 .forPath(path.toString()));
         doc.setVersion(stat.getVersion());
         return doc;
