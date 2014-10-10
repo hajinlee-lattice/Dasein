@@ -51,5 +51,8 @@ public interface Algorithm extends HasName, HasPid {
     ModelDefinition getModelDefinition();
     
     void setModelDefinition(ModelDefinition modelDefinition);
-         
+
+    String getPipelineScript();
+    
+    String getPipelineLibScript();
 }

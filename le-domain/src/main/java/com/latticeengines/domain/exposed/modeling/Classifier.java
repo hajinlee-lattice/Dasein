@@ -24,6 +24,8 @@ public class Classifier implements HasName {
     private String dataProfileHdfsPath;
     private String configMetadataHdfsPath;
     private String dataDiagnosticsDirectory;
+    private String pythonPipelineLibHdfsPath;
+    private String pythonPipelineScriptHdfsPath;
 
     @Override
     @JsonProperty("name")
@@ -190,4 +192,24 @@ public class Classifier implements HasName {
         this.dataDiagnosticsDirectory = dataDiagnosticsDirectory;
     }
 
+    @JsonProperty("python_pipeline_script")
+    public String getPythonPipelineScriptHdfsPath() {
+        return pythonPipelineScriptHdfsPath;
+    }
+
+    @JsonProperty("python_pipeline_script")
+    public void setPythonPipelineScriptHdfsPath(String pythonPipelineScriptHdfsPath) {
+        this.pythonPipelineScriptHdfsPath = pythonPipelineScriptHdfsPath;
+    }
+    
+    @JsonProperty("python_pipeline_lib")
+    public String getPythonPipelineLibHdfsPath() {
+        return pythonPipelineLibHdfsPath;
+    }
+
+    @JsonProperty("python_pipeline_lib")
+    public void setPythonPipelineLibHdfsPath(String pythonPipelineLibHdfsPath) {
+        this.pythonPipelineLibHdfsPath = pythonPipelineLibHdfsPath;
+    }
+    
 }

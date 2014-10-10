@@ -38,6 +38,8 @@ public class AlgorithmBase implements Algorithm {
     private int priority; 
     private String sampleName;
     private ModelDefinition modelDefinition;
+    private String pipelineScript;
+    private String pipelineLibScript;
 
     @Override
     @Id
@@ -156,6 +158,28 @@ public class AlgorithmBase implements Algorithm {
     @Transient
     public Properties getContainerProps() {
         return StringTokenUtils.stringToProperty(getContainerProperties());
+    }
+
+    @JsonProperty("pipeline_script")
+    @Column(name = "PIPELINE_SCRIPT", nullable = true)
+    public String getPipelineScript() {
+        return pipelineScript;
+    }
+
+    @JsonProperty("pipeline_script")
+    public void setPipelineScript(String pipelineScript) {
+        this.pipelineScript = pipelineScript;
+    }
+
+    @JsonProperty("pipeline_lib_script")
+    @Column(name = "PIPELINE_LIB_SCRIPT", nullable = true)
+    public String getPipelineLibScript() {
+        return pipelineLibScript;
+    }
+
+    @JsonProperty("pipeline_lib_script")
+    public void setPipelineLibScript(String pipelineLibScript) {
+        this.pipelineLibScript = pipelineLibScript;
     }
 
     @Override
