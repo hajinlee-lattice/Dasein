@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 
 public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(NutanixDeploymentTestNG.class);
 
     @Autowired
