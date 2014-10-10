@@ -3,7 +3,7 @@
     <queue name="Priority0.MapReduce">
         <weight>1000</weight>
         <queue name="0">
-            <minResources>4096 mb,6 vcores</minResources>
+            <minResources>4096 mb,4 vcores</minResources>
             <schedulingPolicy>fifo</schedulingPolicy>
         </queue>
     </queue>
@@ -70,15 +70,10 @@
     <fairSharePreemptionTimeout>30</fairSharePreemptionTimeout>
 
     <user name="yarn">
-        <maxRunningApps>6</maxRunningApps>
+        <maxRunningApps>2</maxRunningApps>
     </user>
    
      <user name="build">
-        <maxRunningApps>6</maxRunningApps>
+        <maxRunningApps>2</maxRunningApps>
     </user>
-    <user name="hliu">
-        <maxRunningApps>6</maxRunningApps>
-    </user>
-
-
 </allocations>
