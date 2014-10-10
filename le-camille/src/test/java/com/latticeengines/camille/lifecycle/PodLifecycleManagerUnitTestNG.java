@@ -66,6 +66,7 @@ public class PodLifecycleManagerUnitTestNG {
             in.add(podId);
             PodLifecycleManager.create(podId);
         }
-        Assert.assertTrue(in.containsAll(PodLifecycleManager.getAll()));
+
+        Assert.assertTrue(PodLifecycleManager.getAll().containsAll(in));
     }
 }

@@ -2,7 +2,9 @@ package com.latticeengines.camille;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
@@ -30,22 +32,20 @@ public class CamilleEnvironment {
     private static Camille camille = null;
     private static ConfigJson config = null;
 
-    // TODO: accept inputstream with camille.json
     public static synchronized void start(Mode mode, Reader configJsonReader) throws Exception {
         if (camille != null && camille.getCuratorClient() != null
                 && camille.getCuratorClient().getState().equals(CuratorFrameworkState.STARTED)) {
 
             IllegalStateException ise = new IllegalStateException("Camille environment is already started");
             log.error(ise.getMessage(), ise);
-            camille = null;
             throw ise;
         }
 
-        NullPointerException npe = new NullPointerException("mode cannot be null");
         if (mode == null) {
-            log.error(npe.getMessage(), npe);
-            camille = null;
-            throw npe;
+            IllegalArgumentException e = new IllegalArgumentException("mode cannot be null");
+            log.error(e.getMessage(), e);
+            stopNoSync();
+            throw e;
         }
 
         config = null;
@@ -53,7 +53,7 @@ public class CamilleEnvironment {
             config = new ObjectMapper().readValue(configJsonReader, ConfigJson.class);
         } catch (IOException ioe) {
             log.error("An error occurred reading camille.json.", ioe);
-            camille = null;
+            stopNoSync();
             throw ioe;
         }
 
@@ -63,18 +63,35 @@ public class CamilleEnvironment {
             client.blockUntilConnected();
         } catch (InterruptedException ie) {
             log.error("Waiting for Curator connection was interrupted.", ie);
-            camille = null;
+            stopNoSync();
             throw ie;
         }
 
-        if (Mode.RUNTIME.equals(mode) && !PodLifecycleManager.exists(config.getPodId())) {
-            Exception e = new RuntimeException(String.format("Runtime mode requires an existing pod with Id=%s",
-                    config.getPodId()));
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-
         camille = new Camille(client);
+
+        switch (mode) {
+        case BOOTSTRAP:
+            PodLifecycleManager.create(config.getPodId());
+            List<String> podIds = PodLifecycleManager.getAll();
+            if (podIds.size() > 1) {
+                RuntimeException e = new RuntimeException(String.format(
+                        "Only one Pod can exist in Bootstrap mode.  Pods with the following podIds were found: %s",
+                        StringUtils.join(podIds, ";")));
+                log.error(e.getMessage(), e);
+                stopNoSync();
+                throw e;
+            }
+            break;
+        case RUNTIME:
+            if (!PodLifecycleManager.exists(config.getPodId())) {
+                Exception e = new RuntimeException(String.format("Runtime mode requires an existing pod with Id=%s",
+                        config.getPodId()));
+                log.error(e.getMessage(), e);
+                stopNoSync();
+                throw e;
+            }
+            break;
+        }
     }
 
     public synchronized static String getPodId() {
@@ -84,13 +101,21 @@ public class CamilleEnvironment {
         return config.getPodId();
     }
 
-    public static synchronized void stop() {
+    /**
+     * Does a stop but does not synchronize on the class object. Only call this
+     * from a static synchronized method.
+     */
+    private static void stopNoSync() {
         if (camille != null && camille.getCuratorClient() != null
                 && camille.getCuratorClient().getState().equals(CuratorFrameworkState.STARTED)) {
             camille.getCuratorClient().close();
             camille = null;
             config = null;
         }
+    }
+
+    public static synchronized void stop() {
+        stopNoSync();
     }
 
     public static Camille getCamille() {
