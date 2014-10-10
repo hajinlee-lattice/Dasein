@@ -21,7 +21,7 @@ public class LoggerAdapterUnitTestNG {
     private static final Throwable throwable = new Exception("TestException");
     private static final Marker marker = MarkerFactory.getMarker("TestMarker");
 
-    private static final int timeOutMs = 2000;
+    private static final int timeOutMs = 10000;
 
     @Test(groups = "unit")
     public void testTraceIsEnabled() {
