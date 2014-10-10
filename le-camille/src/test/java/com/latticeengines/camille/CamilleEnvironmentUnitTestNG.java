@@ -11,8 +11,6 @@ import org.apache.zookeeper.ZooDefs;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,18 +26,18 @@ public class CamilleEnvironmentUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    @BeforeMethod(groups = "unit")
-    public void setUp() throws Exception {
-        CamilleTestEnvironment.start();
-    }
-
-    @AfterMethod(groups = "unit")
-    public void tearDown() throws Exception {
-        CamilleTestEnvironment.stop();
-    }
+    // @BeforeMethod(groups = "unit")
+    // public void setUp() throws Exception {
+    // CamilleTestEnvironment.start();
+    // }
+    //
+    // @AfterMethod(groups = "unit")
+    // public void tearDown() throws Exception {
+    // CamilleTestEnvironment.stop();
+    // }
 
     @Test(groups = "unit")
-    public void testBootstrapWithMultiplePods() throws Exception {
+    public synchronized void testBootstrapWithMultiplePods() throws Exception {
         try (TestingServer server = new TestingServer()) {
 
             CuratorFramework client = CuratorFrameworkFactory.newClient(server.getConnectString(),
@@ -89,7 +87,7 @@ public class CamilleEnvironmentUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testBootstrapWithOnePod() throws Exception {
+    public synchronized void testBootstrapWithOnePod() throws Exception {
         try (TestingServer server = new TestingServer()) {
 
             CuratorFramework client = CuratorFrameworkFactory.newClient(server.getConnectString(),
@@ -118,7 +116,7 @@ public class CamilleEnvironmentUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testRuntimeWithPod() throws Exception {
+    public synchronized void testRuntimeWithPod() throws Exception {
         try (TestingServer server = new TestingServer()) {
 
             String podId = "pod0";
@@ -163,7 +161,7 @@ public class CamilleEnvironmentUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testRuntimeWithNoPod() throws Exception {
+    public synchronized void testRuntimeWithNoPod() throws Exception {
         try (TestingServer server = new TestingServer()) {
 
             String podId = "pod0";
@@ -175,6 +173,8 @@ public class CamilleEnvironmentUnitTestNG {
             OutputStream stream = new ByteArrayOutputStream();
 
             new ObjectMapper().writeValue(stream, config);
+
+            CamilleEnvironment.stop();
 
             try {
                 CamilleEnvironment.start(Mode.RUNTIME, new StringReader(stream.toString()));

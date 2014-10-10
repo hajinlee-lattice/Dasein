@@ -86,7 +86,7 @@ public class Camille {
     }
 
     /**
-     * Gets direct children only (not a fully hierarchy).
+     * Gets direct children only (not a full hierarchy).
      * 
      * @throws Exception
      */
