@@ -15,7 +15,7 @@ public class DataplatformCheckMBeanTestNG extends DataPlatformFunctionalTestNGBa
     @Autowired
     private DataplatformCheckMBean dataplatformCheckMBean;
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void testCheckDataplatform() {
         assertTrue(dataplatformCheckMBean.checkDataplatform().contains("passed"));
     }

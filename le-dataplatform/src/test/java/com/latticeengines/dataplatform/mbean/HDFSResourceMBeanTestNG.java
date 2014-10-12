@@ -11,7 +11,7 @@ public class HDFSResourceMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private HDFSResourceMBean hdfsRcMBean;
     
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "functional.production"})
     public void testCheckHDFSResource() {
         String files = hdfsRcMBean.checkHDFSResource();
         assertTrue(files.contains("/app/dataplatform/dataplatform.properties"));

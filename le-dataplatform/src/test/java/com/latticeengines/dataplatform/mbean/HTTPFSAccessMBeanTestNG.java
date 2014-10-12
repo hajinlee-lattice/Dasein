@@ -12,7 +12,7 @@ public class HTTPFSAccessMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private HTTPFSAccessMBean httpFSMBean;
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "functional.production"})
     public void testHttpFS() {
         assertTrue(httpFSMBean.checkHttpAccess().contains("\"type\":\"FILE\""));
     }

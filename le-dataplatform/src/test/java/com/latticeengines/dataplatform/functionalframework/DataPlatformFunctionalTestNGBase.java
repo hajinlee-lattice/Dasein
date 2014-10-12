@@ -63,6 +63,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED, FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 20;
 
+    public String suffix = this.getClass().getSimpleName() + "_" + generateUnique();
+    
     @Autowired
     protected Configuration yarnConfiguration;
 
@@ -456,5 +458,14 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         } catch (InterruptedException e) {
             log.error("Can't shut down quartz thread due to: " + ExceptionUtils.getStackTrace(e));
         }
+    }
+    
+    protected String generateUnique() {           
+        return generateUnique("");  
+    }
+    
+    protected String generateUnique(String base) {           
+        String id = UUID.randomUUID().toString();         
+        return base.equals("")?id:(base + "_" + id);  
     }
 }

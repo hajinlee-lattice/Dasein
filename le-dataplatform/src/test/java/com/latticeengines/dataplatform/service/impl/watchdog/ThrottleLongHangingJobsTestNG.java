@@ -18,6 +18,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -50,8 +51,10 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
     private Classifier classifier1Min;
     private Classifier classifier2Mins;
     private Classifier classifier4Mins;
+    
+    private String baseDir = "/functioanlTests/" + suffix;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = {"functional", "functional.production"})
     public void setup() throws Exception {
         // Set up classifiers
         classifier1Min = setupClassifier("train_1min.py");
@@ -60,13 +63,9 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
 
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
-        fs.delete(new Path("/training"), true);
-        fs.delete(new Path("/test"), true);
-        fs.delete(new Path("/scheduler"), true);
-
-        fs.mkdirs(new Path("/training"));
-        fs.mkdirs(new Path("/test"));
-        fs.mkdirs(new Path("/scheduler"));
+        fs.mkdirs(new Path(baseDir + "/training"));
+        fs.mkdirs(new Path(baseDir + "/test"));
+        fs.mkdirs(new Path(baseDir + "/scheduler"));
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
@@ -77,12 +76,12 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         String train2MinsScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_2mins.py");
         String train4MinsScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/fairscheduler/train_4mins.py");
 
-        copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
-        copyEntries.add(new CopyEntry(testFilePath, "/test", false));
-        copyEntries.add(new CopyEntry(jsonFilePath, "/scheduler", false));
-        copyEntries.add(new CopyEntry(train1MinScriptPath, "/scheduler", false));
-        copyEntries.add(new CopyEntry(train2MinsScriptPath, "/scheduler", false));
-        copyEntries.add(new CopyEntry(train4MinsScriptPath, "/scheduler", false));
+        copyEntries.add(new CopyEntry(trainingFilePath, baseDir + "/training", false));
+        copyEntries.add(new CopyEntry(testFilePath, baseDir + "/test", false));
+        copyEntries.add(new CopyEntry(jsonFilePath, baseDir + "/scheduler", false));
+        copyEntries.add(new CopyEntry(train1MinScriptPath, baseDir + "/scheduler", false));
+        copyEntries.add(new CopyEntry(train2MinsScriptPath, baseDir + "/scheduler", false));
+        copyEntries.add(new CopyEntry(train4MinsScriptPath, baseDir + "/scheduler", false));
 
         doCopy(fs, copyEntries);
 
@@ -105,7 +104,13 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         }, 15L);
     }
 
-    @Test(groups = "functional")
+    @AfterClass(groups = {"functional", "functional.production"})
+    public void tearDown() throws Exception {
+        FileSystem fs = FileSystem.get(yarnConfiguration);
+        fs.delete(new Path("/functioanlTests"), true);        
+    }
+    
+    @Test(groups = {"functional", "functional.production"})
     public void testThrottleLongHangingJobs() throws Exception {
         ModelDefinition modelDef = produceModelDefinition();
         Model model = produceIrisMetadataModel();
@@ -139,13 +144,13 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         classifier.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
                 "petal_width" }));
         classifier.setTargets(Arrays.<String> asList(new String[] { "category" }));
-        classifier.setSchemaHdfsPath("/scheduler/iris.json");
-        classifier.setModelHdfsDir("/scheduler/result");
-        classifier.setPythonScriptHdfsPath("/scheduler/" + script);
-        classifier.setTrainingDataHdfsPath("/training/nn_train.dat");
-        classifier.setTestDataHdfsPath("/test/nn_test.dat");
-        classifier.setDataProfileHdfsPath("/training/a.avro");
-        classifier.setConfigMetadataHdfsPath("/training/a.avsc");
+        classifier.setSchemaHdfsPath(baseDir + "/scheduler/iris.json");
+        classifier.setModelHdfsDir(baseDir + "/scheduler/result");
+        classifier.setPythonScriptHdfsPath(baseDir + "/scheduler/" + script);
+        classifier.setTrainingDataHdfsPath(baseDir + "/training/nn_train.dat");
+        classifier.setTestDataHdfsPath(baseDir + "/test/nn_test.dat");
+        classifier.setDataProfileHdfsPath(baseDir + "/training/a.avro");
+        classifier.setConfigMetadataHdfsPath(baseDir + "/training/a.avsc");
         classifier.setPythonPipelineLibHdfsPath("/app/dataplatform/scripts/lepipeline.tar.gz");
         classifier.setPythonPipelineScriptHdfsPath("/app/dataplatform/scripts/pipeline.py");
 

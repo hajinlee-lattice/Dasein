@@ -20,7 +20,7 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         return false;
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void createDataSchema() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host("10.41.1.240") //

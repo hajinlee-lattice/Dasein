@@ -32,7 +32,7 @@ public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private DBConnectionMBean dbcMBean;
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void testDataSourceConnection() throws Exception {
         if (dataSourceType.equals("MySQL")) {
             String dsMySQLUrl = dataSourceURL + "?user=" + dataSourceUser + "&password=" + "wrongPassword";
@@ -43,7 +43,7 @@ public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void testDaoConnection() {
         if (daoType.equals("MySQL")) {
             String daoMySQLUrl = daoURL + "?user=" + daoUser + "&password=" + "wrongPassword2";

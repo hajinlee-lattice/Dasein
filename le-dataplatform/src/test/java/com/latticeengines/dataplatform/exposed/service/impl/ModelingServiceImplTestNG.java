@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -71,19 +72,21 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
 
     private Model model = null;
 
-    @BeforeMethod(groups = "functional")
+    @BeforeMethod(groups = {"functional", "functional.production"})
     public void beforeMethod() {
 
     }
 
     protected static final Log log = LogFactory.getLog(ModelingServiceImplTestNG.class);
 
-    @BeforeClass(groups = "functional")
+    private String customer = "DELL-" + suffix;
+    
+    @BeforeClass(groups = {"functional", "functional.production"})
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(new Path(customerBaseDir + "/DELL"), true);
-        fs.mkdirs(new Path(customerBaseDir + "/DELL/data/DELL_EVENT_TABLE_TEST"));
-        fs.mkdirs(new Path(customerBaseDir + "/DELL/data/DELL_EVENT_TABLE_TEST/EventMetadata"));
+
+        fs.mkdirs(new Path(customerBaseDir + "/" + customer + "/data/DELL_EVENT_TABLE_TEST"));
+        fs.mkdirs(new Path(customerBaseDir + "/" + customer + "/data/DELL_EVENT_TABLE_TEST/EventMetadata"));
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
@@ -92,7 +95,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         File[] avroFiles = getAvroFilesForDir(inputDir);
         for (File avroFile : avroFiles) {
             copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), customerBaseDir
-                    + "/DELL/data/DELL_EVENT_TABLE_TEST", false));
+                    + "/" + customer + "/data/DELL_EVENT_TABLE_TEST", false));
         }
 
         doCopy(fs, copyEntries);
@@ -105,6 +108,13 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
         //
         model = produceModel(modelDef);
+    }
+    
+    @AfterClass (groups = {"functional", "functional.production"})
+    public void tearDown() throws Exception{
+        FileSystem fs = FileSystem.get(yarnConfiguration);
+        fs.delete(new Path(customerBaseDir + "/" + customer), true);
+        
     }
 
     private Model produceModel(ModelDefinition modelDef) {
@@ -121,13 +131,14 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
                 "Column10" }));
         m.setTargetsList(Arrays.<String> asList(new String[] { "Event_Latitude_Customer" }));
         m.setKeyCols(Arrays.<String> asList(new String[] { "IDX" }));
-        m.setCustomer("DELL");
+        //m.setCustomer("DELL");
+        m.setCustomer(customer);
         m.setDataFormat("avro");
         m.setProvenanceProperties("DataLoader_Instance=http://10.41.1.238/ DataLoader_TenantName=ADEBD2V67059448rX25059174r DataLoader_Query=DataForScoring_Lattice");
         return m;
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void createSamples() throws Exception {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
@@ -151,7 +162,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "createSamples" })
+    @Test(groups = {"functional", "functional.production"}, enabled = true, dependsOnMethods = { "createSamples" })
     public void profileData() throws Exception {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(model.getCustomer());
@@ -170,7 +181,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
 
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "profileData" })
+    @Test(groups = {"functional", "functional.production"}, enabled = true, dependsOnMethods = { "profileData" })
     public void submitModel() throws Exception {
         List<ApplicationId> appIds = modelingService.submitModel(model);
 
@@ -186,7 +197,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    @Test(groups = "functional", enabled = true, dependsOnMethods = { "submitModel" })
+    @Test(groups = {"functional", "functional.production"}, enabled = true, dependsOnMethods = { "submitModel" })
     public void submitModelMultithreaded() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(3);
 
@@ -228,7 +239,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "submitModel" })
+    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "submitModel" })
     @Transactional(propagation = Propagation.REQUIRED)
     public void throttleImmediate() throws Exception {
         // clean up: this test case expects no previous throttle
@@ -264,7 +275,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = "functional", dependsOnMethods = { "throttleImmediate" })
+    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "throttleImmediate" })
     public void throttleNewlySubmittedModels() throws Exception {
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setImmediate(false);

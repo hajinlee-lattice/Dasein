@@ -32,20 +32,20 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         return false;
     }
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "functional.production"})
     public void getSchedulerInfo() {
         SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();
         assertNotNull(schedulerInfo);
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "functional.production"})
     public void getApps() {
         AppsInfo appsInfo = yarnService.getApplications(null);
         assertNotNull(appsInfo);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "functional.production"})
     public void getApp() throws Exception {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), "Priority0.0");

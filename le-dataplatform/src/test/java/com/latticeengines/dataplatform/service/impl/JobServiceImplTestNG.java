@@ -22,6 +22,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -53,13 +54,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     private String inputDir = null;
     private String outputDir = null;
     private SamplingConfiguration samplingConfig = null;
+    private String baseDir = "/functioanlTests/" + suffix;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = {"functional", "functional.production"})
     public void setupSamplingMRJob() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-
-        fs.delete(new Path("/eventTable"), true);
-        fs.delete(new Path("/tmp/import"), true);
 
         inputDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE")
                 .getPath();
@@ -80,26 +79,22 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         File[] avroFiles = getAvroFilesForDir(inputDir);
         for (File avroFile : avroFiles) {
-            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), "/eventTable", false));
+            copyEntries.add(new CopyEntry("file:" + avroFile.getAbsolutePath(), baseDir + "/eventTable", false));
         }
 
-        inputDir = "/eventTable";
+        inputDir = baseDir + "/eventTable";
         outputDir = inputDir + "/samples";
         doCopy(fs, copyEntries);
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = {"functional", "functional.production"})
     public void setup() throws Exception {
-        new File("/tmp/ledpjob-metrics.out").delete();
+        //new File("/tmp/ledpjob-metrics.out").delete();
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
-        fs.delete(new Path("/training"), true);
-        fs.delete(new Path("/test"), true);
-        fs.delete(new Path("/datascientist1"), true);
-
-        fs.mkdirs(new Path("/training"));
-        fs.mkdirs(new Path("/test"));
-        fs.mkdirs(new Path("/datascientist1"));
+        fs.mkdirs(new Path(baseDir + "/training"));
+        fs.mkdirs(new Path(baseDir + "/test"));
+        fs.mkdirs(new Path(baseDir + "/datascientist1"));
 
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
 
@@ -110,11 +105,17 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         String jsonFilePath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/iris.json");
         String pythonScriptPath = getFileUrlFromResource("com/latticeengines/dataplatform/service/impl/nn_train.py");
         FileUtils.copyFileToDirectory(new File(modelUrl.getFile()), new File("/tmp"));
-        copyEntries.add(new CopyEntry(trainingFilePath, "/training", false));
-        copyEntries.add(new CopyEntry(testFilePath, "/test", false));
-        copyEntries.add(new CopyEntry(jsonFilePath, "/datascientist1", false));
-        copyEntries.add(new CopyEntry(pythonScriptPath, "/datascientist1", false));
+        copyEntries.add(new CopyEntry(trainingFilePath, baseDir + "/training", false));
+        copyEntries.add(new CopyEntry(testFilePath, baseDir + "/test", false));
+        copyEntries.add(new CopyEntry(jsonFilePath, baseDir + "/datascientist1", false));
+        copyEntries.add(new CopyEntry(pythonScriptPath, baseDir + "/datascientist1", false));
         doCopy(fs, copyEntries);
+    }
+    
+    @AfterClass(groups = {"functional", "functional.production"})
+    public void tearDown() throws Exception {
+        FileSystem fs = FileSystem.get(yarnConfiguration);
+        fs.delete(new Path("/functioanlTests"), true);        
     }
 
     private Properties createAppMasterPropertiesForYarnJob() {
@@ -132,13 +133,13 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         return containerProperties;
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void testGetJobReportsAll() throws Exception {
         List<ApplicationReport> applications = modelingJobService.getJobReportsAll();
         assertNotNull(applications);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void testKillApplication() throws Exception {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 
@@ -153,7 +154,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(status, FinalApplicationStatus.KILLED);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void testGetJobReportByUser() throws Exception {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
 
@@ -183,7 +184,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         modelingJobService.killJob(applicationId);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void testCheckJobName() throws Exception {
         Properties appMasterProperties = createAppMasterPropertiesForYarnJob();
         Properties containerProperties = createContainerPropertiesForYarnJob();
@@ -200,21 +201,21 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertTrue(jobNameService.getDateTimeFromJobName(app.getName()).isBeforeNow());
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void testSubmitPythonYarnJob() throws Exception {
         Classifier classifier = new Classifier();
         classifier.setName("IrisClassifier");
         classifier.setFeatures(Arrays.<String> asList(new String[] { "sepal_length", "sepal_width", "petal_length",
                 "petal_width" }));
         classifier.setTargets(Arrays.<String> asList(new String[] { "category" }));
-        classifier.setSchemaHdfsPath("/datascientist1/iris.json");
-        classifier.setModelHdfsDir("/datascientist1/result");
-        classifier.setPythonScriptHdfsPath("/datascientist1/nn_train.py");
-        classifier.setTrainingDataHdfsPath("/training/nn_train.dat");
-        classifier.setTestDataHdfsPath("/test/nn_test.dat");
+        classifier.setSchemaHdfsPath(baseDir + "/datascientist1/iris.json");
+        classifier.setModelHdfsDir(baseDir + "/datascientist1/result");
+        classifier.setPythonScriptHdfsPath(baseDir + "/datascientist1/nn_train.py");
+        classifier.setTrainingDataHdfsPath(baseDir + "/training/nn_train.dat");
+        classifier.setTestDataHdfsPath(baseDir + "/test/nn_test.dat");
         classifier.setDataFormat("csv");
-        classifier.setDataProfileHdfsPath("/datascientist1/EventMetadata");
-        classifier.setConfigMetadataHdfsPath("/datascientist1/EventMetadata");
+        classifier.setDataProfileHdfsPath(baseDir + "/datascientist1/EventMetadata");
+        classifier.setConfigMetadataHdfsPath(baseDir + "/datascientist1/EventMetadata");
         classifier.setPythonPipelineLibHdfsPath("/app/dataplatform/scripts/lepipeline.tar.gz");
         classifier.setPythonPipelineScriptHdfsPath("/app/dataplatform/scripts/pipeline.py");
 
@@ -230,7 +231,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         NumberFormat appIdFormat = getAppIdFormat();
         String jobId = applicationId.getClusterTimestamp() + "_" + appIdFormat.format(applicationId.getId());
-        String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, "/datascientist1/result/" + jobId).get(0);
+        String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, baseDir + "/datascientist1/result/" + jobId).get(0);
         String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
         assertEquals(modelContents.trim(), "this is the generated model.");
 
@@ -241,7 +242,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertFalse(new File(metadataFileName).exists());
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void testSubmitMRJob() throws Exception {
         Properties properties = new Properties();
         properties.setProperty(EventDataSamplingProperty.QUEUE.name(), "Priority0.MapReduce.0");
@@ -273,17 +274,17 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
      *
      * @throws Exception
      */
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void testLoadData() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
                 .password(dataSourcePasswd).type(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
-        ApplicationId appId = modelingJobService.loadData("iris", "/tmp/import", creds, "Priority0.MapReduce.0",
+        ApplicationId appId = modelingJobService.loadData("iris", baseDir + "/tmp/import", creds, "Priority0.MapReduce.0",
                 "Dell", Arrays.<String> asList(new String[] { "ID" }));
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
-        List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, "/tmp/import", new HdfsFilenameFilter() {
+        List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, baseDir + "/tmp/import", new HdfsFilenameFilter() {
 
             @Override
             public boolean accept(String filename) {

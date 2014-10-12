@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -44,8 +45,9 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         return false;
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = {"functional", "functional.production"})
     public void setup() {
+        
         Classifier classifier = new Classifier();
         classifier.setName("NeuralNetworkClassifier");
         classifier.setSchemaHdfsPath("/datascientist1/iris.json");
@@ -78,7 +80,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         //
         // job
         modelingJob = new ModelingJob();
-        modelingJob.setId("application_12345_00001");
+        modelingJob.setId("application_12345_00001_" + suffix);
         modelingJob.setClient("CLIENT");
         Properties appMasterProperties = new Properties();
         appMasterProperties.setProperty("QUEUE", "Priority0.0");
@@ -102,7 +104,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
         decisionTreeAlgorithm.setSampleName("s1");
 
-        modelDef.setName("Model Definition For Demo");
+        modelDef.setName("Model Definition_" + suffix);
         modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
                 logisticRegressionAlgorithm }));
         //
@@ -112,23 +114,29 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         modelDefinitionEntityMgr.createOrUpdate(modelDef);
         //
         // setup and persist a test model first
-        model.setId("model_" + this.getClass().getSimpleName() + "_0001");
-        model.setName("MODEL TEST NAME");
+        model.setId("model_" + suffix);
+        model.setName("MODEL_NAME_" + suffix);
         model.setModelDefinition(modelDef);
         modelEntityMgr.create(model);
         // link model--job
         modelingJob.setModel(model);
     }
+    
+    @AfterClass(groups = {"functional", "functional.production"})
+    public void tearDown(){
+        modelEntityMgr.delete(model);
+        modelDefinitionEntityMgr.delete(modelDef);
+    }
 
     private void assertJobsEqual(ModelingJob originalJob, ModelingJob retrievedJob) {
-        assertEquals(retrievedJob.getId(), retrievedJob.getId());
-        assertEquals(retrievedJob.getAppId(), retrievedJob.getAppId());
-        assertEquals(retrievedJob.getAppMasterPropertiesObject(), retrievedJob.getAppMasterPropertiesObject());
-        assertEquals(retrievedJob.getChildIds(), retrievedJob.getChildIds());
-        assertEquals(retrievedJob.getClient(), retrievedJob.getClient());
-        assertEquals(retrievedJob.getContainerPropertiesObject(), retrievedJob.getContainerPropertiesObject());
-        assertEquals(retrievedJob.getModel(), retrievedJob.getModel());
-        assertEquals(retrievedJob.getParentPid(), retrievedJob.getParentPid());
+        assertEquals(originalJob.getId(), retrievedJob.getId());
+        assertEquals(originalJob.getAppId(), retrievedJob.getAppId());
+        assertEquals(originalJob.getAppMasterPropertiesObject(), retrievedJob.getAppMasterPropertiesObject());
+        assertEquals(originalJob.getChildIds(), retrievedJob.getChildIds());
+        assertEquals(originalJob.getClient(), retrievedJob.getClient());
+        assertEquals(originalJob.getContainerPropertiesObject(), retrievedJob.getContainerPropertiesObject());
+        assertEquals(originalJob.getModel().getPid(), retrievedJob.getModel().getPid());
+        assertEquals(originalJob.getParentPid(), retrievedJob.getParentPid());
 
         assertEquals(modelingJob.getAppMasterPropertiesObject().getProperty("QUEUE"), retrievedJob
                 .getAppMasterPropertiesObject().getProperty("QUEUE"));
@@ -137,12 +145,12 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "functional.production"})
     public void testPersist() {
         jobEntityMgr.create(modelingJob);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testPersist" })
+    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testPersist" })
     public void testRetrieval() {
         ModelingJob retrievedJob = new ModelingJob();
         retrievedJob.setPid(modelingJob.getPid());
@@ -152,7 +160,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertJobsEqual(modelingJob, retrievedJob);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testPersist" })
+    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testPersist" })
     public void testUpdate() {
         assertNotNull(modelingJob.getPid());
         Properties appMasterProp = modelingJob.getAppMasterPropertiesObject();
@@ -164,7 +172,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         testRetrieval();
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
+    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         jobEntityMgr.delete(modelingJob);
     }

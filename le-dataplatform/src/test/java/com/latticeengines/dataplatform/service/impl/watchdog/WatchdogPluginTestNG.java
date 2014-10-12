@@ -16,7 +16,7 @@ public class WatchdogPluginTestNG extends DataPlatformFunctionalTestNGBase {
         return false;
     }
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "functional.production"})
     public void register() {
         Map<String, WatchdogPlugin> registry = WatchdogPlugin.getPlugins();
         assertEquals(registry.size(), 3);

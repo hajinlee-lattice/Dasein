@@ -15,7 +15,7 @@ public class QuartzJobMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private QuartzJobMBean quartzJobMBean;
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "functional.production"})
     public void testCheckQuartzJob() {
         assertTrue(quartzJobMBean.checkDLQuartzJob().contains("enabled"));
         assertTrue(quartzJobMBean.checkQuartzJob().contains("enabled"));

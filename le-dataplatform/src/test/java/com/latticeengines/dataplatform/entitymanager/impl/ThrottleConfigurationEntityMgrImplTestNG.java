@@ -26,7 +26,7 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
         return false;
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = {"functional", "functional.production"})
     public void setup() {
         config = new ThrottleConfiguration();
         config.setImmediate(true);
@@ -34,12 +34,12 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
         config.setTimestampLong(System.currentTimeMillis());
     }
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "functional.production"})
     public void testPersist() {
         throttleConfigurationEntityMgr.create(config);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testPersist" })
+    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testPersist" })
     public void testRetrieval() {
         ThrottleConfiguration newConfig = new ThrottleConfiguration(config.getPid());
         newConfig = throttleConfigurationEntityMgr.findByKey(newConfig); // /
@@ -62,7 +62,7 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
         assertEquals(newConfig.isImmediate(), config.isImmediate());
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testPersist" })
+    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testPersist" })
     public void testUpdate() {
         assertNotNull(config.getPid());
         config.setEnabled(true);
@@ -73,7 +73,7 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
         testRetrieval();
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
+    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         ThrottleConfiguration newConfig = new ThrottleConfiguration(config.getPid());
         newConfig = throttleConfigurationEntityMgr.findByKey(newConfig);

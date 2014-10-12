@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -32,13 +33,13 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         return false;
     }
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = {"functional", "functional.production"})
     public void setup() {
         ModelingJob job1 = new ModelingJob();
-        job1.setId("application_12345_00001");
+        job1.setId("application_12345_00001_" + suffix);
         job1.setClient("CLIENT 1");
         ModelingJob job2 = new ModelingJob();
-        job2.setId("application_12345_00002");
+        job2.setId("application_12345_00002_" + suffix);
         job2.setClient("CLIENT 2");
 
         LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
@@ -51,7 +52,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
         decisionTreeAlgorithm.setSampleName("s1");
 
-        modelDef.setName("Model Definition For Demo");
+        modelDef.setName("Model Definition For Demo_" + suffix);
         modelDef.addAlgorithm(logisticRegressionAlgorithm);
         modelDef.addAlgorithm(decisionTreeAlgorithm);
         //
@@ -64,36 +65,41 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         model.addModelingJob(job1);
         model.addModelingJob(job2);
 
-        model.setId("model_12345_0001");
-        model.setName("MODEL TEST NAME");
+        model.setId("model_12345_0001_" + suffix);
+        model.setName("MODEL TEST NAME_" + suffix);
         model.setModelDefinition(modelDef);
+    }
+    
+    @AfterClass(groups = {"functional", "functional.production"})
+    public void tearDown(){
+        modelDefinitionEntityMgr.delete(modelDef);
     }
 
     private void assertModelsEqual(Model originalModel, Model retrievedModel) {
         assertNotNull(retrievedModel);
-        assertEquals(model.getId(), retrievedModel.getId());
-        assertEquals(model.getCustomer(), retrievedModel.getCustomer());
-        assertEquals(model.getDataFormat(), retrievedModel.getDataFormat());
-        assertEquals(model.getDataHdfsPath(), retrievedModel.getDataHdfsPath());
-        assertEquals(model.getFeatures(), retrievedModel.getFeatures());
-        assertEquals(model.getKeyCols(), retrievedModel.getKeyCols());
-        assertEquals(model.getMetadataHdfsPath(), retrievedModel.getMetadataHdfsPath());
-        assertEquals(model.getMetadataTable(), retrievedModel.getMetadataTable());
-        assertEquals(model.getModelHdfsDir(), retrievedModel.getModelHdfsDir());
-        assertEquals(model.getName(), retrievedModel.getName());
-        assertEquals(model.getSampleHdfsPath(), retrievedModel.getSampleHdfsPath());
-        assertEquals(model.getSchemaHdfsPath(), retrievedModel.getSchemaHdfsPath());
-        assertEquals(model.getTable(), retrievedModel.getTable());
-        assertEquals(model.getTargets(), retrievedModel.getTargets());
+        assertEquals(originalModel.getId(), retrievedModel.getId());
+        assertEquals(originalModel.getCustomer(), retrievedModel.getCustomer());
+        assertEquals(originalModel.getDataFormat(), retrievedModel.getDataFormat());
+        assertEquals(originalModel.getDataHdfsPath(), retrievedModel.getDataHdfsPath());
+        assertEquals(originalModel.getFeatures(), retrievedModel.getFeatures());
+        assertEquals(originalModel.getKeyCols(), retrievedModel.getKeyCols());
+        assertEquals(originalModel.getMetadataHdfsPath(), retrievedModel.getMetadataHdfsPath());
+        assertEquals(originalModel.getMetadataTable(), retrievedModel.getMetadataTable());
+        assertEquals(originalModel.getModelHdfsDir(), retrievedModel.getModelHdfsDir());
+        assertEquals(originalModel.getName(), retrievedModel.getName());
+        assertEquals(originalModel.getSampleHdfsPath(), retrievedModel.getSampleHdfsPath());
+        assertEquals(originalModel.getSchemaHdfsPath(), retrievedModel.getSchemaHdfsPath());
+        assertEquals(originalModel.getTable(), retrievedModel.getTable());
+        assertEquals(originalModel.getTargets(), retrievedModel.getTargets());
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = {"functional", "functional.production"})
     public void testPersist() {
         modelEntityMgr.create(model);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testPersist" })
+    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testPersist" })
     public void testRetrieval() {
         Model retrievedModel = new Model();
         retrievedModel.setPid(model.getPid());
@@ -102,7 +108,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertModelsEqual(model, retrievedModel);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testPersist" })
+    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testPersist" })
     public void testUpdate() {
         assertNotNull(model.getPid());
         model.setCustomer("NEW CUSTOMER");
@@ -112,7 +118,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         testRetrieval();
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
+    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "testUpdate" })
     public void testDelete() {
         modelEntityMgr.delete(model);
     }
