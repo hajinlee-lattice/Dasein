@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.camille;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -12,42 +11,10 @@ import com.google.common.base.Joiner;
  * Represents an absolute path used by Camille. Valid paths must start with /
  * and contain word characters or .'s.
  */
-public class Path implements Iterable<Path>, DeepCopyable<Path> {
+public class Path implements DeepCopyable<Path> {
     @Override
     public Path deepCopy() {
         return new Path(new ArrayList<String>(parts));
-    }
-
-    /**
-     * Iterates through all the parent paths and this path. Uses a copy of this
-     * object as it exists when this method is called.
-     */
-    @Override
-    public Iterator<Path> iterator() {
-        return new Iterator<Path>() {
-            private final Iterator<Path> iter;
-
-            {
-                List<Path> paths = getParentPaths();
-                paths.add(Path.this);
-                iter = paths.iterator();
-            }
-
-            @Override
-            public boolean hasNext() {
-                return iter.hasNext();
-            }
-
-            @Override
-            public Path next() {
-                return iter.next();
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException("remove is not supported");
-            }
-        };
     }
 
     /**

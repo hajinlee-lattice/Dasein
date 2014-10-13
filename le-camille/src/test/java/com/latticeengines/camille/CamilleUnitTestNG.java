@@ -18,9 +18,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection;
 import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
 import com.latticeengines.domain.exposed.camille.DocumentHierarchy.Node;
+import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class CamilleUnitTestNG {
@@ -48,11 +48,11 @@ public class CamilleUnitTestNG {
         c.createWithEmptyIntermediateNodes(fullPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         int i = 0;
-        for (Path p : fullPath) {
+        for (Path p : fullPath.getParentPaths()) {
             Assert.assertTrue(c.exists(p));
             ++i;
         }
-        Assert.assertEquals(i, 3);
+        Assert.assertEquals(i, 2);
     }
 
     @Test(groups = "unit", timeOut = timeOutMs)
@@ -63,11 +63,11 @@ public class CamilleUnitTestNG {
         c.createWithEmptyIntermediateNodes(fullPath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         int i = 0;
-        for (Path p : fullPath) {
+        for (Path p : fullPath.getParentPaths()) {
             Assert.assertTrue(c.exists(p));
             ++i;
         }
-        Assert.assertEquals(i, 3);
+        Assert.assertEquals(i, 2);
 
         Assert.assertEquals(c.get(fullPath), doc);
     }
