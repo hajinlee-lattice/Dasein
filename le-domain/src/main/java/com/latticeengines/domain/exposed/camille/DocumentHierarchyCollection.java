@@ -121,8 +121,16 @@ public class DocumentHierarchyCollection {
             return document;
         }
 
+        public void setDocument(Document document) {
+            this.document = document;
+        }
+
         public List<Node> getChildren() {
             return children;
+        }
+
+        public void setChildren(List<Node> children) {
+            this.children = children;
         }
 
         @Override
