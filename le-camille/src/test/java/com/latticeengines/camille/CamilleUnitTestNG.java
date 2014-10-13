@@ -18,6 +18,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection;
 import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
 import com.latticeengines.domain.exposed.camille.DocumentHierarchy.Node;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -212,6 +213,97 @@ public class CamilleUnitTestNG {
             case "d0":
                 Assert.assertEquals(i, 0);
                 break;
+            case "d1":
+                Assert.assertEquals(i, 1);
+                break;
+            case "d2":
+                Assert.assertEquals(i, 4);
+                break;
+            case "d3":
+                Assert.assertEquals(i, 2);
+                break;
+            case "d4":
+                Assert.assertEquals(i, 3);
+                break;
+            case "d5":
+                Assert.assertEquals(i, 5);
+                break;
+            case "d6":
+                Assert.assertEquals(i, 6);
+                break;
+            }
+
+            ++i;
+        }
+        Assert.assertEquals(i, 7);
+    }
+
+    @Test(groups = "unit")
+    public void testDocumentDescendantHierarchy() throws Exception {
+        Camille c = CamilleEnvironment.getCamille();
+
+        Path p0 = new Path("/parentPath");
+        Document d0 = new Document("d0", null);
+        c.create(p0, d0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p0));
+
+        Path p1 = new Path(String.format("%s/%s", p0, "p1"));
+        Document d1 = new Document("d1", null);
+        c.create(p1, d1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p1));
+
+        Path p2 = new Path(String.format("%s/%s", p0, "p2"));
+        Document d2 = new Document("d2", null);
+        c.create(p2, d2, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p2));
+
+        Path p3 = new Path(String.format("%s/%s", p1, "p3"));
+        Document d3 = new Document("d3", null);
+        c.create(p3, d3, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p3));
+
+        Path p4 = new Path(String.format("%s/%s", p1, "p4"));
+        Document d4 = new Document("d4", null);
+        c.create(p4, d4, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p4));
+
+        Path p5 = new Path(String.format("%s/%s", p2, "p5"));
+        Document d5 = new Document("d5", null);
+        c.create(p5, d5, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p5));
+
+        Path p6 = new Path(String.format("%s/%s", p2, "p6"));
+        Document d6 = new Document("d6", null);
+        c.create(p6, d6, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p6));
+
+        DocumentHierarchyCollection h = c.getDescendants(p0);
+
+        Assert.assertEquals(h.getChildren().size(), 2);
+        Assert.assertEquals(h.getChildren().get(0).getChildren().size(), 2);
+        for (com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection.Node node : h.getChildren().get(0)
+                .getChildren()) {
+            Assert.assertTrue(node.getChildren().isEmpty());
+        }
+        Assert.assertEquals(h.getChildren().get(1).getChildren().size(), 2);
+        for (com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection.Node node : h.getChildren().get(1)
+                .getChildren()) {
+            Assert.assertTrue(node.getChildren().isEmpty());
+        }
+
+        int i = 1;
+        Iterator<com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection.Node> iter = h
+                .breadthFirstIterator();
+        while (iter.hasNext()) {
+            Assert.assertEquals(iter.next().getDocument().getData(), String.format("d%d", i));
+            ++i;
+        }
+        Assert.assertEquals(i, 7);
+
+        i = 1;
+        iter = h.depthFirstIterator();
+        while (iter.hasNext()) {
+            switch (iter.next().getDocument().getData()) {
             case "d1":
                 Assert.assertEquals(i, 1);
                 break;

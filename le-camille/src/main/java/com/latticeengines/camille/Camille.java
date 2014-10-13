@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.CuratorFramework;
@@ -15,7 +17,9 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Function;
 import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection;
 import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
 import com.latticeengines.domain.exposed.camille.Path;
 
@@ -101,6 +105,25 @@ public class Camille {
         }
 
         return out;
+    }
+
+    public DocumentHierarchyCollection getDescendants(Path path) {
+        return new DocumentHierarchyCollection(path, new Function<Path, List<Map.Entry<Document, Path>>>() {
+            @Override
+            public List<Entry<Document, Path>> apply(Path input) {
+                try {
+                    return asMapEntry(getChildren(input));
+                } catch (Exception e) {
+                    log.error("error getting children of path " + input, e);
+                    return null;
+                }
+            }
+
+            @SuppressWarnings("unchecked")
+            private <E extends Map.Entry<Document, Path>> List<E> asMapEntry(List<Pair<Document, Path>> pairs) {
+                return (List<E>) pairs;
+            }
+        });
     }
 
     public DocumentHierarchy getHierarchy(Path path) throws Exception {
