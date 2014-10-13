@@ -158,7 +158,6 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         // Make directories
         fs.mkdirs(new Path("/app/dataplatform/scripts"));
         fs.mkdirs(new Path("/app/dataplatform/scripts/leframework"));
-        fs.mkdirs(new Path("/app/dataplatform/jetty"));
         // Copy jars from build to hdfs
         String dataplatformPropDir = System.getProperty("DATAPLATFORM_PROPDIR");
         if (StringUtils.isEmpty(dataplatformPropDir)) {
@@ -189,7 +188,6 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/lepipeline.tar.gz",
                 "/app/dataplatform/scripts", false));
         copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
-        //copyEntries.add(new CopyEntry("file:/home/hliu/Downloads/helloworld.war", "/app/dataplatform/jetty", false));
         doCopy(fs, copyEntries);
     }
 

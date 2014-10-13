@@ -120,13 +120,13 @@ public class SchemaGenerator {
         }
 
         if (scriptOnly) {
-            gen = new SchemaGenerator("ledp", DBDialect.MYSQL, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling", "com.latticeengines.domain.exposed.jetty", "com.latticeengines.domain.exposed.modeling.algorithm");
+            gen = new SchemaGenerator("ledp", DBDialect.MYSQL, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling", "com.latticeengines.domain.exposed.modeling.algorithm");
             gen.generateToScript();
 
-            gen = new SchemaGenerator("ledp", DBDialect.SQLSERVER, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling", "com.latticeengines.domain.exposed.jetty", "com.latticeengines.domain.exposed.modeling.algorithm");
+            gen = new SchemaGenerator("ledp", DBDialect.SQLSERVER, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling.algorithm");
             gen.generateToScript();
 
-            gen = new SchemaGenerator("ledp", DBDialect.HSQL, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling", "com.latticeengines.domain.exposed.jetty", "com.latticeengines.domain.exposed.modeling.algorithm");
+            gen = new SchemaGenerator("ledp", DBDialect.HSQL, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling", "com.latticeengines.domain.exposed.modeling.algorithm");
             gen.generateToScript();
 
             genDlOrchestration = new SchemaGenerator("dlOrchestration", DBDialect.MYSQL, "com.latticeengines.domain.exposed.dataplatform.dlorchestration", "com.latticeengines.domain.exposed.dataplatform.dlorchestration.hibernate");
@@ -142,7 +142,7 @@ public class SchemaGenerator {
             Properties[] dbProperties = SchemaGenerator.convertDataplatformDbProperties(dbPropertiesFilepath);
             /** schema generation for ledp **/
             DBDialect dialectToGen = (DBDialect) dbProperties[0].get("local.dbdialect");
-            gen = new SchemaGenerator("ledp", dbProperties[0], dialectToGen, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling", "com.latticeengines.domain.exposed.jetty", "com.latticeengines.domain.exposed.modeling.algorithm");
+            gen = new SchemaGenerator("ledp", dbProperties[0], dialectToGen, "com.latticeengines.domain.exposed.dataplatform", "com.latticeengines.domain.exposed.modeling", "com.latticeengines.domain.exposed.modeling.algorithm");
             gen.generateToDatabase();
             /** schema generation for dlOrchestration **/
             dialectToGen = (DBDialect) dbProperties[1].get("local.dbdialect");
