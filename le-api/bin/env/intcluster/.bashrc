@@ -5,7 +5,6 @@ if [ -f /etc/bashrc ]; then
         . /etc/bashrc
 fi
 
-umask 011
 
 # User specific aliases and functions
 export JETTY_HOME=/opt/jetty
