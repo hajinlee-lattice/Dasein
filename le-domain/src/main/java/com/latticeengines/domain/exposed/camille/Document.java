@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.camille;
 
-
-public class Document {
+public class Document implements DeepCopyable<Document> {
     private String data;
     private int version = -1;
     private DocumentMetadata metadata;
@@ -26,6 +25,15 @@ public class Document {
         this.data = data;
         this.metadata = metadata;
         this.version = version;
+    }
+
+    @Override
+    public Document deepCopy() {
+        Document d = new Document();
+        d.setData(new String(data));
+        d.setVersion(version);
+        d.setMetadata(metadata.deepCopy());
+        return d;
     }
 
     public String getData() {

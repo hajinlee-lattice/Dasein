@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.camille;
 
 // TODO Eventual location for metadata mechanism
-public class DocumentMetadata {
+public class DocumentMetadata implements DeepCopyable<DocumentMetadata> {
 
     @Override
     public boolean equals(Object other) {
@@ -20,5 +20,10 @@ public class DocumentMetadata {
     public int hashCode() {
         // TODO
         return 1;
+    }
+
+    @Override
+    public DocumentMetadata deepCopy() {
+        return new DocumentMetadata();
     }
 }

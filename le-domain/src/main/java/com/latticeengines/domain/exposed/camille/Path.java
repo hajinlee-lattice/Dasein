@@ -12,7 +12,12 @@ import com.google.common.base.Joiner;
  * Represents an absolute path used by Camille. Valid paths must start with /
  * and contain word characters or .'s.
  */
-public class Path implements Iterable<Path> {
+public class Path implements Iterable<Path>, DeepCopyable<Path> {
+    @Override
+    public Path deepCopy() {
+        return new Path(new ArrayList<String>(parts));
+    }
+
     /**
      * Iterates through all the parent paths and this path. Uses a copy of this
      * object as it exists when this method is called.

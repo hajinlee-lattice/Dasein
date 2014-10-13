@@ -1,5 +1,5 @@
 package com.latticeengines.domain.exposed.camille;
 
-public interface Cloneable<T> {
+public interface DeepCopyable<T> {
     public T deepCopy();
 }
