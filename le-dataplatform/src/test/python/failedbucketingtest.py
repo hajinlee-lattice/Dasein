@@ -7,7 +7,7 @@ from leframework.executors.learningexecutor import LearningExecutor
 from testbase import TestBase
 
 
-class ProfilingTest(TestBase):
+class FailedBucketingTest(TestBase):
 
     def setUp(self):
         script = "data_profile.py"
@@ -19,8 +19,6 @@ class ProfilingTest(TestBase):
         results = "./results"
         if os.path.exists(results):
             shutil.rmtree(results)
-
-
 
     def testExecuteProfiling(self):
         # Dynamically import launcher to make sure globals() is clean in launcher

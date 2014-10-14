@@ -1,28 +1,12 @@
 import json
 import os
-import shutil
 import sys
 
 from leframework.executors.learningexecutor import LearningExecutor
-from testbase import TestBase
+from trainingtestbase import TrainingTestBase
 
 
-class ProfilingThenTrainTest(TestBase):
-
-    def setUp(self):
-        profileScript = "data_profile.py"
-        if os.path.exists(profileScript):
-            os.remove(profileScript)
-        trainingScript = "rf_train.py"
-        if os.path.exists(trainingScript):
-            os.remove(trainingScript)
-
-        # Symbolic links will be cleaned up by testBase
-        os.symlink("../../main/python/algorithm/" + profileScript, profileScript)
-        os.symlink("../../main/python/algorithm/" + trainingScript, trainingScript)
-        results = "./results"
-        if os.path.exists(results):
-            shutil.rmtree(results)
+class ProfilingThenTrainTest(TrainingTestBase):
 
     def testExecuteProfilingThenTrain(self):
         # Dynamically import launcher to make sure globals() is clean in launcher

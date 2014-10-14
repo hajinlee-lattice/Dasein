@@ -131,6 +131,9 @@
                                     <location>src/main/python/launcher.py</location>
                                 </source>
                                 <source>
+                                    <location>src/main/python/pipelinefwk.py</location>
+                                </source>
+                                <source>
                                     <location>src/main/python/pipeline/pipeline.py</location>
                                 </source>
                             </sources>

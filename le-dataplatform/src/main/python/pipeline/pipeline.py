@@ -1,22 +1,7 @@
 import encoder
+from pipelinefwk import Pipeline
 from pipelinesteps import EnumeratedColumnTransformStep
 from pipelinesteps import ImputationStep
-
-class Pipeline:
-    pipelineSteps_ = []
-    def __init__(self, pipelineSteps):
-        self.pipelineSteps_ = pipelineSteps
-    
-    def getPipeline(self):
-        return self.pipelineSteps_
-    
-    def predict(self, dataFrame):
-        transformed = dataFrame
-           
-        for step in self.pipelineSteps_:
-            transformed = step.transform(transformed)
-            
-        return transformed
 
 def getDecoratedColumns(metadata):
     stringColumns = dict()
@@ -42,5 +27,3 @@ def setupPipeline(metadata):
     steps = [EnumeratedColumnTransformStep(stringColumns), ImputationStep(continuousColumns)]
     pipeline = Pipeline(steps)
     return pipeline
-
-

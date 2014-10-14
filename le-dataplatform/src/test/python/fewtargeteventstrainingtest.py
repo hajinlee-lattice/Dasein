@@ -1,44 +1,10 @@
 import json
 import os
-import shutil
 import sys
-from testbase import TestBase
+from trainingtestbase import TrainingTestBase
 
 
-class TrainingTest(TestBase):
-
-    def setUp(self):
-        # Simulate what happens in yarn when it copies the framework code over
-        # before running the python script
-        self.fwkdir = "./leframework.tar.gz"
-        self.pipelinefwkdir = "./lepipeline.tar.gz"
-        fwkdir = self.fwkdir
-        pipelinefwkdir = self.pipelinefwkdir
-
-        if os.path.exists(fwkdir):
-            shutil.rmtree(fwkdir)
-        if os.path.exists(pipelinefwkdir):
-            shutil.rmtree(pipelinefwkdir)
-
-        os.makedirs(fwkdir + "/leframework")
-        os.makedirs(pipelinefwkdir)
-
-        enginedir = "/leframework/scoringengine.py"
-        shutil.copyfile("../../main/python" + enginedir, fwkdir + enginedir)
-        shutil.copyfile("../../main/python/pipeline/pipeline.py", "./pipeline.py")
-        shutil.copyfile("../../main/python/pipeline/encoder.py", pipelinefwkdir + "/encoder.py")
-        sys.path.append(pipelinefwkdir)
-
-        # Symbolic links will be cleaned up by testBase
-        scriptDir = "../../main/python/algorithm/" 
-        for f in os.listdir(scriptDir):
-            fPath = os.path.join(scriptDir, f)
-            if os.path.isfile(fPath) and not os.path.exists(f):
-                os.symlink(fPath, f)
-
-        results = "./results"
-        if os.path.exists(results):
-            shutil.rmtree(results)
+class FewTargetEventsTrainingTest(TrainingTestBase):
 
     def testExecuteLearning(self):
         # Dynamically import launcher to make sure globals() is clean in launcher

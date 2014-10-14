@@ -1,10 +1,12 @@
 import os
-import sys
 import shutil
-from testbase import TestBase
-from leframework.executors.learningexecutor import LearningExecutor
+import sys
 
-class ProfilingTest(TestBase):
+from leframework.executors.learningexecutor import LearningExecutor
+from testbase import TestBase
+
+
+class BadTargetProfilingTest(TestBase):
 
     def setUp(self):
         script = "data_profile.py"

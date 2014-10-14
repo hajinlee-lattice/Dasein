@@ -1,6 +1,6 @@
 import logging
 import os
-import sys
+
 from unittest import TestCase
 
 
@@ -20,7 +20,6 @@ class TestBase(TestCase):
             fPath = os.path.join(dataDir,f)
             if os.path.isfile(fPath) and not os.path.exists(f):
                 os.symlink(fPath, f)
-        sys.path.append(baseDir + "../../main/python/pipeline")
 
     @classmethod
     def tearDownClass(cls):

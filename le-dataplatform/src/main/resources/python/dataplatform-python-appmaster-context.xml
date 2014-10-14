@@ -21,6 +21,7 @@
         <yarn:hdfs path="/app/dataplatform/hadoop-metrics2.properties" />
         <yarn:hdfs path="${dataplatform.yarn.job.basedir}/$$JOBDIR$$/*" />
         <yarn:hdfs path="/app/dataplatform/scripts/*" />
+        <yarn:hdfs path="/app/dataplatform/scripts/pipelinefwk.py" />
         <yarn:hdfs path="/app/dataplatform/scripts/leframework.tar.gz" type="ARCHIVE" />
         <yarn:hdfs path="$$TRAINING$$" />
         <yarn:hdfs path="$$TEST$$" />

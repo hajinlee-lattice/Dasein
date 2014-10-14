@@ -1,5 +1,21 @@
 import pandas as pd
 
+class Pipeline:
+    pipelineSteps_ = []
+    def __init__(self, pipelineSteps):
+        self.pipelineSteps_ = pipelineSteps
+    
+    def getPipeline(self):
+        return self.pipelineSteps_
+    
+    def predict(self, dataFrame):
+        transformed = dataFrame
+           
+        for step in self.pipelineSteps_:
+            transformed = step.transform(transformed)
+            
+        return transformed
+
 class ModelStep:
     model_ = None
     modelInputColumns_ = []

@@ -8,7 +8,7 @@ import pickle
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
-from leframework.modelpipelinestep import ModelStep
+from pipelinefwk import ModelStep
 
 class ModelGenerator(State, JsonGenBase):
     
@@ -36,9 +36,12 @@ class ModelGenerator(State, JsonGenBase):
         pipeline = mediator.pipeline
         pickle.dump(pipeline, open(filename, "w"), pickle.HIGHEST_PROTOCOL)
         filename = self.__compressFile(filename)
+        pipelineFwkPkl = self.__getSerializedFile(self.__compressFile("pipelinefwk.py"))
         pipelineBinaryPkl = self.__getSerializedFile(filename)
         pipelinePkl = self.__getSerializedFile(self.__compressFile(self.mediator.schema["python_pipeline_script"]))
-        model["CompressedSupportFiles"] = [{ "Value": pipelinePkl, "Key": "pipeline.py" }, { "Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" }]
+        model["CompressedSupportFiles"] = [{ "Value": pipelinePkl, "Key": "pipeline.py" }, 
+                                           { "Value": pipelineBinaryPkl, "Key": "STPipelineBinary.p" },
+                                           { "Value": pipelineFwkPkl, "Key": "pipelinefwk.py" }]
         
         (dirpath, _, filenames) = os.walk(self.mediator.schema["python_pipeline_lib"]).next()
         
