@@ -6,7 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
 
 import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
+import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
@@ -23,7 +23,7 @@ public interface ConfigurationCacheControllerImpl<T extends ConfigurationScope> 
 
     public List<Pair<Document, Path>> getChildren(Path path) throws Exception;
 
-    public DocumentHierarchy getHierarchy(Path path) throws Exception;
+    public DocumentHierarchyCollection getHierarchy(Path path) throws Exception;
 
     public void delete(Path path) throws Exception;
 

@@ -11,7 +11,7 @@ import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.translators.PathTranslator;
 import com.latticeengines.camille.translators.PathTranslatorFactory;
 import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
+import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
@@ -58,8 +58,8 @@ public class StandardConfigurationCacheControllerImpl<T extends ConfigurationSco
     }
 
     @Override
-    public DocumentHierarchy getHierarchy(Path path) throws Exception {
-        return camille.getHierarchy(translator.getAbsolutePath(path));
+    public DocumentHierarchyCollection getHierarchy(Path path) throws Exception {
+        return camille.getDescendants(translator.getAbsolutePath(path));
     }
 
     @Override

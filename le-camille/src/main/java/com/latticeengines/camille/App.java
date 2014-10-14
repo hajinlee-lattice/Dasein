@@ -25,5 +25,6 @@ public class App {
         }
 
         log.info("Hello, {}!", namespace.get("name"));
+
     }
 }

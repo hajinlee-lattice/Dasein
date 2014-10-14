@@ -1,8 +1,6 @@
 package com.latticeengines.camille;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection;
-import com.latticeengines.domain.exposed.camille.DocumentHierarchy;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class Camille {
@@ -124,27 +121,6 @@ public class Camille {
                 return (List<E>) pairs;
             }
         });
-    }
-
-    public DocumentHierarchy getHierarchy(Path path) throws Exception {
-        DocumentHierarchy h = new DocumentHierarchy(get(path));
-        addChildren(h.getRoot(), path);
-        return h;
-    }
-
-    private void addChildren(DocumentHierarchy.Node parentNode, Path parentPath) throws Exception {
-        List<Pair<Document, Path>> children = getChildren(parentPath);
-        Collections.sort(children, new Comparator<Pair<Document, Path>>() {
-            @Override
-            public int compare(Pair<Document, Path> p0, Pair<Document, Path> p1) {
-                return p0.getRight().toString().compareTo(p1.getRight().toString());
-            }
-        });
-        for (Pair<Document, Path> child : children) {
-            DocumentHierarchy.Node n = new DocumentHierarchy.Node(child.getLeft());
-            parentNode.getChildren().add(n);
-            addChildren(n, child.getRight());
-        }
     }
 
     public void delete(Path path) throws Exception {
