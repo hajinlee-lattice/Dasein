@@ -100,7 +100,6 @@ public class DocumentHierarchyCollection implements Serializable {
         final int prime = 31;
         int result = 1;
         if (children != null) {
-            this.breadthFirstIterator();
             for (Iterator<Node> iter = breadthFirstIterator(); iter.hasNext();) {
                 Node node = iter.next();
                 result = prime * result + ((node == null) ? 0 : node.hashCode());
