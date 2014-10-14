@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.camille;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,7 +17,8 @@ import org.apache.commons.lang.ObjectUtils;
 
 import com.google.common.base.Function;
 
-public class DocumentHierarchyCollection {
+public class DocumentHierarchyCollection implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private List<Node> children;
 
@@ -93,7 +95,49 @@ public class DocumentHierarchyCollection {
         }
     }
 
-    public static class Node implements Comparable<Node> {
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        if (children != null) {
+            this.breadthFirstIterator();
+            for (Iterator<Node> iter = breadthFirstIterator(); iter.hasNext();) {
+                Node node = iter.next();
+                result = prime * result + ((node == null) ? 0 : node.hashCode());
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof DocumentHierarchyCollection))
+            return false;
+        DocumentHierarchyCollection that = (DocumentHierarchyCollection) obj;
+        if (children == null) {
+            if (that.children != null)
+                return false;
+        } else if (that.children == null) {
+            return false;
+        } else if (children.size() != that.children.size()) {
+            return false;
+        } else {
+            for (Iterator<Node> thisIter = breadthFirstIterator(), thatIter = that.breadthFirstIterator(); thisIter
+                    .hasNext();) {
+                if (!thisIter.next().equals(thatIter.next()))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    public static class Node implements Comparable<Node>, Serializable {
+        private static final long serialVersionUID = 1L;
+
         private Path path;
         private Document document;
         private List<Node> children;

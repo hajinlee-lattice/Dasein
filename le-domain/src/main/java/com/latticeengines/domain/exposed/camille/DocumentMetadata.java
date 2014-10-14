@@ -1,7 +1,10 @@
 package com.latticeengines.domain.exposed.camille;
 
+import java.io.Serializable;
+
 // TODO Eventual location for metadata mechanism
-public class DocumentMetadata implements DeepCopyable<DocumentMetadata> {
+public class DocumentMetadata implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Override
     public boolean equals(Object other) {
@@ -20,10 +23,5 @@ public class DocumentMetadata implements DeepCopyable<DocumentMetadata> {
     public int hashCode() {
         // TODO
         return 1;
-    }
-
-    @Override
-    public DocumentMetadata deepCopy() {
-        return new DocumentMetadata();
     }
 }

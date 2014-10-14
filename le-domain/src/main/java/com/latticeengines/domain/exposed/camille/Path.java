@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.camille;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,11 +12,10 @@ import com.google.common.base.Joiner;
  * Represents an absolute path used by Camille. Valid paths must start with /
  * and contain word characters or .'s.
  */
-public class Path implements DeepCopyable<Path> {
-    @Override
-    public Path deepCopy() {
-        return new Path(new ArrayList<String>(parts));
-    }
+public class Path implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    private List<String> parts;
 
     /**
      * @return The parent paths in order.Uses a copy of this object as it exists
@@ -154,6 +154,4 @@ public class Path implements DeepCopyable<Path> {
         result = prime * result + ((parts == null) ? 0 : parts.hashCode());
         return result;
     }
-
-    private List<String> parts;
 }
