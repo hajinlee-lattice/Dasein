@@ -1,12 +1,9 @@
 package com.latticeengines.camille;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
+import org.apache.curator.framework.listen.ListenerContainer;
 import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.NodeCache;
-import org.apache.zookeeper.KeeperException;
+import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,65 +11,46 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class CamilleCache {
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    private Map<Path, NodeCache> caches;
-    private Camille camille;
+    private Path path;
+    private NodeCache cache;
 
-    public CamilleCache() {
-        caches = new HashMap<Path, NodeCache>();
-        camille = CamilleEnvironment.getCamille();
+    public CamilleCache(Path path) {
+        this.path = path;
+        this.cache = new NodeCache(CamilleEnvironment.getCamille().getCuratorClient(), path.toString());
+    }
+    
+    public void start() throws Exception {
+        cache.start(true);
+    }
+    
+    public void close() throws Exception {
+        cache.close();
     }
 
-    /**
-     * Retrieves the latest data for every item in the cache.
-     */
-    public synchronized void rebuild() throws Exception {
-        for (Map.Entry<Path, NodeCache> entry : caches.entrySet()) {
-            NodeCache cache = entry.getValue();
-            cache.rebuild();
-        }
+    public void rebuild() throws Exception {
+        cache.rebuild();
     }
 
-    /**
-     * Retrieve the latest version of a document from the cache. If the
-     * specified path is not currently being cached, it will be added.
-     * 
-     * Will throw if the document doesn't exist as far as this cache is aware,
-     * since the usage pattern for this cache is for all cached documents to
-     * exist.
-     */
-    public synchronized Document get(Path path) throws Exception {
-        if (!caches.containsKey(path)) {
-            log.debug("Not caching " + path + ". Adding an entry for it.");
-            NodeCache cache = new NodeCache(camille.getCuratorClient(), path.toString());
-            cache.start(true);
-            caches.put(path, cache);
-        }
-
-        NodeCache cache = caches.get(path);
+    public Document get() throws DocumentSerializationException {
         ChildData data = cache.getCurrentData();
         if (data == null) {
-            // The general assumption about this cache is that documents are
-            // expected to exist
-            throw new KeeperException.NoNodeException(path.toString());
+            return null;
         }
 
         Document document = DocumentSerializer.toDocument(data.getData());
         document.setVersion(data.getStat().getVersion());
         return document;
     }
+    
+    public boolean exists() throws DocumentSerializationException {
+        return get() != null;
+    }
 
-    /**
-     * Remove a path from the cache.
-     */
-    public synchronized void remove(Path path) throws IllegalArgumentException, IOException {
-        if (!caches.containsKey(path)) {
-            throw new IllegalArgumentException("Not caching path " + path);
-        }
-        NodeCache cache = caches.get(path);
-        cache.close();
-        caches.remove(path);
+    public ListenerContainer<NodeCacheListener> getListeners() {
+        return cache.getListenable();
     }
 }

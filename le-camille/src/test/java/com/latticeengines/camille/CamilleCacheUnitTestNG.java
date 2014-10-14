@@ -29,22 +29,24 @@ public class CamilleCacheUnitTestNG {
 
     @Test(groups = "unit")
     public void testCache() throws Exception {
-        CamilleCache cache = new CamilleCache();
-        Camille camille = CamilleEnvironment.getCamille();
         Path path = new Path("/foo");
+        Camille camille = CamilleEnvironment.getCamille();
+
         Document document = new Document();
         document.setData("foo");
         camille.create(path, document, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertTrue(camille.exists(new Path("/foo")));
 
-        Document cached = cache.get(path);
+        CamilleCache cache = new CamilleCache(path);
+        cache.start();
+        Document cached = cache.get();
         Assert.assertEquals(cached, document);
 
         document.setData("bar");
         camille.set(path, document);
         cache.rebuild();
 
-        cached = cache.get(path);
+        cached = cache.get();
         Assert.assertEquals(cached, document);
     }
 }
