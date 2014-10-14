@@ -71,7 +71,6 @@ public class PropertiesManager {
     @SuppressWarnings("unchecked")
     private <T> T getProperty(String name, Class<T> clazz) throws Exception {
         try {
-            cache.rebuild();
             return (T) getMap(cache.get().getData()).get(name);
         } catch (Exception e) {
             log.error("Error reading properties data", e);
@@ -102,5 +101,6 @@ public class PropertiesManager {
         map.put(name, value);
         doc.setData(mapper.writeValueAsString(map));
         CamilleEnvironment.getCamille().set(path, doc);
+        cache.rebuild();
     }
 }
