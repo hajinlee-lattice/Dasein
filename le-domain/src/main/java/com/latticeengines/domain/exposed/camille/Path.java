@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.camille;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -29,8 +30,7 @@ public class Path implements Serializable {
 
         if (rawPath.equals("/")) {
             parts = new ArrayList<String>();
-        }
-        else {
+        } else {
             String path = rawPath.substring(1, rawPath.length());
             parts = Arrays.asList(path.split("/"));
         }
@@ -42,7 +42,7 @@ public class Path implements Serializable {
                 throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
             }
         }
-        
+
         this.parts = parts;
     }
 
@@ -52,12 +52,16 @@ public class Path implements Serializable {
                 throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
             }
         }
-        
+
         this.parts = Arrays.asList(parts);
     }
 
     public int numParts() {
         return parts.size();
+    }
+
+    public List<String> getParts() {
+        return Collections.unmodifiableList(parts);
     }
 
     public Path append(String part) {
@@ -92,7 +96,7 @@ public class Path implements Serializable {
         if (prefix.isRoot()) {
             return true;
         }
-        
+
         if (prefix.parts.size() > parts.size()) {
             return false;
         }
@@ -124,7 +128,7 @@ public class Path implements Serializable {
         if (prefix.isRoot()) {
             return new Path(parts);
         }
-        
+
         if (!startsWith(prefix)) {
             throw new IllegalArgumentException("Path " + toString() + " does not start with the prefix " + prefix);
         }
@@ -137,10 +141,9 @@ public class Path implements Serializable {
             throw new IllegalArgumentException("Cannot return the parent of root path " + this);
         }
         List<String> parentParts = new ArrayList<String>();
-        parentParts.addAll(parts.subList(0, parts.size()-1));
+        parentParts.addAll(parts.subList(0, parts.size() - 1));
         return new Path(parentParts);
     }
-
 
     /**
      * @return The parent paths in order.Uses a copy of this object as it exists
@@ -165,7 +168,6 @@ public class Path implements Serializable {
         return out;
     }
 
-    
     public String getSuffix() {
         if (isRoot()) {
             return "";
