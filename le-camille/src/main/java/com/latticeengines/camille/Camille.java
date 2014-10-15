@@ -1,6 +1,7 @@
 package com.latticeengines.camille;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class Camille {
@@ -97,15 +98,15 @@ public class Camille {
         List<Pair<Document, Path>> out = new ArrayList<Pair<Document, Path>>(relativeChildPaths.size());
 
         for (String relativePath : relativeChildPaths) {
-            final Path childPath = new Path(String.format("%s/%s", path, relativePath));
+            final Path childPath = path.append(relativePath);
             out.add(Pair.of(get(childPath), childPath));
         }
 
         return out;
     }
 
-    public DocumentHierarchyCollection getDescendants(Path path) {
-        return new DocumentHierarchyCollection(path, new Function<Path, List<Map.Entry<Document, Path>>>() {
+    public DocumentDirectory getDirectory(Path path) {
+        DocumentDirectory directory = new DocumentDirectory(path, new Function<Path, List<Map.Entry<Document, Path>>>() {
             @Override
             public List<Entry<Document, Path>> apply(Path input) {
                 try {
@@ -121,6 +122,7 @@ public class Camille {
                 return (List<E>) pairs;
             }
         });
+        return directory;
     }
 
     public void delete(Path path) throws Exception {

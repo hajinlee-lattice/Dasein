@@ -17,16 +17,18 @@ import org.apache.commons.lang.ObjectUtils;
 
 import com.google.common.base.Function;
 
-public class DocumentHierarchyCollection implements Serializable {
+public class DocumentDirectory implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    private Path root;
     private List<Node> children;
 
-    public DocumentHierarchyCollection() {
+    public DocumentDirectory() {
         children = new ArrayList<Node>();
     }
 
-    public DocumentHierarchyCollection(Path root, Function<Path, List<Map.Entry<Document, Path>>> getChildren) {
+    public DocumentDirectory(Path root, Function<Path, List<Map.Entry<Document, Path>>> getChildren) {
+        this.root = root;
         List<Entry<Document, Path>> childPairs = getChildren.apply(root);
         children = new ArrayList<Node>(childPairs.size());
         for (Entry<Document, Path> childPair : childPairs) {
@@ -38,16 +40,83 @@ public class DocumentHierarchyCollection implements Serializable {
     public List<Node> getChildren() {
         return children;
     }
+    
+    public Path getRootPath() {
+        return root;
+    }
+    
+    public void makePathsLocal() {
+        Iterator<Node> iter = depthFirstIterator();
+        while (iter.hasNext()) {
+            Node node = iter.next();
+            node.setPath(node.getPath().local(root));
+        }
+        root = new Path("/");
+    }
 
-    public void setChildren(List<Node> children) {
-        this.children = children;
+    public Node get(Path path) {
+        Iterator<Node> iter = depthFirstIterator();
+        while (iter.hasNext()) {
+            Node node = iter.next();
+            if (node.getPath().equals(path)) {
+                return node;
+            }
+        }
+
+        return null;
+    }
+
+    public Node add(Path path, Document document) {
+        Node node;
+        Path parentPath = path.parent();
+        if (parentPath.equals(root)) {
+            node = new Node(path, document);
+            children.add(node);
+        } else {
+            Node parent = get(parentPath);
+            if (parent == null) {
+                throw new IllegalArgumentException("Cannot add path " + path
+                        + ".  No such parent node exists with path " + parentPath);
+            }
+            node = new Node(path, document);
+            parent.children.add(node);
+        }
+
+        return node;
+    }
+
+    public void delete(Path path) {
+        Path parentPath = path.parent();
+        List<Node> siblings;
+        if (parentPath.equals(root)) {
+            siblings = children;
+        } else {
+            Node parent = get(parentPath);
+            if (parent == null) {
+                throw new IllegalArgumentException("Cannot delete path " + path
+                        + ".  No such parent node exists with path " + path.parent());
+            }
+            siblings = parent.children;
+        }
+
+        Iterator<Node> iter = siblings.iterator();
+        while (iter.hasNext()) {
+            Node sibling = iter.next();
+            if (sibling.getPath().equals(path)) {
+                iter.remove();
+                return;
+            }
+        }
+
+        throw new IllegalArgumentException("Cannot delete node with " + path + ".  No such node exists");
     }
 
     public Iterator<Node> breadthFirstIterator() {
         Queue<Node> q = new LinkedList<Node>(children);
         Set<Node> visited = new LinkedHashSet<Node>();
         for (Node n = q.poll(); n != null; n = q.poll()) {
-            if (visited.add(n)) {
+            if (!visited.contains(n)) {
+                visited.add(n);
                 q.addAll(n.getChildren());
             }
         }
@@ -63,7 +132,8 @@ public class DocumentHierarchyCollection implements Serializable {
     }
 
     private static void traverse(Node parent, Set<Node> visited) {
-        if (visited.add(parent)) {
+        if (!visited.contains(parent)) {
+            visited.add(parent);
             for (Node child : parent.getChildren()) {
                 traverse(child, visited);
             }
@@ -112,9 +182,9 @@ public class DocumentHierarchyCollection implements Serializable {
             return true;
         if (obj == null)
             return false;
-        if (!(obj instanceof DocumentHierarchyCollection))
+        if (!(obj instanceof DocumentDirectory))
             return false;
-        DocumentHierarchyCollection that = (DocumentHierarchyCollection) obj;
+        DocumentDirectory that = (DocumentDirectory) obj;
         if (children == null) {
             if (that.children != null)
                 return false;
@@ -150,12 +220,25 @@ public class DocumentHierarchyCollection implements Serializable {
             Collections.sort(children);
         }
 
-        public Node() {
-            children = new ArrayList<Node>();
+        private Node(Path path, Document document, List<Node> children) {
+            this.path = path;
+            this.document = document;
+            this.children = children;
+            Collections.sort(children);
+        }
+
+        private Node(Path path, Document document) {
+            this.path = path;
+            this.document = document;
+            this.children = new ArrayList<Node>();
         }
 
         public Path getPath() {
             return path;
+        }
+
+        public void setPath(Path path) {
+            this.path = path;
         }
 
         public Document getDocument() {
@@ -168,10 +251,6 @@ public class DocumentHierarchyCollection implements Serializable {
 
         public List<Node> getChildren() {
             return children;
-        }
-
-        public void setChildren(List<Node> children) {
-            this.children = children;
         }
 
         @Override
@@ -205,4 +284,5 @@ public class DocumentHierarchyCollection implements Serializable {
             return true;
         }
     }
+
 }

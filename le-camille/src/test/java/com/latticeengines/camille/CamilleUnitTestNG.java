@@ -18,7 +18,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class CamilleUnitTestNG {
@@ -146,7 +146,7 @@ public class CamilleUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testDocumentDescendantHierarchy() throws Exception {
+    public void testDocumentDirectory() throws Exception {
         Camille c = CamilleEnvironment.getCamille();
 
         Path p0 = new Path("/parentPath");
@@ -184,23 +184,20 @@ public class CamilleUnitTestNG {
         c.create(p6, d6, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p6));
 
-        DocumentHierarchyCollection h = c.getDescendants(p0);
+        DocumentDirectory h = c.getDirectory(p0);
 
         Assert.assertEquals(h.getChildren().size(), 2);
         Assert.assertEquals(h.getChildren().get(0).getChildren().size(), 2);
-        for (com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection.Node node : h.getChildren().get(0)
-                .getChildren()) {
+        for (DocumentDirectory.Node node : h.getChildren().get(0).getChildren()) {
             Assert.assertTrue(node.getChildren().isEmpty());
         }
         Assert.assertEquals(h.getChildren().get(1).getChildren().size(), 2);
-        for (com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection.Node node : h.getChildren().get(1)
-                .getChildren()) {
+        for (DocumentDirectory.Node node : h.getChildren().get(1).getChildren()) {
             Assert.assertTrue(node.getChildren().isEmpty());
         }
 
         int i = 1;
-        Iterator<com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection.Node> iter = h
-                .breadthFirstIterator();
+        Iterator<DocumentDirectory.Node> iter = h.breadthFirstIterator();
         while (iter.hasNext()) {
             Assert.assertEquals(iter.next().getDocument().getData(), String.format("d%d", i));
             ++i;
@@ -234,5 +231,127 @@ public class CamilleUnitTestNG {
             ++i;
         }
         Assert.assertEquals(i, 7);
+    }
+    
+    @Test(groups = "unit")
+    public void testModifyDocumentDirectory() throws Exception {
+        Camille c = CamilleEnvironment.getCamille();
+
+        Path p0 = new Path("/parentPath");
+        Document d0 = new Document("d0", null);
+        c.create(p0, d0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p0));
+
+        Path p1 = new Path(String.format("%s/%s", p0, "p1"));
+        Document d1 = new Document("d1", null);
+        c.create(p1, d1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p1));
+
+        Path p2 = new Path(String.format("%s/%s", p0, "p2"));
+        Document d2 = new Document("d2", null);
+        c.create(p2, d2, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p2));
+
+        Path p3 = new Path(String.format("%s/%s", p1, "p3"));
+        Document d3 = new Document("d3", null);
+        c.create(p3, d3, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p3));
+
+        Path p4 = new Path(String.format("%s/%s", p1, "p4"));
+        Document d4 = new Document("d4", null);
+        c.create(p4, d4, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p4));
+
+        Path p5 = new Path(String.format("%s/%s", p2, "p5"));
+        Document d5 = new Document("d5", null);
+        c.create(p5, d5, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p5));
+
+        Path p6 = new Path(String.format("%s/%s", p2, "p6"));
+        Document d6 = new Document("d6", null);
+        c.create(p6, d6, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p6));
+
+        DocumentDirectory directory = c.getDirectory(p0);
+        
+        Document d7 = new Document("d7", null);
+        directory.add(new Path("/parentPath/d7"), d7);
+        
+        DocumentDirectory.Node n = directory.get(new Path("/parentPath/d7"));
+        Assert.assertEquals(d7, n.getDocument());
+        
+        directory.delete(new Path("/parentPath/d7"));
+        n = directory.get(new Path("/parentPath/d7"));
+        Assert.assertNull(n);
+
+        // Test local paths
+        directory.makePathsLocal();
+        Assert.assertEquals(directory.getRootPath(), new Path("/"));
+        
+        p1 = p1.local(p0);
+        p2 = p2.local(p0);
+        p3 = p3.local(p0);
+        p4 = p4.local(p0);
+        p5 = p5.local(p0);
+        p6 = p6.local(p0);
+        
+        Assert.assertNotNull(directory.get(p1));
+        Assert.assertNotNull(directory.get(p3));
+
+        // Test cascade deletes
+        directory.delete(p1);
+        Assert.assertNull(directory.get(p1));
+        Assert.assertNull(directory.get(p3));
+        Assert.assertNull(directory.get(p4));
+    }
+    
+    // TODO Uncomment once DocumentSerializer is gone
+    //@Test(groups = "unit")
+    public void testDocumentDirectoryOnRootPaths() throws Exception {
+        Camille c = CamilleEnvironment.getCamille();
+
+        Path p0 = new Path("/parentPath");
+        Document d0 = new Document("d0", null);
+        c.create(p0, d0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p0));
+
+        Path p1 = new Path(String.format("%s/%s", p0, "p1"));
+        Document d1 = new Document("d1", null);
+        c.create(p1, d1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p1));
+
+        Path p2 = new Path(String.format("%s/%s", p0, "p2"));
+        Document d2 = new Document("d2", null);
+        c.create(p2, d2, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p2));
+
+        Path p3 = new Path(String.format("%s/%s", p1, "p3"));
+        Document d3 = new Document("d3", null);
+        c.create(p3, d3, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p3));
+
+        Path p4 = new Path(String.format("%s/%s", p1, "p4"));
+        Document d4 = new Document("d4", null);
+        c.create(p4, d4, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p4));
+
+        Path p5 = new Path(String.format("%s/%s", p2, "p5"));
+        Document d5 = new Document("d5", null);
+        c.create(p5, d5, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p5));
+
+        Path p6 = new Path(String.format("%s/%s", p2, "p6"));
+        Document d6 = new Document("d6", null);
+        c.create(p6, d6, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertNotNull(c.exists(p6));
+
+        DocumentDirectory directory = c.getDirectory(new Path("/"));
+        Assert.assertEquals(directory.getRootPath(), new Path("/"));
+        directory.makePathsLocal();
+        Assert.assertEquals(directory.getRootPath(), new Path("/"));
+        
+        Assert.assertNotNull(directory.get(p0));
+        Assert.assertNotNull(directory.get(p3));
+
     }
 }

@@ -10,8 +10,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection;
-import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection.Node;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
 import com.latticeengines.domain.exposed.camille.DocumentMetadata;
 import com.latticeengines.domain.exposed.camille.Path;
 
@@ -71,9 +71,9 @@ public class DocumentUnitTestNG {
         c.create(p6, d6, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p6));
 
-        DocumentHierarchyCollection h = c.getDescendants(p0);
+        DocumentDirectory h = c.getDirectory(p0);
 
-        DocumentHierarchyCollection hCopy = SerializationUtils.clone(h);
+        DocumentDirectory hCopy = SerializationUtils.clone(h);
         Assert.assertFalse(h == hCopy);
         Assert.assertTrue(h.equals(hCopy));
 

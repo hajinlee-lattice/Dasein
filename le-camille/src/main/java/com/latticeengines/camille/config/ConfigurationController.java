@@ -6,7 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
 
 import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentHierarchyCollection;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
@@ -48,8 +48,8 @@ public class ConfigurationController<T extends ConfigurationScope> implements Co
     }
 
     @Override
-    public DocumentHierarchyCollection getDescendants(Path path) throws Exception {
-        return impl.getDescendants(path);
+    public DocumentDirectory getDirectory(Path path) throws Exception {
+        return impl.getDirectory(path);
     }
 
     @Override
