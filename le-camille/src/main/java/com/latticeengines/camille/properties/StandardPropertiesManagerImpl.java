@@ -28,15 +28,13 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
 
     protected static final ObjectMapper mapper = new ObjectMapper();
 
-    protected T scope;
-    protected Camille camille;
-    protected CamilleCache cache;
-    protected Path absolute;
+    protected final Camille camille;
+    protected final CamilleCache cache;
+    protected final Path absolute;
 
     public StandardPropertiesManagerImpl(T scope, Path relative) throws Exception {
         camille = CamilleEnvironment.getCamille();
-        cache = new CamilleCache(absolute = PathTranslatorFactory.getTranslator(this.scope = scope).getAbsolutePath(
-                relative));
+        cache = new CamilleCache(absolute = PathTranslatorFactory.getTranslator(scope).getAbsolutePath(relative));
         cache.start();
     }
 
