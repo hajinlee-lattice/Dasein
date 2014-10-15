@@ -1,7 +1,6 @@
 package com.latticeengines.camille;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -106,22 +105,23 @@ public class Camille {
     }
 
     public DocumentDirectory getDirectory(Path path) {
-        DocumentDirectory directory = new DocumentDirectory(path, new Function<Path, List<Map.Entry<Document, Path>>>() {
-            @Override
-            public List<Entry<Document, Path>> apply(Path input) {
-                try {
-                    return asMapEntry(getChildren(input));
-                } catch (Exception e) {
-                    log.error("error getting children of path " + input, e);
-                    return null;
-                }
-            }
+        DocumentDirectory directory = new DocumentDirectory(path,
+                new Function<Path, List<Map.Entry<Document, Path>>>() {
+                    @Override
+                    public List<Entry<Document, Path>> apply(Path input) {
+                        try {
+                            return asMapEntry(getChildren(input));
+                        } catch (Exception e) {
+                            log.error("error getting children of path " + input, e);
+                            return null;
+                        }
+                    }
 
-            @SuppressWarnings("unchecked")
-            private <E extends Map.Entry<Document, Path>> List<E> asMapEntry(List<Pair<Document, Path>> pairs) {
-                return (List<E>) pairs;
-            }
-        });
+                    @SuppressWarnings("unchecked")
+                    private <E extends Map.Entry<Document, Path>> List<E> asMapEntry(List<Pair<Document, Path>> pairs) {
+                        return (List<E>) pairs;
+                    }
+                });
         return directory;
     }
 
