@@ -17,42 +17,23 @@ public class Path implements Serializable {
 
     private List<String> parts;
 
-    /**
-     * @return The parent paths in order.Uses a copy of this object as it exists
-     *         when this method is called.
-     */
-    public List<Path> getParentPaths() {
-        ListIterator<String> iter = parts.listIterator();
-
-        int size = parts.size();
-
-        List<String> pathStrings = new ArrayList<String>(size);
-        pathStrings.add(iter.next());
-
-        List<Path> out = new ArrayList<Path>(size);
-        out.add(new Path(new ArrayList<String>(pathStrings)));
-
-        while (iter.nextIndex() < size - 1) {
-            pathStrings.add(iter.next());
-            out.add(new Path(new ArrayList<String>(pathStrings)));
-        }
-
-        return out;
-    }
-
     public Path(String rawPath) throws IllegalArgumentException {
         if (!rawPath.startsWith("/")) {
             throw new IllegalArgumentException("Path " + rawPath + " is invalid.  Paths must start with a /.");
         }
 
-        if (!rawPath.matches("^(/[\\w\\-.]+)+$")) {
+        if (!rawPath.equals("/") && !rawPath.matches("^(/[\\w\\-.]+)+$")) {
             throw new IllegalArgumentException("Path " + rawPath
                     + " is invalid.  A path must contain only word characters or .'s");
         }
 
-        String path = rawPath.substring(1, rawPath.length());
-
-        parts = Arrays.asList(path.split("/"));
+        if (rawPath.equals("/")) {
+            parts = new ArrayList<String>();
+        }
+        else {
+            String path = rawPath.substring(1, rawPath.length());
+            parts = Arrays.asList(path.split("/"));
+        }
     }
 
     public Path(List<String> parts) throws IllegalArgumentException {
@@ -61,10 +42,7 @@ public class Path implements Serializable {
                 throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
             }
         }
-        if (parts.size() == 0) {
-            throw new IllegalArgumentException("Path arrays with length 0 are not allowed");
-        }
-
+        
         this.parts = parts;
     }
 
@@ -74,10 +52,7 @@ public class Path implements Serializable {
                 throw new IllegalArgumentException("Provided path array part " + part + " is invalid.");
             }
         }
-        if (parts.length == 0) {
-            throw new IllegalArgumentException("Path arrays with length 0 are not allowed");
-        }
-
+        
         this.parts = Arrays.asList(parts);
     }
 
@@ -114,6 +89,10 @@ public class Path implements Serializable {
     }
 
     public boolean startsWith(Path prefix) {
+        if (prefix.isRoot()) {
+            return true;
+        }
+        
         if (prefix.parts.size() > parts.size()) {
             return false;
         }
@@ -129,6 +108,10 @@ public class Path implements Serializable {
         return true;
     }
 
+    public boolean isRoot() {
+        return parts.size() == 0;
+    }
+
     /**
      * Returns local path relative to the specified prefix. So for example, if
      * the path is /a/b/c/d, and the prefix is /a/b, this will return the path
@@ -138,6 +121,10 @@ public class Path implements Serializable {
      *             if the path does not start with the specified prefix.
      */
     public Path local(Path prefix) {
+        if (prefix.isRoot()) {
+            return new Path(parts);
+        }
+        
         if (!startsWith(prefix)) {
             throw new IllegalArgumentException("Path " + toString() + " does not start with the prefix " + prefix);
         }
@@ -146,15 +133,43 @@ public class Path implements Serializable {
     }
 
     public Path parent() {
-        if (parts.size() == 1) {
-            throw new IllegalArgumentException("Cannot return the parent of a path (" + toString() + ") with only one part");
+        if (isRoot()) {
+            throw new IllegalArgumentException("Cannot return the parent of root path " + this);
         }
         List<String> parentParts = new ArrayList<String>();
         parentParts.addAll(parts.subList(0, parts.size()-1));
         return new Path(parentParts);
     }
 
+
+    /**
+     * @return The parent paths in order.Uses a copy of this object as it exists
+     *         when this method is called.
+     */
+    public List<Path> getParentPaths() {
+        ListIterator<String> iter = parts.listIterator();
+
+        int size = parts.size();
+
+        List<String> pathStrings = new ArrayList<String>(size);
+        pathStrings.add(iter.next());
+
+        List<Path> out = new ArrayList<Path>(size);
+        out.add(new Path(new ArrayList<String>(pathStrings)));
+
+        while (iter.nextIndex() < size - 1) {
+            pathStrings.add(iter.next());
+            out.add(new Path(new ArrayList<String>(pathStrings)));
+        }
+
+        return out;
+    }
+
+    
     public String getSuffix() {
+        if (isRoot()) {
+            return "";
+        }
         return this.parts.get(this.parts.size() - 1);
     }
 

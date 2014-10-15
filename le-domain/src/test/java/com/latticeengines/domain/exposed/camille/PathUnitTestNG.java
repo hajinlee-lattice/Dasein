@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.camille;
 
+import java.util.ArrayList;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -127,5 +129,21 @@ public class PathUnitTestNG {
         Assert.assertFalse(path.startsWith(new Path("/a/b/c/d/e")));
         Assert.assertFalse(path.startsWith(new Path("/foo/bar")));
     }
+ 
+    @Test(groups = "unit")
+    public void testRootPath() {
+        Path path = new Path("/");
+        Assert.assertEquals(path.toString(), "/");
+        path = new Path(new ArrayList<String>());
+        Assert.assertEquals(path.toString(), "/");
+        Assert.assertTrue(new Path("/a/b/c").startsWith(new Path("/")));
+        Assert.assertEquals(new Path("/a/b/c").local(new Path("/")).toString(), "/a/b/c");
+        Assert.assertEquals(new Path("/").getSuffix(), "");
+    }
     
+    @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
+    public void testParentForRootPathIsInvalid() {
+        Path p = new Path("/");
+        p.parent();
+    }
 }
