@@ -1,4 +1,4 @@
-package com.latticeengines.camille;
+package com.latticeengines.camille.properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,13 +7,13 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.CamilleEnvironment;
+import com.latticeengines.camille.CamilleTestEnvironment;
 import com.latticeengines.camille.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.lifecycle.PodLifecycleManager;
 import com.latticeengines.camille.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.lifecycle.TenantLifecycleManager;
-import com.latticeengines.camille.properties.PropertiesManager;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 import com.latticeengines.domain.exposed.camille.scopes.ContractScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.camille.scopes.PodScope;
@@ -41,7 +41,7 @@ public class PropertiesManagerUnitTestNG {
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
         Path path = new Path("/foo");
 
-        PropertiesManager<ConfigurationScope> pm = new PropertiesManager<ConfigurationScope>(scope, path);
+        PropertiesManager<PodScope> pm = new PropertiesManager<PodScope>(scope, path);
 
         double d = 10;
         String dblName = "myDouble";
@@ -65,7 +65,7 @@ public class PropertiesManagerUnitTestNG {
         ContractLifecycleManager.create(scope.getContractID());
         Path path = new Path("/foo");
 
-        PropertiesManager<ConfigurationScope> pm = new PropertiesManager<ConfigurationScope>(scope, path);
+        PropertiesManager<ContractScope> pm = new PropertiesManager<ContractScope>(scope, path);
 
         double d = 10;
         String dblName = "myDouble";
@@ -90,7 +90,7 @@ public class PropertiesManagerUnitTestNG {
         TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "MySpace");
         Path path = new Path("/foo");
 
-        PropertiesManager<ConfigurationScope> pm = new PropertiesManager<ConfigurationScope>(scope, path);
+        PropertiesManager<TenantScope> pm = new PropertiesManager<TenantScope>(scope, path);
 
         double d = 10;
         String dblName = "myDouble";
@@ -116,7 +116,7 @@ public class PropertiesManagerUnitTestNG {
         SpaceLifecycleManager.create(scope.getContractID(), scope.getTenantID(), scope.getSpaceID());
         Path path = new Path("/foo");
 
-        PropertiesManager<ConfigurationScope> pm = new PropertiesManager<ConfigurationScope>(scope, path);
+        PropertiesManager<CustomerSpaceScope> pm = new PropertiesManager<CustomerSpaceScope>(scope, path);
 
         double d = 10;
         String dblName = "myDouble";

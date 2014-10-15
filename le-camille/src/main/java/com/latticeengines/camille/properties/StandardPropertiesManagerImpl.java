@@ -12,9 +12,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.camille.CamilleCache;
 import com.latticeengines.camille.config.ConfigurationController;
-import com.latticeengines.camille.translators.PathTranslatorFactory;
+import com.latticeengines.camille.config.cache.ConfigurationCacheController;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
@@ -26,15 +25,18 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
 
     protected static final ObjectMapper mapper = new ObjectMapper();
 
-    protected final CamilleCache cache;
-    protected final Path relativePath;
+    protected final ConfigurationCacheController<T> configCacheController;
     protected final ConfigurationController<T> configController;
+    protected final Path relativePath;
 
     public StandardPropertiesManagerImpl(T scope, Path relativePath) throws Exception {
         configController = new ConfigurationController<T>(scope);
-        cache = new CamilleCache(PathTranslatorFactory.getTranslator(scope).getAbsolutePath(
-                this.relativePath = relativePath));
-        cache.start();
+        configCacheController = new ConfigurationCacheController<T>(scope, this.relativePath = relativePath);
+
+        // cache = new
+        // CamilleCache(PathTranslatorFactory.getTranslator(scope).getAbsolutePath(
+        // this.relativePath = relativePath));
+        // cache.start();
     }
 
     @Override
@@ -75,7 +77,7 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
     @SuppressWarnings("unchecked")
     protected <P> P getProperty(String name, Class<P> clazz) throws Exception {
         try {
-            Document doc = cache.get();
+            Document doc = configCacheController.get();
             if (doc == null)
                 doc = new Document();
             return (P) getMap(doc.getData()).get(name);
@@ -90,7 +92,7 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
             try {
                 doSetProperty(name, value);
             } catch (KeeperException.BadVersionException e) {
-                cache.rebuild();
+                configCacheController.rebuild();
                 doSetProperty(name, value);
             }
         } catch (Exception e) {
@@ -103,7 +105,7 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
      * Helper method for setProperty
      */
     private void doSetProperty(String name, Object value) throws Exception {
-        Document doc = cache.get();
+        Document doc = configCacheController.get();
         if (doc == null)
             doc = new Document();
         Map<String, Object> map = getMap(doc.getData());
@@ -114,7 +116,7 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
         } catch (KeeperException.NoNodeException e) {
             configController.create(relativePath, doc);
         }
-        cache.rebuild();
+        configCacheController.rebuild();
     }
 
     @SuppressWarnings("unchecked")
