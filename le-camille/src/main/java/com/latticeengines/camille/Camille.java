@@ -97,7 +97,7 @@ public class Camille {
         List<Pair<Document, Path>> out = new ArrayList<Pair<Document, Path>>(relativeChildPaths.size());
 
         for (String relativePath : relativeChildPaths) {
-            final Path childPath = path.append(relativePath);
+            Path childPath = path.append(relativePath);
             out.add(Pair.of(get(childPath), childPath));
         }
 
