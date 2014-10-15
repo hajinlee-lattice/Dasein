@@ -40,11 +40,11 @@ public class DocumentDirectory implements Serializable {
     public List<Node> getChildren() {
         return children;
     }
-    
+
     public Path getRootPath() {
         return root;
     }
-    
+
     public void makePathsLocal() {
         Iterator<Node> iter = depthFirstIterator();
         while (iter.hasNext()) {
@@ -115,8 +115,7 @@ public class DocumentDirectory implements Serializable {
         Queue<Node> q = new LinkedList<Node>(children);
         Set<Node> visited = new LinkedHashSet<Node>();
         for (Node n = q.poll(); n != null; n = q.poll()) {
-            if (!visited.contains(n)) {
-                visited.add(n);
+            if (visited.add(n)) {
                 q.addAll(n.getChildren());
             }
         }
@@ -132,8 +131,7 @@ public class DocumentDirectory implements Serializable {
     }
 
     private static void traverse(Node parent, Set<Node> visited) {
-        if (!visited.contains(parent)) {
-            visited.add(parent);
+        if (visited.add(parent)) {
             for (Node child : parent.getChildren()) {
                 traverse(child, visited);
             }
