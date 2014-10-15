@@ -32,11 +32,6 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
     public StandardPropertiesManagerImpl(T scope, Path relativePath) throws Exception {
         configController = new ConfigurationController<T>(scope);
         configCacheController = new ConfigurationCacheController<T>(scope, this.relativePath = relativePath);
-
-        // cache = new
-        // CamilleCache(PathTranslatorFactory.getTranslator(scope).getAbsolutePath(
-        // this.relativePath = relativePath));
-        // cache.start();
     }
 
     @Override
