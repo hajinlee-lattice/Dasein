@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,9 +12,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleCache;
-import com.latticeengines.camille.CamilleEnvironment;
+import com.latticeengines.camille.config.ConfigurationController;
 import com.latticeengines.camille.translators.PathTranslatorFactory;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -28,13 +26,14 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
 
     protected static final ObjectMapper mapper = new ObjectMapper();
 
-    protected final Camille camille = CamilleEnvironment.getCamille();
-
     protected final CamilleCache cache;
-    protected final Path absolute;
+    protected final Path relativePath;
+    protected final ConfigurationController<T> configController;
 
-    public StandardPropertiesManagerImpl(T scope, Path relative) throws Exception {
-        cache = new CamilleCache(absolute = PathTranslatorFactory.getTranslator(scope).getAbsolutePath(relative));
+    public StandardPropertiesManagerImpl(T scope, Path relativePath) throws Exception {
+        configController = new ConfigurationController<T>(scope);
+        cache = new CamilleCache(PathTranslatorFactory.getTranslator(scope).getAbsolutePath(
+                this.relativePath = relativePath));
         cache.start();
     }
 
@@ -71,14 +70,6 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
     @Override
     public boolean getBooleanProperty(String name) throws Exception {
         return getProperty(name, Boolean.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    private <M extends Map<String, Object>> M getMap(String data) throws JsonParseException, JsonMappingException,
-            IOException {
-        return (M) (data == null || data.isEmpty() ? new HashMap<String, Object>() : mapper.readValue(data,
-                new TypeReference<Map<String, Object>>() {
-                }));
     }
 
     @SuppressWarnings("unchecked")
@@ -119,10 +110,18 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
         map.put(name, value);
         doc.setData(mapper.writeValueAsString(map));
         try {
-            camille.set(absolute, doc);
+            configController.set(relativePath, doc);
         } catch (KeeperException.NoNodeException e) {
-            camille.create(absolute, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            configController.create(relativePath, doc);
         }
         cache.rebuild();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <M extends Map<String, Object>> M getMap(String data) throws JsonParseException, JsonMappingException,
+            IOException {
+        return (M) (data == null || data.isEmpty() ? new HashMap<String, Object>() : mapper.readValue(data,
+                new TypeReference<Map<String, Object>>() {
+                }));
     }
 }
