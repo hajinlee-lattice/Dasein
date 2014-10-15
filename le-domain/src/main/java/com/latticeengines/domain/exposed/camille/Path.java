@@ -113,6 +113,47 @@ public class Path implements Serializable {
         return new Path(concat);
     }
 
+    public boolean startsWith(Path prefix) {
+        if (prefix.parts.size() > parts.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < prefix.parts.size(); ++i) {
+            String part = parts.get(i);
+            String prefixPart = prefix.parts.get(i);
+            if (!part.equals(prefixPart)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns local path relative to the specified prefix. So for example, if
+     * the path is /a/b/c/d, and the prefix is /a/b, this will return the path
+     * /c/d.
+     * 
+     * @throws IllegalArgumentException
+     *             if the path does not start with the specified prefix.
+     */
+    public Path local(Path prefix) {
+        if (!startsWith(prefix)) {
+            throw new IllegalArgumentException("Path " + toString() + " does not start with the prefix " + prefix);
+        }
+
+        return new Path(toString().substring(prefix.toString().length()));
+    }
+
+    public Path parent() {
+        if (parts.size() == 1) {
+            throw new IllegalArgumentException("Cannot return the parent of a path (" + toString() + ") with only one part");
+        }
+        List<String> parentParts = new ArrayList<String>();
+        parentParts.addAll(parts.subList(0, parts.size()-1));
+        return new Path(parentParts);
+    }
+
     public String getSuffix() {
         return this.parts.get(this.parts.size() - 1);
     }

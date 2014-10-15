@@ -113,4 +113,19 @@ public class PathUnitTestNG {
         Path p = new Path("foo", ".default-space");
     }
 
+    @Test(groups = "unit")
+    public void testLocalPath() {
+        Path path = new Path("/a/b/c/d");
+        Path local = path.local(new Path("/a/b"));
+        Assert.assertEquals(local.toString(), "/c/d");
+    }
+    
+    @Test(groups = "unit")
+    public void testStartsWith() {
+        Path path = new Path("/a/b/c/d");
+        Assert.assertTrue(path.startsWith(new Path("/a/b")));
+        Assert.assertFalse(path.startsWith(new Path("/a/b/c/d/e")));
+        Assert.assertFalse(path.startsWith(new Path("/foo/bar")));
+    }
+    
 }
