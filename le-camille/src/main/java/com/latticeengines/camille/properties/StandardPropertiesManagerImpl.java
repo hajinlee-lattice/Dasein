@@ -82,7 +82,7 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
     }
 
     @SuppressWarnings("unchecked")
-    private <P> P getProperty(String name, Class<P> clazz) throws Exception {
+    protected <P> P getProperty(String name, Class<P> clazz) throws Exception {
         try {
             Document doc = cache.get();
             if (doc == null)
@@ -94,7 +94,7 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
         }
     }
 
-    private void setProperty(String name, Object value) throws Exception {
+    protected void setProperty(String name, Object value) throws Exception {
         try {
             try {
                 doSetProperty(name, value);
