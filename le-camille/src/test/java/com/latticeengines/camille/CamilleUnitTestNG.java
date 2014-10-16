@@ -8,9 +8,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.WatchedEvent;
@@ -84,7 +84,7 @@ public class CamilleUnitTestNG {
         Camille c = CamilleEnvironment.getCamille();
 
         Path path = new Path("/testPath");
-        Document doc0 = new Document("testData0", null);
+        Document doc0 = new Document("testData0");
 
         c.create(path, doc0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
@@ -110,7 +110,7 @@ public class CamilleUnitTestNG {
 
         Assert.assertEquals(c.get(path, watcher).getData(), doc0.getData());
 
-        Document doc1 = new Document("testData1", null);
+        Document doc1 = new Document("testData1");
         c.set(path, doc1);
         latch.await(); // wait for the process callback to be called
         Assert.assertTrue(dataChangedEventFired[0]);
@@ -131,17 +131,17 @@ public class CamilleUnitTestNG {
         Camille c = CamilleEnvironment.getCamille();
 
         Path parentPath = new Path("/parentPath");
-        Document parentDoc = new Document("parentData", null);
+        Document parentDoc = new Document("parentData");
         c.create(parentPath, parentDoc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertTrue(c.exists(parentPath));
 
         Path childPath0 = new Path(String.format("%s/%s", parentPath, "childPath0"));
-        Document childDoc0 = new Document("child0Data", null);
+        Document childDoc0 = new Document("child0Data");
         c.create(childPath0, childDoc0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertTrue(c.exists(childPath0));
 
         Path childPath1 = new Path(String.format("%s/%s", parentPath, "childPath1"));
-        Document childDoc1 = new Document("child1Data", null);
+        Document childDoc1 = new Document("child1Data");
         c.create(childPath1, childDoc1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertTrue(c.exists(childPath1));
 
@@ -159,37 +159,37 @@ public class CamilleUnitTestNG {
         Camille c = CamilleEnvironment.getCamille();
 
         Path p0 = new Path("/parentPath");
-        Document d0 = new Document("d0", null);
+        Document d0 = new Document("d0");
         c.create(p0, d0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p0));
 
         Path p1 = new Path(String.format("%s/%s", p0, "p1"));
-        Document d1 = new Document("d1", null);
+        Document d1 = new Document("d1");
         c.create(p1, d1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p1));
 
         Path p2 = new Path(String.format("%s/%s", p0, "p2"));
-        Document d2 = new Document("d2", null);
+        Document d2 = new Document("d2");
         c.create(p2, d2, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p2));
 
         Path p3 = new Path(String.format("%s/%s", p1, "p3"));
-        Document d3 = new Document("d3", null);
+        Document d3 = new Document("d3");
         c.create(p3, d3, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p3));
 
         Path p4 = new Path(String.format("%s/%s", p1, "p4"));
-        Document d4 = new Document("d4", null);
+        Document d4 = new Document("d4");
         c.create(p4, d4, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p4));
 
         Path p5 = new Path(String.format("%s/%s", p2, "p5"));
-        Document d5 = new Document("d5", null);
+        Document d5 = new Document("d5");
         c.create(p5, d5, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p5));
 
         Path p6 = new Path(String.format("%s/%s", p2, "p6"));
-        Document d6 = new Document("d6", null);
+        Document d6 = new Document("d6");
         c.create(p6, d6, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p6));
 
@@ -247,43 +247,43 @@ public class CamilleUnitTestNG {
         Camille c = CamilleEnvironment.getCamille();
 
         Path p0 = new Path("/parentPath");
-        Document d0 = new Document("d0", null);
+        Document d0 = new Document("d0");
         c.create(p0, d0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p0));
 
         Path p1 = new Path(String.format("%s/%s", p0, "p1"));
-        Document d1 = new Document("d1", null);
+        Document d1 = new Document("d1");
         c.create(p1, d1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p1));
 
         Path p2 = new Path(String.format("%s/%s", p0, "p2"));
-        Document d2 = new Document("d2", null);
+        Document d2 = new Document("d2");
         c.create(p2, d2, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p2));
 
         Path p3 = new Path(String.format("%s/%s", p1, "p3"));
-        Document d3 = new Document("d3", null);
+        Document d3 = new Document("d3");
         c.create(p3, d3, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p3));
 
         Path p4 = new Path(String.format("%s/%s", p1, "p4"));
-        Document d4 = new Document("d4", null);
+        Document d4 = new Document("d4");
         c.create(p4, d4, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p4));
 
         Path p5 = new Path(String.format("%s/%s", p2, "p5"));
-        Document d5 = new Document("d5", null);
+        Document d5 = new Document("d5");
         c.create(p5, d5, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p5));
 
         Path p6 = new Path(String.format("%s/%s", p2, "p6"));
-        Document d6 = new Document("d6", null);
+        Document d6 = new Document("d6");
         c.create(p6, d6, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p6));
 
         DocumentDirectory directory = c.getDirectory(p0);
 
-        Document d7 = new Document("d7", null);
+        Document d7 = new Document("d7");
         directory.add(new Path("/parentPath/d7"), d7);
 
         DocumentDirectory.Node n = directory.get(new Path("/parentPath/d7"));
@@ -320,37 +320,37 @@ public class CamilleUnitTestNG {
         Camille c = CamilleEnvironment.getCamille();
 
         Path p0 = new Path("/parentPath");
-        Document d0 = new Document("d0", null);
+        Document d0 = new Document("d0");
         c.create(p0, d0, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p0));
 
         Path p1 = new Path(String.format("%s/%s", p0, "p1"));
-        Document d1 = new Document("d1", null);
+        Document d1 = new Document("d1");
         c.create(p1, d1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p1));
 
         Path p2 = new Path(String.format("%s/%s", p0, "p2"));
-        Document d2 = new Document("d2", null);
+        Document d2 = new Document("d2");
         c.create(p2, d2, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p2));
 
         Path p3 = new Path(String.format("%s/%s", p1, "p3"));
-        Document d3 = new Document("d3", null);
+        Document d3 = new Document("d3");
         c.create(p3, d3, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p3));
 
         Path p4 = new Path(String.format("%s/%s", p1, "p4"));
-        Document d4 = new Document("d4", null);
+        Document d4 = new Document("d4");
         c.create(p4, d4, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p4));
 
         Path p5 = new Path(String.format("%s/%s", p2, "p5"));
-        Document d5 = new Document("d5", null);
+        Document d5 = new Document("d5");
         c.create(p5, d5, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p5));
 
         Path p6 = new Path(String.format("%s/%s", p2, "p6"));
-        Document d6 = new Document("d6", null);
+        Document d6 = new Document("d6");
         c.create(p6, d6, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertNotNull(c.exists(p6));
 

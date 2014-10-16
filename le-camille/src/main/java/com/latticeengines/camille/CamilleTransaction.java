@@ -23,6 +23,7 @@ public class CamilleTransaction {
 
     private abstract static class Operation {
         protected Path path;
+
         public Operation(Path path) {
             this.path = path;
         }
@@ -34,11 +35,11 @@ public class CamilleTransaction {
         public abstract void updateWithResult(CuratorTransactionResult result);
 
         public abstract OperationType getOperationType();
-       
+
         public Path getPath() {
             return path;
         }
-        
+
     }
 
     private static class DeleteOperation extends Operation {
@@ -46,105 +47,119 @@ public class CamilleTransaction {
             super(path);
         }
 
+        @Override
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception {
             return transaction.delete().forPath(path.toString());
         }
-        
+
+        @Override
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception {
             return bridge.and().delete().forPath(path.toString());
         }
-        
+
+        @Override
         public void updateWithResult(CuratorTransactionResult result) {
             // nothing to do
         }
-        
+
+        @Override
         public OperationType getOperationType() {
             return OperationType.DELETE;
         }
     }
-    
+
     private static class CheckOperation extends Operation {
         private Document document;
-        
+
         public CheckOperation(Path path, Document document) {
             super(path);
             this.document = document;
         }
-        
+
+        @Override
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception {
             return transaction.check().withVersion(document.getVersion()).forPath(path.toString());
         }
-        
+
+        @Override
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception {
             return bridge.and().check().withVersion(document.getVersion()).forPath(path.toString());
         }
-        
+
+        @Override
         public void updateWithResult(CuratorTransactionResult result) {
             // nothing to do
         }
-        
+
+        @Override
         public OperationType getOperationType() {
             return OperationType.CHECK;
         }
     }
-    
+
     private static class CreateOperation extends Operation {
         private Document document;
         private List<ACL> acl;
         private byte[] data;
-        
-        public CreateOperation(Path path, Document document, List<ACL> acl) throws DocumentSerializationException {
+
+        public CreateOperation(Path path, Document document, List<ACL> acl) {
             super(path);
             this.document = document;
             this.acl = acl;
-            this.data = DocumentSerializer.toByteArray(document);
+            this.data = document.getData().getBytes();
         }
-        
+
+        @Override
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception {
             return transaction.create().withACL(acl).forPath(path.toString(), data);
         }
-        
+
+        @Override
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception {
             return bridge.and().create().withACL(acl).forPath(path.toString(), data);
         }
-        
+
+        @Override
         public void updateWithResult(CuratorTransactionResult result) {
             this.document.setVersion(0);
         }
-        
+
+        @Override
         public OperationType getOperationType() {
             return OperationType.CREATE;
         }
     }
-    
+
     private static class SetOperation extends Operation {
         private Document document;
         private byte[] data;
-        
-        public SetOperation(Path path, Document document) throws DocumentSerializationException {
+
+        public SetOperation(Path path, Document document) {
             super(path);
             this.document = document;
-            this.data = DocumentSerializer.toByteArray(document);
+            this.data = document.getData().getBytes();
         }
-        
+
+        @Override
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransaction transaction) throws Exception {
             return transaction.setData().withVersion(document.getVersion()).forPath(path.toString(), data);
         }
-        
+
+        @Override
         public CuratorTransactionBridge getCuratorEquivalent(CuratorTransactionBridge bridge) throws Exception {
             return bridge.and().setData().withVersion(document.getVersion()).forPath(path.toString(), data);
         }
-        
+
+        @Override
         public void updateWithResult(CuratorTransactionResult result) {
             this.document.setVersion(result.getResultStat().getVersion());
         }
-        
+
+        @Override
         public OperationType getOperationType() {
             return OperationType.SET_DATA;
         }
     }
-    
-    
 
     public CamilleTransaction() {
         CuratorFramework curator = CamilleEnvironment.getCamille().getCuratorClient();
@@ -164,7 +179,7 @@ public class CamilleTransaction {
      * Performs a transactional create. This creates the provided document with
      * the provided ACL at the provided path within a transactional context.
      */
-    public void create(Path path, Document document, List<ACL> acl) throws DocumentSerializationException {
+    public void create(Path path, Document document, List<ACL> acl) {
         operations.add(new CreateOperation(path, document, acl));
     }
 
@@ -173,7 +188,7 @@ public class CamilleTransaction {
      * versions and so will result in an exception if the version in the
      * repository doesn't match the version of the document.
      */
-    public void set(Path path, Document document) throws DocumentSerializationException {
+    public void set(Path path, Document document) {
         operations.add(new SetOperation(path, document));
     }
 
@@ -194,12 +209,11 @@ public class CamilleTransaction {
         for (Operation operation : operations) {
             if (built == null) {
                 built = operation.getCuratorEquivalent(transaction);
-            }
-            else {
+            } else {
                 built = operation.getCuratorEquivalent(built);
             }
         }
-        
+
         Collection<CuratorTransactionResult> results = built.and().commit();
         for (CuratorTransactionResult result : results) {
             Operation operation = lookupOperation(result.getType(), new Path(result.getForPath()));

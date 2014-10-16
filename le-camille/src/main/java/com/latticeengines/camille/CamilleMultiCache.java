@@ -25,14 +25,14 @@ public class CamilleMultiCache {
             cache.close();
         }
     }
-    
+
     public synchronized void rebuild() throws Exception {
         for (Map.Entry<Path, CamilleCache> entry : caches.entrySet()) {
             CamilleCache cache = entry.getValue();
             cache.rebuild();
         }
     }
-    
+
     public synchronized void rebuild(Path path) throws Exception {
         if (!caches.containsKey(path)) {
             throw new IllegalArgumentException("Not caching path" + path);
@@ -41,29 +41,28 @@ public class CamilleMultiCache {
         cache.rebuild();
     }
 
-    public synchronized Document get(Path path) throws DocumentSerializationException {
+    public synchronized Document get(Path path) {
         if (!caches.containsKey(path)) {
             log.debug("Not caching " + path + ". Adding an entry for it.");
             CamilleCache cache = new CamilleCache(path);
             try {
                 cache.start();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 log.error("Failed to start cache for path " + path);
                 return null;
             }
-            
+
             caches.put(path, cache);
         }
 
         CamilleCache cache = caches.get(path);
         return cache.get();
     }
-    
-    public synchronized boolean exists(Path path) throws DocumentSerializationException {
+
+    public synchronized boolean exists(Path path) {
         return get(path) != null;
     }
-    
+
     public synchronized void uncache(Path path) throws Exception {
         if (!caches.containsKey(path)) {
             throw new IllegalArgumentException("Not caching path " + path);

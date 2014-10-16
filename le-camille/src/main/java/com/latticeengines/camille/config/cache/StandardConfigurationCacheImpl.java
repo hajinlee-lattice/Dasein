@@ -1,14 +1,12 @@
 package com.latticeengines.camille.config.cache;
 
 import com.latticeengines.camille.CamilleCache;
-import com.latticeengines.camille.DocumentSerializationException;
 import com.latticeengines.camille.translators.PathTranslatorFactory;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
-public class StandardConfigurationCacheImpl<T extends ConfigurationScope> implements
-        ConfigurationCacheImpl<T> {
+public class StandardConfigurationCacheImpl<T extends ConfigurationScope> implements ConfigurationCacheImpl<T> {
 
     protected final CamilleCache cache;
 
@@ -23,7 +21,7 @@ public class StandardConfigurationCacheImpl<T extends ConfigurationScope> implem
     }
 
     @Override
-    public Document get() throws DocumentSerializationException {
+    public Document get() {
         return cache.get();
     }
 }

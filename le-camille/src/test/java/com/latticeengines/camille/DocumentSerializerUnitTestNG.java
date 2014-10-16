@@ -4,20 +4,14 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentMetadata;
 
 public class DocumentSerializerUnitTestNG {
 
     @Test(groups = "unit")
     public void testSerializeDocument() {
-        Document d = new Document(new String("foo"), new DocumentMetadata());
-        try {
-            byte[] data = DocumentSerializer.toByteArray(d);
-            Document reconstituted = DocumentSerializer.toDocument(data);
-            Assert.assertEquals(reconstituted, d);
-        } catch (DocumentSerializationException e) {
-            Assert.fail("Serialization failed: " + e);
-        }
+        Document d = new Document(new String("foo"));
+        byte[] data = d.getData().getBytes();
+        Document reconstituted = new Document(new String(data));
+        Assert.assertEquals(reconstituted, d);
     }
-
 }

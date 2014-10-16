@@ -44,15 +44,13 @@ public class CamilleEnvironmentUnitTestNG {
             // create Pods path
             Path podsPath = PathBuilder.buildPodsPath();
             Document doc = new Document();
-            client.create().withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-                    .forPath(podsPath.toString(), DocumentSerializer.toByteArray(doc));
+            client.create().withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(podsPath.toString(), doc.getData().getBytes());
             doc.setVersion(0);
 
             // create a pod with podId = 0
             Path podPath = PathBuilder.buildPodPath("0");
             doc = new Document();
-            client.create().withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-                    .forPath(podPath.toString(), DocumentSerializer.toByteArray(doc));
+            client.create().withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(podPath.toString(), doc.getData().getBytes());
             doc.setVersion(0);
 
             ConfigJson config = new ConfigJson();
@@ -124,15 +122,13 @@ public class CamilleEnvironmentUnitTestNG {
             // create Pods path
             Path podsPath = PathBuilder.buildPodsPath();
             Document doc = new Document();
-            client.create().withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-                    .forPath(podsPath.toString(), DocumentSerializer.toByteArray(doc));
+            client.create().withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(podsPath.toString(), doc.getData().getBytes());
             doc.setVersion(0);
 
             // create a pod
             Path podPath = PathBuilder.buildPodPath(podId);
             doc = new Document();
-            client.create().withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-                    .forPath(podPath.toString(), DocumentSerializer.toByteArray(doc));
+            client.create().withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(podPath.toString(), doc.getData().getBytes());
             doc.setVersion(0);
 
             ConfigJson config = new ConfigJson();

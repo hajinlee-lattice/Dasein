@@ -27,13 +27,13 @@ public class CamilleCache {
         cache.rebuild();
     }
 
-    public Document get() throws DocumentSerializationException {
+    public Document get() {
         ChildData data = cache.getCurrentData();
         if (data == null) {
             return null;
         }
 
-        Document document = DocumentSerializer.toDocument(data.getData());
+        Document document = new Document(new String(data.getData()));
         document.setVersion(data.getStat().getVersion());
         return document;
     }

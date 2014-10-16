@@ -9,7 +9,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentMetadata;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class CamilleTransactionUnitTestNG {
@@ -30,7 +29,7 @@ public class CamilleTransactionUnitTestNG {
 
     @Test(groups = "unit")
     public void testVersionPopulatedOnCreate() throws Exception {
-        Document document = new Document("foo", new DocumentMetadata());
+        Document document = new Document("foo");
 
         CamilleTransaction transaction = new CamilleTransaction();
         transaction.create(new Path("/foo"), document, ZooDefs.Ids.OPEN_ACL_UNSAFE);
@@ -41,7 +40,7 @@ public class CamilleTransactionUnitTestNG {
 
     @Test(groups = "unit")
     public void testVersionIncreasesOnSet() throws Exception {
-        Document document = new Document("foo", new DocumentMetadata());
+        Document document = new Document("foo");
 
         CamilleTransaction transaction = new CamilleTransaction();
         transaction.create(new Path("/foo"), document, ZooDefs.Ids.OPEN_ACL_UNSAFE);

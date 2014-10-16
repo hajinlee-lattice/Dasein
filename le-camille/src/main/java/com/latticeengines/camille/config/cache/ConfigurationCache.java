@@ -1,6 +1,5 @@
 package com.latticeengines.camille.config.cache;
 
-import com.latticeengines.camille.DocumentSerializationException;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
@@ -25,7 +24,7 @@ public class ConfigurationCache<T extends ConfigurationScope> implements Configu
     }
 
     @Override
-    public Document get() throws DocumentSerializationException {
+    public Document get() {
         return impl.get();
     }
 }
