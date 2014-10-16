@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
 
 import com.google.common.base.Function;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -22,32 +23,35 @@ public class FileSystemToZooKeeperFunction implements Function<Path, List<Map.En
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    // the exposed directory
-    private String baseDir;
+    private String fileSystemDirectoryOfRootPathStr;
 
-    public FileSystemToZooKeeperFunction(File baseDir) throws IOException {
-        switch (baseDir.getName()) {
+    public FileSystemToZooKeeperFunction(File fileSystemDirectoryOfRootPath) throws IOException {
+        switch (fileSystemDirectoryOfRootPath.getName()) {
         case "":
         case ".":
             try {
-                this.baseDir = new java.io.File(".").getCanonicalPath();
+                fileSystemDirectoryOfRootPathStr = new java.io.File(".").getCanonicalPath();
             } catch (IOException e) {
                 log.error("Error getting working directory", e);
                 throw e;
             }
             break;
         default:
-            if (!baseDir.isDirectory())
-                throw new IllegalArgumentException("not a directory");
-            this.baseDir = baseDir.getAbsolutePath().toString();
-            while (StringUtils.endsWithAny(this.baseDir, "\\", "/"))
-                this.baseDir = StringUtils.chop(this.baseDir);
+            if (!fileSystemDirectoryOfRootPath.isDirectory()) {
+                IllegalArgumentException e = new IllegalArgumentException(MessageFormatter.format(
+                        "{} is not a directory", fileSystemDirectoryOfRootPath).getMessage());
+                log.error(e.getMessage(), e);
+                throw e;
+            }
+            fileSystemDirectoryOfRootPathStr = fileSystemDirectoryOfRootPath.getAbsolutePath().toString();
+            while (StringUtils.endsWithAny(this.fileSystemDirectoryOfRootPathStr, "\\", "/"))
+                fileSystemDirectoryOfRootPathStr = StringUtils.chop(fileSystemDirectoryOfRootPathStr);
             break;
         }
     }
 
     private String toAbsolutePath(Path p) {
-        StringBuilder sb = new StringBuilder(baseDir);
+        StringBuilder sb = new StringBuilder(fileSystemDirectoryOfRootPathStr);
         for (String part : p.getParts())
             sb.append('/').append(part);
         return sb.toString();
@@ -64,7 +68,9 @@ public class FileSystemToZooKeeperFunction implements Function<Path, List<Map.En
             try {
                 childPath = parentPath.append(relChildPathStr);
             } catch (IllegalArgumentException e) {
-                log.error("Error reading " + relChildPathStr, e);
+                // this can happen when we try to read C:\$RECYCLE_BIN$, for
+                // example
+                log.warn(MessageFormatter.format("Cannot read {}", relChildPathStr).getMessage(), e);
                 continue;
             }
             String absoluteChildPathStr = toAbsolutePath(childPath);
@@ -75,7 +81,9 @@ public class FileSystemToZooKeeperFunction implements Function<Path, List<Map.En
                 try {
                     doc = new Document(new String(Files.readAllBytes(Paths.get(absoluteChildPathStr))));
                 } catch (IOException e) {
-                    log.error("Error reading " + relChildPathStr, e);
+                    // this can happen when we try to read C:\$RECYCLE_BIN$, for
+                    // example
+                    log.warn(MessageFormatter.format("Cannot read {}", relChildPathStr).getMessage(), e);
                     continue;
                 }
             }
