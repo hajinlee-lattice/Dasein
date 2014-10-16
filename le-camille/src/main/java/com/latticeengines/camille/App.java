@@ -18,6 +18,7 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("prog");
+        parser.addArgument("-connectionString");
         parser.addArgument("-name");
 
         Namespace namespace = null;
@@ -28,10 +29,18 @@ public class App {
             System.exit(1);
         }
 
-        log.info("Hello, {}!", namespace.get("name"));
+        String name = namespace.get("name");
+        if (name != null)
+            log.info("Hello, {}!", name);
 
-        CamilleEnvironment.start(Mode.BOOTSTRAP, new StringReader(
-                "{\"podId\":\"ignored\",\"connectionString\":\"127.0.0.1:2181\"}"));
+        String connectionString = namespace.get("connectionString");
+        if (connectionString == null)
+            connectionString = "127.0.0.1:2181";
+
+        CamilleEnvironment
+                .start(Mode.BOOTSTRAP,
+                        new StringReader(String.format("{\"podId\":\"ignored\",\"connectionString\":\"%s\"}",
+                                connectionString)));
 
         log.info(CamilleEnvironment.getCamille().getCuratorClient().getState().toString());
 
