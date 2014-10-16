@@ -14,10 +14,12 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.camille.config.ConfigurationController;
+import com.latticeengines.camille.config.ConfigurationTransaction;
 import com.latticeengines.camille.config.bootstrap.CustomerSpaceServiceBootstrapManager;
 import com.latticeengines.camille.config.bootstrap.Installer;
 import com.latticeengines.camille.config.bootstrap.Upgrader;
 import com.latticeengines.camille.config.bootstrap.VersionMismatchException;
+import com.latticeengines.camille.config.cache.ConfigurationCache;
 import com.latticeengines.camille.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.paths.PathConstants;
@@ -41,7 +43,7 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         ContractLifecycleManager.create(space.getContractId());
         TenantLifecycleManager.create(space.getContractId(), space.getTenantId(), space.getSpaceId());
         semaphore.acquire();
-   }
+    }
 
     @AfterMethod(groups = "unit")
     public void tearDown() throws Exception {
@@ -95,7 +97,7 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         CustomerSpaceServiceScope scope = getCustomerSpaceServiceScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
         CustomerSpaceServiceBootstrapManager.register("MyService", new Bootstrapper(), new Bootstrapper());
-        
+
         // Bootstrap the initial configuration
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
 
@@ -103,11 +105,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
                 scope);
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
-
-        // TODO for now
-        configuration.delete(new Path("/").append(PathConstants.SERVICE_DATA_VERSION_FILE));
-
-        Assert.assertEquals(configuration, getInitialConfiguration());
+        
+        Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
     }
 
     @Test(groups = "unit")
@@ -115,14 +114,14 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         CustomerSpaceServiceScope scope = getCustomerSpaceServiceScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
         CustomerSpaceServiceBootstrapManager.register("MyService", new Bootstrapper(), new Bootstrapper());
-        
+
         // Bootstrap the initial configuration
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
 
         // Bootstrap again with an incremented data version to run the upgrade
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
         CustomerSpaceServiceBootstrapManager.register("MyService", new Bootstrapper(), new Bootstrapper());
-        
+
         scope.setDataVersion(2);
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
 
@@ -130,10 +129,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
                 scope);
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
-        // TODO for now
-        configuration.delete(new Path("/").append(PathConstants.SERVICE_DATA_VERSION_FILE));
-
-        Assert.assertEquals(configuration, getUpgradedConfiguration());
+        
+        Assert.assertTrue(configurationEquals(configuration, getUpgradedConfiguration()));
     }
 
     /**
@@ -157,14 +154,14 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         scope.setDataVersion(1);
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
     }
-   
+
     @Test(groups = "unit", invocationCount = 10)
     public void testMultithreadedInstall() throws Exception {
         // Using multiple threads, bootstrap the initial configuration
         final CustomerSpaceServiceScope scope = getCustomerSpaceServiceScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
         CustomerSpaceServiceBootstrapManager.register("MyService", new Bootstrapper(), new Bootstrapper());
-        
+
         ExecutorService exec = Executors.newFixedThreadPool(4);
         try {
             for (int i = 0; i < 4; ++i) {
@@ -179,21 +176,70 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
                     }
                 });
             }
-        }
-        finally {
+        } finally {
             exec.shutdown();
             exec.awaitTermination(10, TimeUnit.SECONDS);
         }
-        
+
         // Assert configuration is in the correct structure
-        ConfigurationController<CustomerSpaceServiceScope> controller = 
-                new ConfigurationController<CustomerSpaceServiceScope>(scope);
+        ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
+                scope);
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
 
-        // TODO for now
-        configuration.delete(new Path("/").append(PathConstants.SERVICE_DATA_VERSION_FILE));
-
-        Assert.assertEquals(configuration, getInitialConfiguration());
+        Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
     }
 
+    @Test(groups = "unit")
+    public void testConfigurationControllerBootstraps() throws Exception {
+        CustomerSpaceServiceScope scope = getCustomerSpaceServiceScope();
+        CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
+        CustomerSpaceServiceBootstrapManager.register("MyService", new Bootstrapper(), new Bootstrapper());
+        
+        ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
+                getCustomerSpaceServiceScope());
+        DocumentDirectory configuration = controller.getDirectory(new Path("/"));
+
+        Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
+    }
+    
+    @Test(groups = "unit")
+    public void testConfigurationTransactionBootstraps() throws Exception {
+        CustomerSpaceServiceScope scope = getCustomerSpaceServiceScope();
+        CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
+        CustomerSpaceServiceBootstrapManager.register("MyService", new Bootstrapper(), new Bootstrapper());
+        
+        @SuppressWarnings("unused")
+        ConfigurationTransaction<CustomerSpaceServiceScope> transaction = new ConfigurationTransaction<CustomerSpaceServiceScope>(
+                getCustomerSpaceServiceScope());
+        ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
+                getCustomerSpaceServiceScope());
+        DocumentDirectory configuration = controller.getDirectory(new Path("/"));
+
+        Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
+    }
+    
+    
+    @Test(groups = "unit")
+    public void testConfigurationCacheBootstraps() throws Exception {
+        CustomerSpaceServiceScope scope = getCustomerSpaceServiceScope();
+        CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
+        CustomerSpaceServiceBootstrapManager.register("MyService", new Bootstrapper(), new Bootstrapper());
+        
+        @SuppressWarnings("unused")
+        ConfigurationCache<CustomerSpaceServiceScope> cache = new ConfigurationCache<CustomerSpaceServiceScope>(
+                getCustomerSpaceServiceScope(), new Path("/a"));
+        ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
+                getCustomerSpaceServiceScope());
+        DocumentDirectory configuration = controller.getDirectory(new Path("/"));
+
+        Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
+    }
+    
+    
+    private boolean configurationEquals(DocumentDirectory configurationFromZK, DocumentDirectory sourceConfiguration) {
+        // TODO Eventually will not be necessary once ConfigurationControllers
+        // omit hidden files
+        configurationFromZK.delete(new Path("/").append(PathConstants.SERVICE_DATA_VERSION_FILE));
+        return configurationFromZK.equals(sourceConfiguration);
+    }
 }
