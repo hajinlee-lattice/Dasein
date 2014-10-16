@@ -115,11 +115,11 @@ public class DocumentDirectory implements Serializable {
     }
 
     public Iterator<Node> breadthFirstIterator() {
-        Queue<Node> q = new LinkedList<Node>(children);
+        Queue<Node> q = new LinkedList<Node>(nullSafe(children));
         Set<Node> visited = new LinkedHashSet<Node>();
         for (Node n = q.poll(); n != null; n = q.poll()) {
             if (visited.add(n)) {
-                q.addAll(n.getChildren());
+                q.addAll(nullSafe(n.getChildren()));
             }
         }
         return new IteratorWrapper(visited);
@@ -127,7 +127,7 @@ public class DocumentDirectory implements Serializable {
 
     public Iterator<Node> depthFirstIterator() {
         Set<Node> visited = new LinkedHashSet<Node>();
-        for (Node child : children) {
+        for (Node child : nullSafe(children)) {
             traverse(child, visited);
         }
         return new IteratorWrapper(visited);
@@ -135,10 +135,14 @@ public class DocumentDirectory implements Serializable {
 
     private static void traverse(Node parent, Set<Node> visited) {
         if (visited.add(parent)) {
-            for (Node child : parent.getChildren()) {
+            for (Node child : nullSafe(parent.getChildren())) {
                 traverse(child, visited);
             }
         }
+    }
+
+    private static <T> List<T> nullSafe(List<T> list) {
+        return list == null ? Collections.<T> emptyList() : list;
     }
 
     private static class IteratorWrapper implements Iterator<Node> {
