@@ -31,6 +31,14 @@ public class DocumentUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testSerializeDocument() {
+        Document d = new Document(new String("foo"));
+        byte[] data = d.getData().getBytes();
+        Document reconstituted = new Document(new String(data));
+        Assert.assertEquals(reconstituted, d);
+    }
+
+    @Test(groups = "unit")
     public void testClone() throws Exception {
 
         Camille c = CamilleEnvironment.getCamille();
