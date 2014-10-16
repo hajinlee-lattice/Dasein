@@ -28,13 +28,16 @@ public class DocumentDirectory implements Serializable {
     }
 
     public DocumentDirectory(Path root, Function<Path, List<Map.Entry<Document, Path>>> getChildren) {
-        this.root = root;
-        List<Entry<Document, Path>> childPairs = getChildren.apply(root);
-        children = new ArrayList<Node>(childPairs.size());
-        for (Entry<Document, Path> childPair : childPairs) {
-            children.add(new Node(childPair, getChildren));
+        List<Entry<Document, Path>> childPairs = getChildren.apply(this.root = root);
+        if (childPairs == null) {
+            children = new ArrayList<Node>(0);
+        } else {
+            children = new ArrayList<Node>(childPairs.size());
+            for (Entry<Document, Path> childPair : childPairs) {
+                children.add(new Node(childPair, getChildren));
+            }
+            Collections.sort(children);
         }
-        Collections.sort(children);
     }
 
     public List<Node> getChildren() {
@@ -211,11 +214,15 @@ public class DocumentDirectory implements Serializable {
             path = entry.getValue();
             document = entry.getKey();
             List<Entry<Document, Path>> childPairs = getChildren.apply(path);
-            children = new ArrayList<Node>(childPairs.size());
-            for (Entry<Document, Path> childPair : childPairs) {
-                children.add(new Node(childPair, getChildren));
+            if (childPairs == null) {
+                children = new ArrayList<Node>(0);
+            } else {
+                children = new ArrayList<Node>(childPairs.size());
+                for (Entry<Document, Path> childPair : childPairs) {
+                    children.add(new Node(childPair, getChildren));
+                }
+                Collections.sort(children);
             }
-            Collections.sort(children);
         }
 
         private Node(Path path, Document document, List<Node> children) {
