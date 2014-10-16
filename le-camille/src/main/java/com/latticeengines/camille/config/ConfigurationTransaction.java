@@ -3,14 +3,16 @@ package com.latticeengines.camille.config;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
+import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
 public class ConfigurationTransaction<T extends ConfigurationScope> implements ConfigurationTransactionImpl<T> {
     private ConfigurationTransactionImpl<T> impl;
 
-    public ConfigurationTransaction(T scope) {
+    @SuppressWarnings("unchecked")
+    public ConfigurationTransaction(T scope) throws Exception {
         if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
-            // TODO
-            impl = new StandardConfigurationTransactionImpl<T>(scope);
+            impl = (ConfigurationTransactionImpl<T>) new CustomerSpaceServiceConfigurationTransactionImpl(
+                    (CustomerSpaceServiceScope)scope);
         }
         impl = new StandardConfigurationTransactionImpl<T>(scope);
     }

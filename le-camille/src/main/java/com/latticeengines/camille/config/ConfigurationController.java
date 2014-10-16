@@ -9,14 +9,16 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
+import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
 public class ConfigurationController<T extends ConfigurationScope> implements ConfigurationControllerImpl<T> {
     private ConfigurationControllerImpl<T> impl;
 
-    public ConfigurationController(T scope) {
+    @SuppressWarnings("unchecked")
+    public ConfigurationController(T scope) throws Exception {
         if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
-            // TODO
-            impl = new StandardConfigurationControllerImpl<T>(scope);
+            impl = (ConfigurationControllerImpl<T>) new CustomerSpaceServiceConfigurationControllerImpl(
+                    (CustomerSpaceServiceScope) scope);
         }
         impl = new StandardConfigurationControllerImpl<T>(scope);
     }
