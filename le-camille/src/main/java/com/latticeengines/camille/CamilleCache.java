@@ -38,10 +38,6 @@ public class CamilleCache {
         return document;
     }
 
-    public boolean exists() throws DocumentSerializationException {
-        return get() != null;
-    }
-
     public ListenerContainer<NodeCacheListener> getListeners() {
         return cache.getListenable();
     }
