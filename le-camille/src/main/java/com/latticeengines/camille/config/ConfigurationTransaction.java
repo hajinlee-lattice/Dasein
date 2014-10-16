@@ -8,7 +8,11 @@ public class ConfigurationTransaction<T extends ConfigurationScope> implements C
     private ConfigurationTransactionImpl<T> impl;
 
     public ConfigurationTransaction(T scope) {
-        impl = ConfigurationTransactionImplFactory.getImplementation(scope);
+        if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
+            // TODO
+            impl = new StandardConfigurationTransactionImpl<T>(scope);
+        }
+        impl = new StandardConfigurationTransactionImpl<T>(scope);
     }
 
     @Override

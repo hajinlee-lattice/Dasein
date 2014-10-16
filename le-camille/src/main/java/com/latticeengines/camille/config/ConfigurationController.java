@@ -14,7 +14,11 @@ public class ConfigurationController<T extends ConfigurationScope> implements Co
     private ConfigurationControllerImpl<T> impl;
 
     public ConfigurationController(T scope) {
-        impl = ConfigurationControllerImplFactory.getImplementation(scope);
+        if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
+            // TODO
+            impl = new StandardConfigurationControllerImpl<T>(scope);
+        }
+        impl = new StandardConfigurationControllerImpl<T>(scope);
     }
 
     @Override
