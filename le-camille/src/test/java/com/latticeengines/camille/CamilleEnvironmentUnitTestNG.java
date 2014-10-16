@@ -63,6 +63,8 @@ public class CamilleEnvironmentUnitTestNG {
 
             new ObjectMapper().writeValue(stream, config);
 
+            System.out.println(stream.toString());
+
             try {
                 CamilleEnvironment.start(Mode.BOOTSTRAP, new StringReader(stream.toString()));
                 Assert.fail("A RuntimeException was expected.");
