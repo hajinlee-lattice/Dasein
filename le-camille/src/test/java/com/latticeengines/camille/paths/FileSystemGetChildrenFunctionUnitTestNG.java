@@ -107,7 +107,7 @@ public class FileSystemGetChildrenFunctionUnitTestNG {
         FileSystemGetChildrenFunction func = new FileSystemGetChildrenFunction(tempDir);
         DocumentDirectory d = new DocumentDirectory(new Path("/0/1"), func);
         Iterator<Node> iter = d.leafFirstIterator();
-        for (String expected : new String[] { "/0/1/3/3.txt", "/0/1/4/4.txt", "/0/1/1.txt", "/0/1/3", "/0/1/4" }) {
+        for (String expected : new String[] { "/0/1/4/4.txt", "/0/1/3/3.txt", "/0/1/4", "/0/1/3", "/0/1/1.txt" }) {
             Assert.assertEquals(iter.next().getPath().toString(), expected);
         }
     }
