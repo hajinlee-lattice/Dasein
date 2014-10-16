@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -114,7 +115,11 @@ public class DocumentDirectory implements Serializable {
         throw new IllegalArgumentException("Cannot delete node with " + path + ".  No such node exists");
     }
 
-    public Iterator<Node> breadthFirstIterator() {
+    public ListIterator<Node> breadthFirstIterator() {
+        return breadthFirstIterator(0);
+    }
+
+    public ListIterator<Node> breadthFirstIterator(int index) {
         Queue<Node> q = new LinkedList<Node>(nullSafe(children));
         Set<Node> visited = new LinkedHashSet<Node>();
         for (Node n = q.poll(); n != null; n = q.poll()) {
@@ -122,15 +127,19 @@ public class DocumentDirectory implements Serializable {
                 q.addAll(nullSafe(n.getChildren()));
             }
         }
-        return new IteratorWrapper(visited);
+        return new IteratorWrapper(visited, index);
     }
 
-    public Iterator<Node> depthFirstIterator() {
+    public ListIterator<Node> depthFirstIterator() {
+        return depthFirstIterator(0);
+    }
+
+    public ListIterator<Node> depthFirstIterator(int index) {
         Set<Node> visited = new LinkedHashSet<Node>();
         for (Node child : nullSafe(children)) {
             traverse(child, visited);
         }
-        return new IteratorWrapper(visited);
+        return new IteratorWrapper(visited, index);
     }
 
     private static void traverse(Node parent, Set<Node> visited) {
@@ -145,11 +154,11 @@ public class DocumentDirectory implements Serializable {
         return list == null ? Collections.<T> emptyList() : list;
     }
 
-    private static class IteratorWrapper implements Iterator<Node> {
-        private final Iterator<Node> iter;
+    private static class IteratorWrapper implements ListIterator<Node> {
+        private final ListIterator<Node> iter;
 
-        IteratorWrapper(Collection<Node> c) {
-            iter = c.iterator();
+        IteratorWrapper(Collection<Node> c, int index) {
+            iter = new ArrayList<Node>(c).listIterator(index);
         }
 
         @Override
@@ -163,7 +172,37 @@ public class DocumentDirectory implements Serializable {
         }
 
         @Override
+        public boolean hasPrevious() {
+            return iter.hasPrevious();
+        }
+
+        @Override
+        public Node previous() {
+            return iter.previous();
+        }
+
+        @Override
+        public int nextIndex() {
+            return iter.nextIndex();
+        }
+
+        @Override
+        public int previousIndex() {
+            return iter.previousIndex();
+        }
+
+        @Override
         public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void set(Node e) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void add(Node e) {
             throw new UnsupportedOperationException();
         }
     }
