@@ -115,11 +115,15 @@ public class DocumentDirectory implements Serializable {
         throw new IllegalArgumentException("Cannot delete node with " + path + ".  No such node exists");
     }
 
-    public ListIterator<Node> breadthFirstIterator() {
-        return breadthFirstIterator(0);
+    public Iterator<Node> leafFirstIterator() {
+        return breadthFirstIterator(true);
     }
 
-    public ListIterator<Node> breadthFirstIterator(int index) {
+    public Iterator<Node> breadthFirstIterator() {
+        return breadthFirstIterator(false);
+    }
+
+    private ListIterator<Node> breadthFirstIterator(boolean reverse) {
         Queue<Node> q = new LinkedList<Node>(nullSafe(children));
         Set<Node> visited = new LinkedHashSet<Node>();
         for (Node n = q.poll(); n != null; n = q.poll()) {
@@ -127,19 +131,15 @@ public class DocumentDirectory implements Serializable {
                 q.addAll(nullSafe(n.getChildren()));
             }
         }
-        return new IteratorWrapper(visited, index);
+        return new IteratorWrapper(visited, reverse);
     }
 
-    public ListIterator<Node> depthFirstIterator() {
-        return depthFirstIterator(0);
-    }
-
-    public ListIterator<Node> depthFirstIterator(int index) {
+    public Iterator<Node> depthFirstIterator() {
         Set<Node> visited = new LinkedHashSet<Node>();
         for (Node child : nullSafe(children)) {
             traverse(child, visited);
         }
-        return new IteratorWrapper(visited, index);
+        return new IteratorWrapper(visited, false);
     }
 
     private static void traverse(Node parent, Set<Node> visited) {
@@ -157,8 +157,11 @@ public class DocumentDirectory implements Serializable {
     private static class IteratorWrapper implements ListIterator<Node> {
         private final ListIterator<Node> iter;
 
-        IteratorWrapper(Collection<Node> c, int index) {
-            iter = new ArrayList<Node>(c).listIterator(index);
+        IteratorWrapper(Collection<Node> c, boolean reverse) {
+            ArrayList<Node> list = new ArrayList<Node>(c);
+            if (reverse)
+                Collections.reverse(list);
+            iter = list.listIterator();
         }
 
         @Override
