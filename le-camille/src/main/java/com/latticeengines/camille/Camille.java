@@ -1,6 +1,7 @@
 package com.latticeengines.camille;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class Camille {
@@ -131,5 +133,12 @@ public class Camille {
 
     public boolean exists(Path path) throws Exception {
         return client.checkExists().forPath(path.toString()) != null;
+    }
+
+    public void createDirectory(Path parent, DocumentDirectory directory, List<ACL> acls) throws Exception {
+        for (Iterator<Node> iter = directory.breadthFirstIterator(); iter.hasNext();) {
+            Node node = iter.next();
+            create(parent.append(node.getPath()), node.getDocument(), acls);
+        }
     }
 }

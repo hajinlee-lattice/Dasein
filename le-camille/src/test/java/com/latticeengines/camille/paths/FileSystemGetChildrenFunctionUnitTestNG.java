@@ -75,7 +75,7 @@ public class FileSystemGetChildrenFunctionUnitTestNG {
         for (String expected : new String[] { "/0", "/0/0.txt", "/0/1", "/0/1/1.txt", "/0/1/3", "/0/1/3/3.txt",
                 "/0/1/4", "/0/1/4/4.txt", "/0/2", "/0/2/2.txt", "/0/2/5", "/0/2/5/5.txt", "/0/2/6", "/0/2/6/6.txt" }) {
             Node n = iter.next();
-            Assert.assertEquals(expected, n.getPath().toString());
+            Assert.assertEquals(n.getPath().toString(), expected);
             switch (n.getPath().toString()) {
             case "/0/0.txt":
                 Assert.assertEquals("zero", n.getDocument().getData());
@@ -108,7 +108,7 @@ public class FileSystemGetChildrenFunctionUnitTestNG {
         DocumentDirectory d = new DocumentDirectory(new Path("/0/1"), func);
         Iterator<Node> iter = d.depthFirstIterator();
         for (String expected : new String[] { "/0/1/1.txt", "/0/1/3", "/0/1/3/3.txt", "/0/1/4", "/0/1/4/4.txt" }) {
-            Assert.assertEquals(expected, iter.next().getPath().toString());
+            Assert.assertEquals(iter.next().getPath().toString(), expected);
         }
     }
 }

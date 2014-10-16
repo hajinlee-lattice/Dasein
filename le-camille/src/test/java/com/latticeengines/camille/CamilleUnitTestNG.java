@@ -1,10 +1,15 @@
 package com.latticeengines.camille;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.WatchedEvent;
@@ -17,8 +22,11 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.io.Files;
+import com.latticeengines.camille.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class CamilleUnitTestNG {
@@ -232,7 +240,7 @@ public class CamilleUnitTestNG {
         }
         Assert.assertEquals(i, 7);
     }
-    
+
     @Test(groups = "unit")
     public void testModifyDocumentDirectory() throws Exception {
         Camille c = CamilleEnvironment.getCamille();
@@ -273,13 +281,13 @@ public class CamilleUnitTestNG {
         Assert.assertNotNull(c.exists(p6));
 
         DocumentDirectory directory = c.getDirectory(p0);
-        
+
         Document d7 = new Document("d7", null);
         directory.add(new Path("/parentPath/d7"), d7);
-        
+
         DocumentDirectory.Node n = directory.get(new Path("/parentPath/d7"));
         Assert.assertEquals(d7, n.getDocument());
-        
+
         directory.delete(new Path("/parentPath/d7"));
         n = directory.get(new Path("/parentPath/d7"));
         Assert.assertNull(n);
@@ -287,14 +295,14 @@ public class CamilleUnitTestNG {
         // Test local paths
         directory.makePathsLocal();
         Assert.assertEquals(directory.getRootPath(), new Path("/"));
-        
+
         p1 = p1.local(p0);
         p2 = p2.local(p0);
         p3 = p3.local(p0);
         p4 = p4.local(p0);
         p5 = p5.local(p0);
         p6 = p6.local(p0);
-        
+
         Assert.assertNotNull(directory.get(p1));
         Assert.assertNotNull(directory.get(p3));
 
@@ -304,9 +312,9 @@ public class CamilleUnitTestNG {
         Assert.assertNull(directory.get(p3));
         Assert.assertNull(directory.get(p4));
     }
-    
+
     // TODO Uncomment once DocumentSerializer is gone
-    //@Test(groups = "unit")
+    // @Test(groups = "unit")
     public void testDocumentDirectoryOnRootPaths() throws Exception {
         Camille c = CamilleEnvironment.getCamille();
 
@@ -349,9 +357,89 @@ public class CamilleUnitTestNG {
         Assert.assertEquals(directory.getRootPath(), new Path("/"));
         directory.makePathsLocal();
         Assert.assertEquals(directory.getRootPath(), new Path("/"));
-        
+
         Assert.assertNotNull(directory.get(p0));
         Assert.assertNotNull(directory.get(p3));
+    }
 
+    @Test(groups = "unit")
+    public void testCreateDirectory() throws IllegalArgumentException, Exception {
+        File tempDir = Files.createTempDir();
+
+        createDirectory(tempDir + "/0");
+        createDirectory(tempDir + "/0/1");
+        createDirectory(tempDir + "/0/2");
+        createDirectory(tempDir + "/0/1/3");
+        createDirectory(tempDir + "/0/1/4");
+        createDirectory(tempDir + "/0/2/5");
+        createDirectory(tempDir + "/0/2/6");
+
+        createTextFile(tempDir + "/0/0.txt", "zero");
+        createTextFile(tempDir + "/0/1/1.txt", "one");
+        createTextFile(tempDir + "/0/2/2.txt", "two");
+        createTextFile(tempDir + "/0/1/3/3.txt", "three");
+        createTextFile(tempDir + "/0/1/4/4.txt", "four");
+        createTextFile(tempDir + "/0/2/5/5.txt", "five");
+        createTextFile(tempDir + "/0/2/6/6.txt", "six");
+
+        DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(tempDir));
+
+        Camille c = CamilleEnvironment.getCamille();
+
+        Path parent = new Path("/parent");
+        c.create(parent, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        c.createDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        Iterator<Node> iter = c.getDirectory(parent).depthFirstIterator();
+
+        for (String expected : new String[] { "/0", "/0/0.txt", "/0/1", "/0/1/1.txt", "/0/1/3", "/0/1/3/3.txt",
+                "/0/1/4", "/0/1/4/4.txt", "/0/2", "/0/2/2.txt", "/0/2/5", "/0/2/5/5.txt", "/0/2/6", "/0/2/6/6.txt" }) {
+            Node n = iter.next();
+            Assert.assertEquals(n.getPath().toString(), parent.append(new Path(expected)).toString());
+
+            if (StringUtils.endsWith(n.getPath().toString(), ".txt")) {
+                switch (n.getPath().toString().substring(parent.toString().length())) {
+                case "/0/0.txt":
+                    Assert.assertEquals("zero", n.getDocument().getData());
+                    break;
+                case "/0/1/1.txt":
+                    Assert.assertEquals("one", n.getDocument().getData());
+                    break;
+                case "/0/2/2.txt":
+                    Assert.assertEquals("two", n.getDocument().getData());
+                    break;
+                case "/0/1/3/3.txt":
+                    Assert.assertEquals("three", n.getDocument().getData());
+                    break;
+                case "/0/1/4/4.txt":
+                    Assert.assertEquals("four", n.getDocument().getData());
+                    break;
+                case "/0/2/5/5.txt":
+                    Assert.assertEquals("five", n.getDocument().getData());
+                    break;
+                case "/0/2/6/6.txt":
+                    Assert.assertEquals("six", n.getDocument().getData());
+                    break;
+                default:
+                    Assert.fail("We should never get here.");
+                }
+            }
+        }
+
+        FileUtils.deleteDirectory(tempDir);
+    }
+
+    private static void createDirectory(String path) {
+        File dir = new File(path);
+        dir.mkdir();
+        dir.deleteOnExit();
+    }
+
+    private static void createTextFile(String path, String contents) throws FileNotFoundException {
+        try (PrintWriter w = new PrintWriter(path)) {
+            w.print(contents);
+        }
+        new File(path).deleteOnExit();
     }
 }
