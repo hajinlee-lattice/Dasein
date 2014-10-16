@@ -13,7 +13,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.config.ConfigurationController;
-import com.latticeengines.camille.config.cache.ConfigurationCacheController;
+import com.latticeengines.camille.config.cache.ConfigurationCache;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
@@ -25,13 +25,13 @@ public class StandardPropertiesManagerImpl<T extends ConfigurationScope> impleme
 
     protected static final ObjectMapper mapper = new ObjectMapper();
 
-    protected final ConfigurationCacheController<T> configCacheController;
+    protected final ConfigurationCache<T> configCacheController;
     protected final ConfigurationController<T> configController;
     protected final Path relativePath;
 
     public StandardPropertiesManagerImpl(T scope, Path relativePath) throws Exception {
         configController = new ConfigurationController<T>(scope);
-        configCacheController = new ConfigurationCacheController<T>(scope, this.relativePath = relativePath);
+        configCacheController = new ConfigurationCache<T>(scope, this.relativePath = relativePath);
     }
 
     @Override

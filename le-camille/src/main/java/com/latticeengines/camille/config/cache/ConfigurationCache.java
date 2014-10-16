@@ -5,11 +5,11 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
-public class ConfigurationCacheController<T extends ConfigurationScope> implements ConfigurationCacheControllerImpl<T> {
-    private ConfigurationCacheControllerImpl<T> impl;
+public class ConfigurationCache<T extends ConfigurationScope> implements ConfigurationCacheImpl<T> {
+    private ConfigurationCacheImpl<T> impl;
 
-    public ConfigurationCacheController(T scope, Path relativePath) throws Exception {
-        impl = ConfigurationCacheControllerImplFactory.getImplementation(scope, relativePath);
+    public ConfigurationCache(T scope, Path relativePath) throws Exception {
+        impl = ConfigurationCacheImplFactory.getImplementation(scope, relativePath);
     }
 
     @Override

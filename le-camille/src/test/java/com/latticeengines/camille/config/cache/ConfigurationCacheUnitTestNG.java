@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.camille.scopes.PodScope;
 import com.latticeengines.domain.exposed.camille.scopes.TenantScope;
 
-public class ConfigurationCacheControllerUnitTestNG {
+public class ConfigurationCacheUnitTestNG {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(new Object() {
@@ -46,7 +46,7 @@ public class ConfigurationCacheControllerUnitTestNG {
         ConfigurationController<PodScope> controller = new ConfigurationController<PodScope>(scope);
         controller.create(path, new Document("foo"));
 
-        ConfigurationCacheController<PodScope> cache = new ConfigurationCacheController<PodScope>(scope, path);
+        ConfigurationCache<PodScope> cache = new ConfigurationCache<PodScope>(scope, path);
 
         Assert.assertEquals(cache.get(), controller.get(path));
     }
@@ -61,7 +61,7 @@ public class ConfigurationCacheControllerUnitTestNG {
         ConfigurationController<ContractScope> controller = new ConfigurationController<ContractScope>(scope);
         controller.create(path, new Document("foo"));
 
-        ConfigurationCacheController<ContractScope> cache = new ConfigurationCacheController<ContractScope>(scope, path);
+        ConfigurationCache<ContractScope> cache = new ConfigurationCache<ContractScope>(scope, path);
 
         Assert.assertEquals(cache.get(), controller.get(path));
     }
@@ -77,7 +77,7 @@ public class ConfigurationCacheControllerUnitTestNG {
         ConfigurationController<TenantScope> controller = new ConfigurationController<TenantScope>(scope);
         controller.create(path, new Document("foo"));
 
-        ConfigurationCacheController<TenantScope> cache = new ConfigurationCacheController<TenantScope>(scope, path);
+        ConfigurationCache<TenantScope> cache = new ConfigurationCache<TenantScope>(scope, path);
 
         Assert.assertEquals(cache.get(), controller.get(path));
     }
@@ -94,7 +94,7 @@ public class ConfigurationCacheControllerUnitTestNG {
         ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);
         controller.create(path, new Document("foo"));
 
-        ConfigurationCacheController<CustomerSpaceScope> cache = new ConfigurationCacheController<CustomerSpaceScope>(
+        ConfigurationCache<CustomerSpaceScope> cache = new ConfigurationCache<CustomerSpaceScope>(
                 scope, path);
 
         Assert.assertEquals(cache.get(), controller.get(path));
