@@ -21,7 +21,6 @@ public class CustomerSpaceServiceConfigurationCacheImpl implements Configuration
             throws Exception {
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
         cache = new CamilleCache(PathTranslatorFactory.getTranslator(scope).getAbsolutePath(relativePath));
-        cache.start();
     }
     
     @Override
