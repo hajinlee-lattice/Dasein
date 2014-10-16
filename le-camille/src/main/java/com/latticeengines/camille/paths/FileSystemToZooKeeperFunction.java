@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,20 +25,33 @@ public class FileSystemToZooKeeperFunction implements Function<Path, List<Map.En
     // the exposed directory
     private String baseDir;
 
-    public FileSystemToZooKeeperFunction(String baseDir) {
-        // clip the slash at the end if it exists
-        if (baseDir == null || baseDir.isEmpty())
-            this.baseDir = "";
-        else {
-            char last = baseDir.charAt(baseDir.length() - 1);
-            this.baseDir = last == '\\' || last == '/' ? baseDir.substring(0, baseDir.length() - 1) : baseDir;
+    public FileSystemToZooKeeperFunction(File baseDir) throws IOException {
+        switch (baseDir.getName()) {
+        case "":
+        case ".":
+            try {
+                this.baseDir = new java.io.File(".").getCanonicalPath();
+            } catch (IOException e) {
+                log.error("Error getting working directory", e);
+                throw e;
+            }
+            break;
+        default:
+            if (!baseDir.isDirectory())
+                throw new IllegalArgumentException("not a directory");
+            this.baseDir = baseDir.getAbsolutePath().toString();
+            break;
+        }
+
+        while (StringUtils.endsWithAny(this.baseDir, "\\", "/")) {
+            this.baseDir = StringUtils.chop(this.baseDir);
         }
     }
 
     private String toAbsolutePath(Path p) {
         StringBuilder sb = new StringBuilder(baseDir);
         for (String part : p.getParts())
-            sb.append("\\").append(part);
+            sb.append('/').append(part);
         return sb.toString();
     }
 
@@ -48,16 +62,25 @@ public class FileSystemToZooKeeperFunction implements Function<Path, List<Map.En
             return new ArrayList<Map.Entry<Document, Path>>(0);
         List<Map.Entry<Document, Path>> out = new ArrayList<Map.Entry<Document, Path>>(children.length);
         for (String relChildPathStr : children) {
-            Path childPath = parentPath.append(relChildPathStr);
-            String absoluteChildPathStr = toAbsolutePath(childPath);
-            File f = new File(absoluteChildPathStr);
-            Document doc;
+            Path childPath = null;
             try {
-                doc = f.isDirectory() ? new Document() : new Document(new String(Files.readAllBytes(Paths
-                        .get(absoluteChildPathStr))));
-            } catch (IOException e) {
-                doc = null;
-                log.error("Error reading " + childPath, e);
+                childPath = parentPath.append(relChildPathStr);
+            } catch (IllegalArgumentException e) {
+                log.error("Error reading " + relChildPathStr, e);
+                continue;
+            }
+
+            String absoluteChildPathStr = toAbsolutePath(childPath);
+            Document doc;
+            if (new File(absoluteChildPathStr).isDirectory())
+                doc = new Document();
+            else {
+                try {
+                    doc = new Document(new String(Files.readAllBytes(Paths.get(absoluteChildPathStr))));
+                } catch (IOException e) {
+                    log.error("Error reading " + relChildPathStr, e);
+                    continue;
+                }
             }
             out.add(Pair.of(doc, childPath));
         }
