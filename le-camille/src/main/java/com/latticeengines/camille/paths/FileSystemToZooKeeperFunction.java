@@ -40,11 +40,10 @@ public class FileSystemToZooKeeperFunction implements Function<Path, List<Map.En
             if (!baseDir.isDirectory())
                 throw new IllegalArgumentException("not a directory");
             this.baseDir = baseDir.getAbsolutePath().toString();
+            while (StringUtils.endsWithAny(this.baseDir, "\\", "/")) {
+                this.baseDir = StringUtils.chop(this.baseDir);
+            }
             break;
-        }
-
-        while (StringUtils.endsWithAny(this.baseDir, "\\", "/")) {
-            this.baseDir = StringUtils.chop(this.baseDir);
         }
     }
 
