@@ -14,6 +14,7 @@
         <avro.version>1.7.7</avro.version>
         <cascading.version>2.6.0</cascading.version>
         <le.common.version>1.0.3-SNAPSHOT</le.common.version>
+        <le.domain.version>1.0.3-SNAPSHOT</le.domain.version>
     </properties>
 
     <repositories>
@@ -92,36 +93,43 @@
             <artifactId>cascading-core</artifactId>
             <version>${cascading.version}</version>
         </dependency>
-
         <dependency>
             <groupId>cascading</groupId>
             <artifactId>cascading-local</artifactId>
             <version>${cascading.version}</version>
         </dependency>
-
         <dependency>
             <groupId>cascading</groupId>
             <artifactId>cascading-hadoop</artifactId>
             <version>${cascading.version}</version>
         </dependency>
-
         <dependency>
             <groupId>cascading</groupId>
             <artifactId>cascading-xml</artifactId>
             <version>${cascading.version}</version>
         </dependency>
-
         <dependency>
             <groupId>cascading.avro</groupId>
             <artifactId>avro-scheme</artifactId>
             <version>2.1.2</version>
         </dependency>
-
         <dependency>
             <groupId>cascading</groupId>
             <artifactId>cascading-platform</artifactId>
             <version>${cascading.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${le.domain.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
