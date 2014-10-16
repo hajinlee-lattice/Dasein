@@ -38,7 +38,6 @@ public class CamilleCacheUnitTestNG {
         Assert.assertTrue(camille.exists(new Path("/foo")));
 
         CamilleCache cache = new CamilleCache(path);
-        cache.start();
         Document cached = cache.get();
         Assert.assertEquals(cached, document);
 

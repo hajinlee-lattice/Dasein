@@ -12,7 +12,6 @@ public class StandardConfigurationCacheImpl<T extends ConfigurationScope> implem
 
     public StandardConfigurationCacheImpl(T scope, Path relativePath) throws Exception {
         cache = new CamilleCache(PathTranslatorFactory.getTranslator(scope).getAbsolutePath(relativePath));
-        cache.start();
     }
 
     @Override

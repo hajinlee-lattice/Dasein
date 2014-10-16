@@ -11,11 +11,8 @@ import com.latticeengines.domain.exposed.camille.Path;
 public class CamilleCache {
     private NodeCache cache;
 
-    public CamilleCache(Path path) {
+    public CamilleCache(Path path) throws Exception {
         cache = new NodeCache(CamilleEnvironment.getCamille().getCuratorClient(), path.toString());
-    }
-
-    public void start() throws Exception {
         cache.start(true);
     }
 
