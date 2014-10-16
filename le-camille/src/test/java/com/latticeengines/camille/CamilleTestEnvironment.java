@@ -35,7 +35,7 @@ public class CamilleTestEnvironment {
 
             ConfigJson config = new ConfigJson();
             config.setConnectionString(server.getConnectString());
-            config.setPodId("ignored");
+            config.setPodId("PodID");
 
             OutputStream stream = new ByteArrayOutputStream();
 

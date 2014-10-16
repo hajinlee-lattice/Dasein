@@ -6,8 +6,8 @@ public class ConfigurationTransactionImplFactory {
     public static <T extends ConfigurationScope> ConfigurationTransactionImpl<T> getImplementation(T scope) {
         if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
             // TODO
-            return null;
+            return new StandardConfigurationTransactionImpl<T>(scope);
         }
-        return new StandardConfigurationTransactionImpl<T>(scope);      
+        return new StandardConfigurationTransactionImpl<T>(scope);
     }
 }

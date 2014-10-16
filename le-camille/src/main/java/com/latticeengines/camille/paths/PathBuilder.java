@@ -43,8 +43,7 @@ public final class PathBuilder {
                 tenantID, PathConstants.SPACES, spaceID);
     }
 
-    public static Path buildCustomerSpaceServicesPath(String podID, String contractID, String tenantID, String spaceID,
-            String serviceName) {
+    public static Path buildCustomerSpaceServicesPath(String podID, String contractID, String tenantID, String spaceID) {
         return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS,
                 tenantID, PathConstants.SPACES, spaceID, PathConstants.SERVICES);
     }

@@ -9,6 +9,7 @@ public final class PathConstants {
     public static final String SPACES = "Spaces";
     public static final String SERVICES = "Services";
     
+    public static final String INVISIBLE_FILE_PREFIX = ".";
     public static final String DEFAULT_SPACE_FILE = ".default-space";
-    public static final String SERVICE_VERSION_FILE = ".data-version";
+    public static final String SERVICE_DATA_VERSION_FILE = ".data-version";
 }

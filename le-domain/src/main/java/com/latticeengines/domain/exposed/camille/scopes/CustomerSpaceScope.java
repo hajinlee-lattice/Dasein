@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.camille.scopes;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+
 public class CustomerSpaceScope extends ConfigurationScope {
     private String contractID;
     private String tenantID;
@@ -11,10 +13,25 @@ public class CustomerSpaceScope extends ConfigurationScope {
         this.spaceID = spaceID;
     }
     
+    public CustomerSpaceScope(CustomerSpace customerSpace) {
+        this.contractID = customerSpace.getContractId();
+        this.tenantID = customerSpace.getTenantId();
+        this.spaceID = customerSpace.getSpaceId();
+    }
+    
     public CustomerSpaceScope(String contractID, String tenantID) {
         this.contractID = contractID;
         this.tenantID = tenantID;
         this.spaceID = null;
+    }
+    
+    public CustomerSpace getCustomerSpace() {
+        return new CustomerSpace(contractID, tenantID, spaceID);
+    }
+    
+    @Override
+    public String toString() {
+        return getCustomerSpace().toString();
     }
     
     @Override

@@ -1,13 +1,16 @@
 package com.latticeengines.camille.config;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.ZooDefs;
 
+import com.google.common.base.Predicate;
 import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
+import com.latticeengines.camille.paths.PathConstants;
 import com.latticeengines.camille.translators.PathTranslator;
 import com.latticeengines.camille.translators.PathTranslatorFactory;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -59,12 +62,22 @@ public class StandardConfigurationControllerImpl<T extends ConfigurationScope> i
 
     @Override
     public List<Pair<Document, Path>> getChildren(Path path) throws Exception {
+        // TODO all of this should really be handled in the controller itself
         Path absolute = translator.getAbsolutePath(path);
-        return camille.getChildren(absolute);
+        List<Pair<Document, Path>> children = camille.getChildren(absolute);
+        
+        // Make paths local
+        Iterator<Pair<Document, Path>> iter = children.iterator();
+        while (iter.hasNext()) {
+            Pair<Document, Path> pair = iter.next();
+            pair.setValue(pair.getValue().local(path));
+        }
+        return children;
     }
-
+    
     @Override
     public DocumentDirectory getDirectory(Path path) throws Exception {
+        // TODO all of this should really be handled in the controller itself
         Path absolute = translator.getAbsolutePath(path);
         DocumentDirectory directory = camille.getDirectory(absolute);
         directory.makePathsLocal();
@@ -82,5 +95,4 @@ public class StandardConfigurationControllerImpl<T extends ConfigurationScope> i
         Path absolute = translator.getAbsolutePath(path);
         return camille.exists(absolute);
     }
-
 }

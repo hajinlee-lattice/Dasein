@@ -24,7 +24,8 @@ public class DocumentDirectory implements Serializable {
     private Path root;
     private List<Node> children;
 
-    public DocumentDirectory() {
+    public DocumentDirectory(Path root) {
+        this.root = root;
         children = new ArrayList<Node>();
     }
 
@@ -70,6 +71,10 @@ public class DocumentDirectory implements Serializable {
         return null;
     }
 
+    public Node add(Path path) {
+        return add(path, new Document());
+    }
+    
     public Node add(Path path, Document document) {
         Node node;
         Path parentPath = path.parent();
@@ -335,5 +340,4 @@ public class DocumentDirectory implements Serializable {
             return true;
         }
     }
-
 }

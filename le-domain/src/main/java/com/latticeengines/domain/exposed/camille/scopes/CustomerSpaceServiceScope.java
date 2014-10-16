@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.camille.scopes;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+
 public class CustomerSpaceServiceScope extends ConfigurationScope {
     private String contractID;
     private String tenantID;
@@ -15,6 +17,14 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
         this.dataVersion = dataVersion;
     }
     
+    public CustomerSpaceServiceScope(CustomerSpace space, String serviceName, int dataVersion) {
+        this.contractID = space.getContractId();
+        this.tenantID = space.getTenantId();
+        this.spaceID = space.getSpaceId();
+        this.serviceName = serviceName;
+        this.dataVersion = dataVersion;
+    }
+    
     public CustomerSpaceServiceScope(String contractID, String tenantID, String serviceName, int dataVersion) {
         this.contractID = contractID;
         this.tenantID = tenantID;
@@ -22,7 +32,7 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
         this.serviceName = serviceName;
         this.dataVersion = dataVersion;
     }
-    
+        
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -70,6 +80,16 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
         return true;
     }
 
+
+    public CustomerSpace getCustomerSpace() {
+        return new CustomerSpace(contractID, tenantID, spaceID);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[CustomerSpace=%s, Service=%s, DataVersion=%d]", getCustomerSpace(), serviceName, dataVersion);
+    }
+    
     public String getContractID() {
         return contractID;
     }
@@ -114,5 +134,4 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
     public Type getType() {
         return Type.CUSTOMER_SPACE_SERVICE;
     }
-
 }

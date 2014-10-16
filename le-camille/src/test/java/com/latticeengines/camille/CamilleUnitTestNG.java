@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -146,11 +147,11 @@ public class CamilleUnitTestNG {
 
         Set<Pair<String, String>> actualChildren = new HashSet<Pair<String, String>>();
         for (Pair<Document, Path> childPair : c.getChildren(parentPath)) {
-            actualChildren.add(Pair.of(childPair.getLeft().getData(), childPair.getRight().toString()));
+            actualChildren.add(MutablePair.of(childPair.getLeft().getData(), childPair.getRight().toString()));
         }
 
-        Assert.assertTrue(actualChildren.contains(Pair.of(childDoc0.getData(), childPath0.toString())));
-        Assert.assertTrue(actualChildren.contains(Pair.of(childDoc1.getData(), childPath1.toString())));
+        Assert.assertTrue(actualChildren.contains(MutablePair.of(childDoc0.getData(), childPath0.toString())));
+        Assert.assertTrue(actualChildren.contains(MutablePair.of(childDoc1.getData(), childPath1.toString())));
     }
 
     @Test(groups = "unit")

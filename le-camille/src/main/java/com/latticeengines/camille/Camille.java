@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CuratorWatcher;
@@ -100,7 +101,7 @@ public class Camille {
 
         for (String relativePath : relativeChildPaths) {
             Path childPath = path.append(relativePath);
-            out.add(Pair.of(get(childPath), childPath));
+            out.add(MutablePair.of(get(childPath), childPath));
         }
 
         return out;
