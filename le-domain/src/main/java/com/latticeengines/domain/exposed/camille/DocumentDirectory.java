@@ -237,14 +237,14 @@ public class DocumentDirectory implements Serializable {
                 return false;
         } else if (that.children == null) {
             return false;
-        } else if (children.size() != that.children.size()) {
-            return false;
         } else {
-            for (Iterator<Node> thisIter = breadthFirstIterator(), thatIter = that.breadthFirstIterator(); thisIter
-                    .hasNext();) {
+            Iterator<Node> thisIter = breadthFirstIterator(), thatIter = that.breadthFirstIterator();
+            while (thisIter.hasNext() && thatIter.hasNext()) {
                 if (!thisIter.next().equals(thatIter.next()))
                     return false;
             }
+            if (thisIter.hasNext() || thatIter.hasNext())
+                return false;
         }
         return true;
     }
