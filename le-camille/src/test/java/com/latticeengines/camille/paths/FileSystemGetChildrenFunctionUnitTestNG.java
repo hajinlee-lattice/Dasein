@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
 import com.latticeengines.domain.exposed.camille.Path;
 
-public class FileSystemToZooKeeperFunctionUnitTestNG {
+public class FileSystemGetChildrenFunctionUnitTestNG {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(new Object() {
@@ -69,7 +69,7 @@ public class FileSystemToZooKeeperFunctionUnitTestNG {
 
     @Test(groups = "unit")
     public void testRootIterationAndFileContents() throws IOException {
-        FileSystemToZooKeeperFunction func = new FileSystemToZooKeeperFunction(tempDir);
+        FileSystemGetChildrenFunction func = new FileSystemGetChildrenFunction(tempDir);
         DocumentDirectory d = new DocumentDirectory(new Path("/"), func);
         Iterator<Node> iter = d.depthFirstIterator();
         for (String expected : new String[] { "/0", "/0/0.txt", "/0/1", "/0/1/1.txt", "/0/1/3", "/0/1/3/3.txt",
@@ -104,7 +104,7 @@ public class FileSystemToZooKeeperFunctionUnitTestNG {
 
     @Test(groups = "unit")
     public void testSubIteration() throws IOException {
-        FileSystemToZooKeeperFunction func = new FileSystemToZooKeeperFunction(tempDir);
+        FileSystemGetChildrenFunction func = new FileSystemGetChildrenFunction(tempDir);
         DocumentDirectory d = new DocumentDirectory(new Path("/0/1"), func);
         Iterator<Node> iter = d.depthFirstIterator();
         for (String expected : new String[] { "/0/1/1.txt", "/0/1/3", "/0/1/3/3.txt", "/0/1/4", "/0/1/4/4.txt" }) {

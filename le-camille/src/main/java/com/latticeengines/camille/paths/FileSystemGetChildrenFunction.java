@@ -19,13 +19,13 @@ import com.google.common.base.Function;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
-public class FileSystemToZooKeeperFunction implements Function<Path, List<Map.Entry<Document, Path>>> {
+public class FileSystemGetChildrenFunction implements Function<Path, List<Map.Entry<Document, Path>>> {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
     private String fileSystemDirectoryOfRootPathStr;
 
-    public FileSystemToZooKeeperFunction(File fileSystemDirectoryOfRootPath) throws IOException {
+    public FileSystemGetChildrenFunction(File fileSystemDirectoryOfRootPath) throws IOException {
         switch (fileSystemDirectoryOfRootPath.getName()) {
         case "":
         case ".":
