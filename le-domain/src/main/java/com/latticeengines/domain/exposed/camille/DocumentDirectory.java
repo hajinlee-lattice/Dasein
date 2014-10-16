@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Queue;
 import java.util.Set;
 
 import org.apache.commons.lang.ObjectUtils;
@@ -124,11 +123,18 @@ public class DocumentDirectory implements Serializable {
     }
 
     private ListIterator<Node> breadthFirstIterator(boolean reverse) {
-        Queue<Node> q = new LinkedList<Node>(nullSafe(children));
+        LinkedList<Node> q = new LinkedList<Node>(nullSafe(children));
+        if (reverse)
+            Collections.reverse(q);
         Set<Node> visited = new LinkedHashSet<Node>();
         for (Node n = q.poll(); n != null; n = q.poll()) {
             if (visited.add(n)) {
-                q.addAll(nullSafe(n.getChildren()));
+                if (reverse) {
+                    ArrayList<Node> c = new ArrayList<Node>(nullSafe(n.getChildren()));
+                    Collections.reverse(c);
+                    q.addAll(c);
+                } else
+                    q.addAll(nullSafe(n.getChildren()));
             }
         }
         return new IteratorWrapper(visited, reverse);
