@@ -43,6 +43,7 @@ import cascading.util.Pair;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.GroupByCriteria.AggregationType;
+import com.latticeengines.dataflow.exposed.exception.DataFlowCode;
 import com.latticeengines.dataflow.exposed.exception.DataFlowException;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
@@ -113,7 +114,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 Pair<Pipe, List<FieldMetadata>> pipesAndFields = pipesAndOutputSchemas.get(name);
                 
                 if (pipesAndFields == null) {
-                    throw new DataFlowException("Unseen prior pipe " + name);
+                    throw new DataFlowException(DataFlowCode.DF_10003, new String[] { name });
                 } else {
                     nameToFieldMetadataMap = getFieldMetadataMap(pipesAndFields.getRhs());
                 }
@@ -161,7 +162,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             FieldMetadata fm = nameToFieldMetadataMap.get(fieldName);
             
             if (fm == null) {
-                throw new DataFlowException("Unknown field name " + fieldName + " from previous pipe.");
+                throw new DataFlowException(DataFlowCode.DF_10001, new String[] { fieldName });
             }
             partialFieldMetadata.add(fm);
         }
@@ -227,7 +228,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Pair<Pipe, List<FieldMetadata>> pipeAndMetadata = pipesAndOutputSchemas.get(name);
         
         if (pipeAndMetadata == null) {
-            throw new DataFlowException("Unseen prior pipe " + name);
+            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { name });
         }
 
         List<FieldMetadata> fm = pipeAndMetadata.getRhs();
@@ -240,7 +241,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         List<String> groupByFields = groupByFieldList.getFieldsAsList();
         Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
-            throw new DataFlowException("Unseen prior pipe " + prior + ".");
+            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
         }
         Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(pm.getRhs());
         Pipe groupby = new GroupBy(pm.getLhs(), convertToFields(groupByFields));
@@ -256,7 +257,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             
             FieldMetadata fmForAggFieldName = nameToFieldMetadataMap.get(aggFieldName);
             if (fmForAggFieldName == null) {
-                throw new DataFlowException("Field name " + aggFieldName + " not found in prior pipe.");
+                throw new DataFlowException(DataFlowCode.DF_10002, new String[] { aggFieldName, prior });
             }
             
             if (avroType == null) {

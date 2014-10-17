@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder;
+import com.latticeengines.dataflow.exposed.exception.DataFlowCode;
 import com.latticeengines.dataflow.exposed.exception.DataFlowException;
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -26,7 +27,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         Object dataFlowBldrBean = appContext.getBean(dataFlowBldrBeanName);
         
         if (!(dataFlowBldrBean instanceof DataFlowBuilder)) {
-            throw new DataFlowException("Builder bean not instance of builder.");
+            throw new DataFlowException(DataFlowCode.DF_00000, new String[] { dataFlowBldrBeanName });
         }
         
         DataFlowBuilder dataFlow = (DataFlowBuilder) dataFlowBldrBean;
@@ -42,7 +43,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         }
         
         if (missingProps.size() > 0) {
-            throw new DataFlowException("Data flow context does not have values for required properties: " + StringUtils.join(missingProps, ", "));
+            throw new DataFlowException(DataFlowCode.DF_10000, new String[] { StringUtils.join(missingProps, ", ") });
         }
     }
 
