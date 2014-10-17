@@ -1,5 +1,8 @@
 package com.latticeengines.camille.interfaces.data;
 
+import java.util.Arrays;
+
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -30,7 +33,7 @@ public class DataInterfaceUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void test() throws Exception {
+    public void testGet() throws Exception {
         String interfaceName = "interfaceName";
         DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName);
         DataInterfaceSubscriber sub = new DataInterfaceSubscriber(interfaceName);
@@ -44,5 +47,25 @@ public class DataInterfaceUnitTestNG {
 
         pub.remove(relativePath);
         Assert.assertNull(sub.get(relativePath));
+    }
+
+    @Test(groups = "unit")
+    public void testGetChildren() throws Exception {
+        String interfaceName = "interfaceName";
+        DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName);
+        DataInterfaceSubscriber sub = new DataInterfaceSubscriber(interfaceName);
+
+        String relativePath = "relativePath";
+
+        Path relativePath1 = new Path(String.format("/%s/1", relativePath));
+        Document doc1 = new Document("document1");
+        pub.publish(relativePath1, doc1);
+
+        Path relativePath2 = new Path(String.format("/%s/2", relativePath));
+        Document doc2 = new Document("document2");
+        pub.publish(relativePath2, doc2);
+
+        Assert.assertTrue(sub.getChildren(new Path("/" + relativePath)).containsAll(
+                Arrays.asList(Pair.of(doc1, relativePath1), Pair.of(doc2, relativePath2))));
     }
 }

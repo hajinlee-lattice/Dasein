@@ -22,7 +22,7 @@ public class DataInterfacePublisher extends DataInterfaceBase {
         Camille c = CamilleEnvironment.getCamille();
         Path path = getBasePath().append(relativePath);
         try {
-            c.create(path, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            c.createWithEmptyIntermediateNodes(path, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Node already existed @ {}, forcing update", path);
             c.set(path, doc, true);
