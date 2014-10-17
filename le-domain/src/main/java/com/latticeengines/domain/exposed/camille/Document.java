@@ -5,25 +5,29 @@ import java.io.Serializable;
 public class Document implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String data;
+    private String data = new String();
     private int version = -1;
 
     public Document() {
     }
 
+    public Document(String data) {
+        setData(data);
+    }
+    
     public Document(String data, int version) {
-        if (version < 0) {
-            throw new IllegalArgumentException("Version cannot be less than 0")
-        }
-        this.data = data;
-        this.version = version;
+        setData(data);
+        setVersion(version);
     }
 
     public String getData() {
-        return data == null ? "" : data;
+        return data;
     }
 
     public void setData(String data) {
+        if (data == null) {
+            throw new IllegalArgumentException("Data cannot be null");
+        }
         this.data = data;
     }
 
@@ -32,8 +36,8 @@ public class Document implements Serializable {
     }
 
     public void setVersion(int version) {
-        if (version < 0) {
-            throw new IllegalArgumentException("Version cannot be less than 0")
+        if (version < -1) {
+            throw new IllegalArgumentException("Version must either be -1 (unspecified), or greater or equal to 0");
         }
         this.version = version;
     }
