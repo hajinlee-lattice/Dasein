@@ -5,19 +5,19 @@
 	<artifactId>le-api</artifactId>
 	<packaging>war</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.3/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.3/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.3/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
 	</scm>
 
-	<version>1.0.3</version>
+	<version>1.0.4-SNAPSHOT</version>
 	<name>${component-name}</name>
 	<description>LE API </description>
 
 	<properties>
 		<component-name>le-api</component-name>
-		<le.dataplatform.version>1.0.3</le.dataplatform.version>
-		<le.domain.version>1.0.3</le.domain.version>
+		<le.dataplatform.version>1.0.4-SNAPSHOT</le.dataplatform.version>
+		<le.domain.version>1.0.4-SNAPSHOT</le.domain.version>
 		<sqoop.version>1.4.4.2.1.3.0-563</sqoop.version>
 		<hadoop.version>2.4.0.2.1.3.0-563</hadoop.version>
 	</properties>
@@ -25,7 +25,7 @@
 	<parent>
 		<groupId>com.latticeengines</groupId>
 		<artifactId>le-parent</artifactId>
-		<version>1.0.3</version>
+		<version>1.0.4-SNAPSHOT</version>
 		<relativePath>../le-parent</relativePath>
 	</parent>
 
