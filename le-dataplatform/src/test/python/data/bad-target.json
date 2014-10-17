@@ -70,7 +70,7 @@
   ],
   "model_data_dir": "/user/s-analytics/customers/BD_ADEBDd68060698nX25160587c/models/DataForModelingBD_ADEBDd68060698nX25160587c/b9d4bd6a-7242-4755-a662-25dc2c79efe9",
   "data_format": "avro",
-  "algorithm_properties": "criterion=gini n_estimators=10 n_jobs=4 min_samples_split=25 min_samples_leaf=10 bootstrap=True",
+  "algorithm_properties": "criterion=gini n_estimators=10 n_jobs=4 min_samples_split=25 min_samples_leaf=10 max_depth=8 bootstrap=True",
   "provenance_properties": "DataLoader_Query=DataForModelingBD_ADEBDd68060698nX25160587c DataLoader_TenantName=ADEBDd68060698nX25160587c DataLoader_Instance=https://bodcdevvint187.dev.lattice.local:8080//DLRestService",
   "targets": [
     "P1_Event"
@@ -85,6 +85,6 @@
   "data_profile": "/user/s-analytics/customers/BD_ADEBDd68060698nX25160587c/data/DataForModelingBD_ADEBDd68060698nX25160587c/EventMetadata/bad-target-profile.avro",
   "config_metadata": "/user/s-analytics/customers/BD_ADEBDd68060698nX25160587c/data/DataForModelingBD_ADEBDd68060698nX25160587c/EventMetadata",
   "python_pipeline_script":"/app/dataplatform/scripts/pipeline/pipeline.py",
-  "python_pipeline_lib":"/app/dataplatform/scripts/lepipeline.tar.gz",  
+  "python_pipeline_lib":"/app/dataplatform/scripts/lepipeline.tar.gz",
   "name": "PLSModel"
 }

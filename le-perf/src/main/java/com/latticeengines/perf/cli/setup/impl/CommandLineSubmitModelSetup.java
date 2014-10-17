@@ -87,7 +87,6 @@ public class CommandLineSubmitModelSetup extends CommandLineSetup<SubmitModel> {
             } else if (name.equalsIgnoreCase(ALGORITHM_NAME_RF)) {
                 RandomForestAlgorithm rfa = new RandomForestAlgorithm();
                 configAlgorithm(rfa, virtualCores, memory, priority);
-                rfa.setAlgorithmProperties(ALGORITHM_RF_PROP);
                 algorithms.add(rfa);
             }
         }

@@ -12,6 +12,6 @@ public class RandomForestAlgorithm extends AlgorithmBase {
     public RandomForestAlgorithm() {
         setName("RF");
         setScript("/app/dataplatform/scripts/algorithm/rf_train.py");
-        setAlgorithmProperties("criterion=gini n_estimators=200 n_jobs=4 min_samples_split=25 min_samples_leaf=10 bootstrap=True");
+        setAlgorithmProperties("criterion=gini n_estimators=100 n_jobs=5 min_samples_split=25 min_samples_leaf=10 max_depth=8 bootstrap=True");
     }
 }
