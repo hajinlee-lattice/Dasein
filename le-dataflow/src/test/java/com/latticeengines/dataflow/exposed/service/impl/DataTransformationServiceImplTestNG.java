@@ -34,6 +34,9 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
         
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty("SOURCES", sources);
+        ctx.setProperty("TARGETPATH", "/tmp/EventTable");
+        ctx.setProperty("QUEUE", "Priority0.MapReduce.0");
+        ctx.setProperty("FLOWNAME", "SampleDataFlow-Lead*Oppty");
         dataTransformationService.executeNamedTransformation(ctx, "sampleDataFlowBuilder");
     }
 }

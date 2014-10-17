@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.avro.Schema;
@@ -16,6 +17,7 @@ import org.apache.hadoop.fs.Path;
 import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowDef;
+import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.operation.Aggregator;
 import cascading.operation.aggregator.Count;
 import cascading.operation.aggregator.First;
@@ -31,6 +33,8 @@ import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.joiner.InnerJoin;
+import cascading.property.AppProps;
+import cascading.scheme.hadoop.TextDelimited;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
@@ -40,11 +44,10 @@ import cascading.util.Pair;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.GroupByCriteria.AggregationType;
 import com.latticeengines.dataflow.exposed.exception.DataFlowException;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
-    private boolean local = false;
-    
     @SuppressWarnings("rawtypes")
     private Map<String, Tap> taps = new HashMap<>();
     
@@ -57,7 +60,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
     
     public CascadingDataFlowBuilder(boolean local) {
-        this.local = local;
+        super(local);
     }
     
     public Flow<?> build(FlowDef flowDef) {
@@ -72,7 +75,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     @Override
     protected void addSource(String sourceName, String sourcePath) {
         Tap<?, ?, ?> tap = new Hfs(new AvroScheme(), sourcePath);
-        if (local) {
+        if (isLocal()) {
             sourcePath = "file://" + sourcePath;
             tap = new Lfs(new AvroScheme(), sourcePath);
         }
@@ -290,5 +293,33 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         return null;
     }
     
+    @SuppressWarnings("deprecation")
+    @Override
+    public void runFlow(DataFlowContext dataFlowCtx) {
+        @SuppressWarnings("unchecked")
+        Map<String, String> sourceTables = dataFlowCtx.getProperty("SOURCES", Map.class);
+        String flowName = dataFlowCtx.getProperty("FLOWNAME", String.class);
+        String targetPath = dataFlowCtx.getProperty("TARGETPATH", String.class);
+        String queue = dataFlowCtx.getProperty("QUEUE", String.class);
+        
+        String lastOperator = constructFlowDefinition(sourceTables);
+        
+        Tap<?, ?, ?> sink = new Lfs(new TextDelimited(), targetPath, true);
+        if (!isLocal()) {
+            sink = new Hfs(new TextDelimited(), targetPath, true);
+        }
+        Properties properties = new Properties();
+        properties.put("mapred.job.queue.name", queue);
+        AppProps.setApplicationJarClass(properties, getClass());
+        HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
+
+        FlowDef flowDef = FlowDef.flowDef().setName(flowName) //
+                .addSources(getSources()) //
+                .addTailSink(getPipeByName(lastOperator), sink);
+ 
+        Flow<?> flow = flowConnector.connect(flowDef);
+        flow.writeDOT("dot/wcr.dot");
+        flow.complete();
+    }
     
 }

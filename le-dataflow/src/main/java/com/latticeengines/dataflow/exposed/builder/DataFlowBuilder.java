@@ -7,11 +7,17 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+
 public abstract class DataFlowBuilder {
+    
+    private boolean local;
 
     public abstract String constructFlowDefinition(Map<String, String> sources);
     
     public abstract Schema getSchema(String name);
+    
+    public abstract void runFlow(DataFlowContext dataFlowCtx);
     
     protected abstract void addSource(String sourceName, String sourcePath);
     
@@ -22,6 +28,18 @@ public abstract class DataFlowBuilder {
     protected abstract String addFilter(String prior, String expression, FieldList filterFields);
     
     protected abstract String addFunction(String prior);
+    
+    public DataFlowBuilder() {
+        this(false);
+    }
+    
+    public DataFlowBuilder(boolean local) {
+        this.local = local;
+    }
+    
+    public boolean isLocal() {
+        return local;
+    }
     
     public static class JoinCriteria {
         private final String name;
@@ -49,11 +67,11 @@ public abstract class DataFlowBuilder {
     
     public static class GroupByCriteria {
         public static enum AggregationType {
-            MAX,
-            MIN,
-            SUM,
-            COUNT(Type.INT, Integer.class),
-            FIRST,
+            MAX, //
+            MIN, //
+            SUM, //
+            COUNT(Type.INT, Integer.class), //
+            FIRST, //
             LAST;
             
             private Type avroType;
@@ -141,6 +159,7 @@ public abstract class DataFlowBuilder {
             return Arrays.<String>asList(fields);
         }
     }
+
 
     
 
