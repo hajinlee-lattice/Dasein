@@ -314,8 +314,7 @@ public class CamilleUnitTestNG {
         Assert.assertNull(directory.get(p4));
     }
 
-    // TODO Uncomment once DocumentSerializer is gone
-    // @Test(groups = "unit")
+    @Test(groups = "unit")
     public void testDocumentDirectoryOnRootPaths() throws Exception {
         Camille c = CamilleEnvironment.getCamille();
 

@@ -1,27 +1,29 @@
 package com.latticeengines.camille;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.util.List;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.lifecycle.PodLifecycleManager;
 
 public class CamilleEnvironment {
+    private static final Logger log = LoggerFactory.getLogger(new Object() {
+    }.getClass().getEnclosingClass());
+
     public enum Mode {
         BOOTSTRAP, RUNTIME
     };
 
-    private static final Logger log = LoggerFactory.getLogger(new Object() {
-    }.getClass().getEnclosingClass());
+    public static final String configFileName = "camille.cfg";
 
     // these are reasonable arguments for the ExponentialBackoffRetry. The first
     // retry will wait 1 second - the second will wait up to 2 seconds - the
@@ -30,9 +32,35 @@ public class CamilleEnvironment {
 
     // singleton instance
     private static Camille camille = null;
-    private static ConfigJson config = null;
+    private static CamilleConfig config = null;
 
-    public static synchronized void start(Mode mode, Reader configJsonReader) throws Exception {
+    private CamilleEnvironment() {
+    }
+
+    public static synchronized void start(Mode mode) throws Exception {
+        String workingDirectory = (new CamilleEnvironment()).getClass().getClassLoader().getResource("").getPath();
+        Path configFilePath = Paths.get(workingDirectory, configFileName);
+        log.info("Loading camille.cfg at " + configFilePath);
+        if (!Files.exists(configFilePath)) {
+            IllegalArgumentException e = new IllegalArgumentException("Could not locate camille.cfg. File "
+                    + configFilePath + " does not exist.");
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        CamilleConfig config = null;
+        try {
+            config = mapper.readValue(new File(configFilePath.toString()), CamilleConfig.class);
+        } catch (Exception e) {
+            log.error("Failure parsing camille.cfg", e);
+            throw e;
+        }
+
+        start(mode, config);
+    }
+
+    public static synchronized void start(Mode mode, CamilleConfig config) throws Exception {
         if (camille != null && camille.getCuratorClient() != null
                 && camille.getCuratorClient().getState().equals(CuratorFrameworkState.STARTED)) {
 
@@ -48,15 +76,14 @@ public class CamilleEnvironment {
             throw e;
         }
 
-        config = null;
-        try {
-            config = new ObjectMapper().readValue(configJsonReader, ConfigJson.class);
-        } catch (IOException ioe) {
-            log.error("An error occurred reading camille.json.", ioe);
+        if (config == null) {
+            IllegalArgumentException e = new IllegalArgumentException("config cannot be null");
+            log.error(e.getMessage(), e);
             stopNoSync();
-            throw ioe;
+            throw e;
         }
 
+        CamilleEnvironment.config = config;
         CuratorFramework client = CuratorFrameworkFactory.newClient(config.getConnectionString(), retryPolicy);
         client.start();
         try {
@@ -72,15 +99,6 @@ public class CamilleEnvironment {
         switch (mode) {
         case BOOTSTRAP:
             PodLifecycleManager.create(config.getPodId());
-            List<String> podIds = PodLifecycleManager.getAll();
-            if (podIds.size() > 1) {
-                RuntimeException e = new RuntimeException(String.format(
-                        "Only one Pod can exist in Bootstrap mode.  Pods with the following podIds were found: %s",
-                        StringUtils.join(podIds, ";")));
-                log.error(e.getMessage(), e);
-                stopNoSync();
-                throw e;
-            }
             break;
         case RUNTIME:
             if (!PodLifecycleManager.exists(config.getPodId())) {

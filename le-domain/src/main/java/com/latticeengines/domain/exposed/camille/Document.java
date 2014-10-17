@@ -11,8 +11,12 @@ public class Document implements Serializable {
     public Document() {
     }
 
-    public Document(String data) {
+    public Document(String data, int version) {
+        if (version < 0) {
+            throw new IllegalArgumentException("Version cannot be less than 0")
+        }
         this.data = data;
+        this.version = version;
     }
 
     public String getData() {
@@ -28,6 +32,9 @@ public class Document implements Serializable {
     }
 
     public void setVersion(int version) {
+        if (version < 0) {
+            throw new IllegalArgumentException("Version cannot be less than 0")
+        }
         this.version = version;
     }
 
