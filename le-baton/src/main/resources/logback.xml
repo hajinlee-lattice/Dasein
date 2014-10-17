@@ -1,6 +1,8 @@
 <configuration scan="true">
+	<timestamp key="byMillisecond" datePattern="yyyyMMdd-HHmmssSSS" />
+
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
-		<file>baton.log</file>
+		<file>logs/${byMillisecond}.log</file>
 		<encoder>
  			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern> 
 		</encoder>
