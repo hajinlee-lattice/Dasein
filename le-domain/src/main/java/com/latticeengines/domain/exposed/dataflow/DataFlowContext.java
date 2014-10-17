@@ -11,6 +11,9 @@ public class DataFlowContext {
         properties.put(name, value);
     }
     
+    public boolean containsProperty(String name) {
+        return properties.get(name) != null;
+    }
     
     public <T> T getProperty(String name, Class<T> valueClass) {
         Object value = properties.get(name);
