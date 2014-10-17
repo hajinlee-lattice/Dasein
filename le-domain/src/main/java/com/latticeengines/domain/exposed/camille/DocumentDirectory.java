@@ -74,7 +74,7 @@ public class DocumentDirectory implements Serializable {
     public Node add(Path path) {
         return add(path, new Document());
     }
-    
+
     public Node add(Path path, Document document) {
         Node node;
         Path parentPath = path.parent();

@@ -68,9 +68,9 @@ public class FileSystemGetChildrenFunction implements Function<Path, List<Map.En
             try {
                 childPath = parentPath.append(relChildPathStr);
             } catch (IllegalArgumentException e) {
-                // this can happen when we try to read C:\$RECYCLE_BIN$, for
-                // example
-                log.warn(MessageFormatter.format("Cannot read {}", relChildPathStr).getMessage(), e);
+                log.warn(
+                        MessageFormatter.format("File {} is in an invalid path format.", relChildPathStr).getMessage(),
+                        e);
                 continue;
             }
             String absoluteChildPathStr = toAbsolutePath(childPath);
@@ -81,9 +81,7 @@ public class FileSystemGetChildrenFunction implements Function<Path, List<Map.En
                 try {
                     doc = new Document(new String(Files.readAllBytes(Paths.get(absoluteChildPathStr))));
                 } catch (IOException e) {
-                    // this can happen when we try to read C:\$RECYCLE_BIN$, for
-                    // example
-                    log.warn(MessageFormatter.format("Cannot read {}", relChildPathStr).getMessage(), e);
+                    log.error(MessageFormatter.format("Cannot read {}", relChildPathStr).getMessage(), e);
                     continue;
                 }
             }
