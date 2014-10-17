@@ -15,11 +15,11 @@ public class CustomerSpaceServicePathTranslator extends PathTranslator {
 
     @Override
     public Path getAbsolutePath(Path p) throws Exception {
-        String spaceId = scope.getSpaceID();
+        String spaceId = scope.getSpaceId();
         if (spaceId == null) {
-            spaceId = TenantLifecycleManager.getDefaultSpaceId(scope.getContractID(), scope.getTenantID());
+            spaceId = TenantLifecycleManager.getDefaultSpaceId(scope.getContractId(), scope.getTenantId());
         }
-        return PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), scope.getContractID(),
-                scope.getTenantID(), spaceId, scope.getServiceName()).append(p);
+        return PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), scope.getContractId(),
+                scope.getTenantId(), spaceId, scope.getServiceName()).append(p);
     }
 }

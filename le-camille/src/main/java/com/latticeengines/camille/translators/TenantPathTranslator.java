@@ -14,6 +14,6 @@ public class TenantPathTranslator extends PathTranslator {
 
     @Override
     public Path getAbsolutePath(Path p) throws Exception {
-        return PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), scope.getContractID(), scope.getTenantID()).append(p);  
+        return PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), scope.getContractId(), scope.getTenantId()).append(p);  
     }
 }

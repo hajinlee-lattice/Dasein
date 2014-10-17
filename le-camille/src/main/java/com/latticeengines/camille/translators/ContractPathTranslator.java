@@ -14,6 +14,6 @@ public class ContractPathTranslator extends PathTranslator {
 
     @Override
     public Path getAbsolutePath(Path p) throws Exception {
-        return PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), scope.getContractID()).append(p);
+        return PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), scope.getContractId()).append(p);
     }
 }

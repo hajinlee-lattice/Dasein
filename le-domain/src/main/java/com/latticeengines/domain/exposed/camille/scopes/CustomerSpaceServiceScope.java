@@ -3,45 +3,46 @@ package com.latticeengines.domain.exposed.camille.scopes;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public class CustomerSpaceServiceScope extends ConfigurationScope {
-    private String contractID;
-    private String tenantID;
-    private String spaceID;
+    private String contractId;
+    private String tenantId;
+    private String spaceId;
     private String serviceName;
     private int dataVersion;
-    
-    public CustomerSpaceServiceScope(String contractID, String tenantID, String spaceID, String serviceName, int dataVersion) {
-        this.contractID = contractID;
-        this.tenantID = tenantID;
-        this.spaceID = spaceID;
+
+    public CustomerSpaceServiceScope(String contractId, String tenantId, String spaceId, String serviceName,
+            int dataVersion) {
+        this.contractId = contractId;
+        this.tenantId = tenantId;
+        this.spaceId = spaceId;
         this.serviceName = serviceName;
         this.dataVersion = dataVersion;
     }
-    
+
     public CustomerSpaceServiceScope(CustomerSpace space, String serviceName, int dataVersion) {
-        this.contractID = space.getContractId();
-        this.tenantID = space.getTenantId();
-        this.spaceID = space.getSpaceId();
+        this.contractId = space.getContractId();
+        this.tenantId = space.getTenantId();
+        this.spaceId = space.getSpaceId();
         this.serviceName = serviceName;
         this.dataVersion = dataVersion;
     }
-    
-    public CustomerSpaceServiceScope(String contractID, String tenantID, String serviceName, int dataVersion) {
-        this.contractID = contractID;
-        this.tenantID = tenantID;
-        this.spaceID = null;
+
+    public CustomerSpaceServiceScope(String contractId, String tenantId, String serviceName, int dataVersion) {
+        this.contractId = contractId;
+        this.tenantId = tenantId;
+        this.spaceId = null;
         this.serviceName = serviceName;
         this.dataVersion = dataVersion;
     }
-        
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((contractID == null) ? 0 : contractID.hashCode());
+        result = prime * result + ((contractId == null) ? 0 : contractId.hashCode());
         result = prime * result + dataVersion;
         result = prime * result + ((serviceName == null) ? 0 : serviceName.hashCode());
-        result = prime * result + ((spaceID == null) ? 0 : spaceID.hashCode());
-        result = prime * result + ((tenantID == null) ? 0 : tenantID.hashCode());
+        result = prime * result + ((spaceId == null) ? 0 : spaceId.hashCode());
+        result = prime * result + ((tenantId == null) ? 0 : tenantId.hashCode());
         result = prime * result + getType().hashCode();
         return result;
     }
@@ -55,10 +56,10 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
         if (getClass() != obj.getClass())
             return false;
         CustomerSpaceServiceScope other = (CustomerSpaceServiceScope) obj;
-        if (contractID == null) {
-            if (other.contractID != null)
+        if (contractId == null) {
+            if (other.contractId != null)
                 return false;
-        } else if (!contractID.equals(other.contractID))
+        } else if (!contractId.equals(other.contractId))
             return false;
         if (dataVersion != other.dataVersion)
             return false;
@@ -67,51 +68,51 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
                 return false;
         } else if (!serviceName.equals(other.serviceName))
             return false;
-        if (spaceID == null) {
-            if (other.spaceID != null)
+        if (spaceId == null) {
+            if (other.spaceId != null)
                 return false;
-        } else if (!spaceID.equals(other.spaceID))
+        } else if (!spaceId.equals(other.spaceId))
             return false;
-        if (tenantID == null) {
-            if (other.tenantID != null)
+        if (tenantId == null) {
+            if (other.tenantId != null)
                 return false;
-        } else if (!tenantID.equals(other.tenantID))
+        } else if (!tenantId.equals(other.tenantId))
             return false;
         return true;
     }
 
-
     public CustomerSpace getCustomerSpace() {
-        return new CustomerSpace(contractID, tenantID, spaceID);
+        return new CustomerSpace(contractId, tenantId, spaceId);
     }
 
     @Override
     public String toString() {
-        return String.format("[CustomerSpace=%s, Service=%s, DataVersion=%d]", getCustomerSpace(), serviceName, dataVersion);
-    }
-    
-    public String getContractID() {
-        return contractID;
-    }
-    
-    public void setContractID(String contractiD) {
-        this.contractID = contractiD;
+        return String.format("[CustomerSpace=%s, Service=%s, DataVersion=%d]", getCustomerSpace(), serviceName,
+                dataVersion);
     }
 
-    public String getTenantID() {
-        return tenantID;
+    public String getContractId() {
+        return contractId;
     }
 
-    public void setTenantID(String tenantID) {
-        this.tenantID = tenantID;
+    public void setContractID(String contractId) {
+        this.contractId = contractId;
     }
 
-    public String getSpaceID() {
-        return spaceID;
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantID(String tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public String getSpaceId() {
+        return spaceId;
     }
 
     public void setSpaceID(String spaceID) {
-        this.spaceID = spaceID;
+        this.spaceId = spaceID;
     }
 
     public String getServiceName() {

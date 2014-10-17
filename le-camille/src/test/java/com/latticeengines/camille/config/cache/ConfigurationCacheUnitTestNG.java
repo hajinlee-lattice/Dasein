@@ -55,7 +55,7 @@ public class ConfigurationCacheUnitTestNG {
     public void testContractScope() throws Exception {
         ContractScope scope = new ContractScope("MyContract");
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractID());
+        ContractLifecycleManager.create(scope.getContractId());
         Path path = new Path("/foo");
 
         ConfigurationController<ContractScope> controller = new ConfigurationController<ContractScope>(scope);
@@ -70,8 +70,8 @@ public class ConfigurationCacheUnitTestNG {
     public void testTenantScope() throws Exception {
         TenantScope scope = new TenantScope("MyContract", "MyTenant");
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractID());
-        TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "MySpace");
+        ContractLifecycleManager.create(scope.getContractId());
+        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
         Path path = new Path("/foo");
 
         ConfigurationController<TenantScope> controller = new ConfigurationController<TenantScope>(scope);
@@ -86,9 +86,9 @@ public class ConfigurationCacheUnitTestNG {
     public void testSpaceScope() throws Exception {
         CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant", "MySpace");
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractID());
-        TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "DefaultSpace");
-        SpaceLifecycleManager.create(scope.getContractID(), scope.getTenantID(), scope.getSpaceID());
+        ContractLifecycleManager.create(scope.getContractId());
+        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "DefaultSpace");
+        SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), scope.getSpaceId());
         Path path = new Path("/foo");
 
         ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);

@@ -1,17 +1,17 @@
 package com.latticeengines.domain.exposed.camille.scopes;
 
 public class ContractScope extends ConfigurationScope {
-    private String contractID;
+    private String contractId;
 
-    public ContractScope(String contractID) {
-        this.contractID = contractID;
+    public ContractScope(String contractId) {
+        this.contractId = contractId;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((contractID == null) ? 0 : contractID.hashCode());
+        result = prime * result + ((contractId == null) ? 0 : contractId.hashCode());
         result = prime * result + getType().hashCode();
         return result;
     }
@@ -25,25 +25,25 @@ public class ContractScope extends ConfigurationScope {
         if (getClass() != obj.getClass())
             return false;
         ContractScope other = (ContractScope) obj;
-        if (contractID == null) {
-            if (other.contractID != null)
+        if (contractId == null) {
+            if (other.contractId != null)
                 return false;
-        } else if (!contractID.equals(other.contractID))
+        } else if (!contractId.equals(other.contractId))
             return false;
         return true;
     }
 
-    public String getContractID() {
-        return contractID;
+    public String getContractId() {
+        return contractId;
     }
 
-    public void setContractID(String contractID) {
-        this.contractID = contractID;
+    public void setContractID(String contractId) {
+        this.contractId = contractId;
     }
 
     @Override
     public Type getType() {
         return Type.CONTRACT;
     }
-    
+
 }

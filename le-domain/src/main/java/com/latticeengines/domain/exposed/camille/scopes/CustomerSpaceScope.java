@@ -3,44 +3,44 @@ package com.latticeengines.domain.exposed.camille.scopes;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public class CustomerSpaceScope extends ConfigurationScope {
-    private String contractID;
-    private String tenantID;
-    private String spaceID;
-    
-    public CustomerSpaceScope(String contractID, String tenantID, String spaceID) {
-        this.contractID = contractID;
-        this.tenantID = tenantID;
-        this.spaceID = spaceID;
+    private String contractId;
+    private String tenantId;
+    private String spaceId;
+
+    public CustomerSpaceScope(String contractId, String tenantId, String spaceId) {
+        this.contractId = contractId;
+        this.tenantId = tenantId;
+        this.spaceId = spaceId;
     }
-    
+
     public CustomerSpaceScope(CustomerSpace customerSpace) {
-        this.contractID = customerSpace.getContractId();
-        this.tenantID = customerSpace.getTenantId();
-        this.spaceID = customerSpace.getSpaceId();
+        this.contractId = customerSpace.getContractId();
+        this.tenantId = customerSpace.getTenantId();
+        this.spaceId = customerSpace.getSpaceId();
     }
-    
-    public CustomerSpaceScope(String contractID, String tenantID) {
-        this.contractID = contractID;
-        this.tenantID = tenantID;
-        this.spaceID = null;
+
+    public CustomerSpaceScope(String contractId, String tenantId) {
+        this.contractId = contractId;
+        this.tenantId = tenantId;
+        this.spaceId = null;
     }
-    
+
     public CustomerSpace getCustomerSpace() {
-        return new CustomerSpace(contractID, tenantID, spaceID);
+        return new CustomerSpace(contractId, tenantId, spaceId);
     }
-    
+
     @Override
     public String toString() {
         return getCustomerSpace().toString();
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((contractID == null) ? 0 : contractID.hashCode());
-        result = prime * result + ((spaceID == null) ? 0 : spaceID.hashCode());
-        result = prime * result + ((tenantID == null) ? 0 : tenantID.hashCode());
+        result = prime * result + ((contractId == null) ? 0 : contractId.hashCode());
+        result = prime * result + ((spaceId == null) ? 0 : spaceId.hashCode());
+        result = prime * result + ((tenantId == null) ? 0 : tenantId.hashCode());
         result = prime * result + getType().hashCode();
         return result;
     }
@@ -54,47 +54,51 @@ public class CustomerSpaceScope extends ConfigurationScope {
         if (getClass() != obj.getClass())
             return false;
         CustomerSpaceScope other = (CustomerSpaceScope) obj;
-        if (contractID == null) {
-            if (other.contractID != null)
+        if (contractId == null) {
+            if (other.contractId != null)
                 return false;
-        } else if (!contractID.equals(other.contractID))
+        } else if (!contractId.equals(other.contractId))
             return false;
-        if (spaceID == null) {
-            if (other.spaceID != null)
+        if (spaceId == null) {
+            if (other.spaceId != null)
                 return false;
-        } else if (!spaceID.equals(other.spaceID))
+        } else if (!spaceId.equals(other.spaceId))
             return false;
-        if (tenantID == null) {
-            if (other.tenantID != null)
+        if (tenantId == null) {
+            if (other.tenantId != null)
                 return false;
-        } else if (!tenantID.equals(other.tenantID))
+        } else if (!tenantId.equals(other.tenantId))
             return false;
         return true;
     }
 
-    public String getContractID() {
-        return contractID;
+    public String getContractId() {
+        return contractId;
     }
-    public void setContractID(String contractID) {
-        this.contractID = contractID;
+
+    public void setContractId(String contractId) {
+        this.contractId = contractId;
     }
-    public String getTenantID() {
-        return tenantID;
+
+    public String getTenantId() {
+        return tenantId;
     }
-    public void setTenantID(String tenantID) {
-        this.tenantID = tenantID;
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
-    public String getSpaceID() {
-        return spaceID;
+
+    public String getSpaceId() {
+        return spaceId;
     }
-    public void setSpaceID(String spaceID) {
-        this.spaceID = spaceID;
+
+    public void setSpaceId(String spaceId) {
+        this.spaceId = spaceId;
     }
 
     @Override
     public Type getType() {
         return Type.CUSTOMER_SPACE;
     }
-    
-    
+
 }

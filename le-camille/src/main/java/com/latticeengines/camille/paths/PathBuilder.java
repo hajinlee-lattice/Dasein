@@ -9,52 +9,52 @@ public final class PathBuilder {
         return new Path(Arrays.asList(PathConstants.PODS));
     }
 
-    public static Path buildPodPath(String podID) {
-        return new Path(PathConstants.PODS, podID);
+    public static Path buildPodPath(String podId) {
+        return new Path(PathConstants.PODS, podId);
     }
 
-    public static Path buildServicePath(String podID, String serviceName) {
-        return new Path(PathConstants.PODS, podID, PathConstants.SERVICES, serviceName);
+    public static Path buildServicePath(String podId, String serviceName) {
+        return new Path(PathConstants.PODS, podId, PathConstants.SERVICES, serviceName);
     }
 
-    public static Path buildContractsPath(String podID) {
-        return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS);
+    public static Path buildContractsPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS);
     }
 
-    public static Path buildContractPath(String podID, String contractID) {
-        return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID);
+    public static Path buildContractPath(String podId, String contractId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId);
     }
 
-    public static Path buildTenantsPath(String podID, String contractID) {
-        return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS);
+    public static Path buildTenantsPath(String podId, String contractId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS);
     }
 
-    public static Path buildTenantPath(String podID, String contractID, String tenantID) {
-        return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS, tenantID);
+    public static Path buildTenantPath(String podId, String contractId, String tenantId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS, tenantId);
     }
 
-    public static Path buildCustomerSpacesPath(String podID, String contractID, String tenantID) {
-        return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS,
-                tenantID, PathConstants.SPACES);
+    public static Path buildCustomerSpacesPath(String podId, String contractId, String tenantId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS,
+                tenantId, PathConstants.SPACES);
     }
 
-    public static Path buildCustomerSpacePath(String podID, String contractID, String tenantID, String spaceID) {
-        return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS,
-                tenantID, PathConstants.SPACES, spaceID);
+    public static Path buildCustomerSpacePath(String podId, String contractId, String tenantId, String spaceId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS,
+                tenantId, PathConstants.SPACES, spaceId);
     }
 
-    public static Path buildCustomerSpaceServicesPath(String podID, String contractID, String tenantID, String spaceID) {
-        return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS,
-                tenantID, PathConstants.SPACES, spaceID, PathConstants.SERVICES);
+    public static Path buildCustomerSpaceServicesPath(String podId, String contractId, String tenantId, String spaceId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS,
+                tenantId, PathConstants.SPACES, spaceId, PathConstants.SERVICES);
     }
-    
-    public static Path buildCustomerSpaceServicePath(String podID, String contractID, String tenantID, String spaceID,
+
+    public static Path buildCustomerSpaceServicePath(String podId, String contractId, String tenantId, String spaceId,
             String serviceName) {
-        return new Path(PathConstants.PODS, podID, PathConstants.CONTRACTS, contractID, PathConstants.TENANTS,
-                tenantID, PathConstants.SPACES, spaceID, PathConstants.SERVICES, serviceName);
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS,
+                tenantId, PathConstants.SPACES, spaceId, PathConstants.SERVICES, serviceName);
     }
 
-    public static Path buildDataInterfacePath(String podID, String interfaceName, Long version) {
-        return new Path(PathConstants.PODS, podID, PathConstants.INTERFACES, PathConstants.DATA, interfaceName);
+    public static Path buildDataInterfacePath(String podId, String interfaceName, Long version) {
+        return new Path(PathConstants.PODS, podId, PathConstants.INTERFACES, PathConstants.DATA, interfaceName);
     }
 }

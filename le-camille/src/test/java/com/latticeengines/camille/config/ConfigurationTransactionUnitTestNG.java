@@ -56,7 +56,7 @@ public class ConfigurationTransactionUnitTestNG {
     public void testContractTransaction() throws Exception {
         ContractScope scope = new ContractScope("MyContract");
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractID());
+        ContractLifecycleManager.create(scope.getContractId());
         Path path = new Path("/foo");
 
         ConfigurationTransaction<ContractScope> transaction = new ConfigurationTransaction<ContractScope>(scope);
@@ -71,8 +71,8 @@ public class ConfigurationTransactionUnitTestNG {
     public void testTenantTransaction() throws Exception {
         TenantScope scope = new TenantScope("MyContract", "MyTenant");
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractID());
-        TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "MySpace");
+        ContractLifecycleManager.create(scope.getContractId());
+        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
         Path path = new Path("/foo");
 
         ConfigurationTransaction<TenantScope> transaction = new ConfigurationTransaction<TenantScope>(scope);
@@ -91,9 +91,9 @@ public class ConfigurationTransactionUnitTestNG {
     public void testSpaceTransaction() throws Exception {
         CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant", "MySpace");
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractID());
-        TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "DefaultSpace");
-        SpaceLifecycleManager.create(scope.getContractID(), scope.getTenantID(), scope.getSpaceID());
+        ContractLifecycleManager.create(scope.getContractId());
+        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "DefaultSpace");
+        SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), scope.getSpaceId());
         Path path = new Path("/foo");
 
         ConfigurationTransaction<CustomerSpaceScope> transaction = new ConfigurationTransaction<CustomerSpaceScope>(
@@ -112,9 +112,9 @@ public class ConfigurationTransactionUnitTestNG {
     public void testSpaceCreateDeleteDocumentUsingDefaultSpace() throws Exception {
         CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant");
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractID());
-        TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "MySpace");
-        SpaceLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "MySpace");
+        ContractLifecycleManager.create(scope.getContractId());
+        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
+        SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
         Path path = new Path("/foo");
 
         ConfigurationTransaction<CustomerSpaceScope> transaction = new ConfigurationTransaction<CustomerSpaceScope>(

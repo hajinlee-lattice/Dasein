@@ -56,13 +56,13 @@ public class ConfigurationControllerUnitTestNG {
     public void testContractCreateDeleteDocument() throws Exception {
         ContractScope scope = new ContractScope("MyContract");
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractID());
+        ContractLifecycleManager.create(scope.getContractId());
         Path path = new Path("/foo");
         ConfigurationController<ContractScope> controller = new ConfigurationController<ContractScope>(scope);
         controller.create(path, new Document("foo"));
         Assert.assertTrue(controller.exists(path));
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), scope.getContractID()).append(path)));
+                PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), scope.getContractId()).append(path)));
         controller.delete(path);
         Assert.assertFalse(controller.exists(path));
     }
@@ -71,14 +71,14 @@ public class ConfigurationControllerUnitTestNG {
     public void testTenantCreateDeleteDocument() throws Exception {
         TenantScope scope = new TenantScope("MyContract", "MyTenant");
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractID());
-        TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "MySpace");
+        ContractLifecycleManager.create(scope.getContractId());
+        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
         Path path = new Path("/foo");
         ConfigurationController<TenantScope> controller = new ConfigurationController<TenantScope>(scope);
         controller.create(path, new Document("foo"));
         Assert.assertTrue(controller.exists(path));
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), scope.getContractID(), scope.getTenantID())
+                PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), scope.getContractId(), scope.getTenantId())
                         .append(path)));
         controller.delete(path);
         Assert.assertFalse(controller.exists(path));
@@ -92,16 +92,16 @@ public class ConfigurationControllerUnitTestNG {
     public void testSpaceCreateDeleteDocument() throws Exception {
         CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant", "MySpace");
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractID());
-        TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "DefaultSpace");
-        SpaceLifecycleManager.create(scope.getContractID(), scope.getTenantID(), scope.getSpaceID());
+        ContractLifecycleManager.create(scope.getContractId());
+        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "DefaultSpace");
+        SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), scope.getSpaceId());
         Path path = new Path("/foo");
         ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);
         controller.create(path, new Document("foo"));
         Assert.assertTrue(controller.exists(path));
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), scope.getContractID(),
-                        scope.getTenantID(), scope.getSpaceID()).append(path)));
+                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), scope.getContractId(),
+                        scope.getTenantId(), scope.getSpaceId()).append(path)));
         controller.delete(path);
         Assert.assertFalse(controller.exists(path));
     }
@@ -113,16 +113,16 @@ public class ConfigurationControllerUnitTestNG {
     public void testSpaceCreateDeleteDocumentUsingDefaultSpace() throws Exception {
         CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant");
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractID());
-        TenantLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "MySpace");
-        SpaceLifecycleManager.create(scope.getContractID(), scope.getTenantID(), "MySpace");
+        ContractLifecycleManager.create(scope.getContractId());
+        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
+        SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
         Path path = new Path("/foo");
         ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);
         controller.create(path, new Document("foo"));
         Assert.assertTrue(controller.exists(path));
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), scope.getContractID(),
-                        scope.getTenantID(), "MySpace").append(path)));
+                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), scope.getContractId(),
+                        scope.getTenantId(), "MySpace").append(path)));
         controller.delete(path);
         Assert.assertFalse(controller.exists(path));
     }
