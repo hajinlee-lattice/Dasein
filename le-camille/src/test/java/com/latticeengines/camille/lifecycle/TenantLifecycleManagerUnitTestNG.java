@@ -11,7 +11,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.CamilleTestEnvironment;
 import com.latticeengines.camille.paths.PathBuilder;
@@ -36,30 +35,6 @@ public class TenantLifecycleManagerUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testCreateNullDefaultSpaceAndSetDefaultSpace() throws Exception {
-        String tenantId = "testTenant";
-        Camille camille = CamilleEnvironment.getCamille();
-        TenantLifecycleManager.create(contractId, tenantId);
-        Assert.assertTrue(camille.exists(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId,
-                tenantId)));
-        TenantLifecycleManager.create(contractId, tenantId);
-        String defaultSpaceId1 = TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId);
-        Assert.assertNotNull(defaultSpaceId1);
-        Assert.assertTrue(camille.exists(PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId,
-                tenantId, defaultSpaceId1)));
-        String defaultSpaceId2 = "testDefaultSpaceId";
-        try {
-            TenantLifecycleManager.setDefaultSpaceId(contractId, tenantId, defaultSpaceId2);
-            Assert.fail(String.format("Space with spaceId=%s does not exist.  setDefaultSpaceId should have failed.",
-                    defaultSpaceId2));
-        } catch (RuntimeException e) {
-        }
-        SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId2);
-        TenantLifecycleManager.setDefaultSpaceId(contractId, tenantId, defaultSpaceId2);
-        Assert.assertEquals(TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId), defaultSpaceId2);
-    }
-
-    @Test(groups = "unit")
     public void testCreateNotNullDefaultSpaceAndSetDefaultSpace() throws Exception {
         String tenantId = "testTenant";
         String defaultSpaceId1 = "testDefaultSpaceId1";
@@ -68,9 +43,6 @@ public class TenantLifecycleManagerUnitTestNG {
 
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)));
-
-        // should fail gracefully without modifying .default-space
-        TenantLifecycleManager.create(contractId, tenantId);
 
         Assert.assertEquals(defaultSpaceId1, TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId));
         String defaultSpaceId2 = "testDefaultSpaceId2";
@@ -88,8 +60,9 @@ public class TenantLifecycleManagerUnitTestNG {
     @Test(groups = "unit")
     public void testDelete() throws Exception {
         String tenantId = "testTenant";
+        String spaceId = "spaceId";
         TenantLifecycleManager.delete(contractId, tenantId);
-        TenantLifecycleManager.create(contractId, tenantId);
+        TenantLifecycleManager.create(contractId, tenantId, spaceId);
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)));
         TenantLifecycleManager.delete(contractId, tenantId);
@@ -100,8 +73,9 @@ public class TenantLifecycleManagerUnitTestNG {
     @Test(groups = "unit")
     public void testExists() throws Exception {
         String tenantId = "testTenant";
+        String spaceId = "spaceId";
         Assert.assertFalse(TenantLifecycleManager.exists(contractId, tenantId));
-        TenantLifecycleManager.create(contractId, tenantId);
+        TenantLifecycleManager.create(contractId, tenantId, spaceId);
         Assert.assertTrue(TenantLifecycleManager.exists(contractId, tenantId));
         TenantLifecycleManager.delete(contractId, tenantId);
         Assert.assertFalse(TenantLifecycleManager.exists(contractId, tenantId));
@@ -113,7 +87,7 @@ public class TenantLifecycleManagerUnitTestNG {
         for (int i = 0; i < 10; ++i) {
             String tenantId = Integer.toString(i);
             in.add(tenantId);
-            TenantLifecycleManager.create(contractId, tenantId);
+            TenantLifecycleManager.create(contractId, tenantId, "defaultSpaceId");
         }
         Assert.assertTrue(in.containsAll(TenantLifecycleManager.getAll(contractId)));
     }

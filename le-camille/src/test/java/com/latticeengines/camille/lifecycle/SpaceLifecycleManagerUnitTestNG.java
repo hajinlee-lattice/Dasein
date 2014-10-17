@@ -28,24 +28,12 @@ public class SpaceLifecycleManagerUnitTestNG {
         CamilleTestEnvironment.start();
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
         ContractLifecycleManager.create(contractId);
-        TenantLifecycleManager.create(contractId, tenantId);
+        TenantLifecycleManager.create(contractId, tenantId, "spaceId");
     }
 
     @AfterMethod(groups = "unit")
     public void tearDown() throws Exception {
         CamilleTestEnvironment.stop();
-    }
-
-    @Test(groups = "unit")
-    public void testCreateDefault() throws Exception {
-        SpaceLifecycleManager.createDefault(contractId, tenantId);
-        Assert.assertEquals(
-                1,
-                CamilleEnvironment
-                        .getCamille()
-                        .getChildren(
-                                PathBuilder.buildCustomerSpacesPath(CamilleEnvironment.getPodId(), contractId, tenantId))
-                        .size());
     }
 
     @Test(groups = "unit")

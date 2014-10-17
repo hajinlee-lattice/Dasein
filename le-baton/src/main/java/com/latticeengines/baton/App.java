@@ -20,6 +20,7 @@ public class App {
         try {
             namespace = parser.parseArgs(args);
         } catch (ArgumentParserException e) {
+            log.error("Error parsing input arguments", e);
             System.exit(1);
         }
 

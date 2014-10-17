@@ -23,11 +23,28 @@ public class TenantLifecycleManager {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    public static void create(String contractId, String tenantId) throws Exception {
-        create(contractId, tenantId, null);
-    }
+    // public static void create(String contractId, String tenantId) throws
+    // Exception {
+    // create(contractId, tenantId, null);
+    // }
 
     public static void create(String contractId, String tenantId, String defaultSpaceId) throws Exception {
+        if (contractId == null) {
+            IllegalArgumentException e = new IllegalArgumentException("contractId cannot be null");
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+        if (tenantId == null) {
+            IllegalArgumentException e = new IllegalArgumentException("tenantId cannot be null");
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+        if (defaultSpaceId == null) {
+            IllegalArgumentException e = new IllegalArgumentException("defaultSpaceId cannot be null");
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+
         Camille camille = CamilleEnvironment.getCamille();
 
         try {
@@ -42,11 +59,7 @@ public class TenantLifecycleManager {
             camille.create(tenantPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             log.debug("created Tenant @ {}", tenantPath);
 
-            if (defaultSpaceId == null) {
-                defaultSpaceId = SpaceLifecycleManager.createDefault(contractId, tenantId);
-            } else {
-                SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId);
-            }
+            SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId);
 
             // create default space file
             Path defaultSpacePath = tenantPath.append(PathConstants.DEFAULT_SPACE_FILE);
