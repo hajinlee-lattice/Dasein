@@ -23,11 +23,6 @@ public class TenantLifecycleManager {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    // public static void create(String contractId, String tenantId) throws
-    // Exception {
-    // create(contractId, tenantId, null);
-    // }
-
     public static void create(String contractId, String tenantId, String defaultSpaceId) throws Exception {
         if (contractId == null) {
             IllegalArgumentException e = new IllegalArgumentException("contractId cannot be null");
