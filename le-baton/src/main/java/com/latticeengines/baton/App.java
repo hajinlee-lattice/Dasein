@@ -5,14 +5,29 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
+import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.LoggerContext;
 
 public class App {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    public static void main(String[] args) {
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
+                if (loggerFactory instanceof LoggerContext) {
+                    ((LoggerContext) loggerFactory).stop();
+                }
+            }
+        });
+    }
+
+    public static void main(String[] args) throws InterruptedException {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("prog");
         parser.addArgument("-name");
 
