@@ -174,4 +174,24 @@ public class AvroUtils {
     public static String getAvroFriendlyString(String value) {
         return value.replaceAll("[^A-Za-z0-9()\\[\\]]", "_");
     }
+    
+    public static Class<?> getJavaType(Type avroType) {
+        switch (avroType) {
+        case DOUBLE:
+            return Double.class;
+        case FLOAT:
+            return Float.class;
+        case INT:
+            return Integer.class;
+        case LONG:
+            return Long.class;
+        case STRING:
+            return String.class;
+        case BOOLEAN:
+            return Boolean.class;
+        default:
+            throw new RuntimeException("Unknown java type for avro type " + avroType);
+        }
+        
+    }
 }
