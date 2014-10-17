@@ -25,9 +25,11 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         Table lead = createLead();
         Table opportunity = createOpportunity();
         Table contact = createContact();
+        Table contactRole = createOpportunityContactRole();
         tables.add(lead);
         tables.add(opportunity);
         tables.add(contact);
+        tables.add(contactRole);
         Configuration config = new YarnConfiguration();
         ImportContext context = new ImportContext();
         context.setProperty(ImportProperty.HADOOPCONFIG, config);
@@ -147,6 +149,35 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         table.addAttribute(email);
         table.addAttribute(lastModifiedDate);
 
+        return table;
+    }
+
+    private Table createOpportunityContactRole() {
+        Table table = new Table();
+        table.setName("OpportunityContactRole");
+
+        Attribute id = new Attribute();
+        id.setName("Id");
+        Attribute primary = new Attribute();
+        primary.setName("IsPrimary");
+        Attribute role = new Attribute();
+        role.setName("Role");
+        Attribute contactId = new Attribute();
+        contactId.setName("ContactId");
+        Attribute opportunityId = new Attribute();
+        opportunityId.setName("OpportunityId");
+        Attribute lastModifiedDate = new Attribute();
+        lastModifiedDate.setName("LastModifiedDate");
+        Attribute createdDate = new Attribute();
+        createdDate.setName("CreatedDate");
+
+        table.addAttribute(id);
+        table.addAttribute(primary);
+        table.addAttribute(role);
+        table.addAttribute(contactId);
+        table.addAttribute(opportunityId);
+        table.addAttribute(lastModifiedDate);
+        table.addAttribute(createdDate);
 
         return table;
     }
