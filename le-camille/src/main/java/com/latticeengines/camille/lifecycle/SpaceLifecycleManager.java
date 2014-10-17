@@ -28,11 +28,15 @@ public class SpaceLifecycleManager {
      * @return defaultSpaceId
      */
     public static String createDefault(String contractId, String tenantId) throws Exception {
+        LifecycleUtils.validateIds(contractId, tenantId);
+
         create(contractId, tenantId, defaultSpaceId);
         return defaultSpaceId;
     }
 
     public static void create(String contractId, String tenantId, String spaceId) throws Exception {
+        LifecycleUtils.validateIds(contractId, tenantId, spaceId);
+
         if (spaceId == null) {
             IllegalArgumentException e = new IllegalArgumentException("spaceId cannot be null");
             log.error(e.getMessage(), e);
@@ -56,8 +60,9 @@ public class SpaceLifecycleManager {
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Space already existed @ {}, ignoring create", spacePath);
         }
-        
-        Path servicesPath = PathBuilder.buildCustomerSpaceServicesPath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId);
+
+        Path servicesPath = PathBuilder.buildCustomerSpaceServicesPath(CamilleEnvironment.getPodId(), contractId,
+                tenantId, spaceId);
         try {
             camille.create(servicesPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
             log.debug("created Services directory @ {}", servicesPath);
@@ -67,6 +72,8 @@ public class SpaceLifecycleManager {
     }
 
     public static void delete(String contractId, String tenantId, String spaceId) throws Exception {
+        LifecycleUtils.validateIds(contractId, tenantId, spaceId);
+
         Path spacePath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
                 spaceId);
         try {
@@ -78,6 +85,8 @@ public class SpaceLifecycleManager {
     }
 
     public static boolean exists(String contractId, String tenantId, String spaceId) throws Exception {
+        LifecycleUtils.validateIds(contractId, tenantId, spaceId);
+
         return CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId));
     }
@@ -86,6 +95,8 @@ public class SpaceLifecycleManager {
      * @return A list of spaceIds
      */
     public static List<String> getAll(String contractId, String tenantId) throws IllegalArgumentException, Exception {
+        LifecycleUtils.validateIds(contractId, tenantId);
+
         List<Pair<Document, Path>> childPairs = CamilleEnvironment.getCamille().getChildren(
                 PathBuilder.buildCustomerSpacesPath(CamilleEnvironment.getPodId(), contractId, tenantId));
         Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {

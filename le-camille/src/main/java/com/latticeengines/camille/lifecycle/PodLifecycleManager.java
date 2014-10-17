@@ -23,6 +23,8 @@ public class PodLifecycleManager {
     }.getClass().getEnclosingClass());
 
     public static void create(String podId) throws Exception {
+        LifecycleUtils.validateIds(podId);
+
         Camille camille = CamilleEnvironment.getCamille();
 
         try {
@@ -42,6 +44,8 @@ public class PodLifecycleManager {
     }
 
     public static void delete(String podId) throws Exception {
+        LifecycleUtils.validateIds(podId);
+
         Path podPath = PathBuilder.buildPodPath(podId);
         try {
             CamilleEnvironment.getCamille().delete(podPath);
@@ -52,6 +56,8 @@ public class PodLifecycleManager {
     }
 
     public static boolean exists(String podId) throws Exception {
+        LifecycleUtils.validateIds(podId);
+
         return CamilleEnvironment.getCamille().exists(PathBuilder.buildPodPath(podId));
     }
 

@@ -23,6 +23,8 @@ public class ContractLifecycleManager {
     }.getClass().getEnclosingClass());
 
     public static void create(String contractId) throws Exception {
+        LifecycleUtils.validateIds(contractId);
+
         Camille camille = CamilleEnvironment.getCamille();
 
         try {
@@ -42,6 +44,8 @@ public class ContractLifecycleManager {
     }
 
     public static void delete(String contractId) throws Exception {
+        LifecycleUtils.validateIds(contractId);
+
         Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
         try {
             CamilleEnvironment.getCamille().delete(contractPath);
@@ -52,6 +56,8 @@ public class ContractLifecycleManager {
     }
 
     public static boolean exists(String contractId) throws Exception {
+        LifecycleUtils.validateIds(contractId);
+
         return CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId));
     }

@@ -24,6 +24,8 @@ public class TenantLifecycleManager {
     }.getClass().getEnclosingClass());
 
     public static void create(String contractId, String tenantId, String defaultSpaceId) throws Exception {
+        LifecycleUtils.validateIds(contractId, tenantId, defaultSpaceId);
+
         if (contractId == null) {
             IllegalArgumentException e = new IllegalArgumentException("contractId cannot be null");
             log.error(e.getMessage(), e);
@@ -82,6 +84,8 @@ public class TenantLifecycleManager {
     }
 
     public static void setDefaultSpaceId(String contractId, String tenantId, String defaultSpaceId) throws Exception {
+        LifecycleUtils.validateIds(contractId, tenantId, defaultSpaceId);
+
         if (defaultSpaceId == null) {
             IllegalArgumentException e = new IllegalArgumentException("defaultSpaceId cannot be null");
             log.error(e.getMessage(), e);
@@ -99,6 +103,8 @@ public class TenantLifecycleManager {
     }
 
     public static String getDefaultSpaceId(String contractId, String tenantId) throws Exception {
+        LifecycleUtils.validateIds(contractId, tenantId);
+
         return CamilleEnvironment
                 .getCamille()
                 .get(PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
@@ -106,6 +112,8 @@ public class TenantLifecycleManager {
     }
 
     public static void delete(String contractId, String tenantId) throws Exception {
+        LifecycleUtils.validateIds(contractId, tenantId);
+
         Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
         try {
             CamilleEnvironment.getCamille().delete(tenantPath);
@@ -116,6 +124,8 @@ public class TenantLifecycleManager {
     }
 
     public static boolean exists(String contractId, String tenantId) throws Exception {
+        LifecycleUtils.validateIds(contractId, tenantId);
+
         return CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId));
     }
@@ -124,6 +134,8 @@ public class TenantLifecycleManager {
      * @return A list of tenantIds
      */
     public static List<String> getAll(String contractId) throws IllegalArgumentException, Exception {
+        LifecycleUtils.validateIds(contractId);
+
         List<Pair<Document, Path>> childPairs = CamilleEnvironment.getCamille().getChildren(
                 PathBuilder.buildTenantsPath(CamilleEnvironment.getPodId(), contractId));
         Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {
