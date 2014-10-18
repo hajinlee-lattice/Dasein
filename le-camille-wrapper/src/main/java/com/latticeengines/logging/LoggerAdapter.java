@@ -179,6 +179,22 @@ public final class LoggerAdapter {
             }
         }
 
+        private void fireDebug(final String message, final Throwable t) {
+            final Iterator<Appender> iter = appendersList.iterator();
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String m = messageWithStackTrace(message, t);
+                    while (iter.hasNext()) {
+                        try {
+                            iter.next().debug(name, m);
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            });
+        }
+
         private void fireDebug(final String format, final Object... args) {
             final Iterator<Appender> iter = appendersList.iterator();
             executor.submit(new Runnable() {
@@ -188,6 +204,22 @@ public final class LoggerAdapter {
                     while (iter.hasNext()) {
                         try {
                             iter.next().debug(name, message);
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            });
+        }
+
+        private void fireError(final String message, final Throwable t) {
+            final Iterator<Appender> iter = appendersList.iterator();
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String m = messageWithStackTrace(message, t);
+                    while (iter.hasNext()) {
+                        try {
+                            iter.next().error(name, m);
                         } catch (Exception e) {
                         }
                     }
@@ -211,6 +243,22 @@ public final class LoggerAdapter {
             });
         }
 
+        private void fireInfo(final String message, final Throwable t) {
+            final Iterator<Appender> iter = appendersList.iterator();
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String m = messageWithStackTrace(message, t);
+                    while (iter.hasNext()) {
+                        try {
+                            iter.next().info(name, m);
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            });
+        }
+
         private void fireInfo(final String format, final Object... args) {
             final Iterator<Appender> iter = appendersList.iterator();
             executor.submit(new Runnable() {
@@ -227,6 +275,22 @@ public final class LoggerAdapter {
             });
         }
 
+        private void fireTrace(final String message, final Throwable t) {
+            final Iterator<Appender> iter = appendersList.iterator();
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String m = messageWithStackTrace(message, t);
+                    while (iter.hasNext()) {
+                        try {
+                            iter.next().trace(name, m);
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            });
+        }
+
         private void fireTrace(final String format, final Object... args) {
             final Iterator<Appender> iter = appendersList.iterator();
             executor.submit(new Runnable() {
@@ -236,6 +300,22 @@ public final class LoggerAdapter {
                     while (iter.hasNext()) {
                         try {
                             iter.next().trace(name, message);
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            });
+        }
+
+        private void fireWarn(final String message, final Throwable t) {
+            final Iterator<Appender> iter = appendersList.iterator();
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String m = messageWithStackTrace(message, t);
+                    while (iter.hasNext()) {
+                        try {
+                            iter.next().warn(name, m);
                         } catch (Exception e) {
                         }
                     }
@@ -326,7 +406,7 @@ public final class LoggerAdapter {
 
         @Override
         public void debug(String arg0, Throwable arg1) {
-            fireDebug(messageWithStackTrace(arg0, arg1));
+            fireDebug(arg0, arg1);
         }
 
         @Override
@@ -351,7 +431,7 @@ public final class LoggerAdapter {
 
         @Override
         public void debug(Marker arg0, String arg1, Throwable arg2) {
-            fireDebug(messageWithStackTrace(arg1, arg2));
+            fireDebug(arg1, arg2);
         }
 
         @Override
@@ -376,7 +456,7 @@ public final class LoggerAdapter {
 
         @Override
         public void error(String arg0, Throwable arg1) {
-            fireError(messageWithStackTrace(arg0, arg1));
+            fireError(arg0, arg1);
         }
 
         @Override
@@ -401,7 +481,7 @@ public final class LoggerAdapter {
 
         @Override
         public void error(Marker arg0, String arg1, Throwable arg2) {
-            fireError(messageWithStackTrace(arg1, arg2));
+            fireError(arg1, arg2);
         }
 
         @Override
@@ -426,7 +506,7 @@ public final class LoggerAdapter {
 
         @Override
         public void info(String arg0, Throwable arg1) {
-            fireInfo(messageWithStackTrace(arg0, arg1));
+            fireInfo(arg0, arg1);
         }
 
         @Override
@@ -451,7 +531,7 @@ public final class LoggerAdapter {
 
         @Override
         public void info(Marker arg0, String arg1, Throwable arg2) {
-            fireInfo(messageWithStackTrace(arg1, arg2));
+            fireInfo(arg1, arg2);
         }
 
         @Override
@@ -476,7 +556,7 @@ public final class LoggerAdapter {
 
         @Override
         public void trace(String arg0, Throwable arg1) {
-            fireTrace(messageWithStackTrace(arg0, arg1));
+            fireTrace(arg0, arg1);
         }
 
         @Override
@@ -501,7 +581,7 @@ public final class LoggerAdapter {
 
         @Override
         public void trace(Marker arg0, String arg1, Throwable arg2) {
-            fireTrace(messageWithStackTrace(arg1, arg2));
+            fireTrace(arg1, arg2);
         }
 
         @Override
@@ -526,7 +606,7 @@ public final class LoggerAdapter {
 
         @Override
         public void warn(String arg0, Throwable arg1) {
-            fireWarn(messageWithStackTrace(arg0, arg1));
+            fireWarn(arg0, arg1);
         }
 
         @Override
@@ -551,7 +631,7 @@ public final class LoggerAdapter {
 
         @Override
         public void warn(Marker arg0, String arg1, Throwable arg2) {
-            fireWarn(messageWithStackTrace(arg1, arg2));
+            fireWarn(arg1, arg2);
         }
 
         @Override
