@@ -26,6 +26,7 @@ import cascading.operation.aggregator.MaxValue;
 import cascading.operation.aggregator.MinValue;
 import cascading.operation.aggregator.Sum;
 import cascading.operation.expression.ExpressionFilter;
+import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.filter.Not;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
@@ -285,13 +286,28 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         filterFields.toArray(filterFieldsArray);
         Not filter = new Not(new ExpressionFilter(expression, filterFieldsArray, getTypes(filterFields, pm.getRhs())));
         Pipe each = new Each(pm.getLhs(), convertToFields(filterFields), filter);
-        pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, (List<FieldMetadata>) null));
+        List<FieldMetadata> fm = new ArrayList<>(pm.getRhs());
+        pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, fm));
         return each.getName();
     }
     
     @Override
-    protected String addFunction(String prior) {
-        return null;
+    protected String addFunction(String prior, String expression, FieldList fieldsToApply, String fieldToCreate, Class<?> fieldDataTypeToCreate) {
+        Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        
+        if (pm == null) {
+            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+        }
+        ExpressionFunction function = new ExpressionFunction(new Fields(fieldToCreate), //
+                expression, //
+                fieldsToApply.getFields(), //
+                getTypes(fieldsToApply.getFieldsAsList(), pm.getRhs()));
+
+        Pipe each = new Each(pm.getLhs(), convertToFields(fieldsToApply.getFieldsAsList()), function, Fields.ALL);
+        List<FieldMetadata> fm = new ArrayList<>(pm.getRhs());
+        fm.add(new FieldMetadata(AvroUtils.getAvroType(fieldDataTypeToCreate), fieldDataTypeToCreate, fieldToCreate));
+        pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, fm));
+        return each.getName();
     }
     
     @SuppressWarnings("deprecation")

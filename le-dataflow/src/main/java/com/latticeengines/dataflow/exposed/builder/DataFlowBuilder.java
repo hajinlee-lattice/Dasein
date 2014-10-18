@@ -27,7 +27,8 @@ public abstract class DataFlowBuilder {
     
     protected abstract String addFilter(String prior, String expression, FieldList filterFields);
     
-    protected abstract String addFunction(String prior);
+    protected abstract String addFunction(String prior, String expression, FieldList fieldsToApply, String fieldToCreate, Class<?> fieldDataTypeToCreate);
+
     
     public DataFlowBuilder() {
         this(false);
@@ -39,6 +40,10 @@ public abstract class DataFlowBuilder {
     
     public boolean isLocal() {
         return local;
+    }
+    
+    public void setLocal(boolean local) {
+        this.local = local;
     }
     
     public static class JoinCriteria {
@@ -160,7 +165,5 @@ public abstract class DataFlowBuilder {
         }
     }
 
-
-    
 
 }

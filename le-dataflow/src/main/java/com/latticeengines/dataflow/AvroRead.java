@@ -22,6 +22,7 @@ import cascading.flow.hadoop.HadoopFlowConnector;
 import cascading.operation.aggregator.MaxValue;
 import cascading.operation.aggregator.Sum;
 import cascading.operation.expression.ExpressionFilter;
+import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.filter.Not;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
@@ -40,8 +41,8 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 public class AvroRead {
 
     public static void main(String[] args) throws Exception {
-        String lead = "file:///tmp/Lead/Lead_07-10-2014.avro";
-        String opportunity = "file:///tmp/Opportunity/Opportunity_07-10-2014.avro";
+        String lead = "file://" + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
+        String opportunity = "file://" + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
         String wcPath = "/tmp/EventTable";
 
         // Get the schema from a file
@@ -90,7 +91,14 @@ public class AvroRead {
                 new Fields(declaredFields), //
                 new InnerJoin());
         
-        join = new GroupBy(join, new Fields("Company"));
+        ExpressionFunction function = new ExpressionFunction(new Fields("Domain"), //
+                "Email.substring(Email.indexOf('@') + 1)", //
+                new String[] { "Email" },
+                new Class[] { String.class });
+        
+        join = new Each(join, new Fields("Email"), function, Fields.ALL);
+        
+        join = new GroupBy(join, new Fields("Domain"));
         join = new Every(join, new Fields("AnnualRevenue"), new MaxValue(new Fields("MaxRevenue")), Fields.ALL);
         join = new Every(join, new Fields("NumberOfEmployees"), new Sum(new Fields("TotalEmployees")), Fields.ALL);
         

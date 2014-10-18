@@ -29,8 +29,8 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
     @Test(groups = "functional")
     public void executeNamedTransformation() {
         Map<String, String> sources = new HashMap<>();
-        sources.put("lead", lead);
-        sources.put("oppty", opportunity);
+        sources.put("Lead", lead);
+        sources.put("Opportunity", opportunity);
         
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty("SOURCES", sources);
