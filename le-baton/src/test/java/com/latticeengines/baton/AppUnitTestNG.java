@@ -7,12 +7,12 @@ import org.testng.annotations.Test;
 
 public class AppUnitTestNG {
     @BeforeMethod(groups = "unit")
-    public void setUp() throws Exception {
+    public void setUp() {
 
     }
 
     @AfterMethod(groups = "unit")
-    public void tearDown() throws Exception {
+    public void tearDown() {
 
     }
 
