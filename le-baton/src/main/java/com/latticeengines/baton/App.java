@@ -27,7 +27,7 @@ public class App {
         });
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("prog");
         parser.addArgument("-name");
 
