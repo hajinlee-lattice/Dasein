@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
@@ -23,8 +24,15 @@ public final class LoggerAdapter {
     // to ensure uniqueness
     private static final Collection<Appender> appendersSet = new HashSet<Appender>();
 
-    // single logging thread ensures log ordering
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    // single daemon logging thread ensures log ordering
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            return t;
+        }
+    });
 
     // at system shutdown, kill the logging thread and await its' termination
     static {
@@ -114,86 +122,6 @@ public final class LoggerAdapter {
         }
     }
 
-    private static void fireDebug(final String name, final String message) {
-        final Iterator<Appender> iter = appendersList.iterator();
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                while (iter.hasNext()) {
-                    Appender a = iter.next();
-                    try {
-                        a.debug(name, message);
-                    } catch (Exception e) {
-                    }
-                }
-            }
-        });
-    }
-
-    private static void fireError(final String name, final String message) {
-        final Iterator<Appender> iter = appendersList.iterator();
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                while (iter.hasNext()) {
-                    Appender a = iter.next();
-                    try {
-                        a.error(name, message);
-                    } catch (Exception e) {
-                    }
-                }
-            }
-        });
-    }
-
-    private static void fireInfo(final String name, final String message) {
-        final Iterator<Appender> iter = appendersList.iterator();
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                while (iter.hasNext()) {
-                    Appender a = iter.next();
-                    try {
-                        a.info(name, message);
-                    } catch (Exception e) {
-                    }
-                }
-            }
-        });
-    }
-
-    private static void fireTrace(final String name, final String message) {
-        final Iterator<Appender> iter = appendersList.iterator();
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                while (iter.hasNext()) {
-                    Appender a = iter.next();
-                    try {
-                        a.trace(name, message);
-                    } catch (Exception e) {
-                    }
-                }
-            }
-        });
-    }
-
-    private static void fireWarn(final String name, final String message) {
-        final Iterator<Appender> iter = appendersList.iterator();
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                while (iter.hasNext()) {
-                    Appender a = iter.next();
-                    try {
-                        a.warn(name, message);
-                    } catch (Exception e) {
-                    }
-                }
-            }
-        });
-    }
-
     public static boolean addAppender(Appender appender) {
         if (appender == null)
             return false;
@@ -227,9 +155,6 @@ public final class LoggerAdapter {
     private static class LoggerImpl implements Logger {
         private String name;
 
-        private boolean debugEnabled = true, errorEnabled = true, infoEnabled = true, traceEnabled = true,
-                warnEnabled = true;
-
         private static String messageWithStackTrace(String message, Throwable t) {
             return message + "\n" + stackTraceToString(t);
         }
@@ -254,329 +179,384 @@ public final class LoggerAdapter {
             }
         }
 
-        private void doDebug(String format, Object... args) {
-            if (debugEnabled)
-                fireDebug(name, format(format, args));
+        private void fireDebug(final String format, final Object... args) {
+            final Iterator<Appender> iter = appendersList.iterator();
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String message = format(format, args);
+                    while (iter.hasNext()) {
+                        try {
+                            iter.next().debug(name, message);
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            });
         }
 
-        private void doError(String format, Object... args) {
-            if (errorEnabled)
-                fireError(name, format(format, args));
+        private void fireError(final String format, final Object... args) {
+            final Iterator<Appender> iter = appendersList.iterator();
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String message = format(format, args);
+                    while (iter.hasNext()) {
+                        try {
+                            iter.next().error(name, message);
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            });
         }
 
-        private void doInfo(String format, Object... args) {
-            if (infoEnabled)
-                fireInfo(name, format(format, args));
+        private void fireInfo(final String format, final Object... args) {
+            final Iterator<Appender> iter = appendersList.iterator();
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String message = format(format, args);
+                    while (iter.hasNext()) {
+                        try {
+                            iter.next().info(name, message);
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            });
         }
 
-        private void doTrace(String format, Object... args) {
-            if (traceEnabled)
-                fireTrace(name, format(format, args));
+        private void fireTrace(final String format, final Object... args) {
+            final Iterator<Appender> iter = appendersList.iterator();
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String message = format(format, args);
+                    while (iter.hasNext()) {
+                        try {
+                            iter.next().trace(name, message);
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            });
         }
 
-        private void doWarn(String format, Object... args) {
-            if (warnEnabled)
-                fireWarn(name, format(format, args));
+        private void fireWarn(final String format, final Object... args) {
+            final Iterator<Appender> iter = appendersList.iterator();
+            executor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    String message = format(format, args);
+                    while (iter.hasNext()) {
+                        try {
+                            iter.next().warn(name, message);
+                        } catch (Exception e) {
+                        }
+                    }
+                }
+            });
         }
 
         @Override
         public boolean isDebugEnabled() {
-            return debugEnabled;
+            return true;
         }
 
         @Override
         public boolean isDebugEnabled(Marker arg0) {
-            return debugEnabled;
+            return true;
         }
 
         @Override
         public boolean isErrorEnabled() {
-            return errorEnabled;
+            return true;
         }
 
         @Override
         public boolean isErrorEnabled(Marker arg0) {
-            return errorEnabled;
+            return true;
         }
 
         @Override
         public boolean isInfoEnabled() {
-            return infoEnabled;
+            return true;
         }
 
         @Override
         public boolean isInfoEnabled(Marker arg0) {
-            return infoEnabled;
+            return true;
         }
 
         @Override
         public boolean isTraceEnabled() {
-            return traceEnabled;
+            return true;
         }
 
         @Override
         public boolean isTraceEnabled(Marker arg0) {
-            return traceEnabled;
+            return true;
         }
 
         @Override
         public boolean isWarnEnabled() {
-            return warnEnabled;
+            return true;
         }
 
         @Override
         public boolean isWarnEnabled(Marker arg0) {
-            return warnEnabled;
+            return true;
         }
 
         @Override
         public void debug(String arg0) {
-            doDebug(arg0);
+            fireDebug(arg0);
         }
 
         @Override
         public void debug(String arg0, Object arg1) {
-            doDebug(arg0, arg1);
+            fireDebug(arg0, arg1);
         }
 
         @Override
         public void debug(String arg0, Object... arg1) {
-            doDebug(arg0, arg1);
+            fireDebug(arg0, arg1);
         }
 
         @Override
         public void debug(String arg0, Throwable arg1) {
-            doDebug(messageWithStackTrace(arg0, arg1));
+            fireDebug(messageWithStackTrace(arg0, arg1));
         }
 
         @Override
         public void debug(Marker arg0, String arg1) {
-            doDebug(arg1);
+            fireDebug(arg1);
         }
 
         @Override
         public void debug(String arg0, Object arg1, Object arg2) {
-            doDebug(arg0, arg1, arg2);
+            fireDebug(arg0, arg1, arg2);
         }
 
         @Override
         public void debug(Marker arg0, String arg1, Object arg2) {
-            doDebug(arg1, arg2);
+            fireDebug(arg1, arg2);
         }
 
         @Override
         public void debug(Marker arg0, String arg1, Object... arg2) {
-            doDebug(arg1, arg2);
+            fireDebug(arg1, arg2);
         }
 
         @Override
         public void debug(Marker arg0, String arg1, Throwable arg2) {
-            doDebug(messageWithStackTrace(arg1, arg2));
+            fireDebug(messageWithStackTrace(arg1, arg2));
         }
 
         @Override
         public void debug(Marker arg0, String arg1, Object arg2, Object arg3) {
-            doDebug(arg1, arg2, arg3);
+            fireDebug(arg1, arg2, arg3);
         }
 
         @Override
         public void error(String arg0) {
-            doError(arg0);
+            fireError(arg0);
         }
 
         @Override
         public void error(String arg0, Object arg1) {
-            doError(arg0, arg1);
+            fireError(arg0, arg1);
         }
 
         @Override
         public void error(String arg0, Object... arg1) {
-            doError(arg0, arg1);
+            fireError(arg0, arg1);
         }
 
         @Override
         public void error(String arg0, Throwable arg1) {
-            doError(messageWithStackTrace(arg0, arg1));
+            fireError(messageWithStackTrace(arg0, arg1));
         }
 
         @Override
         public void error(Marker arg0, String arg1) {
-            doError(arg1);
+            fireError(arg1);
         }
 
         @Override
         public void error(String arg0, Object arg1, Object arg2) {
-            doError(arg0, arg1, arg2);
+            fireError(arg0, arg1, arg2);
         }
 
         @Override
         public void error(Marker arg0, String arg1, Object arg2) {
-            doError(arg1, arg2);
+            fireError(arg1, arg2);
         }
 
         @Override
         public void error(Marker arg0, String arg1, Object... arg2) {
-            doError(arg1, arg2);
+            fireError(arg1, arg2);
         }
 
         @Override
         public void error(Marker arg0, String arg1, Throwable arg2) {
-            doError(messageWithStackTrace(arg1, arg2));
+            fireError(messageWithStackTrace(arg1, arg2));
         }
 
         @Override
         public void error(Marker arg0, String arg1, Object arg2, Object arg3) {
-            doError(arg1, arg2, arg3);
+            fireError(arg1, arg2, arg3);
         }
 
         @Override
         public void info(String arg0) {
-            doInfo(arg0);
+            fireInfo(arg0);
         }
 
         @Override
         public void info(String arg0, Object arg1) {
-            doInfo(arg0, arg1);
+            fireInfo(arg0, arg1);
         }
 
         @Override
         public void info(String arg0, Object... arg1) {
-            doInfo(arg0, arg1);
+            fireInfo(arg0, arg1);
         }
 
         @Override
         public void info(String arg0, Throwable arg1) {
-            doInfo(messageWithStackTrace(arg0, arg1));
+            fireInfo(messageWithStackTrace(arg0, arg1));
         }
 
         @Override
         public void info(Marker arg0, String arg1) {
-            doInfo(arg1);
+            fireInfo(arg1);
         }
 
         @Override
         public void info(String arg0, Object arg1, Object arg2) {
-            doInfo(arg0, arg1, arg2);
+            fireInfo(arg0, arg1, arg2);
         }
 
         @Override
         public void info(Marker arg0, String arg1, Object arg2) {
-            doInfo(arg1, arg2);
+            fireInfo(arg1, arg2);
         }
 
         @Override
         public void info(Marker arg0, String arg1, Object... arg2) {
-            doInfo(arg1, arg2);
+            fireInfo(arg1, arg2);
         }
 
         @Override
         public void info(Marker arg0, String arg1, Throwable arg2) {
-            doInfo(messageWithStackTrace(arg1, arg2));
+            fireInfo(messageWithStackTrace(arg1, arg2));
         }
 
         @Override
         public void info(Marker arg0, String arg1, Object arg2, Object arg3) {
-            doInfo(arg1, arg2, arg3);
+            fireInfo(arg1, arg2, arg3);
         }
 
         @Override
         public void trace(String arg0) {
-            doTrace(arg0);
+            fireTrace(arg0);
         }
 
         @Override
         public void trace(String arg0, Object arg1) {
-            doTrace(arg0, arg1);
+            fireTrace(arg0, arg1);
         }
 
         @Override
         public void trace(String arg0, Object... arg1) {
-            doTrace(arg0, arg1);
+            fireTrace(arg0, arg1);
         }
 
         @Override
         public void trace(String arg0, Throwable arg1) {
-            doTrace(messageWithStackTrace(arg0, arg1));
+            fireTrace(messageWithStackTrace(arg0, arg1));
         }
 
         @Override
         public void trace(Marker arg0, String arg1) {
-            doTrace(arg1);
+            fireTrace(arg1);
         }
 
         @Override
         public void trace(String arg0, Object arg1, Object arg2) {
-            doTrace(arg0, arg1, arg2);
+            fireTrace(arg0, arg1, arg2);
         }
 
         @Override
         public void trace(Marker arg0, String arg1, Object arg2) {
-            doTrace(arg1, arg2);
+            fireTrace(arg1, arg2);
         }
 
         @Override
         public void trace(Marker arg0, String arg1, Object... arg2) {
-            doTrace(arg1, arg2);
+            fireTrace(arg1, arg2);
         }
 
         @Override
         public void trace(Marker arg0, String arg1, Throwable arg2) {
-            doTrace(messageWithStackTrace(arg1, arg2));
+            fireTrace(messageWithStackTrace(arg1, arg2));
         }
 
         @Override
         public void trace(Marker arg0, String arg1, Object arg2, Object arg3) {
-            doTrace(arg1, arg2, arg3);
+            fireTrace(arg1, arg2, arg3);
         }
 
         @Override
         public void warn(String arg0) {
-            doWarn(arg0);
+            fireWarn(arg0);
         }
 
         @Override
         public void warn(String arg0, Object arg1) {
-            doWarn(arg0, arg1);
+            fireWarn(arg0, arg1);
         }
 
         @Override
         public void warn(String arg0, Object... arg1) {
-            doWarn(arg0, arg1);
+            fireWarn(arg0, arg1);
         }
 
         @Override
         public void warn(String arg0, Throwable arg1) {
-            doWarn(messageWithStackTrace(arg0, arg1));
+            fireWarn(messageWithStackTrace(arg0, arg1));
         }
 
         @Override
         public void warn(Marker arg0, String arg1) {
-            doWarn(arg1);
+            fireWarn(arg1);
         }
 
         @Override
         public void warn(String arg0, Object arg1, Object arg2) {
-            doWarn(arg0, arg1, arg2);
+            fireWarn(arg0, arg1, arg2);
         }
 
         @Override
         public void warn(Marker arg0, String arg1, Object arg2) {
-            doWarn(arg1, arg2);
+            fireWarn(arg1, arg2);
         }
 
         @Override
         public void warn(Marker arg0, String arg1, Object... arg2) {
-            doWarn(arg1, arg2);
+            fireWarn(arg1, arg2);
         }
 
         @Override
         public void warn(Marker arg0, String arg1, Throwable arg2) {
-            doWarn(messageWithStackTrace(arg1, arg2));
+            fireWarn(messageWithStackTrace(arg1, arg2));
         }
 
         @Override
         public void warn(Marker arg0, String arg1, Object arg2, Object arg3) {
-            doWarn(arg1, arg2, arg3);
+            fireWarn(arg1, arg2, arg3);
         }
     }
 
