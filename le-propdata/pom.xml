@@ -4,22 +4,22 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.latticeengines</groupId>
 	<artifactId>le-propdata</artifactId>
-	<version>1.0.5-SNAPSHOT</version>
+	<version>1.0.6-SNAPSHOT</version>
 	<name>${component-name}</name>
 	<description>LE PropData</description>
 
 	<parent>
 		<groupId>com.latticeengines</groupId>
 		<artifactId>le-parent</artifactId>
-		<version>1.0.5-SNAPSHOT</version>
+		<version>1.0.6-SNAPSHOT</version>
 		<relativePath>../le-parent</relativePath>
 	</parent>
 
 	<properties>
 		<component-name>le-propdata</component-name>
-		<le.common.version>1.0.5-SNAPSHOT</le.common.version>
-		<le.domain.version>1.0.5-SNAPSHOT</le.domain.version>
-		<le.db.version>1.0.5-SNAPSHOT</le.db.version>
+		<le.common.version>1.0.6-SNAPSHOT</le.common.version>
+		<le.domain.version>1.0.6-SNAPSHOT</le.domain.version>
+		<le.db.version>1.0.6-SNAPSHOT</le.db.version>
 	</properties>
 
 	<profiles>
