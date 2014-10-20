@@ -5,12 +5,12 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     X_train = trainingData.as_matrix()[:, schema["featureIndex"]]
     Y_train = trainingData.as_matrix()[:, schema["targetIndex"]]
 
-    clf = ensemble.RandomForestClassifier(criterion=algorithmProperties["criterion"],
-                                          n_estimators=int(algorithmProperties["n_estimators"]),
-                                          min_samples_split=int(algorithmProperties["min_samples_split"]),
-                                          min_samples_leaf=int(algorithmProperties["min_samples_leaf"]),
-                                          max_depth=int(algorithmProperties["max_depth"]),
-                                          bootstrap=bool(algorithmProperties["bootstrap"]))
+    clf = ensemble.RandomForestClassifier(criterion=algorithmProperties.get("criterion", "gini"),
+                                          n_estimators=int(algorithmProperties.get("n_estimators", 100)),
+                                          min_samples_split=int(algorithmProperties.get("min_samples_split", 25)),
+                                          min_samples_leaf=int(algorithmProperties.get("min_samples_leaf", 10)),
+                                          max_depth=int(algorithmProperties.get("max_depth", 8)),
+                                          bootstrap=bool(algorithmProperties.get("bootstrap", True)))
 
     clf.fit(X_train, Y_train)
 
