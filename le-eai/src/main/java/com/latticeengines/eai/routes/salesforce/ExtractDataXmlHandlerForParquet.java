@@ -27,7 +27,7 @@ import com.latticeengines.eai.routes.converter.AvroTypeConverter;
 
 public class ExtractDataXmlHandlerForParquet extends DefaultHandler {
     private static final Log log = LogFactory.getLog(ExtractDataXmlHandlerForParquet.class);
-    
+
     private TypeConverterRegistry typeConverterRegistry;
     private Map<String, Attribute> tableAttributeMap;
     private Schema schema;
@@ -101,14 +101,16 @@ public class ExtractDataXmlHandlerForParquet extends DefaultHandler {
         }
         String value = new String(ch, start, length);
         Type type = Type.valueOf(attr.getPhysicalDataType());
-        record.put(currentQname, AvroTypeConverter.convertIntoJavaValueForAvroType(typeConverterRegistry, type, value));
+
+        record.put(currentQname,
+                AvroTypeConverter.convertIntoJavaValueForAvroType(typeConverterRegistry, type, attr, value));
     }
 
     public String initialize(TypeConverterRegistry typeConverterRegistry, Table table) {
         this.typeConverterRegistry = typeConverterRegistry;
         this.tableAttributeMap = table.getNameAttributeMap();
         this.schema = table.getSchema();
-        
+
         String fileName = table.getName() + "_" + new SimpleDateFormat("dd-MM-yyyy").format(new Date()) + ".pqt";
         CompressionCodecName compressionCodecName = CompressionCodecName.SNAPPY;
         int blockSize = 256 * 1024 * 1024;
@@ -119,12 +121,12 @@ public class ExtractDataXmlHandlerForParquet extends DefaultHandler {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
+
         this.file = new File(fileName);
 
         return fileName;
     }
-    
+
     public File getFile() {
         return file;
     }

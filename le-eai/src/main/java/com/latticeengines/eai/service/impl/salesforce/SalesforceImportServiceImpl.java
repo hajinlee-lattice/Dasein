@@ -123,6 +123,10 @@ public class SalesforceImportServiceImpl extends ImportService {
                                 ToStringFunction.INSTANCE);
                         attr.setCleanedUpEnumValues(cleanedUpEnumValues);
                         attr.setEnumValues(enumValues);
+                    } else if (type.equals("date")) {
+                        attr.setPropertyValue("dateFormat", "YYYY-MM-DD");
+                    } else if (type.equals("datetime")) {
+                        attr.setPropertyValue("dateFormat", "YYYY-MM-DD'T'HH:mm:ss.sssZ");
                     }
 
                     newTable.addAttribute(attr);

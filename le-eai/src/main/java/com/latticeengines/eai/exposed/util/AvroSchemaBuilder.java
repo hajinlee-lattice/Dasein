@@ -135,6 +135,10 @@ public class AvroSchemaBuilder {
             fieldBuilder = fieldBuilder.prop("logicalType", attr.getLogicalDataType());
             fieldBuilder = fieldBuilder.prop("uuid", UUID.randomUUID().toString());
             
+            for (Map.Entry<String, Object> entry : attr.getEntries()) {
+                fieldBuilder.prop(entry.getKey(), entry.getValue().toString());
+            }
+            
             if (attr.getEnumValues().size() > 0) {
                 fieldBuilder = fieldBuilder.prop("enumValues", StringUtils.join(attr.getEnumValues().toArray(), ","));
             }

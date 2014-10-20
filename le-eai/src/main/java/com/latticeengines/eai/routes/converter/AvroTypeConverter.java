@@ -3,14 +3,23 @@ package com.latticeengines.eai.routes.converter;
 import org.apache.avro.Schema.Type;
 import org.apache.camel.TypeConverter;
 import org.apache.camel.spi.TypeConverterRegistry;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.eai.Attribute;
 
 public abstract class AvroTypeConverter {
 
+    private static final Log log = LogFactory.getLog(AvroTypeConverter.class);
+
     public abstract Type convertTypeToAvro(String type);
 
-    public static Object convertIntoJavaValueForAvroType(TypeConverterRegistry typeRegistry, Type avroType, Object value) {
+    public static Object convertIntoJavaValueForAvroType(TypeConverterRegistry typeRegistry, Type avroType,
+            Attribute attr, Object value) {
         Class<?> targetType = null;
         switch (avroType) {
         case DOUBLE:
@@ -24,7 +33,19 @@ public abstract class AvroTypeConverter {
             break;
         case LONG:
             targetType = Long.class;
-            break;
+            DateTimeFormatter dtf = null;
+
+            if (attr.getLogicalDataType().equals("date")) {
+                dtf = ISODateTimeFormat.dateElementParser();
+            } else if (attr.getLogicalDataType().equals("datetime")) {
+                dtf = ISODateTimeFormat.dateTimeParser();
+            }
+            try {
+                DateTime dateTime = dtf.parseDateTime((String) value);
+                return dateTime.getMillis();
+            } catch (Exception e) {
+                log.warn("Error parsing date for column " + attr.getName() + " with value " + value, e);
+            }
         case STRING:
             targetType = String.class;
             break;
@@ -36,10 +57,6 @@ public abstract class AvroTypeConverter {
             break;
         default:
             break;
-        }
-
-        if (avroType == Type.ENUM) {
-            value = AvroUtils.getAvroFriendlyString((String) value);
         }
 
         if (value.getClass().equals(targetType)) {

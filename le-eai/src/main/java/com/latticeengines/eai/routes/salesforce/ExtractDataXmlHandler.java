@@ -27,7 +27,7 @@ import com.latticeengines.eai.routes.converter.AvroTypeConverter;
 
 public class ExtractDataXmlHandler extends DefaultHandler {
     private static final Log log = LogFactory.getLog(ExtractDataXmlHandler.class);
-    
+
     private TypeConverterRegistry typeConverterRegistry;
     private Map<String, Attribute> tableAttributeMap;
     private Schema schema;
@@ -44,7 +44,7 @@ public class ExtractDataXmlHandler extends DefaultHandler {
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
         if (qName.equals("queryResult")) {
             log.info("Thread id = " + Thread.currentThread().getName());
-            
+
             DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
             dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter);
             try {
@@ -110,7 +110,9 @@ public class ExtractDataXmlHandler extends DefaultHandler {
         }
         String value = new String(ch, start, length);
         Type type = Type.valueOf(attr.getPhysicalDataType());
-        record.put(currentQname, AvroTypeConverter.convertIntoJavaValueForAvroType(typeConverterRegistry, type, value));
+
+        record.put(currentQname,
+                AvroTypeConverter.convertIntoJavaValueForAvroType(typeConverterRegistry, type, attr, value));
     }
 
     public String initialize(TypeConverterRegistry typeConverterRegistry, Table table) {
@@ -121,10 +123,9 @@ public class ExtractDataXmlHandler extends DefaultHandler {
         this.file = new File(fileName);
         return fileName;
     }
-    
+
     public File getFile() {
         return file;
     }
-    
 
 }

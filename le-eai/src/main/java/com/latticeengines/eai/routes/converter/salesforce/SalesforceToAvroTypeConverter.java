@@ -26,8 +26,8 @@ public class SalesforceToAvroTypeConverter extends AvroTypeConverter {
         typeMap.put("currency", Type.DOUBLE);
         typeMap.put("percent", Type.DOUBLE);
         typeMap.put("boolean", Type.BOOLEAN);
-        typeMap.put("date", Type.STRING);
-        typeMap.put("datetime", Type.STRING);
+        typeMap.put("date", Type.LONG);
+        typeMap.put("datetime", Type.LONG);
     }
 
     @Override
