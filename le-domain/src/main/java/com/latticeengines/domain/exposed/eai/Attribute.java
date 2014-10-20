@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasProperty;
@@ -121,4 +122,11 @@ public class Attribute implements HasName, HasProperty, Serializable {
     public void setPropertyValue(String key, Object value) {
         properties.put(key, value);
     }
+    
+    @Override
+    public Set<Map.Entry<String, Object>> getEntries() {
+        return properties.entrySet();
+    }
+    
+    
 }
