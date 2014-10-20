@@ -1,5 +1,9 @@
 package com.latticeengines.camille;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
+
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
@@ -9,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.CamilleEnvironment.Mode;
 import com.latticeengines.camille.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -36,10 +41,15 @@ public class CamilleEnvironmentUnitTestNG {
 
             CamilleEnvironment.stop();
 
-            CamilleConfig config = new CamilleConfig();
+            ConfigJson config = new ConfigJson();
             config.setConnectionString(server.getConnectString());
             config.setPodId("ignored");
-            CamilleEnvironment.start(Mode.BOOTSTRAP, config);
+
+            OutputStream stream = new ByteArrayOutputStream();
+
+            new ObjectMapper().writeValue(stream, config);
+
+            CamilleEnvironment.start(Mode.BOOTSTRAP, new StringReader(stream.toString()));
         } finally {
             CamilleEnvironment.stop();
         }
@@ -74,10 +84,15 @@ public class CamilleEnvironmentUnitTestNG {
             client.create().withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(podPath.toString(), doc.getData().getBytes());
             doc.setVersion(0);
 
-            CamilleConfig config = new CamilleConfig();
+            ConfigJson config = new ConfigJson();
             config.setConnectionString(server.getConnectString());
             config.setPodId(podId);
-            CamilleEnvironment.start(Mode.RUNTIME, config);
+
+            OutputStream stream = new ByteArrayOutputStream();
+
+            new ObjectMapper().writeValue(stream, config);
+
+            CamilleEnvironment.start(Mode.RUNTIME, new StringReader(stream.toString()));
         } finally {
             CamilleEnvironment.stop();
         }
@@ -89,14 +104,18 @@ public class CamilleEnvironmentUnitTestNG {
 
             String podId = "pod0";
 
-            CamilleConfig config = new CamilleConfig();
+            ConfigJson config = new ConfigJson();
             config.setConnectionString(server.getConnectString());
             config.setPodId(podId);
+
+            OutputStream stream = new ByteArrayOutputStream();
+
+            new ObjectMapper().writeValue(stream, config);
 
             CamilleEnvironment.stop();
 
             try {
-                CamilleEnvironment.start(Mode.RUNTIME, config);
+                CamilleEnvironment.start(Mode.RUNTIME, new StringReader(stream.toString()));
                 Assert.fail("A RuntimeException was expected.");
             } catch (RuntimeException e) {
             }

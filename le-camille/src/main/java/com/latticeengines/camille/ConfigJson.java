@@ -1,10 +1,10 @@
 package com.latticeengines.camille;
 
-class CamilleConfig {
+public class ConfigJson {
     private String podId = null;
     private String connectionString = null;
 
-    CamilleConfig() {
+    public ConfigJson() {
     }
 
     public String getPodId() {

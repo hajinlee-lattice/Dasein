@@ -8,7 +8,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.camille.CamilleEnvironment;
-import com.latticeengines.camille.CamilleTestEnvironment;
 import com.latticeengines.camille.config.ConfigurationController;
 import com.latticeengines.camille.config.ConfigurationTransaction;
 import com.latticeengines.camille.lifecycle.ContractLifecycleManager;
@@ -16,6 +15,7 @@ import com.latticeengines.camille.lifecycle.PodLifecycleManager;
 import com.latticeengines.camille.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.paths.PathBuilder;
+import com.latticeengines.camille.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ContractScope;

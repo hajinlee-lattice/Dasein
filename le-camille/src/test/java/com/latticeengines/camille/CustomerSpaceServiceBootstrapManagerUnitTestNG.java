@@ -23,6 +23,7 @@ import com.latticeengines.camille.config.cache.ConfigurationCache;
 import com.latticeengines.camille.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.paths.PathConstants;
+import com.latticeengines.camille.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;

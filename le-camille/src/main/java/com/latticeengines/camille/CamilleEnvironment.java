@@ -1,30 +1,27 @@
 package com.latticeengines.camille;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.lifecycle.PodLifecycleManager;
 
 public class CamilleEnvironment {
-    private static final Logger log = LoggerFactory.getLogger(new Object() {
-    }.getClass().getEnclosingClass());
-
     public enum Mode {
         BOOTSTRAP, RUNTIME
     };
 
-    public static final String configFileName = "camille.cfg";
+    private static final Logger log = LoggerFactory.getLogger(new Object() {
+    }.getClass().getEnclosingClass());
 
     // these are reasonable arguments for the ExponentialBackoffRetry. The first
     // retry will wait 1 second - the second will wait up to 2 seconds - the
@@ -33,43 +30,9 @@ public class CamilleEnvironment {
 
     // singleton instance
     private static Camille camille = null;
-    private static CamilleConfig config = null;
+    private static ConfigJson config = null;
 
-    private CamilleEnvironment() {
-    }
-
-    public static synchronized void start(Mode mode) throws Exception {
-        String workingDirectory = (new CamilleEnvironment()).getClass().getClassLoader().getResource("").getPath();
-        String configFilePath = workingDirectory + configFileName;
-        File file = new File(configFilePath);
-        log.info("Loading camille.cfg at " + configFilePath);
-        if (!file.exists()) {
-            FileNotFoundException e = new FileNotFoundException("Could not locate camille.cfg. File "
-                    + configFilePath + " does not exist.");
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-        
-        if (file.isDirectory()) {
-            FileNotFoundException e = new FileNotFoundException("Could not locate camille.cfg. Expected file at "
-                    + configFilePath + " but found directory.");
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        CamilleConfig config = null;
-        try {
-            config = mapper.readValue(file, CamilleConfig.class);
-        } catch (Exception e) {
-            log.error("Failure parsing camille.cfg", e);
-            throw e;
-        }
-
-        start(mode, config);
-    }
-
-    public static synchronized void start(Mode mode, CamilleConfig config) throws Exception {
+    public static synchronized void start(Mode mode, Reader configJsonReader) throws Exception {
         if (camille != null && camille.getCuratorClient() != null
                 && camille.getCuratorClient().getState().equals(CuratorFrameworkState.STARTED)) {
 
@@ -85,14 +48,15 @@ public class CamilleEnvironment {
             throw e;
         }
 
-        if (config == null) {
-            IllegalArgumentException e = new IllegalArgumentException("config cannot be null");
-            log.error(e.getMessage(), e);
+        config = null;
+        try {
+            config = new ObjectMapper().readValue(configJsonReader, ConfigJson.class);
+        } catch (IOException ioe) {
+            log.error("An error occurred reading the configuration file.", ioe);
             stopNoSync();
-            throw e;
+            throw ioe;
         }
 
-        CamilleEnvironment.config = config;
         CuratorFramework client = CuratorFrameworkFactory.newClient(config.getConnectionString(), retryPolicy);
         client.start();
         try {

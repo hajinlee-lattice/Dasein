@@ -12,8 +12,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.camille.CamilleEnvironment;
-import com.latticeengines.camille.CamilleTestEnvironment;
 import com.latticeengines.camille.paths.PathBuilder;
+import com.latticeengines.camille.util.CamilleTestEnvironment;
 
 public class SpaceLifecycleManagerUnitTestNG {
     @SuppressWarnings("unused")

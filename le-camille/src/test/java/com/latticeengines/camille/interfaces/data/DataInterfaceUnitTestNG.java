@@ -11,8 +11,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.camille.CamilleEnvironment;
-import com.latticeengines.camille.CamilleTestEnvironment;
 import com.latticeengines.camille.lifecycle.PodLifecycleManager;
+import com.latticeengines.camille.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 

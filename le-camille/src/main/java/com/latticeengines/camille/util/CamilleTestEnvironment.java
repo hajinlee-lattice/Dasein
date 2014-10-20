@@ -1,9 +1,16 @@
-package com.latticeengines.camille;
+package com.latticeengines.camille.util;
+
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.CamilleEnvironment.Mode;
+import com.latticeengines.camille.ConfigJson;
 import com.netflix.curator.test.TestingServer;
 
 public class CamilleTestEnvironment {
@@ -28,10 +35,15 @@ public class CamilleTestEnvironment {
 
             CamilleEnvironment.stop();
 
-            CamilleConfig config = new CamilleConfig();
+            ConfigJson config = new ConfigJson();
             config.setConnectionString(server.getConnectString());
             config.setPodId("PodID");
-            CamilleEnvironment.start(Mode.BOOTSTRAP, config);
+
+            OutputStream stream = new ByteArrayOutputStream();
+
+            new ObjectMapper().writeValue(stream, config);
+
+            CamilleEnvironment.start(Mode.BOOTSTRAP, new StringReader(stream.toString()));
         } catch (Exception e) {
             log.error("Error starting Camille environment", e);
             throw e;
