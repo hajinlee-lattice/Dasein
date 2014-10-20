@@ -77,6 +77,10 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         String modelFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath);
         modelCommandLogService.log(modelCommand, "Model json file download link: " + httpFsPrefix + modelFileHdfsPath
                 + HTTPFS_SUFFIX);
+        
+        String scoreFileHdfsPath = jobStatus.getResultDirectory() + "/scored.txt";
+        modelCommandLogService.log(modelCommand, "Score file download link: " + httpFsPrefix + scoreFileHdfsPath
+                + HTTPFS_SUFFIX);
 
         ModelCommandOutput output = new ModelCommandOutput(1, modelCommand.getPid().intValue(), SAMPLE_SIZE,
                 RANDOM_FOREST, modelFilePath, new Date());
