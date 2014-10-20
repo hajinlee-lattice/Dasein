@@ -1,6 +1,7 @@
 package com.latticeengines.camille;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,11 +40,19 @@ public class CamilleEnvironment {
 
     public static synchronized void start(Mode mode) throws Exception {
         String workingDirectory = (new CamilleEnvironment()).getClass().getClassLoader().getResource("").getPath();
-        Path configFilePath = Paths.get(workingDirectory, configFileName);
+        String configFilePath = workingDirectory + configFileName;
+        File file = new File(configFilePath);
         log.info("Loading camille.cfg at " + configFilePath);
-        if (!Files.exists(configFilePath)) {
-            IllegalArgumentException e = new IllegalArgumentException("Could not locate camille.cfg. File "
+        if (!file.exists()) {
+            FileNotFoundException e = new FileNotFoundException("Could not locate camille.cfg. File "
                     + configFilePath + " does not exist.");
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+        
+        if (file.isDirectory()) {
+            FileNotFoundException e = new FileNotFoundException("Could not locate camille.cfg. Expected file at "
+                    + configFilePath + " but found directory.");
             log.error(e.getMessage(), e);
             throw e;
         }
@@ -51,7 +60,7 @@ public class CamilleEnvironment {
         ObjectMapper mapper = new ObjectMapper();
         CamilleConfig config = null;
         try {
-            config = mapper.readValue(new File(configFilePath.toString()), CamilleConfig.class);
+            config = mapper.readValue(file, CamilleConfig.class);
         } catch (Exception e) {
             log.error("Failure parsing camille.cfg", e);
             throw e;
