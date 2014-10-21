@@ -23,6 +23,10 @@ public class DocumentDirectory implements Serializable {
 
     private Path root;
     private List<Node> children;
+    
+    public DocumentDirectory() {
+        this(new Path("/"));
+    }
 
     public DocumentDirectory(Path root) {
         this.root = root;
