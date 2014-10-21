@@ -35,7 +35,6 @@ import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.property.AppProps;
-import cascading.scheme.hadoop.TextDelimited;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
@@ -90,7 +89,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         for (Field field : sourceSchema.getFields()) {
             Type avroType = field.schema().getTypes().get(0).getType();
-            FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name());
+            FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
             fields.add(fm);
         }
         pipesAndOutputSchemas.put(sourceName, new Pair<>(new Pipe(sourceName), fields));
@@ -137,12 +136,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 String originalFieldName = fieldName;
                 
                 if (seenFields.contains(fieldName)) {
-                    fieldName = name + "$" + fieldName;
+                    fieldName = name + "__" + fieldName;
                 }
 
                 seenFields.add(fieldName);
-                FieldMetadata fm = nameToFieldMetadataMap.get(originalFieldName);
-                declaredFields.add(new FieldMetadata(fm.getAvroType(), fm.getJavaType(), fieldName));
+                FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
+                FieldMetadata fm = new FieldMetadata(origfm.getAvroType(), origfm.getJavaType(), fieldName, origfm.getField());
+                
+                declaredFields.add(fm);
             }
             pipes[i] = getPipeByName(name);
             joinFields[i] = convertToFields(joinCriterion.getJoinFields().getFields());
@@ -234,16 +235,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     @Override
-    public Schema getSchema(String name) {
+    public Schema getSchema(String flowName, String name) {
         Pair<Pipe, List<FieldMetadata>> pipeAndMetadata = pipesAndOutputSchemas.get(name);
 
         if (pipeAndMetadata == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { name });
         }
-
-        List<FieldMetadata> fm = pipeAndMetadata.getRhs();
-
-        return null;
+        return super.createSchema(flowName, pipeAndMetadata.getRhs());
     }
 
     protected String addAggregation(String prior, AggregationType aggType) {
@@ -293,7 +291,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 avroType = fmForAggFieldName.getAvroType();
                 javaType = fmForAggFieldName.getJavaType();
             }
-            declaredFields.add(new FieldMetadata(avroType, javaType, groupByCriterion.getTargetFieldName()));
+            declaredFields.add(new FieldMetadata(avroType, javaType, groupByCriterion.getTargetFieldName(), null));
         }
 
         pipesAndOutputSchemas.put(groupby.getName(), new Pair<>(groupby, declaredFields));
@@ -319,20 +317,19 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     @Override
-    protected String addFunction(String prior, String expression, FieldList fieldsToApply, String targetField,
-            Class<?> targetFieldDataType) {
+    protected String addFunction(String prior, String expression, FieldList fieldsToApply, FieldMetadata targetField) {
         Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
 
         if (pm == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
         }
-        ExpressionFunction function = new ExpressionFunction(new Fields(targetField), //
+        ExpressionFunction function = new ExpressionFunction(new Fields(targetField.getFieldName()), //
                 expression, //
                 fieldsToApply.getFields(), //
                 getTypes(fieldsToApply.getFieldsAsList(), pm.getRhs()));
 
         Fields fieldStrategy = Fields.ALL;
-        if (fieldsToApply.getFields().length == 1 && fieldsToApply.getFields()[0].equals(targetField)) {
+        if (fieldsToApply.getFields().length == 1 && fieldsToApply.getFields()[0].equals(targetField.getFieldName())) {
             fieldStrategy = Fields.REPLACE;
         }
 
@@ -340,15 +337,15 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         List<FieldMetadata> fm = new ArrayList<>(pm.getRhs());
 
         if (fieldStrategy != Fields.REPLACE) {
-            fm.add(new FieldMetadata(AvroUtils.getAvroType(targetFieldDataType), targetFieldDataType, targetField));
+            fm.add(targetField);
         } else {
             Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(fm);
-            FieldMetadata targetFm = nameToFieldMetadataMap.get(targetField);
+            FieldMetadata targetFm = nameToFieldMetadataMap.get(targetField.getFieldName());
 
-            if (targetFm.getJavaType() != targetFieldDataType) {
-                FieldMetadata replaceFm = new FieldMetadata(AvroUtils.getAvroType(targetFieldDataType),
-                        targetFieldDataType, targetField);
-                nameToFieldMetadataMap.put(targetField, replaceFm);
+            if (targetFm.getJavaType() != targetField.getJavaType()) {
+                FieldMetadata replaceFm = new FieldMetadata(targetField.getAvroType(),
+                        targetField.getJavaType(), targetField.getFieldName(), null);
+                nameToFieldMetadataMap.put(targetField.getFieldName(), replaceFm);
                 fm = new ArrayList<>(nameToFieldMetadataMap.values());
             }
         }
@@ -364,7 +361,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         Pipe each = new Each(pm.getLhs(), Fields.ALL, new AddRowId(new Fields(fieldName), tableName), Fields.ALL);
         List<FieldMetadata> newFm = new ArrayList<>(pm.getRhs());
-        newFm.add(new FieldMetadata(Type.LONG, Long.class, fieldName));
+        FieldMetadata rowIdFm = new FieldMetadata(Type.LONG, Long.class, fieldName, null);
+        rowIdFm.setPropertyValue("logicalType", "rowid");
+        rowIdFm.setPropertyValue("length", "0");
+        rowIdFm.setPropertyValue("precision", "0");
+        rowIdFm.setPropertyValue("scale", "0");
+        rowIdFm.setPropertyValue("displayName", "Row ID");
+        newFm.add(rowIdFm);
         pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, newFm));
         return each.getName();
     }
@@ -379,10 +382,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         String queue = dataFlowCtx.getProperty("QUEUE", String.class);
 
         String lastOperator = constructFlowDefinition(sourceTables);
-
-        Tap<?, ?, ?> sink = new Lfs(new TextDelimited(), targetPath, true);
+        Schema schema = getSchema(flowName, lastOperator);
+        System.out.println(schema);
+        Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, true);
         if (!isLocal()) {
-            sink = new Hfs(new TextDelimited(), targetPath, true);
+            sink = new Hfs(new AvroScheme(schema), targetPath, true);
         }
         Properties properties = new Properties();
         properties.put("mapred.job.queue.name", queue);

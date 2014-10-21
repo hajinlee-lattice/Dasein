@@ -52,7 +52,7 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
         String functionOperatorName = addFunction(joinOperatorName, //
                 "Email.substring(Email.indexOf('@') + 1)", //
                 new FieldList("Email"), //
-                "Domain", String.class);
+                new FieldMetadata("Domain", String.class));
         
         // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees) TotalEmployees FROM T GROUP BY Domain
         List<GroupByCriteria> groupByCriteria = new ArrayList<>();
