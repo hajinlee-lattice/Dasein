@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
@@ -14,13 +15,13 @@ public class DataInterfacePublisher extends DataInterfaceBase {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    public DataInterfacePublisher(String interfaceName) throws Exception {
-        super(interfaceName);
+    public DataInterfacePublisher(String interfaceName, CustomerSpace space) throws Exception {
+        super(interfaceName, space);
     }
 
-    public void publish(Path relativePath, Document doc) throws Exception {
+    public void publish(Path localPath, Document doc) throws Exception {
         Camille c = CamilleEnvironment.getCamille();
-        Path path = getBasePath().append(relativePath);
+        Path path = getBasePath().append(localPath);
         try {
             c.createWithEmptyIntermediateNodes(path, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         } catch (KeeperException.NodeExistsException e) {
@@ -29,7 +30,7 @@ public class DataInterfacePublisher extends DataInterfaceBase {
         }
     }
 
-    public void remove(Path relativePath) throws Exception {
-        CamilleEnvironment.getCamille().delete(getBasePath().append(relativePath));
+    public void remove(Path localPath) throws Exception {
+        CamilleEnvironment.getCamille().delete(getBasePath().append(localPath));
     }
 }

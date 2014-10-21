@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.CamilleEnvironment;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
@@ -18,30 +19,24 @@ public class DataInterfaceSubscriber extends DataInterfaceBase {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    public DataInterfaceSubscriber(String interfaceName) throws Exception {
-        super(interfaceName);
+    public DataInterfaceSubscriber(String interfaceName, CustomerSpace space) throws Exception {
+        super(interfaceName, space);
     }
-
+    
     /**
      * @return The corresponding Document, or null if no such Document exists.
      */
-    public Document get(Path relativePath) throws Exception {
-        if (relativePath.numParts() > 1) {
-            IllegalArgumentException e = new IllegalArgumentException("relativePath cannot have more than 1 part");
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-
+    public Document get(Path localPath) throws Exception {
         try {
-            return CamilleEnvironment.getCamille().get(getBasePath().append(relativePath));
+            return CamilleEnvironment.getCamille().get(getBasePath().append(localPath));
         } catch (KeeperException.NoNodeException e) {
             return null;
         }
     }
 
-    public List<Pair<Document, Path>> getChildren(Path relativePath) throws Exception {
+    public List<Pair<Document, Path>> getChildren(Path localPath) throws Exception {
         List<Pair<Document, Path>> children = CamilleEnvironment.getCamille().getChildren(
-                getBasePath().append(relativePath));
+                getBasePath().append(localPath));
 
         if (children == null)
             return Collections.emptyList();

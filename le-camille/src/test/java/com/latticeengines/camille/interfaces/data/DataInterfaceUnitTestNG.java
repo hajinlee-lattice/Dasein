@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.lifecycle.PodLifecycleManager;
 import com.latticeengines.camille.util.CamilleTestEnvironment;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
@@ -35,8 +36,9 @@ public class DataInterfaceUnitTestNG {
     @Test(groups = "unit")
     public void testGet() throws Exception {
         String interfaceName = "interfaceName";
-        DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName);
-        DataInterfaceSubscriber sub = new DataInterfaceSubscriber(interfaceName);
+        CustomerSpace space = new CustomerSpace("ContractId", "TenantId", "SpaceId");
+        DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName, space);
+        DataInterfaceSubscriber sub = new DataInterfaceSubscriber(interfaceName, space);
 
         Path relativePath = new Path("/relativePath");
         Document doc = new Document("document");
@@ -52,9 +54,10 @@ public class DataInterfaceUnitTestNG {
     @Test(groups = "unit")
     public void testGetChildren() throws Exception {
         String interfaceName = "interfaceName";
-        DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName);
-        DataInterfaceSubscriber sub = new DataInterfaceSubscriber(interfaceName);
-
+        CustomerSpace space = new CustomerSpace("ContractId", "TenantId", "SpaceId");
+        DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName, space);
+        DataInterfaceSubscriber sub = new DataInterfaceSubscriber(interfaceName, space);
+        
         String relativePath = "relativePath";
 
         Path relativePath1 = new Path(String.format("/%s/1", relativePath));
@@ -68,4 +71,25 @@ public class DataInterfaceUnitTestNG {
         Assert.assertTrue(sub.getChildren(new Path("/" + relativePath)).containsAll(
                 Arrays.asList(Pair.of(doc1, relativePath1), Pair.of(doc2, relativePath2))));
     }
+    
+    @Test(groups = "unit")
+    public void testGetChildrenAtRoot() throws Exception {
+        String interfaceName = "interfaceName";
+        CustomerSpace space = new CustomerSpace("ContractId", "TenantId", "SpaceId");
+        DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName, space);
+        DataInterfaceSubscriber sub = new DataInterfaceSubscriber(interfaceName, space);
+        
+        Path doc1path = new Path("/1");
+        Document doc1 = new Document("document1");
+        pub.publish(doc1path, doc1);
+
+        Path doc2path = new Path("/2");
+        Document doc2 = new Document("document2");
+        pub.publish(doc2path, doc2);
+
+        Assert.assertTrue(sub.getChildren(new Path("/")).containsAll(
+                Arrays.asList(Pair.of(doc1, doc1path), Pair.of(doc2, doc2path))));
+    }
+    
+    
 }
