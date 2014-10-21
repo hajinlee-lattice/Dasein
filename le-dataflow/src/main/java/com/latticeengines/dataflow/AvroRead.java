@@ -37,12 +37,17 @@ import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.dataflow.runtime.cascading.AddRowId;
 
 public class AvroRead {
 
+    @SuppressWarnings("deprecation")
     public static void main(String[] args) throws Exception {
-        String lead = "file://" + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
-        String opportunity = "file://" + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
+        String lead = "file://"
+                + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
+        String opportunity = "file://"
+                + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro")
+                        .getPath();
         String wcPath = "/tmp/EventTable";
 
         // Get the schema from a file
@@ -53,12 +58,13 @@ public class AvroRead {
         properties.put("mapred.job.queue.name", "Priority0.MapReduce.0");
         AppProps.setApplicationJarClass(properties, AvroRead.class);
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
-        //FlowConnector flowConnector = new LocalFlowConnector();
+        // FlowConnector flowConnector = new LocalFlowConnector();
 
         Map<String, Tap> sources = new HashMap<>();
         Tap<?, ?, ?> leadTap = new Lfs(new AvroScheme(), lead);
         Tap<?, ?, ?> opportunityTap = new Lfs(new AvroScheme(), opportunity);
-        Tap<?, ?, ?> sink = new Lfs(new TextDelimited(/*new Fields("Id", "AnnualRevenue")*/), wcPath, true);
+        Tap<?, ?, ?> sink = new Lfs(new TextDelimited(/*new Fields("Domain", "Company", "Email", "FirstName", "LastName",
+                "CreatedDate")*/), wcPath, true);
         sources.put("lead", leadTap);
         sources.put("oppty", opportunityTap);
 
@@ -68,7 +74,7 @@ public class AvroRead {
         for (Field field : leadSchema.getFields()) {
             String name = field.name();
             if (seenFieldNames.contains(name)) {
-                name = name + "_1";
+                name = "lead$" + name;
             }
             fieldNames.add(name);
             seenFieldNames.add(name);
@@ -77,7 +83,7 @@ public class AvroRead {
         for (Field field : opportunitySchema.getFields()) {
             String name = field.name();
             if (seenFieldNames.contains(name)) {
-                name = name + "_1";
+                name = "oppty$" + name;
             }
             fieldNames.add(name);
             seenFieldNames.add(name);
@@ -90,36 +96,40 @@ public class AvroRead {
                 new Fields("Id"), //
                 new Fields(declaredFields), //
                 new InnerJoin());
-        
+
         ExpressionFunction function = new ExpressionFunction(new Fields("Domain"), //
                 "Email.substring(Email.indexOf('@') + 1)", //
-                new String[] { "Email" },
-                new Class[] { String.class });
-        
+                new String[] { "Email" }, new Class[] { String.class });
+
         join = new Each(join, new Fields("Email"), function, Fields.ALL);
-        
-        join = new GroupBy(join, new Fields("Domain"));
+
+        join = new GroupBy(join, new Fields("Domain"), new Fields("FirstName"));
+
+        // join = new Every(join, Fields.ALL, new Last(), Fields.RESULTS);
+        // /*
         join = new Every(join, new Fields("AnnualRevenue"), new MaxValue(new Fields("MaxRevenue")), Fields.ALL);
         join = new Every(join, new Fields("NumberOfEmployees"), new Sum(new Fields("TotalEmployees")), Fields.ALL);
-        
-        ExpressionFilter filter = new ExpressionFilter("$0 > 0.0", Double.TYPE);
+
+        ExpressionFilter filter = new ExpressionFilter("$0 > 0.0", Double.TYPE); 
         Not not = new Not(filter);
         join = new Each(join, new Fields("MaxRevenue"), not);
+        
+        join = new Each(join, Fields.ALL, new AddRowId(new Fields("RowId"), "EventTable"), Fields.ALL);
 
         FlowDef flowDef = FlowDef.flowDef().setName("wc") //
                 .addSources(sources) //
                 .addTailSink(join, sink);
-        
+
         // write a DOT file and run the flow
         Flow<?> flow = flowConnector.connect(flowDef);
         flow.writeDOT("dot/wcr.dot");
         flow.addStepListener(new DefaultFlowStepListener());
         flow.complete();
     }
-    
+
     @SuppressWarnings("rawtypes")
     static class DefaultFlowStepListener implements FlowStepListener {
-        
+
         @Override
         public void onStepStarting(FlowStep flowStep) {
             System.out.println("Starting " + flowStep.getName());
@@ -145,7 +155,7 @@ public class AvroRead {
             throwable.printStackTrace();
             return false;
         }
-        
+
     }
 
 }
