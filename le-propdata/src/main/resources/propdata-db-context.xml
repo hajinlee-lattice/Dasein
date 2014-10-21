@@ -8,17 +8,10 @@
   http://www.springframework.org/schema/task
       http://www.springframework.org/schema/task/spring-task-3.2.xsd">
 
-	<context:component-scan base-package="com.latticeengines.propdata" />
+	<context:component-scan
+		base-package="com.latticeengines.propdata.entitymanager,com.latticeengines.propdata.dao,com.latticeengines.propdata.service.db" />
 
-	<import resource="classpath:db-context.xml"/>
-	<import resource="classpath:propdata-persistence-context.xml"/>
-	<import resource="classpath:dataplatform-context.xml"/>
-
-	<task:executor id="executorPool" pool-size="5"
-		queue-capacity="5" rejection-policy="CALLER_RUNS" />
-	<bean id="poolService"
-		class="org.springframework.core.task.support.ExecutorServiceAdapter">
-		<constructor-arg ref="executorPool" />
-	</bean>
+	<import resource="classpath:propdata-persistence-context.xml" />
+	<import resource="classpath:dataplatform-context.xml" />
 
 </beans>
