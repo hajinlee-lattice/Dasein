@@ -176,6 +176,9 @@ public class AvroUtils {
     }
     
     public static Class<?> getJavaType(Type avroType) {
+        if (avroType == null) {
+            return null;
+        }
         switch (avroType) {
         case DOUBLE:
             return Double.class;
@@ -191,6 +194,29 @@ public class AvroUtils {
             return Boolean.class;
         default:
             throw new RuntimeException("Unknown java type for avro type " + avroType);
+        }
+        
+    }
+
+    public static Type getAvroType(Class<?> javaType) {
+        if (javaType == null) {
+            return null;
+        }
+        switch (javaType.getSimpleName()) {
+        case "Double":
+            return Type.DOUBLE;
+        case "Float":
+            return Type.FLOAT;
+        case "Integer":
+            return Type.INT;
+        case "Long":
+            return Type.LONG;
+        case "String":
+            return Type.STRING;
+        case "Boolean":
+            return Type.BOOLEAN;
+        default:
+            throw new RuntimeException("Unknown avro type for java type " + javaType.getSimpleName());
         }
         
     }
