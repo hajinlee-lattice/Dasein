@@ -93,6 +93,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         
         ctx.setProperty("EVENTDEFNEXPR", "StageName.equals(\"Contracting\") || StageName.equals(\"Closed Won\")");
         ctx.setProperty("EVENTDEFNCOLS", new String[] { "StageName" });
+        ctx.setProperty("APPLYMETADATAPRUNING", Boolean.TRUE);
         
         dataTransformationService.executeNamedTransformation(ctx, "createFinalEventTable");
     }

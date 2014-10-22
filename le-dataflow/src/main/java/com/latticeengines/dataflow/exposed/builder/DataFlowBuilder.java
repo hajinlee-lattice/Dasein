@@ -26,7 +26,7 @@ public abstract class DataFlowBuilder {
 
     public abstract String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources);
 
-    public abstract Schema getSchema(String flowName, String operatorName);
+    public abstract Schema getSchema(String flowName, String operatorName, DataFlowContext dataFlowCtx);
 
     public abstract void runFlow(DataFlowContext dataFlowCtx);
 
@@ -80,7 +80,7 @@ public abstract class DataFlowBuilder {
         return new Pair<>(fm.getAvroType(), map);
     }
     
-    protected Schema createSchema(String flowName, List<FieldMetadata> fieldMetadata) {
+    protected Schema createSchema(String flowName, List<FieldMetadata> fieldMetadata, DataFlowContext dataFlowCtx) {
         RecordBuilder<Schema> recordBuilder = SchemaBuilder.record("EventTable");
         
         recordBuilder = recordBuilder.prop("uuid", UUID.randomUUID().toString());
@@ -91,6 +91,13 @@ public abstract class DataFlowBuilder {
             Pair<Type, Map<String, String>> requiredProps = getRequiredProperties(fm);
             
             Map<String, String> props = requiredProps.getSecond();
+            
+            if (dataFlowCtx.getProperty("APPLYMETADATAPRUNING", Boolean.class) != null) {
+                String logicalType = props.get("logicalType"); 
+                if (logicalType != null && (logicalType.equals("id") || logicalType.equals("reference"))) {
+                    continue;
+                }
+            }
             for (Map.Entry<String, String> entry : props.entrySet()) {
                 String k = entry.getKey();
                 String v = entry.getValue();

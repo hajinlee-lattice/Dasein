@@ -238,13 +238,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     @Override
-    public Schema getSchema(String flowName, String name) {
+    public Schema getSchema(String flowName, String name, DataFlowContext dataFlowCtx) {
         Pair<Pipe, List<FieldMetadata>> pipeAndMetadata = pipesAndOutputSchemas.get(name);
 
         if (pipeAndMetadata == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { name });
         }
-        return super.createSchema(flowName, pipeAndMetadata.getRhs());
+        return super.createSchema(flowName, pipeAndMetadata.getRhs(), dataFlowCtx);
     }
 
     protected String addAggregation(String prior, AggregationType aggType) {
@@ -433,7 +433,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         String queue = dataFlowCtx.getProperty("QUEUE", String.class);
 
         String lastOperator = constructFlowDefinition(dataFlowCtx, sourceTables);
-        Schema schema = getSchema(flowName, lastOperator);
+        Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
         System.out.println(schema);
         Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, true);
         //Tap<?, ?, ?> sink = new Lfs(new TextDelimited(), targetPath, true);
