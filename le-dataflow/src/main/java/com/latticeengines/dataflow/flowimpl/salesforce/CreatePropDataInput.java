@@ -20,7 +20,7 @@ public class CreatePropDataInput extends CascadingDataFlowBuilder {
         groupByCriteria.add(new GroupByCriteria(GroupByCriteria.AggregationType.FIRST, FieldList.GROUP));
 
         String groupby = addGroupBy("EventTable", //
-                new FieldList("Domain", "Company", "City", "Country", "PropDataHash"), groupByCriteria);
+                new FieldList("Domain", "Company", "City", "State", "Country", "PropDataHash"), groupByCriteria);
         String withRowId = addRowId(groupby, "RowId", groupby);
         return withRowId;
     }
