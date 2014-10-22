@@ -20,20 +20,20 @@ public class AlertServiceTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     AlertService alertService;
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testTriggerOneDetail() throws ClientProtocolException, IOException, ParseException {
         String result = alertService.triggerCriticalEvent("AlertServiceTestNG", new BasicNameValuePair("testmetric",
                 "testvalue"));
         confirmResult(result);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testTriggerNoDetail() throws ClientProtocolException, IOException, ParseException {
         String result = alertService.triggerCriticalEvent("AlertServiceTestNG");
         confirmResult(result);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testTriggerMultipleDetail() throws ClientProtocolException, IOException, ParseException {
         String result = alertService.triggerCriticalEvent("AlertServiceTestNG", new BasicNameValuePair("testmetric",
                 "testvalue"), new BasicNameValuePair("anothertestmetric", "anothertestvalue"));
