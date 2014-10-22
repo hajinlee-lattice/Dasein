@@ -417,6 +417,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, newFm));
         return each.getName();
     }
+    
+    @Override
+    protected List<FieldMetadata> getMetadata(String operator) {
+        return pipesAndOutputSchemas.get(operator).getRhs();
+    }
 
     @SuppressWarnings("deprecation")
     @Override
@@ -427,7 +432,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         String targetPath = dataFlowCtx.getProperty("TARGETPATH", String.class);
         String queue = dataFlowCtx.getProperty("QUEUE", String.class);
 
-        String lastOperator = constructFlowDefinition(sourceTables);
+        String lastOperator = constructFlowDefinition(dataFlowCtx, sourceTables);
         Schema schema = getSchema(flowName, lastOperator);
         System.out.println(schema);
         Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, true);

@@ -100,6 +100,12 @@ public class AvroRead {
 
         join = new Each(join, new Fields("Email"), function, Fields.ALL);
 
+        ExpressionFunction domainFunction = new ExpressionFunction(new Fields("IsDomain"), //
+                "Domain.contains(\".com\") || Domain.contains(\"www\")", //
+                new String[] { "Domain" }, new Class[] { String.class });
+
+        join = new Each(join, new Fields("Domain"), domainFunction, Fields.ALL);
+
         //join = new GroupBy(join, new Fields("Domain"), new Fields("FirstName"));
 
         // join = new Every(join, Fields.ALL, new Last(), Fields.RESULTS);
@@ -113,7 +119,7 @@ public class AvroRead {
         
         join = new Each(join, new Fields("Domain", "Company", "City", "Country"), new AddMD5Hash(new Fields("PropDataHash")), Fields.ALL);
 
-        join = new GroupBy(join, new Fields("Domain", "Company", "City", "Country", "PropDataHash"));
+        join = new GroupBy(join, new Fields("Domain", "Company", "City", "Country", "PropDataHash", "IsDomain"));
         
         join = new Every(join, Fields.ALL, new Last(), Fields.GROUP);
         FlowDef flowDef = FlowDef.flowDef().setName("wc") //

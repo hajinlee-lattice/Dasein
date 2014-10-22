@@ -19,6 +19,9 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
     
     @Autowired
+    private CreateFinalEventTable createFinalEventTable;
+
+    @Autowired
     private CreateInitialEventTable createInitialEventTable;
     
     @Autowired
@@ -34,8 +37,9 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        createInitialEventTable.setLocal(false);
-        createPropDataInput.setLocal(false);
+        createFinalEventTable.setLocal(true);
+        createInitialEventTable.setLocal(true);
+        createPropDataInput.setLocal(true);
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
         opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
         contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro").getPath();
@@ -71,15 +75,25 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         // Execute the first flow
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty("SOURCES", sources);
-        ctx.setProperty("TARGETPATH", "/tmp/EventTable");
+        ctx.setProperty("TARGETPATH", "/tmp/TmpEventTable");
         ctx.setProperty("QUEUE", "Priority0.MapReduce.0");
         ctx.setProperty("FLOWNAME", "CreateInitialEventTable");
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
         
         // Execute the second flow, with the output of the first flow as input into the second
-        sources.put("EventTable", "/tmp/EventTable/part-00000.avro");
+        sources.put("EventTable", "/tmp/TmpEventTable/part-00000.avro");
         ctx.setProperty("TARGETPATH", "/tmp/PDTable");
         ctx.setProperty("FLOWNAME", "CreatePropDataInput");
         dataTransformationService.executeNamedTransformation(ctx, "createPropDataInput");
+        
+        // Execute the third flow, with the output of the first flow as input into the third
+        sources.put("EventTable", "/tmp/TmpEventTable/part-00000.avro");
+        ctx.setProperty("TARGETPATH", "/tmp/EventTable");
+        ctx.setProperty("FLOWNAME", "CreateFinalEventTable");
+        
+        ctx.setProperty("EVENTDEFNEXPR", "StageName.equals(\"Contracting\") || StageName.equals(\"Closed Won\")");
+        ctx.setProperty("EVENTDEFNCOLS", new String[] { "StageName" });
+        
+        dataTransformationService.executeNamedTransformation(ctx, "createFinalEventTable");
     }
 }

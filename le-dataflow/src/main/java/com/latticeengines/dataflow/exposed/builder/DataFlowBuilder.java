@@ -24,7 +24,7 @@ public abstract class DataFlowBuilder {
 
     private boolean local;
 
-    public abstract String constructFlowDefinition(Map<String, String> sources);
+    public abstract String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources);
 
     public abstract Schema getSchema(String flowName, String operatorName);
 
@@ -48,6 +48,8 @@ public abstract class DataFlowBuilder {
     protected abstract String addRowId(String prior, String fieldName, String tableName);
     
     protected abstract String addMD5(String prior, FieldList fieldsToApply, String targetFieldName);
+    
+    protected abstract List<FieldMetadata> getMetadata(String operator);
 
     public DataFlowBuilder() {
         this(false);

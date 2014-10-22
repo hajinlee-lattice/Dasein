@@ -7,12 +7,13 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 @Component("createPropDataInput")
 public class CreatePropDataInput extends CascadingDataFlowBuilder {
 
     @Override
-    public String constructFlowDefinition(Map<String, String> sources) {
+    public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
         addSource("EventTable", sources.get("EventTable"));
 
         List<GroupByCriteria> groupByCriteria = new ArrayList<>();

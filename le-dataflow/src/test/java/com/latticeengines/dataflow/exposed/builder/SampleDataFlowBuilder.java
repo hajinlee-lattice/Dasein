@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+
 @Component("sampleDataFlowBuilder")
 public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
     
@@ -24,7 +26,7 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
      * ) WHERE MaxRevenue > 0 AND TotalEmployees > 0
      */
     @Override
-    public String constructFlowDefinition(Map<String, String> sources) {
+    public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
         
         // SELECT a.*, b.* FROM lead a, oppty b WHERE a.ConvertedOpportunityId = b.Id
         List<JoinCriteria> joinCriteria = new ArrayList<>();
