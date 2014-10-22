@@ -44,6 +44,7 @@ public class ModelingResourceCLI {
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static void executeJob(CommandLineSetup cmdlstp, String restEndpointHost) throws Exception {
         int numOfCustomers = Integer.parseInt(cl.getOptionValue(CommandLineProperties.CUSTOMER_OPT));
         int customerID = 0;
@@ -81,6 +82,7 @@ public class ModelingResourceCLI {
         int numOfThreads = Integer.parseInt(command[3]);
         executor = Executors.newFixedThreadPool(numOfThreads);
 
+        @SuppressWarnings("rawtypes")
         CommandLineSetup cmdlstp = CommandLineSetupFactory.create(command);
         cl = cmdlstp.getCommandLine();
         // Class<? extends ModelingResourceJob> cls = (Class<? extends

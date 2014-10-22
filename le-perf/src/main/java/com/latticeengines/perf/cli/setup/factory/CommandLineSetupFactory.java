@@ -11,8 +11,10 @@ import com.latticeengines.perf.job.properties.CommandLineProperties;
 
 public class CommandLineSetupFactory {
 
+    @SuppressWarnings("rawtypes")
     private static CommandLineSetup cls;
 
+    @SuppressWarnings("rawtypes")
     public static CommandLineSetup create(String[] command) throws ParseException {
         String operation = command[1];
         String restEndpointHost = command[2];

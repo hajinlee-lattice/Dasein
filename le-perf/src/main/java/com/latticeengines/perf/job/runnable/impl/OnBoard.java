@@ -12,15 +12,11 @@ public class OnBoard extends ModelingResourceJob<OnBoardConfiguration, List<Stri
     private LoadData ld;
     private CreateSamples cs;
     private Profile pf;
-    private Configuration hadoopConfiguration;
-    private String hdfsPath;
 
     public OnBoard(Configuration hadoopConfiguration, String hdfsPath) {
         ld = new LoadData();
         cs = new CreateSamples();
         pf = new Profile();
-        this.hadoopConfiguration = hadoopConfiguration;
-        this.hdfsPath = hdfsPath;
     }
 
     @Override

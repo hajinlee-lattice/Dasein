@@ -127,14 +127,14 @@ public class LedpRestClient {
     }
 
     public static void main(String[] args) {
-        LedpRestClient lrc = new LedpRestClient("localhost:8080");
+        // LedpRestClient lrc = new LedpRestClient("localhost:8080");
         // System.out.println(lrc.getYarnConfiguration("localhost:8088").get(1).getName());
         try {
             // List<String> appIds = lrc.loadData(new LoadConfiguration());
             // System.out.println(appIds.size());
             LoadData ld = new LoadData();
             ld.setConfiguration("localhost:8080", new LoadConfiguration());
-            List<String> appIds = ld.executeJob();
+            // List<String> appIds = ld.executeJob();
         } catch (Exception e) {
             // TODO Auto-generated catch block
 
