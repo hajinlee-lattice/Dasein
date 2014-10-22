@@ -95,7 +95,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         pipesAndOutputSchemas.put(sourceName, new Pair<>(new Pipe(sourceName), fields));
         schemas.put(sourceName, sourceSchema);
     }
-    
+
     @Override
     protected String addInnerJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields) {
         List<JoinCriteria> joinCriteria = new ArrayList<>();
@@ -134,15 +134,16 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             }
             for (String fieldName : outputFields) {
                 String originalFieldName = fieldName;
-                
+
                 if (seenFields.contains(fieldName)) {
                     fieldName = name + "__" + fieldName;
                 }
 
                 seenFields.add(fieldName);
                 FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
-                FieldMetadata fm = new FieldMetadata(origfm.getAvroType(), origfm.getJavaType(), fieldName, origfm.getField());
-                
+                FieldMetadata fm = new FieldMetadata(origfm.getAvroType(), origfm.getJavaType(), fieldName,
+                        origfm.getField(), origfm.getProperties());
+
                 declaredFields.add(fm);
             }
             pipes[i] = getPipeByName(name);
@@ -279,19 +280,17 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             groupby = new Every(groupby, convertToFields(aggFieldName), //
                     getAggregator(groupByCriterion.getTargetFieldName(), groupByCriterion.getAggregationType()), //
                     Fields.ALL);
-            Type avroType = groupByCriterion.getAggregationType().getAvroType();
-            Class<?> javaType = groupByCriterion.getAggregationType().getJavaType();
+            FieldMetadata fm = groupByCriterion.getAggregationType().getFieldMetadata();
 
-            FieldMetadata fmForAggFieldName = nameToFieldMetadataMap.get(aggFieldName);
-            if (fmForAggFieldName == null) {
-                throw new DataFlowException(DataFlowCode.DF_10002, new String[] { aggFieldName, prior });
+            if (fm == null) {
+                fm = nameToFieldMetadataMap.get(aggFieldName);
+                if (fm == null) {
+                    throw new DataFlowException(DataFlowCode.DF_10002, new String[] { aggFieldName, prior });
+                }
             }
-
-            if (avroType == null) {
-                avroType = fmForAggFieldName.getAvroType();
-                javaType = fmForAggFieldName.getJavaType();
-            }
-            declaredFields.add(new FieldMetadata(avroType, javaType, groupByCriterion.getTargetFieldName(), null));
+            FieldMetadata newfm = new FieldMetadata(fm);
+            newfm.setFieldName(groupByCriterion.getTargetFieldName());
+            declaredFields.add(newfm);
         }
 
         pipesAndOutputSchemas.put(groupby.getName(), new Pair<>(groupby, declaredFields));
@@ -343,8 +342,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             FieldMetadata targetFm = nameToFieldMetadataMap.get(targetField.getFieldName());
 
             if (targetFm.getJavaType() != targetField.getJavaType()) {
-                FieldMetadata replaceFm = new FieldMetadata(targetField.getAvroType(),
-                        targetField.getJavaType(), targetField.getFieldName(), null);
+                FieldMetadata replaceFm = new FieldMetadata(targetField.getAvroType(), targetField.getJavaType(),
+                        targetField.getFieldName(), null);
                 nameToFieldMetadataMap.put(targetField.getFieldName(), replaceFm);
                 fm = new ArrayList<>(nameToFieldMetadataMap.values());
             }
@@ -353,7 +352,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, fm));
         return each.getName();
     }
-    
+
     protected String addRowId(String prior, String fieldName, String tableName) {
         Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {

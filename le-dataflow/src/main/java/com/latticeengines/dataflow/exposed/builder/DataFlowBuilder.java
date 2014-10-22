@@ -156,30 +156,25 @@ public abstract class DataFlowBuilder {
         public static enum AggregationType {
             MAX, //
             MIN, //
-            SUM, //
-            COUNT(Type.INT, Integer.class), //
+            SUM(new FieldMetadata(Type.DOUBLE, Double.class, null, null)), //
+            COUNT(new FieldMetadata(Type.LONG, Long.class, null, null)), //
             FIRST, //
             LAST;
 
-            private Type avroType;
-            private Class<?> javaType;
+            private FieldMetadata fieldMetadata;
 
             AggregationType() {
-                this(null, null);
+                this(null);
             }
 
-            AggregationType(Type avroType, Class<?> javaType) {
-                this.avroType = avroType;
-                this.javaType = javaType;
+            AggregationType(FieldMetadata fieldMetadata) {
+                this.fieldMetadata = fieldMetadata;
             }
 
-            public Type getAvroType() {
-                return avroType;
+            public FieldMetadata getFieldMetadata() {
+                return fieldMetadata;
             }
 
-            public Class<?> getJavaType() {
-                return javaType;
-            }
         }
 
         private final String aggregatedFieldName;
@@ -206,11 +201,15 @@ public abstract class DataFlowBuilder {
     }
 
     public static class FieldMetadata {
-        private final Schema.Type avroType;
-        private final Class<?> javaType;
-        private final String fieldName;
-        private final Field avroField;
+        private Schema.Type avroType;
+        private Class<?> javaType;
+        private String fieldName;
+        private Field avroField;
         private Map<String, String> properties = new HashMap<>();
+        
+        public FieldMetadata(FieldMetadata fm) {
+            this(fm.getAvroType(), fm.javaType, fm.getFieldName(), fm.getField(), fm.getProperties());
+        }
         
         public FieldMetadata(String fieldName, Class<?> javaType) {
             this(AvroUtils.getAvroType(javaType), javaType, fieldName, null);
@@ -228,6 +227,12 @@ public abstract class DataFlowBuilder {
             }
         }
 
+        public FieldMetadata(Schema.Type avroType, Class<?> javaType, String fieldName, Field avroField, Map<String, String> properties) {
+            this(avroType, javaType, fieldName, avroField);
+            if (avroField == null && properties != null) {
+                this.properties.putAll(properties);
+            }
+        }
         public Schema.Type getAvroType() {
             return avroType;
         }
@@ -238,6 +243,10 @@ public abstract class DataFlowBuilder {
 
         public String getFieldName() {
             return fieldName;
+        }
+        
+        public void setFieldName(String fieldName) {
+            this.fieldName = fieldName;
         }
         
         public Field getField() {
