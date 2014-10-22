@@ -10,30 +10,35 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.service.PagerDutyService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
 public class PagerDutyServiceTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
-    PagerDutyService pagerDutyService;
+    PagerDutyServiceImpl pagerDutyService;
 
-    @Test(groups = "functional", enabled = false)
+    @BeforeClass(groups = "functional")
+    public void setup() {
+        pagerDutyService.useTestServiceApiKey();
+    }
+
+    @Test(groups = "functional", enabled = true)
     public void testTriggerOneDetail() throws ClientProtocolException, IOException, ParseException {
         String result = pagerDutyService.triggerEvent("PagerDutyServiceTestNG", new BasicNameValuePair("testmetric",
                 "testvalue"));
         confirmResult(result);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testTriggerNoDetail() throws ClientProtocolException, IOException, ParseException {
         String result = pagerDutyService.triggerEvent("PagerDutyServiceTestNG");
         confirmResult(result);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testTriggerMultipleDetail() throws ClientProtocolException, IOException, ParseException {
         String result = pagerDutyService.triggerEvent("PagerDutyServiceTestNG", new BasicNameValuePair("testmetric",
                 "testvalue"), new BasicNameValuePair("anothertestmetric", "anothertestvalue"));

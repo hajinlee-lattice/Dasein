@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.exposed.service.AlertService;
-import com.latticeengines.dataplatform.exposed.service.PagerDutyService;
 
 @Component("alertService")
 public class AlertServiceImpl implements AlertService {
@@ -21,7 +20,7 @@ public class AlertServiceImpl implements AlertService {
     private boolean alertServiceEnabled;
 
     @Autowired
-    private PagerDutyService pagerDutyService;
+    private PagerDutyServiceImpl pagerDutyService;
 
     public String triggerCriticalEvent(String description, BasicNameValuePair... details) {
         if (!alertServiceEnabled) {
@@ -38,5 +37,10 @@ public class AlertServiceImpl implements AlertService {
         }
 
         return result;
+    }
+
+    void enableTestMode() {
+        alertServiceEnabled = true;
+        pagerDutyService.useTestServiceApiKey();
     }
 }

@@ -10,6 +10,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.exposed.service.AlertService;
@@ -18,22 +19,27 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 public class AlertServiceTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
-    AlertService alertService;
+    AlertServiceImpl alertService;
 
-    @Test(groups = "functional", enabled = false)
+    @BeforeClass(groups = "functional")
+    public void setup() {
+        alertService.enableTestMode();
+    }
+
+    @Test(groups = "functional", enabled = true)
     public void testTriggerOneDetail() throws ClientProtocolException, IOException, ParseException {
         String result = alertService.triggerCriticalEvent("AlertServiceTestNG", new BasicNameValuePair("testmetric",
                 "testvalue"));
         confirmResult(result);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testTriggerNoDetail() throws ClientProtocolException, IOException, ParseException {
         String result = alertService.triggerCriticalEvent("AlertServiceTestNG");
         confirmResult(result);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testTriggerMultipleDetail() throws ClientProtocolException, IOException, ParseException {
         String result = alertService.triggerCriticalEvent("AlertServiceTestNG", new BasicNameValuePair("testmetric",
                 "testvalue"), new BasicNameValuePair("anothertestmetric", "anothertestvalue"));

@@ -15,17 +15,22 @@ import com.latticeengines.dataplatform.exposed.service.PagerDutyService;
 @Component("pagerDutyService")
 public class PagerDutyServiceImpl implements PagerDutyService {
 
+    private static final String MODELINGPLATFORM_SERVICEAPI_KEY = "62368b3c576e4f6180dba752216fd487";
+    private static final String TEST_SERVICEAPI_KEY = "c6ca7f8f643c4db4a475bae9a504552d";
+
     private static List<BasicNameValuePair> headers = new ArrayList<>();
     static {
         headers.add(new BasicNameValuePair("Authorization", "Token token=VjqbZdWQbwq2Fy7gniny"));
         headers.add(new BasicNameValuePair("Content-type", "application/json"));
     }
 
+    private String serviceApiKey = MODELINGPLATFORM_SERVICEAPI_KEY;
+
     public String triggerEvent(String description, BasicNameValuePair... details) throws ClientProtocolException,
             IOException {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"service_key\": \"62368b3c576e4f6180dba752216fd487\",");
+        sb.append("\"service_key\": \"" + serviceApiKey + "\",");
         sb.append("\"event_type\": \"trigger\",");
         sb.append("\"description\": \"" + description + "\",");
         sb.append("\"client\": \"Modeling Platform\",");
@@ -45,6 +50,11 @@ public class PagerDutyServiceImpl implements PagerDutyService {
                 "https://events.pagerduty.com/generic/2010-04-15/create_event.json", headers, sb.toString());
 
         return response;
+    }
+
+    @VisibleForTesting
+    void useTestServiceApiKey() {
+        serviceApiKey = TEST_SERVICEAPI_KEY;
     }
 
     @VisibleForTesting
