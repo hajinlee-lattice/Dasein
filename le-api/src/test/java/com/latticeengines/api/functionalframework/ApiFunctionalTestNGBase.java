@@ -70,10 +70,6 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
 
         platformTestBase.setYarnClient(defaultYarnClient);
 
-        if (!doYarnClusterSetup()) {
-            return;
-        }
-        platformTestBase.setupRunEnvironment();
     }
 
     static class ThrowExceptionResponseErrorHandler implements ResponseErrorHandler {

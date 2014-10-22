@@ -143,56 +143,6 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     public void afterEachTest() {
     }
 
-    @BeforeClass(groups = { "functional", "functional.scheduler" })
-    public void setupRunEnvironment() throws Exception {
-        log.info("Test name = " + this.getClass());
-
-        if (!doYarnClusterSetup()) {
-            return;
-        }
-
-        FileSystem fs = FileSystem.get(yarnConfiguration);
-        // Delete directories
-        fs.delete(new Path("/app"), true);
-
-        // Make directories
-        fs.mkdirs(new Path("/app/dataplatform/scripts"));
-        fs.mkdirs(new Path("/app/dataplatform/scripts/leframework"));
-        // Copy jars from build to hdfs
-        String dataplatformPropDir = System.getProperty("DATAPLATFORM_PROPDIR");
-        if (StringUtils.isEmpty(dataplatformPropDir)) {
-            dataplatformPropDir = System.getenv().get("DATAPLATFORM_PROPDIR");
-        }
-        List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
-
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/hadoop-metrics2.properties",
-                "/app/dataplatform", false));
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/launcher.py",
-                "/app/dataplatform/scripts", false));
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/pipelinefwk.py",
-                "/app/dataplatform/scripts", false));
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../src/main/python/pipeline/pipeline.py",
-                "/app/dataplatform/scripts", false));
-        copyEntries.add(new CopyEntry(
-                "file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/lr_train.py",
-                "/app/dataplatform/scripts/algorithm", false));
-        copyEntries.add(new CopyEntry(
-                "file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/dt_train.py",
-                "/app/dataplatform/scripts/algorithm", false));
-        copyEntries.add(new CopyEntry(
-                "file:" + dataplatformPropDir + "/../../../src/main/python/algorithm/rf_train.py",
-                "/app/dataplatform/scripts/algorithm", false));
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir
-                + "/../../../src/main/python/algorithm/data_profile.py", "/app/dataplatform/scripts/algorithm", false));
-        String dataplatformProps = "file:" + dataplatformPropDir + "/dataplatform.properties";
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/leframework.tar.gz",
-                "/app/dataplatform/scripts", false));
-        copyEntries.add(new CopyEntry("file:" + dataplatformPropDir + "/../../../target/lepipeline.tar.gz",
-                "/app/dataplatform/scripts", false));
-        copyEntries.add(new CopyEntry(dataplatformProps, "/app/dataplatform", false));
-        doCopy(fs, copyEntries);
-    }
-
     protected void cleanUpHdfs(String customer) {
         String deletePath = customerBaseDir + "/" + customer + "/data";
         try (FileSystem fs = FileSystem.get(yarnConfiguration)) {

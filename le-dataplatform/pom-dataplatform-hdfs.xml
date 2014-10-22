@@ -14,6 +14,13 @@
         <relativePath>../le-parent</relativePath>
     </parent>
 
+    <properties>
+        <mapping.username>yarn</mapping.username>
+        <mapping.groupname>hdfs</mapping.groupname>
+        <pre.install.script>preinstall</pre.install.script>
+        <post.install.script>postinstall</post.install.script>
+    </properties>
+
     <profiles>
         <profile>
             <id>development</id>
@@ -82,6 +89,23 @@
                 <hadoop-metrics2.properties.path>conf/env/buildmachine</hadoop-metrics2.properties.path>
             </properties>
         </profile>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>dev</value>
+                </property>
+            </activation>
+            <properties>
+                <dataplatform.properties.path>conf/env/dev</dataplatform.properties.path>
+                <hadoop-metrics2.properties.path>conf/env/dev</hadoop-metrics2.properties.path>
+                <mapping.username>smeng</mapping.username>
+                <mapping.groupname>users</mapping.groupname>
+                <pre.install.script>preinstall-local</pre.install.script>
+                <post.install.script>postinstall-local</post.install.script>
+            </properties>
+        </profile>
     </profiles>
 
     <build>
@@ -104,8 +128,8 @@
                         <mapping>
                             <directory>/tmp/app/dataplatform</directory>
                             <filemode>644</filemode>
-                            <username>yarn</username>
-                            <groupname>hdfs</groupname>
+                            <username>${mapping.username}</username>
+                            <groupname>${mapping.groupname}</groupname>
                             <sources>
                                 <source>
                                     <location>${hadoop-metrics2.properties.path}/hadoop-metrics2.properties</location>
@@ -118,8 +142,8 @@
                         <mapping>
                             <directory>/tmp/app/dataplatform/scripts</directory>
                             <filemode>644</filemode>
-                            <username>yarn</username>
-                            <groupname>hdfs</groupname>
+                            <username>${mapping.username}</username>
+                            <groupname>${mapping.groupname}</groupname>
                             <sources>
                                 <source>
                                     <location>target/leframework.tar.gz</location>
@@ -141,8 +165,8 @@
                         <mapping>
                             <directory>/tmp/app/dataplatform/scripts/algorithm</directory>
                             <filemode>644</filemode>
-                            <username>yarn</username>
-                            <groupname>hdfs</groupname>
+                            <username>${mapping.username}</username>
+                            <groupname>${mapping.groupname}</groupname>
                             <sources>
                                 <source>
                                     <location>src/main/python/algorithm</location>
@@ -151,10 +175,10 @@
                         </mapping>
                     </mappings>
                     <preinstallScriptlet>
-                        <scriptFile>src/main/resources/rpm/dataplatform-hdfs/scripts/preinstall</scriptFile>
+                        <scriptFile>src/main/resources/rpm/dataplatform-hdfs/scripts/${pre.install.script}</scriptFile>
                     </preinstallScriptlet>
                     <postinstallScriptlet>
-                        <scriptFile>src/main/resources/rpm/dataplatform-hdfs/scripts/postinstall</scriptFile>
+                        <scriptFile>src/main/resources/rpm/dataplatform-hdfs/scripts/${post.install.script}</scriptFile>
                         <fileEncoding>utf-8</fileEncoding>
                     </postinstallScriptlet>
                 </configuration>
