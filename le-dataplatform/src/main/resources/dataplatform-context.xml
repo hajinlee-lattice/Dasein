@@ -27,7 +27,6 @@
     <import resource="classpath:dataplatform-yarn-client-context.xml"/>
     <import resource="classpath:sampling/dataplatform-mr-sampling-context.xml" />
     <import resource="classpath:dataplatform-persistence-context.xml" />
-    <import resource="classpath:common-component-context.xml" />
     <import resource="classpath:common-jmx-component-context.xml" />
 
     <bean id="sqoopJobTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
