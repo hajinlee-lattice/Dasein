@@ -5,7 +5,7 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.HttpUtils;
+import com.latticeengines.common.exposed.util.HttpWithRetryUtils;
 
 @Component("httpFSMBean")
 @ManagedResource(objectName = "Diagnostics:name=HttpFSCheck")
@@ -18,7 +18,7 @@ public class HTTPFSAccessMBean {
     public String checkHttpAccess() {
         try {
             String url = webHDFS + "/app/dataplatform/dataplatform.properties?user.name=yarn&op=GETFILESTATUS";
-            return "/app/dataplatform/dataplatform.properties: \n" + HttpUtils.executeGetRequest(url);
+            return "/app/dataplatform/dataplatform.properties: \n" + HttpWithRetryUtils.executeGetRequest(url);
         } catch (Exception e) {
             return "Failed to access /app/dataplatform/dataplatform.properties from HttpFS due to: " + e.getMessage();
         }

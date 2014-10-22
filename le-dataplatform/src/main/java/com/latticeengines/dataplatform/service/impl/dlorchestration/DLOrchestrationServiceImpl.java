@@ -21,6 +21,7 @@ import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
+import com.latticeengines.dataplatform.exposed.service.AlertService;
 import com.latticeengines.dataplatform.service.dlorchestration.DLOrchestrationService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
@@ -54,6 +55,8 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     private ModelStepProcessor modelStepRetrieveMetadataProcessor;
 
+    private AlertService alertService;
+
     private DebugProcessorImpl debugProcessorImpl;
 
     private int waitTime = 180;
@@ -83,7 +86,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
                     modelingJobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor,
                     modelCommandLogService, modelCommandResultEntityMgr, modelStepFinishProcessor,
                     modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor, debugProcessorImpl,
-                    httpFsPrefix)));
+                    alertService, httpFsPrefix)));
         }
         for (Future<Long> future : futures) {
             try {
@@ -213,5 +216,13 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     public void setHttpFsPrefix(String httpFsPrefix) {
         this.httpFsPrefix = httpFsPrefix;
+    }
+
+    public AlertService getAlertService() {
+        return alertService;
+    }
+
+    public void setAlertService(AlertService alertService) {
+        this.alertService = alertService;
     }
 }

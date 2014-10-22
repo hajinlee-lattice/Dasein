@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HttpUtils;
+import com.latticeengines.common.exposed.util.HttpWithRetryUtils;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
@@ -67,7 +67,7 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
                     modelCommandParameters.getDlTenant(), modelCommandParameters.getDlQuery());
             Map<String, String> headers = new HashMap<String, String>();
             headers.put("MagicAuthentication", "Security through obscurity!");
-            metadata = HttpUtils.executePostRequest(queryMetadataUrl, request, headers);
+            metadata = HttpWithRetryUtils.executePostRequest(queryMetadataUrl, request, headers);
             if (Strings.isNullOrEmpty(metadata)) {
                 throw new LedpException(LedpCode.LEDP_16006, new String[] { String.valueOf(modelCommand.getPid()),
                         queryMetadataUrl });

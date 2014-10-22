@@ -138,7 +138,7 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setTargets(model.getTargetsList());
         classifier.setKeyCols(model.getKeyColsList());
         classifier.setPythonScriptHdfsPath(algorithm.getScript());
-        
+
         String pipelineLibScript = algorithm.getPipelineLibScript();
         if (StringUtils.isEmpty(pipelineLibScript)) {
         	pipelineLibScript = "/app/dataplatform/scripts/lepipeline.tar.gz";
@@ -147,7 +147,7 @@ public class ModelingServiceImpl implements ModelingService {
         if (StringUtils.isEmpty(pipelineScript)) {
         	pipelineScript = "/app/dataplatform/scripts/pipeline.py";
         }
-        
+
         classifier.setPythonPipelineLibHdfsPath(pipelineLibScript);
         classifier.setPythonPipelineScriptHdfsPath(pipelineScript);
         classifier.setDataFormat(model.getDataFormat());

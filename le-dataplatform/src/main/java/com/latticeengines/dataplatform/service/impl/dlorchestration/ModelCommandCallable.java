@@ -12,9 +12,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.http.message.BasicNameValuePair;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
@@ -24,6 +26,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.dataplatform.exposed.service.AlertService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
@@ -65,6 +68,8 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private DebugProcessorImpl debugProcessorImpl;
 
+    private AlertService alertService;
+
     private ModelCommand modelCommand;
 
     private String httpFsPrefix;
@@ -78,7 +83,7 @@ public class ModelCommandCallable implements Callable<Long> {
             ModelCommandLogService modelCommandLogService, ModelCommandResultEntityMgr modelCommandResultEntityMgr,
             ModelStepProcessor modelStepFinishProcessor, ModelStepProcessor modelStepOutputResultsProcessor,
             ModelStepProcessor modelStepRetrieveMetadataProcessor, DebugProcessorImpl debugProcessorImpl,
-            String httpFsPrefix) {
+            AlertService alertService, String httpFsPrefix) {
         this.modelCommand = modelCommand;
         this.yarnConfiguration = yarnConfiguration;
         this.modelingJobService = modelingJobService;
@@ -91,6 +96,7 @@ public class ModelCommandCallable implements Callable<Long> {
         this.modelStepFinishProcessor = modelStepFinishProcessor;
         this.modelStepRetrieveMetadataProcessor = modelStepRetrieveMetadataProcessor;
         this.debugProcessorImpl = debugProcessorImpl;
+        this.alertService = alertService;
         this.httpFsPrefix = httpFsPrefix;
     }
 
@@ -207,7 +213,8 @@ public class ModelCommandCallable implements Callable<Long> {
         }
     }
 
-    private void handleJobFailed() {
+    @VisibleForTesting
+    void handleJobFailed() {
         modelCommandLogService.logCompleteStep(modelCommand, modelCommand.getModelCommandStep(),
                 ModelCommandStatus.FAIL);
 
@@ -218,6 +225,11 @@ public class ModelCommandCallable implements Callable<Long> {
 
         modelCommand.setCommandStatus(ModelCommandStatus.FAIL);
         modelCommandEntityMgr.update(modelCommand);
+
+        alertService.triggerCriticalEvent(LedpCode.LEDP_16007.getMessage(), new BasicNameValuePair("commandId",
+                modelCommand.getPid().toString()),
+                new BasicNameValuePair("deploymentExternalId", modelCommand.getDeploymentExternalId()),
+                new BasicNameValuePair("failedStep", modelCommand.getModelCommandStep().getDescription()));
     }
 
     private void executeYarnStep(ModelCommandStep step, ModelCommandParameters commandParameters) {

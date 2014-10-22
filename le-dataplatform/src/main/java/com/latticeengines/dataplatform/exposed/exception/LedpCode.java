@@ -46,7 +46,9 @@ public enum LedpCode {
     LEDP_16003("Problem retrieving DL sessionId for model command:{0} from url:{1}."), //
     LEDP_16004("Retrieved empty DL sessionId for model command:{0} from url:{1}."), //
     LEDP_16005("Problem retrieving DL metadata columns for model command:{0} from url:{1}."), //
-    LEDP_16006("Retrieved empty DL metadata columns for model command:{0} from url:{1}.");
+    LEDP_16006("Retrieved empty DL metadata columns for model command:{0} from url:{1}."), //
+    LEDP_16007("LeadScoringCommand failed.");
+
 
     private String message;
 
