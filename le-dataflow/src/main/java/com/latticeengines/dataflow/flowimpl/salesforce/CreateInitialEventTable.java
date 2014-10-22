@@ -47,7 +47,7 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
                 new FieldList("ContactId"));
 
         String propDataHash = addMD5(opptyContactRole$lead$contact, //
-                new FieldList("Domain", "Company", "City", "Country"), //
+                new FieldList("Domain", "Company", "City", "State", "Country"), //
                 "PropDataHash");
 
         return propDataHash;
