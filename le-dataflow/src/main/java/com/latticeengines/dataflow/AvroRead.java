@@ -19,11 +19,8 @@ import cascading.flow.FlowDef;
 import cascading.flow.FlowStep;
 import cascading.flow.FlowStepListener;
 import cascading.flow.hadoop.HadoopFlowConnector;
-import cascading.operation.aggregator.MaxValue;
-import cascading.operation.aggregator.Sum;
-import cascading.operation.expression.ExpressionFilter;
+import cascading.operation.aggregator.Last;
 import cascading.operation.expression.ExpressionFunction;
-import cascading.operation.filter.Not;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -37,7 +34,7 @@ import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.dataflow.runtime.cascading.AddRowId;
+import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 
 public class AvroRead {
 
@@ -48,7 +45,7 @@ public class AvroRead {
         String opportunity = "file://"
                 + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro")
                         .getPath();
-        String wcPath = "/tmp/EventTable";
+        String wcPath = "/tmp/AvroReadResults";
 
         // Get the schema from a file
         Schema leadSchema = AvroUtils.getSchema(new Configuration(), new Path(lead));
@@ -103,19 +100,22 @@ public class AvroRead {
 
         join = new Each(join, new Fields("Email"), function, Fields.ALL);
 
-        join = new GroupBy(join, new Fields("Domain"), new Fields("FirstName"));
+        //join = new GroupBy(join, new Fields("Domain"), new Fields("FirstName"));
 
         // join = new Every(join, Fields.ALL, new Last(), Fields.RESULTS);
-        // /*
+        /*
         join = new Every(join, new Fields("AnnualRevenue"), new MaxValue(new Fields("MaxRevenue")), Fields.ALL);
         join = new Every(join, new Fields("NumberOfEmployees"), new Sum(new Fields("TotalEmployees")), Fields.ALL);
 
         ExpressionFilter filter = new ExpressionFilter("$0 > 0.0", Double.TYPE); 
         Not not = new Not(filter);
-        join = new Each(join, new Fields("MaxRevenue"), not);
+        join = new Each(join, new Fields("MaxRevenue"), not);*/
         
-        join = new Each(join, Fields.ALL, new AddRowId(new Fields("RowId"), "EventTable"), Fields.ALL);
+        join = new Each(join, new Fields("Domain", "Company", "City", "Country"), new AddMD5Hash(new Fields("PropDataHash")), Fields.ALL);
 
+        join = new GroupBy(join, new Fields("Domain", "Company", "City", "Country", "PropDataHash"));
+        
+        join = new Every(join, Fields.ALL, new Last(), Fields.GROUP);
         FlowDef flowDef = FlowDef.flowDef().setName("wc") //
                 .addSources(sources) //
                 .addTailSink(join, sink);

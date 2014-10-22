@@ -44,8 +44,10 @@ public abstract class DataFlowBuilder {
     protected abstract String addFilter(String prior, String expression, FieldList filterFields);
 
     protected abstract String addFunction(String prior, String expression, FieldList fieldsToApply, FieldMetadata fieldToCreate);
-
+    
     protected abstract String addRowId(String prior, String fieldName, String tableName);
+    
+    protected abstract String addMD5(String prior, FieldList fieldsToApply, String targetFieldName);
 
     public DataFlowBuilder() {
         this(false);
@@ -180,11 +182,21 @@ public abstract class DataFlowBuilder {
         private final String aggregatedFieldName;
         private final String targetFieldName;
         private final AggregationType aggregationType;
-
+        private final FieldList outputFieldStrategy;
+        
         public GroupByCriteria(String aggregatedFieldName, String targetFieldName, AggregationType aggregationType) {
+            this(aggregatedFieldName, targetFieldName, aggregationType, null);
+        }
+        
+        public GroupByCriteria(AggregationType aggregationType, FieldList outputFieldStrategy) {
+            this(null, null, aggregationType, outputFieldStrategy);
+        }
+
+        public GroupByCriteria(String aggregatedFieldName, String targetFieldName, AggregationType aggregationType, FieldList outputFieldStrategy) {
             this.aggregatedFieldName = aggregatedFieldName;
             this.targetFieldName = targetFieldName;
             this.aggregationType = aggregationType;
+            this.outputFieldStrategy = outputFieldStrategy;
         }
 
         public String getAggregatedFieldName() {
@@ -197,6 +209,10 @@ public abstract class DataFlowBuilder {
 
         public AggregationType getAggregationType() {
             return aggregationType;
+        }
+
+        public FieldList getOutputFieldStrategy() {
+            return outputFieldStrategy;
         }
     }
 
@@ -276,7 +292,21 @@ public abstract class DataFlowBuilder {
     }
 
     public static class FieldList {
-        private final String[] fields;
+        public static FieldList ALL = new FieldList(KindOfFields.ALL);
+        public static FieldList RESULTS = new FieldList(KindOfFields.RESULTS);
+        public static FieldList GROUP = new FieldList(KindOfFields.GROUP);
+        
+        public static enum KindOfFields {
+            ALL, //
+            RESULTS, //
+            GROUP;
+        }
+        private String[] fields;
+        private KindOfFields kind;
+        
+        public FieldList(KindOfFields kind) {
+            this.kind = kind;
+        }
 
         public FieldList(String... fields) {
             this.fields = fields;
@@ -292,6 +322,11 @@ public abstract class DataFlowBuilder {
             }
             return Arrays.<String> asList(fields);
         }
+
+        public KindOfFields getKind() {
+            return kind;
+        }
+
     }
 
 }

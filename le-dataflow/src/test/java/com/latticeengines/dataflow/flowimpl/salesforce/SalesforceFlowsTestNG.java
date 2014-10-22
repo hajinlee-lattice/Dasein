@@ -16,11 +16,14 @@ import com.latticeengines.dataflow.exposed.service.impl.DataTransformationServic
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
-public class CreateInitialEventTableTestNG extends DataFlowFunctionalTestNGBase {
+public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
     
     @Autowired
     private CreateInitialEventTable createInitialEventTable;
     
+    @Autowired
+    private CreatePropDataInput createPropDataInput;
+
     @Autowired
     private DataTransformationServiceImpl dataTransformationService;
     
@@ -31,7 +34,8 @@ public class CreateInitialEventTableTestNG extends DataFlowFunctionalTestNGBase 
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        createInitialEventTable.setLocal(true);
+        createInitialEventTable.setLocal(false);
+        createPropDataInput.setLocal(false);
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
         opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
         contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro").getPath();
@@ -64,6 +68,7 @@ public class CreateInitialEventTableTestNG extends DataFlowFunctionalTestNGBase 
             sources.put("OpportunityContactRole", "/tmp/avro/OpportunityContactRole.avro");
         }
         
+        // Execute the first flow
         DataFlowContext ctx = new DataFlowContext();
         ctx.setProperty("SOURCES", sources);
         ctx.setProperty("TARGETPATH", "/tmp/EventTable");
@@ -71,5 +76,10 @@ public class CreateInitialEventTableTestNG extends DataFlowFunctionalTestNGBase 
         ctx.setProperty("FLOWNAME", "CreateInitialEventTable");
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
         
+        // Execute the second flow, with the output of the first flow as input into the second
+        sources.put("EventTable", "/tmp/EventTable/part-00000.avro");
+        ctx.setProperty("TARGETPATH", "/tmp/PDTable");
+        ctx.setProperty("FLOWNAME", "CreatePropDataInput");
+        dataTransformationService.executeNamedTransformation(ctx, "createPropDataInput");
     }
 }

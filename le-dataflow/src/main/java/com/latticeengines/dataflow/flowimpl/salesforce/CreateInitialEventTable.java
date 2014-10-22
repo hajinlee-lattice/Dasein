@@ -15,16 +15,16 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
         addSource("Contact", sources.get("Contact"));
         addSource("OpportunityContactRole", sources.get("OpportunityContactRole"));
 
-        FieldMetadata domainForLead = new FieldMetadata("DomainForLead", String.class);
-        domainForLead.setPropertyValue("length", "255");
-        domainForLead.setPropertyValue("precision", "0");
-        domainForLead.setPropertyValue("scale", "0");
-        domainForLead.setPropertyValue("logicalType", "domain");
+        FieldMetadata domain = new FieldMetadata("Domain", String.class);
+        domain.setPropertyValue("length", "255");
+        domain.setPropertyValue("precision", "0");
+        domain.setPropertyValue("scale", "0");
+        domain.setPropertyValue("logicalType", "domain");
         String f1Name = addFunction("Lead", //
                 "Email.substring(Email.indexOf('@') + 1)", //
                 new FieldList("Email"), //
-                domainForLead);
-        
+                domain);
+
         FieldMetadata domainForContact = new FieldMetadata("DomainForContact", String.class);
         domainForContact.setPropertyValue("length", "255");
         domainForContact.setPropertyValue("precision", "0");
@@ -36,7 +36,7 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
                 domainForContact);
 
         String lead$contact = addInnerJoin(f1Name, //
-                new FieldList("DomainForLead"), //
+                new FieldList("Domain"), //
                 f2Name, //
                 new FieldList("DomainForContact"));
 
@@ -44,10 +44,11 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
                 new FieldList("Contact__Id"), //
                 "OpportunityContactRole", //
                 new FieldList("ContactId"));
-        
-        String withRowid = addRowId(opptyContactRole$lead$contact, //
-                "RowId", opptyContactRole$lead$contact);
 
-        return withRowid;
+        String propDataHash = addMD5(opptyContactRole$lead$contact, //
+                new FieldList("Domain", "Company", "City", "Country"), //
+                "PropDataHash");
+
+        return propDataHash;
     }
 }
