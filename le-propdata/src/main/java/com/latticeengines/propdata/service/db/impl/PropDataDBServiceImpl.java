@@ -190,19 +190,33 @@ public class PropDataDBServiceImpl implements PropDataDBService {
 		builder.append(commandName).append("_").append(commandId).append("_")
 				.append(destTable);
 		tableList.add(builder.toString());
-		keyColsList.add("Source_Id");
+		keyColsList.add("Source_RowId");
 		tableList.add(builder.append("_MetaData").toString());
 		keyColsList.add("InternalColumnName");
 	}
 
 	@Override
 	public PropDataContext exportToDB(PropDataContext requestContext) {
+
 		PropDataContext responseContext = new PropDataContext();
+		Boolean mapColumn = requestContext.getProperty(
+				PropDataKey.ImportExportKey.MAP_COLUMN.getValue(),
+				Boolean.class);
+		if (mapColumn == null) {
+			mapColumn = true;
+		}
 
 		try {
 
-			createSingleTableFromAvro(requestContext);
-			return exportFromHdfsToDB(requestContext);
+			List<StringBuilder> mapColumnSqls = new ArrayList<>();
+			internalCreateTableFromAvro(requestContext, mapColumnSqls);
+			responseContext = exportFromHdfsToDB(requestContext);
+
+			if (mapColumn) {
+				for (StringBuilder mapColumnSql : mapColumnSqls) {
+					propDataEntityMgr.executeProcedure(mapColumnSql.toString());
+				}
+			}
 
 		} catch (Exception ex) {
 			log.error("Failed to export!", ex);
@@ -276,17 +290,27 @@ public class PropDataDBServiceImpl implements PropDataDBService {
 	public void createSingleTableFromAvro(PropDataContext requestContext)
 			throws Exception {
 
-		String tableName = requestContext.getProperty(
-				PropDataKey.ImportExportKey.TABLE.getValue(), String.class);
-
-		dropTable(tableName);
-
-		String sql = generateSql(requestContext);
-		propDataEntityMgr.createTableByQuery(sql);
+		List<StringBuilder> mapColumnSqls = new ArrayList<>();
+		internalCreateTableFromAvro(requestContext, mapColumnSqls);
 
 	}
 
-	private String generateSql(PropDataContext requestContext) throws Exception {
+	private void internalCreateTableFromAvro(PropDataContext requestContext,
+			List<StringBuilder> mapColumnSqls) throws Exception {
+		String tableName = requestContext.getProperty(
+				PropDataKey.ImportExportKey.TABLE.getValue(), String.class);
+
+		StringBuilder createTableSql = new StringBuilder();
+
+		generateSql(requestContext, createTableSql, mapColumnSqls);
+
+		dropTable(tableName);
+		propDataEntityMgr.executeQueryUpdate(createTableSql.toString());
+	}
+
+	private void generateSql(PropDataContext requestContext,
+			StringBuilder createTableSql, List<StringBuilder> mapColumnSqls)
+			throws Exception {
 		String customer = requestContext.getProperty(
 				PropDataKey.ImportExportKey.CUSTOMER.getValue(), String.class);
 		String table = requestContext.getProperty(
@@ -302,25 +326,55 @@ public class PropDataDBServiceImpl implements PropDataDBService {
 					}
 				});
 
-		return generateSqlFromAvroFile(files.get(0), table);
+		generateSqlFromAvroFile(files.get(0), table, createTableSql,
+				mapColumnSqls);
 	}
 
-	private String generateSqlFromAvroFile(String file, String table) {
-		StringBuilder builder = new StringBuilder();
+	private void generateSqlFromAvroFile(String file, String table,
+			StringBuilder createTableSql, List<StringBuilder> mapColumnSqls) {
 		Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(file));
-		builder.append("CREATE TABLE ").append(table).append(" (");
+
+		getCrearteTableSql(createTableSql, table, schema);
+		getMapColumnSql(mapColumnSqls, table, schema);
+
+	}
+
+	private void getMapColumnSql(List<StringBuilder> mapColumnSqls,
+			String table, Schema schema) {
 
 		List<Field> fields = schema.getFields();
 		for (Field field : fields) {
-			addField(builder, field);
+			StringBuilder builder = addFieldForMapColumn(field, table);
+			if (builder != null && builder.length() > 0) {
+				mapColumnSqls.add(builder);
+			}
 		}
-		builder.setLength(builder.length() - 1);
-		builder.append(")");
-
-		return builder.toString();
 	}
 
-	private void addField(StringBuilder builder, Field field) {
+	private StringBuilder addFieldForMapColumn(Field field, String table) {
+
+		String fieldName = field.name();
+		if (fieldName.equalsIgnoreCase("Company")) {
+			StringBuilder builder = new StringBuilder("sp_rename ").append("'")
+					.append(table).append(".").append(fieldName).append("', ");
+			builder.append("'").append("Name").append("',").append(" 'COLUMN'");
+			return builder;
+		}
+		return null;
+	}
+
+	private void getCrearteTableSql(StringBuilder createTableSql, String table,
+			Schema schema) {
+		createTableSql.append("CREATE TABLE ").append(table).append(" (");
+		List<Field> fields = schema.getFields();
+		for (Field field : fields) {
+			addFieldForCreateTable(createTableSql, field);
+		}
+		createTableSql.setLength(createTableSql.length() - 1);
+		createTableSql.append(")");
+	}
+
+	private void addFieldForCreateTable(StringBuilder builder, Field field) {
 		builder.append(field.name()).append(" ");
 
 		Schema schema = field.schema();
@@ -433,8 +487,10 @@ public class PropDataDBServiceImpl implements PropDataDBService {
 
 		commands.setNumRetries(0);
 		commands.setProcessUID(UUID.randomUUID().toString());
-		commands.setSourceTable(requestContext.getProperty(
-				PropDataKey.CommandsKey.SOURCE_TABLE.getValue(), String.class));
+		String sourceTable = requestContext.getProperty(
+				PropDataKey.CommandsKey.SOURCE_TABLE.getValue(), String.class);
+		commands.setSourceTable(sourceTable);
+
 		return commands;
 	}
 

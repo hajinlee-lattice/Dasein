@@ -29,6 +29,7 @@ public class PropDataDBServiceImplTestNG extends
 	private static final String LEAD_TABLE = "lead";
 	private static final String OPPORTUNITY_TABLE = "Opportunity";
 	private static final String PAYPAL_TABLE = "PayPal_matching_pipeline";
+	private static final String EVENT_TABLE_TABLE = "EventTable";
 
 	private static final String CUSTOMER = "PropData-Pipeline-Tester";
 
@@ -42,6 +43,10 @@ public class PropDataDBServiceImplTestNG extends
 	private static final String PAYPALL_FILE = ClassLoader
 			.getSystemResource(
 					"com/latticeengines/propdata/dataflow/service/impl/PayPal_matching_pipeline.avro")
+			.getPath();
+	private static final String EVENT_TABLE_FILE = ClassLoader
+			.getSystemResource(
+					"com/latticeengines/propdata/dataflow/service/impl/EventTable.avro")
 			.getPath();
 
 	@Autowired
@@ -71,10 +76,11 @@ public class PropDataDBServiceImplTestNG extends
 	}
 
 	@Test(groups = "functional", dataProvider = "exportToDBData", dependsOnMethods = { "init" })
-	public void exportToDB(String customer, String table) throws Exception {
+	public void exportToDB(String customer, String table, boolean mapColumn)
+			throws Exception {
 
 		PropDataContext requestContext = getRequestContextForExport(customer,
-				table);
+				table, mapColumn);
 		PropDataContext responseContext = propDataDBService
 				.exportToDB(requestContext);
 
@@ -155,19 +161,24 @@ public class PropDataDBServiceImplTestNG extends
 	public Object[][] getInitData() {
 		return new Object[][] { { CUSTOMER, LEAD_TABLE, LEAD_FILE },
 				{ CUSTOMER, OPPORTUNITY_TABLE, OPPORTUNITY_FILE },
-				{ CUSTOMER, PAYPAL_TABLE, PAYPALL_FILE }, };
+				{ CUSTOMER, PAYPAL_TABLE, PAYPALL_FILE },
+				{ CUSTOMER, EVENT_TABLE_TABLE, EVENT_TABLE_FILE }, };
 	}
 
 	@DataProvider(name = "exportToDBData")
 	public Object[][] getExportToDBData() {
-		return new Object[][] { { CUSTOMER, LEAD_TABLE },
-				{ CUSTOMER, OPPORTUNITY_TABLE }, { CUSTOMER, PAYPAL_TABLE }, };
+		return new Object[][] { { CUSTOMER, LEAD_TABLE, false },
+				{ CUSTOMER, OPPORTUNITY_TABLE, false },
+				{ CUSTOMER, PAYPAL_TABLE, false },
+				{ CUSTOMER, EVENT_TABLE_TABLE, true }, };
 	}
 
 	@DataProvider(name = "addCommandData")
 	public Object[][] getAddCommandData() {
 		return new Object[][] { { CUSTOMER, LEAD_TABLE },
-				{ CUSTOMER, OPPORTUNITY_TABLE }, { CUSTOMER, PAYPAL_TABLE },
+				{ CUSTOMER, OPPORTUNITY_TABLE},
+				{ CUSTOMER, PAYPAL_TABLE },
+				{ CUSTOMER, EVENT_TABLE_TABLE},
 
 		};
 	}
@@ -176,7 +187,8 @@ public class PropDataDBServiceImplTestNG extends
 	public Object[][] getImportFromDBData() {
 		return new Object[][] { { CUSTOMER, LEAD_TABLE, "Email" },
 				{ CUSTOMER, OPPORTUNITY_TABLE, "Amount" },
-				{ CUSTOMER, PAYPAL_TABLE, "DUNS" }, };
+				{ CUSTOMER, PAYPAL_TABLE, "DUNS" },
+				{ CUSTOMER, EVENT_TABLE_TABLE, "RowId" }, };
 	}
 
 	private PropDataContext getRequestContextForAddCommand(String customer,
@@ -198,7 +210,7 @@ public class PropDataDBServiceImplTestNG extends
 				customer);
 		requestContext.setProperty(
 				PropDataKey.CommandsKey.DESTTABLES.getValue(),
-				"DerivedColumns|Experian_Source");
+				"DerivedColumns|Alexa_Source");
 
 		requestContext.setProperty(
 				PropDataKey.CommandsKey.IS_DOWNLOADING.getValue(),
@@ -229,13 +241,14 @@ public class PropDataDBServiceImplTestNG extends
 	}
 
 	private PropDataContext getRequestContextForExport(String customer,
-			String table) {
+			String table, boolean mapColumn) {
 		PropDataContext requestContext = new PropDataContext();
 		requestContext.setProperty(
 				PropDataKey.ImportExportKey.CUSTOMER.getValue(), customer);
 		requestContext.setProperty(
 				PropDataKey.ImportExportKey.TABLE.getValue(), table);
-
+		requestContext.setProperty(
+				PropDataKey.ImportExportKey.MAP_COLUMN.getValue(), mapColumn);
 		return requestContext;
 	}
 

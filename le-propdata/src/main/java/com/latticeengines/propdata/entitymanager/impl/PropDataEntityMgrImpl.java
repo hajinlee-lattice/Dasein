@@ -62,8 +62,14 @@ public class PropDataEntityMgrImpl implements PropDataEntityMgr {
 
 	@Override
 	@Transactional(value = "propdata", readOnly = true)
-	public void createTableByQuery(String sql) {
+	public void executeQueryUpdate(String sql) {
 		commandsDao.executeQueryUpdate(sql);
+	}
+
+	@Override
+	@Transactional(value = "propdata", readOnly = true)
+	public void executeProcedure(String procedure) {
+		commandsDao.executeProcedure(procedure);
 	}
 
 }

@@ -10,5 +10,6 @@ public interface PropDataEntityMgr {
 	Commands getCommands(Long pid);
 	CommandIds getCommandIds(Long pid);
 	void dropTable(String tableName);
-	void createTableByQuery(String sql);
+	void executeQueryUpdate(String sql);
+	void executeProcedure(String procedure);
 }

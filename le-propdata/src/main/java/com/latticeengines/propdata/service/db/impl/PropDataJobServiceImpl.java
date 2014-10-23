@@ -23,8 +23,11 @@ public class PropDataJobServiceImpl extends JobServiceImpl implements
 			String queue, String customer, String splitCols, String jdbcUrl) {
 		int numDefaultMappers = hadoopConfiguration.getInt(
 				"mapreduce.map.cpu.vcores", 4);
-		return importData(table, targetDir, queue, customer, splitCols, 1,
-				jdbcUrl);
+		if (!splitCols.equalsIgnoreCase("Source_RowId")) {
+			numDefaultMappers = 1;
+		}
+		return importData(table, targetDir, queue, customer, splitCols,
+				numDefaultMappers, jdbcUrl);
 	}
 
 	@Override

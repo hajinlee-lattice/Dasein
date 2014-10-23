@@ -9,4 +9,6 @@ public interface CommandsDao extends BaseDao<Commands> {
 
 	void executeQueryUpdate(String sql);
 
+	void executeProcedure(String procedure);
+
 }

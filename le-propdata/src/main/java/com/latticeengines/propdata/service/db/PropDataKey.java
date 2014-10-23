@@ -40,7 +40,9 @@ public class PropDataKey {
 		CUSTOMER("customer"),
 		TABLE("table"),
 		KEY_COLS("keyCols"),
-		APPLICATION_ID("applicationId");
+		APPLICATION_ID("applicationId"),
+
+		MAP_COLUMN("mapColumn");
 		
 		String value;
 		private ImportExportKey(String value) {
