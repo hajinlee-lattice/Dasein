@@ -54,7 +54,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     private String inputDir = null;
     private String outputDir = null;
     private SamplingConfiguration samplingConfig = null;
-    private String baseDir = "/functioanlTests/" + suffix;
+    private String baseDir = "/functionalTests/" + suffix;
 
     @BeforeClass(groups = {"functional", "functional.production"})
     public void setupSamplingMRJob() throws Exception {
@@ -115,7 +115,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @AfterClass(groups = {"functional", "functional.production"})
     public void tearDown() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(new Path("/functioanlTests"), true);        
+        fs.delete(new Path("/functionalTests"), true);        
     }
 
     private Properties createAppMasterPropertiesForYarnJob() {

@@ -63,7 +63,7 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED, FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 20;
 
-    public String suffix = this.getClass().getSimpleName() + "_" + generateUnique();
+    protected String suffix = this.getClass().getSimpleName() + "_" + generateUnique();
     
     @Autowired
     protected Configuration yarnConfiguration;

@@ -52,9 +52,9 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
     private Classifier classifier2Mins;
     private Classifier classifier4Mins;
     
-    private String baseDir = "/functioanlTests/" + suffix;
+    private String baseDir = "/functionalTests/" + suffix;
 
-    @BeforeClass(groups = {"functional", "functional.production"})
+    @BeforeClass(groups = {"functional"})
     public void setup() throws Exception {
         // Set up classifiers
         classifier1Min = setupClassifier("train_1min.py");
@@ -104,13 +104,13 @@ public class ThrottleLongHangingJobsTestNG extends DataPlatformFunctionalTestNGB
         }, 15L);
     }
 
-    @AfterClass(groups = {"functional", "functional.production"})
+    @AfterClass(groups = {"functional"})
     public void tearDown() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(new Path("/functioanlTests"), true);        
+        fs.delete(new Path("/functionalTests"), true);        
     }
     
-    @Test(groups = {"functional", "functional.production"})
+    @Test(groups = {"functional"})
     public void testThrottleLongHangingJobs() throws Exception {
         ModelDefinition modelDef = produceModelDefinition();
         Model model = produceIrisMetadataModel();

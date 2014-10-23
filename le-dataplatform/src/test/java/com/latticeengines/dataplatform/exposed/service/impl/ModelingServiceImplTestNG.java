@@ -239,7 +239,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         }
     }
 
-    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "submitModel" })
+    @Test(groups = {"functional"}, dependsOnMethods = { "submitModel" })
     @Transactional(propagation = Propagation.REQUIRED)
     public void throttleImmediate() throws Exception {
         // clean up: this test case expects no previous throttle
@@ -275,7 +275,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Test(groups = {"functional", "functional.production"}, dependsOnMethods = { "throttleImmediate" })
+    @Test(groups = {"functional"}, dependsOnMethods = { "throttleImmediate" })
     public void throttleNewlySubmittedModels() throws Exception {
         ThrottleConfiguration config = new ThrottleConfiguration();
         config.setImmediate(false);

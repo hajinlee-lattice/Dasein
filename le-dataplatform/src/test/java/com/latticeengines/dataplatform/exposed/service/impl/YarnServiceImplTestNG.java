@@ -49,7 +49,7 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void getApp() throws Exception {
         Properties appMasterProperties = new Properties();
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), "Priority0.0");
-        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell");
+        appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), "Dell-" + suffix);
         Properties containerProperties = new Properties();
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "64");
