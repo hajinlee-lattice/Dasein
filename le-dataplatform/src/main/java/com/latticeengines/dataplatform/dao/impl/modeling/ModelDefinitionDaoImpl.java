@@ -30,7 +30,7 @@ public class ModelDefinitionDaoImpl extends BaseDaoImpl<ModelDefinition> impleme
         query.setString("aModelDefName", name);
 
         ModelDefinition modelDef = null;
-        List list = query.list();
+        List<?> list = query.list();
         if (!list.isEmpty()) {
             modelDef = (ModelDefinition) list.get(0);
         }
