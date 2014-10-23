@@ -35,6 +35,7 @@ class AvroSourceTable(val df: DataFlow) extends DataOperator(df) {
   override def getPropertyNames(): Set[String] = {
     return Set(AvroSourceTable.DataPath, AvroSourceTable.UniqueKeyCol)
   }
+  
 }
 
 object AvroSourceTable {

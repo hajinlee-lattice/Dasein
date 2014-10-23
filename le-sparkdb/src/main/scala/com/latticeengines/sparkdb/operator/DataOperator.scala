@@ -24,5 +24,6 @@ abstract class DataOperator(val dataFlow: DataFlow) extends HasName with HasProp
   
   def getPropertyNames(): Set[String]
   
+  
 }
 
