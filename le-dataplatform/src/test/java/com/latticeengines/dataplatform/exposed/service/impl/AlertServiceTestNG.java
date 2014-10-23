@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.service.AlertService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 
 public class AlertServiceTestNG extends DataPlatformFunctionalTestNGBase {

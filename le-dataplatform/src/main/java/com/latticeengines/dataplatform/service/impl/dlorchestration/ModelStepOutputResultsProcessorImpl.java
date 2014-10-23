@@ -74,8 +74,12 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                     new String[] { String.valueOf(modelCommand.getPid()), appId });
         }
         // Provide link to diagnostics file
-        String modelFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath);
-        modelCommandLogService.log(modelCommand, "Model json file download link: " + httpFsPrefix + modelFileHdfsPath
+        String modelJsonFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath);
+        modelCommandLogService.log(modelCommand, "Model json file download link: " + httpFsPrefix + modelJsonFileHdfsPath
+                + HTTPFS_SUFFIX);
+        
+        String modelCSVFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath).replace(".json", ".csv");
+        modelCommandLogService.log(modelCommand, "Model csv file download link: " + httpFsPrefix + modelCSVFileHdfsPath
                 + HTTPFS_SUFFIX);
         
         String scoreFileHdfsPath = jobStatus.getResultDirectory() + "/scored.txt";

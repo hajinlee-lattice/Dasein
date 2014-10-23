@@ -163,7 +163,7 @@ class ArgumentParser(object):
         schema["config_metadata"] = parser.getConfigMetadata()
         schema["targets"] = self.targets
         schema["stringColumns"] = self.stringColNames
-     
+
     def isAvro(self):
         return self.metadataSchema["data_format"] == "avro"
     

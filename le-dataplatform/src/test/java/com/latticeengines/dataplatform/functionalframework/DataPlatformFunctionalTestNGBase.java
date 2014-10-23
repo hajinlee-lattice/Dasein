@@ -5,7 +5,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
@@ -42,7 +41,6 @@ import org.springframework.yarn.test.context.YarnCluster;
 import org.springframework.yarn.test.junit.ApplicationInfo;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.dataplatform.entitymanager.BaseEntityMgr;
@@ -60,11 +58,12 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
 public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(DataPlatformFunctionalTestNGBase.class);
-    public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED, FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
+    public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
+            FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 20;
 
     protected String suffix = this.getClass().getSimpleName() + "_" + generateUnique();
-    
+
     @Autowired
     protected Configuration yarnConfiguration;
 
@@ -194,13 +193,15 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
 
         ModelDefinition modelDef = new ModelDefinition();
         modelDef.setName("Model-" + System.currentTimeMillis());
-        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm, randomForestAlgorithm, logisticRegressionAlgorithm }));
+        modelDef.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { decisionTreeAlgorithm,
+                randomForestAlgorithm, logisticRegressionAlgorithm }));
 
         return modelDef;
     }
 
     /**
-     * this helper method produces a Model for unit / functional test (note: ModelDefinition still needs to be set)
+     * this helper method produces a Model for unit / functional test (note:
+     * ModelDefinition still needs to be set)
      *
      * @param appIdStr
      * @return
@@ -213,9 +214,9 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         model.setTable("iris");
         model.setMetadataTable("iris_metadata");
         model.setFeaturesList(Arrays.<String> asList(new String[] { "SEPAL_LENGTH", //
-        "SEPAL_WIDTH", //
-        "PETAL_LENGTH", //
-        "PETAL_WIDTH" }));
+                "SEPAL_WIDTH", //
+                "PETAL_LENGTH", //
+                "PETAL_WIDTH" }));
         model.setTargetsList(Arrays.<String> asList(new String[] { "CATEGORY" }));
         model.setCustomer("INTERNAL");
         model.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
@@ -309,8 +310,10 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     }
 
     /**
-     * Submits application and wait status. Returned status is <code>NULL</code> if something failed or final known status after the wait/poll operations. Array
-     * of application statuses can be used to return immediately from wait loop if status is matched.
+     * Submits application and wait status. Returned status is <code>NULL</code>
+     * if something failed or final known status after the wait/poll operations.
+     * Array of application statuses can be used to return immediately from wait
+     * loop if status is matched.
      *
      * @param applicationStatuses
      *            the application statuses to wait
@@ -319,7 +322,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
      *             if exception occurred
      * @see ApplicationInfo
      */
-    protected ApplicationId submitApplicationAndWaitStatus(FinalApplicationStatus... applicationStatuses) throws Exception {
+    protected ApplicationId submitApplicationAndWaitStatus(FinalApplicationStatus... applicationStatuses)
+            throws Exception {
         Assert.notEmpty(applicationStatuses, "Need to have at least one status");
 
         ApplicationId applicationId = submitApplication();
@@ -341,7 +345,8 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         return applicationId;
     }
 
-    public FinalApplicationStatus waitForStatus(ApplicationId applicationId, FinalApplicationStatus... applicationStatuses) throws Exception {
+    public FinalApplicationStatus waitForStatus(ApplicationId applicationId,
+            FinalApplicationStatus... applicationStatuses) throws Exception {
         Assert.notNull(yarnClient, "Yarn client must be set");
         Assert.notNull(applicationId, "ApplicationId must not be null");
 
@@ -409,13 +414,13 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
             log.error("Can't shut down quartz thread due to: " + ExceptionUtils.getStackTrace(e));
         }
     }
-    
-    protected String generateUnique() {           
-        return generateUnique("");  
+
+    protected String generateUnique() {
+        return generateUnique("");
     }
-    
-    protected String generateUnique(String base) {           
-        String id = UUID.randomUUID().toString();         
-        return base.equals("")?id:(base + "_" + id);  
+
+    protected String generateUnique(String base) {
+        String id = UUID.randomUUID().toString();
+        return base.equals("") ? id : (base + "_" + id);
     }
 }
