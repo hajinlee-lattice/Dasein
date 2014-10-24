@@ -23,19 +23,22 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
     public void importData() throws Exception {
         List<Table> tables = new ArrayList<>();
         Table lead = createLead();
+        Table account = createAccount();
         Table opportunity = createOpportunity();
         Table contact = createContact();
         Table contactRole = createOpportunityContactRole();
         tables.add(lead);
+        tables.add(account);
         tables.add(opportunity);
         tables.add(contact);
         tables.add(contactRole);
+
         Configuration config = new YarnConfiguration();
         ImportContext context = new ImportContext();
         context.setProperty(ImportProperty.HADOOPCONFIG, config);
         context.setProperty(ImportProperty.TARGETPATH, "/tmp");
         dataExtractionService.extractAndImport(tables, context);
-        Thread.sleep(20000L);
+        Thread.sleep(60000L);
     }
     
     private Table createLead() {
@@ -112,6 +115,91 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         table.addAttribute(createdDate);
         table.addAttribute(convertedOpportunityId);
         table.addAttribute(ownerId);
+
+        return table;
+    }
+
+    private Table createAccount() {
+        Table table = new Table();
+        table.setName("Account");
+
+        Attribute id = new Attribute();
+        id.setName("Id");
+        Attribute accountSource = new Attribute();
+        accountSource.setName("AccountSource");
+        Attribute name = new Attribute();
+        name.setName("Name");
+        Attribute tickerSymbol = new Attribute();
+        tickerSymbol.setName("TickerSymbol");
+        Attribute type = new Attribute();
+        type.setName("Type");
+        Attribute street = new Attribute();
+        street.setName("Street");
+        Attribute city = new Attribute();
+        city.setName("City");
+        Attribute state = new Attribute();
+        state.setName("State");
+        Attribute postalCode = new Attribute();
+        postalCode.setName("PostalCode");
+        Attribute country = new Attribute();
+        country.setName("Country");
+        Attribute website = new Attribute();
+        website.setName("Website");
+        Attribute naicsCode = new Attribute();
+        naicsCode.setName("NaicsCode");
+        Attribute status = new Attribute();
+        status.setName("Status");
+        Attribute company = new Attribute();
+        company.setName("Company");
+        Attribute sic = new Attribute();
+        sic.setName("Sic");
+        Attribute industry = new Attribute();
+        industry.setName("Industry");
+        Attribute annualRevenue = new Attribute();
+        annualRevenue.setName("AnnualRevenue");
+        Attribute numEmployees = new Attribute();
+        numEmployees.setName("NumberOfEmployees");
+        Attribute converted = new Attribute();
+        converted.setName("IsConverted");
+        Attribute lastActivityDate = new Attribute();
+        lastActivityDate.setName("LastActivityDate");
+        Attribute lastViewedDate = new Attribute();
+        lastViewedDate.setName("LastViewedDate");
+        Attribute createdDate = new Attribute();
+        createdDate.setName("CreatedDate");
+        Attribute ownerId = new Attribute();
+        ownerId.setName("OwnerId");
+        Attribute salutation = new Attribute();
+        salutation.setName("Salutation");
+        Attribute ownership = new Attribute();
+        ownership.setName("Ownership");
+        Attribute rating = new Attribute();
+        rating.setName("Rating");
+
+        table.addAttribute(id);
+        table.addAttribute(accountSource);
+        table.addAttribute(name);
+        table.addAttribute(tickerSymbol);
+        table.addAttribute(type);
+        table.addAttribute(street);
+        table.addAttribute(city);
+        table.addAttribute(state);
+        table.addAttribute(postalCode);
+        table.addAttribute(country);
+        table.addAttribute(website);
+        table.addAttribute(naicsCode);
+        table.addAttribute(status);
+        table.addAttribute(company);
+        table.addAttribute(sic);
+        table.addAttribute(industry);
+        table.addAttribute(annualRevenue);
+        table.addAttribute(numEmployees);
+        table.addAttribute(converted);
+        table.addAttribute(lastActivityDate);
+        table.addAttribute(createdDate);
+        table.addAttribute(ownerId);
+        table.addAttribute(salutation);
+        table.addAttribute(rating);
 
         return table;
     }
