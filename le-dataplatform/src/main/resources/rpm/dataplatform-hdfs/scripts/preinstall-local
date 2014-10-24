@@ -1,3 +1,0 @@
-#!/bin/bash
-rm -rf /tmp/app
-runuser -l smeng -c '/home/LATTICE/smeng/tools/hadoop-2.4.0/bin/hadoop fs -rm -f -r /app'

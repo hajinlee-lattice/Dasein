@@ -102,8 +102,6 @@
                 <hadoop-metrics2.properties.path>conf/env/dev</hadoop-metrics2.properties.path>
                 <mapping.username>smeng</mapping.username>
                 <mapping.groupname>users</mapping.groupname>
-                <pre.install.script>preinstall-local</pre.install.script>
-                <post.install.script>postinstall-local</post.install.script>
             </properties>
         </profile>
     </profiles>

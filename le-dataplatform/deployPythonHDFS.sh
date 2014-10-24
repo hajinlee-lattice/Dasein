@@ -1,14 +1,18 @@
-#!/bin/bash -x
-IFS=', ' read -a array <<< ${HostName}
+#!/bin/bash
 
-for host in "${array[@]}"
-do
-  scp -o StrictHostKeyChecking=no -p ../le-release/src/main/scripts/dependencies_install ${host}:/tmp
-  #copy target pom file to the repository
-  pushd target/rpm/le-dataplatform-hdfs/RPMS/noarch
-  rpm=`basename le-dataplatform-hdfs*`
-  echo "start ssh ${host}"
-  scp -p $rpm ${host}:/tmp
-  ssh -t ${host} "cd /tmp; chmod 744 $rpm dependencies_install; ./dependencies_install; rpm -e le-dataplatform-hdfs; rpm -i --replacefiles $rpm; rm -f $rpm dependencies_install"
-  popd
-done
+/home/LATTICE/smeng/tools/hadoop-2.4.0/bin/hadoop fs -rm -f -r /app
+/home/LATTICE/smeng/tools/hadoop-2.4.0/bin/hadoop fs -mkdir /app
+
+rm -rf /tmp/app
+mkdir -p /tmp/app/dataplatform/scripts/algorithm
+
+cp ~/workspace/ledp/le-dataplatform/conf/env/dev/dataplatform.properties /tmp/app/dataplatform/
+cp ~/workspace/ledp/le-dataplatform/conf/env/dev/hadoop-metrics2.properties /tmp/app/dataplatform/
+cp ~/workspace/ledp/le-dataplatform/target/leframework.tar.gz /tmp/app/dataplatform/scripts
+cp ~/workspace/ledp/le-dataplatform/target/lepipeline.tar.gz /tmp/app/dataplatform/scripts
+cp ~/workspace/ledp/le-dataplatform/src/main/python/launcher.py /tmp/app/dataplatform/scripts 
+cp ~/workspace/ledp/le-dataplatform/src/main/python/pipelinefwk.py /tmp/app/dataplatform/scripts 
+cp ~/workspace/ledp/le-dataplatform/src/main/python/pipeline/pipeline.py /tmp/app/dataplatform/scripts 
+cp ~/workspace/ledp/le-dataplatform/src/main/python/algorithm/*.py /tmp/app/dataplatform/scripts/algorithm
+
+/home/LATTICE/smeng/tools/hadoop-2.4.0/bin/hadoop fs -copyFromLocal /tmp/app/dataplatform /app/dataplatform
