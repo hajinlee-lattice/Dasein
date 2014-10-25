@@ -33,8 +33,8 @@ public abstract class DataFlowBuilder {
     protected abstract void addSource(String sourceName, String sourcePath);
 
     protected abstract String addInnerJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields);
-
-    protected abstract String addInnerJoin(List<JoinCriteria> joinCriteria);
+    
+    protected abstract String addJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields, JoinType joinType);
 
     protected abstract String addGroupBy(String prior, FieldList groupByFields, List<GroupByCriteria> groupByCriteria);
 
@@ -139,28 +139,11 @@ public abstract class DataFlowBuilder {
         
     }
 
-    public static class JoinCriteria {
-        private final String name;
-        private final FieldList joinFields;
-        private final FieldList outputFields;
-
-        public JoinCriteria(String name, FieldList joinFields, FieldList outputFields) {
-            this.name = name;
-            this.joinFields = joinFields;
-            this.outputFields = outputFields;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public FieldList getJoinFields() {
-            return joinFields;
-        }
-
-        public FieldList getOutputFields() {
-            return outputFields;
-        }
+    public static enum JoinType {
+        INNER, //
+        LEFT, //
+        RIGHT, //
+        OUTER
     }
 
     public static class GroupByCriteria {

@@ -29,27 +29,7 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
     public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
         
         // SELECT a.*, b.* FROM lead a, oppty b WHERE a.ConvertedOpportunityId = b.Id
-        List<JoinCriteria> joinCriteria = new ArrayList<>();
-        for (Map.Entry<String, String> entry : sources.entrySet()) {
-            String name = entry.getKey();
-            addSource(name, entry.getValue());
-            
-            switch (name) {
-            
-            case "Lead":
-                FieldList joinFieldsForLead = new FieldList("ConvertedOpportunityId");
-                joinCriteria.add(new JoinCriteria(name, joinFieldsForLead, null));
-                break;
-
-            case "Opportunity":
-                FieldList joinFieldsForOppty = new FieldList("Id");
-                joinCriteria.add(new JoinCriteria(name, joinFieldsForOppty, null));
-                break;
-            }
-            
-        }
-        
-        String joinOperatorName = addInnerJoin(joinCriteria);
+        String joinOperatorName = addInnerJoin("Lead", new FieldList("ConvertedOpportunityId"), "Opportunity", new FieldList("Id"));
         
         String functionOperatorName = addFunction(joinOperatorName, //
                 "Email.substring(Email.indexOf('@') + 1)", //

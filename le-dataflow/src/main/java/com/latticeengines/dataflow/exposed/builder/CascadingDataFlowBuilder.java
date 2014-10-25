@@ -34,7 +34,11 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.pipe.joiner.BaseJoiner;
 import cascading.pipe.joiner.InnerJoin;
+import cascading.pipe.joiner.LeftJoin;
+import cascading.pipe.joiner.OuterJoin;
+import cascading.pipe.joiner.RightJoin;
 import cascading.property.AppProps;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
@@ -97,65 +101,77 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         pipesAndOutputSchemas.put(sourceName, new Pair<>(new Pipe(sourceName), fields));
         schemas.put(sourceName, sourceSchema);
     }
-
+    
     @Override
     protected String addInnerJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields) {
-        List<JoinCriteria> joinCriteria = new ArrayList<>();
-        joinCriteria.add(new JoinCriteria(lhs, lhsJoinFields, null));
-        joinCriteria.add(new JoinCriteria(rhs, rhsJoinFields, null));
-        return addInnerJoin(joinCriteria);
+        return addJoin(lhs, lhsJoinFields, rhs, rhsJoinFields, JoinType.INNER);
     }
 
     @Override
-    protected String addInnerJoin(List<JoinCriteria> joinCriteria) {
+    protected String addJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields, JoinType joinType) {
         List<FieldMetadata> declaredFields = new ArrayList<>();
-        Set<String> seenFields = new HashSet<>();
-        Pipe[] pipes = new Pipe[joinCriteria.size()];
-        Fields[] joinFields = new Fields[joinCriteria.size()];
-        int i = 0;
-        Map<String, FieldMetadata> nameToFieldMetadataMap = null;
-        for (JoinCriteria joinCriterion : joinCriteria) {
-            String name = joinCriterion.getName();
-            FieldList outputFieldList = joinCriterion.getOutputFields();
-
-            List<String> outputFields = null;
-
-            if (outputFieldList == null) {
-
-                Pair<Pipe, List<FieldMetadata>> pipesAndFields = pipesAndOutputSchemas.get(name);
-
-                if (pipesAndFields == null) {
-                    throw new DataFlowException(DataFlowCode.DF_10003, new String[] { name });
-                } else {
-                    nameToFieldMetadataMap = getFieldMetadataMap(pipesAndFields.getRhs());
-                }
-                outputFields = new ArrayList<>();
-                outputFields.addAll(getFieldNames(pipesAndFields.getRhs()));
-            } else {
-                outputFields = outputFieldList.getFieldsAsList();
-            }
-            for (String fieldName : outputFields) {
-                String originalFieldName = fieldName;
-
-                if (seenFields.contains(fieldName)) {
-                    fieldName = name + "__" + fieldName;
-                }
-
-                seenFields.add(fieldName);
-                FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
-                FieldMetadata fm = new FieldMetadata(origfm.getAvroType(), origfm.getJavaType(), fieldName,
-                        origfm.getField(), origfm.getProperties());
-
-                declaredFields.add(fm);
-            }
-            pipes[i] = getPipeByName(name);
-            joinFields[i] = convertToFields(joinCriterion.getJoinFields().getFields());
-            i++;
+        Pair<Pipe, List<FieldMetadata>> lhsPipesAndFields = pipesAndOutputSchemas.get(lhs);
+        Pair<Pipe, List<FieldMetadata>> rhsPipesAndFields = pipesAndOutputSchemas.get(rhs);
+        if (lhsPipesAndFields == null) {
+            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { lhs });
         }
-        Pipe join = new CoGroup(pipes, joinFields, convertToFields(getFieldNames(declaredFields)), new InnerJoin());
+        if (rhsPipesAndFields == null) {
+            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { rhs });
+        }
+        Set<String> seenFields = new HashSet<>();
+        
+        List<String> outputFields = new ArrayList<>();
+        outputFields.addAll(getFieldNames(lhsPipesAndFields.getRhs()));
+        Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(lhsPipesAndFields.getRhs());
+        for (String fieldName : outputFields) {
+            seenFields.add(fieldName);
+            declaredFields.add(nameToFieldMetadataMap.get(fieldName));
+        }
+
+        outputFields = new ArrayList<>();
+        outputFields.addAll(getFieldNames(rhsPipesAndFields.getRhs()));
+        nameToFieldMetadataMap = getFieldMetadataMap(rhsPipesAndFields.getRhs());
+        for (String fieldName : outputFields) {
+            String originalFieldName = fieldName;
+
+            if (seenFields.contains(fieldName)) {
+                fieldName = rhs + "__" + fieldName;
+            }
+            seenFields.add(fieldName);
+            FieldMetadata origfm = nameToFieldMetadataMap.get(originalFieldName);
+            FieldMetadata fm = new FieldMetadata(origfm.getAvroType(), origfm.getJavaType(), fieldName,
+                    origfm.getField(), origfm.getProperties());
+            declaredFields.add(fm);
+        }
+        
+        BaseJoiner joiner = null;
+        
+        switch (joinType) {
+        case LEFT:
+            joiner = new LeftJoin();
+            break;
+        case RIGHT:
+            joiner = new RightJoin();
+            break;
+        case OUTER:
+            joiner = new OuterJoin();
+            break;
+        default:
+            joiner = new InnerJoin();
+            break;
+        }
+        
+        Pipe join = new CoGroup(lhsPipesAndFields.getLhs(), //
+                convertToFields(lhsJoinFields.getFields()), //
+                rhsPipesAndFields.getLhs(), //
+                convertToFields(rhsJoinFields.getFields()), //
+                convertToFields(getFieldNames(declaredFields)), //
+                joiner);
         pipesAndOutputSchemas.put(join.getName(), new Pair<>(join, declaredFields));
         return join.getName();
+
     }
+
 
     private static Class<?>[] getTypes(List<String> fieldNames, List<FieldMetadata> full) {
         List<FieldMetadata> fmList = getIntersection(fieldNames, full);

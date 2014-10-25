@@ -16,30 +16,32 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
         addSource("Contact", sources.get("Contact"));
         addSource("OpportunityContactRole", sources.get("OpportunityContactRole"));
 
+        String lead$contact = addJoin("Lead", //
+                new FieldList("Email"), //
+                "Contact", //
+                new FieldList("Email"), //
+                JoinType.OUTER);
+        
+        String removeNullsForEmailsOnBothSides = addFilter(lead$contact, //
+                "(Email == null || Email.trim().isEmpty()) && (Contact__Email == null || Contact__Email.trim().isEmpty())", //
+                new FieldList("Email", "Contact__Email"));
+        
+        String normalizeEmail = addFunction(removeNullsForEmailsOnBothSides, //
+                "Email != null ? Email : Contact__Email", //
+                new FieldList("Email", "Contact__Email"), //
+                new FieldMetadata("Email", String.class));
+
         FieldMetadata domain = new FieldMetadata("Domain", String.class);
         domain.setPropertyValue("length", "255");
         domain.setPropertyValue("precision", "0");
         domain.setPropertyValue("scale", "0");
         domain.setPropertyValue("logicalType", "domain");
-        String f1Name = addFunction("Lead", //
+
+        String addDomain = addFunction(normalizeEmail, //
                 "Email.substring(Email.indexOf('@') + 1)", //
                 new FieldList("Email"), //
                 domain);
 
-        FieldMetadata domainForContact = new FieldMetadata("DomainForContact", String.class);
-        domainForContact.setPropertyValue("length", "255");
-        domainForContact.setPropertyValue("precision", "0");
-        domainForContact.setPropertyValue("scale", "0");
-        domainForContact.setPropertyValue("logicalType", "domain");
-        String f2Name = addFunction("Contact", //
-                "Email.substring(Email.indexOf('@') + 1)", //
-                new FieldList("Email"), //
-                domainForContact);
-
-        String lead$contact = addInnerJoin(f1Name, //
-                new FieldList("Domain"), //
-                f2Name, //
-                new FieldList("DomainForContact"));
 
         String opptyContactRole$lead$contact = addInnerJoin(lead$contact, //
                 new FieldList("Contact__Id"), //
