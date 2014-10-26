@@ -5,9 +5,8 @@ import java.util.Map;
 
 public interface MatchService {
 
+    Map<String, Map<String, Object>> match(String domain, List<String> sources);
 
-	Map<String, Map<String, Object>> match(String domain, List<String> sources);
-
-	void createDomainIndex(String sourceName);
+    void createDomainIndex(String sourceName);
 
 }

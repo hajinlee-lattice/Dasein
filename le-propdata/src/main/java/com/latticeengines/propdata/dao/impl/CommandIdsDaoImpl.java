@@ -15,5 +15,4 @@ public class CommandIdsDaoImpl extends BaseDaoImpl<CommandIds> implements Comman
         return CommandIds.class;
     }
 
-
 }

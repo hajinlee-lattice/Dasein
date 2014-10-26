@@ -19,93 +19,83 @@ import com.latticeengines.db.dao.cassandra.data.ColumnTypeMapper;
 import com.latticeengines.propdata.service.MatchService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:propdata-context.xml",
-		"classpath:propdata-properties-context.xml" })
+@ContextConfiguration(locations = { "classpath:propdata-context.xml", "classpath:propdata-properties-context.xml" })
 public class PropDataServicemplTestNG extends AbstractTestNGSpringContextTests {
 
-	@Resource(name = "propDataCassandraGenericDao")
-	private CassandraGenericDao dao;
+    @Resource(name = "propDataCassandraGenericDao")
+    private CassandraGenericDao dao;
 
-	@Autowired
-	private MatchService matchService;
+    @Autowired
+    private MatchService matchService;
 
-	@Test(groups = "manual")
-	public void createDomainIndex() {
-		
-		matchService.createDomainIndex("HGData_Source");
-		matchService.createDomainIndex("BuiltWithDomain");
-		matchService.createDomainIndex("Experian_Source");
-	}
+    @Test(groups = "manual")
+    public void createDomainIndex() {
 
-	@Test(groups = "manual")
-	public void lookupIndex() {
-		long startTime = System.currentTimeMillis();
+        matchService.createDomainIndex("HGData_Source");
+        matchService.createDomainIndex("BuiltWithDomain");
+        matchService.createDomainIndex("Experian_Source");
+    }
 
-		String domainIndexTable = "Domain_Index";
-		dao.createIndex(domainIndexTable, "HGData_Source",
-				"HGData_Source_Index");
-		dao.createIndex(domainIndexTable, "BuiltWithDomain",
-				"BuiltWithDomain_Index");
-		dao.createIndex(domainIndexTable, "Experian_Source",
-				"Experian_Source_Index");
+    @Test(groups = "manual")
+    public void lookupIndex() {
+        long startTime = System.currentTimeMillis();
 
-		String cql = "SELECT * FROM " + domainIndexTable;
-		ResultSet resultSet = dao.query(cql);
-		Row row = null;
+        String domainIndexTable = "Domain_Index";
+        dao.createIndex(domainIndexTable, "HGData_Source", "HGData_Source_Index");
+        dao.createIndex(domainIndexTable, "BuiltWithDomain", "BuiltWithDomain_Index");
+        dao.createIndex(domainIndexTable, "Experian_Source", "Experian_Source_Index");
 
-		int totalCount = 0;
-		int oneSourceCount = 0;
-		int twoSourceCount = 0;
-		int threeSourceCount = 0;
+        String cql = "SELECT * FROM " + domainIndexTable;
+        ResultSet resultSet = dao.query(cql);
+        Row row = null;
 
-		while ((row = resultSet.one()) != null) {
-			Map<String, Object> map = ColumnTypeMapper.convertRowToMap(row);
-			String hgDataUUID = (String) map.get("hgdata_source");
-			String builtWithUUID = (String) map.get("builtwithdomain");
-			String experianUUID = (String) map.get("experian_source");
+        int totalCount = 0;
+        int oneSourceCount = 0;
+        int twoSourceCount = 0;
+        int threeSourceCount = 0;
 
-			int sourceCount = 0;
+        while ((row = resultSet.one()) != null) {
+            Map<String, Object> map = ColumnTypeMapper.convertRowToMap(row);
+            String hgDataUUID = (String) map.get("hgdata_source");
+            String builtWithUUID = (String) map.get("builtwithdomain");
+            String experianUUID = (String) map.get("experian_source");
 
-			if (hgDataUUID != null) {
-				Assert.assertNotNull(dao.findByKey2("\"HGData_Source\"",
-						"uuid", hgDataUUID));
-				sourceCount++;
-			}
+            int sourceCount = 0;
 
-			if (builtWithUUID != null) {
-				Assert.assertNotNull(dao.findByKey2("\"BuiltWithDomain\"",
-						"uuid", builtWithUUID));
-				sourceCount++;
-			}
+            if (hgDataUUID != null) {
+                Assert.assertNotNull(dao.findByKey2("\"HGData_Source\"", "uuid", hgDataUUID));
+                sourceCount++;
+            }
 
-			if (experianUUID != null) {
-				Assert.assertNotNull(dao.findByKey2("\"Experian_Source\"",
-						"uuid", experianUUID));
-				sourceCount++;
-			}
+            if (builtWithUUID != null) {
+                Assert.assertNotNull(dao.findByKey2("\"BuiltWithDomain\"", "uuid", builtWithUUID));
+                sourceCount++;
+            }
 
-			if (sourceCount == 1) {
-				oneSourceCount++;
-			} else if (sourceCount == 2) {
-				twoSourceCount++;
-			} else if (sourceCount == 3) {
-				threeSourceCount++;
-			}
+            if (experianUUID != null) {
+                Assert.assertNotNull(dao.findByKey2("\"Experian_Source\"", "uuid", experianUUID));
+                sourceCount++;
+            }
 
-			totalCount++;
+            if (sourceCount == 1) {
+                oneSourceCount++;
+            } else if (sourceCount == 2) {
+                twoSourceCount++;
+            } else if (sourceCount == 3) {
+                threeSourceCount++;
+            }
 
-			if (totalCount % 1000 == 0) {
-				System.out.println("Count=" + totalCount);
-			}
-		}
-		System.out.println("One source count=" + oneSourceCount);
-		System.out.println("Two source count=" + twoSourceCount);
-		System.out.println("Three source count=" + threeSourceCount);
-		System.out.println("Total source count=" + totalCount);
-		System.out
-				.println("Index lookup total time="
-						+ (System.currentTimeMillis() - startTime) / 1000
-						+ " seconds.");
-	}
+            totalCount++;
+
+            if (totalCount % 1000 == 0) {
+                System.out.println("Count=" + totalCount);
+            }
+        }
+        System.out.println("One source count=" + oneSourceCount);
+        System.out.println("Two source count=" + twoSourceCount);
+        System.out.println("Three source count=" + threeSourceCount);
+        System.out.println("Total source count=" + totalCount);
+        System.out.println("Index lookup total time=" + (System.currentTimeMillis() - startTime) / 1000 + " seconds.");
+    }
 
 }

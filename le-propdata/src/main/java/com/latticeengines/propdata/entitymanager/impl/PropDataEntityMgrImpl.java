@@ -16,60 +16,60 @@ import com.latticeengines.propdata.entitymanager.PropDataEntityMgr;
 @Component("propDataEntityMgr")
 public class PropDataEntityMgrImpl implements PropDataEntityMgr {
 
-	private final Log log = LogFactory.getLog(this.getClass());
+    private final Log log = LogFactory.getLog(this.getClass());
 
-	@Autowired
-	private CommandIdsDao commandIdsDao;
+    @Autowired
+    private CommandIdsDao commandIdsDao;
 
-	@Autowired
-	private CommandsDao commandsDao;
+    @Autowired
+    private CommandsDao commandsDao;
 
-	public PropDataEntityMgrImpl() {
-		super();
-	}
+    public PropDataEntityMgrImpl() {
+        super();
+    }
 
-	@Override
-	@Transactional(value = "propdata", propagation = Propagation.REQUIRED)
-	public void createCommands(Commands commands) {
-		CommandIds commandIds = commands.getCommandIds();
-		if (commandIds == null) {
-			log.error("There's no CommandIds for :" + commands);
-			throw new IllegalStateException("There's no CommandIds specified.");
-		}
+    @Override
+    @Transactional(value = "propdata", propagation = Propagation.REQUIRED)
+    public void createCommands(Commands commands) {
+        CommandIds commandIds = commands.getCommandIds();
+        if (commandIds == null) {
+            log.error("There's no CommandIds for :" + commands);
+            throw new IllegalStateException("There's no CommandIds specified.");
+        }
 
-		commandIdsDao.create(commandIds);
-		commands.setPid(commandIds.getPid());
-		commandsDao.create(commands);
-	}
+        commandIdsDao.create(commandIds);
+        commands.setPid(commandIds.getPid());
+        commandsDao.create(commands);
+    }
 
-	@Override
-	@Transactional(value = "propdata", readOnly = true)
-	public Commands getCommands(Long pid) {
-		return commandsDao.findByKey(Commands.class, pid);
-	}
+    @Override
+    @Transactional(value = "propdata", readOnly = true)
+    public Commands getCommands(Long pid) {
+        return commandsDao.findByKey(Commands.class, pid);
+    }
 
-	@Override
-	@Transactional(value = "propdata", readOnly = true)
-	public CommandIds getCommandIds(Long pid) {
-		return commandIdsDao.findByKey(CommandIds.class, pid);
-	}
+    @Override
+    @Transactional(value = "propdata", readOnly = true)
+    public CommandIds getCommandIds(Long pid) {
+        return commandIdsDao.findByKey(CommandIds.class, pid);
+    }
 
-	@Override
-	@Transactional(value = "propdata", readOnly = true)
-	public void dropTable(String tableName) {
-		commandsDao.dropTable(tableName);
-	}
+    @Override
+    @Transactional(value = "propdata", readOnly = true)
+    public void dropTable(String tableName) {
+        commandsDao.dropTable(tableName);
+    }
 
-	@Override
-	@Transactional(value = "propdata", readOnly = true)
-	public void executeQueryUpdate(String sql) {
-		commandsDao.executeQueryUpdate(sql);
-	}
+    @Override
+    @Transactional(value = "propdata", readOnly = true)
+    public void executeQueryUpdate(String sql) {
+        commandsDao.executeQueryUpdate(sql);
+    }
 
-	@Override
-	@Transactional(value = "propdata", readOnly = true)
-	public void executeProcedure(String procedure) {
-		commandsDao.executeProcedure(procedure);
-	}
+    @Override
+    @Transactional(value = "propdata", readOnly = true)
+    public void executeProcedure(String procedure) {
+        commandsDao.executeProcedure(procedure);
+    }
 
 }

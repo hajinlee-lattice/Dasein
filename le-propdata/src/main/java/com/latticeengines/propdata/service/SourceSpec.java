@@ -2,12 +2,12 @@ package com.latticeengines.propdata.service;
 
 public interface SourceSpec {
 
-	String getSourceName();
+    String getSourceName();
 
-	String getSourceDomainColumn();
+    String getSourceDomainColumn();
 
-	String getSourceKey();
+    String getSourceKey();
 
-	String getIndexKeyColumn();
+    String getIndexKeyColumn();
 
 }

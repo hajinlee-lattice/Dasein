@@ -5,10 +5,10 @@ import com.latticeengines.domain.exposed.propdata.Commands;
 
 public interface CommandsDao extends BaseDao<Commands> {
 
-	void dropTable(String tableName);
+    void dropTable(String tableName);
 
-	void executeQueryUpdate(String sql);
+    void executeQueryUpdate(String sql);
 
-	void executeProcedure(String procedure);
+    void executeProcedure(String procedure);
 
 }

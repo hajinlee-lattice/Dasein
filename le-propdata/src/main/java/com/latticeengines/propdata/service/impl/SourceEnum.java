@@ -9,56 +9,54 @@ import com.latticeengines.propdata.service.SourceSpec;
 
 public enum SourceEnum implements SourceSpec {
 
-	Experian("Experian_Source", "URL", "uuid", "domain_name"), BuiltWith(
-			"BuiltWithDomain", "Domain", "uuid", "domain_name"), HGData(
-			"HGData_Source", "Url", "uuid", "domain_name");
+    Experian("Experian_Source", "URL", "uuid", "domain_name"), BuiltWith("BuiltWithDomain", "Domain", "uuid",
+            "domain_name"), HGData("HGData_Source", "Url", "uuid", "domain_name");
 
-	private static Map<String, SourceSpec> specMap = new HashMap<>();
-	static {
-		specMap.put(Experian.getSourceName().toLowerCase(), Experian);
-		specMap.put(BuiltWith.getSourceName().toLowerCase(), BuiltWith);
-		specMap.put(HGData.getSourceName().toLowerCase(), HGData);
+    private static Map<String, SourceSpec> specMap = new HashMap<>();
+    static {
+        specMap.put(Experian.getSourceName().toLowerCase(), Experian);
+        specMap.put(BuiltWith.getSourceName().toLowerCase(), BuiltWith);
+        specMap.put(HGData.getSourceName().toLowerCase(), HGData);
 
-	}
+    }
 
-	private SourceEnum(String sourceName, String sourceDomainColumn,
-			String sourceKey, String indexKeyColumn) {
-		this.sourceName = sourceName;
-		this.sourceDomainColumn = sourceDomainColumn;
-		this.sourceKey = sourceKey;
-		this.indexKeyColumn = indexKeyColumn;
-	}
+    private SourceEnum(String sourceName, String sourceDomainColumn, String sourceKey, String indexKeyColumn) {
+        this.sourceName = sourceName;
+        this.sourceDomainColumn = sourceDomainColumn;
+        this.sourceKey = sourceKey;
+        this.indexKeyColumn = indexKeyColumn;
+    }
 
-	private String sourceName;
-	private String sourceDomainColumn;
-	private String sourceKey;
-	private String indexKeyColumn;
+    private String sourceName;
+    private String sourceDomainColumn;
+    private String sourceKey;
+    private String indexKeyColumn;
 
-	@Override
-	public String getSourceName() {
-		return sourceName;
-	}
+    @Override
+    public String getSourceName() {
+        return sourceName;
+    }
 
-	@Override
-	public String getSourceDomainColumn() {
-		return sourceDomainColumn;
-	}
+    @Override
+    public String getSourceDomainColumn() {
+        return sourceDomainColumn;
+    }
 
-	@Override
-	public String getSourceKey() {
-		return sourceKey;
-	}
+    @Override
+    public String getSourceKey() {
+        return sourceKey;
+    }
 
-	@Override
-	public String getIndexKeyColumn() {
-		return indexKeyColumn;
-	}
+    @Override
+    public String getIndexKeyColumn() {
+        return indexKeyColumn;
+    }
 
-	public static SourceSpec getConnectorSpec(String sourceName) {
-		if (StringUtils.isEmpty(sourceName)) {
-			return null;
-		}
-		return specMap.get(sourceName.trim().toLowerCase());
+    public static SourceSpec getConnectorSpec(String sourceName) {
+        if (StringUtils.isEmpty(sourceName)) {
+            return null;
+        }
+        return specMap.get(sourceName.trim().toLowerCase());
 
-	}
+    }
 }
