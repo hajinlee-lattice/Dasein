@@ -39,7 +39,7 @@ import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 @Component
 public class PropDataDBServiceImpl implements PropDataDBService {
 
-    private static final int MATCHING_TIMEOUT_MINUTES = 60;
+    private static final int MATCHING_TIMEOUT_MINUTES = 120;
 
     private final Log log = LogFactory.getLog(this.getClass());
 
@@ -157,17 +157,18 @@ public class PropDataDBServiceImpl implements PropDataDBService {
         }
         String[] destTables = StringUtils.split(destTablesStr.trim(), "|");
         for (String destTable : destTables) {
-            generateNewTable(commandId, destTable, commandName, tableList, keyColsList);
+            generateNewTable(requestContext, commandId, destTable.trim(), commandName, tableList, keyColsList);
         }
     }
 
-    private void generateNewTable(Long commandId, String destTable, String commandName, List<String> tableList,
-            List<String> keyColsList) {
+    private void generateNewTable(PropDataContext requestContext, Long commandId, String destTable, String commandName,
+            List<String> tableList, List<String> keyColsList) {
 
         StringBuilder builder = new StringBuilder();
         builder.append(commandName).append("_").append(commandId).append("_").append(destTable);
         tableList.add(builder.toString());
-        keyColsList.add("Source_RowId");
+        String keyCols = requestContext.getProperty(ImportExportKey.KEY_COLS.getKey(), String.class);
+        keyColsList.add("Source_" + keyCols);
         tableList.add(builder.append("_MetaData").toString());
         keyColsList.add("InternalColumnName");
     }
