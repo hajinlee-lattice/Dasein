@@ -1,15 +1,12 @@
+from avro import schema, datafile, io
 import codecs
 from collections import OrderedDict
-import os
-import pwd
 import json
 import logging
 import math
-import sys
-
-from avro import schema, datafile, io
 from sklearn import metrics
 from sklearn.metrics.cluster.supervised import entropy
+import sys
 
 from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
