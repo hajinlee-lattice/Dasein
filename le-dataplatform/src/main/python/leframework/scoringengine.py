@@ -16,7 +16,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 def decodeDataValue(serializedValueAndType):
-    serializedType, sep, serializedValue = serializedValueAndType.partition('|')
+    serializedType, _, serializedValue = serializedValueAndType.partition('|')
     if len(serializedValue) > 0:
         serializedValue = serializedValue[1:-1]
     elif serializedType == "String":
