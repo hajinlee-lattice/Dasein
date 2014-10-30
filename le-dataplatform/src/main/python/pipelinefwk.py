@@ -10,7 +10,7 @@ class Pipeline:
     
     def predict(self, dataFrame):
         transformed = dataFrame
-           
+
         for step in self.pipelineSteps_:
             transformed = step.transform(transformed)
             
