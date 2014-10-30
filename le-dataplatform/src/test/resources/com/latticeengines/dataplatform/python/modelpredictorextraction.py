@@ -1,6 +1,8 @@
 import os
 import sys
 import json
+import itertools
+import operator
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -9,11 +11,14 @@ def main(argv):
     
     ModelJSONFilePath = sys.argv[1]
     CSVFilePath = sys.argv[2]
+    nameArray = []
+    sumArray = []
  
     with open (ModelJSONFilePath, "r") as myfile:
-        ModelJSON=myfile.read().replace('\n', '')
+        ModelJSON = myfile.read().replace('\n', '')
         
     contentJSON = json.loads(ModelJSON)
+
     if contentJSON["AverageProbability"] is None:
         print "-------------------------------------------"
         print "No AverageProbability in the model!!"
@@ -35,8 +40,22 @@ def main(argv):
         return 1
     
     with open (CSVFilePath, "w") as csvFile:
-	
-        csvFile.write("Feature_Name,Predictive_Power,Bucket_Lower_Bound,Bucket_Upper_Bound,Bucket_Value,Bucket_Probability,Bucket_Lift,Bucket_Frequency,Total#Lead\n")
+        csvFile.write("Feature Name,Predictive Power,Bucket Lower Bound,Bucket Upper Bound,Bucket Value, Conversion Rate,Lift,Total Leads,Frequency(#),Frequency/Total Leads\n")
+
+    # This section calculates the total #leads for each predictor. Ideally it should be the same for each predictor, but there seem to be some exceptions
+        siddata = sorted(contentJSON["Summary"]["Predictors"], key=operator.itemgetter('Name'))
+        sidgroups = itertools.groupby(siddata, operator.itemgetter('Name'))
+        for key, group in sidgroups:  # print('{}\t{}'.format(key, sum(int(value["Count"]) for value in group)))
+            for value in group:
+                total = 0
+                for i in value['Elements']:
+                    total = total + i['Count']
+                print value['Name'], ":\t\t", total
+                nameArray.append(value['Name'])
+                sumArray.append(total)
+        dictArray = dict(zip(nameArray, sumArray))
+        # dictArray is a list of dictionaries with attributeName = #Total Leads
+
         for predictor in contentJSON["Summary"]["Predictors"]:
             totalCount = 0
             for predictorElement in predictor["Elements"]:    
@@ -91,30 +110,39 @@ def main(argv):
                                     csvFile.write(';')                         
                         csvFile.write(']",')
                 if 'Lift' in predictorElement:
-		    if predictorElement["Lift"] is None:
+                    if predictorElement["Lift"] is None:
                         csvFile.write("null")
-			csvFile.write(",")
-			csvFile.write("null")
+                        csvFile.write(",")
+                        csvFile.write("null")
                     else:                         
-                        csvFile.write(unicode(averageProb*predictorElement["Lift"]))
-			csvFile.write(",")
-			csvFile.write(unicode(predictorElement["Lift"]))          
-                csvFile.write(",")          
+                        csvFile.write(unicode(averageProb * predictorElement["Lift"]))
+                        csvFile.write(",")
+                        csvFile.write(unicode(predictorElement["Lift"]))          
+                csvFile.write(",") 
+                
+                if predictor['Name'] in dictArray.keys():
+                    if dictArray[predictor['Name']] is None:
+                        csvFile.write("notFound")
+                    else:                     
+                    # write total #leads to csvFile
+                        csvFile.write('"' + str(dictArray[predictor['Name']]) + '"')            
+                csvFile.write(",")         
              
                 if 'Count' in predictorElement:
                     if predictorElement["Count"] is None:
                         csvFile.write("null")
                     else:     
-                        csvFile.write(unicode(predictorElement["Count"]))        
-                        totalCount = totalCount + predictorElement["Count"]                        
+                        csvFile.write(unicode(predictorElement["Count"]))
+                        csvFile.write(",")     
+                        csvFile.write(unicode(predictorElement["Count"] / float(dictArray[predictor['Name']])))                   
                 csvFile.write(",") 
 
                 csvFile.write(unicode(totalCount))                
                 csvFile.write("\n")
     
-    #print "----------------------------------------------------------------------------"
-    #print "successfully extracted predictors information to " + CSVFilePath
-    #print "----------------------------------------------------------------------------"
+    # print "----------------------------------------------------------------------------"
+    # print "successfully extracted predictors information to " + CSVFilePath
+    # print "----------------------------------------------------------------------------"
     
 if __name__ == "__main__":
     sys.exit(main(sys.argv))

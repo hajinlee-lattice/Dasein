@@ -79,7 +79,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                 + HTTPFS_SUFFIX);
         
         String modelCSVFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath).replace(".json", ".csv");
-        modelCommandLogService.log(modelCommand, "Model csv file download link: " + httpFsPrefix + modelCSVFileHdfsPath
+        modelCommandLogService.log(modelCommand, "Top Predictors csv file download link: " + httpFsPrefix + modelCSVFileHdfsPath
                 + HTTPFS_SUFFIX);
         
         String scoreFileHdfsPath = jobStatus.getResultDirectory() + "/scored.txt";
