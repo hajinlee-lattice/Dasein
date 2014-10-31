@@ -177,7 +177,7 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
                     String[] tokens = StringUtils.split(applicationId, "_");
                     String folder = StringUtils.join(new String[] { tokens[1], tokens[2] }, "_");
                     jobStatus.setResultDirectory(classifier.getModelHdfsDir() + "/" + folder);
-                    jobStatus.setDataDiagnosticsDirectory(classifier.getDataDiagnosticsDirectory());
+                    jobStatus.setDataDiagnosticsPath(classifier.getDataDiagnosticsPath());
                 }
             }
         }
@@ -219,11 +219,11 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
     }
 
     protected ModelingJob getLeafJob(String applicationId) {
-        ModelingJob modelingJob = (ModelingJob)jobEntityMgr.findByObjectId(applicationId); // /
+        ModelingJob modelingJob = (ModelingJob) jobEntityMgr.findByObjectId(applicationId); // /
         // jobEntityMgr.getById(applicationId);
         while (modelingJob != null && modelingJob.getChildIdList().size() > 0) {
             applicationId = modelingJob.getChildIdList().get(0);
-            modelingJob = (ModelingJob)jobEntityMgr.findByObjectId(applicationId);
+            modelingJob = (ModelingJob) jobEntityMgr.findByObjectId(applicationId);
         }
         return modelingJob;
     }

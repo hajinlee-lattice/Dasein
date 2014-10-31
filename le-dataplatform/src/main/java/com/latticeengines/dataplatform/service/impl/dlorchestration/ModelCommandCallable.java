@@ -2,8 +2,6 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -13,13 +11,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.http.message.BasicNameValuePair;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
-import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
@@ -277,50 +274,33 @@ public class ModelCommandCallable implements Callable<Long> {
     }
 
     private void generateDataDiagnostics(ModelCommandState commandState, JobStatus jobStatus) throws Exception {
-        String diagnosticsPath = "";
-        try {
-            for (String filePath : HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getDataDiagnosticsDirectory())) {
-                if (filePath.endsWith("diagnostics.json")) {
-                    diagnosticsPath = filePath;
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_16002, e, new String[] { String.valueOf(modelCommand.getPid()),
-                    commandState.getYarnApplicationId() });
-        }
+        String diagnosticsPath = jobStatus.getDataDiagnosticsPath();
 
-        if (diagnosticsPath.isEmpty()) {
+        if (!HdfsUtils.fileExists(yarnConfiguration, diagnosticsPath)) {
             modelCommandLogService.log(modelCommand, "No data diagnostics generated.");
             log.warn("No data diagnostics generated for command " + modelCommand.getPid() + "with application id "
                     + commandState.getYarnApplicationId());
             return;
         }
 
-        // Parse file
+        // Parse diagnostics file
         String warnings = "";
-        diagnosticsPath = jobStatus.getDataDiagnosticsDirectory() + "/" + StringTokenUtils.stripPath(diagnosticsPath); // full
-                                                                                                                       // hdfs
-                                                                                                                       // path
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
-        TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
-        };
-        HashMap<String, Object> diagnostics = new ObjectMapper().readValue(content.getBytes(), typeRef);
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
 
         // Check positive event rate between arbitrary range
         double[] positiveEventRateThresh = { 1, 50 }; // 1% to 50%
-        @SuppressWarnings("unchecked")
-        double positiveEventRate = (double) ((LinkedHashMap<String, Object>) diagnostics.get("Summary"))
-                .get("PositiveEventRate");
-        positiveEventRate *= 100;
+        double positiveEventRate = (double) ((JSONObject) jsonObject.get("Summary")).get("PositiveEventRate");
+        positiveEventRate *= 100;   // Convert to percentage
+        
         if (positiveEventRate < positiveEventRateThresh[0] || positiveEventRate > positiveEventRateThresh[1]) {
             warnings += "Detected abnormal positive event rate " + positiveEventRate + "% from event table (below "
                     + positiveEventRateThresh[0] + "% or above " + positiveEventRateThresh[1] + "%).\n";
         }
+        
         // Check any invalid column bucketing metadata
-        @SuppressWarnings("unchecked")
-        LinkedHashMap<String, Object> metadataDiagnostics = ((LinkedHashMap<String, Object>) diagnostics
-                .get("MetadataDiagnostics"));
+        JSONObject metadataDiagnostics = (JSONObject) jsonObject.get("MetadataDiagnostics");
         List<String> columns = new ArrayList<String>();
         for (Object key : metadataDiagnostics.keySet()) {
             columns.add((String) key);

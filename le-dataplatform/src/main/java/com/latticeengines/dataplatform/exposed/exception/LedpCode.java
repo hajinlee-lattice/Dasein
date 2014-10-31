@@ -39,6 +39,9 @@ public enum LedpCode {
     LEDP_15001("Could not find sample file for prefix {0}."), //
     LEDP_15002("Customer must be set for a model."), //
     LEDP_15003("There should at least be one file of type {0}."), //
+    LEDP_15004("Could not find diagnostics for model input data."), //
+    LEDP_15005("Input data has too few rows: {0}."), //
+    LEDP_15006("Failed to validate the input data."), //
     // DLOrchestration service: 16000-16999
     LEDP_16000("Missing model command parameter(s) {0}."), //
     LEDP_16001("Problem deleting path {0} before load."), //
@@ -48,7 +51,6 @@ public enum LedpCode {
     LEDP_16005("Problem retrieving DL metadata columns for model command:{0} from url:{1}."), //
     LEDP_16006("Retrieved empty DL metadata columns for model command:{0} from url:{1}."), //
     LEDP_16007("LeadScoringCommand failed.");
-
 
     private String message;
 

@@ -22,6 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -59,6 +61,8 @@ public class ModelingServiceImpl implements ModelingService {
 
     private static final Log log = LogFactory.getLog(ModelingServiceImpl.class);
 
+    private static final String DIAGNOSTIC_FILE = "diagnostics.json";
+
     @Autowired
     private Configuration yarnConfiguration;
 
@@ -74,6 +78,9 @@ public class ModelingServiceImpl implements ModelingService {
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
+    @Value("${dataplatform.modeling.row.threshold:50}")
+    private int rowSizeThreshold;
+    
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     /**
@@ -82,6 +89,11 @@ public class ModelingServiceImpl implements ModelingService {
      */
     public List<ApplicationId> submitModel(Model model) {
         setupModelProperties(model);
+        try {
+            validateModelInputData(model);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_15006, e);
+        }
         List<ApplicationId> applicationIds = new ArrayList<ApplicationId>();
         ModelDefinition modelDefinition = model.getModelDefinition();
 
@@ -120,9 +132,29 @@ public class ModelingServiceImpl implements ModelingService {
 
     private void setupModelProperties(Model model) {
         model.setId(UUID.randomUUID().toString());
-        model.setModelHdfsDir(customerBaseDir + "/" + model.getCustomer() + "/models/" + model.getTable() + "/" + model.getId());
+        model.setModelHdfsDir(customerBaseDir + "/" + model.getCustomer() + "/models/" + model.getTable() + "/"
+                + model.getId());
         model.setDataHdfsPath(customerBaseDir + "/" + model.getCustomer() + "/data/" + model.getTable());
         model.setMetadataHdfsPath(customerBaseDir + "/" + model.getCustomer() + "/data/" + model.getMetadataTable());
+    }
+
+    private void validateModelInputData(Model model) throws Exception {
+        String diagnosticsPath = model.getMetadataHdfsPath() + "/" + DIAGNOSTIC_FILE;
+
+        if (!HdfsUtils.fileExists(yarnConfiguration, diagnosticsPath)) {
+            throw new LedpException(LedpCode.LEDP_15004);
+        }
+        // Parse diagnostics file
+        String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
+        long  sampleSize = (long) ((JSONObject) jsonObject.get("Summary")).get("SampleSize");
+
+        if (sampleSize < rowSizeThreshold) {
+            throw new LedpException(LedpCode.LEDP_15005, new String[] { Double.toString(sampleSize) });
+        }
+
+        return;
     }
 
     private Classifier createClassifier(Model model, Algorithm algorithm) {
@@ -141,11 +173,11 @@ public class ModelingServiceImpl implements ModelingService {
 
         String pipelineLibScript = algorithm.getPipelineLibScript();
         if (StringUtils.isEmpty(pipelineLibScript)) {
-        	pipelineLibScript = "/app/dataplatform/scripts/lepipeline.tar.gz";
+            pipelineLibScript = "/app/dataplatform/scripts/lepipeline.tar.gz";
         }
         String pipelineScript = algorithm.getPipelineScript();
         if (StringUtils.isEmpty(pipelineScript)) {
-        	pipelineScript = "/app/dataplatform/scripts/pipeline.py";
+            pipelineScript = "/app/dataplatform/scripts/pipeline.py";
         }
 
         classifier.setPythonPipelineLibHdfsPath(pipelineLibScript);
@@ -155,7 +187,7 @@ public class ModelingServiceImpl implements ModelingService {
         classifier.setProvenanceProperties(model.getProvenanceProperties());
         classifier.setDataProfileHdfsPath(getDataProfileAvroPathInHdfs(model.getMetadataHdfsPath()));
         classifier.setConfigMetadataHdfsPath(getConfigMetadataPathInHdfs(model.getMetadataHdfsPath()));
-        classifier.setDataDiagnosticsDirectory(model.getMetadataHdfsPath());
+        classifier.setDataDiagnosticsPath(model.getMetadataHdfsPath() + "/" + DIAGNOSTIC_FILE);
 
         String samplePrefix = algorithm.getSampleName();
         String trainingPath = getAvroFileHdfsPath(samplePrefix + "Training", model.getSampleHdfsPath());
@@ -271,7 +303,8 @@ public class ModelingServiceImpl implements ModelingService {
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
-        //containerProperties.put(PythonContainerProperty.TABLE.name(), model.getTable());
+        // containerProperties.put(PythonContainerProperty.TABLE.name(),
+        // model.getTable());
         modelingJob.setClient("pythonClient");
         modelingJob.setAppMasterPropertiesObject(appMasterProperties);
         modelingJob.setContainerPropertiesObject(containerProperties);
@@ -333,16 +366,17 @@ public class ModelingServiceImpl implements ModelingService {
         m.setMetadataTable(dataProfileConfig.getMetadataTable());
         setupModelProperties(m);
         try {
-            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, m.getDataHdfsPath() + "/samples", new HdfsFilenameFilter() {
+            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, m.getDataHdfsPath() + "/samples",
+                    new HdfsFilenameFilter() {
 
-                @Override
-                public boolean accept(String filename) {
-                    Pattern p = Pattern.compile(".*.avro");
-                    Matcher matcher = p.matcher(filename.toString());
-                    return matcher.matches();
-                }
+                        @Override
+                        public boolean accept(String filename) {
+                            Pattern p = Pattern.compile(".*.avro");
+                            Matcher matcher = p.matcher(filename.toString());
+                            return matcher.matches();
+                        }
 
-            });
+                    });
 
             if (paths.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_00002);
@@ -484,7 +518,8 @@ public class ModelingServiceImpl implements ModelingService {
         model.setMetadataTable(config.getMetadataTable());
         setupModelProperties(model);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        return modelingJobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue, model.getCustomer(), config.getKeyCols());
+        return modelingJobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
+                model.getCustomer(), config.getKeyCols());
     }
 
     @Override
