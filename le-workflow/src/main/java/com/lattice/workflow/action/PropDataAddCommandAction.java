@@ -9,7 +9,6 @@ import com.latticeengines.propdata.service.db.PropDataContext;
 import com.latticeengines.propdata.service.db.PropDataDBService;
 import com.latticeengines.propdata.service.db.PropDataKey.CommandIdsKey;
 import com.latticeengines.propdata.service.db.PropDataKey.CommandsKey;
-import com.latticeengines.propdata.service.db.PropDataKey.ImportExportKey;
 
 public class PropDataAddCommandAction extends AbstractAction<PropDataContext, PropDataContext> {
 

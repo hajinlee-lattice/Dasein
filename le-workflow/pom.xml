@@ -1,83 +1,86 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.latticeengines</groupId>
-	<artifactId>le-workflow</artifactId>
-	<version>1.0.8-SNAPSHOT</version>
-	<name>${component-name}</name>
-	<description>LE WorkFlow</description>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.latticeengines</groupId>
+    <artifactId>le-workflow</artifactId>
+    <version>1.0.8-SNAPSHOT</version>
+    <name>le-${component-name}</name>
+    <description>LE WorkFlow</description>
 
-	<parent>
-		<groupId>com.latticeengines</groupId>
-		<artifactId>le-parent</artifactId>
-		<version>1.0.8-SNAPSHOT</version>
-		<relativePath>../le-parent</relativePath>
-	</parent>
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>1.0.8-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
 
-	<properties>
-		<component-name>le-workflow</component-name>
-		<le.db.version>1.0.8-SNAPSHOT</le.db.version>
-	</properties>
+    <properties>
+        <component-name>workflow</component-name>
+        <le.db.version>1.0.9-SNAPSHOT</le.db.version>
+        <le.propdata.version>1.0.9-SNAPSHOT</le.propdata.version>
+        <oozie.version>4.0.0.2.1.3.0-563</oozie.version>
+    </properties>
 
-	<profiles>
-		<profile>
-			<id>functional</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>${maven.surefire.version}</version>
-						<executions>
-							<execution>
-								<id>unit-test</id>
-								<configuration>
-									<skip>true</skip>
-								</configuration>
-							</execution>
-							<execution>
-								<id>default-test</id>
-								<configuration>
-									<skip>true</skip>
-								</configuration>
-							</execution>
-							<execution>
-								<id>functional-test</id>
-								<goals>
-									<goal>test</goal>
-								</goals>
-								<phase>integration-test</phase>
-								<configuration>
-									<argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
-									<skip>false</skip>
-									<includes>
-										<include>${functional.classes.include}</include>
-										<exclude>${functional.classes.exclude}</exclude>
-									</includes>
-									<groups>${functional.groups}</groups>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+    <profiles>
+        <profile>
+            <id>functional</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unit-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>functional-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                                <configuration>
+                                    <argLine>-XX:MaxPermSize=256m
+                                        ${argLine}</argLine>
+                                    <skip>false</skip>
+                                    <includes>
+                                        <include>${functional.classes.include}</include>
+                                        <exclude>${functional.classes.exclude}</exclude>
+                                    </includes>
+                                    <groups>${functional.groups}</groups>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.latticeengines</groupId>
-			<artifactId>le-propdata</artifactId>
-			<version>1.0.8-SNAPSHOT</version>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-propdata</artifactId>
+            <version>${le.propdata.version}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.apache.oozie</groupId>
-			<artifactId>oozie-client</artifactId>
-			<version>4.0.0.2.1.3.0-563</version>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.oozie</groupId>
+            <artifactId>oozie-client</artifactId>
+            <version>${oozie.version}</version>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 </project>
