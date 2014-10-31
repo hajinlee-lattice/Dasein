@@ -42,8 +42,8 @@ public class WorkflowServiceImpl implements WorkflowService {
         OozieClient wc = new OozieClient(oozieAdminUrl);
 
         Properties conf = wc.createConfiguration();
-//        conf.setProperty(OozieClient.APP_PATH, nameNode + workflowAppPath);
-        conf.setProperty(OozieClient.COORDINATOR_APP_PATH, nameNode + workflowAppPath);
+        conf.setProperty(OozieClient.APP_PATH, nameNode + workflowAppPath);
+//        conf.setProperty(OozieClient.COORDINATOR_APP_PATH, nameNode + workflowAppPath);
         conf.setProperty("workflowAppUri", nameNode + workflowAppPath);
 
         conf.setProperty("start", "2014-01-01T00:00Z");

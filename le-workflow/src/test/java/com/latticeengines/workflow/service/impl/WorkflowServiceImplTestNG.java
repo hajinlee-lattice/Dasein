@@ -1,4 +1,4 @@
-package com.latticeengines.workflow.service;
+package com.latticeengines.workflow.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -7,6 +7,9 @@ import org.springframework.test.context.support.DirtiesContextTestExecutionListe
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.latticeengines.workflow.service.WorkflowContext;
+import com.latticeengines.workflow.service.WorkflowService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:workflow-context.xml", "classpath:workflow-properties-context.xml" })
