@@ -20,6 +20,7 @@
             <arg>ie-mapColumn=${propDataMapColumn}</arg>
             <file>/app/dataplatform/dataplatform.properties</file>
             <file>/app/workflow/propdata.properties</file>
+            <file>/app/workflow/workflow.properties</file>
         </java>
         <ok to="Propdata_Match" />
         <error to="fail" />
@@ -39,6 +40,7 @@
             <arg>commands-sourceTable=${table}</arg>
             <file>/app/dataplatform/dataplatform.properties</file>
             <file>/app/workflow/propdata.properties</file>
+            <file>/app/workflow/workflow.properties</file>
             <capture-output />
         </java>
         <ok to="Propdata_Import" />
@@ -59,6 +61,7 @@
             <arg>commands-commandName=${wf:actionData('Propdata_Match')['commands-commandName']}</arg>
             <file>/app/dataplatform/dataplatform.properties</file>
             <file>/app/workflow/propdata.properties</file>
+            <file>/app/workflow/workflow.properties</file>
         </java>
         <ok to="end" />
         <error to="fail" />

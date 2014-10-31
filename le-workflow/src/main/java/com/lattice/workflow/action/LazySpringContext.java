@@ -20,6 +20,7 @@ public class LazySpringContext {
 
         String dataplatformProp = "dataplatform.properties";
         String propdataProp = "propdata.properties";
+        String workflowProp = "workflow.properties";
         String workflowContextFile = "workflow-context.xml";
 
         springContext = new ClassPathXmlApplicationContext(new String[] { workflowContextFile }, false);
@@ -28,6 +29,7 @@ public class LazySpringContext {
         try {
             properties.load(new FileReader(dataplatformProp));
             properties.load(new FileReader(propdataProp));
+            properties.load(new FileReader(workflowProp));
 
         } catch (IOException ex) {
             log.error("Spring init context failed!", ex);
