@@ -35,6 +35,10 @@ def writeModel(schema, modelDir, clf):
 
     for i in range(0, numInputs):
         fo.write(schema["features"][i] + ",double,continuous,NA,NA,asMissing\n")
+        
+    for i in range(0, numInputs):
+        fo.write("%f\n" % importances[i])
+        
 
     fo.write(str(numClasses) + "\n")
 

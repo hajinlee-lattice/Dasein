@@ -14,6 +14,10 @@ from testbase import TestBase
 class TrainingTestBase(TestBase):
 
     def setUp(self):
+        # These properties won't really be used since these are just unit tests.
+        # Functional and end-to-end tests should be done from java
+        os.environ["CONTAINER_ID"] = "xyz"
+        os.environ["SHDP_HD_FSWEB"] = "localhost:50070"
         # Simulate what happens in yarn when it copies the framework code over
         # before running the python script
         self.fwkdir = "./leframework.tar.gz"

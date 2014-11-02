@@ -308,7 +308,7 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         dataWriter.append(datum)
 
     # Create bucket for nulls if applicable
-    index = writeNullBucket(index, colname, columnVector, eventVector, avgProbability, dataWriter, False)
+    index = writeNullBucket(index, colname, columnVector, eventVector, avgProbability, None, None, dataWriter, False)
     return index
 
 def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, colname, index):
@@ -353,10 +353,10 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         dataWriter.append(datum)
 
     # Create bucket for nulls if applicable
-    index = writeNullBucket(index, colname, columnVector, eventVector, avgProbability, dataWriter, True)
+    index = writeNullBucket(index, colname, columnVector, eventVector, avgProbability, mean, median, dataWriter, True)
     return index
 
-def writeNullBucket(index, colname, columnVector, eventVector, avgProbability, dataWriter, continuous):
+def writeNullBucket(index, colname, columnVector, eventVector, avgProbability, mean, median, dataWriter, continuous):
     bandVector = []
     
     if continuous:
@@ -374,8 +374,8 @@ def writeNullBucket(index, colname, columnVector, eventVector, avgProbability, d
     datum["Dtype"] = "BND" if continuous else "STR"
     datum["minV"] = None
     datum["maxV"] = None
-    datum["mean"] = None
-    datum["median"] = None
+    datum["mean"] = mean
+    datum["median"] = median
     datum["mode"] = None
     datum["count"] = bandCount
     datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)

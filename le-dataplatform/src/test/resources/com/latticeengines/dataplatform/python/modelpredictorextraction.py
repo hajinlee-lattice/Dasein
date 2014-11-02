@@ -1,8 +1,9 @@
+import itertools
+import json
+import operator
 import os
 import sys
-import json
-import itertools
-import operator
+
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -30,7 +31,7 @@ def main(argv):
     if contentJSON["Summary"] is None:
         print "-------------------------------------------"
         print "No ModelSummary information in the model!!"
-        print "-------------------------------------------"                
+        print "-------------------------------------------"
         return 1
     
     if contentJSON["Summary"]["Predictors"] is None:
@@ -45,7 +46,7 @@ def main(argv):
     # This section calculates the total #leads for each predictor. Ideally it should be the same for each predictor, but there seem to be some exceptions
         siddata = sorted(contentJSON["Summary"]["Predictors"], key=operator.itemgetter('Name'))
         sidgroups = itertools.groupby(siddata, operator.itemgetter('Name'))
-        for key, group in sidgroups:  # print('{}\t{}'.format(key, sum(int(value["Count"]) for value in group)))
+        for key, group in sidgroups:
             for value in group:
                 total = 0
                 for i in value['Elements']:
@@ -58,21 +59,21 @@ def main(argv):
 
         for predictor in contentJSON["Summary"]["Predictors"]:
             totalCount = 0
-            for predictorElement in predictor["Elements"]:    
+            for predictorElement in predictor["Elements"]:
                 if 'Name' in predictor:   
                     if predictor["Name"] is None:
                         csvFile.write("null")
                     else:
-                        csvFile.write('"')                    
+                        csvFile.write('"')
                         csvFile.write(unicode(predictor["Name"]).replace('"', '""'))
-                        csvFile.write('"')                        
+                        csvFile.write('"')
                 csvFile.write(",")
             
                 if 'UncertaintyCoefficient' in predictor:
                     if predictor["UncertaintyCoefficient"] is None:
                         csvFile.write("null")
                     else:                     
-                        csvFile.write('"' + unicode(predictor["UncertaintyCoefficient"]) + '"')            
+                        csvFile.write('"' + unicode(predictor["UncertaintyCoefficient"]) + '"')
                 csvFile.write(",")           
 
                 length = 0

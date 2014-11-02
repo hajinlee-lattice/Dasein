@@ -18,6 +18,7 @@ class TestBase(TestCase):
         
         baseDir = os.path.dirname(os.path.abspath(__file__))
         dataDir = baseDir + "/data/"
+        
         # Creates symbolic links from data directory to current directory
         for f in os.listdir(dataDir):
             fPath = os.path.join(dataDir,f)
@@ -35,4 +36,5 @@ def removeLinks():
     for f in os.listdir(curDir):
         if os.path.islink(f):
             os.unlink(f)
+
 
