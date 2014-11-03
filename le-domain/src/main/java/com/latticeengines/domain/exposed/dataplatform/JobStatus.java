@@ -9,7 +9,7 @@ public class JobStatus implements HasId<String> {
 
     private String jobId;
     private String resultDirectory;
-    private String dataDiagnosticsDirectory;
+    private String dataDiagnosticsPath;
     private FinalApplicationStatus status;
     private YarnApplicationState state;
     private float progress;
@@ -59,14 +59,14 @@ public class JobStatus implements HasId<String> {
         this.resultDirectory = resultDirectory;
     }
     
-    @JsonProperty("diagnostics_dir")
-    public String getDataDiagnosticsDirectory() {
-        return dataDiagnosticsDirectory;
+    @JsonProperty("diagnostics_path")
+    public String getDataDiagnosticsPath() {
+        return dataDiagnosticsPath;
     }
 
-    @JsonProperty("diagnostics_dir")
-    public void setDataDiagnosticsDirectory(String dataDiagnosticsDirectory) {
-        this.dataDiagnosticsDirectory = dataDiagnosticsDirectory;
+    @JsonProperty("diagnostics_path")
+    public void setDataDiagnosticsPath(String dataDiagnosticsPath) {
+        this.dataDiagnosticsPath = dataDiagnosticsPath;
     }
     
     @JsonProperty("progress")

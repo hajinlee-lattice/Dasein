@@ -23,7 +23,7 @@ public class Classifier implements HasName {
     private String provenanceProperties;
     private String dataProfileHdfsPath;
     private String configMetadataHdfsPath;
-    private String dataDiagnosticsDirectory;
+    private String dataDiagnosticsPath;
     private String pythonPipelineLibHdfsPath;
     private String pythonPipelineScriptHdfsPath;
 
@@ -182,14 +182,14 @@ public class Classifier implements HasName {
         this.configMetadataHdfsPath = configMetadataHdfsPath;
     }
 
-    @JsonProperty("diagnostics_dir")
-    public String getDataDiagnosticsDirectory() {
-        return dataDiagnosticsDirectory;
+    @JsonProperty("diagnostics_path")
+    public String getDataDiagnosticsPath() {
+        return dataDiagnosticsPath;
     }
 
-    @JsonProperty("diagnostics_dir")
-    public void setDataDiagnosticsDirectory(String dataDiagnosticsDirectory) {
-        this.dataDiagnosticsDirectory = dataDiagnosticsDirectory;
+    @JsonProperty("diagnostics_path")
+    public void setDataDiagnosticsPath(String dataDiagnosticsPath) {
+        this.dataDiagnosticsPath = dataDiagnosticsPath;
     }
 
     @JsonProperty("python_pipeline_script")
