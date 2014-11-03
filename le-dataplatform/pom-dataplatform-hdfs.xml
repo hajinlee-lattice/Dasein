@@ -89,21 +89,6 @@
                 <hadoop-metrics2.properties.path>conf/env/buildmachine</hadoop-metrics2.properties.path>
             </properties>
         </profile>
-        <profile>
-            <id>dev</id>
-            <activation>
-                <property>
-                    <name>environment.type</name>
-                    <value>dev</value>
-                </property>
-            </activation>
-            <properties>
-                <dataplatform.properties.path>conf/env/dev</dataplatform.properties.path>
-                <hadoop-metrics2.properties.path>conf/env/dev</hadoop-metrics2.properties.path>
-                <mapping.username>smeng</mapping.username>
-                <mapping.groupname>users</mapping.groupname>
-            </properties>
-        </profile>
     </profiles>
 
     <build>
