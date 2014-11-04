@@ -209,8 +209,13 @@ public class ModelCommandCallable implements Callable<Long> {
                     // Job in progress.
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.KILLED)
                         || jobStatus.getStatus().equals(FinalApplicationStatus.FAILED)) {
-                    modelCommandLogService.log(modelCommand, "Job Memory used: "
-                            + jobStatus.getAppResUsageReport().getUsedResources().getMemory() + "MB");
+                    int memory = jobStatus.getAppResUsageReport().getUsedResources().getMemory();
+                    modelCommandLogService.log(modelCommand, "Job Memory used: " + memory + "MB");
+                    if (memory > jobStatus.getAppResUsageReport().getNeededResources().getMemory()) {
+                        modelCommandLogService
+                                .log(modelCommand,
+                                        "Job failed due to too much memory being used! Please decrease the size of the dataset and try again.");
+                    }
                     jobFailed = true;
                 }
             }
