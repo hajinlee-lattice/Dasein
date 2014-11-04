@@ -122,7 +122,7 @@ class Launcher(object):
                 if executor.accept(filename) is False:
                     continue
                 hdfs.copyFromLocal(modelLocalDir + filename, "%s/%s" % (modelHdfsDir, filename))
-                if filename.endswith(".json"):
+                if filename.endswith(".json") and filename != "diagnostics.json":
                     modelName = parser.getSchema()["name"]
                     self.__publishToConsumer(hdfs, modelLocalDir + filename, modelHdfsDir, "BARD", modelName)
 
