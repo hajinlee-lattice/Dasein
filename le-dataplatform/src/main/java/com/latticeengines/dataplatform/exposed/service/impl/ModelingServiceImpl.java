@@ -473,7 +473,10 @@ public class ModelingServiceImpl implements ModelingService {
                 columnSet.add(field.getProp("columnName"));
             }
 
-            Set<String> targetsSet = new HashSet<>(model.getTargetsList());
+            Set<String> targetsSet = new HashSet<>();
+            if (model.getTargetsList() != null) {
+                targetsSet.addAll(model.getTargetsList());
+            }
             for (GenericRecord datum : data) {
                 String name = datum.get("barecolumnname").toString();
                 if (!depivoted) {
