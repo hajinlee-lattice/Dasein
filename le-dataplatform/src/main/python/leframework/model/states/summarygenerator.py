@@ -96,6 +96,11 @@ class SummaryGenerator(State, JsonGenBase):
         predictor = OrderedDict()
         predictor["Elements"] = elements
         predictor["Name"] = colname
+        
+        if "displayname" in record:
+            predictor["DisplayName"] = record["displayname"]
+        else:
+            predictor["DisplayName"] = colname
         predictor["UncertaintyCoefficient"] = attrLevelUncertaintyCoeff
         return predictor
 

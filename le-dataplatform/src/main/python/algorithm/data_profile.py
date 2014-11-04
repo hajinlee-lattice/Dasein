@@ -50,6 +50,11 @@ def getSchema():
         "columnName" : "barecolumnname",
         "sqlType" : "-9"
       }, {
+        "name" : "displayname",
+        "type" : [ "string", "null" ],
+        "columnName" : "displayname",
+        "sqlType" : "-9"
+      }, {
         "name" : "columnvalue",
         "type" : [ "string", "null" ],
         "columnName" : "columnvalue",
@@ -152,7 +157,9 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     stringcols = set(schema["stringColumns"])
     features = set(schema["features"])
     eventVector = data.iloc[:, schema["targetIndex"]]
-    colnameBucketMetadata, metadataDiagnostics = retrieveColumnBucketMetadata(schema["config_metadata"])
+    configMetadata = schema["config_metadata"]
+    displayMetadata = retrieveColumnDisplayMetadata(configMetadata)
+    colnameBucketMetadata, metadataDiagnostics = retrieveColumnBucketMetadata(configMetadata)
     progressReporter.setTotalState(len(colnames))
 
     index = 1
@@ -161,12 +168,36 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
         # Update progress
         progressReporter.nextState()
         if colname in features:
-            index, columnDiagnostics = profileColumn(data[colname], colname, stringcols, eventVector, bucketDispatcher, dataWriter, index, colnameBucketMetadata.get(colname))
+            if not displayMetadata.has_key(colname):
+                displayMetadata[colname] = colname
+            index, columnDiagnostics = profileColumn(data[colname], colname, displayMetadata[colname], 
+                                                     stringcols, eventVector, bucketDispatcher, dataWriter, index, colnameBucketMetadata.get(colname))
             dataDiagnostics.append(columnDiagnostics)
 
     writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir)
     dataWriter.close()
     return None
+
+def retrieveColumnDisplayMetadata(columnsMetadata):
+    displayMetadata = dict()
+    if columnsMetadata is None or not columnsMetadata.has_key("Metadata"):
+        return displayMetadata
+    else:
+        columnsMetadata = columnsMetadata["Metadata"]
+
+    for columnMetadata in columnsMetadata:
+        colname = columnMetadata['ColumnName']
+        try :
+            displayName = columnMetadata['DisplayName']
+            if columnMetadata['DisplayName'] is None:
+                displayName = colname
+                
+            displayMetadata[colname] = displayName
+        except :
+            logger.warn("Invalid metadata format for column: " + colname)
+            continue
+
+    return displayMetadata
 
 def retrieveColumnBucketMetadata(columnsMetadata):
     '''
@@ -211,12 +242,13 @@ def getPopulatedRowCount(columnData, continuous):
         return columnData.count()
     return sum(map(lambda x: 1 if x is not None else 0, columnData))
 
-def profileColumn(columnData, colname, stringcols, eventVector, bucketDispatcher, dataWriter, index, bucketingParams = None):
+def profileColumn(columnData, colName, displayName, stringcols, eventVector, bucketDispatcher, dataWriter, index, bucketingParams = None):
     '''
     Performs profiling on given column 
     Args:
         columnData: A DataFrame vector of data for given column
-        colname: Name of given column
+        colName: Name of given column
+        displayName: Display name of a given column
         stringcols: A list of names of string columns 
         eventVector: A DataFrame vector of event column
         bucketDispatcher: A dispatcher that performs specific bucketing based on passed in parameters
@@ -231,30 +263,31 @@ def profileColumn(columnData, colname, stringcols, eventVector, bucketDispatcher
         RuntimeError : An error occurred when more than 1 bucketing strategy is found for a given column
     '''
     diagnostics = OrderedDict()
-    diagnostics["Colname"] = colname
-    diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colname not in stringcols)/float(len(columnData))
+    diagnostics["Colname"] = colName
+    diagnostics["DisplayName"] = displayName
+    diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colName not in stringcols)/float(len(columnData))
     
     if diagnostics["PopulationRate"] == 0.0:
         return (index, diagnostics)
 
-    if colname in stringcols:
+    if colName in stringcols:
         # Categorical column
         diagnostics["Type"] = "Categorical"
         uniqueValues = len(columnData.unique())
         mode = columnData.value_counts().idxmax()
         diagnostics["UniqueValues"] = uniqueValues
         if uniqueValues > 200:
-            logger.warn("String column name: " + colname + " is discarded due to more than 200 unique values.")
+            logger.warn("String column name: " + colName + " is discarded due to more than 200 unique values.")
             return (index, diagnostics)
 
-        index = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colname, index)
+        index = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colName, displayName, index)
     else:
         # Band column
         diagnostics["Type"] = "Band"
         mean = columnData.mean()
         median = columnData.median()
         if math.isnan(median):
-            logger.warn("Median to impute for column name: " + colname + " is null; excluding this column.")
+            logger.warn("Median to impute for column name: " + colName + " is null; excluding this column.")
             return (index, diagnostics)
         # Convert all continuous values into a numeric data type
         columnData = columnData.convert_objects(convert_numeric=True) 
@@ -264,15 +297,15 @@ def profileColumn(columnData, colname, stringcols, eventVector, bucketDispatcher
             diagnostics["BucketingStrategy"] = bucketingParams
         else:
             # Default bucketer
-            logger.debug("Using default bucketer for column name: " + colname)
+            logger.debug("Using default bucketer for column name: " + colName)
             bands = bucketDispatcher.bucketColumn(columnData, eventVector)
             diagnostics["BucketingStrategy"] = None
-        index = writeBandsToAvro(dataWriter, columnData, eventVector, bands, mean, median, colname, index)
+        index = writeBandsToAvro(dataWriter, columnData, eventVector, bands, mean, median, colName, displayName, index)
 
     return (index, diagnostics)
 
 
-def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, colname, index):
+def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, colName, displayName, index):
     '''
     Creates a datum for each unique value in the categorical column and writes to buffered writer   
     Args:
@@ -280,7 +313,7 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         columnVector: A DataFrame vector of column data 
         eventVector: A DataFrame vector of event column
         mode: Mode of all values in the column vector
-        colname: Name of given column
+        colName: Name of given column
         index: Current id of column in output file
     Returns:
         index: id of next column in output file 
@@ -291,7 +324,8 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         valueCount = sum(valueVector)
         datum = {}
         datum["id"] = index
-        datum["barecolumnname"] = colname
+        datum["barecolumnname"] = colName
+        datum["displayname"] = displayName
         datum["columnvalue"] = value
         datum["Dtype"] = "STR"
         datum["minV"] = None
@@ -308,10 +342,10 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         dataWriter.append(datum)
 
     # Create bucket for nulls if applicable
-    index = writeNullBucket(index, colname, columnVector, eventVector, avgProbability, None, None, dataWriter, False)
+    index = writeNullBucket(index, colName, displayName, columnVector, eventVector, avgProbability, None, None, dataWriter, False)
     return index
 
-def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, colname, index):
+def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, colName, displayName, index):
     '''
     Creates a datum for each band in the band column and writes to buffered writer   
     Args:
@@ -319,7 +353,7 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         columnVector: A DataFrame vector of column data 
         eventVector: A DataFrame vector of event column
         bands: A list of band boundries, i.e. band i = (band[i], band[i+1)
-        colname: Name of given column
+        colName: Name of given column
         index: Current id of column in output file
     Returns:
         index: id of next column in output file 
@@ -329,14 +363,15 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         bandVector = map(lambda x: 1 if x >= bands[i] and x < bands[i + 1] else 0, columnVector)
         bandCount = sum(bandVector)
         if bandCount == 0:
-            logger.critical("No samples found in band [" + str(bands[i]) + ", " + str(bands[i+1]) + "] for column: " + colname)
+            logger.critical("No samples found in band [" + str(bands[i]) + ", " + str(bands[i+1]) + "] for column: " + colName)
             continue
 
         # Replace np.inf with None value
         band = map(lambda x: None if np.isinf(x) else x, [bands[i], bands[i + 1]])
         datum = {}
         datum["id"] = index
-        datum["barecolumnname"] = colname
+        datum["barecolumnname"] = colName
+        datum["displayname"] = displayName
         datum["columnvalue"] = None
         datum["Dtype"] = "BND"
         datum["minV"] = band[0]
@@ -353,10 +388,10 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         dataWriter.append(datum)
 
     # Create bucket for nulls if applicable
-    index = writeNullBucket(index, colname, columnVector, eventVector, avgProbability, mean, median, dataWriter, True)
+    index = writeNullBucket(index, colName, displayName, columnVector, eventVector, avgProbability, mean, median, dataWriter, True)
     return index
 
-def writeNullBucket(index, colname, columnVector, eventVector, avgProbability, mean, median, dataWriter, continuous):
+def writeNullBucket(index, colName, displayName, columnVector, eventVector, avgProbability, mean, median, dataWriter, continuous):
     bandVector = []
     
     if continuous:
@@ -369,7 +404,8 @@ def writeNullBucket(index, colname, columnVector, eventVector, avgProbability, m
     
     datum = {}
     datum["id"] = index
-    datum["barecolumnname"] = colname
+    datum["barecolumnname"] = colName
+    datum["displayname"] = displayName
     datum["columnvalue"] = None
     datum["Dtype"] = "BND" if continuous else "STR"
     datum["minV"] = None
