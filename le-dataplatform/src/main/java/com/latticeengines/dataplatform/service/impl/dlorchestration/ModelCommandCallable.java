@@ -152,26 +152,20 @@ public class ModelCommandCallable implements Callable<Long> {
                 Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("EXEC sp_spaceused N'"
                         + commandParameters.getEventTable() + "'");
                 String dataSize = (String) resMap.get("data");
-                modelCommandLogService.log(modelCommand, "Data Size is: " + dataSize);
-
                 String rowSize = (String) resMap.get("rows");
-                modelCommandLogService.log(modelCommand, "Row Size is: " + rowSize);
                 int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
                         "SELECT COUNT(*) FROM sys.columns where object_id = OBJECT_ID('["
                                 + commandParameters.getEventTable() + "]')", Integer.class);
-                modelCommandLogService.log(modelCommand, "Column Size is: " + columnSize);
+                modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize +" Column count: " + columnSize);
             } else {
                 Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("show table status where name = '"
                         + commandParameters.getEventTable() + "'");
                 BigInteger dataSize = (BigInteger) resMap.get("Data_length");
-                modelCommandLogService.log(modelCommand, "Data Size is: " + dataSize);
-
                 BigInteger rowSize = (BigInteger) resMap.get("Rows");
-                modelCommandLogService.log(modelCommand, "Row Size is: " + rowSize);
                 int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
                         "select count(*) from INFORMATION_SCHEMA.COLUMNS where table_name='"
                                 + commandParameters.getEventTable() + "'", Integer.class);
-                modelCommandLogService.log(modelCommand, "Column Size is: " + columnSize);
+                modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize +" Column count: " + columnSize);
             }
         } else { // modelCommand IN_PROGRESS
             List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand,
@@ -182,8 +176,6 @@ public class ModelCommandCallable implements Callable<Long> {
             for (ModelCommandState commandState : commandStates) {
                 JobStatus jobStatus = modelingJobService.getJobStatus(commandState.getYarnApplicationId());
                 saveModelCommandStateFromJobStatus(commandState, jobStatus);
-                modelCommandLogService.log(modelCommand, "Memory used: "
-                        + jobStatus.getAppResUsageReport().getUsedResources().getMemory());
                 if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
                     if (commandState.getModelCommandStep().equals(ModelCommandStep.LOAD_DATA)) {
                         ModelCommandParameters commandParameters = new ModelCommandParameters(
@@ -208,11 +200,15 @@ public class ModelCommandCallable implements Callable<Long> {
                         generateDataDiagnostics(commandState, jobStatus);
                     }
                     successCount++;
+                    modelCommandLogService.log(modelCommand, "Job Memory used: "
+                            + jobStatus.getAppResUsageReport().getUsedResources().getMemory());
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
                         || YarnUtils.isPrempted(jobStatus.getDiagnostics())) {
                     // Job in progress.
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.KILLED)
                         || jobStatus.getStatus().equals(FinalApplicationStatus.FAILED)) {
+                    modelCommandLogService.log(modelCommand, "Job Memory used: "
+                            + jobStatus.getAppResUsageReport().getUsedResources().getMemory());
                     jobFailed = true;
                 }
             }
