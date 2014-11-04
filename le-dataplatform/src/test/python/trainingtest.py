@@ -3,8 +3,9 @@ import json
 import os
 import pickle
 from random import random
-from sklearn.ensemble import RandomForestClassifier
 import sys
+
+from sklearn.ensemble import RandomForestClassifier
 
 from leframework import scoringengine as se
 from trainingtestbase import TrainingTestBase
@@ -40,13 +41,13 @@ class TrainingTest(TrainingTestBase):
         self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][2]["Value"], pipelineFwk)
         self.assertTrue(filecmp.cmp(pipelineFwk + ".decompressed", './pipelinefwk.py'))
 
-        pipelineStepsScript = "./results/pipelinesteps.py.gz"
-        self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][3]["Value"], pipelineStepsScript)
-        self.assertTrue(filecmp.cmp(pipelineStepsScript + ".decompressed", './lepipeline.tar.gz/pipelinesteps.py'))
-
         encoderScript = "./results/encoder.py.gz"
-        self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][4]["Value"], encoderScript)
+        self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][3]["Value"], encoderScript)
         self.assertTrue(filecmp.cmp(encoderScript + ".decompressed", './lepipeline.tar.gz/encoder.py'))
+
+        pipelineStepsScript = "./results/pipelinesteps.py.gz"
+        self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][4]["Value"], pipelineStepsScript)
+        self.assertTrue(filecmp.cmp(pipelineStepsScript + ".decompressed", './lepipeline.tar.gz/pipelinesteps.py'))
 
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
 

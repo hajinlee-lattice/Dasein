@@ -45,6 +45,7 @@ class ModelGenerator(State, JsonGenBase):
         
         (dirpath, _, filenames) = os.walk(self.mediator.schema["python_pipeline_lib"]).next()
         
+        filenames = sorted(filenames)
         for filename in filenames:
             if filename.endswith(".pyc"):
                 continue
