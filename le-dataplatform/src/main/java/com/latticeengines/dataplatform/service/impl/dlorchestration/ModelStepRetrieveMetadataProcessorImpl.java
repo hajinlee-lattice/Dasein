@@ -25,6 +25,8 @@ import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataCol
 
 @Component("modelStepRetrieveMetadataProcessor")
 public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcessor {
+    public static final String ERROR_MESSAGE_NULL = "\"ErrorMessage\":null";
+
     private static final Log log = LogFactory.getLog(ModelStepRetrieveMetadataProcessorImpl.class);
 
     @Autowired
@@ -35,6 +37,9 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
+
+    @Value("${dataplatform.dlorchestration.metadataerror.fail}")
+    private boolean failOnMetadataError;
 
     private static final String DL_CONFIG_SERVICE_GET_QUERY_META_DATA_COLUMNS = "/GetQueryMetaDataColumns";
 
@@ -62,25 +67,34 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
         String queryMetadataUrl = modelCommandParameters.getDlUrl() + queryMetadataUrlSuffix;
         String metadata = null;
-        try {
-            GetQueryMetaDataColumnsRequest request = new GetQueryMetaDataColumnsRequest(
-                    modelCommandParameters.getDlTenant(), modelCommandParameters.getDlQuery());
-            Map<String, String> headers = new HashMap<String, String>();
-            headers.put("MagicAuthentication", "Security through obscurity!");
-            metadata = HttpWithRetryUtils.executePostRequest(queryMetadataUrl, request, headers);
-            if (Strings.isNullOrEmpty(metadata)) {
-                throw new LedpException(LedpCode.LEDP_16006, new String[] { String.valueOf(modelCommand.getPid()),
-                        queryMetadataUrl });
-            } else if (!metadata.contains("\"ErrorMessage\":null")) {
-                modelCommandLogService.log(modelCommand, "Problem with metadata:" + metadata);
-            }
-            log.info(metadata);
 
-            String hdfsPath = getHdfsPathForMetadataFile(modelCommand, modelCommandParameters);
-            HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, metadata);
-        } catch (Exception e) {
+        GetQueryMetaDataColumnsRequest request = new GetQueryMetaDataColumnsRequest(
+                modelCommandParameters.getDlTenant(), modelCommandParameters.getDlQuery());
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("MagicAuthentication", "Security through obscurity!");
+        try {
+            metadata = HttpWithRetryUtils.executePostRequest(queryMetadataUrl, request, headers);
+        } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_16005, e, new String[] { String.valueOf(modelCommand.getPid()),
                     queryMetadataUrl });
+        }
+        if (Strings.isNullOrEmpty(metadata)) {
+            throw new LedpException(LedpCode.LEDP_16006, new String[] { String.valueOf(modelCommand.getPid()),
+                    queryMetadataUrl });
+        } else if (!metadata.contains(ERROR_MESSAGE_NULL)) {
+            modelCommandLogService.log(modelCommand, "Problem with metadata:" + metadata);
+            // if system property enabled
+            if (failOnMetadataError) {
+                throw new LedpException(LedpCode.LEDP_16008, new String[] { metadata });
+            }
+        }
+        log.info(metadata);
+
+        String hdfsPath = getHdfsPathForMetadataFile(modelCommand, modelCommandParameters);
+        try {
+            HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, metadata);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_16009, e, new String[] { hdfsPath, metadata });
         }
     }
 
