@@ -4,7 +4,7 @@ import os
 import pickle
 from random import random
 import sys
-
+import glob
 from sklearn.ensemble import RandomForestClassifier
 
 from leframework import scoringengine as se
@@ -24,7 +24,7 @@ class TrainingTest(TrainingTestBase):
         t = traininglauncher.training;
         
         # Retrieve the pickled model from the json file
-        jsonDict = json.loads(open("./results/model.json").read())
+        jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
 
         pipelineScript = "./results/pipeline.py.gz"
         self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][0]["Value"], pipelineScript)

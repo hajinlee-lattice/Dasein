@@ -41,10 +41,10 @@ class Finalize(State):
                 key = state.getKey()
                 value = state.getJsonProperty()
                 jsonDict[key] = value
-        with open(mediator.modelLocalDir + "model.json", "wb") as fp:
+        with open(mediator.modelLocalDir + mediator.name+ ".json", "wb") as fp:
             json.dump(jsonDict, fp)
             
     def modelPredictorsExtraction(self, mediator):
-        modelJSONFilePath = mediator.modelLocalDir + "model.json"
-        csvFilePath = mediator.modelLocalDir + "model.csv"
+        modelJSONFilePath = mediator.modelLocalDir + mediator.name+ ".json"
+        csvFilePath = mediator.modelLocalDir + mediator.name+ ".csv"
         subprocess.call([sys.executable, 'modelpredictorextraction.py', modelJSONFilePath, csvFilePath])

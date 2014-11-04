@@ -2,7 +2,8 @@ import filecmp
 import json
 import os
 import pickle
-import sys 
+import sys
+import glob
 
 from sklearn.ensemble import RandomForestClassifier
 
@@ -21,7 +22,7 @@ class BadTargetTrainingTest(TrainingTestBase):
         traininglauncher.execute(False)
 
         # Retrieve the pickled model from the json file
-        jsonDict = json.loads(open("./results/model.json").read())
+        jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
 
         pipelineScript = "./results/pipeline.py.gz"
         self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][0]["Value"], pipelineScript)

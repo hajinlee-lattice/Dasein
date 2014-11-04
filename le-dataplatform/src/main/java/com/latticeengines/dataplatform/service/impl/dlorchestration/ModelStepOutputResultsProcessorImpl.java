@@ -29,6 +29,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
     public static final int SAMPLE_SIZE = 100;
     public static final String RANDOM_FOREST = "RandomForest";
     private static final String JSON_SUFFIX = ".json";
+    private static final String CSV_SUFFIX = ".csv";
     private static final String CREATE_OUTPUT_TABLE_SQL = "(Id int NOT NULL,\n" + "    CommandId int NOT NULL,\n"
             + "    SampleSize int NOT NULL,\n" + "    Algorithm varchar(50) NOT NULL,\n"
             + "    JsonPath varchar(512) NULL,\n" + "    Timestamp datetime NULL\n" + ")\n" + "";
@@ -78,7 +79,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         modelCommandLogService.log(modelCommand, "Model json file download link: " + httpFsPrefix + modelJsonFileHdfsPath
                 + HTTPFS_SUFFIX);
         
-        String modelCSVFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath).replace(".json", ".csv");
+        String modelCSVFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath).replace(JSON_SUFFIX, CSV_SUFFIX);
         modelCommandLogService.log(modelCommand, "Top Predictors csv file download link: " + httpFsPrefix + modelCSVFileHdfsPath
                 + HTTPFS_SUFFIX);
         

@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import glob
 
 from leframework.executors.learningexecutor import LearningExecutor
 from trainingtestbase import TrainingTestBase
@@ -33,7 +34,7 @@ class ProfilingThenTrainTest(TrainingTestBase):
         traininglauncher = Launcher("model-badlift-training.json")
         traininglauncher.execute(False)
         
-        jsonDict = json.loads(open("./results/model.json").read())
+        jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
         
         
 

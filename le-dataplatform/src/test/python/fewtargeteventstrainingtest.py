@@ -1,7 +1,7 @@
 import json
 import sys
 from trainingtestbase import TrainingTestBase
-
+import glob
 
 class FewTargetEventsTrainingTest(TrainingTestBase):
 
@@ -14,7 +14,7 @@ class FewTargetEventsTrainingTest(TrainingTestBase):
         traininglauncher = Launcher("model-dp410.json")
         traininglauncher.execute(False)
         # Retrieve the pickled model from the json file
-        jsonDict = json.loads(open("./results/model.json").read())
+        jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
         print("Roc score = %f" % rocScore)
         self.assertFalse(rocScore == 0)
