@@ -4,6 +4,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class JobStatus implements HasId<String> {
@@ -121,12 +122,12 @@ public class JobStatus implements HasId<String> {
         this.finishTime = finishTime;
     }
     
-    @JsonProperty("app_resource")
+    @JsonIgnore
     public ApplicationResourceUsageReport getAppResUsageReport(){
         return this.appResUsgReport;
     }
 
-    @JsonProperty("app_resource")
+    @JsonIgnore
     public void setAppResUsageReport(ApplicationResourceUsageReport appResUsgReport) {
         this.appResUsgReport = appResUsgReport;
     }
