@@ -473,6 +473,7 @@ public class ModelingServiceImpl implements ModelingService {
                 columnSet.add(field.getProp("columnName"));
             }
 
+            Set<String> targetsSet = new HashSet<>(model.getTargetsList());
             for (GenericRecord datum : data) {
                 String name = datum.get("barecolumnname").toString();
                 if (!depivoted) {
@@ -484,7 +485,7 @@ public class ModelingServiceImpl implements ModelingService {
                 String datatype = datum.get("Dtype").toString();
                 String featureName = name;
 
-                if (featureName.equals("P1_Event")) {
+                if (targetsSet.contains(featureName)) {
                     continue;
                 }
 
