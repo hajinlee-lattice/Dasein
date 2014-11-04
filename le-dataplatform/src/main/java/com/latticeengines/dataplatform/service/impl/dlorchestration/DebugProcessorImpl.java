@@ -40,4 +40,8 @@ public class DebugProcessorImpl {
             modelCommandLogService.logException(modelCommand, "Problem creating copy of event table", e);
         }
     }
+    
+    public JdbcTemplate getDlOrchestrationJdbcTemplate(){
+        return dlOrchestrationJdbcTemplate;
+    }
 }

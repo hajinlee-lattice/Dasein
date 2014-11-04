@@ -2,6 +2,10 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNotNull;
+import java.math.BigInteger;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -65,16 +69,38 @@ public class DebugProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
         String tableCopy = "";
+        Object dataSize = null;
+        Object rowSize = null;
+        int columnSize = 0;
         if (dbDriverName.contains("Microsoft")) {
             // Microsoft JDBC Driver 4.0 for SQL Server
             // select name from sys.tables where [name] = 'X'
             tableCopy = dlOrchestrationJdbcTemplate.queryForObject("select [name] from sys.tables where [name] = '"
                     + TEMP_EVENTTABLE_COPY + "'", String.class);
+            Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("EXEC sp_spaceused N'"
+                    + TEMP_EVENTTABLE + "'");
+            dataSize = (String) resMap.get("data");
+            rowSize = (String) resMap.get("rows");
+            columnSize = dlOrchestrationJdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM sys.columns where object_id = OBJECT_ID('["
+                            + commandParameters.getEventTable() + "]')", Integer.class);
         } else {
             // MySQL Connector Java
             tableCopy = dlOrchestrationJdbcTemplate.queryForObject("SHOW TABLES LIKE '" + TEMP_EVENTTABLE_COPY + "'",
                     String.class);
+            Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("show table status where name = '"
+                    + commandParameters.getEventTable() + "'");
+            dataSize = (BigInteger) resMap.get("Data_length");
+
+            rowSize = (BigInteger) resMap.get("Rows");
+
+            columnSize = dlOrchestrationJdbcTemplate.queryForObject(
+                    "select count(*) from INFORMATION_SCHEMA.COLUMNS where table_name='"
+                            + commandParameters.getEventTable() + "'", Integer.class);
         }
+        assertNotNull(dataSize);
+        assertNotNull(rowSize);
+        assertTrue(columnSize > 0);
         assertEquals(tableCopy, TEMP_EVENTTABLE_COPY);
     }
 }

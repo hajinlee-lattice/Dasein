@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.dataplatform;
 
+import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 
@@ -17,6 +18,7 @@ public class JobStatus implements HasId<String> {
     private String trackingUrl;
     private long startTime;
     private long finishTime;
+    private ApplicationResourceUsageReport appResUsgReport; 
 
     @Override
     public String getId() {
@@ -117,6 +119,16 @@ public class JobStatus implements HasId<String> {
     @JsonProperty("end_time")
     public void setFinishTime(long finishTime) {
         this.finishTime = finishTime;
+    }
+    
+    @JsonProperty("app_resource")
+    public ApplicationResourceUsageReport getAppResUsageReport(){
+        return this.appResUsgReport;
+    }
+
+    @JsonProperty("app_resource")
+    public void setAppResUsageReport(ApplicationResourceUsageReport appResUsgReport) {
+        this.appResUsgReport = appResUsgReport;
     }
 
 }

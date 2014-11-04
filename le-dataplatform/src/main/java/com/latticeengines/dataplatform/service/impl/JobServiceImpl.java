@@ -183,6 +183,7 @@ public abstract class JobServiceImpl implements JobService, ApplicationContextAw
             jobStatus.setProgress(appReport.getProgress());
             jobStatus.setStartTime(appReport.getStartTime());
             jobStatus.setTrackingUrl(appReport.getTrackingUrl());
+            jobStatus.setAppResUsageReport(appReport.getApplicationResourceUsageReport());
         }
     }
 

@@ -1,8 +1,11 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
@@ -13,6 +16,7 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -140,6 +144,36 @@ public class ModelCommandCallable implements Callable<Long> {
 
             executeStep(modelStepRetrieveMetadataProcessor, ModelCommandStep.RETRIEVE_METADATA, commandParameters);
             executeYarnStep(ModelCommandStep.LOAD_DATA, commandParameters);
+
+            JdbcTemplate dlOrchestrationJdbcTemplate = debugProcessorImpl.getDlOrchestrationJdbcTemplate();
+            String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData()
+                    .getDriverName();
+            if (dbDriverName.contains("Microsoft")) {
+                dlOrchestrationJdbcTemplate.execute("use " + commandParameters.getEventTable());
+                Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("EXEC sp_spaceused N'"
+                        + commandParameters.getEventTable() + "'");
+                String dataSize = (String) resMap.get("data");
+                modelCommandLogService.log(modelCommand, "Data Size is: " + dataSize);
+
+                String rowSize = (String) resMap.get("rows");
+                modelCommandLogService.log(modelCommand, "Row Size is: " + rowSize);
+                int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM sys.columns where object_id = OBJECT_ID('["
+                                + commandParameters.getEventTable() + "]')", Integer.class);
+                modelCommandLogService.log(modelCommand, "Column Size is: " + columnSize);
+            } else {
+                Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("show table status where name = '"
+                        + commandParameters.getEventTable() + "'");
+                BigInteger dataSize = (BigInteger) resMap.get("Data_length");
+                modelCommandLogService.log(modelCommand, "Data Size is: " + dataSize);
+
+                BigInteger rowSize = (BigInteger) resMap.get("Rows");
+                modelCommandLogService.log(modelCommand, "Row Size is: " + rowSize);
+                int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
+                        "select count(*) from INFORMATION_SCHEMA.COLUMNS where table_name='"
+                                + commandParameters.getEventTable() + "'", Integer.class);
+                modelCommandLogService.log(modelCommand, "Column Size is: " + columnSize);
+            }
         } else { // modelCommand IN_PROGRESS
             List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand,
                     modelCommand.getModelCommandStep());
@@ -149,7 +183,8 @@ public class ModelCommandCallable implements Callable<Long> {
             for (ModelCommandState commandState : commandStates) {
                 JobStatus jobStatus = modelingJobService.getJobStatus(commandState.getYarnApplicationId());
                 saveModelCommandStateFromJobStatus(commandState, jobStatus);
-
+                modelCommandLogService.log(modelCommand, "Memory used: "
+                        + jobStatus.getAppResUsageReport().getUsedResources().getMemory());
                 if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
                     if (commandState.getModelCommandStep().equals(ModelCommandStep.LOAD_DATA)) {
                         ModelCommandParameters commandParameters = new ModelCommandParameters(
@@ -293,13 +328,13 @@ public class ModelCommandCallable implements Callable<Long> {
         // Check positive event rate between arbitrary range
         double[] positiveEventRateThresh = { 1, 50 }; // 1% to 50%
         double positiveEventRate = (double) ((JSONObject) jsonObject.get("Summary")).get("PositiveEventRate");
-        positiveEventRate *= 100;   // Convert to percentage
-        
+        positiveEventRate *= 100; // Convert to percentage
+
         if (positiveEventRate < positiveEventRateThresh[0] || positiveEventRate > positiveEventRateThresh[1]) {
             warnings += "Detected abnormal positive event rate " + positiveEventRate + "% from event table (below "
                     + positiveEventRateThresh[0] + "% or above " + positiveEventRateThresh[1] + "%).\n";
         }
-        
+
         // Check any invalid column bucketing metadata
         JSONObject metadataDiagnostics = (JSONObject) jsonObject.get("MetadataDiagnostics");
         List<String> columns = new ArrayList<String>();
