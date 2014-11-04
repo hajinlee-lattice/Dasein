@@ -19,6 +19,7 @@ cd /usr/local/bin
 ./pip2.7 install pandas==0.13.1
 ./pip2.7 install patsy==0.3.0
 ./pip2.7 install statsmodels==0.5.0
+./pip2.7 install lxml==2.3.2
 # Install avro
 cd /tmp/avro-1.7.6
 /usr/local/bin/python2.7 setup.py install
