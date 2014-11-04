@@ -75,4 +75,12 @@ public class ModelCommandLogServiceImpl implements ModelCommandLogService {
         sb.append(" errorMessage:").append(e.getMessage()).append(LINE_SEPARATOR).append(stackTrace);
         log(modelCommand, sb.toString());
     }
+
+    @Override
+    public void logYarnAppId(ModelCommand modelCommand, String yarnAppId, ModelCommandStep step) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(step.getDescription()).append(" [").append(yarnAppId).append("] ");
+        log(modelCommand, sb.toString());
+    }
+
 }

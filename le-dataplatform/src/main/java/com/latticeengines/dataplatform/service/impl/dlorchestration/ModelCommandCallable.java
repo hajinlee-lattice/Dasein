@@ -237,11 +237,12 @@ public class ModelCommandCallable implements Callable<Long> {
         List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep(modelCommand.getDeploymentExternalId(),
                 step, commandParameters);
         for (ApplicationId appId : appIds) {
-            String s = appId.toString();
-            JobStatus jobStatus = modelingJobService.getJobStatus(s);
+            String appIdString = appId.toString();
+            modelCommandLogService.logYarnAppId(modelCommand, appIdString, step);
+            JobStatus jobStatus = modelingJobService.getJobStatus(appIdString);
 
             ModelCommandState commandState = new ModelCommandState(modelCommand, step);
-            commandState.setYarnApplicationId(appId.toString());
+            commandState.setYarnApplicationId(appIdString);
             saveModelCommandStateFromJobStatus(commandState, jobStatus);
         }
     }

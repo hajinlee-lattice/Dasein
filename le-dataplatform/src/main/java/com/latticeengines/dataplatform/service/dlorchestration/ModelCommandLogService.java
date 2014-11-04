@@ -12,6 +12,8 @@ public interface ModelCommandLogService {
 
     void logCompleteStep(ModelCommand modelCommand, ModelCommandStep step, ModelCommandStatus status);
 
+    void logYarnAppId(ModelCommand modelCommand, String yarnAppId, ModelCommandStep step);
+
     void logBeginStep(ModelCommand modelCommand, ModelCommandStep step);
 
     void logLedpException(ModelCommand modelCommand, LedpException e);
