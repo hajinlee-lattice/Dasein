@@ -149,7 +149,6 @@ public class ModelCommandCallable implements Callable<Long> {
             String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData()
                     .getDriverName();
             if (dbDriverName.contains("Microsoft")) {
-                dlOrchestrationJdbcTemplate.execute("use " + commandParameters.getEventTable());
                 Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("EXEC sp_spaceused N'"
                         + commandParameters.getEventTable() + "'");
                 String dataSize = (String) resMap.get("data");
