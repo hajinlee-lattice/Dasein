@@ -37,7 +37,7 @@ public class PagerDutyServiceImpl implements PagerDutyService {
         sb.append("\"client_url\": \"http://production\",");
         sb.append("\"details\": {");
         for (int i = 0; i < details.length; i++) {
-            BasicNameValuePair detail = details[0];
+            BasicNameValuePair detail = details[i];
             sb.append("\"" + detail.getName() + "\":");
             sb.append("\"" + detail.getValue() + "\"");
             if ((i+1) < details.length) {
