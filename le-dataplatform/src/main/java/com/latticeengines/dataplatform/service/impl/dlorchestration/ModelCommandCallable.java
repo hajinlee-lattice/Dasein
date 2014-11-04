@@ -156,7 +156,8 @@ public class ModelCommandCallable implements Callable<Long> {
                 int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
                         "SELECT COUNT(*) FROM sys.columns where object_id = OBJECT_ID('["
                                 + commandParameters.getEventTable() + "]')", Integer.class);
-                modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize +" Column count: " + columnSize);
+                modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize
+                        + " Column count: " + columnSize);
             } else {
                 Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("show table status where name = '"
                         + commandParameters.getEventTable() + "'");
@@ -165,7 +166,8 @@ public class ModelCommandCallable implements Callable<Long> {
                 int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
                         "select count(*) from INFORMATION_SCHEMA.COLUMNS where table_name='"
                                 + commandParameters.getEventTable() + "'", Integer.class);
-                modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize +" Column count: " + columnSize);
+                modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize
+                        + " Column count: " + columnSize);
             }
         } else { // modelCommand IN_PROGRESS
             List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand,
@@ -201,14 +203,14 @@ public class ModelCommandCallable implements Callable<Long> {
                     }
                     successCount++;
                     modelCommandLogService.log(modelCommand, "Job Memory used: "
-                            + jobStatus.getAppResUsageReport().getUsedResources().getMemory());
+                            + jobStatus.getAppResUsageReport().getUsedResources().getMemory() + "MB");
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
                         || YarnUtils.isPrempted(jobStatus.getDiagnostics())) {
                     // Job in progress.
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.KILLED)
                         || jobStatus.getStatus().equals(FinalApplicationStatus.FAILED)) {
                     modelCommandLogService.log(modelCommand, "Job Memory used: "
-                            + jobStatus.getAppResUsageReport().getUsedResources().getMemory());
+                            + jobStatus.getAppResUsageReport().getUsedResources().getMemory() + "MB");
                     jobFailed = true;
                 }
             }
