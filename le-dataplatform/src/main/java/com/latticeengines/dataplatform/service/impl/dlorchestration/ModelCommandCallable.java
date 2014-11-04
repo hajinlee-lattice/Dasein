@@ -203,14 +203,14 @@ public class ModelCommandCallable implements Callable<Long> {
                     }
                     successCount++;
                     modelCommandLogService.log(modelCommand, "Job Memory used: "
-                            + jobStatus.getAppResUsageReport().getUsedResources().getMemory() + "MB");
+                            + jobStatus.getAppResUsageReport().getUsedResources().getMemory() + " MB");
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
                         || YarnUtils.isPrempted(jobStatus.getDiagnostics())) {
                     // Job in progress.
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.KILLED)
                         || jobStatus.getStatus().equals(FinalApplicationStatus.FAILED)) {
                     int memory = jobStatus.getAppResUsageReport().getUsedResources().getMemory();
-                    modelCommandLogService.log(modelCommand, "Job Memory used: " + memory + "MB");
+                    modelCommandLogService.log(modelCommand, "Job Memory used: " + memory + " MB");
                     if (memory > jobStatus.getAppResUsageReport().getNeededResources().getMemory()) {
                         modelCommandLogService
                                 .log(modelCommand,
