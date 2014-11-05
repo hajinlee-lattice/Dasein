@@ -1,10 +1,10 @@
 import filecmp
+import glob
 import json
-import os
 import pickle
 from random import random
 import sys
-import glob
+
 from sklearn.ensemble import RandomForestClassifier
 
 from leframework import scoringengine as se
