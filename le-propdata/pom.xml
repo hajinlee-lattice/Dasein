@@ -5,21 +5,21 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
     <artifactId>le-propdata</artifactId>
-    <version>1.0.11-SNAPSHOT</version>
+    <version>1.0.12-SNAPSHOT</version>
     <name>${component-name}</name>
     <description>LE PropData</description>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.11-SNAPSHOT</version>
+        <version>1.0.12-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
     <properties>
         <component-name>le-propdata</component-name>
-        <le.db.version>1.0.11-SNAPSHOT</le.db.version>
-        <le.dataplatform.version>1.0.11-SNAPSHOT</le.dataplatform.version>
+        <le.db.version>1.0.12-SNAPSHOT</le.db.version>
+        <le.dataplatform.version>1.0.12-SNAPSHOT</le.dataplatform.version>
     </properties>
 
     <profiles>
