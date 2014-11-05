@@ -74,7 +74,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
             throw new LedpException(LedpCode.LEDP_16002, e,
                     new String[] { String.valueOf(modelCommand.getPid()), appId });
         }
-        // Provide link to diagnostics file
+        // Provide link to result files
         String modelJsonFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath);
         modelCommandLogService.log(modelCommand, "Model json file download link: " + httpFsPrefix + modelJsonFileHdfsPath
                 + HTTPFS_SUFFIX);
@@ -87,6 +87,11 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         modelCommandLogService.log(modelCommand, "Score file download link: " + httpFsPrefix + scoreFileHdfsPath
                 + HTTPFS_SUFFIX);
 
+        String readOutSampleFileHdfsPath = jobStatus.getResultDirectory() + "/readoutsample.csv";
+        modelCommandLogService.log(modelCommand, "ReadOutSample file download link: " + httpFsPrefix + readOutSampleFileHdfsPath
+                + HTTPFS_SUFFIX);
+        
+        
         ModelCommandOutput output = new ModelCommandOutput(1, modelCommand.getPid().intValue(), SAMPLE_SIZE,
                 RANDOM_FOREST, modelFilePath, new Date());
         dlOrchestrationJdbcTemplate.execute("drop table " + modelCommandParameters.getEventTable());
