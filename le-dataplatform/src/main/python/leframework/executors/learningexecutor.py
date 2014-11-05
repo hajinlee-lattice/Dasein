@@ -14,6 +14,7 @@ from leframework.model.states.initialize import Initialize
 from leframework.model.states.modelgenerator import ModelGenerator
 from leframework.model.states.namegenerator import NameGenerator
 from leframework.model.states.percentilebucketgenerator import PercentileBucketGenerator
+from leframework.model.states.readoutsamplegenerator import ReadoutSampleGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
 
 
@@ -49,7 +50,8 @@ class LearningExecutor(Executor):
         stateMachine.addState(SummaryGenerator(), 7)
         stateMachine.addState(NameGenerator(), 8)
         stateMachine.addState(PercentileBucketGenerator(), 9)
-        stateMachine.addState(Finalize(), 10)
+        stateMachine.addState(ReadoutSampleGenerator(), 10)
+        stateMachine.addState(Finalize(), 11)
         return stateMachine
 
     def retrieveMetadata(self, schema, depivoted):
@@ -109,6 +111,8 @@ class LearningExecutor(Executor):
             mediator.clf = clf
             mediator.modelLocalDir = params["modelLocalDir"]
             mediator.modelHdfsDir = params["modelHdfsDir"]
+            mediator.allDataPreTransform = params["allDataPreTransform"]
+            mediator.allDataPostTransform = params["allDataPostTransform"]
             mediator.data = params["test"].as_matrix()
             mediator.schema = params["schema"]
             mediator.target = mediator.data[:, mediator.schema["targetIndex"]]

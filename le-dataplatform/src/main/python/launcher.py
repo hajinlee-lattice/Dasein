@@ -4,6 +4,7 @@ import pwd
 import string
 import sys
 from urlparse import urlparse
+from pandas.core.frame import DataFrame
 
 from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
@@ -97,7 +98,9 @@ class Launcher(object):
         schema["python_pipeline_script"] = params["pipelineScript"]
         schema["python_pipeline_lib"] = self.stripPath(schema["python_pipeline_lib"])
 
+        params["allDataPreTransform"] = DataFrame.append(self.training, self.test)
         (self.training, self.test, metadata) = executor.transformData(params)
+        params["allDataPostTransform"] = DataFrame.append(self.training, self.test)
 
         params["training"] = self.training
         params["test"] = self.test
