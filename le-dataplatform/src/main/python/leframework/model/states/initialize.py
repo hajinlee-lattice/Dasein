@@ -3,7 +3,7 @@ import logging
 
 from leframework.codestyle import overrides
 from leframework.model.state import State
-from leframework.util.scoringutil import ScoringUtil
+
 
 class Initialize(State):
     
@@ -14,6 +14,15 @@ class Initialize(State):
     @overrides(State)
     def execute(self):
         mediator = self.getMediator()
-        scored = ScoringUtil.score(mediator, mediator.data, self.logger)
+        scored = self.score(mediator)
         mediator.scored = scored
         
+    def score(self, mediator):
+        scored = mediator.clf.predict_proba(mediator.data[:, mediator.schema["featureIndex"]])
+        index = 1
+        if len(scored) > 0 and len(scored[0]) < 2:
+            self.logger.warn("All events have the same label.")
+            index = 0
+        return [sample[index] for sample in scored]
+
+    

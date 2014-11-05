@@ -20,7 +20,6 @@ class Finalize(State):
         self.writeJson(self.getMediator())
         self.writeScoredText(self.getMediator())
         self.modelPredictorsExtraction(self.getMediator())
-        self.writeReadoutSample(self.getMediator())
 
     def writeScoredText(self, mediator):
         scored = mediator.scored
@@ -49,7 +48,3 @@ class Finalize(State):
         modelJSONFilePath = mediator.modelLocalDir + mediator.name+ ".json"
         csvFilePath = mediator.modelLocalDir + mediator.name+ ".csv"
         subprocess.call([sys.executable, 'modelpredictorextraction.py', modelJSONFilePath, csvFilePath])
-
-    def writeReadoutSample(self, mediator):
-        csvFilePath = mediator.modelLocalDir + "readoutsample.csv"
-        self.mediator.readoutsample.to_csv(csvFilePath, index = False)

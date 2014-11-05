@@ -4,20 +4,20 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>le-perf</artifactId>
 	<packaging>jar</packaging>
-	<version>1.0.10-SNAPSHOT</version>
+	<version>1.0.9-SNAPSHOT</version>
 	<name>le-${component-name}</name>
 
 	<properties>
 		<component-name>perf</component-name>
 		<hadoop.version>2.4.0.2.1.3.0-563</hadoop.version>
-		<le.common.version>1.0.10-SNAPSHOT</le.common.version>
-		<le.domain.version>1.0.10-SNAPSHOT</le.domain.version>
+		<le.common.version>1.0.9-SNAPSHOT</le.common.version>
+		<le.domain.version>1.0.9-SNAPSHOT</le.domain.version>
 	</properties>
 
 	<parent>
 		<groupId>com.latticeengines</groupId>
 		<artifactId>le-parent</artifactId>
-		<version>1.0.10-SNAPSHOT</version>
+		<version>1.0.9-SNAPSHOT</version>
 		<relativePath>../le-parent</relativePath>
 	</parent>
 
