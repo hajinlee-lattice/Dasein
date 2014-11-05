@@ -12,7 +12,7 @@ class NameGenerator(State, JsonGenBase):
     
     @overrides(State)
     def execute(self):
-        self.mediator.name = self.mediator.schema["name"] + "_" + time.strftime("%Y-%m-%d-%H:%M")
+        self.mediator.name = self.mediator.schema["name"] + "_" + time.strftime("%Y-%m-%d_%H-%M")
         
     @overrides(JsonGenBase)
     def getKey(self):
