@@ -3,7 +3,6 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -20,7 +19,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
@@ -179,26 +177,7 @@ public class ModelCommandCallable implements Callable<Long> {
                 JobStatus jobStatus = modelingJobService.getJobStatus(commandState.getYarnApplicationId());
                 saveModelCommandStateFromJobStatus(commandState, jobStatus);
                 if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
-                    if (commandState.getModelCommandStep().equals(ModelCommandStep.LOAD_DATA)) {
-                        ModelCommandParameters commandParameters = new ModelCommandParameters(
-                                modelCommand.getCommandParameters());
-                        String customer = modelCommand.getDeploymentExternalId();
-                        String filePath = modelStepRetrieveMetadataProcessor.getCustomerBaseDir() + "/" + customer
-                                + "/data/" + commandParameters.getEventTable();
-                        List<String> files = HdfsUtils.getFilesForDir(
-                                modelStepRetrieveMetadataProcessor.getConfiguration(), filePath,
-                                new HdfsFilenameFilter() {
-
-                                    @Override
-                                    public boolean accept(String filename) {
-                                        return filename.endsWith(".avro");
-                                    }
-
-                                });
-                        log.info("_____Job is " + jobStatus.getState() + "," + jobStatus.getStatus() + " file status "
-                                + filePath + " is : \n");
-                        log.info(files);
-                    } else if (commandState.getModelCommandStep().equals(ModelCommandStep.PROFILE_DATA)) {
+                    if (commandState.getModelCommandStep().equals(ModelCommandStep.PROFILE_DATA)) {
                         generateDataDiagnostics(commandState, jobStatus);
                     }
                     successCount++;

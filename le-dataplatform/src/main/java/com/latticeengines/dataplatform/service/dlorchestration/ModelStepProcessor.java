@@ -9,8 +9,4 @@ public interface ModelStepProcessor {
 
     void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters);
 
-	Configuration getConfiguration();
-
-	String getCustomerBaseDir();
-
 }

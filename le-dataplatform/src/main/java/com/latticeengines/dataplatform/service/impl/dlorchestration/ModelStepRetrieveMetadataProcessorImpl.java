@@ -103,16 +103,4 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
         return customerBaseDir + "/" + customer + "/data/" + modelCommandParameters.getMetadataTable()
                 + "/metadata.avsc";
     }
-
-    @Override
-    public Configuration getConfiguration() {
-        return yarnConfiguration;
-    }
-
-    @Override
-    public String getCustomerBaseDir() {
-        // TODO Auto-generated method stub
-        return customerBaseDir;
-    }
-
 }
