@@ -2,8 +2,9 @@ from collections import OrderedDict
 import json
 import logging
 import numpy
-import sys
 import subprocess
+import sys
+
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
@@ -19,7 +20,7 @@ class Finalize(State):
     def execute(self):
         self.writeJson(self.getMediator())
         self.writeScoredText(self.getMediator())
-        self.modelPredictorsExtraction(self.getMediator())
+        self.invokeModelPredictorsExtraction(self.getMediator())
         self.writeReadoutSample(self.getMediator())
 
     def writeScoredText(self, mediator):
@@ -45,7 +46,7 @@ class Finalize(State):
         with open(mediator.modelLocalDir + mediator.name+ ".json", "wb") as fp:
             json.dump(jsonDict, fp)
             
-    def modelPredictorsExtraction(self, mediator):
+    def invokeModelPredictorsExtraction(self, mediator):
         modelJSONFilePath = mediator.modelLocalDir + mediator.name+ ".json"
         csvFilePath = mediator.modelLocalDir + mediator.name+ ".csv"
         subprocess.call([sys.executable, 'modelpredictorextraction.py', modelJSONFilePath, csvFilePath])
