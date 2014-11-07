@@ -10,4 +10,7 @@ public class FieldSchema {
 
     // The storage type and interpretation of the data in this field.
     public FieldType type;
+
+    // What purpose this field has in the model.
+    public FieldInterpretation interpretation;
 }
