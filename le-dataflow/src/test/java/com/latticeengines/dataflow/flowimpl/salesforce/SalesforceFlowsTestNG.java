@@ -78,6 +78,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         ctx.setProperty("TARGETPATH", "/tmp/TmpEventTable");
         ctx.setProperty("QUEUE", "Priority0.MapReduce.0");
         ctx.setProperty("FLOWNAME", "CreateInitialEventTable");
+        ctx.setProperty("CHECKPOINT", "true");
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
         
         // Execute the second flow, with the output of the first flow as input into the second

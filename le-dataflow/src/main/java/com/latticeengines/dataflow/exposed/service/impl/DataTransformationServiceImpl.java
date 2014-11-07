@@ -22,7 +22,7 @@ public class DataTransformationServiceImpl implements DataTransformationService 
     
     @Override
     public void executeNamedTransformation(DataFlowContext dataFlowCtx, String dataFlowBldrBeanName) {
-        validateParameters(dataFlowCtx, "SOURCES", "QUEUE", "TARGETPATH", "FLOWNAME");
+        validateParameters(dataFlowCtx, "SOURCES", "QUEUE", "TARGETPATH", "CUSTOMER", "FLOWNAME", "CHECKPOINT");
         
         Object dataFlowBldrBean = appContext.getBean(dataFlowBldrBeanName);
         
@@ -31,6 +31,9 @@ public class DataTransformationServiceImpl implements DataTransformationService 
         }
         
         DataFlowBuilder dataFlow = (DataFlowBuilder) dataFlowBldrBean;
+        
+        boolean doCheckpoint = dataFlowCtx.getProperty("CHECKPOINT", Boolean.class);
+        dataFlow.setCheckpoint(doCheckpoint);
         dataFlow.runFlow(dataFlowCtx);
     }
     

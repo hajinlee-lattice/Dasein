@@ -29,6 +29,7 @@ import cascading.operation.aggregator.Sum;
 import cascading.operation.expression.ExpressionFilter;
 import cascading.operation.expression.ExpressionFunction;
 import cascading.operation.filter.Not;
+import cascading.pipe.Checkpoint;
 import cascading.pipe.CoGroup;
 import cascading.pipe.Each;
 import cascading.pipe.Every;
@@ -40,6 +41,8 @@ import cascading.pipe.joiner.LeftJoin;
 import cascading.pipe.joiner.OuterJoin;
 import cascading.pipe.joiner.RightJoin;
 import cascading.property.AppProps;
+import cascading.scheme.Scheme;
+import cascading.scheme.hadoop.SequenceFile;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
@@ -54,30 +57,53 @@ import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
+@SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
-    @SuppressWarnings("rawtypes")
+    private Integer counter = 1;
+    
     private Map<String, Tap> taps = new HashMap<>();
 
     private Map<String, Schema> schemas = new HashMap<>();
 
     private Map<String, Pair<Pipe, List<FieldMetadata>>> pipesAndOutputSchemas = new HashMap<>();
 
+    private Map<String, Pair<Checkpoint, Tap>> checkpoints = new HashMap<>();
+    
     public CascadingDataFlowBuilder() {
-        this(false);
+        this(false, false);
     }
 
-    public CascadingDataFlowBuilder(boolean local) {
-        super(local);
+    public CascadingDataFlowBuilder(boolean local, boolean checkpoint) {
+        super(local, checkpoint);
     }
 
     public Flow<?> build(FlowDef flowDef) {
         return null;
     }
 
-    @SuppressWarnings("rawtypes")
     public Map<String, Tap> getSources() {
         return taps;
+    }
+    
+    @SuppressWarnings({ "deprecation", "unchecked" })
+    private Pipe doCheckpoint(Pipe pipe) {
+        if (isCheckpoint()) {
+            DataFlowContext ctx = getDataFlowCtx();
+            String ckptName = "ckpt-" + counter++;
+            Checkpoint ckpt = new Checkpoint(ckptName, pipe);
+            String targetPath = "/tmp/checkpoints/" + ctx.getProperty("CUSTOMER", String.class) + "/" + ckptName;
+            Scheme scheme = new SequenceFile(Fields.UNKNOWN);
+            Tap ckptTap = new Lfs(scheme, targetPath, true);
+            if (!isLocal()) {
+                ckptTap = new Hfs(scheme, targetPath, true);
+            }
+            checkpoints.put(pipe.getName(), new Pair<>(ckpt, ckptTap));
+            Pair<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas.get(pipe.getName());
+            pipesAndOutputSchemas.put(ckptName, new Pair<>((Pipe) ckpt, pipeAndFields.getRhs()));
+            return ckpt;
+        }
+        return pipe;
     }
 
     @Override
@@ -168,8 +194,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 convertToFields(getFieldNames(declaredFields)), //
                 joiner);
         pipesAndOutputSchemas.put(join.getName(), new Pair<>(join, declaredFields));
-        return join.getName();
-
+        return doCheckpoint(join).getName();
     }
 
 
@@ -328,11 +353,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         pipesAndOutputSchemas.put(groupby.getName(), new Pair<>(groupby, declaredFields));
 
-        return groupby.getName();
-    }
-
-    protected String addTarget(String targetName, Map<String, List<String>> targetFieldNames) {
-        return null;
+        return doCheckpoint(groupby).getName();
     }
 
     @Override
@@ -345,7 +366,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Pipe each = new Each(pm.getLhs(), convertToFields(filterFields), filter);
         List<FieldMetadata> fm = new ArrayList<>(pm.getRhs());
         pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, fm));
-        return each.getName();
+        return doCheckpoint(each).getName();
     }
 
     @Override
@@ -394,7 +415,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, fm));
-        return each.getName();
+        return doCheckpoint(each).getName();
     }
 
     @Override
@@ -412,7 +433,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         pdHashFm.setPropertyValue("displayName", "Prop Data Hash");
         newFm.add(pdHashFm);
         pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, newFm));
-        return each.getName();
+        return doCheckpoint(each).getName();
     }
 
     @Override
@@ -431,7 +452,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         rowIdFm.setPropertyValue("displayName", "Row ID");
         newFm.add(rowIdFm);
         pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, newFm));
-        return each.getName();
+        return doCheckpoint(each).getName();
     }
     
     @Override
@@ -464,6 +485,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         FlowDef flowDef = FlowDef.flowDef().setName(flowName) //
                 .addSources(getSources()) //
                 .addTailSink(getPipeByName(lastOperator), sink);
+        
+        for (Pair<Checkpoint, Tap> entry : checkpoints.values()) {
+            flowDef = flowDef.addCheckpoint(entry.getLhs(), entry.getRhs());
+        }
 
         Flow<?> flow = flowConnector.connect(flowDef);
         flow.writeDOT("dot/wcr.dot");

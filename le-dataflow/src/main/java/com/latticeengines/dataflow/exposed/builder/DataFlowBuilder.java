@@ -23,6 +23,8 @@ import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 public abstract class DataFlowBuilder {
 
     private boolean local;
+    private boolean checkpoint;
+    private DataFlowContext dataFlowCtx;
 
     public abstract String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources);
 
@@ -52,11 +54,12 @@ public abstract class DataFlowBuilder {
     protected abstract List<FieldMetadata> getMetadata(String operator);
 
     public DataFlowBuilder() {
-        this(false);
+        this(false, false);
     }
 
-    public DataFlowBuilder(boolean local) {
+    public DataFlowBuilder(boolean local, boolean checkpoint) {
         this.local = local;
+        this.setCheckpoint(checkpoint);
     }
 
     public boolean isLocal() {
@@ -92,7 +95,7 @@ public abstract class DataFlowBuilder {
             
             Map<String, String> props = requiredProps.getSecond();
             
-            if (dataFlowCtx.getProperty("APPLYMETADATAPRUNING", Boolean.class) != null) {
+            if (dataFlowCtx != null && dataFlowCtx.getProperty("APPLYMETADATAPRUNING", Boolean.class) != null) {
                 String logicalType = props.get("logicalType"); 
                 if (logicalType != null && (logicalType.equals("id") || logicalType.equals("reference"))) {
                     continue;
@@ -137,6 +140,22 @@ public abstract class DataFlowBuilder {
         }
         return fieldAssembler.endRecord();
         
+    }
+
+    public boolean isCheckpoint() {
+        return checkpoint;
+    }
+
+    public void setCheckpoint(boolean checkpoint) {
+        this.checkpoint = checkpoint;
+    }
+
+    public DataFlowContext getDataFlowCtx() {
+        return dataFlowCtx;
+    }
+
+    public void setDataFlowCtx(DataFlowContext dataFlowCtx) {
+        this.dataFlowCtx = dataFlowCtx;
     }
 
     public static enum JoinType {
