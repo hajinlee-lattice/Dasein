@@ -7,7 +7,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 public interface PagerDutyService {
 
-    String triggerEvent(String description, BasicNameValuePair... details) throws ClientProtocolException,
+    String triggerEvent(String description, String clientUrl, BasicNameValuePair... details) throws ClientProtocolException,
             IOException;
 
 }

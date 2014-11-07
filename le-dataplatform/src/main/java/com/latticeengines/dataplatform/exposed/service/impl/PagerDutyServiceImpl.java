@@ -26,7 +26,7 @@ public class PagerDutyServiceImpl implements PagerDutyService {
 
     private String serviceApiKey = MODELINGPLATFORM_SERVICEAPI_KEY;
 
-    public String triggerEvent(String description, BasicNameValuePair... details) throws ClientProtocolException,
+    public String triggerEvent(String description, String clientUrl, BasicNameValuePair... details) throws ClientProtocolException,
             IOException {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
@@ -34,7 +34,7 @@ public class PagerDutyServiceImpl implements PagerDutyService {
         sb.append("\"event_type\": \"trigger\",");
         sb.append("\"description\": \"" + description + "\",");
         sb.append("\"client\": \"Modeling Platform\",");
-        sb.append("\"client_url\": \"http://production\",");
+        sb.append("\"client_url\": \"" + clientUrl + "\",");
         sb.append("\"details\": {");
         for (int i = 0; i < details.length; i++) {
             BasicNameValuePair detail = details[i];
@@ -46,6 +46,7 @@ public class PagerDutyServiceImpl implements PagerDutyService {
         }
         sb.append("}}");
 
+        // response should look like this - {"status":"success","message":"Event processed","incident_key":”acdcfa307f3e47d1b42b37edcbf22ae7"}
         String response = HttpUtils.sendPostRequest(
                 "https://events.pagerduty.com/generic/2010-04-15/create_event.json", headers, sb.toString());
 

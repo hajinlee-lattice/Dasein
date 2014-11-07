@@ -4,6 +4,6 @@ import org.apache.http.message.BasicNameValuePair;
 
 public interface AlertService {
 
-    String triggerCriticalEvent(String description, BasicNameValuePair... details);
+    String triggerCriticalEvent(String description, String clientUrl, BasicNameValuePair... details);
 
 }

@@ -24,6 +24,7 @@
                 <entry key="alertService" value-ref="alertService" />
                 <entry key="waitTime" value="${dataplatform.dlorchestrationjob.wait.time}" />
                 <entry key="httpFsPrefix" value="${dataplatform.fs.web.defaultFS}" />
+                <entry key="resourceManagerWebAppAddress" value="${dataplatform.yarn.resourcemanager.webapp.address}" />
             </map>
         </property>
     </bean>

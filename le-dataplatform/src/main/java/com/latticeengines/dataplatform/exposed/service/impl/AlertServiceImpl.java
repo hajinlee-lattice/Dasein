@@ -22,7 +22,7 @@ public class AlertServiceImpl implements AlertService {
     @Autowired
     private PagerDutyServiceImpl pagerDutyService;
 
-    public String triggerCriticalEvent(String description, BasicNameValuePair... details) {
+    public String triggerCriticalEvent(String description, String clientUrl, BasicNameValuePair... details) {
         if (!alertServiceEnabled) {
             return "";
         }
@@ -30,7 +30,7 @@ public class AlertServiceImpl implements AlertService {
         String result = "";
 
         try {
-            result = pagerDutyService.triggerEvent(description, details);
+            result = pagerDutyService.triggerEvent(description, clientUrl, details);
         } catch (IOException e) {
             // Intentionally log and consume error
             log.error("Problem sending event to PagerDuty", e);
@@ -39,7 +39,7 @@ public class AlertServiceImpl implements AlertService {
         return result;
     }
 
-    void enableTestMode() {
+    public void enableTestMode() {
         alertServiceEnabled = true;
         pagerDutyService.useTestServiceApiKey();
     }

@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.json.simple.parser.JSONParser;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
@@ -41,6 +43,7 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private static final Log log = LogFactory.getLog(ModelCommandCallable.class);
 
+    private static final Joiner joiner = Joiner.on(", ").skipNulls();
     private static final int SUCCESS = 0;
     private static final int FAIL = -1;
     private static final String HTTPFS_SUFFIX = "?op=OPEN&user.name=yarn";
@@ -73,6 +76,8 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private String httpFsPrefix;
 
+    private String resourceManagerWebAppAddress;
+
     public ModelCommandCallable() {
     }
 
@@ -82,7 +87,7 @@ public class ModelCommandCallable implements Callable<Long> {
             ModelCommandLogService modelCommandLogService, ModelCommandResultEntityMgr modelCommandResultEntityMgr,
             ModelStepProcessor modelStepFinishProcessor, ModelStepProcessor modelStepOutputResultsProcessor,
             ModelStepProcessor modelStepRetrieveMetadataProcessor, DebugProcessorImpl debugProcessorImpl,
-            AlertService alertService, String httpFsPrefix) {
+            AlertService alertService, String httpFsPrefix, String resourceManagerWebAppAddress) {
         this.modelCommand = modelCommand;
         this.yarnConfiguration = yarnConfiguration;
         this.modelingJobService = modelingJobService;
@@ -97,6 +102,7 @@ public class ModelCommandCallable implements Callable<Long> {
         this.debugProcessorImpl = debugProcessorImpl;
         this.alertService = alertService;
         this.httpFsPrefix = httpFsPrefix;
+        this.resourceManagerWebAppAddress = resourceManagerWebAppAddress;
     }
 
     @Override
@@ -172,6 +178,7 @@ public class ModelCommandCallable implements Callable<Long> {
                     modelCommand.getModelCommandStep());
             int successCount = 0;
             boolean jobFailed = false;
+            List<String> failedYarnApplicationIds = new ArrayList<>();
 
             for (ModelCommandState commandState : commandStates) {
                 JobStatus jobStatus = modelingJobService.getJobStatus(commandState.getYarnApplicationId());
@@ -196,6 +203,7 @@ public class ModelCommandCallable implements Callable<Long> {
                                         "Job failed due to too much memory being used! Please decrease the size of the dataset and try again.");
                     }
                     jobFailed = true;
+                    failedYarnApplicationIds.add(commandState.getYarnApplicationId());
                 }
             }
 
@@ -203,7 +211,7 @@ public class ModelCommandCallable implements Callable<Long> {
                                                         // move on to next step
                 handleAllJobsSucceeded();
             } else if (jobFailed) {
-                handleJobFailed();
+                handleJobFailed(failedYarnApplicationIds);
             } else {
                 // Do nothing; job(s) in progress.
             }
@@ -227,7 +235,12 @@ public class ModelCommandCallable implements Callable<Long> {
     }
 
     @VisibleForTesting
-    void handleJobFailed() {
+    String handleJobFailed() {
+        return handleJobFailed(Collections.<String> emptyList());
+    }
+
+    @VisibleForTesting
+    String handleJobFailed(List<String> failedYarnApplicationIds) {
         modelCommandLogService.logCompleteStep(modelCommand, modelCommand.getModelCommandStep(),
                 ModelCommandStatus.FAIL);
 
@@ -239,10 +252,20 @@ public class ModelCommandCallable implements Callable<Long> {
         modelCommand.setCommandStatus(ModelCommandStatus.FAIL);
         modelCommandEntityMgr.update(modelCommand);
 
-        alertService.triggerCriticalEvent(LedpCode.LEDP_16007.getMessage(), new BasicNameValuePair("commandId",
-                modelCommand.getPid().toString()),
-                new BasicNameValuePair("deploymentExternalId", modelCommand.getDeploymentExternalId()),
-                new BasicNameValuePair("failedStep", modelCommand.getModelCommandStep().getDescription()));
+        String appIds = "";
+        StringBuilder clientUrl = new StringBuilder(resourceManagerWebAppAddress).append("/cluster/");
+        if (!failedYarnApplicationIds.isEmpty()) {
+            appIds = joiner.join(failedYarnApplicationIds);
+            // Currently each step only generates one yarn job anyways so first
+            // failed appId works
+            clientUrl.append("app/").append(failedYarnApplicationIds.get(0));
+        }
+
+        return alertService.triggerCriticalEvent(LedpCode.LEDP_16007.getMessage(), clientUrl.toString(),
+                new BasicNameValuePair("commandId", modelCommand.getPid().toString()), new BasicNameValuePair(
+                        "yarnAppIds", failedYarnApplicationIds.isEmpty() ? "None" : appIds), new BasicNameValuePair(
+                        "deploymentExternalId", modelCommand.getDeploymentExternalId()), new BasicNameValuePair(
+                        "failedStep", modelCommand.getModelCommandStep().getDescription()));
     }
 
     private void executeYarnStep(ModelCommandStep step, ModelCommandParameters commandParameters) {
