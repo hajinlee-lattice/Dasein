@@ -110,10 +110,6 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
         this.yarnConfiguration = yarnConfiguration;
     }
 
-    protected boolean doYarnClusterSetup() {
-        return true;
-    }
-
     protected boolean doClearDbTables() {
         return true;
     }

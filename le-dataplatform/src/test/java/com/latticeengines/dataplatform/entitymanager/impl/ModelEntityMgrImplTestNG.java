@@ -28,11 +28,6 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
-    @Override
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @BeforeClass(groups = {"functional", "functional.production"})
     public void setup() {
         ModelingJob job1 = new ModelingJob();
@@ -69,7 +64,7 @@ public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         model.setName("MODEL TEST NAME_" + suffix);
         model.setModelDefinition(modelDef);
     }
-    
+
     @AfterClass(groups = {"functional", "functional.production"})
     public void tearDown(){
         modelDefinitionEntityMgr.delete(modelDef);

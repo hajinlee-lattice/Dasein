@@ -53,10 +53,6 @@ public class ApiFunctionalTestNGBase extends DataPlatformFunctionalTestNGBase {
     @Value("${api.rest.endpoint.hostport}")
     protected String restEndpointHost;
 
-    protected boolean doYarnClusterSetup() {
-        return true;
-    }
-
     @Override
     public boolean doClearDbTables() {
         return false;

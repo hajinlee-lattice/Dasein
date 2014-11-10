@@ -5,7 +5,6 @@ import static org.testng.Assert.assertTrue;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTestNGBase {
@@ -13,10 +12,6 @@ public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTe
     protected static final Log log = LogFactory.getLog(NameNodeHAInfrastructureTestNG.class);
 
     private String ACTIVE = "active";
-
-    @BeforeClass(groups = "functional")
-    public void setup() throws Exception {
-    }
 
     @Test(groups = "infrastructure", enabled = true)
     public void testConsistentReadFromBothNameNodes() throws Exception {

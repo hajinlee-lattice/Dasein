@@ -88,11 +88,6 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
     private StandaloneHttpServer httpServer;
 
-    @Override
-    protected boolean doYarnClusterSetup() {
-        return true;
-    }
-
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
     }

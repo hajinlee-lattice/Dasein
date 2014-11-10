@@ -11,11 +11,6 @@ import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctiona
 
 public class WatchdogPluginTestNG extends DataPlatformFunctionalTestNGBase {
 
-    @Override
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @Test(groups = {"functional"})
     public void register() {
         Map<String, WatchdogPlugin> registry = WatchdogPlugin.getPlugins();

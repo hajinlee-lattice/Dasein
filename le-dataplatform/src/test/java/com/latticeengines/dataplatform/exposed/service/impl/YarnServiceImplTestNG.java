@@ -27,11 +27,6 @@ public class YarnServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private YarnService yarnService;
 
-    @Override
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @Test(groups = {"functional", "functional.production"})
     public void getSchedulerInfo() {
         SchedulerTypeInfo schedulerInfo = yarnService.getSchedulerInfo();

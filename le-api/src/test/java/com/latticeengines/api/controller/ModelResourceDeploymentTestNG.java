@@ -40,21 +40,17 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     private Model model;
 
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         throttleConfigurationEntityMgr.deleteAll();
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(new Path(customerBaseDir + "/INTERNAL"), true);
+        fs.delete(new Path(customerBaseDir + "/INTERNAL_ModelResourceDeploymentTestNG"), true);
 
         LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
         logisticRegressionAlgorithm.setPriority(0);
@@ -86,7 +82,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
                 "PETAL_LENGTH", //
                 "PETAL_WIDTH" }));
         model.setTargetsList(Arrays.<String> asList(new String[] { "CATEGORY" }));
-        model.setCustomer("INTERNAL");
+        model.setCustomer("INTERNAL_ModelResourceDeploymentTestNG");
         model.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         model.setDataFormat("avro");
     }
@@ -121,7 +117,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
                 .password(dataSourcePasswd).type(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
-        config.setCustomer("INTERNAL");
+        config.setCustomer("INTERNAL_ModelResourceDeploymentTestNG");
         config.setTable("iris");
         config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
         config.setMetadataTable("iris_metadata");
@@ -169,7 +165,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         FinalApplicationStatus status = platformTestBase.waitForStatus(profileAppId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
     }
-    
+
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
     public void submit() throws Exception {
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/submit", model,

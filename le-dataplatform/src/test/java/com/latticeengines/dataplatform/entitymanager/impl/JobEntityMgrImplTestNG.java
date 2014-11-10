@@ -40,14 +40,9 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
-    @Override
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @BeforeClass(groups = {"functional", "functional.production"})
     public void setup() {
-        
+
         Classifier classifier = new Classifier();
         classifier.setName("NeuralNetworkClassifier");
         classifier.setSchemaHdfsPath("/datascientist1/iris.json");
@@ -121,7 +116,7 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         // link model--job
         modelingJob.setModel(model);
     }
-    
+
     @AfterClass(groups = {"functional", "functional.production"})
     public void tearDown(){
         modelEntityMgr.delete(model);

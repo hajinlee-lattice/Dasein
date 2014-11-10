@@ -43,14 +43,10 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     private Model model;
 
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(new Path(customerBaseDir + "/Lattice"), true);
+        fs.delete(new Path(customerBaseDir + "/INTERNAL_LatticeDeploymentTestNG"), true);
 
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
@@ -63,13 +59,12 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         model = new Model();
         model.setModelDefinition(modelDef);
-        model.setName("Lattice Random Forest Model on raw Data");
+        model.setName("INTERNAL_LatticeDeploymentTestNG Random Forest Model on raw Data");
         model.setTable("DataForScoring_Lattice");
         model.setMetadataTable("EventMetadata");
-        model.setCustomer("Lattice");
+        model.setCustomer("INTERNAL_LatticeDeploymentTestNG");
         model.setKeyCols(Arrays.<String> asList(new String[] { "LeadID" }));
         model.setDataFormat("avro");
-
     }
 
     private Pair<String, List<String>> getTargetAndFeatures() {
@@ -96,7 +91,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
                 .password(dataSourcePasswd).type(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
-        config.setCustomer("Lattice");
+        config.setCustomer("INTERNAL_LatticeDeploymentTestNG");
         config.setTable("DataForScoring_Lattice");
         config.setKeyCols(Arrays.<String> asList(new String[] { "LeadID" }));
         return config;

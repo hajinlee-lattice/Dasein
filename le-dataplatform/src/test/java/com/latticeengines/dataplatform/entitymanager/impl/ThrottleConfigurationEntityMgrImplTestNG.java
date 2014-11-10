@@ -21,11 +21,6 @@ public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFuncti
     @Autowired
     protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
-    @Override
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @BeforeClass(groups = {"functional"})
     public void setup() {
         config = new ThrottleConfiguration();

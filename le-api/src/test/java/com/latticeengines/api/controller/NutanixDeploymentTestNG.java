@@ -44,14 +44,10 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     private Model model;
 
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
-        fs.delete(new Path(customerBaseDir + "/Nutanix"), true);
+        fs.delete(new Path(customerBaseDir + "/INTERNAL_NutanixDeploymentTestNG"), true);
 
         ModelDefinition modelDef = produceModelDef();
         this.model = produceAModel(modelDef);
@@ -60,10 +56,10 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
     protected Model produceAModel(ModelDefinition modelDef) {
         Model model = new Model();
         model.setModelDefinition(modelDef);
-        model.setName("Nutanix Random Forest Model on Depivoted Data");
+        model.setName("INTERNAL_NutanixDeploymentTestNG Random Forest Model on Depivoted Data");
         model.setTable("Q_EventTable_Nutanix");
         model.setMetadataTable("EventMetadata");
-        model.setCustomer("Nutanix");
+        model.setCustomer("INTERNAL_NutanixDeploymentTestNG");
         model.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         model.setDataFormat("avro");
 
@@ -105,7 +101,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
                 .password(dataSourcePasswd).type(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
-        config.setCustomer("Nutanix");
+        config.setCustomer("INTERNAL_NutanixDeploymentTestNG");
         config.setTable("Q_EventTable_Nutanix");
         config.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
         return config;

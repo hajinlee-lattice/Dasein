@@ -15,11 +15,6 @@ public class MetadataServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
     @Autowired
     private MetadataService metadataService;
 
-    @Override
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @Test(groups = {"functional", "functional.production"}, enabled = true)
     public void createDataSchema() {
         DbCreds.Builder builder = new DbCreds.Builder();
