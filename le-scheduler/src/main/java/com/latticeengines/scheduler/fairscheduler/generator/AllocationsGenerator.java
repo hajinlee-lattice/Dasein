@@ -8,12 +8,12 @@ import javax.xml.bind.Marshaller;
 
 public class AllocationsGenerator {
 
-    private static final String MAX_RUNNING_APPS = "72";
-    private static final int NUM_MR_LEAF_QUEUES = 24;
-    private static final int NUM_NON_MR_LEAF_QUEUES = 72;
+    private static final String MAX_RUNNING_APPS = "33";
+    private static final int NUM_MR_LEAF_QUEUES = 12;
+    private static final int NUM_NON_MR_LEAF_QUEUES = 33;
     private static final String FIFO = "fifo";
-    private static final String MR_MIN_RESOURCES = "21504";
-    private static final String NON_MR_MIN_RESOURCES = "7168";
+    private static final String MR_MIN_RESOURCES = "43008";
+    private static final String NON_MR_MIN_RESOURCES = "15360";
 
     public static void main(String[] args) throws Exception {
 
@@ -27,7 +27,7 @@ public class AllocationsGenerator {
         for (int i = 0; i < NUM_MR_LEAF_QUEUES; i++) {
             Queue leaf = factory.createQueue();
             leaf.setName(Integer.toString(i));
-            leaf.setMinResources(MR_MIN_RESOURCES + " mb, 6 vcores");
+            leaf.setMinResources(MR_MIN_RESOURCES + " mb, 12 vcores");
             leaf.setSchedulingPolicy(FIFO);
             p0MRQ.getQueue().add(leaf);
         }
@@ -70,7 +70,7 @@ public class AllocationsGenerator {
             Queue leaf = factory.createQueue();
             leaf.setName(Integer.toString(i));
             if (minResources) {
-                leaf.setMinResources(NON_MR_MIN_RESOURCES + " mb, 2 vcores");
+                leaf.setMinResources(NON_MR_MIN_RESOURCES + " mb, 4 vcores");
             }
             leaf.setSchedulingPolicy(FIFO);
             q.getQueue().add(leaf);
