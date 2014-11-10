@@ -1,5 +1,6 @@
 package com.latticeengines.skald;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -16,7 +17,7 @@ import com.latticeengines.skald.model.ScoreDerivation;
 @RestController
 public class ScoreService {
     @RequestMapping(value = "ScoreRecord", method = RequestMethod.POST)
-    public Map<String, Object> scoreRecord(@RequestBody ScoreRequest request) {
+    public Map<String, Map<String, Object>> scoreRecord(@RequestBody ScoreRequest request) {
         log.info(String.format("Received a score request for %1$s model %2$s", request.spaceID, request.modelID));
 
         PredictiveModel model = retriever.getPredictiveModel(request.spaceID, request.modelID);
@@ -30,7 +31,9 @@ public class ScoreService {
 
         // TODO: Apply transformations.
 
-        return evaluator.evaluate(model, derivation, request.record);
+        Map<String, Map<String, Object>> result = new HashMap<String, Map<String, Object>>();
+        result.put(request.modelID, evaluator.evaluate(model, derivation, request.record));
+        return result;
     }
 
     @Autowired
