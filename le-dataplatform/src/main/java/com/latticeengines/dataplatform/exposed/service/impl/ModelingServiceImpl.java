@@ -81,6 +81,12 @@ public class ModelingServiceImpl implements ModelingService {
     @Value("${dataplatform.modeling.row.threshold:50}")
     private int rowSizeThreshold;
     
+    @Value("${dataplatform.container.virtualcores}")
+    private int virtualCores;
+
+    @Value("${dataplatform.container.memory}")
+    private int memory;
+    
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     /**
@@ -415,7 +421,7 @@ public class ModelingServiceImpl implements ModelingService {
         modelDefinition.setName(m.getName());
         AlgorithmBase dataProfileAlgorithm = new DataProfilingAlgorithm();
         dataProfileAlgorithm.setSampleName(dataProfileConfig.getSamplePrefix());
-        dataProfileAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=1024 PRIORITY=1");
+        dataProfileAlgorithm.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY=0");
         if (!StringUtils.isEmpty(dataProfileConfig.getScript())) {
             dataProfileAlgorithm.setScript(dataProfileConfig.getScript());
         }
