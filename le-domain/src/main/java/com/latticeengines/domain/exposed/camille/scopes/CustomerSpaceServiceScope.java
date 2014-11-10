@@ -26,14 +26,6 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
         this.dataVersion = dataVersion;
     }
 
-    public CustomerSpaceServiceScope(String contractId, String tenantId, String serviceName, int dataVersion) {
-        this.contractId = contractId;
-        this.tenantId = tenantId;
-        this.spaceId = null;
-        this.serviceName = serviceName;
-        this.dataVersion = dataVersion;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;

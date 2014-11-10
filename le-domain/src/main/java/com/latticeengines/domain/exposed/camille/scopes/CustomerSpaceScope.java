@@ -19,12 +19,6 @@ public class CustomerSpaceScope extends ConfigurationScope {
         this.spaceId = customerSpace.getSpaceId();
     }
 
-    public CustomerSpaceScope(String contractId, String tenantId) {
-        this.contractId = contractId;
-        this.tenantId = tenantId;
-        this.spaceId = null;
-    }
-
     public CustomerSpace getCustomerSpace() {
         return new CustomerSpace(contractId, tenantId, spaceId);
     }

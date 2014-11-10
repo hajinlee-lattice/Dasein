@@ -105,25 +105,4 @@ public class ConfigurationControllerUnitTestNG {
         controller.delete(path);
         Assert.assertFalse(controller.exists(path));
     }
-
-    /**
-     * Test when using the default space
-     */
-    @Test(groups = "unit")
-    public void testSpaceCreateDeleteDocumentUsingDefaultSpace() throws Exception {
-        CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant");
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractId());
-        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
-        SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
-        Path path = new Path("/foo");
-        ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);
-        controller.create(path, new Document("foo"));
-        Assert.assertTrue(controller.exists(path));
-        Assert.assertTrue(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), scope.getContractId(),
-                        scope.getTenantId(), "MySpace").append(path)));
-        controller.delete(path);
-        Assert.assertFalse(controller.exists(path));
-    }
 }
