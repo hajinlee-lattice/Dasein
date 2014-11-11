@@ -86,7 +86,6 @@ class LearningExecutor(Executor):
     @overrides(Executor)
     def transformData(self, params):
         metadata = self.retrieveMetadata(params["schema"]["data_profile"], params["parser"].isDepivoted())
-        stringColumns = params["parser"].getStringColumns()
         
         # Execute the packaged script from the client and get the returned file
         # that contains the generated data pipeline
@@ -97,7 +96,7 @@ class LearningExecutor(Executor):
         globals()["encodeCategoricalColumnsForMetadata"](metadata[0])
         
         # Create the data pipeline
-        pipeline = globals()["setupPipeline"](metadata[0], stringColumns)
+        pipeline = globals()["setupPipeline"](metadata[0])
         params["pipeline"] = pipeline
         
         training = pipeline.predict(params["training"])

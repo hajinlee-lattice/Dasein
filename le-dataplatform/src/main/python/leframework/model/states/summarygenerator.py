@@ -101,14 +101,6 @@ class SummaryGenerator(State, JsonGenBase):
             predictor["DisplayName"] = record["displayname"]
         else:
             predictor["DisplayName"] = colname
-        if "approvedusage" in record:
-            predictor["ApprovedUsage"] = record["approvedusage"]
-        else:
-            predictor["ApprovedUsage"] = ""
-        if "category" in record:
-            predictor["Category"] = record["category"]
-        else:
-            predictor["Category"] = ""
         predictor["UncertaintyCoefficient"] = attrLevelUncertaintyCoeff
         return predictor
 

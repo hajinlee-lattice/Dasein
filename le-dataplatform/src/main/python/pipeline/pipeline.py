@@ -1,6 +1,5 @@
 import encoder
 from pipelinefwk import Pipeline
-from pipelinesteps import ColumnTypeConversionStep
 from pipelinesteps import EnumeratedColumnTransformStep
 from pipelinesteps import ImputationStep
 
@@ -23,9 +22,8 @@ def encodeCategoricalColumnsForMetadata(metadata):
             if value["Dtype"] == "STR" and value["hashValue"] is not None:
                 value["hashValue"] = encoder.transform(value["hashValue"])
 
-def setupPipeline(metadata, stringColumns):
-    (categoricalColumns, continuousColumns) = getDecoratedColumns(metadata)
-    stringColumns = list(set(categoricalColumns.keys()) - stringColumns)
-    steps = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(stringColumns), ImputationStep(continuousColumns)]
+def setupPipeline(metadata):
+    (stringColumns, continuousColumns) = getDecoratedColumns(metadata)
+    steps = [EnumeratedColumnTransformStep(stringColumns), ImputationStep(continuousColumns)]
     pipeline = Pipeline(steps)
     return pipeline
