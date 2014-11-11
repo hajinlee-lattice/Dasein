@@ -235,7 +235,8 @@ def retrieveCategoricalColumns(columnsMetadata, features, categoricalMetadataFro
     for colName in features:
         if columnMetadataDict.has_key(colName):
             columnMetadata = columnMetadataDict[colName]
-            if columnMetadata["StatisticalType"] is not None and columnMetadata["StatisticalType"] == "nominal":
+            statType = columnMetadata["StatisticalType"] 
+            if statType is not None and (statType == "nominal" or statType == "ordinal"):
                 categoricalMetadataFromSchema.add(colName)
             elif colName in categoricalMetadataFromSchema:
                 categoricalMetadataFromSchema.remove(colName)
@@ -316,7 +317,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
     if diagnostics["PopulationRate"] == 0.0:
         return (index, diagnostics)
 
-    print("Processing column %s." % colName)
+    logger.info("Processing column %s." % colName)
     if colName in stringcols:
         # Categorical column
         columnData = columnData.astype(np.str)
