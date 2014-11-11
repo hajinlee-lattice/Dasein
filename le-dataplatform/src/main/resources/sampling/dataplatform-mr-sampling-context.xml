@@ -22,10 +22,10 @@
         yarn.resourcemanager.scheduler.address=${dataplatform.yarn.resourcemanager.scheduler.address}
         mapred.job.tracker=${dataplatform.mapred.job.tracker}
         yarn.app.mapreduce.am.resource.cpu-vcores=1
-        mapreduce.map.memory.mb=1024
-        mapreduce.reduce.memory.mb=1024
-        mapreduce.map.cpu.vcores=4
-        mapreduce.reduce.cpu.vcores=1
+        mapreduce.map.memory.mb=${dataplatform.container.mapreduce.memory}
+        mapreduce.reduce.memory.mb=${dataplatform.container.mapreduce.memory}
+        mapreduce.map.cpu.vcores=${dataplatform.container.map.virtualcores}
+        mapreduce.reduce.cpu.vcores=${dataplatform.container.reduce.virtualcores}
         mapreduce.job.queuename=Priority0.MapReduce.0
     </hdp:configuration>
 
