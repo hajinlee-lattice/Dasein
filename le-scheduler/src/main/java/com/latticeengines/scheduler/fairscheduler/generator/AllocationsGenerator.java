@@ -8,12 +8,12 @@ import javax.xml.bind.Marshaller;
 
 public class AllocationsGenerator {
 
-    private static final String MAX_RUNNING_APPS = "33";
+    private static final String MAX_RUNNING_APPS = "17";
     private static final int NUM_MR_LEAF_QUEUES = 12;
-    private static final int NUM_NON_MR_LEAF_QUEUES = 33;
+    private static final int NUM_NON_MR_LEAF_QUEUES = 17;
     private static final String FIFO = "fifo";
     private static final String MR_MIN_RESOURCES = "43008";
-    private static final String NON_MR_MIN_RESOURCES = "15360";
+    private static final String NON_MR_MIN_RESOURCES = "29696";
 
     public static void main(String[] args) throws Exception {
 
