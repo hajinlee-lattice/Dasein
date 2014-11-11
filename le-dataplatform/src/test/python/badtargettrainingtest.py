@@ -1,11 +1,9 @@
 import filecmp
-import json
-import os
-import pickle
-import sys
 import glob
-
+import json
+import pickle
 from sklearn.ensemble import RandomForestClassifier
+import sys
 
 from trainingtestbase import TrainingTestBase
 
@@ -32,7 +30,7 @@ class BadTargetTrainingTest(TrainingTestBase):
         self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][1]["Value"], payload)
         # Load from the file system and deserialize into the model
         pipeline = pickle.load(open(payload + ".decompressed", "r"))
-        self.assertTrue(isinstance(pipeline.getPipeline()[2].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
+        self.assertTrue(isinstance(pipeline.getPipeline()[3].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
 
         pipelineFwk = "./results/pipelinefwk.py.gz"
         self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][2]["Value"], pipelineFwk)

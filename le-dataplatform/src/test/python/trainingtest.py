@@ -3,9 +3,8 @@ import glob
 import json
 import pickle
 from random import random
-import sys
-
 from sklearn.ensemble import RandomForestClassifier
+import sys
 
 from leframework import scoringengine as se
 from trainingtestbase import TrainingTestBase
@@ -34,7 +33,7 @@ class TrainingTest(TrainingTestBase):
         self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][1]["Value"], payload)
         # Load from the file system and deserialize into the model
         pipeline = pickle.load(open(payload + ".decompressed", "r"))
-        self.assertTrue(isinstance(pipeline.getPipeline()[2].getModel(), RandomForestClassifier), 
+        self.assertTrue(isinstance(pipeline.getPipeline()[3].getModel(), RandomForestClassifier), 
                         "clf not instance of sklearn RandomForestClassifier.")
 
         pipelineFwk = "./results/pipelinefwk.py.gz"
@@ -52,7 +51,7 @@ class TrainingTest(TrainingTestBase):
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
 
         # Test the scoring engine using the generated pipeline that was deserialized
-        inputColumns = pipeline.getPipeline()[2].getModelInputColumns()
+        inputColumns = pipeline.getPipeline()[3].getModelInputColumns()
         value = [ random() for _ in range(len(inputColumns))]
 
         fieldList = traininglauncher.getParser().fields

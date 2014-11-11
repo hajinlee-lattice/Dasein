@@ -16,4 +16,7 @@ class NullMedianProfileTest(ProfilingTestBase):
             for v in value:
                 if v["Dtype"] == "BND":
                     self.assertTrue(v["median"] is not None)
+                self.assertTrue(v["category"] is not None)
+                self.assertTrue(v["displayname"] is not None)
+                self.assertTrue(v["approvedusage"] is not None)
 
