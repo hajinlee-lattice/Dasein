@@ -115,7 +115,7 @@ class TrainingTestBase(TestBase):
 
         with gzip.GzipFile(filename, "rb") as compressed:
             data = compressed.read()
-            with open(filename + ".decompressed", "wb") as decompressed:
+            with open(filename, "wb") as decompressed:
                 decompressed.write(data)
         compressed.close()
         decompressed.close()

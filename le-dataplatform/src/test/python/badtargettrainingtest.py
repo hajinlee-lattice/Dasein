@@ -22,26 +22,14 @@ class BadTargetTrainingTest(TrainingTestBase):
         # Retrieve the pickled model from the json file
         jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
 
-        pipelineScript = "./results/pipeline.py.gz"
-        self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][0]["Value"], pipelineScript)
-        self.assertTrue(filecmp.cmp(pipelineScript + ".decompressed", './pipeline.py'))
-
-        payload = "./results/STPipelineBinary.p.gz"
-        self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][1]["Value"], payload)
-        # Load from the file system and deserialize into the model
-        pipeline = pickle.load(open(payload + ".decompressed", "r"))
-        self.assertTrue(isinstance(pipeline.getPipeline()[3].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
-
-        pipelineFwk = "./results/pipelinefwk.py.gz"
-        self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][2]["Value"], pipelineFwk)
-        self.assertTrue(filecmp.cmp(pipelineFwk + ".decompressed", './pipelinefwk.py'))
-
-        encoderScript = "./results/encoder.py.gz"
-        self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][3]["Value"], encoderScript)
-        self.assertTrue(filecmp.cmp(encoderScript + ".decompressed", './lepipeline.tar.gz/encoder.py'))
-
-        pipelineStepsScript = "./results/pipelinesteps.py.gz"
-        self.decodeBase64ThenDecompressToFile(jsonDict["Model"]["CompressedSupportFiles"][4]["Value"], pipelineStepsScript)
-        self.assertTrue(filecmp.cmp(pipelineStepsScript + ".decompressed", './lepipeline.tar.gz/pipelinesteps.py'))
+        for index in range(0, len(jsonDict["Model"]["CompressedSupportFiles"])):
+            entry = jsonDict["Model"]["CompressedSupportFiles"][index]
+            fileName = "./results/" + entry["Key"] + ".gz"
+            self.decodeBase64ThenDecompressToFile(entry["Value"], fileName)
+            if entry["Key"].find('STPipelineBinary') >= 0:
+                pipeline = pickle.load(open(fileName, "r"))
+                self.assertTrue(isinstance(pipeline.getPipeline()[3].getModel(), RandomForestClassifier), "clf not instance of sklearn RandomForestClassifier.")
+            elif entry["Key"].find('encoder') >= 0 or entry["Key"].find('pipelinesteps') >= 0: self.assertTrue(filecmp.cmp(fileName, './lepipeline.tar.gz/' + entry["Key"]))
+            else: self.assertTrue(filecmp.cmp(fileName, './' + entry["Key"]))
 
         self.assertTrue(jsonDict["Model"]["Script"] is not None)

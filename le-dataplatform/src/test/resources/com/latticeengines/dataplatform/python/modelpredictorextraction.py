@@ -1,9 +1,8 @@
-import itertools
-import json
-import operator
 import os
 import sys
-
+import json
+import itertools
+import operator
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -16,7 +15,7 @@ def main(argv):
     sumArray = []
  
     with open (ModelJSONFilePath, "r") as myfile:
-        ModelJSON = myfile.read().replace('\n', '')
+        ModelJSON=myfile.read().replace('\n', '')
         
     contentJSON = json.loads(ModelJSON)
 
@@ -43,10 +42,10 @@ def main(argv):
     with open (CSVFilePath, "w") as csvFile:
         csvFile.write("Feature Name,Predictive Power,Bucket Lower Bound,Bucket Upper Bound,Bucket Value, Conversion Rate,Lift,Total Leads,Frequency(#),Frequency/Total Leads\n")
 
-    # This section calculates the total #leads for each predictor. Ideally it should be the same for each predictor, but there seem to be some exceptions
+    #This section calculates the total #leads for each predictor. Ideally it should be the same for each predictor, but there seem to be some exceptions
         siddata = sorted(contentJSON["Summary"]["Predictors"], key=operator.itemgetter('Name'))
         sidgroups = itertools.groupby(siddata, operator.itemgetter('Name'))
-        for key, group in sidgroups:
+        for key, group in sidgroups: #print('{}\t{}'.format(key, sum(int(value["Count"]) for value in group)))
             for value in group:
                 total = 0
                 for i in value['Elements']:
@@ -54,11 +53,10 @@ def main(argv):
                 print value['Name'], ":\t\t", total
                 nameArray.append(value['Name'])
                 sumArray.append(total)
-        dictArray = dict(zip(nameArray, sumArray))
-        # dictArray is a list of dictionaries with attributeName = #Total Leads
+        dictArray = dict(zip(nameArray,sumArray))
+        #dictArray is a list of dictionaries with attributeName = #Total Leads
 
         for predictor in contentJSON["Summary"]["Predictors"]:
-            totalCount = 0
             for predictorElement in predictor["Elements"]:
                 if 'Name' in predictor:   
                     if predictor["Name"] is None:
@@ -116,18 +114,18 @@ def main(argv):
                         csvFile.write(",")
                         csvFile.write("null")
                     else:                         
-                        csvFile.write(unicode(averageProb * predictorElement["Lift"]))
+                        csvFile.write(unicode(averageProb*predictorElement["Lift"]))
                         csvFile.write(",")
                         csvFile.write(unicode(predictorElement["Lift"]))          
-                csvFile.write(",") 
-                
+                csvFile.write(",")
+
                 if predictor['Name'] in dictArray.keys():
                     if dictArray[predictor['Name']] is None:
                         csvFile.write("notFound")
                     else:                     
-                    # write total #leads to csvFile
+                    #write total #leads to csvFile
                         csvFile.write('"' + str(dictArray[predictor['Name']]) + '"')            
-                csvFile.write(",")         
+                csvFile.write(",")
              
                 if 'Count' in predictorElement:
                     if predictorElement["Count"] is None:
@@ -135,15 +133,14 @@ def main(argv):
                     else:     
                         csvFile.write(unicode(predictorElement["Count"]))
                         csvFile.write(",")     
-                        csvFile.write(unicode(predictorElement["Count"] / float(dictArray[predictor['Name']])))                   
+                        csvFile.write(unicode(predictorElement["Count"]/float(dictArray[predictor['Name']])))                   
                 csvFile.write(",") 
-
-                csvFile.write(unicode(totalCount))                
+                
                 csvFile.write("\n")
     
-    # print "----------------------------------------------------------------------------"
-    # print "successfully extracted predictors information to " + CSVFilePath
-    # print "----------------------------------------------------------------------------"
+    #print "----------------------------------------------------------------------------"
+    #print "successfully extracted predictors information to " + CSVFilePath
+    #print "----------------------------------------------------------------------------"
     
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
