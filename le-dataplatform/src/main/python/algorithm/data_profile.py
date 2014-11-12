@@ -222,6 +222,8 @@ def retrieveOtherMetadata(columnsMetadata):
     return otherMetadata
 
 def retrieveCategoricalColumns(columnsMetadata, features, categoricalMetadataFromSchema):
+    return categoricalMetadataFromSchema
+    '''
     categoricalMetadata = set(categoricalMetadataFromSchema)
     if columnsMetadata is None or not columnsMetadata.has_key("Metadata"):
         return categoricalMetadataFromSchema
@@ -247,6 +249,7 @@ def retrieveCategoricalColumns(columnsMetadata, features, categoricalMetadataFro
     logger.info("Categorical columns from schema: " + str(categoricalMetadata))
     logger.info("Categorical columns from metadata: " + str(categoricalMetadataFromSchema))
     return categoricalMetadataFromSchema
+    '''
 
 def retrieveColumnBucketMetadata(columnsMetadata):
     '''
