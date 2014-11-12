@@ -44,12 +44,15 @@ public class VisiDBMetadataServlet extends HttpServlet {
             
             if (dataType >= Types.NUMERIC && dataType <= Types.DOUBLE) {
                 m.setDisplayDiscretizationStrategy(getDisplayDiscretizationStrategy());
+                m.setStatisticalType("ratio");
+            } else if (new Random().nextInt(2) == 0) {
+                m.setStatisticalType("nominal");
             }
             
             metadataCols.add(m);
         }
         metadata.setMetadata(metadataCols);
-        
+        System.out.println(metadata.toString());
         resp.getWriter().write(metadata.toString());
         resp.setStatus(HttpStatus.ORDINAL_200_OK);
     }

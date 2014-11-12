@@ -235,11 +235,14 @@ def retrieveCategoricalColumns(columnsMetadata, features, categoricalMetadataFro
     for colName in features:
         if columnMetadataDict.has_key(colName):
             columnMetadata = columnMetadataDict[colName]
-            statType = columnMetadata["StatisticalType"] 
-            if statType is not None and (statType == "nominal" or statType == "ordinal"):
-                categoricalMetadataFromSchema.add(colName)
-            elif colName in categoricalMetadataFromSchema:
-                categoricalMetadataFromSchema.remove(colName)
+            statType = columnMetadata["StatisticalType"] if columnMetadata.has_key("StatisticalType") else None
+            if statType is not None:
+                if statType == "nominal" or statType == "ordinal":
+                    categoricalMetadataFromSchema.add(colName)
+                elif colName in categoricalMetadataFromSchema:
+                    categoricalMetadataFromSchema.remove(colName)
+            else:
+                logger.warn("No statistical type for column %s." % colName)
 
     logger.info("Categorical columns from schema: " + str(categoricalMetadata))
     logger.info("Categorical columns from metadata: " + str(categoricalMetadataFromSchema))

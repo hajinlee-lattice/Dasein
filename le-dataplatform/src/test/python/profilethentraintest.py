@@ -1,7 +1,7 @@
+import glob
 import json
 import os
 import sys
-import glob
 
 from leframework.executors.learningexecutor import LearningExecutor
 from trainingtestbase import TrainingTestBase
