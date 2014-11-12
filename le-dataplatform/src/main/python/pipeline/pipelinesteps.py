@@ -58,9 +58,19 @@ class ColumnReductionStep:
         return outputFrame
 
 class ColumnTypeConversionStep:
+    columnsToConvert_ = []
+    
+    def __init__(self, columnsToConvert=[]):
+        self.columnsToConvert_ = columnsToConvert
+        
     def transform(self, dataFrame):
-        outputFrame = dataFrame.convert_objects()
-        return outputFrame
+        if len(self.columnsToConvert_) > 0:
+            for column in self.columnsToConvert_:
+                if column in dataFrame and dataFrame[column].dtype == np.object_:
+                    dataFrame[column] = pd.Series(pd.lib.maybe_convert_numeric(dataFrame[column].as_matrix(), set(), coerce_numeric=True))
+                else:
+                    print("Column %s cannot be transformed since it is not in the data frame." % column)
+        return dataFrame
     
 class ImputationStep:
     _enumMappings = dict()

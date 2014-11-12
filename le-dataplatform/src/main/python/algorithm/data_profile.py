@@ -12,6 +12,7 @@ from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 from leframework.progressreporter import ProgressReporter
 import numpy as np
+import pandas as pd
 
 
 reload(sys)
@@ -53,6 +54,16 @@ def getSchema():
         "name" : "displayname",
         "type" : [ "string", "null" ],
         "columnName" : "displayname",
+        "sqlType" : "-9"
+      }, {
+        "name" : "approvedusage",
+        "type" : [ "string", "null" ],
+        "columnName" : "approvedusage",
+        "sqlType" : "-9"
+      }, {
+        "name" : "category",
+        "type" : [ "string", "null" ],
+        "columnName" : "category",
         "sqlType" : "-9"
       }, {
         "name" : "columnvalue",
@@ -153,51 +164,86 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     dataWriter = datafile.DataFileWriter(codecs.open(modelDir + '/profile.avro', 'wb'),
                                          recordWriter, writers_schema = avroSchema, codec = 'deflate')
 
-    colnames = list(data.columns.values)
-    stringcols = set(schema["stringColumns"])
+    colNames = list(data.columns.values)
+    categoricalCols = set(schema["stringColumns"])
     features = set(schema["features"])
     eventVector = data.iloc[:, schema["targetIndex"]]
     configMetadata = schema["config_metadata"]
-    displayMetadata = retrieveColumnDisplayMetadata(configMetadata)
+    otherMetadata = retrieveOtherMetadata(configMetadata)
+    categoricalCols = retrieveCategoricalColumns(configMetadata, features, categoricalCols)
     colnameBucketMetadata, metadataDiagnostics = retrieveColumnBucketMetadata(configMetadata)
-    progressReporter.setTotalState(len(colnames))
+    progressReporter.setTotalState(len(colNames))
 
     index = 1
     dataDiagnostics = []
-    for colname in colnames:
+    for colName in colNames:
         # Update progress
         progressReporter.nextState()
-        if colname in features:
-            if not displayMetadata.has_key(colname):
-                displayMetadata[colname] = colname
-            index, columnDiagnostics = profileColumn(data[colname], colname, displayMetadata[colname], 
-                                                     stringcols, eventVector, bucketDispatcher, dataWriter, index, colnameBucketMetadata.get(colname))
+        if colName in features:
+            if not otherMetadata.has_key(colName):
+                otherMetadata[colName] = (colName, "", "")
+            index, columnDiagnostics = profileColumn(data[colName], colName, otherMetadata[colName], 
+                                                     categoricalCols, eventVector, bucketDispatcher, dataWriter, index, colnameBucketMetadata.get(colName))
             dataDiagnostics.append(columnDiagnostics)
 
     writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir)
     dataWriter.close()
     return None
 
-def retrieveColumnDisplayMetadata(columnsMetadata):
-    displayMetadata = dict()
+def retrieveOtherMetadata(columnsMetadata):
+    otherMetadata = dict()
     if columnsMetadata is None or not columnsMetadata.has_key("Metadata"):
-        return displayMetadata
+        return otherMetadata
     else:
         columnsMetadata = columnsMetadata["Metadata"]
 
     for columnMetadata in columnsMetadata:
-        colname = columnMetadata['ColumnName']
+        colName = columnMetadata['ColumnName']
         try :
             displayName = columnMetadata['DisplayName']
-            if columnMetadata['DisplayName'] is None:
-                displayName = colname
-                
-            displayMetadata[colname] = displayName
+            approvedUsage = columnMetadata['ApprovedUsage']
+            extensions = columnMetadata["Extensions"]
+            category = ""
+            for extension in extensions:
+                if extension["Key"] == "Category":
+                    category = extension["Value"]
+            
+            if displayName is None:
+                displayName = colName
+            if approvedUsage is None:
+                approvedUsage = ""
+            if isinstance(approvedUsage, list):
+                approvedUsage = ",".join(approvedUsage)
+            otherMetadata[colName] = (displayName, approvedUsage, category)
         except :
-            logger.warn("Invalid metadata format for column: " + colname)
+            logger.warn("Invalid metadata format for column: " + colName)
             continue
 
-    return displayMetadata
+    return otherMetadata
+
+def retrieveCategoricalColumns(columnsMetadata, features, categoricalMetadataFromSchema):
+    categoricalMetadata = set(categoricalMetadataFromSchema)
+    if columnsMetadata is None or not columnsMetadata.has_key("Metadata"):
+        return categoricalMetadataFromSchema
+    else:
+        columnsMetadata = columnsMetadata["Metadata"]
+    columnMetadataDict = dict()
+    for columnMetadata in columnsMetadata:
+        colName = columnMetadata['ColumnName']
+        columnMetadataDict[colName] = columnMetadata
+        
+    for colName in features:
+        if columnMetadataDict.has_key(colName):
+            columnMetadata = columnMetadataDict[colName]
+            statType = columnMetadata["StatisticalType"] 
+            if statType is not None and (statType == "nominal" or statType == "ordinal"):
+                categoricalMetadataFromSchema.add(colName)
+            elif colName in categoricalMetadataFromSchema:
+                categoricalMetadataFromSchema.remove(colName)
+
+    logger.info("Categorical columns from schema: " + str(categoricalMetadata))
+    logger.info("Categorical columns from metadata: " + str(categoricalMetadataFromSchema))
+    return categoricalMetadataFromSchema
 
 def retrieveColumnBucketMetadata(columnsMetadata):
     '''
@@ -212,6 +258,7 @@ def retrieveColumnBucketMetadata(columnsMetadata):
     '''
     bucketsMetadata = dict()
     diagnostics = OrderedDict()
+    
     if columnsMetadata is None or not columnsMetadata.has_key("Metadata"):
         diagnostics["Summary"] = "Invalid metadata format"
         return (bucketsMetadata, diagnostics)
@@ -242,13 +289,13 @@ def getPopulatedRowCount(columnData, continuous):
         return columnData.count()
     return sum(map(lambda x: 1 if x is not None else 0, columnData))
 
-def profileColumn(columnData, colName, displayName, stringcols, eventVector, bucketDispatcher, dataWriter, index, bucketingParams = None):
+def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, bucketDispatcher, dataWriter, index, bucketingParams = None):
     '''
     Performs profiling on given column 
     Args:
         columnData: A DataFrame vector of data for given column
         colName: Name of given column
-        displayName: Display name of a given column
+        otherMetadata: Other interesting metadata of a given column
         stringcols: A list of names of string columns 
         eventVector: A DataFrame vector of event column
         bucketDispatcher: A dispatcher that performs specific bucketing based on passed in parameters
@@ -264,14 +311,16 @@ def profileColumn(columnData, colName, displayName, stringcols, eventVector, buc
     '''
     diagnostics = OrderedDict()
     diagnostics["Colname"] = colName
-    diagnostics["DisplayName"] = displayName
+    diagnostics["DisplayName"] = otherMetadata[0]
     diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colName not in stringcols)/float(len(columnData))
     
     if diagnostics["PopulationRate"] == 0.0:
         return (index, diagnostics)
 
+    logger.info("Processing column %s." % colName)
     if colName in stringcols:
         # Categorical column
+        columnData = columnData.astype(np.str)
         diagnostics["Type"] = "Categorical"
         uniqueValues = len(columnData.unique())
         mode = columnData.value_counts().idxmax()
@@ -280,17 +329,18 @@ def profileColumn(columnData, colName, displayName, stringcols, eventVector, buc
             logger.warn("String column name: " + colName + " is discarded due to more than 200 unique values.")
             return (index, diagnostics)
 
-        index = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colName, displayName, index)
+        index = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colName, otherMetadata, index)
     else:
         # Band column
         diagnostics["Type"] = "Band"
+        # Convert all continuous values into a numeric data type
+        if columnData.dtype == np.object_:
+            columnData = pd.Series(pd.lib.maybe_convert_numeric(columnData.as_matrix(), set(), coerce_numeric=True)) 
         mean = columnData.mean()
         median = columnData.median()
         if math.isnan(median):
             logger.warn("Median to impute for column name: " + colName + " is null; excluding this column.")
             return (index, diagnostics)
-        # Convert all continuous values into a numeric data type
-        columnData = columnData.convert_objects(convert_numeric=True) 
         if bucketingParams is not None:
             # Apply bucketing with specified type and parameters
             bands = bucketDispatcher.bucketColumn(columnData, eventVector, bucketingParams[0], bucketingParams[1])
@@ -300,12 +350,12 @@ def profileColumn(columnData, colName, displayName, stringcols, eventVector, buc
             logger.debug("Using default bucketer for column name: " + colName)
             bands = bucketDispatcher.bucketColumn(columnData, eventVector)
             diagnostics["BucketingStrategy"] = None
-        index = writeBandsToAvro(dataWriter, columnData, eventVector, bands, mean, median, colName, displayName, index)
+        index = writeBandsToAvro(dataWriter, columnData, eventVector, bands, mean, median, colName, otherMetadata, index)
 
     return (index, diagnostics)
 
 
-def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, colName, displayName, index):
+def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, colName, otherMetadata, index):
     '''
     Creates a datum for each unique value in the categorical column and writes to buffered writer   
     Args:
@@ -325,7 +375,9 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         datum = {}
         datum["id"] = index
         datum["barecolumnname"] = colName
-        datum["displayname"] = displayName
+        datum["displayname"] = otherMetadata[0]
+        datum["approvedusage"] = otherMetadata[1]
+        datum["category"] = otherMetadata[2]
         datum["columnvalue"] = value
         datum["Dtype"] = "STR"
         datum["minV"] = None
@@ -342,10 +394,10 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         dataWriter.append(datum)
 
     # Create bucket for nulls if applicable
-    index = writeNullBucket(index, colName, displayName, columnVector, eventVector, avgProbability, None, None, dataWriter, False)
+    index = writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, None, None, dataWriter, False)
     return index
 
-def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, colName, displayName, index):
+def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, colName, otherMetadata, index):
     '''
     Creates a datum for each band in the band column and writes to buffered writer   
     Args:
@@ -371,7 +423,9 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         datum = {}
         datum["id"] = index
         datum["barecolumnname"] = colName
-        datum["displayname"] = displayName
+        datum["displayname"] = otherMetadata[0]
+        datum["approvedusage"] = otherMetadata[1] 
+        datum["category"] = otherMetadata[2]
         datum["columnvalue"] = None
         datum["Dtype"] = "BND"
         datum["minV"] = band[0]
@@ -388,10 +442,10 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         dataWriter.append(datum)
 
     # Create bucket for nulls if applicable
-    index = writeNullBucket(index, colName, displayName, columnVector, eventVector, avgProbability, mean, median, dataWriter, True)
+    index = writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, mean, median, dataWriter, True)
     return index
 
-def writeNullBucket(index, colName, displayName, columnVector, eventVector, avgProbability, mean, median, dataWriter, continuous):
+def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, mean, median, dataWriter, continuous):
     bandVector = []
     
     if continuous:
@@ -405,7 +459,9 @@ def writeNullBucket(index, colName, displayName, columnVector, eventVector, avgP
     datum = {}
     datum["id"] = index
     datum["barecolumnname"] = colName
-    datum["displayname"] = displayName
+    datum["displayname"] = otherMetadata[0]
+    datum["approvedusage"] = otherMetadata[1]
+    datum["category"] = otherMetadata[2]
     datum["columnvalue"] = None
     datum["Dtype"] = "BND" if continuous else "STR"
     datum["minV"] = None
