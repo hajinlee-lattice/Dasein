@@ -44,27 +44,30 @@ public class ModelCommandState extends AbstractTimestampEntity implements HasPid
 
     @Column(name = "YarnApplicationId")
     private String yarnApplicationId;
-    
+
     @Column(name = "Status")
     @Enumerated(EnumType.STRING)
     private FinalApplicationStatus status;
-    
-    @Column(name = "Progress")  
+
+    @Column(name = "Progress")
     private Float progress;
 
     @Column(name = "Diagnostics", length = 65535)
     private String diagnostics;
-    
+
     @Column(name = "TrackingUrl", length = 65535)
     private String trackingUrl;
-    
+
     @Column(name = "ElapsedTimeInMillis")
     private Long elapsedTimeInMillis;
-    
+
+    @Column(name = "UsedMemory")
+    private Integer usedMemory = 0;
+
     ModelCommandState() {
         super();
     }
-    
+
     public ModelCommandState(ModelCommand modelCommand, ModelCommandStep modelCommandStep) {
         super();
         this.modelCommand = modelCommand;
@@ -135,6 +138,14 @@ public class ModelCommandState extends AbstractTimestampEntity implements HasPid
 
     public void setElapsedTimeInMillis(Long elapsedTimeInMillis) {
         this.elapsedTimeInMillis = elapsedTimeInMillis;
+    }
+
+    public Integer getUsedMemory() {
+        return usedMemory;
+    }
+
+    public void setUsedMemory(Integer usedMemory) {
+        this.usedMemory = usedMemory;
     }
 
 }

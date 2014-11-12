@@ -188,19 +188,15 @@ public class ModelCommandCallable implements Callable<Long> {
                         generateDataDiagnostics(commandState, jobStatus);
                     }
                     successCount++;
-                    modelCommandLogService.log(modelCommand, "Job Memory used: "
-                            + jobStatus.getAppResUsageReport().getUsedResources().getMemory() + " MB");
+                    modelCommandLogService.log(modelCommand, commandState.getModelCommandStep() + " Memory used: " + commandState.getUsedMemory() + " MB");
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
                         || YarnUtils.isPrempted(jobStatus.getDiagnostics())) {
                     // Job in progress.
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.KILLED)
                         || jobStatus.getStatus().equals(FinalApplicationStatus.FAILED)) {
-                    int memory = jobStatus.getAppResUsageReport().getUsedResources().getMemory();
-                    modelCommandLogService.log(modelCommand, "Job Memory used: " + memory + " MB");
-                    if (memory > jobStatus.getAppResUsageReport().getNeededResources().getMemory()) {
-                        modelCommandLogService
-                                .log(modelCommand,
-                                        "Job failed due to too much memory being used! Please decrease the size of the dataset and try again.");
+                    modelCommandLogService.log(modelCommand, commandState.getModelCommandStep() + " Memory used: " + commandState.getUsedMemory() + " MB");
+                    if (commandState.getUsedMemory() > jobStatus.getAppResUsageReport().getNeededResources().getMemory()) {
+                        modelCommandLogService.log(modelCommand, commandState.getModelCommandStep() + " failed due to too much memory being used! Please decrease the size of the dataset and try again.");
                     }
                     jobFailed = true;
                     failedYarnApplicationIds.add(commandState.getYarnApplicationId());
@@ -310,6 +306,8 @@ public class ModelCommandCallable implements Callable<Long> {
         commandState.setDiagnostics(jobStatus.getDiagnostics());
         commandState.setTrackingUrl(jobStatus.getTrackingUrl());
         commandState.setElapsedTimeInMillis(System.currentTimeMillis() - jobStatus.getStartTime());
+        commandState.setUsedMemory(Math.max(commandState.getUsedMemory(), jobStatus.getAppResUsageReport()
+                .getUsedResources().getMemory()));
         modelCommandStateEntityMgr.createOrUpdate(commandState);
     }
 
