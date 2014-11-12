@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+import math
 
 class Encoder(object):
     __metaclass__ = ABCMeta
@@ -24,6 +25,12 @@ def transform(x):
     '''
     if x is None:
         x = 'NULL'
+        
+    if isinstance(x, (int, long, float)):
+        if math.isnan(x):
+            x = 'NULL'
+        else:
+            return x
     try:
         return int(0xffffffff & reduce(lambda h,c: ord(c) + (h << 6) + (h << 16) - h, x, 0))
     except Exception:
