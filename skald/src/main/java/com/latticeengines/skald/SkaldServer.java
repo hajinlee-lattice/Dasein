@@ -13,7 +13,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 public class SkaldServer {
     public static void main(String[] args) throws Exception {
-        // TODO: Add an actual logging configuration.
         BasicConfigurator.configure();
 
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();

@@ -11,8 +11,8 @@ public class PredictiveModel {
     // Theses will be executed in order, which should capture any dependencies.
     public List<TransformDefinition> transforms;
 
-    // The PMML model itself in XML form.
-    public String model;
+    // The PMML model itself in UTF-8 XML form.
+    public String pmml;
 
     // The name of the output field to use for the positive probability.
     public String output;

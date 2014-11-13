@@ -9,6 +9,9 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 @Configuration
 @EnableWebMvc
 public class SkaldConfiguration extends WebMvcConfigurerAdapter {
@@ -19,6 +22,11 @@ public class SkaldConfiguration extends WebMvcConfigurerAdapter {
 
     @Bean
     MappingJackson2HttpMessageConverter converter() {
-        return new MappingJackson2HttpMessageConverter();
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        converter.setObjectMapper(mapper);
+
+        return converter;
     }
 }

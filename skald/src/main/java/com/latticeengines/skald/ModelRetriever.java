@@ -1,17 +1,36 @@
 package com.latticeengines.skald;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.skald.model.PredictiveModel;
-import com.latticeengines.skald.model.ScoreDerivation;
 
 @Service
 public class ModelRetriever {
-    public PredictiveModel getPredictiveModel(CustomerSpaceID spaceID, String modelID) {
-        return null;
-    }
+    public List<ModelElement> getModelCombination(CustomerSpace spaceID, String combination) {
+        PredictiveModel model = new PredictiveModel();
 
-    public ScoreDerivation getScoreDerivation(CustomerSpaceID spaceID, String modelID) {
-        return null;
+        // TODO Replace with actual retrieval logic.
+        try {
+            byte[] buffer = Files.readAllBytes(Paths.get("c:\\users\\wbaumann\\desktop\\rfpmml.xml"));
+            model.pmml = new String(buffer, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // TODO Retrieve the other structures.
+        ModelElement element = new ModelElement();
+        element.model = model;
+
+        List<ModelElement> result = new ArrayList<ModelElement>();
+        result.add(element);
+        return result;
     }
 }

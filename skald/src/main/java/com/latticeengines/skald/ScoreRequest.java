@@ -2,11 +2,13 @@ package com.latticeengines.skald;
 
 import java.util.Map;
 
-public class ScoreRequest {
-    // TODO: Replace this structure with the Camille equivalent.
-    public CustomerSpaceID spaceID;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
-    public String modelID;
+public class ScoreRequest {
+    public CustomerSpace customerID;
+
+    // Combination of models that is the target of this score request.
+    public String combination;
 
     public Map<String, Object> record;
 }
