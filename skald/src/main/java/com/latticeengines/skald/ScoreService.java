@@ -17,7 +17,7 @@ public class ScoreService {
     public Map<String, Object> scoreRecord(@RequestBody ScoreRequest request) {
         log.info(String.format("Received a score request for %1$s model %2$s", request.customerID, request.combination));
 
-        List<ModelElement> active = retriever.getModelCombination(request.customerID, request.combination);
+        List<ModelElement> combination = retriever.getModelCombination(request.customerID, request.combination);
 
         // TODO Verify all the model schemas against input record.
 
@@ -26,7 +26,7 @@ public class ScoreService {
         // TODO Query and join aggregate data.
 
         // TODO Evaluate the filters to determine the selected model.
-        ModelElement selected = active.get(0);
+        ModelElement selected = combination.get(0);
 
         // TODO Apply transformations.
 
