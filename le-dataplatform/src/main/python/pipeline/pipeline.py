@@ -25,7 +25,10 @@ def encodeCategoricalColumnsForMetadata(metadata):
 
 def setupPipeline(metadata, stringColumns):
     (categoricalColumns, continuousColumns) = getDecoratedColumns(metadata)
-    stringColumns = list(set(categoricalColumns.keys()) - stringColumns)
-    steps = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(stringColumns), ImputationStep(continuousColumns)]
+    # stringColumns refer to the columns that are categorical from the physical schema
+    # categoricalColumns refer to the columns that are categorical from the metadata
+    # We need to transform the physical strings into numbers
+    columnsToTransform = set(stringColumns - set(categoricalColumns.keys()))
+    steps = [EnumeratedColumnTransformStep(categoricalColumns), ColumnTypeConversionStep(columnsToTransform), ImputationStep(continuousColumns)]
     pipeline = Pipeline(steps)
     return pipeline
