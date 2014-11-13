@@ -2,8 +2,9 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+
 import java.math.BigInteger;
 import java.util.Map;
 
