@@ -4,13 +4,17 @@ public class CustomerSpace {
     private String contractId;
     private String tenantId;
     private String spaceId;
-    
+
+    // Serialization constructor.
+    public CustomerSpace() {
+    }
+
     public CustomerSpace(String contractId, String tenantId, String spaceId) {
         this.contractId = contractId;
         this.tenantId = tenantId;
         this.spaceId = spaceId;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -47,7 +51,7 @@ public class CustomerSpace {
             return false;
         return true;
     }
-    
+
     @Override
     public String toString() {
         return String.format("%s.%s.%s", contractId, tenantId, spaceId);
@@ -56,21 +60,25 @@ public class CustomerSpace {
     public String getContractId() {
         return contractId;
     }
+
     public void setContractId(String contractId) {
         this.contractId = contractId;
     }
+
     public String getTenantId() {
         return tenantId;
     }
+
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
     }
+
     public String getSpaceId() {
         return spaceId;
     }
+
     public void setSpaceId(String spaceId) {
         this.spaceId = spaceId;
     }
-    
 
 }
