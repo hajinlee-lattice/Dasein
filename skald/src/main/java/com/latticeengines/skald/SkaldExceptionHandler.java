@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+// TODO Generalize this slightly, and then standardize on it.
 @ControllerAdvice
 public class SkaldExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler

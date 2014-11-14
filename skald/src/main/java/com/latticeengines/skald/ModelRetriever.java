@@ -10,6 +10,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.skald.model.FieldInterpretation;
+import com.latticeengines.skald.model.FieldSchema;
+import com.latticeengines.skald.model.FieldSource;
+import com.latticeengines.skald.model.FieldType;
 import com.latticeengines.skald.model.PredictiveModel;
 
 @Service
@@ -28,6 +32,9 @@ public class ModelRetriever {
         // TODO Retrieve the other structures.
         ModelElement element = new ModelElement();
         element.model = model;
+        element.model.fields = new ArrayList<FieldSchema>();
+        element.model.fields.add(new FieldSchema("magic", FieldSource.Request, FieldType.Float,
+                FieldInterpretation.Feature));
 
         List<ModelElement> result = new ArrayList<ModelElement>();
         result.add(element);
