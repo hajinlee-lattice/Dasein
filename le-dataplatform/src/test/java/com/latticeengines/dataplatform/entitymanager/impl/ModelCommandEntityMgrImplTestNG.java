@@ -22,10 +22,6 @@ public class ModelCommandEntityMgrImplTestNG extends DataPlatformFunctionalTestN
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
     }

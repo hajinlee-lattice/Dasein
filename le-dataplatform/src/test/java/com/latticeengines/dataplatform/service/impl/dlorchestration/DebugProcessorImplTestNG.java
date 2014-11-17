@@ -33,10 +33,6 @@ public class DebugProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @BeforeClass(groups = "functional")
     public void beforeClass() throws Exception {
         initMocks(this);

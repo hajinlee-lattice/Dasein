@@ -27,24 +27,24 @@ public class ModelCommandLog extends AbstractTimestampEntity implements HasPid, 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
-    
+
     @ManyToOne()
     @JoinColumn(name = "CommandId", nullable = false)
-    private ModelCommand modelCommand;    
-    
+    private ModelCommand modelCommand;
+
     @Column(name = "Message", nullable = false, length = 65535)
     private String message;
 
     ModelCommandLog() {
         super();
     }
-    
+
     public ModelCommandLog(ModelCommand modelCommand, String message) {
         super();
         this.modelCommand = modelCommand;
         this.message = message;
     }
-   
+
     @Override
     public Long getPid() {
         return this.pid;
@@ -60,6 +60,11 @@ public class ModelCommandLog extends AbstractTimestampEntity implements HasPid, 
     }
 
     public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String toString() {
         return message;
     }
 }

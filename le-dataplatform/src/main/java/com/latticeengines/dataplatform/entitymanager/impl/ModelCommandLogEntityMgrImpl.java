@@ -1,11 +1,14 @@
 package com.latticeengines.dataplatform.entitymanager.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.ModelCommandLogDao;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
 
 @Component("modelCommandLogEntityMgr")
@@ -13,7 +16,7 @@ public class ModelCommandLogEntityMgrImpl extends BaseOrchestrationEntityMgrImpl
 
     @Autowired
     private ModelCommandLogDao modelCommandLogDao;
-    
+
     public ModelCommandLogEntityMgrImpl() {
         super();
     }
@@ -21,6 +24,11 @@ public class ModelCommandLogEntityMgrImpl extends BaseOrchestrationEntityMgrImpl
     @Override
     public BaseDao<ModelCommandLog> getDao() {
         return modelCommandLogDao;
-    }  
+    }
+
+    @Override
+    public List<ModelCommandLog> findByModelCommand(ModelCommand modelCommand) {
+        return modelCommandLogDao.findByModelCommand(modelCommand);
+    }
 
 }

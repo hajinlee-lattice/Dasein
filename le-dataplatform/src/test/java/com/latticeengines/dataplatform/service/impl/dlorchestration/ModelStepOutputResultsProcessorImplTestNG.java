@@ -52,10 +52,6 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
     private List<String> contents = Arrays.<String> asList(new String[] { "a", "b", "c", "d" });
 
-    protected boolean doYarnClusterSetup() {
-        return false;
-    }
-
     @BeforeClass(groups = "functional")
     public void beforeClass() throws Exception {
         initMocks(this);

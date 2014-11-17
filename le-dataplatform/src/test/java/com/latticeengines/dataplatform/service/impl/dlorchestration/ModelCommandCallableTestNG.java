@@ -5,6 +5,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,6 +35,8 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 
 @ContextConfiguration(locations = { "classpath:dataplatform-dlorchestration-quartz-context.xml" })
 public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase {
+
+    private static final Log log = LogFactory.getLog(ModelCommandCallableTestNG.class);
 
     private static final String TEMP_EVENTTABLE = "ModelCommandCallableTestNG_eventtable";
 
@@ -132,7 +136,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         if (command.getCommandStatus() == ModelCommandStatus.FAIL) {
             List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
             for (ModelCommandLog modelCommandLog : logs) {
-                System.out.println(modelCommandLog.getMessage());
+                log.info(modelCommandLog.getMessage());
             }
         }
         assertTrue(command.getCommandStatus() == ModelCommandStatus.SUCCESS,

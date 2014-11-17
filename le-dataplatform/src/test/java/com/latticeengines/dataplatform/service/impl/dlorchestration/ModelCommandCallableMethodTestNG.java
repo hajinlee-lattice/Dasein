@@ -12,7 +12,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
-import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.impl.AlertServiceImpl;
@@ -46,9 +45,6 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
 
     @Autowired
     private ModelStepProcessor modelStepRetrieveMetadataProcessor;
-
-    @Autowired
-    private ModelCommandLogEntityMgr modelCommandLogEntityMgr;
 
     @Autowired
     private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
@@ -85,13 +81,18 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
         command.setModelCommandStep(ModelCommandStep.PROFILE_DATA);
         modelCommandEntityMgr.create(command);
 
-        ModelCommandResult result = new ModelCommandResult(command, new Date(), new Date(), ModelCommandStatus.IN_PROGRESS);
+        modelCommandLogService.log(command, "message.  #%#$%%^$%^$%^$%^");
+        modelCommandLogService.log(command, "another message.  #%#$%%^$%^$%^$%^ 12344       .");
+
+        ModelCommandResult result = new ModelCommandResult(command, new Date(), new Date(),
+                ModelCommandStatus.IN_PROGRESS);
         modelCommandResultEntityMgr.create(result);
 
         ModelCommandCallable callable = new ModelCommandCallable(command, yarnConfiguration, modelingJobService,
                 modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
                 modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
-                modelStepRetrieveMetadataProcessor, debugProcessorImpl, alertService, httpFsPrefix, resourceManagerWebAppAddress);
+                modelStepRetrieveMetadataProcessor, debugProcessorImpl, alertService, httpFsPrefix,
+                resourceManagerWebAppAddress);
 
         PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed());
 

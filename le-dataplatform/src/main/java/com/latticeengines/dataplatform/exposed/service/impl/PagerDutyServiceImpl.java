@@ -2,6 +2,8 @@ package com.latticeengines.dataplatform.exposed.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.client.ClientProtocolException;
@@ -26,8 +28,13 @@ public class PagerDutyServiceImpl implements PagerDutyService {
 
     private String serviceApiKey = MODELINGPLATFORM_SERVICEAPI_KEY;
 
-    public String triggerEvent(String description, String clientUrl, BasicNameValuePair... details) throws ClientProtocolException,
-            IOException {
+    public String triggerEvent(String description, String clientUrl, BasicNameValuePair... details)
+            throws ClientProtocolException, IOException {
+        return triggerEvent(description, clientUrl, Arrays.asList(details));
+    }
+
+    public String triggerEvent(String description, String clientUrl, Iterable<? extends BasicNameValuePair> details)
+            throws ClientProtocolException, IOException {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"service_key\": \"" + serviceApiKey + "\",");
@@ -36,17 +43,19 @@ public class PagerDutyServiceImpl implements PagerDutyService {
         sb.append("\"client\": \"Modeling Platform\",");
         sb.append("\"client_url\": \"" + clientUrl + "\",");
         sb.append("\"details\": {");
-        for (int i = 0; i < details.length; i++) {
-            BasicNameValuePair detail = details[i];
+
+        for (Iterator<? extends BasicNameValuePair> iterator = details.iterator(); iterator.hasNext();) {
+            BasicNameValuePair detail = iterator.next();
             sb.append("\"" + detail.getName() + "\":");
             sb.append("\"" + detail.getValue() + "\"");
-            if ((i+1) < details.length) {
+            if (iterator.hasNext()) {
                 sb.append(",");
             }
         }
         sb.append("}}");
 
-        // response should look like this - {"status":"success","message":"Event processed","incident_key":”acdcfa307f3e47d1b42b37edcbf22ae7"}
+        // response should look like this -
+        // {"status":"success","message":"Event processed","incident_key":”acdcfa307f3e47d1b42b37edcbf22ae7"}
         String response = HttpUtils.sendPostRequest(
                 "https://events.pagerduty.com/generic/2010-04-15/create_event.json", headers, sb.toString());
 

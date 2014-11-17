@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
+import java.util.List;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -81,6 +83,11 @@ public class ModelCommandLogServiceImpl implements ModelCommandLogService {
         StringBuilder sb = new StringBuilder();
         sb.append(step.getDescription()).append(" [").append(yarnAppId).append("] ");
         log(modelCommand, sb.toString());
+    }
+
+    @Override
+    public List<ModelCommandLog> findByModelCommand(ModelCommand modelCommand) {
+        return modelCommandLogEntityMgr.findByModelCommand(modelCommand);
     }
 
 }

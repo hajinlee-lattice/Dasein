@@ -34,6 +34,7 @@ import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProc
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
@@ -43,7 +44,7 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private static final Log log = LogFactory.getLog(ModelCommandCallable.class);
 
-    private static final Joiner joiner = Joiner.on(", ").skipNulls();
+    private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
     private static final int SUCCESS = 0;
     private static final int FAIL = -1;
     private static final String HTTPFS_SUFFIX = "?op=OPEN&user.name=yarn";
@@ -188,15 +189,21 @@ public class ModelCommandCallable implements Callable<Long> {
                         generateDataDiagnostics(commandState, jobStatus);
                     }
                     successCount++;
-                    modelCommandLogService.log(modelCommand, commandState.getModelCommandStep() + " Memory used: " + commandState.getUsedMemory() + " MB");
+                    modelCommandLogService.log(modelCommand, commandState.getModelCommandStep() + " Memory used: "
+                            + commandState.getUsedMemory() + " MB");
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
                         || YarnUtils.isPrempted(jobStatus.getDiagnostics())) {
                     // Job in progress.
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.KILLED)
                         || jobStatus.getStatus().equals(FinalApplicationStatus.FAILED)) {
-                    modelCommandLogService.log(modelCommand, commandState.getModelCommandStep() + " Memory used: " + commandState.getUsedMemory() + " MB");
-                    if (commandState.getUsedMemory() > jobStatus.getAppResUsageReport().getNeededResources().getMemory()) {
-                        modelCommandLogService.log(modelCommand, commandState.getModelCommandStep() + " failed due to too much memory being used! Please decrease the size of the dataset and try again.");
+                    modelCommandLogService.log(modelCommand, commandState.getModelCommandStep() + " Memory used: "
+                            + commandState.getUsedMemory() + " MB");
+                    if (commandState.getUsedMemory() > jobStatus.getAppResUsageReport().getNeededResources()
+                            .getMemory()) {
+                        modelCommandLogService
+                                .log(modelCommand,
+                                        commandState.getModelCommandStep()
+                                                + " failed due to too much memory being used! Please decrease the size of the dataset and try again.");
                     }
                     jobFailed = true;
                     failedYarnApplicationIds.add(commandState.getYarnApplicationId());
@@ -251,17 +258,26 @@ public class ModelCommandCallable implements Callable<Long> {
         String appIds = "";
         StringBuilder clientUrl = new StringBuilder(resourceManagerWebAppAddress).append("/cluster/");
         if (!failedYarnApplicationIds.isEmpty()) {
-            appIds = joiner.join(failedYarnApplicationIds);
+            appIds = commaJoiner.join(failedYarnApplicationIds);
             // Currently each step only generates one yarn job anyways so first
             // failed appId works
             clientUrl.append("app/").append(failedYarnApplicationIds.get(0));
         }
 
-        return alertService.triggerCriticalEvent(LedpCode.LEDP_16007.getMessage(), clientUrl.toString(),
-                new BasicNameValuePair("commandId", modelCommand.getPid().toString()), new BasicNameValuePair(
-                        "yarnAppIds", failedYarnApplicationIds.isEmpty() ? "None" : appIds), new BasicNameValuePair(
-                        "deploymentExternalId", modelCommand.getDeploymentExternalId()), new BasicNameValuePair(
-                        "failedStep", modelCommand.getModelCommandStep().getDescription()));
+        List<BasicNameValuePair> details = new ArrayList<>();
+        details.add(new BasicNameValuePair("commandId", modelCommand.getPid().toString()));
+        details.add(new BasicNameValuePair("yarnAppIds", failedYarnApplicationIds.isEmpty() ? "None" : appIds));
+        details.add(new BasicNameValuePair("deploymentExternalId", modelCommand.getDeploymentExternalId()));
+        details.add(new BasicNameValuePair("failedStep", modelCommand.getModelCommandStep().getDescription()));
+        List<ModelCommandLog> logs = modelCommandLogService.findByModelCommand(modelCommand);
+        if (!logs.isEmpty()) {
+            for (ModelCommandLog modelCommandLog : logs) {
+                details.add(new BasicNameValuePair("commandLogId" + modelCommandLog.getPid(), modelCommandLog
+                        .getMessage()));
+            }
+        }
+
+        return alertService.triggerCriticalEvent(LedpCode.LEDP_16007.getMessage(), clientUrl.toString(), details);
     }
 
     private void executeYarnStep(ModelCommandStep step, ModelCommandParameters commandParameters) {

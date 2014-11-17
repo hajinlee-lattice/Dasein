@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.exposed.service.impl;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,6 +24,10 @@ public class AlertServiceImpl implements AlertService {
     private PagerDutyServiceImpl pagerDutyService;
 
     public String triggerCriticalEvent(String description, String clientUrl, BasicNameValuePair... details) {
+        return triggerCriticalEvent(description, clientUrl, Arrays.asList(details));
+    }
+
+    public String triggerCriticalEvent(String description, String clientUrl, Iterable<? extends BasicNameValuePair> details) {
         if (!alertServiceEnabled) {
             return "";
         }
