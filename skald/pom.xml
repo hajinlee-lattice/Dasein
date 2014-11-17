@@ -12,6 +12,8 @@
         <le.domain.version>1.0.13-SNAPSHOT</le.domain.version>
         <!-- JPMML versions beyond 1.0.x are licensed differently; do not upgrade! -->
         <jpmml.version>1.0.22</jpmml.version>
+        <!--  There's a broken commit on b3 related to importing site.py. -->
+        <jython.version>2.7-b2</jython.version>
         <jackson.version>2.4.1</jackson.version>
     </properties>
 
@@ -21,7 +23,7 @@
         <version>1.0.13-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
-    
+
     <dependencies>
         <dependency>
             <groupId>com.latticeengines</groupId>
@@ -65,6 +67,12 @@
 		    <artifactId>pmml-evaluator</artifactId>
 		    <version>${jpmml.version}</version>
 		</dependency>
+		
+		<dependency>
+	    <groupId>org.python</groupId>
+	    <artifactId>jython</artifactId>
+	    <version>${jython.version}</version>
+	</dependency>
     </dependencies>
 
 </project>

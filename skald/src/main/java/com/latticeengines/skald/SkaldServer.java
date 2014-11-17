@@ -1,5 +1,7 @@
 package com.latticeengines.skald;
 
+import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.BasicConfigurator;
@@ -7,6 +9,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.python.util.PythonInterpreter;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -14,6 +17,10 @@ import org.springframework.web.servlet.DispatcherServlet;
 public class SkaldServer {
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure();
+
+        Properties properties = new Properties(System.getProperties());
+        properties.setProperty("python.cachedir.skip", "true");
+        PythonInterpreter.initialize(System.getProperties(), properties, new String[0]);
 
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
         context.setConfigLocation("com.latticeengines.skald");

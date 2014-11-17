@@ -53,9 +53,9 @@ public class ScoreService {
         // TODO Evaluate the filters to determine the selected model.
         ModelElement selected = combination.get(0);
 
-        // TODO Apply transformations.
+        Map<String, Object> transformed = transformer.transform(selected.model.transforms, request.record);
 
-        return evaluator.evaluate(selected, request.record);
+        return evaluator.evaluate(selected, transformed);
 
         // TODO Write record and results to a score history database.
         // TODO Also do this for failures and capture error information.
@@ -63,6 +63,9 @@ public class ScoreService {
 
     @Autowired
     private ModelRetriever retriever;
+
+    @Autowired
+    private RecordTransformer transformer;
 
     @Autowired
     private ModelEvaluator evaluator;

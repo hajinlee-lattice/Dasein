@@ -15,10 +15,13 @@ import com.latticeengines.skald.model.FieldSchema;
 import com.latticeengines.skald.model.FieldSource;
 import com.latticeengines.skald.model.FieldType;
 import com.latticeengines.skald.model.PredictiveModel;
+import com.latticeengines.skald.model.TransformDefinition;
 
 @Service
 public class ModelRetriever {
     public List<ModelElement> getModelCombination(CustomerSpace spaceID, String combination) {
+        // TODO Add a caching layer.
+
         PredictiveModel model = new PredictiveModel();
 
         // TODO Replace with actual retrieval logic.
@@ -28,6 +31,11 @@ public class ModelRetriever {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        model.transforms = new ArrayList<TransformDefinition>();
+        TransformDefinition transform = new TransformDefinition("test_transform", "victory_field", FieldType.Float,
+                null);
+        model.transforms.add(transform);
 
         // TODO Retrieve the other structures.
         ModelElement element = new ModelElement();
