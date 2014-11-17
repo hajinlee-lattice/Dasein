@@ -24,5 +24,6 @@ class ProfilingTestBase(TrainingTestBase):
     def tearDown(self):
         super(ProfilingTestBase, self).tearDown()
         # Remove launcher module to restore its globals()
-        del sys.modules['launcher']
+        if 'launcher' in sys.modules:
+            del sys.modules['launcher']
 

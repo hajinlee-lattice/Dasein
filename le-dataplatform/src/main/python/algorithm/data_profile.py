@@ -4,7 +4,6 @@ from collections import OrderedDict
 import json
 import logging
 import math
-from sklearn import metrics
 from sklearn.metrics.cluster.supervised import entropy
 import sys
 
@@ -12,8 +11,8 @@ from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 from leframework.progressreporter import ProgressReporter
 import numpy as np
+import itertools
 import pandas as pd
-
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -371,8 +370,13 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
     Returns:
         index: id of next column in output file 
     '''
+    mi, componentMi = calculateMutualInfo(columnVector, eventVector)
+    entropyValue = entropy(eventVector)
+    
     avgProbability = sum(eventVector) / float(len(eventVector))
     for value in columnVector.unique():
+        if (value is None):
+            continue
         valueVector = map(lambda x: 1 if x == value else 0, columnVector)
         valueCount = sum(valueVector)
         datum = {}
@@ -390,14 +394,14 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         datum["mode"] = mode
         datum["count"] = valueCount
         datum["lift"] = getLift(avgProbability, valueCount, valueVector, eventVector)
-        datum["uncertaintyCoefficient"] = uncertaintyCoefficientXgivenY(eventVector, valueVector)
+        datum["uncertaintyCoefficient"] = componentMi[value]/entropyValue if componentMi[value] is not None else None
         datum["discreteNullBucket"] = False
         datum["continuousNullBucket"] = False
         index = index + 1
         dataWriter.append(datum)
 
     # Create bucket for nulls if applicable
-    index = writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, None, None, dataWriter, False)
+    index = writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, None, None, dataWriter, False, componentMi, entropyValue)
     return index
 
 def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, colName, otherMetadata, index):
@@ -413,6 +417,10 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
     Returns:
         index: id of next column in output file 
     '''
+    bucketsVector = mapToBands(columnVector, bands)
+    mi, componentMi = calculateMutualInfo(bucketsVector, eventVector)
+    entropyValue = entropy(eventVector)
+    
     avgProbability = sum(eventVector) / float(len(eventVector))
     for i in range(len(bands) - 1):
         bandVector = map(lambda x: 1 if x >= bands[i] and x < bands[i + 1] else 0, columnVector)
@@ -438,17 +446,30 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         datum["mode"] = None
         datum["count"] = bandCount
         datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)
-        datum["uncertaintyCoefficient"] = uncertaintyCoefficientXgivenY(eventVector, bandVector)
+        datum["uncertaintyCoefficient"] = componentMi[bands[i]]/entropyValue if componentMi[bands[i]] is not None else None 
         datum["discreteNullBucket"] = False
         datum["continuousNullBucket"] = False
         index = index + 1
         dataWriter.append(datum)
 
     # Create bucket for nulls if applicable
-    index = writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, mean, median, dataWriter, True)
+    index = writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, mean, median, dataWriter, True, componentMi, entropyValue)
     return index
 
-def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, mean, median, dataWriter, continuous):
+def mapToBands(columnVector, bands):
+    bucketsVector = []
+    for x in columnVector:
+        if (np.isnan(x) or x is None): 
+            bucketsVector.append(None)
+            continue
+        for i in range(len(bands) - 1):
+            if x >= bands[i] and x < bands[i + 1]:
+                bucketsVector.append(bands[i])
+                break
+    return bucketsVector
+            
+
+def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, mean, median, dataWriter, continuous, componentMi, entropyValue):
     bandVector = []
     
     if continuous:
@@ -474,7 +495,7 @@ def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, av
     datum["mode"] = None
     datum["count"] = bandCount
     datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)
-    datum["uncertaintyCoefficient"] = uncertaintyCoefficientXgivenY(eventVector, bandVector)
+    datum["uncertaintyCoefficient"] = componentMi[None]/entropyValue if None in componentMi else None
     datum["discreteNullBucket"] = not continuous
     datum["continuousNullBucket"] = continuous
     index = index + 1
@@ -534,17 +555,21 @@ def getLift(avgProbability, valueCount, valueVector, eventVector):
         return None
     return getCountWhereEventIsOne(valueVector, eventVector) / float(avgProbability * valueCount)
 
-def uncertaintyCoefficientXgivenY(x, y):
-    '''
-    Calculates the uncertaintyCoefficient of X given Y.
-    In this case, x should be the event column, while y should be the predictor column-value
-    Args:
-        x: A DataFrame vector
-        y: A DataFrame vector
-    Returns:
-        UncertaintyCefficient value
-    '''
-    if entropy(x) == 0:
-        return None
-    return metrics.mutual_info_score(x, y) / entropy(x)
+# correct MI calculation (http://en.wikipedia.org/wiki/Mutual_information)
+def calculateMutualInfo(values, truth):
+    total_mi = 0
+    mi_components = {}
+    for x_val in set(values):
+        mi_components[x_val] = 0
+        x_binary = [1 if x == x_val else 0 for x in values]
+        p_x = float(sum(x_binary))/len(truth)
+        for y_val in set(truth):
+            y_binary = [1 if y == y_val else 0 for y in truth]
+            p_y = float(sum(y_binary))/len(truth)
 
+            joint_prob = float(sum((n for n in itertools.imap(lambda x, y: x*y, x_binary, y_binary))))/len(truth)
+            relative_dependence = joint_prob * math.log(joint_prob / (p_x*p_y)) if joint_prob != 0 else 0
+
+            total_mi += relative_dependence
+            mi_components[x_val] += relative_dependence
+    return total_mi, mi_components
