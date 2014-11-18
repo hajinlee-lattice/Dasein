@@ -1,11 +1,15 @@
 package com.latticeengines.dataflow.runtime.cascading;
 
-import java.io.File;
-import java.net.URL;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.script.ScriptException;
+
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
@@ -17,44 +21,47 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 import com.latticeengines.common.exposed.jython.JythonEvaluator;
+import com.latticeengines.common.exposed.util.JarUtils;
 
 @SuppressWarnings("rawtypes")
 public class JythonFunction extends BaseOperation implements Function {
-
+    private static final Log log = LogFactory.getLog(JythonFunction.class);
     private static final long serialVersionUID = 7015322136073224137L;
     private static JythonEvaluator evaluator;
-    
-    
+
     static {
         if (evaluator == null) {
             evaluator = new JythonEvaluator();
-            URL url = ClassLoader.getSystemResource("pythonlib");
-            File pythonLibDir = new File(url.getFile());
-            String[] paths = pythonLibDir.list();
+            String[] paths = new String[] {};
+            try {
+                paths = JarUtils.getResourceListing(JythonFunction.class, "pythonlib");
+            } catch (URISyntaxException | IOException e) {
+                log.error(ExceptionUtils.getFullStackTrace(e));
+            }
             List<String> pyPaths = new ArrayList<>();
             for (String path : paths) {
                 if (path.endsWith(".py")) {
-                    pyPaths.add(pythonLibDir.getAbsolutePath() + "/" + path);
+                    pyPaths.add(path);
                 }
             }
             paths = new String[pyPaths.size()];
             pyPaths.toArray(paths);
-            evaluator.initialize(paths);
+            evaluator.initializeFromJar(paths);
         }
-        
+
     }
     private String functionName;
     private Class<?> returnType;
     private Fields fieldsToApply;
     private List<Integer> paramList;
-    
+
     public JythonFunction(String functionName, Class<?> returnType, Fields fieldsToApply, Fields fieldsDeclaration) {
         super(0, fieldsDeclaration);
         this.functionName = functionName;
         this.fieldsToApply = fieldsToApply;
         this.returnType = returnType;
     }
-    
+
     private List<Integer> computeParamList(Fields declaration, Fields argFields) {
         paramList = new ArrayList<>();
         for (int j = 0; j < declaration.size(); j++) {
@@ -65,11 +72,11 @@ public class JythonFunction extends BaseOperation implements Function {
                     paramList.add(i);
                 }
             }
-            
+
         }
         return paramList;
     }
-    
+
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         Fields argFields = functionCall.getArgumentFields();
@@ -77,7 +84,7 @@ public class JythonFunction extends BaseOperation implements Function {
             paramList = computeParamList(fieldsToApply, argFields);
         }
         String functionCallStr = functionName + "(";
-        
+
         TupleEntry entry = functionCall.getArguments();
 
         boolean first = true;
@@ -95,7 +102,7 @@ public class JythonFunction extends BaseOperation implements Function {
             first = false;
         }
         functionCallStr += ")";
-        
+
         try {
             functionCall.getOutputCollector().add(new Tuple(evaluator.execute(functionCallStr, returnType)));
         } catch (ScriptException e) {

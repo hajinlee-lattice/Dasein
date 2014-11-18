@@ -74,11 +74,12 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         
         // Execute the first flow
         DataFlowContext ctx = new DataFlowContext();
+        ctx.setProperty("CUSTOMER", "customer1");
         ctx.setProperty("SOURCES", sources);
         ctx.setProperty("TARGETPATH", "/tmp/TmpEventTable");
         ctx.setProperty("QUEUE", "Priority0.MapReduce.0");
         ctx.setProperty("FLOWNAME", "CreateInitialEventTable");
-        ctx.setProperty("CHECKPOINT", "true");
+        ctx.setProperty("CHECKPOINT", false);
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
         
         // Execute the second flow, with the output of the first flow as input into the second
@@ -94,7 +95,7 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         
         ctx.setProperty("EVENTDEFNEXPR", "StageName.equals(\"Contracting\") || StageName.equals(\"Closed Won\")");
         ctx.setProperty("EVENTDEFNCOLS", new String[] { "StageName" });
-        ctx.setProperty("APPLYMETADATAPRUNING", Boolean.TRUE);
+        ctx.setProperty("APPLYMETADATAPRUNING", true);
         
         dataTransformationService.executeNamedTransformation(ctx, "createFinalEventTable");
     }

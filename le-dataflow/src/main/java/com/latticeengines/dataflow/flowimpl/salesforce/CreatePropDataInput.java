@@ -14,6 +14,7 @@ public class CreatePropDataInput extends CascadingDataFlowBuilder {
 
     @Override
     public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
+        setDataFlowCtx(dataFlowCtx);
         addSource("EventTable", sources.get("EventTable"));
 
         List<GroupByCriteria> groupByCriteria = new ArrayList<>();

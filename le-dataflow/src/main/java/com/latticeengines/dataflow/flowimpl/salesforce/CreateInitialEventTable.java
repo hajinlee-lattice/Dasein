@@ -12,6 +12,7 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
 
     @Override
     public String constructFlowDefinition(DataFlowContext dataFlowCtx, Map<String, String> sources) {
+        setDataFlowCtx(dataFlowCtx);
         addSource("Lead", sources.get("Lead"));
         addSource("Contact", sources.get("Contact"));
         addSource("OpportunityContactRole", sources.get("OpportunityContactRole"));
@@ -29,7 +30,7 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
         String normalizeEmail = addFunction(removeNullsForEmailsOnBothSides, //
                 "Email != null ? Email : Contact__Email", //
                 new FieldList("Email", "Contact__Email"), //
-                new FieldMetadata("Email", String.class));
+                new FieldMetadata("CleanEmail", String.class));
 
         FieldMetadata domain = new FieldMetadata("Domain", String.class);
         domain.setPropertyValue("length", "255");
@@ -38,12 +39,12 @@ public class CreateInitialEventTable extends CascadingDataFlowBuilder {
         domain.setPropertyValue("logicalType", "domain");
 
         String addDomain = addFunction(normalizeEmail, //
-                "Email.substring(Email.indexOf('@') + 1)", //
-                new FieldList("Email"), //
+                "CleanEmail.substring(CleanEmail.indexOf('@') + 1)", //
+                new FieldList("CleanEmail"), //
                 domain);
 
 
-        String opptyContactRole$lead$contact = addInnerJoin(lead$contact, //
+        String opptyContactRole$lead$contact = addInnerJoin(addDomain, //
                 new FieldList("Contact__Id"), //
                 "OpportunityContactRole", //
                 new FieldList("ContactId"));
