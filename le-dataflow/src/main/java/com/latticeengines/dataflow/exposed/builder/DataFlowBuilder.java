@@ -51,6 +51,8 @@ public abstract class DataFlowBuilder {
     
     protected abstract String addMD5(String prior, FieldList fieldsToApply, String targetFieldName);
     
+    protected abstract String addJythonFunction(String prior, String functionName, FieldList fieldsToApply, FieldMetadata targetField);
+    
     protected abstract List<FieldMetadata> getMetadata(String operator);
 
     public DataFlowBuilder() {

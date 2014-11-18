@@ -55,6 +55,7 @@ import com.latticeengines.dataflow.exposed.exception.DataFlowCode;
 import com.latticeengines.dataflow.exposed.exception.DataFlowException;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
+import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 @SuppressWarnings("rawtypes")
@@ -453,6 +454,21 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         newFm.add(rowIdFm);
         pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, newFm));
         return doCheckpoint(each).getName();
+    }
+    
+    @Override
+    protected String addJythonFunction(String prior, String functionName, FieldList fieldsToApply, FieldMetadata targetField) {
+        Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        if (pm == null) {
+            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+        }
+        return addFunction(prior, //
+                new JythonFunction(functionName, //
+                        targetField.getJavaType(), //
+                        convertToFields(fieldsToApply.getFields()), //
+                        convertToFields(targetField.getFieldName())), //
+                fieldsToApply, //
+                targetField);
     }
     
     @Override

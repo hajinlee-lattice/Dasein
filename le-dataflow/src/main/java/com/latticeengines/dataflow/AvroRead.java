@@ -42,6 +42,7 @@ import cascading.util.NullNotEquivalentComparator;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
+import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
 
 public class AvroRead {
 
@@ -158,6 +159,8 @@ public class AvroRead {
                 "/tmp/ckpt4", true);
 
         each = new Each(c4, new Fields("Domain", "MaxRevenue", "TotalEmployees"), new AddMD5Hash(new Fields("PropDataHash")), Fields.ALL);
+        
+        each = new Each(each, Fields.GROUP, new JythonFunction("transform", Integer.class, new Fields("Domain"), new Fields("DomainAsInt")), Fields.ALL);
 /*
         ExpressionFilter filter = new ExpressionFilter(
                 "(Email == null || Email.trim().isEmpty()) && (contact$Email == null || contact$Email.trim().isEmpty())", //

@@ -32,10 +32,17 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
         String joinOperatorName = addInnerJoin("Lead", new FieldList("ConvertedOpportunityId"), "Opportunity",
                 new FieldList("Id"));
 
-        String functionOperatorName = addFunction(joinOperatorName, //
+        String createDomain = addFunction(joinOperatorName, //
                 "Email == null ? \"\" : Email.substring(Email.indexOf('@') + 1)", //
                 new FieldList("Email"), //
                 new FieldMetadata("Domain", String.class));
+
+        FieldMetadata convertedDomainField = new FieldMetadata("DomainAsInt", Integer.class);
+        
+        String domainConverted = addJythonFunction(createDomain, //
+                "transform", //
+                new FieldList("Domain"), //
+                convertedDomainField);
 
         // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees) TotalEmployees 
         // FROM T GROUP BY Domain
@@ -43,13 +50,9 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
         groupByCriteria.add(new GroupByCriteria("AnnualRevenue", "MaxRevenue", GroupByCriteria.AggregationType.MAX));
         groupByCriteria.add(new GroupByCriteria("NumberOfEmployees", "TotalEmployees",
                 GroupByCriteria.AggregationType.SUM));
-        String lastAggregatedOperatorName = addGroupBy(functionOperatorName, new FieldList("Domain"), groupByCriteria);
+        String lastAggregatedOperatorName = addGroupBy(domainConverted, new FieldList("Domain"), groupByCriteria);
 
-        // SELECT Domain, MaxRevenue, TotalEmployees FROM T WHERE MaxRevenue > 0 && TotalEmployees > 0
-        String lastFilter = addFilter(lastAggregatedOperatorName, "MaxRevenue > 0 && TotalEmployees > 0",
-                new FieldList("MaxRevenue", "TotalEmployees"));
-
-        return lastFilter;
+        return lastAggregatedOperatorName;
     }
 
 }
