@@ -2,9 +2,7 @@ package com.latticeengines.common.exposed.jython;
 
 import static org.testng.Assert.assertEquals;
 
-import java.io.File;
 import java.math.BigInteger;
-import java.net.URL;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -16,9 +14,7 @@ public class JythonEvaluatorUnitTestNG {
     @BeforeClass(groups = "unit")
     public void setup() throws Exception {
         jythonEvaluator = new JythonEvaluator();
-        URL url = ClassLoader.getSystemResource("com/latticeengines/common/exposed/jython/test_functions.py");
-        File pythonFile = new File(url.getFile());
-        jythonEvaluator.initialize(pythonFile.getAbsolutePath());
+        jythonEvaluator.initializeFromJar("com/latticeengines/common/exposed/jython/test_functions.py");
     }
 
     @Test(groups = "unit")

@@ -1,9 +1,8 @@
 package com.latticeengines.common.exposed.jython;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -12,6 +11,7 @@ import javax.script.ScriptException;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.StreamUtils;
 
 public class JythonEvaluator {
     
@@ -23,11 +23,16 @@ public class JythonEvaluator {
         pyEngine = new ScriptEngineManager().getEngineByName("python");
     }
     
-    public void initialize(String... paths) {
+    public void initializeFromJar(String... paths) {
         for (String path : paths) {
             try {
-                pyEngine.eval(new FileReader(new File(path)));
-            } catch (FileNotFoundException | ScriptException e) {
+                try {
+                    String script = StreamUtils.copyToString(ClassLoader.getSystemResourceAsStream(path), Charset.defaultCharset());
+                    pyEngine.eval(script);
+                } catch (IOException e) {
+                    log.warn("Cannot load script " + path, e);
+                }
+            } catch (ScriptException e) {
                 log.error("Cannot evaluate python file: " + path);
                 log.error(ExceptionUtils.getFullStackTrace(e));
             }
@@ -41,6 +46,7 @@ public class JythonEvaluator {
             return null;
         }
         
+        // TODO not pretty; need to come up with more generic solution
         if (result instanceof BigInteger) {
             if (valueClass == Integer.class) {
                 result = ((BigInteger) result).intValue();
