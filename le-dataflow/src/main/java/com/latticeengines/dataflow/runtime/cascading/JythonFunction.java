@@ -31,10 +31,14 @@ public class JythonFunction extends BaseOperation implements Function {
             URL url = ClassLoader.getSystemResource("pythonlib");
             File pythonLibDir = new File(url.getFile());
             String[] paths = pythonLibDir.list();
-            int i = 0;
+            List<String> pyPaths = new ArrayList<>();
             for (String path : paths) {
-                paths[i] = pythonLibDir.getAbsolutePath() + "/" + path;
+                if (path.endsWith(".py")) {
+                    pyPaths.add(pythonLibDir.getAbsolutePath() + "/" + path);
+                }
             }
+            paths = new String[pyPaths.size()];
+            pyPaths.toArray(paths);
             evaluator.initialize(paths);
         }
         

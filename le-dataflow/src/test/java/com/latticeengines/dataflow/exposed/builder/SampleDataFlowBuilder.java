@@ -37,22 +37,22 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
                 new FieldList("Email"), //
                 new FieldMetadata("Domain", String.class));
 
-        FieldMetadata convertedDomainField = new FieldMetadata("DomainAsInt", Integer.class);
-        
-        String domainConverted = addJythonFunction(createDomain, //
-                "transform", //
-                new FieldList("Domain"), //
-                convertedDomainField);
-
         // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees) TotalEmployees 
         // FROM T GROUP BY Domain
         List<GroupByCriteria> groupByCriteria = new ArrayList<>();
         groupByCriteria.add(new GroupByCriteria("AnnualRevenue", "MaxRevenue", GroupByCriteria.AggregationType.MAX));
         groupByCriteria.add(new GroupByCriteria("NumberOfEmployees", "TotalEmployees",
                 GroupByCriteria.AggregationType.SUM));
-        String lastAggregatedOperatorName = addGroupBy(domainConverted, new FieldList("Domain"), groupByCriteria);
+        String lastAggregatedOperatorName = addGroupBy(createDomain, new FieldList("Domain"), groupByCriteria);
 
-        return lastAggregatedOperatorName;
+        // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees) TotalEmployees, HashCode(Domain) DomainHashCode 
+        // FROM T GROUP BY Domain
+        String domainConverted = addJythonFunction(lastAggregatedOperatorName, //
+                "transform", //
+                new FieldList("Domain"), //
+                new FieldMetadata("DomainHashCode", Integer.class));
+
+        return domainConverted;
     }
 
 }
