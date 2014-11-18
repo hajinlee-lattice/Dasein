@@ -11,7 +11,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.common.exposed.util.HttpUtils;
+import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.dataplatform.exposed.service.PagerDutyService;
 
 @Component("pagerDutyService")
@@ -56,8 +56,8 @@ public class PagerDutyServiceImpl implements PagerDutyService {
 
         // response should look like this -
         // {"status":"success","message":"Event processed","incident_key":”acdcfa307f3e47d1b42b37edcbf22ae7"}
-        String response = HttpUtils.sendPostRequest(
-                "https://events.pagerduty.com/generic/2010-04-15/create_event.json", headers, sb.toString());
+        String response = HttpClientWithOptionalRetryUtils.sendPostRequest(
+                "https://events.pagerduty.com/generic/2010-04-15/create_event.json", true, headers, sb.toString());
 
         return response;
     }
@@ -69,7 +69,7 @@ public class PagerDutyServiceImpl implements PagerDutyService {
 
     @VisibleForTesting
     String getEvents() throws ClientProtocolException, IOException {
-        String response = HttpUtils.sendGetRequest("https://lattice-engines.pagerduty.com/api/v1/alerts", headers,
+        String response = HttpClientWithOptionalRetryUtils.sendGetRequest("https://lattice-engines.pagerduty.com/api/v1/alerts", true, headers,
                 new BasicNameValuePair("since", "2014-09-15T15:28-05"), new BasicNameValuePair("until",
                         "2014-10-15T15:30-05"));
 

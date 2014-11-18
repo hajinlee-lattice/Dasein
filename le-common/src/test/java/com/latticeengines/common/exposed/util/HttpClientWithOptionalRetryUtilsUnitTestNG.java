@@ -8,9 +8,10 @@ import java.util.List;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.testng.annotations.Test;
 
-public class HttpUtilsUnitTestNG {
+public class HttpClientWithOptionalRetryUtilsUnitTestNG {
 
     private static final String SOME_TEST_PAYLOAD = "some test payload";
     private static final String _101 = "101";
@@ -26,7 +27,14 @@ public class HttpUtilsUnitTestNG {
         headers.add(new BasicNameValuePair(AUTHORIZATION, TOKEN_SOME_TOKEN));
         headers.add(new BasicNameValuePair(CONTENT_TYPE, APPLICATION_JSON));
 
-        String result = HttpUtils.sendGetRequest("https://httpbin.org/get", headers, new BasicNameValuePair(TEMPERATURE, _101));
+        String result = HttpClientWithOptionalRetryUtils.sendGetRequest("https://httpbin.org/get", false, headers, new BasicNameValuePair(TEMPERATURE, _101));
+        confirmGetResponse(result);
+
+        result = HttpClientWithOptionalRetryUtils.sendGetRequest("https://httpbin.org/get", true, headers, new BasicNameValuePair(TEMPERATURE, _101));
+        confirmGetResponse(result);
+    }
+
+    private void confirmGetResponse(String result) throws ParseException {
         JSONParser parser = new JSONParser();
         JSONObject resultObj = (JSONObject)parser.parse(result);
         JSONObject argsObj = (JSONObject)resultObj.get("args");
@@ -43,7 +51,11 @@ public class HttpUtilsUnitTestNG {
         headers.add(new BasicNameValuePair(AUTHORIZATION, TOKEN_SOME_TOKEN));
         headers.add(new BasicNameValuePair(CONTENT_TYPE, APPLICATION_JSON));
 
-        String result = HttpUtils.sendPostRequest("https://httpbin.org/post", headers, SOME_TEST_PAYLOAD);
+        String result = HttpClientWithOptionalRetryUtils.sendPostRequest("https://httpbin.org/post", false, headers, SOME_TEST_PAYLOAD);
+        confirmPostResponse(result);
+    }
+
+    private void confirmPostResponse(String result) throws ParseException {
         JSONParser parser = new JSONParser();
         JSONObject resultObj = (JSONObject)parser.parse(result);
 
