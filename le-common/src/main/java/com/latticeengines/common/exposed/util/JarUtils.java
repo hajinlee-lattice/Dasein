@@ -13,6 +13,7 @@ import java.util.jar.JarFile;
 
 public class JarUtils {
 
+    @SuppressWarnings("resource")
     public static String[] getResourceListing(Class<?> clazz, String path) throws URISyntaxException, IOException {
         URL dirURL = ClassLoader.getSystemClassLoader().getResource(path);
         if (dirURL != null && dirURL.getProtocol().equals("file")) {
