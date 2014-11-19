@@ -1,34 +1,25 @@
 package com.latticeengines.skald;
 
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.bind.JAXBException;
-
 import org.dmg.pmml.FieldName;
-import org.dmg.pmml.IOUtil;
-import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.EvaluatorUtil;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.ModelEvaluatorFactory;
 import org.jpmml.manager.PMMLManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.skald.model.ScoreDerivation;
 
 @Service
 public class ModelEvaluator {
-    public Map<String, Object> evaluate(ModelElement element, Map<String, Object> record) {
-        PMML pmml;
-        try {
-            pmml = IOUtil.unmarshal(new InputSource(new StringReader(element.model.pmml)));
-        } catch (SAXException | JAXBException e) {
-            throw new RuntimeException(e);
-        }
-
-        PMMLManager manager = new PMMLManager(pmml);
+    public Map<String, Object> evaluate(CustomerSpace space, String model, ScoreDerivation derivation,
+            Map<String, Object> record) {
+        PMMLManager manager = retriever.getModel(space, model);
         Evaluator evaluator = (Evaluator) manager.getModelManager(null, ModelEvaluatorFactory.getInstance());
 
         Map<FieldName, FieldValue> arguments = new HashMap<FieldName, FieldValue>();
@@ -38,7 +29,7 @@ public class ModelEvaluator {
         }
 
         Map<FieldName, ?> results = evaluator.evaluate(arguments);
-        Object predicted = EvaluatorUtil.decode(results.get(element.model.output));
+        Object predicted = EvaluatorUtil.decode(results.get("XXX target field"));
 
         // TODO Create derived score elements.
 
@@ -50,4 +41,7 @@ public class ModelEvaluator {
         result.put("fake", true);
         return result;
     }
+
+    @Autowired
+    private ModelRetriever retriever;
 }

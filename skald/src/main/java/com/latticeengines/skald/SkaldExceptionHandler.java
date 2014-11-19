@@ -40,14 +40,14 @@ public class SkaldExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
             HttpHeaders headers, HttpStatus status, WebRequest request) {
         log.error(ex);
-        return handleExceptionInternal(ex, null, headers, status, request);
+        return handleExceptionInternal(ex, handleException(ex), headers, status, request);
     }
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotWritable(HttpMessageNotWritableException ex,
             HttpHeaders headers, HttpStatus status, WebRequest request) {
         log.error(ex);
-        return handleExceptionInternal(ex, null, headers, status, request);
+        return handleExceptionInternal(ex, handleException(ex), headers, status, request);
     }
 
     private static final Log log = LogFactory.getLog(SkaldExceptionHandler.class);

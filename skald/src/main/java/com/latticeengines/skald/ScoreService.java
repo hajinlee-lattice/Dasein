@@ -20,15 +20,15 @@ import com.latticeengines.skald.model.FieldSource;
 public class ScoreService {
     @RequestMapping(value = "ScoreRecord", method = RequestMethod.POST)
     public Map<String, Object> scoreRecord(@RequestBody ScoreRequest request) {
-        log.info(String.format("Received a score request for %1$s model combination %2$s", request.customerID,
-                request.combination));
+        log.info(String
+                .format("Received a score request for %1$s combination %2$s", request.space, request.combination));
 
-        List<ModelElement> combination = retriever.getModelCombination(request.customerID, request.combination);
+        List<ModelElement> combination = retriever.getCombination(request.space, request.combination);
 
         // Verify all the model schemas against incoming record.
         List<String> wrong = new ArrayList<String>();
         for (ModelElement element : combination) {
-            for (FieldSchema field : element.model.fields) {
+            for (FieldSchema field : element.data.fields) {
                 if (field.source == FieldSource.Request) {
                     if (!request.record.containsKey(field.name)) {
                         wrong.add(String.format("%1$s [%2$s] was missing", field.name, field.type));
@@ -53,16 +53,16 @@ public class ScoreService {
         // TODO Evaluate the filters to determine the selected model.
         ModelElement selected = combination.get(0);
 
-        Map<String, Object> transformed = transformer.transform(selected.model.transforms, request.record);
+        Map<String, Object> transformed = transformer.transform(selected.data.transforms, request.record);
 
-        return evaluator.evaluate(selected, transformed);
+        return evaluator.evaluate(request.space, selected.model, selected.derivation, transformed);
 
         // TODO Write record and results to a score history database.
         // TODO Also do this for failures and capture error information.
     }
 
     @Autowired
-    private ModelRetriever retriever;
+    private CombinationRetriever retriever;
 
     @Autowired
     private RecordTransformer transformer;

@@ -5,7 +5,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public class ScoreRequest {
-    public CustomerSpace customerID;
+    public CustomerSpace space;
 
     // Combination of models that is the target of this score request.
     public String combination;
