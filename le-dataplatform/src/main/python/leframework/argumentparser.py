@@ -37,7 +37,7 @@ class ArgumentParser(object):
         
         self.fields = dataSchema["fields"]
         self.features = set(self.metadataSchema["features"])
-        (self.targets, self.readouts) = self.extractTargets()
+        self.targets = set(self.metadataSchema["targets"])
         self.keyCols = set(self.metadataSchema["key_columns"])
         self.depivoted = False
         if "depivoted" in self.metadataSchema:
@@ -48,42 +48,6 @@ class ArgumentParser(object):
         self.provenanceProperties = self.__parseProperties("provenance_properties")
         self.runtimeProperties = self.__parseRuntimeProperties(propertyFile)
         logger.debug("reading runtime properties" + str(self.runtimeProperties))
-
-    def extractTargets(self):
-        specifiedTargets = self.metadataSchema["targets"]
-
-        def logWarning(column, columnType):
-            message = "The following " + columnType + " column does not exist: \"" + column + "\"."
-            possibleIssue = "The ModelTargets DL parameter may be formatted incorrectly."
-            logger.warn(message + " " + possibleIssue)
-
-        fields = set([e["columnName"] for e in self.fields])
-        def columnExists(column): return column in fields
-
-        eventKey = "Event".lower()
-        readoutKey = "Readouts".lower()
-
-        targets = []; readouts = []
-        for target in specifiedTargets:
-            pair = target.split(":")
-            if len(pair) == 2:
-                key = pair[0].strip().lower()
-                value = pair[1].strip()
-                if key == eventKey:
-                    if columnExists(value): targets.append(value)
-                    else: logWarning(value, "target")
-                elif key == readoutKey:
-                    for value in [e.strip() for e in value.split("|")]:
-                        if columnExists(value): readouts.append(value)
-                        else: logWarning(value, "readout")
-                else: logWarning(value, "unspecified")
-            # Legacy
-            elif len(pair) == 1:
-                value = pair[0]
-                if columnExists(value): targets.append(value)
-                else: logWarning(value, "target")
-
-        return set(targets), readouts
         
     def __parseProperties(self, name):
         element = {}
@@ -114,9 +78,7 @@ class ArgumentParser(object):
         return self.fields[index]
     
     def __convertType(self, cell, fieldType):
-        if cell is None or len(str(cell)) == 0:
-            return None
-        elif (fieldType == "int"):
+        if (fieldType == "int"):
             return int(cell)
         elif (fieldType == "float"):
             return float(cell)
@@ -132,7 +94,6 @@ class ArgumentParser(object):
         l = 0
         includedNames = []
         included = []
-        readoutsIncluded = []
         self.featureIndex = set()
         self.nameToFeatureIndex = dict()
         self.keyColIndex = set()
@@ -141,9 +102,8 @@ class ArgumentParser(object):
         for f in self.fields:
             fType = f["type"][0]
             fName = f["name"]
-            if fName in self.readouts:
-                readoutsIncluded.append(l)
-            elif fName in self.features or fName in self.targets or fName in self.keyCols:
+            if fName in self.features or fName in self.targets or fName in self.keyCols:
+                
                 logger.info("Adding %s with index %d" % (fName, l))
                 includedNames.append(fName)
                 included.append(l)
@@ -160,7 +120,7 @@ class ArgumentParser(object):
                 k = k+1
             l = l+1
         
-        tmpData = []; readoutData = []
+        tmpData = []
 
         reader = None 
         filedescriptor = open(dataFileName, 'rb')
@@ -170,7 +130,7 @@ class ArgumentParser(object):
             reader = csv.reader(filedescriptor)
 
         for row in reader:
-            rowlist = []; readoutlist = []
+            rowlist = []
             if len(row) != len(self.fields):
                 msg = "Data-metadata mismatch. Metadata has %s, while data has %s fields." % (len(self.fields), len(row))
                 raise Exception(msg)
@@ -183,20 +143,13 @@ class ArgumentParser(object):
                 else:
                     row[targetName] = float(row[targetName])
                 rowlist = [str(row[name]) if name in self.stringColNames else row[name] for name in includedNames]
-                readoutlist = [row[name] for name in self.readouts]
             else:
                 # CSV format
-                rowlist = [float(row[i]) if self.__getField(i)["name"] in self.targets else self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]
-                readoutlist = [self.__convertType(row[i], self.__getField(i)["type"][0]) for i in readoutsIncluded]
-
-            tmpData.append(rowlist); readoutData.append(readoutlist)
+                rowlist = [self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]
+            tmpData.append(rowlist)
 
         self.__populateSchemaWithMetadata(self.getSchema(), self)
-
-        scoringFrame = pd.DataFrame(tmpData, columns=includedNames)
-        readoutFrame = pd.DataFrame(readoutData, columns=self.readouts)
-
-        return scoringFrame, readoutFrame
+        return pd.DataFrame(tmpData, columns=includedNames)
 
     def __populateSchemaWithMetadata(self, schema, parser):
         schema["featureIndex"] = parser.getFeatureTuple()
@@ -209,7 +162,6 @@ class ArgumentParser(object):
             schema["data_profile"] = self.stripPath(self.metadataSchema["data_profile"]) 
         schema["config_metadata"] = parser.getConfigMetadata()
         schema["targets"] = self.targets
-        schema["readouts"] = self.readouts
         schema["stringColumns"] = self.stringColNames
 
     def isAvro(self):
