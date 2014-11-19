@@ -4,62 +4,65 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.util.StreamUtils;
 
 public class JythonEvaluator {
-    
-    private static final Log log = LogFactory.getLog(JythonEvaluator.class);
+    private static ScriptEngine engine;
 
-    private static ScriptEngine pyEngine;
-    
     static {
-        pyEngine = new ScriptEngineManager().getEngineByName("python");
+        engine = new ScriptEngineManager().getEngineByName("python");
     }
-    
-    public void initializeFromJar(String... paths) {
-        for (String path : paths) {
+
+    public static JythonEvaluator fromResource(String... paths) {
+        String[] scripts = new String[paths.length];
+        for (int index = 0; index < paths.length; index++) {
             try {
-                try {
-                    String script = StreamUtils.copyToString(ClassLoader.getSystemResourceAsStream(path), Charset.defaultCharset());
-                    pyEngine.eval(script);
-                } catch (IOException e) {
-                    log.warn("Cannot load script " + path, e);
-                }
+                scripts[index] = StreamUtils.copyToString(ClassLoader.getSystemResourceAsStream(paths[index]),
+                        Charset.defaultCharset());
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to load file: " + paths[index], e);
+            }
+        }
+
+        return new JythonEvaluator(scripts);
+    }
+
+    public JythonEvaluator(String... scripts) {
+        for (String script : scripts) {
+            try {
+                engine.eval(script);
             } catch (ScriptException e) {
-                log.error("Cannot evaluate python file: " + path);
-                log.error(ExceptionUtils.getFullStackTrace(e));
+                throw new RuntimeException("Unable to load script", e);
             }
         }
     }
-    
-    public <T> T execute(String expression, Class<T> valueClass) throws ScriptException {
-        pyEngine.eval("result = " + expression);
-        Object result = pyEngine.get("result");
-        if (result == null) {
-            return null;
+
+    public <T> T function(String name, Class<T> type, Object... arguments) {
+        Invocable invocable = (Invocable) engine;
+
+        Object result;
+        try {
+            result = invocable.invokeFunction(name, arguments);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("Unable to find function: " + name, e);
+        } catch (ScriptException e) {
+            throw new RuntimeException("Unable to execute function: " + name, e);
         }
-        
+
         // TODO not pretty; need to come up with more generic solution
         if (result instanceof BigInteger) {
-            if (valueClass == Integer.class) {
+            if (type == Integer.class) {
                 result = ((BigInteger) result).intValue();
-            } else if (valueClass == Long.class) {
+            } else if (type == Long.class) {
                 result = ((BigInteger) result).longValue();
             }
         }
-        
-        if (valueClass.isInstance(result)) {
-            return valueClass.cast(result);
-        } else {
-            throw new RuntimeException("Value is not of type " + valueClass);
-        }
-        
+
+        return type.cast(result);
     }
 }

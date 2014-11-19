@@ -41,7 +41,11 @@ public class ModelRetriever {
         ModelElement element = new ModelElement();
         element.model = model;
         element.model.fields = new ArrayList<FieldSchema>();
-        element.model.fields.add(new FieldSchema("magic", FieldSource.Request, FieldType.Float,
+        element.model.fields.add(new FieldSchema("extra", FieldSource.Request, FieldType.Float,
+                FieldInterpretation.Feature));
+        element.model.fields.add(new FieldSchema("special", FieldSource.Request, FieldType.Float,
+                FieldInterpretation.Feature));
+        element.model.fields.add(new FieldSchema("magic", FieldSource.Request, FieldType.Integer,
                 FieldInterpretation.Feature));
 
         List<ModelElement> result = new ArrayList<ModelElement>();
