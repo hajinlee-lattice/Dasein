@@ -23,11 +23,11 @@ public class ScoreService {
         log.info(String
                 .format("Received a score request for %1$s combination %2$s", request.space, request.combination));
 
-        List<ModelElement> combination = retriever.getCombination(request.space, request.combination);
+        List<CombinationElement> combination = combinationRetriever.getCombination(request.space, request.combination);
 
         // Verify all the model schemas against incoming record.
         List<String> wrong = new ArrayList<String>();
-        for (ModelElement element : combination) {
+        for (CombinationElement element : combination) {
             for (FieldSchema field : element.data.fields) {
                 if (field.source == FieldSource.Request) {
                     if (!request.record.containsKey(field.name)) {
@@ -51,24 +51,26 @@ public class ScoreService {
         // TODO Query and join aggregate data.
 
         // TODO Evaluate the filters to determine the selected model.
-        ModelElement selected = combination.get(0);
+        CombinationElement selected = combination.get(0);
 
         Map<String, Object> transformed = transformer.transform(selected.data.transforms, request.record);
 
-        return evaluator.evaluate(request.space, selected.model, selected.derivation, transformed);
+        ModelEvaluator evaluator = modelRetriever.getEvaluator(request.space, selected.model, selected.derivation);
+
+        return evaluator.evaluate(transformed);
 
         // TODO Write record and results to a score history database.
         // TODO Also do this for failures and capture error information.
     }
 
     @Autowired
-    private CombinationRetriever retriever;
+    private CombinationRetriever combinationRetriever;
 
     @Autowired
     private RecordTransformer transformer;
 
     @Autowired
-    private ModelEvaluator evaluator;
+    private ModelRetriever modelRetriever;
 
     private static final Log log = LogFactory.getLog(ScoreService.class);
 }

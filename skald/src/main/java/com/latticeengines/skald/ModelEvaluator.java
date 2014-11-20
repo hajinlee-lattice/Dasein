@@ -1,25 +1,38 @@
 package com.latticeengines.skald;
 
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.bind.JAXBException;
+
 import org.dmg.pmml.FieldName;
+import org.dmg.pmml.IOUtil;
+import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.EvaluatorUtil;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.ModelEvaluatorFactory;
 import org.jpmml.manager.PMMLManager;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.skald.model.ScoreDerivation;
 
-@Service
 public class ModelEvaluator {
-    public Map<String, Object> evaluate(CustomerSpace space, String model, ScoreDerivation derivation,
-            Map<String, Object> record) {
-        PMMLManager manager = retriever.getModel(space, model);
+    public ModelEvaluator(String pmml, ScoreDerivation derivation) {
+        PMML unmarshalled;
+        try {
+            unmarshalled = IOUtil.unmarshal(new InputSource(new StringReader(pmml)));
+        } catch (SAXException | JAXBException e) {
+            throw new RuntimeException("Unable to parse PMML file", e);
+        }
+
+        this.manager = new PMMLManager(unmarshalled);
+        this.derivation = derivation;
+    }
+
+    public Map<String, Object> evaluate(Map<String, Object> record) {
         Evaluator evaluator = (Evaluator) manager.getModelManager(null, ModelEvaluatorFactory.getInstance());
 
         Map<FieldName, FieldValue> arguments = new HashMap<FieldName, FieldValue>();
@@ -42,6 +55,6 @@ public class ModelEvaluator {
         return result;
     }
 
-    @Autowired
-    private ModelRetriever retriever;
+    private final PMMLManager manager;
+    private final ScoreDerivation derivation;
 }

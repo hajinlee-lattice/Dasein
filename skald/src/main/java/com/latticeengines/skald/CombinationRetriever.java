@@ -16,7 +16,7 @@ import com.latticeengines.skald.model.TransformDefinition;
 // Retrieves and caches active model structures, transform definitions, and score derivations.
 @Service
 public class CombinationRetriever {
-    public List<ModelElement> getCombination(CustomerSpace spaceID, String combination) {
+    public List<CombinationElement> getCombination(CustomerSpace spaceID, String combination) {
         // TODO Add a caching layer.
 
         DataComposition data = new DataComposition();
@@ -27,7 +27,7 @@ public class CombinationRetriever {
         data.transforms.add(transform);
 
         // TODO Retrieve the other structures.
-        ModelElement element = new ModelElement();
+        CombinationElement element = new CombinationElement();
         element.data = data;
         element.data.fields = new ArrayList<FieldSchema>();
         element.data.fields.add(new FieldSchema("extra", FieldSource.Request, FieldType.Float,
@@ -37,7 +37,7 @@ public class CombinationRetriever {
         element.data.fields.add(new FieldSchema("magic", FieldSource.Request, FieldType.Integer,
                 FieldInterpretation.Feature));
 
-        List<ModelElement> result = new ArrayList<ModelElement>();
+        List<CombinationElement> result = new ArrayList<CombinationElement>();
         result.add(element);
         return result;
     }
