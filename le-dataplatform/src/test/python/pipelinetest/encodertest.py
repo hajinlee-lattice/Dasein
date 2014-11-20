@@ -24,4 +24,8 @@ class EncoderTest(TestBase):
     def testEncodeLong(self):
         t1 = encoder.transform(12345678912345)
         self.assertTrue(t1, 12345678912345)
+
+    def testEncodeString(self):
+        t1 = encoder.transform('abcdef')
+        self.assertTrue(t1, 2534611139)
         
