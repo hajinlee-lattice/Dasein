@@ -5,13 +5,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.script.ScriptException;
-
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import cascading.flow.FlowException;
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -31,7 +28,7 @@ public class JythonFunction extends BaseOperation implements Function {
 
     static {
         if (evaluator == null) {
-            evaluator = new JythonEvaluator();
+            
             String[] paths = new String[] {};
             try {
                 paths = JarUtils.getResourceListing(JythonFunction.class, "pythonlib");
@@ -46,7 +43,7 @@ public class JythonFunction extends BaseOperation implements Function {
             }
             paths = new String[pyPaths.size()];
             pyPaths.toArray(paths);
-            evaluator.initializeFromJar(paths);
+            evaluator = JythonEvaluator.fromResource(paths);
         }
 
     }
@@ -83,31 +80,16 @@ public class JythonFunction extends BaseOperation implements Function {
         if (paramList == null) {
             paramList = computeParamList(fieldsToApply, argFields);
         }
-        String functionCallStr = functionName + "(";
+        String functionCallStr = functionName;
+        List<Object> params = new ArrayList<>();
 
         TupleEntry entry = functionCall.getArguments();
 
-        boolean first = true;
         for (Integer paramIndex : paramList) {
-            if (!first) {
-                functionCallStr += ",";
-            }
             Object value = entry.getTuple().getObject(paramIndex);
-            if (value instanceof String) {
-                value = "'" + value.toString() + "'";
-            } else {
-                value = value.toString();
-            }
-            functionCallStr += value;
-            first = false;
+            params.add(value);
         }
-        functionCallStr += ")";
-
-        try {
-            functionCall.getOutputCollector().add(new Tuple(evaluator.execute(functionCallStr, returnType)));
-        } catch (ScriptException e) {
-            throw new FlowException(e);
-        }
+        functionCall.getOutputCollector().add(new Tuple(evaluator.function(functionCallStr, returnType, params.toArray())));
     }
 
 }
