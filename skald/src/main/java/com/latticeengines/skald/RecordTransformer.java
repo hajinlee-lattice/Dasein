@@ -16,8 +16,8 @@ public class RecordTransformer {
         result.putAll(record);
 
         for (TransformDefinition entry : definitions) {
-            JythonTransform transform = retriever.getTransform(entry.name, entry.type);
-            Object value = transform.invoke(entry.arguments, result);
+            JythonTransform transform = retriever.getTransform(entry.name);
+            Object value = transform.invoke(entry.arguments, result, entry.type.type());
             result.put(entry.output, value);
         }
 

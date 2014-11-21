@@ -1,6 +1,6 @@
 package com.latticeengines.skald;
 
-import java.io.StringReader;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,12 +20,12 @@ import org.xml.sax.SAXException;
 import com.latticeengines.skald.model.ScoreDerivation;
 
 public class ModelEvaluator {
-    public ModelEvaluator(String pmml, ScoreDerivation derivation) {
+    public ModelEvaluator(Reader pmml, ScoreDerivation derivation) {
         PMML unmarshalled;
         try {
-            unmarshalled = IOUtil.unmarshal(new InputSource(new StringReader(pmml)));
-        } catch (SAXException | JAXBException e) {
-            throw new RuntimeException("Unable to parse PMML file", e);
+            unmarshalled = IOUtil.unmarshal(new InputSource(pmml));
+        } catch (SAXException | JAXBException ex) {
+            throw new RuntimeException("Unable to parse PMML file", ex);
         }
 
         this.manager = new PMMLManager(unmarshalled);

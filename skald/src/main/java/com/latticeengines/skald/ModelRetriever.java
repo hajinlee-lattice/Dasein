@@ -1,10 +1,13 @@
 package com.latticeengines.skald;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -14,16 +17,33 @@ import com.latticeengines.skald.model.ScoreDerivation;
 @Service
 public class ModelRetriever {
     public ModelEvaluator getEvaluator(CustomerSpace space, String model, ScoreDerivation derivation) {
-        // TODO Replace with actual retrieval logic.
-        String text;
+        // TODO Implement a caching layer.
+
+        // TODO Create a lookup path for PMML files parameterized on just the
+        // space and model name.
+
+        // TODO Look in a properties directory to get the correct HDFS address.
+
+        // TODO Build this URL in a (slightly) less terrible way.
+        URL address;
         try {
-            byte[] buffer = Files.readAllBytes(Paths.get("c:\\users\\wbaumann\\desktop\\rfpmml.xml"));
-            text = new String(buffer, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to read PMML file", e);
+            address = new URL(
+                    String.format(
+                            "http://%1$s:%2$d/webhdfs/v1/%3$s?op=OPEN",
+                            "bodcdevvhort148.lattice.local",
+                            50070,
+                            "user/s-analytics/customers/Nutanix/models/Q_EventTable_Nutanix/ec5b2e4d-1431-4557-a317-524503cdb499/1414617158371_6175/rfpmml.xml"));
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException("Failed to generate WebHDFS URL", ex);
         }
 
-        // TODO Implement a caching layer.
-        return new ModelEvaluator(text, derivation);
+        log.info("Retrieving model from " + address.toString());
+        try (InputStreamReader reader = new InputStreamReader(address.openStream(), StandardCharsets.UTF_8)) {
+            return new ModelEvaluator(reader, derivation);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to read PMML file from WebHDFS", ex);
+        }
     }
+
+    private static final Log log = LogFactory.getLog(ModelRetriever.class);
 }
