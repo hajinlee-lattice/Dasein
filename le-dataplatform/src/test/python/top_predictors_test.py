@@ -1,8 +1,10 @@
-from profilingtestbase import ProfilingTestBase
+from numpy import inf
+
 from sklearn import metrics
 from sklearn.metrics.cluster.supervised import entropy
+
 import pandas as pd
-from numpy import inf, NaN
+from profilingtestbase import ProfilingTestBase
 
 class TopPredictorsTest(ProfilingTestBase):
 
@@ -47,6 +49,28 @@ class TopPredictorsTest(ProfilingTestBase):
         self.assertEqual(round(mi_components[None], 4), 0.0481)
         self.assertEqual(round(mi_components[-inf], 4), 0.0481)
         print ("Components:", mi_components)
+    
+    def calculateMutualInfo_AllZeroEvent(self):
+        data = range(10, 100, 10)
+        # This gives [10, 20, 30, 40, 50, 60, 70, 80, 90]
+        event = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        print(len(data), len(event))
+        buckets = map(classify_input, data)
+        
+        execfile("data_profile.py", globals())
+        mi, component_mi = globals()["calculateMutualInfo"](buckets, event)
+        self.assertEqual(mi, 0)
+        y = entropy(event)
+        for k, v in component_mi.iteritems():
+            self.assertEqual(v, 0)
+            self.assertEqual(y, 0)
+            uc = globals()["uncertaintyCoefficient"](v, y)
+            self.assertEqual(uc, None)
+            
+        
+        uc = globals()["uncertaintyCoefficient"](None, 0.5)
+        self.assertEqual(uc, None)
+   
         
 def classify_input(x):
     classification = 'unknown'

@@ -54,6 +54,7 @@ class SummaryGenerator(State, JsonGenBase):
         elements = []
 
         attrLevelUncertaintyCoeff = 0
+        hasNotNoneUC = False
         for record in metadata:
             self.logger.info(record)
             element = OrderedDict()
@@ -77,6 +78,7 @@ class SummaryGenerator(State, JsonGenBase):
             if record["uncertaintyCoefficient"] is not None:
                 element["UncertaintyCoefficient"] = record["uncertaintyCoefficient"] 
                 attrLevelUncertaintyCoeff += element["UncertaintyCoefficient"]
+                hasNotNoneUC = True
 
             # Discrete value
             if record["Dtype"] == "BND":
@@ -109,7 +111,11 @@ class SummaryGenerator(State, JsonGenBase):
             predictor["Category"] = record["category"]
         else:
             predictor["Category"] = ""
-        predictor["UncertaintyCoefficient"] = attrLevelUncertaintyCoeff
+        
+        if hasNotNoneUC: 
+            predictor["UncertaintyCoefficient"] = attrLevelUncertaintyCoeff
+        else:
+            predictor["UncertaintyCoefficient"] = -1
         return predictor
 
     def __getSegmentChart(self, probRange, widthRange, buckets, averageProbability):

@@ -394,7 +394,7 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         datum["mode"] = mode
         datum["count"] = valueCount
         datum["lift"] = getLift(avgProbability, valueCount, valueVector, eventVector)
-        datum["uncertaintyCoefficient"] = componentMi[value]/entropyValue if componentMi[value] is not None else None
+        datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[value], entropyValue)
         datum["discreteNullBucket"] = False
         datum["continuousNullBucket"] = False
         index = index + 1
@@ -446,7 +446,7 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         datum["mode"] = None
         datum["count"] = bandCount
         datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)
-        datum["uncertaintyCoefficient"] = componentMi[bands[i]]/entropyValue if componentMi[bands[i]] is not None else None 
+        datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[bands[i]], entropyValue)
         datum["discreteNullBucket"] = False
         datum["continuousNullBucket"] = False
         index = index + 1
@@ -495,7 +495,7 @@ def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, av
     datum["mode"] = None
     datum["count"] = bandCount
     datum["lift"] = getLift(avgProbability, bandCount, bandVector, eventVector)
-    datum["uncertaintyCoefficient"] = componentMi[None]/entropyValue if None in componentMi else None
+    datum["uncertaintyCoefficient"] = uncertaintyCoefficient(componentMi[None], entropyValue) if None in componentMi else None
     datum["discreteNullBucket"] = not continuous
     datum["continuousNullBucket"] = continuous
     index = index + 1
@@ -554,6 +554,11 @@ def getLift(avgProbability, valueCount, valueVector, eventVector):
     if (avgProbability * valueCount) == 0:
         return None
     return getCountWhereEventIsOne(valueVector, eventVector) / float(avgProbability * valueCount)
+
+def uncertaintyCoefficient(mi, entropy):
+    if mi == None or entropy == 0:
+        return None
+    return mi/entropy
 
 # correct MI calculation (http://en.wikipedia.org/wiki/Mutual_information)
 def calculateMutualInfo(values, truth):
