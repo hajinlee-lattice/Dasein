@@ -79,7 +79,7 @@ public class SalesforceImportServiceImpl extends ImportService {
     }
 
     @Override
-    public List<Table> importMetadata(List<Table> tables) {
+    public List<Table> importMetadata(List<Table> tables, ImportContext context) {
         List<Table> newTables = new ArrayList<>();
         for (Table table : tables) {
             JobInfo jobInfo = setupJob(table);

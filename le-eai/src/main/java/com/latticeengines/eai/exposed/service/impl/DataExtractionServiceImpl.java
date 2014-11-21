@@ -23,7 +23,7 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     @Override
     public void extractAndImport(List<Table> tables, ImportContext context) {
-        List<Table> tableMetadata = salesforceImportService.importMetadata(tables);
+        List<Table> tableMetadata = salesforceImportService.importMetadata(tables, context);
 
         for (Table table : tableMetadata) {
             List<Attribute> attributes = table.getAttributes();

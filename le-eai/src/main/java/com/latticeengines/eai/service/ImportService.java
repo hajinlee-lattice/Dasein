@@ -26,7 +26,7 @@ public abstract class ImportService {
      *            list of tables that only has table name and attribute names
      * @return
      */
-    public abstract List<Table> importMetadata(List<Table> tables);
+    public abstract List<Table> importMetadata(List<Table> tables, ImportContext context);
 
     public abstract void importDataAndWriteToHdfs(List<Table> tables, ImportContext context);
     

@@ -12,7 +12,7 @@ import com.latticeengines.eai.service.ImportService;
 public class EloquaImportServiceImpl extends ImportService {
 
     @Override
-    public List<Table> importMetadata(List<Table> tables) {
+    public List<Table> importMetadata(List<Table> tables, ImportContext context) {
         // TODO Auto-generated method stub
         return null;
     }

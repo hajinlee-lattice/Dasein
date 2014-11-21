@@ -6,5 +6,5 @@ public class ImportProperty {
     public static final String HADOOPCONFIG = "hadoopConfig";
     public static final String IMPORTCTX = "importContext";
     public static final String TARGETPATH = "targetPath";
-    
+    public static final String CUSTOMER = "customer";
 }
