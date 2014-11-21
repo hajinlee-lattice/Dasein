@@ -33,3 +33,13 @@ class BadTargetTrainingTest(TrainingTestBase):
             else: self.assertTrue(filecmp.cmp(fileName, './' + entry["Key"]))
 
         self.assertTrue(jsonDict["Model"]["Script"] is not None)
+        
+        self.__assertTopPredictors(jsonDict)
+        
+    def __assertTopPredictors(self, jsonDict):
+        predictors = jsonDict["Summary"]["Predictors"]
+        for predictor in predictors:
+            self.assertEqual(predictor["UncertaintyCoefficient"], -1)
+            elements = predictor["Elements"]
+            for element in elements:
+                self.assertTrue("UncertaintyCoefficient" not in element)
