@@ -8,6 +8,7 @@ from pandas.core.frame import DataFrame
 
 from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
+from leframework.util.pandasutil import PandasUtil
 from leframework.webhdfs import WebHDFS
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -63,8 +64,8 @@ class Launcher(object):
         self.__validateParameters(schema)
 
         # Extract data and scripts for execution
-        self.training = parser.createList(self.stripPath(schema["training_data"]))
-        self.test = parser.createList(self.stripPath(schema["test_data"]))
+        (self.training, self.trainingReadout) = parser.createList(self.stripPath(schema["training_data"]))
+        (self.test, self.testReadout) = parser.createList(self.stripPath(schema["test_data"]))
         script = self.stripPath(schema["python_script"])
 
         # Create directory for model result
@@ -101,6 +102,10 @@ class Launcher(object):
         params["allDataPreTransform"] = DataFrame.append(self.training, self.test)
         (self.training, self.test, metadata) = executor.transformData(params)
         params["allDataPostTransform"] = DataFrame.append(self.training, self.test)
+
+        # Append Readouts
+        readouts = DataFrame.append(self.trainingReadout, self.testReadout)
+        params["allDataPreTransform"] = PandasUtil.appendDataFrame(params["allDataPreTransform"], readouts)
 
         params["training"] = self.training
         params["test"] = self.test

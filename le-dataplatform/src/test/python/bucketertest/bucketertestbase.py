@@ -8,7 +8,7 @@ class BucketerTestBase(object):
         testSize = 100
         parser = ArgumentParser("model-dataprofile.json")
         schema = parser.getSchema()
-        training = parser.createList(parser.stripPath(schema["training_data"]))
+        (training, _) = parser.createList(parser.stripPath(schema["training_data"]))
         self.data = training[:testSize]
         self.target = self.data.iloc[:,schema["targetIndex"]]
         self.stringcols = set(schema["stringColumns"])
