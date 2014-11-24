@@ -32,7 +32,7 @@ public class ModelRetriever {
                             "http://%1$s:%2$d/webhdfs/v1/%3$s?op=OPEN",
                             "bodcdevvhort148.lattice.local",
                             50070,
-                            "user/s-analytics/customers/Nutanix/models/Q_EventTable_Nutanix/ec5b2e4d-1431-4557-a317-524503cdb499/1414617158371_6175/rfpmml.xml"));
+                            "user/s-analytics/customers/Nutanix/models/Q_EventTable_Nutanix/0764821e-cceb-44fd-982e-d53b105d5c14/1414617158371_6972/rfpmml.xml"));
         } catch (MalformedURLException ex) {
             throw new RuntimeException("Failed to generate WebHDFS URL", ex);
         }

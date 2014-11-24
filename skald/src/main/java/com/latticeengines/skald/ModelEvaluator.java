@@ -37,12 +37,25 @@ public class ModelEvaluator {
 
         Map<FieldName, FieldValue> arguments = new HashMap<FieldName, FieldValue>();
         for (FieldName name : evaluator.getActiveFields()) {
-            FieldValue value = evaluator.prepare(name, record.get(name));
-            arguments.put(name, value);
+            Object value = record.get(name.getValue());
+            if (value == null) {
+                throw new RuntimeException("Null value for model input " + name.getValue());
+            }
+            arguments.put(name, evaluator.prepare(name, value));
         }
 
         Map<FieldName, ?> results = evaluator.evaluate(arguments);
-        Object predicted = EvaluatorUtil.decode(results.get("XXX target field"));
+
+        String target = derivation.target;
+        if (target == null) {
+            if (results.size() == 1) {
+                target = results.keySet().iterator().next().getValue();
+            } else {
+                throw new RuntimeException("PMML model has multiple results and no target was specified");
+            }
+        }
+
+        Object predicted = EvaluatorUtil.decode(results.get(new FieldName(target)));
 
         // TODO Create derived score elements.
 
