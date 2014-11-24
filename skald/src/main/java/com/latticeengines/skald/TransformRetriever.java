@@ -13,9 +13,8 @@ public class TransformRetriever {
         // TODO Implement a caching strategy for these.
 
         // TODO Actually retrieve these from somewhere.
-        JythonEvaluator evaluator = new JythonEvaluator(
-                "def transform(args, record):\n    return sum(record.values())\n\n");
-        return new JythonTransform(evaluator);
+        String path = "com/latticeengines/domain/exposed/transforms/python/" + name + ".py";
+        return new JythonTransform(JythonEvaluator.fromResource(path));
     }
 
     private static final Log log = LogFactory.getLog(ModelRetriever.class);

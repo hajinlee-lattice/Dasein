@@ -3,6 +3,7 @@ package com.latticeengines.skald;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -24,8 +25,9 @@ public class CombinationRetriever {
         DataComposition data = new DataComposition();
 
         data.transforms = new ArrayList<TransformDefinition>();
-        TransformDefinition transform = new TransformDefinition("test_transform", "victory_field", FieldType.Float,
-                null);
+        Map<String, Object> arguments = new HashMap<String, Object>();
+        arguments.put("value", 10.0);
+        TransformDefinition transform = new TransformDefinition("echo", "victory_field", FieldType.Float, arguments);
         data.transforms.add(transform);
 
         // TODO Retrieve the other structures.
