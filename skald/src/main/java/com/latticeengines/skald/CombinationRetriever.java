@@ -1,16 +1,17 @@
 package com.latticeengines.skald;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.skald.model.DataComposition;
 import com.latticeengines.skald.model.FieldInterpretation;
 import com.latticeengines.skald.model.FieldSchema;
 import com.latticeengines.skald.model.FieldSource;
 import com.latticeengines.skald.model.FieldType;
-import com.latticeengines.skald.model.DataComposition;
 import com.latticeengines.skald.model.TransformDefinition;
 
 // Retrieves and caches active model structures, transform definitions, and score derivations.
@@ -29,12 +30,12 @@ public class CombinationRetriever {
         // TODO Retrieve the other structures.
         CombinationElement element = new CombinationElement();
         element.data = data;
-        element.data.fields = new ArrayList<FieldSchema>();
-        element.data.fields.add(new FieldSchema("extra", FieldSource.Request, FieldType.Float,
+        element.data.fields = new HashMap<String, FieldSchema>();
+        element.data.fields.put("extra", new FieldSchema(FieldSource.Request, FieldType.Float,
                 FieldInterpretation.Feature));
-        element.data.fields.add(new FieldSchema("special", FieldSource.Request, FieldType.Float,
+        element.data.fields.put("special", new FieldSchema(FieldSource.Request, FieldType.Float,
                 FieldInterpretation.Feature));
-        element.data.fields.add(new FieldSchema("magic", FieldSource.Request, FieldType.Integer,
+        element.data.fields.put("magic", new FieldSchema(FieldSource.Request, FieldType.Integer,
                 FieldInterpretation.Feature));
 
         List<CombinationElement> result = new ArrayList<CombinationElement>();

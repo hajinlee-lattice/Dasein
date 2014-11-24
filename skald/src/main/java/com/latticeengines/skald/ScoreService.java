@@ -28,14 +28,15 @@ public class ScoreService {
         // Verify all the model schemas against incoming record.
         List<String> wrong = new ArrayList<String>();
         for (CombinationElement element : combination) {
-            for (FieldSchema field : element.data.fields) {
+            for (String name : element.data.fields.keySet()) {
+                FieldSchema field = element.data.fields.get(name);
                 if (field.source == FieldSource.Request) {
-                    if (!request.record.containsKey(field.name)) {
-                        wrong.add(String.format("%1$s [%2$s] was missing", field.name, field.type));
+                    if (!request.record.containsKey(name)) {
+                        wrong.add(String.format("%1$s [%2$s] was missing", name, field.type));
                     } else {
-                        Object value = request.record.get(field.name);
+                        Object value = request.record.get(name);
                         if (value != null && !field.type.type().isInstance(value)) {
-                            wrong.add(String.format("%1$s [%2$s] was not the correct type", field.name, field.type));
+                            wrong.add(String.format("%1$s [%2$s] was not the correct type", name, field.type));
                         }
                     }
                 }
