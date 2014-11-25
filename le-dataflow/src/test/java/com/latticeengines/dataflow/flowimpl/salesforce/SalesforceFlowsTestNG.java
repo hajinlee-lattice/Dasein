@@ -1,11 +1,11 @@
 package com.latticeengines.dataflow.flowimpl.salesforce;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.math3.util.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,12 +45,12 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro").getPath();
         opportunityContactRole = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/OpportunityContactRole.avro").getPath();
         
-        List<Pair<String, String>> entries = new ArrayList<>();
+        List<AbstractMap.SimpleEntry<String, String>> entries = new ArrayList<>();
         
-        entries.add(new Pair<>("file://" + lead, "/tmp/avro"));
-        entries.add(new Pair<>("file://" + opportunity, "/tmp/avro"));
-        entries.add(new Pair<>("file://" + contact, "/tmp/avro"));
-        entries.add(new Pair<>("file://" + opportunityContactRole, "/tmp/avro"));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + lead, "/tmp/avro"));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunity, "/tmp/avro"));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + contact, "/tmp/avro"));
+        entries.add(new AbstractMap.SimpleEntry<>("file://" + opportunityContactRole, "/tmp/avro"));
         
         FileSystem fs = FileSystem.get(new Configuration());
         doCopy(fs, entries);

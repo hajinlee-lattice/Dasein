@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.exposed.builder;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +16,6 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
-import org.apache.commons.math3.util.Pair;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
@@ -73,7 +73,7 @@ public abstract class DataFlowBuilder {
     }
     
     @SuppressWarnings("deprecation")
-    private Pair<Type, Map<String, String>> getRequiredProperties(FieldMetadata fm) {
+    private AbstractMap.SimpleEntry<Type, Map<String, String>> getRequiredProperties(FieldMetadata fm) {
         Map<String, String> map = null;
         Field avroField = fm.getField();
         
@@ -82,7 +82,7 @@ public abstract class DataFlowBuilder {
         } else {
             map = fm.getProperties();
         }
-        return new Pair<>(fm.getAvroType(), map);
+        return new AbstractMap.SimpleEntry<>(fm.getAvroType(), map);
     }
     
     protected Schema createSchema(String flowName, List<FieldMetadata> fieldMetadata, DataFlowContext dataFlowCtx) {
@@ -93,9 +93,9 @@ public abstract class DataFlowBuilder {
 
         for (FieldMetadata fm : fieldMetadata) {
             FieldBuilder<Schema> fieldBuilder = fieldAssembler.name(fm.getFieldName());
-            Pair<Type, Map<String, String>> requiredProps = getRequiredProperties(fm);
+            AbstractMap.SimpleEntry<Type, Map<String, String>> requiredProps = getRequiredProperties(fm);
             
-            Map<String, String> props = requiredProps.getSecond();
+            Map<String, String> props = requiredProps.getValue();
             
             if (dataFlowCtx != null && dataFlowCtx.getProperty("APPLYMETADATAPRUNING", Boolean.class) != null) {
                 String logicalType = props.get("logicalType"); 
@@ -115,7 +115,7 @@ public abstract class DataFlowBuilder {
             
             fieldBuilder.prop("uuid", UUID.randomUUID().toString());
 
-            Type type = requiredProps.getFirst();
+            Type type = requiredProps.getKey();
 
             switch (type) {
             case DOUBLE:

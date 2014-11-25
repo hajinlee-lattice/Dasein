@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.exposed.builder;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,7 +48,6 @@ import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
-import cascading.util.Pair;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.GroupByCriteria.AggregationType;
@@ -67,9 +67,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     private Map<String, Schema> schemas = new HashMap<>();
 
-    private Map<String, Pair<Pipe, List<FieldMetadata>>> pipesAndOutputSchemas = new HashMap<>();
+    private Map<String, AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>>> pipesAndOutputSchemas = new HashMap<>();
 
-    private Map<String, Pair<Checkpoint, Tap>> checkpoints = new HashMap<>();
+    private Map<String, AbstractMap.SimpleEntry<Checkpoint, Tap>> checkpoints = new HashMap<>();
     
     public CascadingDataFlowBuilder() {
         this(false, false);
@@ -99,9 +99,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             if (!isLocal()) {
                 ckptTap = new Hfs(scheme, targetPath, true);
             }
-            checkpoints.put(pipe.getName(), new Pair<>(ckpt, ckptTap));
-            Pair<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas.get(pipe.getName());
-            pipesAndOutputSchemas.put(ckptName, new Pair<>((Pipe) ckpt, pipeAndFields.getRhs()));
+            checkpoints.put(pipe.getName(), new AbstractMap.SimpleEntry<>(ckpt, ckptTap));
+            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas.get(pipe.getName());
+            pipesAndOutputSchemas.put(ckptName, new AbstractMap.SimpleEntry<>((Pipe) ckpt, pipeAndFields.getValue()));
             return ckpt;
         }
         return pipe;
@@ -125,7 +125,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             FieldMetadata fm = new FieldMetadata(avroType, AvroUtils.getJavaType(avroType), field.name(), field);
             fields.add(fm);
         }
-        pipesAndOutputSchemas.put(sourceName, new Pair<>(new Pipe(sourceName), fields));
+        pipesAndOutputSchemas.put(sourceName, new AbstractMap.SimpleEntry<>(new Pipe(sourceName), fields));
         schemas.put(sourceName, sourceSchema);
     }
     
@@ -137,8 +137,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     @Override
     protected String addJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields, JoinType joinType) {
         List<FieldMetadata> declaredFields = new ArrayList<>();
-        Pair<Pipe, List<FieldMetadata>> lhsPipesAndFields = pipesAndOutputSchemas.get(lhs);
-        Pair<Pipe, List<FieldMetadata>> rhsPipesAndFields = pipesAndOutputSchemas.get(rhs);
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> lhsPipesAndFields = pipesAndOutputSchemas.get(lhs);
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> rhsPipesAndFields = pipesAndOutputSchemas.get(rhs);
         if (lhsPipesAndFields == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { lhs });
         }
@@ -148,16 +148,16 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Set<String> seenFields = new HashSet<>();
         
         List<String> outputFields = new ArrayList<>();
-        outputFields.addAll(getFieldNames(lhsPipesAndFields.getRhs()));
-        Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(lhsPipesAndFields.getRhs());
+        outputFields.addAll(getFieldNames(lhsPipesAndFields.getValue()));
+        Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(lhsPipesAndFields.getValue());
         for (String fieldName : outputFields) {
             seenFields.add(fieldName);
             declaredFields.add(nameToFieldMetadataMap.get(fieldName));
         }
 
         outputFields = new ArrayList<>();
-        outputFields.addAll(getFieldNames(rhsPipesAndFields.getRhs()));
-        nameToFieldMetadataMap = getFieldMetadataMap(rhsPipesAndFields.getRhs());
+        outputFields.addAll(getFieldNames(rhsPipesAndFields.getValue()));
+        nameToFieldMetadataMap = getFieldMetadataMap(rhsPipesAndFields.getValue());
         for (String fieldName : outputFields) {
             String originalFieldName = fieldName;
 
@@ -188,13 +188,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             break;
         }
         
-        Pipe join = new CoGroup(lhsPipesAndFields.getLhs(), //
+        Pipe join = new CoGroup(lhsPipesAndFields.getKey(), //
                 convertToFields(lhsJoinFields.getFields()), //
-                rhsPipesAndFields.getLhs(), //
+                rhsPipesAndFields.getKey(), //
                 convertToFields(rhsJoinFields.getFields()), //
                 convertToFields(getFieldNames(declaredFields)), //
                 joiner);
-        pipesAndOutputSchemas.put(join.getName(), new Pair<>(join, declaredFields));
+        pipesAndOutputSchemas.put(join.getName(), new AbstractMap.SimpleEntry<>(join, declaredFields));
         return doCheckpoint(join).getName();
     }
 
@@ -276,17 +276,17 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
 
     public Pipe getPipeByName(String name) {
-        return pipesAndOutputSchemas.get(name).getLhs();
+        return pipesAndOutputSchemas.get(name).getKey();
     }
 
     @Override
     public Schema getSchema(String flowName, String name, DataFlowContext dataFlowCtx) {
-        Pair<Pipe, List<FieldMetadata>> pipeAndMetadata = pipesAndOutputSchemas.get(name);
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndMetadata = pipesAndOutputSchemas.get(name);
 
         if (pipeAndMetadata == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { name });
         }
-        return super.createSchema(flowName, pipeAndMetadata.getRhs(), dataFlowCtx);
+        return super.createSchema(flowName, pipeAndMetadata.getValue(), dataFlowCtx);
     }
 
     protected String addAggregation(String prior, AggregationType aggType) {
@@ -302,22 +302,22 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     protected String addGroupBy(String prior, FieldList groupByFieldList, FieldList sortFieldList,
             List<GroupByCriteria> groupByCriteria) {
         List<String> groupByFields = groupByFieldList.getFieldsAsList();
-        Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
         }
-        Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(pm.getRhs());
+        Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(pm.getValue());
 
         Pipe groupby = null;
 
         if (sortFieldList != null) {
-            groupby = new GroupBy(pm.getLhs(), convertToFields(groupByFields),
+            groupby = new GroupBy(pm.getKey(), convertToFields(groupByFields),
                     convertToFields(sortFieldList.getFieldsAsList()));
         } else {
-            groupby = new GroupBy(pm.getLhs(), convertToFields(groupByFields));
+            groupby = new GroupBy(pm.getKey(), convertToFields(groupByFields));
         }
 
-        List<FieldMetadata> declaredFields = getIntersection(groupByFields, pipesAndOutputSchemas.get(prior).getRhs());
+        List<FieldMetadata> declaredFields = getIntersection(groupByFields, pipesAndOutputSchemas.get(prior).getValue());
 
         for (GroupByCriteria groupByCriterion : groupByCriteria) {
             String aggFieldName = groupByCriterion.getAggregatedFieldName();
@@ -352,7 +352,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             }
         }
 
-        pipesAndOutputSchemas.put(groupby.getName(), new Pair<>(groupby, declaredFields));
+        pipesAndOutputSchemas.put(groupby.getName(), new AbstractMap.SimpleEntry<>(groupby, declaredFields));
 
         return doCheckpoint(groupby).getName();
     }
@@ -360,19 +360,19 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     @Override
     protected String addFilter(String prior, String expression, FieldList filterFieldList) {
         List<String> filterFields = filterFieldList.getFieldsAsList();
-        Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         String[] filterFieldsArray = new String[filterFields.size()];
         filterFields.toArray(filterFieldsArray);
-        Not filter = new Not(new ExpressionFilter(expression, filterFieldsArray, getTypes(filterFields, pm.getRhs())));
-        Pipe each = new Each(pm.getLhs(), convertToFields(filterFields), filter);
-        List<FieldMetadata> fm = new ArrayList<>(pm.getRhs());
-        pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, fm));
+        Not filter = new Not(new ExpressionFilter(expression, filterFieldsArray, getTypes(filterFields, pm.getValue())));
+        Pipe each = new Each(pm.getKey(), convertToFields(filterFields), filter);
+        List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
+        pipesAndOutputSchemas.put(each.getName(), new AbstractMap.SimpleEntry<>(each, fm));
         return doCheckpoint(each).getName();
     }
 
     @Override
     protected String addFunction(String prior, String expression, FieldList fieldsToApply, FieldMetadata targetField) {
-        Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
 
         if (pm == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
@@ -380,26 +380,26 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         ExpressionFunction function = new ExpressionFunction(new Fields(targetField.getFieldName()), //
                 expression, //
                 fieldsToApply.getFields(), //
-                getTypes(fieldsToApply.getFieldsAsList(), pm.getRhs()));
+                getTypes(fieldsToApply.getFieldsAsList(), pm.getValue()));
 
         return addFunction(prior, function, fieldsToApply, targetField);
     }
 
     private String addFunction(String prior, Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
-        Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
 
         if (pm == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
         }
         Fields fieldStrategy = Fields.ALL;
 
-        List<FieldMetadata> fm = new ArrayList<>(pm.getRhs());
+        List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
         
         if (fieldsToApply.getFields().length == 1 && fieldsToApply.getFields()[0].equals(targetField.getFieldName())) {
             fieldStrategy = Fields.REPLACE;
         }
 
-        Pipe each = new Each(pm.getLhs(), convertToFields(fieldsToApply.getFieldsAsList()), function, fieldStrategy);
+        Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFieldsAsList()), function, fieldStrategy);
         
         if (fieldStrategy != Fields.REPLACE) {
             fm.add(targetField);
@@ -415,36 +415,36 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             }
         }
 
-        pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, fm));
+        pipesAndOutputSchemas.put(each.getName(), new AbstractMap.SimpleEntry<>(each, fm));
         return doCheckpoint(each).getName();
     }
 
     @Override
     protected String addMD5(String prior, FieldList fieldsToApply, String targetFieldName) {
-        Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
         }
-        Pipe each = new Each(pm.getLhs(), convertToFields(fieldsToApply.getFields()), new AddMD5Hash(new Fields(targetFieldName)), Fields.ALL);
-        List<FieldMetadata> newFm = new ArrayList<>(pm.getRhs());
+        Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFields()), new AddMD5Hash(new Fields(targetFieldName)), Fields.ALL);
+        List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
         FieldMetadata pdHashFm = new FieldMetadata(Type.STRING, String.class, targetFieldName, null);
         pdHashFm.setPropertyValue("length", "32");
         pdHashFm.setPropertyValue("precision", "0");
         pdHashFm.setPropertyValue("scale", "0");
         pdHashFm.setPropertyValue("displayName", "Prop Data Hash");
         newFm.add(pdHashFm);
-        pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, newFm));
+        pipesAndOutputSchemas.put(each.getName(), new AbstractMap.SimpleEntry<>(each, newFm));
         return doCheckpoint(each).getName();
     }
 
     @Override
     protected String addRowId(String prior, String targetFieldName, String tableName) {
-        Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
         }
-        Pipe each = new Each(pm.getLhs(), Fields.ALL, new AddRowId(new Fields(targetFieldName), tableName), Fields.ALL);
-        List<FieldMetadata> newFm = new ArrayList<>(pm.getRhs());
+        Pipe each = new Each(pm.getKey(), Fields.ALL, new AddRowId(new Fields(targetFieldName), tableName), Fields.ALL);
+        List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
         FieldMetadata rowIdFm = new FieldMetadata(Type.LONG, Long.class, targetFieldName, null);
         rowIdFm.setPropertyValue("logicalType", "rowid");
         rowIdFm.setPropertyValue("length", "0");
@@ -452,13 +452,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         rowIdFm.setPropertyValue("scale", "0");
         rowIdFm.setPropertyValue("displayName", "Row ID");
         newFm.add(rowIdFm);
-        pipesAndOutputSchemas.put(each.getName(), new Pair<>(each, newFm));
+        pipesAndOutputSchemas.put(each.getName(), new AbstractMap.SimpleEntry<>(each, newFm));
         return doCheckpoint(each).getName();
     }
     
     @Override
     protected String addJythonFunction(String prior, String functionName, FieldList fieldsToApply, FieldMetadata targetField) {
-        Pair<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
         }
@@ -473,7 +473,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     
     @Override
     protected List<FieldMetadata> getMetadata(String operator) {
-        return pipesAndOutputSchemas.get(operator).getRhs();
+        return pipesAndOutputSchemas.get(operator).getValue();
     }
 
     @SuppressWarnings("deprecation")
@@ -502,8 +502,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 .addSources(getSources()) //
                 .addTailSink(getPipeByName(lastOperator), sink);
         
-        for (Pair<Checkpoint, Tap> entry : checkpoints.values()) {
-            flowDef = flowDef.addCheckpoint(entry.getLhs(), entry.getRhs());
+        for (AbstractMap.SimpleEntry<Checkpoint, Tap> entry : checkpoints.values()) {
+            flowDef = flowDef.addCheckpoint(entry.getKey(), entry.getValue());
         }
 
         Flow<?> flow = flowConnector.connect(flowDef);

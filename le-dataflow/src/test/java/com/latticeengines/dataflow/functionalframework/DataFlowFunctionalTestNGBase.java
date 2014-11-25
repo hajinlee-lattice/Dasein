@@ -1,11 +1,11 @@
 package com.latticeengines.dataflow.functionalframework;
 
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.math3.util.Pair;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -25,13 +25,13 @@ public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DataFlowFunctionalTestNGBase.class);
     
-    public void doCopy(FileSystem fs, List<Pair<String, String>> copyEntries) throws Exception {
+    public void doCopy(FileSystem fs, List<AbstractMap.SimpleEntry<String, String>> copyEntries) throws Exception {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
-        for (Pair<String, String> e : copyEntries) {
-            for (String pattern : StringUtils.commaDelimitedListToStringArray(e.getFirst())) {
+        for (AbstractMap.SimpleEntry<String, String> e : copyEntries) {
+            for (String pattern : StringUtils.commaDelimitedListToStringArray(e.getKey())) {
                 for (Resource res : resolver.getResources(pattern)) {
-                    Path destinationPath = getDestinationPath(e.getSecond(), res);
+                    Path destinationPath = getDestinationPath(e.getValue(), res);
                     FSDataOutputStream os = fs.create(destinationPath);
                     FileCopyUtils.copy(res.getInputStream(), os);
                 }
