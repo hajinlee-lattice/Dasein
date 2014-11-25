@@ -34,6 +34,7 @@ public class ModelDefinition implements HasName, HasPid {
 
     @Override
     @Id
+    @JsonIgnore
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)

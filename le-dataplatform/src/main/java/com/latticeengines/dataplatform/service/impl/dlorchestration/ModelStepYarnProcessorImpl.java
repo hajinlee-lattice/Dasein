@@ -125,7 +125,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     private LoadConfiguration generateLoadConfiguration(DataSetType type, String customer, ModelCommandParameters commandParameters) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).type(dbType);
+        builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).dbType(dbType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer(customer);

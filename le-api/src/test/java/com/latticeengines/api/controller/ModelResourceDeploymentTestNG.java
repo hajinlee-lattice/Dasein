@@ -114,7 +114,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
                 .port(dataSourcePort) //
                 .db(dataSourceDB) //
                 .user(dataSourceUser) //
-                .password(dataSourcePasswd).type(dataSourceDBType);
+                .password(dataSourcePasswd).dbType(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer("INTERNAL_ModelResourceDeploymentTestNG");

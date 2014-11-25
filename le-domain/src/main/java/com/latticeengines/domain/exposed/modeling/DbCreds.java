@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.modeling;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class DbCreds {
 
     private String user;
@@ -7,7 +9,7 @@ public class DbCreds {
     private String host;
     private int port;
     private String db;
-    private String type;
+    private String dbType;
     
     public DbCreds() {
     }
@@ -18,7 +20,7 @@ public class DbCreds {
         this.host = builder.host;
         this.port = builder.port;
         this.db = builder.db;
-        this.setType(builder.type);
+        this.setDBType(builder.dbType);
     }
 
     public String getUser() {
@@ -61,12 +63,13 @@ public class DbCreds {
         this.db = db;
     }
 
-    public String getType() {
-        return type;
+    @JsonProperty("db_type")
+    public String getDBType() {
+        return dbType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setDBType(String dbType) {
+        this.dbType = dbType;
     }
 
     public static class Builder {
@@ -76,7 +79,7 @@ public class DbCreds {
         private String host;
         private int port;
         private String db;
-        private String type = "SQLServer";
+        private String dbType = "SQLServer";
 
         public Builder() {
         }
@@ -106,8 +109,8 @@ public class DbCreds {
             return this;
         }
 
-        public Builder type(String type) {
-            this.type = type;
+        public Builder dbType(String dbType) {
+            this.dbType = dbType;
             return this;
         }
 }

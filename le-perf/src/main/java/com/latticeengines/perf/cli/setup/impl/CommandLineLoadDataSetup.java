@@ -65,7 +65,7 @@ public class CommandLineLoadDataSetup extends CommandLineSetup<LoadData> {
         String keyCol = cl.getOptionValue(KEYCOLUMN_OPT);
         String metadataTable = cl.getOptionValue(METADATA_TABLE_OPT);
 
-        builder.host(host).port(Integer.parseInt(port)).db(db).user(user).password(passwd).type(dbtp);
+        builder.host(host).port(Integer.parseInt(port)).db(db).user(user).password(passwd).dbType(dbtp);
         DbCreds dc = new DbCreds(builder);
         config.setCustomer(customer);
         config.setTable(table);

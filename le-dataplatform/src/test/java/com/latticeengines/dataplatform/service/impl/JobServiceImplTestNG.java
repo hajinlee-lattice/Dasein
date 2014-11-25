@@ -277,7 +277,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     public void testLoadData() throws Exception {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
-                .password(dataSourcePasswd).type(dataSourceDBType);
+                .password(dataSourcePasswd).dbType(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = modelingJobService.loadData("iris", baseDir + "/tmp/import", creds, "Priority0.MapReduce.0",
                 "Dell", Arrays.<String> asList(new String[] { "ID" }));

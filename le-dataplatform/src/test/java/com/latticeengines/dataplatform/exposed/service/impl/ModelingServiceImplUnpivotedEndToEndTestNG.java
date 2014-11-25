@@ -145,7 +145,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     private DbCreds getCreds() {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB)
-                .user(dataSourceUser).password(dataSourcePasswd).type(dataSourceDBType);
+                .user(dataSourceUser).password(dataSourcePasswd).dbType(dataSourceDBType);
         return new DbCreds(builder);
     }
 

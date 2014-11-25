@@ -161,7 +161,7 @@ public class PerfLoadTestNGBase {
         String user = prop.getProperty("dataplatform.test.datasource.user");
         String password = CipherUtils.decrypt(prop.getProperty("dataplatform.test.datasource.password.encrypted"));
         String type = prop.getProperty("dataplatform.test.datasource.type");
-        builder.host(host).port(port).db(database).user(user).password(password).type(type);
+        builder.host(host).port(port).db(database).user(user).password(password).dbType(type);
         DbCreds creds = new DbCreds(builder);
         config.setCreds(creds);
         config.setCustomer(customer);
