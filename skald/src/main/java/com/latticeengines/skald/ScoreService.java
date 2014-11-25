@@ -19,7 +19,7 @@ import com.latticeengines.skald.model.FieldSource;
 @RestController
 public class ScoreService {
     @RequestMapping(value = "ScoreRecord", method = RequestMethod.POST)
-    public Map<String, Object> scoreRecord(@RequestBody ScoreRequest request) {
+    public Map<ScoreType, Object> scoreRecord(@RequestBody ScoreRequest request) {
         log.info(String
                 .format("Received a score request for %1$s combination %2$s", request.space, request.combination));
 

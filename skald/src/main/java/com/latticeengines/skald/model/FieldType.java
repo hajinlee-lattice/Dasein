@@ -1,18 +1,18 @@
 package com.latticeengines.skald.model;
 
 public enum FieldType {
-    Boolean(Boolean.class),
+    BOOLEAN(Boolean.class),
 
-    Integer(Integer.class),
+    INTEGER(Integer.class),
 
     // Typical stored as a double precision value.
-    Float(Double.class),
+    FLOAT(Double.class),
 
     // Encoded with UTF-8.
-    String(String.class),
+    STRING(String.class),
 
     // Milliseconds since the unix epoch stored in an int64.
-    Temporal(Long.class);
+    TEMPORAL(Long.class);
 
     private FieldType(Class<?> type) {
         this.type = type;

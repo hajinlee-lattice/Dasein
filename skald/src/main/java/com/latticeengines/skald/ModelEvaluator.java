@@ -32,7 +32,7 @@ public class ModelEvaluator {
         this.derivation = derivation;
     }
 
-    public Map<String, Object> evaluate(Map<String, Object> record) {
+    public Map<ScoreType, Object> evaluate(Map<String, Object> record) {
         Evaluator evaluator = (Evaluator) manager.getModelManager(null, ModelEvaluatorFactory.getInstance());
 
         Map<FieldName, FieldValue> arguments = new HashMap<FieldName, FieldValue>();
@@ -59,12 +59,11 @@ public class ModelEvaluator {
 
         // TODO Create derived score elements.
 
-        Map<String, Object> result = new HashMap<String, Object>();
-        result.put("probability", predicted);
-        result.put("lift", 3.5);
-        result.put("percentile", 96);
-        result.put("bucket", "A");
-        result.put("fake", true);
+        Map<ScoreType, Object> result = new HashMap<ScoreType, Object>();
+        result.put(ScoreType.PROBABILITY, predicted);
+        result.put(ScoreType.LIFT, 3.5);
+        result.put(ScoreType.PERCENTILE, 96);
+        result.put(ScoreType.BUCKET, "A");
         return result;
     }
 
