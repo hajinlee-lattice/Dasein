@@ -20,10 +20,10 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 
 @Entity
 @Table(name = "JOB")
@@ -67,7 +67,7 @@ public class Job implements HasPid, HasId<String> {
     @JsonIgnore
     @Transient
     public ApplicationId getAppId() {
-        return YarnUtils.getApplicationIdFromString(id);
+        return ConverterUtils.toApplicationId(id);
     }
 
     @JsonIgnore
