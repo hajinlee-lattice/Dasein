@@ -9,6 +9,7 @@ import javax.xml.bind.JAXBException;
 import org.dmg.pmml.FieldName;
 import org.dmg.pmml.IOUtil;
 import org.dmg.pmml.PMML;
+import org.jpmml.evaluator.ClassificationMap;
 import org.jpmml.evaluator.Evaluator;
 import org.jpmml.evaluator.EvaluatorUtil;
 import org.jpmml.evaluator.FieldValue;
@@ -54,8 +55,10 @@ public class ModelEvaluator {
                 throw new RuntimeException("PMML model has multiple results and no target was specified");
             }
         }
-
-        Object predicted = EvaluatorUtil.decode(results.get(new FieldName(target)));
+        
+        @SuppressWarnings("unchecked")
+        ClassificationMap<FieldName> classification = (ClassificationMap<FieldName>)results.get(new FieldName(target));
+        Object predicted = classification.get("1");
 
         // TODO Create derived score elements.
 

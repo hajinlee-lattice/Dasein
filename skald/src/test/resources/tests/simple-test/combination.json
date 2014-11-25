@@ -1,0 +1,556 @@
+[{
+		"filter" : null,
+		"data" : {
+			"fields" : {
+				"BW_seo_title" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_SoftwareBasic_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"UCCFilings" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"FundingFinanceRound" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_CRM_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_ProductivitySltns_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_seo_meta" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"NumberOfEmployees" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"ExperianCreditRating" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_HardwareBasic_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_ITGovernance_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_ns" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_CommTech_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"DerogatoryIndicator" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_DataCenterSolutions_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_docinfo" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Years_in_Business_Code" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BusinessECommerceSite" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_ProductivitySltns_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_EnterpriseContent_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_MarketingPerfMgmt_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_WebOrntdArch_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_mx" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_analytics" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Alexa_Rank" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_cdns" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Alexa_MonthsSinceOnline" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BusinessEstimatedEmployees" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_Web_Server" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_ProjectMgnt_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_encoding" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"AnnualRevenue" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_CRM_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_ITGovernance_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_SoftwareBasic_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_CloudService_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_cms" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_DataCenterSolutions_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_EnterpriseApplications_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Activity_InterestingMoment_cnt" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_javascript" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"FundingReceived" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_media" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Activity_FillOutForm_cnt" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_cdn" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"FundingAmount" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"FundingStage" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Activity_OpenEmail_cnt" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Activity_ClickLink_cnt" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_feeds" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Non_Profit_Indicator" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BusinessSocialPresence" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_ads" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_MarketingPerfMgmt_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BankruptcyFiled" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_WebOrntdArch_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_EnterpriseContent_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Activity_EmailBncedSft_cnt" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"PercentileModel" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_CloudService_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"PD_DA_PrimarySIC1" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_widgets" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"FundingAwardAmount" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BusinessVCFunded" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"ModelAction" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"PD_DA_MonthsSinceFundAwardDate" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_Web_Master" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_NetworkComputing_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_mapping" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BusinessAnnualSalesAbs" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Intelliscore" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Activity_ClickEmail_cnt" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"JobsRecentJobs" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Activity_VisitWeb_cnt" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_NetworkComputing_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_hosting" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_HardwareBasic_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"PD_DA_JobTitle" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"FundingAgency" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"UCCFilingsPresent" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Alexa_ViewsPerMillion" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_CommTech_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_parked" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BusinessUrlNumPages" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"PD_DA_LastSocialActivity_Units" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BusinessFirmographicsParentEmployees" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_seo_headers" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_TotalTech_Cnt" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_shop" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_EnterpriseApplications_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Alexa_ViewsPerUser" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_TechTags_Cnt" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Alexa_ReachPerMillion" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"Activity_UnsubscrbEmail_cnt" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_VerticalMarkets_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BusinessEstablishedYear" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_payment" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_framework" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BusinessFirmographicsParentRevenue" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_ProjectMgnt_Two" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BusinessEstimatedAnnualSales_k" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"CloudTechnologies_VerticalMarkets_One" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BusinessRetirementParticipants" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"JobsTrendString" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"PD_DA_MonthsPatentGranted" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_ssl" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"BW_Server" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				},
+				"PD_DA_AwardCategory" : {
+					"source" : "Request",
+					"type" : "FLOAT",
+					"interpretation" : "Feature"
+				}
+			},
+			"transforms" : []
+		},
+		"model" : "model",
+		"derivation" : {
+			"target" : null,
+			"averageProbability" : 0.0,
+			"percentiles" : null,
+			"buckets" : null
+		}
+	}
+]

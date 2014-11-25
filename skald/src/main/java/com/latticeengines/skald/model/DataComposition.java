@@ -1,9 +1,16 @@
 package com.latticeengines.skald.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class DataComposition {
+    public DataComposition() {
+        this.fields = new HashMap<String, FieldSchema>();
+        this.transforms = new ArrayList<TransformDefinition>();
+    }
+
     // All the fields from the event table that was used to create this model.
     // This schema should match the input provided to the modeling service.
     // Keyed by internal name of the column associated with this field.
