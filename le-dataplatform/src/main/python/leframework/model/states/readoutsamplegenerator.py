@@ -15,6 +15,7 @@ class ReadoutSampleGenerator(State):
     def execute(self):
         preTransform = self.mediator.allDataPreTransform.copy()
         postTransform = self.mediator.allDataPostTransform.as_matrix()
+        nonScoringTargets = self.mediator.schema["nonScoringTargets"]
         readouts = self.mediator.schema["readouts"]
 
         (rows, _) = preTransform.shape
@@ -45,7 +46,13 @@ class ReadoutSampleGenerator(State):
         self.result = PandasUtil.insertIntoDataFrame(self.result, convertedColumName, converted, 1)
 
         # Shift Readouts (+2 offset due to score/converted insertion)
-        self.result = PandasUtil.shiftTail(self.result, len(readouts), 2)
+        tailCount = len(nonScoringTargets)
+        for column in nonScoringTargets[::-1]:
+            if column in readouts:
+                (self.result, moved) = PandasUtil.moveTailColumn(self.result, tailCount, column, 2)
+            else:
+                (self.result, moved) = PandasUtil.moveTailColumn(self.result, tailCount, column)
+            if moved: tailCount = tailCount - 1
 
         # Add Result to Mediator
         self.mediator.readoutsample = self.result

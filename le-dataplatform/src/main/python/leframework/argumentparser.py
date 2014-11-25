@@ -38,6 +38,7 @@ class ArgumentParser(object):
         self.fields = dataSchema["fields"]
         self.features = set(self.metadataSchema["features"])
         (self.targets, self.readouts) = self.extractTargets()
+        self.nonScoringTargets = list(self.readouts)
         self.keyCols = set(self.metadataSchema["key_columns"])
         self.depivoted = False
         if "depivoted" in self.metadataSchema:
@@ -57,7 +58,7 @@ class ArgumentParser(object):
             possibleIssue = "The ModelTargets DL parameter may be formatted incorrectly."
             logger.warn(message + " " + possibleIssue)
 
-        fields = set([e["columnName"] for e in self.fields])
+        fields = set([e["name"] for e in self.fields])
         def columnExists(column): return column in fields
 
         eventKey = "Event".lower()
@@ -132,7 +133,8 @@ class ArgumentParser(object):
         l = 0
         includedNames = []
         included = []
-        readoutsIncluded = []
+        nonScoringIncludedNames = []
+        nonScoringIncluded = []
         self.featureIndex = set()
         self.nameToFeatureIndex = dict()
         self.keyColIndex = set()
@@ -141,9 +143,7 @@ class ArgumentParser(object):
         for f in self.fields:
             fType = f["type"][0]
             fName = f["name"]
-            if fName in self.readouts:
-                readoutsIncluded.append(l)
-            elif fName in self.features or fName in self.targets or fName in self.keyCols:
+            if fName in self.features or fName in self.targets or fName in self.keyCols:
                 logger.info("Adding %s with index %d" % (fName, l))
                 includedNames.append(fName)
                 included.append(l)
@@ -158,9 +158,12 @@ class ArgumentParser(object):
                 if (fType == 'string' or fType == 'boolean' or fType == 'bytes') and fName not in self.targets:
                     self.stringColNames.add(fName)
                 k = k+1
+            elif fName in self.readouts:
+                nonScoringIncludedNames.append(fName)
+                nonScoringIncluded.append(l)
             l = l+1
         
-        tmpData = []; readoutData = []
+        tmpData = []; nonScoringData = []
 
         reader = None 
         filedescriptor = open(dataFileName, 'rb')
@@ -170,7 +173,7 @@ class ArgumentParser(object):
             reader = csv.reader(filedescriptor)
 
         for row in reader:
-            rowlist = []; readoutlist = []
+            rowlist = []; nonScoringlist = []
             if len(row) != len(self.fields):
                 msg = "Data-metadata mismatch. Metadata has %s, while data has %s fields." % (len(self.fields), len(row))
                 raise Exception(msg)
@@ -183,20 +186,24 @@ class ArgumentParser(object):
                 else:
                     row[targetName] = float(row[targetName])
                 rowlist = [str(row[name]) if name in self.stringColNames else row[name] for name in includedNames]
-                readoutlist = [row[name] for name in self.readouts]
+                nonScoringlist = [row[name] for name in nonScoringIncludedNames]
             else:
                 # CSV format
                 rowlist = [float(row[i]) if self.__getField(i)["name"] in self.targets else self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]
-                readoutlist = [self.__convertType(row[i], self.__getField(i)["type"][0]) for i in readoutsIncluded]
+                nonScoringlist = [self.__convertType(row[i], self.__getField(i)["type"][0]) for i in nonScoringIncluded]
 
-            tmpData.append(rowlist); readoutData.append(readoutlist)
+            tmpData.append(rowlist); nonScoringData.append(nonScoringlist)
+
+        # Defense (Filter Scoring Columns)
+        self.nonScoringTargets = filter(lambda e: e not in includedNames, self.nonScoringTargets)
+        self.readouts = filter(lambda e: e not in includedNames, self.readouts)
 
         self.__populateSchemaWithMetadata(self.getSchema(), self)
 
         scoringFrame = pd.DataFrame(tmpData, columns=includedNames)
-        readoutFrame = pd.DataFrame(readoutData, columns=self.readouts)
+        nonScoringFrame = pd.DataFrame(nonScoringData, columns=nonScoringIncludedNames)
 
-        return scoringFrame, readoutFrame
+        return scoringFrame, nonScoringFrame
 
     def __populateSchemaWithMetadata(self, schema, parser):
         schema["featureIndex"] = parser.getFeatureTuple()
@@ -209,6 +216,7 @@ class ArgumentParser(object):
             schema["data_profile"] = self.stripPath(self.metadataSchema["data_profile"]) 
         schema["config_metadata"] = parser.getConfigMetadata()
         schema["targets"] = self.targets
+        schema["nonScoringTargets"] = self.nonScoringTargets
         schema["readouts"] = self.readouts
         schema["stringColumns"] = self.stringColNames
 

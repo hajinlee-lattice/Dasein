@@ -17,11 +17,16 @@ class ReadoutSampleTest(TrainingTestBase):
         self.checkResults(expectedRows = 2000)
         self.cleanup()
 
+    def testReadoutSampleReadouts(self):
+        self.launch("model-readouts.json")
+        self.checkResults(expectedRows = 2000)
+        self.cleanup()
+
     def testReadoutSampleCSV(self):
         self.launch("model-csv.json")
         self.checkResults(expectedRows = 2000)
         self.cleanup()
-
+ 
     def testReadoutSampleLegacy(self):
         self.launch("model-legacy.json")
         self.checkResults(expectedRows = 2000, includeReadouts = False)

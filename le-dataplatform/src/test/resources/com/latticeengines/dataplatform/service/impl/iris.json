@@ -2,11 +2,11 @@
     "name":"IrisDataSet",
     "fields":
     [
-        {"name":"sepal_length","type":["float","0.0"],"columnName":"sepal_length"},
-        {"name":"sepal_width","type":["float","0.0"],"columnName":"sepal_width"},
-        {"name":"petal_length","type":["float","0.0"],"columnName":"petal_length"},
-        {"name":"petal_width","type":["float","0.0"],"columnName":"petal_width"},
-        {"name":"category","type":["int","0"],"columnName":"category"}
+        {"name":"sepal_length","type":["float","0.0"]},
+        {"name":"sepal_width","type":["float","0.0"]},
+        {"name":"petal_length","type":["float","0.0"]},
+        {"name":"petal_width","type":["float","0.0"]},
+        {"name":"category","type":["int","0"]}
     ],
     "type":"record"
 }

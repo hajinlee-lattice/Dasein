@@ -64,8 +64,8 @@ class Launcher(object):
         self.__validateParameters(schema)
 
         # Extract data and scripts for execution
-        (self.training, self.trainingReadout) = parser.createList(self.stripPath(schema["training_data"]))
-        (self.test, self.testReadout) = parser.createList(self.stripPath(schema["test_data"]))
+        (self.training, self.trainingNonScoringTargets) = parser.createList(self.stripPath(schema["training_data"]))
+        (self.test, self.testNonScoringTargets) = parser.createList(self.stripPath(schema["test_data"]))
         script = self.stripPath(schema["python_script"])
 
         # Create directory for model result
@@ -103,10 +103,11 @@ class Launcher(object):
         (self.training, self.test, metadata) = executor.transformData(params)
         params["allDataPostTransform"] = DataFrame.append(self.training, self.test)
 
-        # Append Readouts
-        readouts = DataFrame.append(self.trainingReadout, self.testReadout)
-        params["allDataPreTransform"] = PandasUtil.appendDataFrame(params["allDataPreTransform"], readouts)
+        # Append NonScoringTargets
+        nonScoringTargets = DataFrame.append(self.trainingNonScoringTargets, self.testNonScoringTargets)
+        params["allDataPreTransform"] = PandasUtil.appendDataFrame(params["allDataPreTransform"], nonScoringTargets)
 
+        params["readouts"] = parser.readouts
         params["training"] = self.training
         params["test"] = self.test
         params["metadata"] = metadata

@@ -21,3 +21,16 @@ class PandasUtil():
         popIndex = len(columns) - 1
         for _ in range(shift): columns.insert(index, columns.pop(popIndex))
         return dataFrame[columns]
+
+    @staticmethod
+    def moveTailColumn(dataFrame, tailCount, column, index = -1):
+        columns = dataFrame.columns.tolist()
+        numColumns = len(columns)
+        tailOffset =  numColumns - tailCount
+        tailColumns = columns[tailOffset:]
+        if column in tailColumns:
+            columns.pop(tailOffset + tailColumns.index(column))
+            if index != -1: columns.insert(index, column)
+            return dataFrame[columns], True
+        else:
+            return dataFrame[columns], False
