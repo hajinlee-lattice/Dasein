@@ -79,6 +79,8 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private String resourceManagerWebAppAddress;
 
+    private String appTimeLineWebAppAddress;
+
     public ModelCommandCallable() {
     }
 
@@ -88,7 +90,7 @@ public class ModelCommandCallable implements Callable<Long> {
             ModelCommandLogService modelCommandLogService, ModelCommandResultEntityMgr modelCommandResultEntityMgr,
             ModelStepProcessor modelStepFinishProcessor, ModelStepProcessor modelStepOutputResultsProcessor,
             ModelStepProcessor modelStepRetrieveMetadataProcessor, DebugProcessorImpl debugProcessorImpl,
-            AlertService alertService, String httpFsPrefix, String resourceManagerWebAppAddress) {
+            AlertService alertService, String httpFsPrefix, String resourceManagerWebAppAddress, String appTimeLineWebAppAddress) {
         this.modelCommand = modelCommand;
         this.yarnConfiguration = yarnConfiguration;
         this.modelingJobService = modelingJobService;
@@ -104,6 +106,7 @@ public class ModelCommandCallable implements Callable<Long> {
         this.alertService = alertService;
         this.httpFsPrefix = httpFsPrefix;
         this.resourceManagerWebAppAddress = resourceManagerWebAppAddress;
+        this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
     }
 
     @Override
@@ -189,22 +192,11 @@ public class ModelCommandCallable implements Callable<Long> {
                         generateDataDiagnostics(commandState, jobStatus);
                     }
                     successCount++;
-                    modelCommandLogService.log(modelCommand, commandState.getModelCommandStep() + " Memory used: "
-                            + commandState.getUsedMemory() + " MB");
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.UNDEFINED)
                         || YarnUtils.isPrempted(jobStatus.getDiagnostics())) {
                     // Job in progress.
                 } else if (jobStatus.getStatus().equals(FinalApplicationStatus.KILLED)
                         || jobStatus.getStatus().equals(FinalApplicationStatus.FAILED)) {
-                    modelCommandLogService.log(modelCommand, commandState.getModelCommandStep() + " Memory used: "
-                            + commandState.getUsedMemory() + " MB");
-                    if (commandState.getUsedMemory() > jobStatus.getAppResUsageReport().getNeededResources()
-                            .getMemory()) {
-                        modelCommandLogService
-                                .log(modelCommand,
-                                        commandState.getModelCommandStep()
-                                                + " failed due to too much memory being used! Please decrease the size of the dataset and try again.");
-                    }
                     jobFailed = true;
                     failedYarnApplicationIds.add(commandState.getYarnApplicationId());
                 }
@@ -246,7 +238,6 @@ public class ModelCommandCallable implements Callable<Long> {
     String handleJobFailed(List<String> failedYarnApplicationIds) {
         modelCommandLogService.logCompleteStep(modelCommand, modelCommand.getModelCommandStep(),
                 ModelCommandStatus.FAIL);
-
         ModelCommandResult result = modelCommandResultEntityMgr.findByModelCommand(modelCommand);
         result.setEndTime(new Date());
         result.setProcessStatus(ModelCommandStatus.FAIL);
@@ -262,6 +253,7 @@ public class ModelCommandCallable implements Callable<Long> {
             // Currently each step only generates one yarn job anyways so first
             // failed appId works
             clientUrl.append("app/").append(failedYarnApplicationIds.get(0));
+            modelCommandLogService.log(modelCommand, "Failed job link: " + appTimeLineWebAppAddress + "/app/" + failedYarnApplicationIds.get(0));
         }
 
         List<BasicNameValuePair> details = new ArrayList<>();
@@ -322,8 +314,6 @@ public class ModelCommandCallable implements Callable<Long> {
         commandState.setDiagnostics(jobStatus.getDiagnostics());
         commandState.setTrackingUrl(jobStatus.getTrackingUrl());
         commandState.setElapsedTimeInMillis(System.currentTimeMillis() - jobStatus.getStartTime());
-        commandState.setUsedMemory(Math.max(commandState.getUsedMemory(), jobStatus.getAppResUsageReport()
-                .getUsedResources().getMemory()));
         modelCommandStateEntityMgr.createOrUpdate(commandState);
     }
 

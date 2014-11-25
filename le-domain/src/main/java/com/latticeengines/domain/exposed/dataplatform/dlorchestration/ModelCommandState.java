@@ -61,9 +61,6 @@ public class ModelCommandState extends AbstractTimestampEntity implements HasPid
     @Column(name = "ElapsedTimeInMillis")
     private Long elapsedTimeInMillis;
 
-    @Column(name = "UsedMemory")
-    private Integer usedMemory = 0;
-
     ModelCommandState() {
         super();
     }
@@ -139,13 +136,4 @@ public class ModelCommandState extends AbstractTimestampEntity implements HasPid
     public void setElapsedTimeInMillis(Long elapsedTimeInMillis) {
         this.elapsedTimeInMillis = elapsedTimeInMillis;
     }
-
-    public Integer getUsedMemory() {
-        return usedMemory;
-    }
-
-    public void setUsedMemory(Integer usedMemory) {
-        this.usedMemory = usedMemory;
-    }
-
 }

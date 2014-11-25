@@ -67,6 +67,8 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     private String resourceManagerWebAppAddress;
 
+    private String appTimeLineWebAppAddress;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         run(context);
@@ -88,7 +90,7 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
                     modelingJobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor,
                     modelCommandLogService, modelCommandResultEntityMgr, modelStepFinishProcessor,
                     modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor, debugProcessorImpl,
-                    alertService, httpFsPrefix, resourceManagerWebAppAddress)));
+                    alertService, httpFsPrefix, resourceManagerWebAppAddress, appTimeLineWebAppAddress)));
         }
         for (Future<Long> future : futures) {
             try {

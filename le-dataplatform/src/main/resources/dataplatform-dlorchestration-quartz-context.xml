@@ -25,6 +25,7 @@
                 <entry key="waitTime" value="${dataplatform.dlorchestrationjob.wait.time}" />
                 <entry key="httpFsPrefix" value="${dataplatform.fs.web.defaultFS}" />
                 <entry key="resourceManagerWebAppAddress" value="${dataplatform.yarn.resourcemanager.webapp.address}" />
+                <entry key="appTimeLineWebAppAddress" value="${dataplatform.yarn.timeline-service.webapp.address}" />
             </map>
         </property>
     </bean>

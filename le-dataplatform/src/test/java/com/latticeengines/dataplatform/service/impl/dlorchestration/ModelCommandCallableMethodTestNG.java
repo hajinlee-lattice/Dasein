@@ -70,6 +70,9 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
     @Value("${dataplatform.yarn.resourcemanager.webapp.address}")
     private String resourceManagerWebAppAddress;
 
+    @Value("${dataplatform.yarn.timeline-service.webapp.address}")
+    private String appTimeLineWebAppAddress;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         alertService.enableTestMode();
@@ -92,7 +95,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
                 modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
                 modelStepRetrieveMetadataProcessor, debugProcessorImpl, alertService, httpFsPrefix,
-                resourceManagerWebAppAddress);
+                resourceManagerWebAppAddress, appTimeLineWebAppAddress);
 
         PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed());
 
