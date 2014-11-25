@@ -23,7 +23,8 @@ public class ScoreService {
         log.info(String
                 .format("Received a score request for %1$s combination %2$s", request.space, request.combination));
 
-        List<CombinationElement> combination = combinationRetriever.getCombination(request.space, request.combination);
+        List<CombinationElement> combination = combinationRetriever.getCombination(request.space, request.combination,
+                request.tag);
 
         // Verify all the model schemas against incoming record.
         List<String> wrong = new ArrayList<String>();

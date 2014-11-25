@@ -19,7 +19,17 @@ import com.latticeengines.skald.model.TransformDefinition;
 // Retrieves and caches active model structures, transform definitions, and score derivations.
 @Service
 public class CombinationRetriever {
-    public List<CombinationElement> getCombination(CustomerSpace spaceID, String combination) {
+    public List<CombinationElement> getCombination(CustomerSpace spaceID, String combination, String tag) {
+        // TODO Retrieve the named ModelCombination structure from ZooKeeper.
+
+        // TODO Retrieve the ModelTags structure for this space from ZooKeeper.
+
+        // TODO For each entry in the combination, retrieve the DataComposition
+        // and (default or override) ScoreDerivation from ZooKeeper.
+
+        // TODO Populate the CombinationElement structure with the above and a
+        // model identifier.
+
         // TODO Add a caching layer.
 
         DataComposition data = new DataComposition();
@@ -30,7 +40,6 @@ public class CombinationRetriever {
         TransformDefinition transform = new TransformDefinition("echo", "victory_field", FieldType.FLOAT, arguments);
         data.transforms.add(transform);
 
-        // TODO Retrieve the other structures.
         CombinationElement element = new CombinationElement();
         element.derivation = new ScoreDerivation();
         element.data = data;

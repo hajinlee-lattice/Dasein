@@ -15,6 +15,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.skald.model.ModelIdentifier;
 
 public class MockScoreService {
     @InjectMocks
@@ -36,20 +37,21 @@ public class MockScoreService {
 
         // When asking for the specified model combination, return the one from
         // the definition
-        when(combinationRetriever.getCombination(Mockito.any(CustomerSpace.class), Mockito.anyString())).thenReturn(
-                combination);
+        when(
+                combinationRetriever.getCombination(Mockito.any(CustomerSpace.class), Mockito.anyString(),
+                        Mockito.anyString())).thenReturn(combination);
 
         // When asking for a ModelEvaluator, just look up the model in the
         // definition and return
         // a new ModelEvaluator that operates against it.
-        when(modelRetriever.getEvaluator(Mockito.any(CustomerSpace.class), Mockito.anyString())).thenAnswer(
-                new Answer<ModelEvaluator>() {
+        when(modelRetriever.getEvaluator(Mockito.any(CustomerSpace.class), Mockito.any(ModelIdentifier.class)))
+                .thenAnswer(new Answer<ModelEvaluator>() {
                     @Override
                     public ModelEvaluator answer(InvocationOnMock invocation) throws Throwable {
                         Object[] args = invocation.getArguments();
-                        String modelid = (String) args[1];
+                        ModelIdentifier modelid = (ModelIdentifier) args[1];
                         // look up the model
-                        String pmml = modelsPMML.get(modelid);
+                        String pmml = modelsPMML.get(modelid.name);
                         if (pmml == null) {
                             throw new IllegalArgumentException("Cold not locate model with id " + modelid);
                         }

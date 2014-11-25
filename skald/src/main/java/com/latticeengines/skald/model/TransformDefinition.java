@@ -14,7 +14,7 @@ public class TransformDefinition {
     public TransformDefinition() {
     }
 
-    // The name of the transform function to be invoked.
+    // The name of the transform file to be invoked.
     public String name;
 
     // The name of the field this transform will populate.

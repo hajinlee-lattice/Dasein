@@ -10,7 +10,7 @@ public class ScoreRequest {
         this.combination = combination;
         this.record = record;
     }
-    
+
     public ScoreRequest() {
     }
 
@@ -18,6 +18,9 @@ public class ScoreRequest {
 
     // Combination of models that is the target of this score request.
     public String combination;
+
+    // Which tagged version of the models to score against.
+    public String tag;
 
     public Map<String, Object> record;
 }

@@ -15,6 +15,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.skald.model.ModelIdentifier;
 
 // Retrieves and caches the actual PMML files and their resultant expensive structures.
 @Service
@@ -22,11 +23,12 @@ public class ModelRetriever {
     public ModelRetriever() {
         // TODO Make the cache properties tunable.
         cache = CacheBuilder.newBuilder().maximumSize(200)
-                .build(new CacheLoader<AbstractMap.SimpleEntry<CustomerSpace, String>, ModelEvaluator>() {
+                .build(new CacheLoader<AbstractMap.SimpleEntry<CustomerSpace, ModelIdentifier>, ModelEvaluator>() {
                     @Override
-                    public ModelEvaluator load(AbstractMap.SimpleEntry<CustomerSpace, String> key) throws Exception {
+                    public ModelEvaluator load(AbstractMap.SimpleEntry<CustomerSpace, ModelIdentifier> key)
+                            throws Exception {
                         // TODO Create a lookup path for PMML files
-                        // parameterized on just the space and model name.
+                        // parameterized on just the space and model identifier.
 
                         // TODO Look in a properties directory to get the
                         // correct HDFS address.
@@ -56,11 +58,11 @@ public class ModelRetriever {
                 });
     }
 
-    public ModelEvaluator getEvaluator(CustomerSpace space, String model) {
-        return cache.getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, String>(space, model));
+    public ModelEvaluator getEvaluator(CustomerSpace space, ModelIdentifier model) {
+        return cache.getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, ModelIdentifier>(space, model));
     }
 
-    private LoadingCache<AbstractMap.SimpleEntry<CustomerSpace, String>, ModelEvaluator> cache;
+    private LoadingCache<AbstractMap.SimpleEntry<CustomerSpace, ModelIdentifier>, ModelEvaluator> cache;
 
     private static final Log log = LogFactory.getLog(ModelRetriever.class);
 }
