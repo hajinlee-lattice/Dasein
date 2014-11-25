@@ -18,7 +18,7 @@ public class AccessTokenImportStrategy extends MarketoImportStrategyBase {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void importTable(ProducerTemplate template, Table table, ImportContext ctx) {
+    public void importData(ProducerTemplate template, Table table, ImportContext ctx) {
         Map<String, Object> headers = getHeaders(ctx);
         headers.put(MarketoImportProperty.CLIENTID, ctx.getProperty(MarketoImportProperty.CLIENTID, String.class));
         headers.put(MarketoImportProperty.CLIENTSECRET,

@@ -22,12 +22,12 @@ public class LeadImportStrategy extends MarketoImportStrategyBase {
     }
 
     @Override
-    public void importTable(ProducerTemplate template, Table table, ImportContext ctx) {
+    public void importData(ProducerTemplate template, Table table, ImportContext ctx) {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public Table importTableMetadata(ProducerTemplate template, Table table, ImportContext ctx) {
+    public Table importMetadata(ProducerTemplate template, Table table, ImportContext ctx) {
         Map<String, Object> headers = getHeaders(ctx);
         Map<String, Object> result = template.requestBodyAndHeaders("direct:getLeadMetadata", null, headers, Map.class);
         List<Map<String, Object>> leadMetadata = (List<Map<String, Object>>) result.get("result") ;
@@ -48,6 +48,12 @@ public class LeadImportStrategy extends MarketoImportStrategyBase {
             attribute.setLength((Integer) lead.get("length"));
         }
         
-        return super.importTableMetadata(template, table, ctx);
+        return super.importMetadata(template, table, ctx);
     }
+    
+    @Override
+    public boolean needsPageToken() {
+        return true;
+    }
+    
 }

@@ -32,8 +32,10 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         
         Table activityType = createActivityType();
         Table lead = createLead();
+        Table activity = createActivity();
         tables.add(activityType);
         tables.add(lead);
+        tables.add(activity);
     }
     
     @Test(groups = "functional")
@@ -52,6 +54,32 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         marketoImportService.importDataAndWriteToHdfs(tables, ctx);
     }
 
+    private Table createActivity() {
+        Table table = new Table();
+        table.setName("Activity");
+        Attribute id = new Attribute();
+        id.setName("id");
+        id.setDisplayName("Id");
+        id.setLogicalDataType("id");
+        Attribute leadId = new Attribute();
+        leadId.setName("leadId");
+        leadId.setDisplayName("Lead Id");
+        leadId.setLogicalDataType("integer");
+        Attribute activityDate = new Attribute();
+        activityDate.setName("activityDate");
+        activityDate.setDisplayName("Activity Date");
+        activityDate.setLogicalDataType("datetime");
+        Attribute activityTypeId = new Attribute();
+        activityTypeId.setName("activityTypeId");
+        activityTypeId.setDisplayName("Activity Type Id");
+        activityTypeId.setLogicalDataType("integer");
+        table.addAttribute(id);
+        table.addAttribute(leadId);
+        table.addAttribute(activityDate);
+        table.addAttribute(activityTypeId);
+        return table;
+    }
+    
     private Table createActivityType() {
         Table table = new Table();
         table.setName("ActivityType");

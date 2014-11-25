@@ -26,9 +26,9 @@ public abstract class ImportStrategy {
         return getImportStrategy(sourceType, table.getName());
     }
     
-    public abstract void importTable(ProducerTemplate template, Table table, ImportContext ctx);
+    public abstract void importData(ProducerTemplate template, Table table, ImportContext ctx);
     
-    public abstract Table importTableMetadata(ProducerTemplate template, Table table, ImportContext ctx);
+    public abstract Table importMetadata(ProducerTemplate template, Table table, ImportContext ctx);
     
     protected abstract AvroTypeConverter getAvroTypeConverter();
 }

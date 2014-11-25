@@ -43,12 +43,16 @@ public abstract class MarketoImportStrategyBase extends ImportStrategy {
     }
     
     @Override
-    public Table importTableMetadata(ProducerTemplate template, Table table, ImportContext ctx) {
+    public Table importMetadata(ProducerTemplate template, Table table, ImportContext ctx) {
         AvroTypeConverter converter = getAvroTypeConverter();
         List<Attribute> attributes = table.getAttributes();
         for (Attribute attribute : attributes) {
             attribute.setPhysicalDataType(converter.convertTypeToAvro(attribute.getLogicalDataType()).name());
         }
         return table;
+    }
+    
+    public boolean needsPageToken() {
+        return false;
     }
 }

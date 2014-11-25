@@ -11,6 +11,7 @@ public class MarketoUrlGenerator {
     private static final String GETACTIVITIESURL = "/rest/v1/activities.json?access_token=$$ACCESSTOKEN$$&$$NEXTPAGETOKEN$$&$$ACTIVITYTYPES$$";
     private static final String GETACTIVITYTYPESURL = "/rest/v1/activities/types.json?access_token=$$ACCESSTOKEN$$";
     private static final String GETLEADMETADATAURL = "/rest/v1/leads/describe.json?access_token=$$ACCESSTOKEN$$";
+    private static final String GETPAGINGTOKENURL = "/rest/v1/activities/pagingtoken.json?access_token=$$ACCESSTOKEN$$&sinceDatetime=$$SINCEDATETIME$$";
 
     public String getBaseUrl(String host) {
         return BASEURL.replace("$$HOST$$", host);
@@ -35,5 +36,10 @@ public class MarketoUrlGenerator {
 
     public String getLeadMetadataUrl(String baseUrl, String accessToken) {
         return baseUrl + GETLEADMETADATAURL.replace("$$ACCESSTOKEN$$", accessToken);
+    }
+
+    public String getPagingTokenUrl(String baseUrl, String accessToken, String dateTime) {
+        String pagingTokenUrl = baseUrl + GETPAGINGTOKENURL.replace("$$ACCESSTOKEN$$", accessToken);
+        return pagingTokenUrl.replace("$$SINCEDATETIME$$", dateTime);
     }
 }

@@ -33,5 +33,11 @@ public class MarketoRouteConfig extends SpringRouteBuilder {
         process(new GenerateLeadMetadataUrlProcessor()). //
         recipientList(header("leadMetadataUrl")). //
         unmarshal(dataFormat);
+
+        from("direct:getPagingToken"). //
+        process(baseUrlProcessor). //
+        process(new GeneratePagingTokenUrlProcessor()). //
+        recipientList(header("pagingTokenUrl")). //
+        unmarshal(dataFormat);
     }
 }

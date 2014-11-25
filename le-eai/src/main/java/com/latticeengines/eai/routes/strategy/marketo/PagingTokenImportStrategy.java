@@ -7,20 +7,21 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 
-@Component("activityTypeImportStrategy")
-public class ActivityTypeImportStrategy extends MarketoImportStrategyBase {
-    
-    public ActivityTypeImportStrategy() {
-        super("Marketo.ActivityType");
+@Component("pagingTokenImportStrategy")
+public class PagingTokenImportStrategy extends MarketoImportStrategyBase {
+
+    public PagingTokenImportStrategy() {
+        super("Marketo.PagingToken");
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void importData(ProducerTemplate template, Table table, ImportContext ctx) {
         Map<String, Object> headers = getHeaders(ctx);
-        Map<String, Object> activityTypes = template.requestBodyAndHeaders("direct:getActivityTypes", null, headers, Map.class);
-        System.out.println(activityTypes);
+        Map<String, String> tokenMap = template.requestBodyAndHeaders("direct:getPagingToken", null, headers, Map.class);
+        ctx.setProperty(MarketoImportProperty.NEXTPAGETOKEN, tokenMap.get("nextPageToken"));
     }
 
 }

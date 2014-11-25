@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.routes.SourceType;
 import com.latticeengines.eai.routes.strategy.ImportStrategy;
+import com.latticeengines.eai.routes.strategy.marketo.MarketoImportStrategyBase;
 import com.latticeengines.eai.service.ImportService;
 
 @Component("marketoImportService")
@@ -30,7 +31,16 @@ public class MarketoImportServiceImpl extends ImportService {
         if (accessTokenStrategy == null) {
             throw new RuntimeException("Access token strategy not available.");
         } else {
-            accessTokenStrategy.importTable(producer, null, ctx);
+            accessTokenStrategy.importData(producer, null, ctx);
+        }
+    }
+
+    private void setupPagingToken(Table table, ImportContext ctx) {
+        ImportStrategy accessTokenStrategy = ImportStrategy.getImportStrategy(SourceType.MARKETO, "PagingToken");
+        if (accessTokenStrategy == null) {
+            throw new RuntimeException("Paging token strategy not available.");
+        } else {
+            accessTokenStrategy.importData(producer, null, ctx);
         }
     }
 
@@ -40,11 +50,11 @@ public class MarketoImportServiceImpl extends ImportService {
         List<Table> tablesWithMetadata = new ArrayList<>();
         for (Table table : tables) {
             ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.MARKETO, table);
-            if (strategy != null) {
-                tablesWithMetadata.add(strategy.importTableMetadata(producer, table, ctx));
-            } else {
+            if (strategy == null) {
                 log.error("No import strategy for Marketo table " + table.getName());
+                continue;
             }
+            tablesWithMetadata.add(strategy.importMetadata(producer, table, ctx));
         }
         return tablesWithMetadata;
     }
@@ -53,12 +63,15 @@ public class MarketoImportServiceImpl extends ImportService {
     public void importDataAndWriteToHdfs(List<Table> tables, ImportContext ctx) {
         setupAccessToken(ctx);
         for (Table table : tables) {
-            ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.MARKETO, table);
-            if (strategy != null) {
-                strategy.importTable(producer, table, ctx);
-            } else {
+            MarketoImportStrategyBase strategy = (MarketoImportStrategyBase) ImportStrategy.getImportStrategy(SourceType.MARKETO, table);
+            if (strategy == null) {
                 log.error("No import strategy for Marketo table " + table.getName());
+                continue;
             }
+            if (strategy.needsPageToken()) {
+                setupPagingToken(table, ctx);
+            }
+            strategy.importData(producer, table, ctx);
         }
     }
 
