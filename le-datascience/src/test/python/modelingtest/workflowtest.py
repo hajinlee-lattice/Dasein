@@ -3,16 +3,18 @@ Created on Oct 23, 2014
 
 @author: hliu
 '''
-import unittest
+from unittest import TestCase
+
 from domain.classdictgenerator import initDict
-from modeling.loaddata import LoadData
 from modeling.createsamples import CreateSamples
+from modeling.getjobstatus import GetJobStatus
+from modeling.loaddata import LoadData
 from modeling.profiledata import ProfileData
 from modeling.setalgorithm import SetAlgorithm
 from modeling.submitmodel import SubmitModel
-from modeling.getjobstatus import GetJobStatus
 
-class WorkFlowTest(unittest.TestCase):
+
+class WorkFlowTest(TestCase):
 
     def setUp(self):
         classDict = initDict("../../../main/resources/jsonschema/")
@@ -68,9 +70,3 @@ class WorkFlowTest(unittest.TestCase):
         for appId in appIds:
             self.assertEqual(appId.find("application"), 0)
             self.assertEqual(self.jobStatus.pollJobStatus(appId, self.restEndpointHost), "SUCCEEDED")
-        
-        
-
-        
-
-

@@ -3,20 +3,22 @@ Created on Oct 21, 2014
 
 @author: hliu
 '''
-from urlparse import urlparse
-from webhdfs import WebHDFS
 import pwd, os
+from urlparse import urlparse
+
+from webhdfs import WebHDFS
+
 
 class ModelingJob(object):
 
-    def __init__(self, classDict):
+    def __init__(self, classDict={}):
         self.longOpts = []
         self.hdfs = ""
         
         
     def getLongOptions(self): return self.longOpts
         
-    def generateConfiguration(self, opts, config=None):pass
+    def generateConfiguration(self, opts, config=None): pass
     
     def populateValueFromOption(self, opt, arg, objDict):
         for key in objDict.viewkeys():
@@ -24,7 +26,7 @@ class ModelingJob(object):
                 if (str(objDict[key].__repr__).find("list") > 0): objDict[key] = arg.split(",")
                 else: objDict[key] = arg
         
-    def submitJob(self, configuration, restEndpointHost):pass
+    def submitJob(self, configuration, restEndpointHost): pass
     
     def setWebHDFS(self, url):
         webHdfsHostPort = urlparse(url)
