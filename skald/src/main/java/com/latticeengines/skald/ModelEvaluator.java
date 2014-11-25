@@ -11,7 +11,6 @@ import org.dmg.pmml.IOUtil;
 import org.dmg.pmml.PMML;
 import org.jpmml.evaluator.ClassificationMap;
 import org.jpmml.evaluator.Evaluator;
-import org.jpmml.evaluator.EvaluatorUtil;
 import org.jpmml.evaluator.FieldValue;
 import org.jpmml.evaluator.ModelEvaluatorFactory;
 import org.jpmml.manager.PMMLManager;
@@ -21,7 +20,7 @@ import org.xml.sax.SAXException;
 import com.latticeengines.skald.model.ScoreDerivation;
 
 public class ModelEvaluator {
-    public ModelEvaluator(Reader pmml, ScoreDerivation derivation) {
+    public ModelEvaluator(Reader pmml) {
         PMML unmarshalled;
         try {
             unmarshalled = IOUtil.unmarshal(new InputSource(pmml));
@@ -30,10 +29,9 @@ public class ModelEvaluator {
         }
 
         this.manager = new PMMLManager(unmarshalled);
-        this.derivation = derivation;
     }
 
-    public Map<ScoreType, Object> evaluate(Map<String, Object> record) {
+    public Map<ScoreType, Object> evaluate(Map<String, Object> record, ScoreDerivation derivation) {
         Evaluator evaluator = (Evaluator) manager.getModelManager(null, ModelEvaluatorFactory.getInstance());
 
         Map<FieldName, FieldValue> arguments = new HashMap<FieldName, FieldValue>();
@@ -55,9 +53,9 @@ public class ModelEvaluator {
                 throw new RuntimeException("PMML model has multiple results and no target was specified");
             }
         }
-        
+
         @SuppressWarnings("unchecked")
-        ClassificationMap<FieldName> classification = (ClassificationMap<FieldName>)results.get(new FieldName(target));
+        ClassificationMap<FieldName> classification = (ClassificationMap<FieldName>) results.get(new FieldName(target));
         Object predicted = classification.get("1");
 
         // TODO Create derived score elements.
@@ -71,5 +69,4 @@ public class ModelEvaluator {
     }
 
     private final PMMLManager manager;
-    private final ScoreDerivation derivation;
 }

@@ -56,9 +56,9 @@ public class ScoreService {
 
         Map<String, Object> transformed = transformer.transform(selected.data.transforms, request.record);
 
-        ModelEvaluator evaluator = modelRetriever.getEvaluator(request.space, selected.model, selected.derivation);
+        ModelEvaluator evaluator = modelRetriever.getEvaluator(request.space, selected.model);
 
-        return evaluator.evaluate(transformed);
+        return evaluator.evaluate(transformed, selected.derivation);
 
         // TODO Write record and results to a score history database.
         // TODO Also do this for failures and capture error information.

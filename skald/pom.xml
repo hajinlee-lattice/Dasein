@@ -11,6 +11,7 @@
         <component-name>skald</component-name>
         <le.common.version>1.0.15-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.15-SNAPSHOT</le.domain.version>
+        <guava.version>18.0</guava.version>
         <jpmml.version>2.0.0</jpmml.version>
         <jackson.version>2.4.1</jackson.version>
     </properties>
@@ -66,6 +67,13 @@
             <artifactId>spring-webmvc</artifactId>
             <version>4.0.0.RELEASE</version>
         </dependency>
+        
+        <dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava.version}</version>
+		</dependency>
+		        
         
         <dependency>
 		    <groupId>org.jpmml</groupId>
