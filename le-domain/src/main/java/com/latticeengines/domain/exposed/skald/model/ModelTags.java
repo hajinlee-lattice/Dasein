@@ -1,4 +1,4 @@
-package com.latticeengines.skald.model;
+package com.latticeengines.domain.exposed.skald.model;
 
 import java.util.HashMap;
 

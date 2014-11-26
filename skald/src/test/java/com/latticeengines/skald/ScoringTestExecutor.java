@@ -26,20 +26,8 @@ public class ScoringTestExecutor {
             for (Map.Entry<ScoreType, Object> pair : expected.entrySet()) {
                 ScoreType type = pair.getKey();
                 Assert.assertTrue(actual.containsKey(type));
-                Assert.assertTrue(scoreOutputEquals(type, pair.getValue(), actual.get(type)));
+                Assert.assertTrue(ScoreType.valueEquals(type, pair.getValue(), actual.get(type)));
             }
-        }
-    }
-    
-    private boolean scoreOutputEquals(ScoreType type, Object expected, Object actual) {
-        // TODO consolidate score output semantic and type information - migrate to ScoreType
-        if (type == ScoreType.PROBABILITY) {
-            Double dexpected = (Double)expected;
-            Double dactual = (Double)actual;
-            return Math.abs(dexpected.doubleValue() - dactual.doubleValue()) < 1.0e-8;
-        }
-        else {
-            throw new UnsupportedOperationException();
         }
     }
 }

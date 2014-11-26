@@ -17,7 +17,7 @@ import org.jpmml.manager.PMMLManager;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.latticeengines.skald.model.ScoreDerivation;
+import com.latticeengines.domain.exposed.skald.model.ScoreDerivation;
 
 public class ModelEvaluator {
     public ModelEvaluator(Reader pmml) {

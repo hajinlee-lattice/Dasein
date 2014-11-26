@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.skald.model.FieldSchema;
-import com.latticeengines.skald.model.FieldSource;
+import com.latticeengines.domain.exposed.skald.model.FieldSchema;
+import com.latticeengines.domain.exposed.skald.model.FieldSource;
 
 @RestController
 public class ScoreService {

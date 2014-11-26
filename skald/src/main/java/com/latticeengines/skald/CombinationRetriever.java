@@ -8,13 +8,13 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.skald.model.DataComposition;
-import com.latticeengines.skald.model.FieldInterpretation;
-import com.latticeengines.skald.model.FieldSchema;
-import com.latticeengines.skald.model.FieldSource;
-import com.latticeengines.skald.model.FieldType;
-import com.latticeengines.skald.model.ScoreDerivation;
-import com.latticeengines.skald.model.TransformDefinition;
+import com.latticeengines.domain.exposed.skald.model.DataComposition;
+import com.latticeengines.domain.exposed.skald.model.FieldInterpretation;
+import com.latticeengines.domain.exposed.skald.model.FieldSchema;
+import com.latticeengines.domain.exposed.skald.model.FieldSource;
+import com.latticeengines.domain.exposed.skald.model.FieldType;
+import com.latticeengines.domain.exposed.skald.model.ScoreDerivation;
+import com.latticeengines.domain.exposed.skald.model.TransformDefinition;
 
 // Retrieves and caches active model structures, transform definitions, and score derivations.
 @Service

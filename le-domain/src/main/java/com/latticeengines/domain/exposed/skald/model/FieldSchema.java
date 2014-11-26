@@ -1,4 +1,4 @@
-package com.latticeengines.skald.model;
+package com.latticeengines.domain.exposed.skald.model;
 
 public class FieldSchema {
     public FieldSchema(FieldSource source, FieldType type, FieldInterpretation interpretation) {

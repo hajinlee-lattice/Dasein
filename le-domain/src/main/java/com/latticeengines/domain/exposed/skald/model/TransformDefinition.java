@@ -1,6 +1,8 @@
-package com.latticeengines.skald.model;
+package com.latticeengines.domain.exposed.skald.model;
 
 import java.util.Map;
+
+import com.latticeengines.skald.model.FieldType;
 
 public class TransformDefinition {
     public TransformDefinition(String name, String output, FieldType type, Map<String, Object> arguments) {

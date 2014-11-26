@@ -545,7 +545,10 @@
 			},
 			"transforms" : []
 		},
-		"model" : "model",
+		"model" : {
+			"name" : "model",
+			"version" : 0
+		},
 		"derivation" : {
 			"target" : null,
 			"averageProbability" : 0.0,

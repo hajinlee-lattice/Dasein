@@ -18,7 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.skald.model.FieldSchema;
+import com.latticeengines.domain.exposed.skald.model.FieldSchema;
 
 public class TestDirectoryReader {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
@@ -108,7 +108,7 @@ public class TestDirectoryReader {
     private Map<String, String> readModels(File testDirectory, List<CombinationElement> combination) throws Exception {
         Map<String, String> modelsPMML = new HashMap<String, String>();
         for (CombinationElement element : combination) {
-            Path modelPath = Paths.get(testDirectory.getAbsolutePath(), element.model + ".pmml");
+            Path modelPath = Paths.get(testDirectory.getAbsolutePath(), element.model.name + ".pmml");
             String text;
             try {
                 byte[] buffer = Files.readAllBytes(modelPath);
