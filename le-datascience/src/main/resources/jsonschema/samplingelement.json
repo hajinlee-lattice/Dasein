@@ -1,1 +1,11 @@
-{"type":"object","properties":{"percentage":{"type":"integer"},"name":{"type":"string"}}}
+{
+  "type": "object",
+  "properties": {
+    "percentage": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    }
+  }
+}
