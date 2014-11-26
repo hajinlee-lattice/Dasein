@@ -3,11 +3,8 @@ package com.latticeengines.scoring.exposed.service.impl;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.xml.transform.Source;
-
+import org.dmg.pmml.IOUtil;
 import org.dmg.pmml.PMML;
-import org.jpmml.model.ImportFilter;
-import org.jpmml.model.JAXBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -26,10 +23,8 @@ public class ScoringServiceImplTestNG extends ScoringFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        InputStream pmmlInputStream = ClassLoader
-                .getSystemResourceAsStream("com/latticeengines/scoring/LogisticRegressionPMML.xml");
-        Source source = ImportFilter.apply(new InputSource(pmmlInputStream));
-        pmml = JAXBUtil.unmarshalPMML(source);
+        InputStream pmmlInputStream = ClassLoader.getSystemResourceAsStream("com/latticeengines/scoring/LogisticRegressionPMML.xml");
+        pmml = IOUtil.unmarshal(new InputSource(pmmlInputStream));
         requests = createListRequest(150);
     }
     

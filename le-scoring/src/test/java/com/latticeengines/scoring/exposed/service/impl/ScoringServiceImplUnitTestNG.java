@@ -8,12 +8,9 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.transform.Source;
-
 import org.codehaus.jackson.map.ObjectMapper;
+import org.dmg.pmml.IOUtil;
 import org.dmg.pmml.PMML;
-import org.jpmml.model.ImportFilter;
-import org.jpmml.model.JAXBUtil;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.xml.sax.InputSource;
@@ -31,8 +28,7 @@ public class ScoringServiceImplUnitTestNG {
     public void setup() throws Exception {
         InputStream pmmlInputStream = ClassLoader
                 .getSystemResourceAsStream("com/latticeengines/scoring/LogisticRegressionPMML.xml");
-        Source source = ImportFilter.apply(new InputSource(pmmlInputStream));
-        pmml = JAXBUtil.unmarshalPMML(source); 
+        pmml = IOUtil.unmarshal(new InputSource(pmmlInputStream));
     }
 
     @Test(groups = "unit")
