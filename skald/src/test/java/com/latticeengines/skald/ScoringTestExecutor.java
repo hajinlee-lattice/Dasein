@@ -26,8 +26,17 @@ public class ScoringTestExecutor {
             for (Map.Entry<ScoreType, Object> pair : expected.entrySet()) {
                 ScoreType type = pair.getKey();
                 Assert.assertTrue(actual.containsKey(type));
-                Assert.assertTrue(ScoreType.valueEquals(type, pair.getValue(), actual.get(type)));
+                Assert.assertTrue(valueEquals(type, pair.getValue(), actual.get(type)));
             }
         }
+
+    }
+    
+    private static boolean valueEquals(ScoreType scoretype, Object value1, Object value2) {
+        Class<?> clazz = scoretype.type();
+        if (clazz == Double.class) {
+            return Math.abs(((Double)value1).doubleValue() - ((Double)value2).doubleValue()) < 1e-10; 
+        }
+        return value1.equals(value2);
     }
 }

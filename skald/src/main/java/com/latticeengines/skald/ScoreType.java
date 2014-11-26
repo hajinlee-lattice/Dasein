@@ -48,12 +48,4 @@ public enum ScoreType {
             throw new RuntimeException("Failure parsing value " + rawvalue + " to ScoreType " + scoretype);
         }
     }
-    
-    public static boolean valueEquals(ScoreType scoretype, Object value1, Object value2) {
-        Class<?> clazz = scoretype.type();
-        if (clazz == Double.class) {
-            return Math.abs(((Double)value1).doubleValue() - ((Double)value2).doubleValue()) < 1e-10; 
-        }
-        return value1.equals(value2);
-    }
 }
