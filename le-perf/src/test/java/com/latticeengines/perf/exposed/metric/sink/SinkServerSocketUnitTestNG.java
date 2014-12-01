@@ -8,14 +8,14 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class SinkServerSocketUnitTestNG {
-    
+
     private SinkCollectionServer sinkServerSocket;
 
     @BeforeClass(groups = "unit")
     public void setup() {
         sinkServerSocket = spy(new SinkCollectionServer("/tmp/metricfile.txt", 123));
     }
-    
+
     @Test(groups = "unit")
     public void invokeCanWrite() throws Exception {
         sinkServerSocket.invoke("CANWRITE");

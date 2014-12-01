@@ -7,35 +7,39 @@ import java.util.Map;
 
 import org.apache.avro.Schema;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class AttributeOwner {
 
-    private List<Attribute> attributes = new ArrayList<>();
-    private Schema schema;
+	private List<Attribute> attributes = new ArrayList<>();
+	private Schema schema;
 
-    public void addAttribute(Attribute attribute) {
-        attributes.add(attribute);
-    }
+	public void addAttribute(Attribute attribute) {
+		attributes.add(attribute);
+	}
+	
+	public List<Attribute> getAttributes() {
+		return attributes;
+	}
 
-    public List<Attribute> getAttributes() {
-        return attributes;
-    }
+	@JsonIgnore
+	public Map<String, Attribute> getNameAttributeMap() {
+		Map<String, Attribute> map = new HashMap<String, Attribute>();
 
-    public Map<String, Attribute> getNameAttributeMap() {
-        Map<String, Attribute> map = new HashMap<String, Attribute>();
+		for (Attribute attribute : attributes) {
+			map.put(attribute.getName(), attribute);
+		}
+		return map;
+	}
 
-        for (Attribute attribute : attributes) {
-            map.put(attribute.getName(), attribute);
-        }
-        return map;
-    }
+	@JsonIgnore
+	public Schema getSchema() {
+		return schema;
+	}
 
-    public Schema getSchema() {
-        return schema;
-    }
-
-    public void setSchema(Schema schema) {
-        this.schema = schema;
-    }
-
+	@JsonIgnore
+	public void setSchema(Schema schema) {
+		this.schema = schema;
+	}
 
 }

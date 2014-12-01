@@ -20,7 +20,7 @@ public class SecureFileTransferAgent {
     private String userId;
 
     private String password;
-    
+
     public SecureFileTransferAgent(String serverAddress, String userId, String password) {
         this.serverAddress = serverAddress;
         this.userId = userId;

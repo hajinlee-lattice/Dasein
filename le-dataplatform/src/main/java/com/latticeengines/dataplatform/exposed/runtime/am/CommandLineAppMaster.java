@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.runtime.python;
+package com.latticeengines.dataplatform.exposed.runtime.am;
 
 import java.io.File;
 import java.util.Iterator;
@@ -32,9 +32,9 @@ import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.runtime.metric.LedpMetricsMgr;
 
-public class PythonAppMaster extends StaticEventingAppmaster implements ContainerLauncherInterceptor {
+public class CommandLineAppMaster extends StaticEventingAppmaster implements ContainerLauncherInterceptor {
 
-    private final static Log log = LogFactory.getLog(PythonAppMaster.class);
+    private final static Log log = LogFactory.getLog(CommandLineAppMaster.class);
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -44,7 +44,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 
     private LedpMetricsMgr ledpMetricsMgr = null;
 
-    private String pythonContainerId;
+    private String containerId;
 
     private ProgressMonitor monitor;
 
@@ -91,7 +91,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
     public void submitApplication() {
         super.submitApplication();
         String appAttemptId = getApplicationAttemptId().toString();
-        final String appId = getApplicationId(appAttemptId);
+        final String appId = getApplicationAttemptId().getApplicationId().toString();
 
         ledpMetricsMgr = LedpMetricsMgr.getInstance(appAttemptId);
         ledpMetricsMgr.setPriority(priority);
@@ -99,7 +99,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         final long appStartTime = System.currentTimeMillis();
         ledpMetricsMgr.setAppStartTime(appStartTime);
 
-        log.info("Application submitted with Application id = " + getApplicationId(appId));
+        log.info("Application submitted with Application id = " + appId);
 
         new Thread(new Runnable() {
 
@@ -124,9 +124,9 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 
     @Override
     public ContainerLaunchContext preLaunch(Container container, ContainerLaunchContext context) {
-    	logFilesInLocalFilesystem();
-        pythonContainerId = container.getId().toString();
-        log.info("Container id = " + pythonContainerId);
+        logFilesInLocalFilesystem();
+        containerId = container.getId().toString();
+        log.info("Container id = " + containerId);
         // Start monitoring process
         monitor.start();
 
@@ -180,7 +180,7 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         log.info(status.getDiagnostics());
 
         if (status.getExitStatus() == ContainerExitStatus.ABORTED) {
-            if (!containerId.equals(pythonContainerId)) {
+            if (!containerId.equals(containerId)) {
                 log.info("Releasing container " + containerId + ". Ignoring abort error.");
                 return true;
             } else {
@@ -202,13 +202,8 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         monitor.stop();
     }
 
-    private String getApplicationId(String appAttemptId) {
-        String[] tokens = appAttemptId.split("_");
-        return "application_" + tokens[1] + "_" + tokens[2];
-    }
-
     private void setRuntimeConfig(Properties parameters) {
-        // Sets runtime host and port needed by python
+        // Sets runtime host and port needed by container
         String configPath = hdfsJobBaseDir + "/" + parameters.getProperty(ContainerProperty.JOBDIR.name()) + "/"
                 + parameters.getProperty(ContainerProperty.RUNTIME_CONFIG.name());
         RuntimeConfig runtimeConfig = new RuntimeConfig(configPath, yarnConfiguration);
@@ -227,9 +222,9 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
         }
 
     }
-    
+
     private void logFilesInLocalFilesystem() {
-        
+
         IOFileFilter filter = new IOFileFilter() {
 
 			@Override
@@ -243,11 +238,8 @@ public class PythonAppMaster extends StaticEventingAppmaster implements Containe
 			}
         };
         Iterator<File> it = FileUtils.iterateFilesAndDirs(new File("."), filter, filter);
-        
         while (it.hasNext()) {
-        	log.info(it.next().getAbsolutePath());
+            log.info(it.next().getAbsolutePath());
         }
-
-    	
     }
 }

@@ -89,5 +89,4 @@ public class ModelingResourceCLI {
         // ModelingResourceJob>) cmdlstp.getClass();
         executeJob(cmdlstp, command[2]);
     }
-
 }

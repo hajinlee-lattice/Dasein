@@ -1,4 +1,5 @@
 #!/bin/bash
+chmod 755 /tmp/app/dataplatform/eai
 chmod 755 /tmp/app/dataplatform/scripts
 chmod 755 /tmp/app/dataplatform/scripts/algorithm
 rm /tmp/app/dataplatform/scripts/*.pyc

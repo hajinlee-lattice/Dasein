@@ -12,10 +12,10 @@ import org.apache.hadoop.metrics2.MetricsException;
 
 class SinkServerClient implements SinkOperations {
     private static final Log log = LogFactory.getLog(SinkServerClient.class);
-    
+
     private String host;
     private int port;
-    
+
     public SinkServerClient(String host, int port) {
         try {
             this.host = host;
@@ -24,7 +24,7 @@ class SinkServerClient implements SinkOperations {
             throw new MetricsException(e);
         }
     }
-    
+
     private String writeThenRead(String output) {
         try (Socket clientSocket = new Socket(host, port)) {
             DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
@@ -33,7 +33,7 @@ class SinkServerClient implements SinkOperations {
             outToServer.flush();
             String retval = inFromServer.readLine();
             log.info("FROM SERVER: " + retval);
-            
+
             return retval;
         } catch (IOException e) {
             throw new MetricsException(e);

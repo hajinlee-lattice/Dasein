@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.eai;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
 public class Table extends AttributeOwner implements HasName {
@@ -24,4 +25,9 @@ public class Table extends AttributeOwner implements HasName {
     public String getDisplayName() {
         return displayName;
     }
+
+	@Override
+	public String toString() {
+		return JsonUtils.serialize(this);
+	}
 }

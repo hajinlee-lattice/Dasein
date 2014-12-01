@@ -1,6 +1,7 @@
 package com.latticeengines.api.controller;
 
 import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -11,11 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.latticeengines.dataplatform.exposed.service.EaiService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.api.ThrottleSubmission;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.eai.EaiConfiguration;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
@@ -30,6 +34,9 @@ public class ModelResource {
 
     @Autowired
     private ModelingService modelingService;
+
+    @Autowired
+    private EaiService eaiService;
 
     public ModelResource() {
         // Need to set java.class.path in order for the Sqoop dynamic java
@@ -97,5 +104,12 @@ public class ModelResource {
     @ResponseBody
     public StringList getFeatures(@RequestBody Model model) {
         return new StringList(modelingService.getFeatures(model, false));
+    }
+
+    @RequestMapping(value = "/eai", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    public AppSubmission eai(@RequestBody EaiConfiguration config) {
+        AppSubmission submission = new AppSubmission(Arrays.<ApplicationId> asList(eaiService.invokeEai(config)));
+        return submission;
     }
 }

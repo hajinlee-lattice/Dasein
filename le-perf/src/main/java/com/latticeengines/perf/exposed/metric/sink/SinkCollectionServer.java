@@ -25,7 +25,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
     private Map<String, Method> methodMap = new HashMap<String, Method>();
     private BufferedOutputStream metricsOutputStream;
     private int numMetrics = 1;
-    
+
     public SinkCollectionServer(String metricFileName, int port) {
         this.port = port;
         try {
@@ -39,54 +39,55 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
         }
         init();
     }
-    
+
     private void init() {
         Class<SinkOperations> c = SinkOperations.class;
-        
+
         Method[] methods = c.getMethods();
-        
+
         for (Method method : methods) {
             methodMap.put(method.getName().toUpperCase(), method);
         }
     }
-    
+
     @Override
     public void run() {
         try (ServerSocket listener = new ServerSocket(port)) {
             while (true) {
                 Socket connectionSocket = listener.accept();
-                BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
+                BufferedReader inFromClient = new BufferedReader(new InputStreamReader(
+                        connectionSocket.getInputStream()));
                 DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
                 String command = inFromClient.readLine();
                 log.info("Invoking command " + command);
                 Object retval = null;
                 try {
-                    retval = invoke(command);    
+                    retval = invoke(command);
                     if (retval == null) {
                         retval = "Acknowledged";
                     }
                 } catch (Exception e) {
                     retval = "Error";
                 }
-                
+
                 log.info("Writing " + retval);
                 outToClient.writeBytes(retval.toString());
-                connectionSocket.close(); 
+                connectionSocket.close();
             }
         } catch (Exception e) {
             throw new MetricsException(e);
         }
     }
-    
+
     Object invoke(String command) throws Exception {
         if (command == null) {
             return null;
         }
         String[] tokens = command.split(" ");
-        
+
         String cmd = tokens[0];
         Method method = methodMap.get(cmd);
-        
+
         if (method == null) {
             log.info("Method " + cmd + " does not exist in SinkOperations interface.");
             return null;
@@ -94,7 +95,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
         int tokenLen = tokens.length;
         if (tokenLen > 1) {
             String[] tokensWithoutCmd = new String[tokenLen - 1];
-            
+
             System.arraycopy(tokens, 1, tokensWithoutCmd, 0, tokenLen - 1);
             String param = StringUtils.join(tokensWithoutCmd, ",");
             return method.invoke(this, new Object[] { param });
@@ -107,7 +108,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
     public String canWrite() {
         return Boolean.toString(canWrite);
     }
-    
+
     public void setCanWrite(boolean canWrite) {
         this.canWrite = canWrite;
     }
@@ -117,7 +118,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
         log.info(metric);
         try {
             metricsOutputStream.write((metric + "\n").getBytes());
-            
+
             if (numMetrics % 100 == 0) {
                 metricsOutputStream.flush();
             }
@@ -125,7 +126,7 @@ public class SinkCollectionServer implements Runnable, SinkOperations {
             throw new MetricsException(e);
         }
     }
-    
+
     public void flushToFile() {
         try {
             metricsOutputStream.flush();

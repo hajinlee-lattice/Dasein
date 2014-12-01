@@ -23,7 +23,6 @@
         <relativePath>../le-parent</relativePath>
     </parent>
 
-
     <profiles>
         <profile>
             <id>functional</id>

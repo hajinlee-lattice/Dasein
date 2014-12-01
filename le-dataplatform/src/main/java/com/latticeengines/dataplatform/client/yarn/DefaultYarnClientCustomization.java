@@ -25,18 +25,21 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DefaultYarnClientCustomization.class);
 
-    protected Configuration configuration;
+    protected Configuration yarnConfiguration;
 
     protected String hdfsJobBaseDir;
 
-    public DefaultYarnClientCustomization(Configuration configuration, String hdfsJobBaseDir) {
-        this.configuration = configuration;
-        this.hdfsJobBaseDir = hdfsJobBaseDir;
+    protected String webHdfs;
+
+    public DefaultYarnClientCustomization(Configuration yarnConfiguration) {
+        this.yarnConfiguration = yarnConfiguration;
+        this.hdfsJobBaseDir = yarnConfiguration.get("dataplatform.hdfsJobBaseDir");
+        this.webHdfs = yarnConfiguration.get("dataplatform.webHdfs");
     }
 
     @Override
     public ResourceLocalizer getResourceLocalizer(Properties containerProperties) {
-        return new DefaultResourceLocalizer(configuration, getHdfsEntries(containerProperties),
+        return new DefaultResourceLocalizer(yarnConfiguration, getHdfsEntries(containerProperties),
                 getCopyEntries(containerProperties));
     }
 
@@ -115,7 +118,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
                     + " does not exist.");
         }
         String parameter = setupParameters(containerProperties);
-        
+
         return Arrays.<String> asList(new String[] { "$JAVA_HOME/bin/java", //
                 // "-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4001,server=y,suspend=y",
                 // //
@@ -149,5 +152,10 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
         }
         String propStr = prop.toString();
         return propStr.substring(1, propStr.length() - 1).replaceAll(",", " ");
+    }
+
+    @Override
+    public Map<String, String> setEnvironment(Map<String, String> environment, Properties containerProperties) {
+        return environment;
     }
 }

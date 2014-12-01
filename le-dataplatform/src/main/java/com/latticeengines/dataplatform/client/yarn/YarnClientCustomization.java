@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.client.yarn;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
@@ -35,4 +36,6 @@ public interface YarnClientCustomization {
     void validate(Properties appMasterProperties, Properties containerProperties);
 
     void finalize(Properties appMasterProperties, Properties containerProperties);
+
+    Map<String, String> setEnvironment(Map<String, String> environment, Properties containerProperties);
 }

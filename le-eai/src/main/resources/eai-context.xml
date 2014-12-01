@@ -22,8 +22,9 @@
       http://www.springframework.org/schema/util/spring-util-4.0.xsd
       http://camel.apache.org/schema/spring
       http://camel.apache.org/schema/spring/camel-spring.xsd">
-    
+
     <context:component-scan base-package="com.latticeengines.eai"/>
+    
     <camel:camelContext id="eai">
         <camel:package>com.latticeengines.eai.routes</camel:package>
     </camel:camelContext>

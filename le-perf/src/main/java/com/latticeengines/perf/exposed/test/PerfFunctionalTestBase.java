@@ -13,14 +13,13 @@ import org.apache.commons.logging.LogFactory;
 import com.latticeengines.perf.exposed.metric.sink.SinkCollectionServer;
 import com.latticeengines.perf.exposed.metric.sink.SocketSink;
 
-
 public class PerfFunctionalTestBase {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PerfFunctionalTestBase.class);
-    
+
     private SinkCollectionServer collectionServer = null;
     private ExecutorService exec = null;
-    
+
     public PerfFunctionalTestBase(String metricFileName) {
         String hostPortStr = null;
         try {
@@ -29,12 +28,12 @@ public class PerfFunctionalTestBase {
         } catch (ConfigurationException e) {
             throw new IllegalStateException(e);
         }
-        
+
         if (hostPortStr != null) {
             String[] hostPortTokens = SocketSink.parseServer(hostPortStr);
             collectionServer = new SinkCollectionServer(metricFileName, Integer.parseInt(hostPortTokens[1]));
         }
-        
+
     }
 
     public void beforeClass() {
@@ -48,21 +47,21 @@ public class PerfFunctionalTestBase {
         });
         exec.submit(collectionServer);
     }
-    
+
     public void beforeMethod() {
         collectionServer.setCanWrite(true);
     }
-    
+
     public void afterMethod() {
         collectionServer.flushToFile();
         collectionServer.setCanWrite(false);
     }
-    
+
     public void afterClass() {
         collectionServer.setCanWrite(false);
         exec.shutdownNow();
     }
-    
+
     public void flushToFile() {
         collectionServer.flushToFile();
     }

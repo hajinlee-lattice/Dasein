@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.TypeConverter;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +24,6 @@ import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.exposed.exception.LedpCode;
 import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
@@ -173,7 +173,7 @@ public abstract class JobServiceImpl implements JobService, ApplicationContextAw
     }
 
     protected void setJobStatus(JobStatus jobStatus, String applicationId) {
-        ApplicationReport appReport = defaultYarnClient.getApplicationReport(YarnUtils.getApplicationIdFromString(applicationId));
+        ApplicationReport appReport = getJobReportById(ConverterUtils.toApplicationId(applicationId));
         jobStatus.setId(applicationId);
         if (appReport != null) {
             jobStatus.setStatus(appReport.getFinalApplicationStatus());

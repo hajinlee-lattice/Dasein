@@ -40,7 +40,7 @@
         PYTHONPATH=.:leframework.tar.gz:$$PYTHONPIPELINELIB$$
     </yarn:environment>
 
-    <yarn:master appmaster-class="com.latticeengines.dataplatform.runtime.python.PythonAppMaster">
+    <yarn:master appmaster-class="com.latticeengines.dataplatform.exposed.runtime.am.CommandLineAppMaster">
         <yarn:container-allocator
             virtualcores="$$VIRTUALCORES$$"
             memory="$$MEMORY$$"
@@ -49,7 +49,7 @@
         <yarn:container-command>
                         <![CDATA[
                         /usr/local/bin/python2.7
-                        launcher.py $$METADATA$$ ${dataplatform.yarn.job.runtime.config} 
+                        launcher.py metadata.json ${dataplatform.yarn.job.runtime.config} 
                         1><LOG_DIR>/PythonContainer.stdout
                         2><LOG_DIR>/PythonContainer.stderr
                         ]]>

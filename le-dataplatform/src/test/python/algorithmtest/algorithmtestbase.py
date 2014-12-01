@@ -7,7 +7,7 @@ from trainingtestbase import TrainingTestBase
 class AlgorithmTestBase(TrainingTestBase):
     
     algorithmJsonFileName = ""
-    
+
     def tearDown(self):
         if os.path.exists(self.algorithmJsonFileName):
             os.remove(self.algorithmJsonFileName)

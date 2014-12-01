@@ -10,6 +10,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppInfo;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 
@@ -112,7 +112,7 @@ public class ThrottleLongHangingJobs extends WatchdogPlugin {
         List<String> appsKilled = new ArrayList<String>();
         for (String appId : appsToKill) {
             try {
-                modelingJobService.killJob(YarnUtils.getApplicationIdFromString(appId));
+                modelingJobService.killJob(ConverterUtils.toApplicationId(appId));
                 appsKilled.add(appId);
                 appRecords.remove(appId);
             } catch (Exception e) {

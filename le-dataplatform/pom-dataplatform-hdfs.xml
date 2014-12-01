@@ -34,6 +34,7 @@
             <properties>
                 <dataplatform.properties.path>conf/env/devcluster</dataplatform.properties.path>
                 <hadoop-metrics2.properties.path>conf/env/devcluster</hadoop-metrics2.properties.path>
+                <eai.properties.path>../le-eai/conf/env/devcluster</eai.properties.path>
             </properties>
         </profile>
         <profile>
@@ -119,6 +120,17 @@
                                 </source>
                                 <source>
                                     <location>${dataplatform.properties.path}/dataplatform.properties</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/tmp/app/dataplatform/eai</directory>
+                            <filemode>644</filemode>
+                            <username>${mapping.username}</username>
+                            <groupname>${mapping.groupname}</groupname>
+                            <sources>
+                                <source>
+                                    <location>${eai.properties.path}/eai.properties</location>
                                 </source>
                             </sources>
                         </mapping>

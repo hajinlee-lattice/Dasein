@@ -72,7 +72,6 @@ public class CommandLineLoadDataSetup extends CommandLineSetup<LoadData> {
         config.setMetadataTable(metadataTable);
         config.setKeyCols(Arrays.<String> asList(keyCol.split(VALUE_DELIMETER)));
         config.setCreds(dc);
-
         ld.setConfiguration(restEndpointHost, config);
     }
 }

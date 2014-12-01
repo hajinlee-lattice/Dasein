@@ -52,7 +52,9 @@ public enum LedpCode {
     LEDP_16006("Retrieved empty DL metadata columns for model command:{0} from url:{1}."), //
     LEDP_16007("LeadScoringCommand failed."), //
     LEDP_16008("Error message received in DL metadata columns response: {0}"), //
-    LEDP_16009("Problem writing metadata to HDFS path: {0}, metadata content: (1)");
+    LEDP_16009("Problem writing metadata to HDFS path: {0}, metadata content: (1)"),//
+    // Eai Service 17000-17999
+    LEDP_17000("At least one attribute required."); //
 
     private String message;
 

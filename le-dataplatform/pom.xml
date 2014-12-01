@@ -16,6 +16,7 @@
         <le.common.version>1.0.15-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.15-SNAPSHOT</le.domain.version>
         <le.scheduler.version>1.0.15-SNAPSHOT</le.scheduler.version>
+        <le.eai.version>1.0.15-SNAPSHOT</le.eai.version>
     </properties>
 
     <parent>
@@ -208,6 +209,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
+            <artifactId>spring-yarn-batch</artifactId>
+            <version>${spring.data.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
             <artifactId>spring-yarn-test</artifactId>
             <version>${spring.data.version}</version>
         </dependency>
@@ -258,6 +264,11 @@
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-eai</artifactId>
+            <version>${le.eai.version}</version>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

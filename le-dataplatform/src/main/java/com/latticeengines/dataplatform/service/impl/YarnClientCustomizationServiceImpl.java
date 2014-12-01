@@ -52,7 +52,8 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     private String runtimeConfig;
 
     @Override
-    public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties, Properties containerProperties) {
+    public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties,
+            Properties containerProperties) {
 
         YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
         if (customization == null) {
@@ -66,24 +67,27 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             throw new LedpException(LedpCode.LEDP_00000, e, new String[] { dir });
         }
         containerProperties.put(ContainerProperty.JOBDIR.name(), dir);
+        containerProperties.put(ContainerProperty.RUNTIME_CONFIG.name(), runtimeConfig);
         customization.beforeCreateLocalLauncherContextFile(containerProperties);
         String fileName = createContainerLauncherContextFile(customization, appMasterProperties, containerProperties);
         containerProperties.put(ContainerProperty.APPMASTER_CONTEXT_FILE.name(), fileName);
-        containerProperties.put(ContainerProperty.RUNTIME_CONFIG.name(), runtimeConfig);
         String container_count = appMasterProperties.getProperty(AppMasterProperty.CONTAINER_COUNT.name());
         if (container_count == null)
             container_count = "1";
         containerProperties.put(AppmasterConstants.CONTAINER_COUNT, container_count);
-        containerProperties.setProperty(AppMasterProperty.QUEUE.name(), appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()));
-        containerProperties.setProperty(AppMasterProperty.CUSTOMER.name(), appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()));
+        containerProperties.setProperty(AppMasterProperty.QUEUE.name(),
+                appMasterProperties.getProperty(AppMasterProperty.QUEUE.name()));
+        containerProperties.setProperty(AppMasterProperty.CUSTOMER.name(),
+                appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()));
         ResourceLocalizer resourceLocalizer = customization.getResourceLocalizer(containerProperties);
         int memory = customization.getMemory(appMasterProperties);
         int virtualCores = customization.getVirtualcores(appMasterProperties);
         int priority = customization.getPriority(appMasterProperties);
         String queue = customization.getQueue(appMasterProperties);
         List<String> commands = customization.getCommands(containerProperties);
-
-        client.setAppName(jobNameService.createJobName(appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()), clientName));
+        Map<String, String> environment = customization.setEnvironment(client.getEnvironment(), containerProperties);
+        client.setAppName(jobNameService.createJobName(
+                appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()), clientName));
         if (resourceLocalizer != null) {
             client.setResourceLocalizer(resourceLocalizer);
         }
@@ -108,9 +112,14 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             client.setCommands(commands);
         }
 
+        if (environment != null) {
+            client.setEnvironment(environment);
+        }
+
     }
 
-    private String createContainerLauncherContextFile(YarnClientCustomization customization, Properties appMasterProperties, Properties containerProperties) {
+    private String createContainerLauncherContextFile(YarnClientCustomization customization,
+            Properties appMasterProperties, Properties containerProperties) {
         String contextFileName = customization.getContainerLauncherContextFile(appMasterProperties);
 
         try (InputStream contextFileUrlFromClasspathAsStream = getClass().getResourceAsStream(contextFileName)) {
@@ -136,7 +145,8 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     }
 
     @Override
-    public void validate(CommandYarnClient client, String clientName, Properties appMasterProperties, Properties containerProperties) {
+    public void validate(CommandYarnClient client, String clientName, Properties appMasterProperties,
+            Properties containerProperties) {
         YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
         if (customization == null) {
             return;

@@ -14,21 +14,21 @@ public class SocketSink implements MetricsSink {
     private static final String SERVER_KEY = "server";
 
     private SinkServerClient client = null;
-    
+
     @Override
     public void init(SubsetConfiguration conf) {
         String hostPort = conf.getString(SERVER_KEY);
         String[] hostPortTokens = parseServer(hostPort);
         client = new SinkServerClient(hostPortTokens[0], Integer.parseInt(hostPortTokens[1]));
     }
-    
+
     public static String[] parseServer(String hostPort) {
         if (hostPort == null) {
             throw new MetricsException("Missing server property");
         }
-        
+
         String[] hostPortTokens = hostPort.split(":");
-        
+
         if (hostPortTokens.length != 2) {
             throw new MetricsException("Format must be host:port");
         }
@@ -82,5 +82,5 @@ public class SocketSink implements MetricsSink {
     public void flush() {
         // NOOP
     }
-    
+
 }

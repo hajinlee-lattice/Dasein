@@ -29,8 +29,8 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
 
-    public PythonClientCustomization(Configuration configuration, String hdfsJobBaseDir) {
-        super(configuration, hdfsJobBaseDir);
+    public PythonClientCustomization(Configuration yarnConfiguration) {
+        super(yarnConfiguration);
     }
 
     @Override
@@ -40,6 +40,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
     @Override
     public String getContainerLauncherContextFile(Properties properties) {
+        //return "/batch-amjob/appmaster-context.xml";
         return "/python/dataplatform-python-appmaster-context.xml";
     }
 
@@ -78,8 +79,58 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
         copyEntries.add(new LocalResourcesFactoryBean.CopyEntry("file:" + metadataFilePath,
                 getJobDir(containerProperties), false));
         return copyEntries;
-
     }
+
+    /**
+    @Override
+    public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
+        Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = super.getHdfsEntries(containerProperties);
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                "/app/dataplatform/scripts/*", //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.ARCHIVE, //
+                LocalResourceVisibility.PUBLIC, //
+                "/app/dataplatform/scripts/leframework.tar.gz", //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                "/datascientist/modelpredictorextraction.py", //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                containerProperties.getProperty(PythonContainerProperty.TRAINING.name()), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                containerProperties.getProperty(PythonContainerProperty.TEST.name()), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                containerProperties.getProperty(PythonContainerProperty.SCHEMA.name()), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                containerProperties.getProperty(PythonContainerProperty.DATAPROFILE.name()), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                containerProperties.getProperty(PythonContainerProperty.CONFIGMETADATA.name()), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                containerProperties.getProperty(PythonContainerProperty.PYTHONSCRIPT.name()), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
+                LocalResourceVisibility.PUBLIC, //
+                containerProperties.getProperty(PythonContainerProperty.PYTHONPIPELINESCRIPT.name()), //
+                false));
+        hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.ARCHIVE, //
+                LocalResourceVisibility.PUBLIC, //
+                containerProperties.getProperty(PythonContainerProperty.PYTHONPIPELINELIBFQDN.name()), //
+                false));
+        return hdfsEntries;
+    }**/
 
     @Override
     public void validate(Properties appMasterProperties, Properties containerProperties) {
@@ -107,7 +158,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
         }
         String metadataJson = null;
         try {
-            metadataJson = HdfsUtils.getHdfsFileContents(configuration, schemaHdfsPath);
+            metadataJson = HdfsUtils.getHdfsFileContents(yarnConfiguration, schemaHdfsPath);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_10001, e);
         }
@@ -131,5 +182,15 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             }
         }
     }
+
+    /**
+    @Override
+    public Map<String, String> setEnvironment(Map<String, String> environment, Properties containerPropertie) {
+        environment.put("SHDP_HD_FSWEB", webHdfs);
+        environment.put("PYTHONIOENCODING", "UTF-8");
+        environment.put("PYTHONPATH",
+                ".:leframework.tar.gz:" + containerPropertie.get(PythonContainerProperty.PYTHONPIPELINELIB.name()));
+        return environment;
+    }**/
 
 }
