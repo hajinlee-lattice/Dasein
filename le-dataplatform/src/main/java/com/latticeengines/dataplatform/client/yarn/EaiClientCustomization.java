@@ -31,7 +31,7 @@ public class EaiClientCustomization extends DefaultYarnClientCustomization {
 
     @Override
     public String getContainerLauncherContextFile(Properties properties) {
-        return "/eai-batch-amjob/appmaster-context.xml";
+        return "/eai-batch-amjob/dataplatform-eai-appmaster-context.xml";
     }
 
     @Override
