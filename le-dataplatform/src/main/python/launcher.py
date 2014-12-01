@@ -10,6 +10,7 @@ from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
 from leframework.util.pandasutil import PandasUtil
 from leframework.webhdfs import WebHDFS
+from leframework.progressreporter import ProgressReporter
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -64,10 +65,15 @@ class Launcher(object):
         self.__validateParameters(schema)
 
         # Extract data and scripts for execution
+        runtimeProperties = parser.getRuntimeProperties()
+        progressReporter = ProgressReporter(runtimeProperties["host"], int(runtimeProperties["port"]))
+        progressReporter.setTotalState(2)
         (self.training, self.trainingNonScoringTargets) = parser.createList(self.stripPath(schema["training_data"]))
+        progressReporter.nextStateForPreStateMachine(0, 0.1, 1)
         (self.test, self.testNonScoringTargets) = parser.createList(self.stripPath(schema["test_data"]))
         script = self.stripPath(schema["python_script"])
-
+        progressReporter.nextStateForPreStateMachine(0, 0.1, 2)
+        
         # Create directory for model result
         modelLocalDir = os.getcwd() + "/results/"
         
@@ -81,7 +87,7 @@ class Launcher(object):
         # that contains the generated model data
         execfile(script, globals())
 
-        executor = LearningExecutor(parser.getRuntimeProperties())
+        executor = LearningExecutor(runtimeProperties)
         if 'getExecutor' in globals():
             executor = globals()["getExecutor"]()
 

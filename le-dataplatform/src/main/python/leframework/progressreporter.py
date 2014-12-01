@@ -40,7 +40,12 @@ class ProgressReporter(object):
         self.curState += 1
         self.progress = self.preStateMachineWeight + self.stateMachineWeight * self.curState / float(self.stateCount)
         self.__reportProgress()
-        
+    
+    def nextStateForPreStateMachine(self, previousWeight, currentWeight, curState):
+        self.curState = curState;
+        self.progress = previousWeight + currentWeight * self.curState / float(self.stateCount)
+        self.__reportProgress()
+            
     def __reportProgress(self):
         if self.host is None or self.port == 0:
             self.logger.warn("Couldn't connect to a null host")
