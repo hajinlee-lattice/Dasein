@@ -4,7 +4,7 @@ from time import sleep
 
 class ConsoleCaptureTest(TestBase):
 
-    def Capture(self):
+    def testCapture(self):
         with Capture() as capture:
             print "List1"
             print "List2"
@@ -14,7 +14,7 @@ class ConsoleCaptureTest(TestBase):
             print "List3"
             self.assertEqual(capture.getCaptureList(), ["List3"])
             
-    def CaptureMonitor(self):
+    def testCaptureMonitor(self):
         with Capture() as capture:
             print "building tree1"
             print "building tree2"
