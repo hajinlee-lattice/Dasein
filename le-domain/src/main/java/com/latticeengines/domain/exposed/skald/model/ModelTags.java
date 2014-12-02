@@ -2,6 +2,8 @@ package com.latticeengines.domain.exposed.skald.model;
 
 import java.util.HashMap;
 
+// There's a single instance of this document for each space, and it maps
+// tags to version numbers for each model.
 // First keyed by model name, then by tag, mapping to a model version number.
 @SuppressWarnings("serial")
 public class ModelTags extends HashMap<String, HashMap<String, Integer>> {

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// Defines how to construct an input record for a PMML model.
 public class DataComposition {
     public DataComposition() {
         this.fields = new HashMap<String, FieldSchema>();

@@ -2,6 +2,8 @@ package com.latticeengines.domain.exposed.skald.model;
 
 import java.util.List;
 
+// Contains all the information necessary to construct score elements that
+// are derived from the probability.
 public class ScoreDerivation {
     // The PMML predicted field to look use as the predicted probability.
     // Required only if the PMML model has multiple predicted fields.
