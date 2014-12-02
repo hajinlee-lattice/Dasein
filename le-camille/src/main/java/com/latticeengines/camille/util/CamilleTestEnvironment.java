@@ -37,7 +37,7 @@ public class CamilleTestEnvironment {
 
             ConfigJson config = new ConfigJson();
             config.setConnectionString(server.getConnectString());
-            config.setPodId("PodID");
+            config.setPodId("Development");
 
             OutputStream stream = new ByteArrayOutputStream();
 
