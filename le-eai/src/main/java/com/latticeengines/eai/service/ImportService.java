@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
+import com.latticeengines.domain.exposed.eai.DataExtractionConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.routes.ImportProperty;
@@ -26,9 +27,9 @@ public abstract class ImportService {
      *            list of tables that only has table name and attribute names
      * @return
      */
-    public abstract List<Table> importMetadata(List<Table> tables, ImportContext context);
+    public abstract List<Table> importMetadata(DataExtractionConfiguration extractionConfig, ImportContext context);
 
-    public abstract void importDataAndWriteToHdfs(List<Table> tables, ImportContext context);
+    public abstract void importDataAndWriteToHdfs(DataExtractionConfiguration extractionConfig, ImportContext context);
     
     public void validate(ImportContext context) {
         Configuration config = context.getProperty(ImportProperty.HADOOPCONFIG, Configuration.class);

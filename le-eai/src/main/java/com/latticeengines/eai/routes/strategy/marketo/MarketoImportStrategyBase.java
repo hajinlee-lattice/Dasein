@@ -1,17 +1,25 @@
 package com.latticeengines.eai.routes.strategy.marketo;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.ProducerTemplate;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.foundationdb.sql.StandardException;
+import com.foundationdb.sql.parser.SQLParser;
+import com.foundationdb.sql.parser.StatementNode;
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
+import com.latticeengines.eai.routes.SourceType;
 import com.latticeengines.eai.routes.converter.AvroTypeConverter;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 import com.latticeengines.eai.routes.strategy.ImportStrategy;
@@ -28,11 +36,9 @@ public abstract class MarketoImportStrategyBase extends ImportStrategy {
     
     protected Map<String, Object> getHeaders(ImportContext ctx) {
         Map<String, Object> headers = new HashMap<>();
-        headers.put(MarketoImportProperty.HOST, ctx.getProperty(MarketoImportProperty.HOST, String.class));
-        headers.put(MarketoImportProperty.CLIENTID, ctx.getProperty(MarketoImportProperty.CLIENTID, String.class));
-        headers.put(MarketoImportProperty.CLIENTSECRET,
-                ctx.getProperty(MarketoImportProperty.CLIENTSECRET, String.class));
-        headers.put(MarketoImportProperty.ACCESSTOKEN, ctx.getProperty(MarketoImportProperty.ACCESSTOKEN, String.class));
+        for (Map.Entry<String, Object> entry : ctx.getEntries()) {
+            headers.put(entry.getKey(), entry.getValue());
+        }
         headers.put(Exchange.CONTENT_TYPE, "application/json");
         return headers;
     }
@@ -52,7 +58,47 @@ public abstract class MarketoImportStrategyBase extends ImportStrategy {
         return table;
     }
     
-    public boolean needsPageToken() {
-        return false;
+    @Override
+    public ImportContext resolveFilterExpression(String expression, ImportContext ctx) {
+        return ctx;
+    }
+    
+    protected void setupPagingToken(ProducerTemplate template, ImportContext ctx, String sinceDateTime) {
+        ImportStrategy pagingTokenStrategy = ImportStrategy.getImportStrategy(SourceType.MARKETO, "PagingToken");
+        if (pagingTokenStrategy == null) {
+            throw new RuntimeException("No paging token strategy.");
+        }
+        DateTimeFormatter dtf = ISODateTimeFormat.dateTimeParser();
+        if (sinceDateTime == null) {
+            DateTime today = new DateTime(new Date());
+            sinceDateTime = today.minusYears(1).toString(dtf);
+        } else {
+            dtf.parseDateTime(sinceDateTime);
+        }
+        ctx.setProperty(MarketoImportProperty.SINCEDATETIME, sinceDateTime);
+        pagingTokenStrategy.importData(template, null, null, ctx);
+    }
+    
+    protected Map<String, Object> parse(String expression) {
+        ExpressionParserVisitorBase exprVisitor = getParser();
+        return parse(exprVisitor, expression);
+    }
+    
+    protected ExpressionParserVisitorBase getParser() {
+        return null;
+    }
+    
+    protected static Map<String, Object> parse(ExpressionParserVisitorBase exprVisitor, String expression) {
+        if (exprVisitor == null) {
+            return new HashMap<>();
+        }
+        SQLParser parser = new SQLParser();
+        try {
+            StatementNode stmt = parser.parseStatement("SELECT * FROM T WHERE " + expression);
+            stmt.accept(exprVisitor);
+            return exprVisitor.getExpressions();
+        } catch (StandardException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

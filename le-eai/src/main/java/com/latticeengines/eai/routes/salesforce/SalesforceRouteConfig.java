@@ -3,17 +3,29 @@ package com.latticeengines.eai.routes.salesforce;
 import org.apache.camel.spring.SpringRouteBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
 
 public class SalesforceRouteConfig extends SpringRouteBuilder {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(SalesforceRouteConfig.class);
 
+    @Value("${eai.max.redeliveries}")
+    private int maximumRedeliveries;
+
+    @Value("${eai.backoff.multiplier}")
+    private int backoffMultiplier;
+
+
     public SalesforceRouteConfig() {
     }
 
     @Override
     public void configure() throws Exception {
+        errorHandler(defaultErrorHandler(). //
+                maximumRedeliveries(maximumRedeliveries). //
+                backOffMultiplier(backoffMultiplier));
+
         from("direct:createJob"). //
                 to("salesforce:createJob");
 
@@ -40,6 +52,7 @@ public class SalesforceRouteConfig extends SpringRouteBuilder {
                 to("salesforce:getDescription");
 
         from("seda:batchInfo?concurrentConsumers=4").process(new BatchInfoProcessor());
+        
     }
 
 }

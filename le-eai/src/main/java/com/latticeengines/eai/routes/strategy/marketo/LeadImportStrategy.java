@@ -22,7 +22,7 @@ public class LeadImportStrategy extends MarketoImportStrategyBase {
     }
 
     @Override
-    public void importData(ProducerTemplate template, Table table, ImportContext ctx) {
+    public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -49,11 +49,6 @@ public class LeadImportStrategy extends MarketoImportStrategyBase {
         }
         
         return super.importMetadata(template, table, ctx);
-    }
-    
-    @Override
-    public boolean needsPageToken() {
-        return true;
     }
     
 }

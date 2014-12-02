@@ -17,7 +17,7 @@ public class ActivityTypeImportStrategy extends MarketoImportStrategyBase {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void importData(ProducerTemplate template, Table table, ImportContext ctx) {
+    public void importData(ProducerTemplate template, Table table, String filter, ImportContext ctx) {
         Map<String, Object> headers = getHeaders(ctx);
         Map<String, Object> activityTypes = template.requestBodyAndHeaders("direct:getActivityTypes", null, headers, Map.class);
         System.out.println(activityTypes);

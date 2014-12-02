@@ -13,6 +13,8 @@
         <camel.version>2.14.0</camel.version>
         <le.common.version>1.0.15-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.15-SNAPSHOT</le.domain.version>
+        <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
+        <parquet.avro.version>1.4.3</parquet.avro.version>
     </properties>
 
     <parent>
@@ -34,9 +36,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.foundationdb</groupId>
+            <artifactId>fdb-sql-parser</artifactId>
+            <version>${fdb.sql.parser.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.twitter</groupId>
             <artifactId>parquet-avro</artifactId>
-            <version>1.4.3</version>
+            <version>${parquet.avro.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.camel</groupId>

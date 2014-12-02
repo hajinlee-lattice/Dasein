@@ -9,6 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.eai.DataExtractionConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.routes.SourceType;
@@ -31,23 +32,15 @@ public class MarketoImportServiceImpl extends ImportService {
         if (accessTokenStrategy == null) {
             throw new RuntimeException("Access token strategy not available.");
         } else {
-            accessTokenStrategy.importData(producer, null, ctx);
-        }
-    }
-
-    private void setupPagingToken(Table table, ImportContext ctx) {
-        ImportStrategy accessTokenStrategy = ImportStrategy.getImportStrategy(SourceType.MARKETO, "PagingToken");
-        if (accessTokenStrategy == null) {
-            throw new RuntimeException("Paging token strategy not available.");
-        } else {
-            accessTokenStrategy.importData(producer, null, ctx);
+            accessTokenStrategy.importData(producer, null, null, ctx);
         }
     }
 
     @Override
-    public List<Table> importMetadata(List<Table> tables, ImportContext ctx) {
+    public List<Table> importMetadata(DataExtractionConfiguration extractionConfig, ImportContext ctx) {
         setupAccessToken(ctx);
         List<Table> tablesWithMetadata = new ArrayList<>();
+        List<Table> tables = extractionConfig.getTables();
         for (Table table : tables) {
             ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.MARKETO, table);
             if (strategy == null) {
@@ -60,18 +53,16 @@ public class MarketoImportServiceImpl extends ImportService {
     }
 
     @Override
-    public void importDataAndWriteToHdfs(List<Table> tables, ImportContext ctx) {
+    public void importDataAndWriteToHdfs(DataExtractionConfiguration extractionConfig, ImportContext ctx) {
         setupAccessToken(ctx);
+        List<Table> tables = extractionConfig.getTables();
         for (Table table : tables) {
             MarketoImportStrategyBase strategy = (MarketoImportStrategyBase) ImportStrategy.getImportStrategy(SourceType.MARKETO, table);
             if (strategy == null) {
                 log.error("No import strategy for Marketo table " + table.getName());
                 continue;
             }
-            if (strategy.needsPageToken()) {
-                setupPagingToken(table, ctx);
-            }
-            strategy.importData(producer, table, ctx);
+            strategy.importData(producer, table, extractionConfig.getFilter(table.getName()), ctx);
         }
     }
 

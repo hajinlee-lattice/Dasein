@@ -29,7 +29,7 @@ public class SalesforceImportServiceImplUnitTestNG {
         table.addAttribute(email);
 
         SalesforceImportServiceImpl svc = new SalesforceImportServiceImpl();
-        String query = svc.createQuery(table);
+        String query = svc.createQuery(table, null);
         assertEquals(query, "SELECT FirstName,LastName,Salutation,Email FROM Lead");
     }
 }

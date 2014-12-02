@@ -8,10 +8,11 @@ public class MarketoUrlGenerator {
 
     private static final String BASEURL = "https4://$$HOST$$";
     private static final String GETACCESSTOKENURL = "/identity/oauth/token?grant_type=client_credentials&client_id=$$CLIENTID$$&client_secret=$$CLIENTSECRET$$";
-    private static final String GETACTIVITIESURL = "/rest/v1/activities.json?access_token=$$ACCESSTOKEN$$&$$NEXTPAGETOKEN$$&$$ACTIVITYTYPES$$";
+    private static final String GETACTIVITIESURL = "/rest/v1/activities.json?access_token=$$ACCESSTOKEN$$&nextPageToken=$$NEXTPAGETOKEN$$&$$ACTIVITYTYPES$$";
     private static final String GETACTIVITYTYPESURL = "/rest/v1/activities/types.json?access_token=$$ACCESSTOKEN$$";
     private static final String GETLEADMETADATAURL = "/rest/v1/leads/describe.json?access_token=$$ACCESSTOKEN$$";
     private static final String GETPAGINGTOKENURL = "/rest/v1/activities/pagingtoken.json?access_token=$$ACCESSTOKEN$$&sinceDatetime=$$SINCEDATETIME$$";
+    private static final String GETLEADSURL = "/rest/v1/leads.json?access_token=$$ACCESSTOKEN$$&nextPageToken=$$NEXTPAGETOKEN$$&filterType=$$FILTERTYPE$$&filterValues$$FILTERVALUES$$";
 
     public String getBaseUrl(String host) {
         return BASEURL.replace("$$HOST$$", host);
@@ -23,7 +24,7 @@ public class MarketoUrlGenerator {
         return baseUrl + tokenUrl;
     }
 
-    public String getActivitiesUrl(String baseUrl, String accessToken, String nextPageToken, List<Integer> activityTypes) {
+    public String getActivitiesUrl(String baseUrl, String accessToken, String nextPageToken, List<String> activityTypes) {
         String activitiesUrl = GETACTIVITIESURL.replace("$$ACCESSTOKEN$$", accessToken);
         activitiesUrl = activitiesUrl.replace("$$NEXTPAGETOKEN$$", nextPageToken);
         activitiesUrl = activitiesUrl.replace("$$ACTIVITYTYPES$$", StringUtils.join(activityTypes, "&"));
@@ -42,4 +43,14 @@ public class MarketoUrlGenerator {
         String pagingTokenUrl = baseUrl + GETPAGINGTOKENURL.replace("$$ACCESSTOKEN$$", accessToken);
         return pagingTokenUrl.replace("$$SINCEDATETIME$$", dateTime);
     }
+
+    public String getLeadsUrl(String baseUrl, String accessToken, String nextPageToken, String filterType,
+            List<String> filterValues) {
+        String leadsUrl = GETLEADSURL.replace("$$ACCESSTOKEN$$", accessToken);
+        leadsUrl = leadsUrl.replace("$$NEXTPAGETOKEN$$", nextPageToken);
+        leadsUrl = leadsUrl.replace("$$FILTERTYPES$$", filterType);
+        leadsUrl = leadsUrl.replace("$$FILTERVALUES$$", StringUtils.join(filterValues, ","));
+        return baseUrl + leadsUrl;
+    }
+
 }

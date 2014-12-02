@@ -9,7 +9,8 @@ public class GeneratePagingTokenUrlProcessor implements Processor {
     public void process(Exchange exchange) throws Exception {
         String baseUrl = exchange.getIn().getHeader(MarketoImportProperty.BASEURL, String.class);
         String accessToken = exchange.getIn().getHeader(MarketoImportProperty.ACCESSTOKEN, String.class);
+        String sinceDateTime = exchange.getIn().getHeader(MarketoImportProperty.SINCEDATETIME, String.class);
         exchange.getIn().setHeader("pagingTokenUrl",
-                new MarketoUrlGenerator().getPagingTokenUrl(baseUrl, accessToken, ""));
+                new MarketoUrlGenerator().getPagingTokenUrl(baseUrl, accessToken, sinceDateTime));
     }
 }

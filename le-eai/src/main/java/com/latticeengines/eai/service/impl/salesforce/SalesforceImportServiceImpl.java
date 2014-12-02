@@ -24,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.eai.Attribute;
+import com.latticeengines.domain.exposed.eai.DataExtractionConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.exposed.util.AvroSchemaBuilder;
@@ -79,8 +80,9 @@ public class SalesforceImportServiceImpl extends ImportService {
     }
 
     @Override
-    public List<Table> importMetadata(List<Table> tables, ImportContext context) {
+    public List<Table> importMetadata(DataExtractionConfiguration extractionConfig, ImportContext context) {
         List<Table> newTables = new ArrayList<>();
+        List<Table> tables = extractionConfig.getTables();
         for (Table table : tables) {
             JobInfo jobInfo = setupJob(table);
             try {
@@ -142,10 +144,11 @@ public class SalesforceImportServiceImpl extends ImportService {
     }
 
     @Override
-    public void importDataAndWriteToHdfs(List<Table> tables, ImportContext context) {
+    public void importDataAndWriteToHdfs(DataExtractionConfiguration extractionConfig, ImportContext context) {
+        List<Table> tables = extractionConfig.getTables();
         for (Table table : tables) {
             JobInfo jobInfo = setupJob(table);
-            String query = createQuery(table);
+            String query = createQuery(table, extractionConfig.getFilter(table.getName()));
             Map<String, Object> headers = new HashMap<String, Object>();
             headers.put(SalesforceEndpointConfig.SOBJECT_QUERY, query);
             super.setHeaders(headers, table, context);
@@ -153,8 +156,13 @@ public class SalesforceImportServiceImpl extends ImportService {
         }
     }
 
-    String createQuery(Table table) {
-        return "SELECT " + StringUtils.join(table.getAttributes(), ",") + " FROM " + table.getName();
+    String createQuery(Table table, String filterExpression) {
+        String query = "SELECT " + StringUtils.join(table.getAttributes(), ",") + " FROM " + table.getName();
+        
+        if (filterExpression != null) {
+            query += " WHERE " + filterExpression;
+        }
+        return query;
     }
 
 }
