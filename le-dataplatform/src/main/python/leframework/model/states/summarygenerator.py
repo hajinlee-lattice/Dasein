@@ -90,7 +90,7 @@ class SummaryGenerator(State, JsonGenBase):
             if "continuousNullBucket" in record and record["continuousNullBucket"] == True:
                 element["Values"] = [None]
             if "discreteNullBucket" in record and record["discreteNullBucket"] == True:
-                element["Values"] = ["null"]
+                element["Values"] = [None]
             
             element["IsVisible"] = True
             elements.append(element)

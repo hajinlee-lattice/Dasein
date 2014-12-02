@@ -8,6 +8,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.domain.exposed.eai.DataExtractionConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.exposed.service.DataExtractionService;
@@ -34,7 +35,9 @@ public class EaiProcessor implements ItemProcessor<List<Table>, String> {
         ImportContext context = new ImportContext();
         context.setProperty(ImportProperty.HADOOPCONFIG, yarnConfiguration);
         context.setProperty(ImportProperty.TARGETPATH, targetPath);
-        dataExtractionService.extractAndImport(item, context);
+        DataExtractionConfiguration extractionConfig = new DataExtractionConfiguration();
+        extractionConfig.setTables(item);
+        dataExtractionService.extractAndImport(extractionConfig, context);
         Thread.sleep(10000L);
         return null;
     }
