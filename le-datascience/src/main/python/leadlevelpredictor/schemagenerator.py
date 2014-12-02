@@ -23,6 +23,8 @@ class SchemaGenerator(object):
         rowCount = numRows.fetchall()[0][0]
         numRowsWithEvent = self.qb.executeQuery("SELECT COUNT(1) FROM dbo.%s WHERE %s = 1 AND %s" % (tableName, eventColumnName, whereClause))
         rowWithEventCount = numRowsWithEvent.fetchall()[0][0]
+        if rowCount == 0:
+            return 0.0
         return float(rowWithEventCount)/float(rowCount)
 
     def generate(self, eventColumnName, tableName):
