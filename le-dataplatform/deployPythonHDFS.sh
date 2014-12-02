@@ -5,6 +5,7 @@ $HADOOP_HOME/bin/hadoop fs -mkdir /app
 
 rm -rf /tmp/app
 mkdir -p /tmp/app/dataplatform/scripts/algorithm
+mkdir -p /tmp/app/dataplatform/eai
 
 cp conf/env/dev/dataplatform.properties /tmp/app/dataplatform/
 cp conf/env/dev/hadoop-metrics2.properties /tmp/app/dataplatform/
@@ -14,5 +15,6 @@ cp src/main/python/launcher.py /tmp/app/dataplatform/scripts
 cp src/main/python/pipelinefwk.py /tmp/app/dataplatform/scripts 
 cp src/main/python/pipeline/pipeline.py /tmp/app/dataplatform/scripts 
 cp src/main/python/algorithm/*.py /tmp/app/dataplatform/scripts/algorithm
+cp ../le-eai/conf/env/dev/eai.properties /tmp/app/dataplatform/eai
 
 $HADOOP_HOME/bin/hadoop fs -copyFromLocal /tmp/app/dataplatform /app/dataplatform
