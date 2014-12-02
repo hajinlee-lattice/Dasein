@@ -8,7 +8,12 @@ from profilingtestbase import ProfilingTestBase
 
 class TopPredictorsTest(ProfilingTestBase):
 
-    def topPredictor(self):
+    def tearDown(self):
+        super(ProfilingTestBase, self).tearDown()
+        self.tearDownClass()
+        self.setUpClass()
+
+    def testTopPredictor(self):
         data = range(10, 100, 10)
         # This gives [10, 20, 30, 40, 50, 60, 70, 80, 90]
         event = [1, 1, 0, 1, 0, 1, 0, 0, 1]
@@ -28,29 +33,42 @@ class TopPredictorsTest(ProfilingTestBase):
         
         component_uc = {k:v/entropy(event) for k, v in component_mi.iteritems()}
 
-        print('Overall UC: ', mi/entropy(event))
-        print('Conponent UC: ', component_uc)
+        overallUc = expectedMi/entropy(event)
+        sumOfUc = sum(component_uc.values())
+        print('Overall UC: ', overallUc)
+        print('Component UC: ', component_uc)
+        print('Summed up component UC: ', sumOfUc)
         
+        self.assertTrue(abs(overallUc - sumOfUc) < 0.0001)
 
-    def topPredictorWithNone(self):
+    def testTopPredictorWithNone(self):
         columnVector = pd.Series([-1, 1, 3, 5, None, 6, 8])
         bands = [-inf, 0, 2, 8, 10]
         
         execfile("data_profile.py", globals())
         result = globals()["mapToBands"](columnVector, bands)
         self.assertEqual(result, [-inf, 0, 2, 2, None, 2, 8]) 
-        
-        total_mi, mi_components = globals()["calculateMutualInfo"](result, [0, 1, 0, 1, 0, 0, 0]) 
-        self.assertEqual (round(total_mi, 4), 0.3255)
-        self.assertEqual(len(mi_components), 5)
-        self.assertEqual(round(mi_components[0], 4), 0.179)
-        self.assertEqual(round(mi_components[2], 4), 0.0023)
-        self.assertEqual(round(mi_components[8], 4), 0.0481)
-        self.assertEqual(round(mi_components[None], 4), 0.0481)
-        self.assertEqual(round(mi_components[-inf], 4), 0.0481)
-        print ("Components:", mi_components)
+        event = [0, 1, 0, 1, 0, 0, 0]
+        mi, component_mi = globals()["calculateMutualInfo"](result, event)
+        expectedMi = metrics.mutual_info_score(result, event)
+        self.assertEqual (round(mi, 4), 0.3255)
+        self.assertEqual(len(component_mi), 5)
+        self.assertEqual(round(component_mi[0], 4), 0.179)
+        self.assertEqual(round(component_mi[2], 4), 0.0023)
+        self.assertEqual(round(component_mi[8], 4), 0.0481)
+        self.assertEqual(round(component_mi[None], 4), 0.0481)
+        self.assertEqual(round(component_mi[-inf], 4), 0.0481)
+
+        component_uc = {k:v/entropy(event) for k, v in component_mi.iteritems()}
+        overallUc = expectedMi/entropy(event)
+        sumOfUc = sum(component_uc.values())
+        print('Overall UC: ', overallUc)
+        print('Component UC: ', component_uc)
+        print('Summed up component UC: ', sumOfUc)
+        self.assertTrue(abs(overallUc - sumOfUc) < 0.0001)
+
     
-    def calculateMutualInfo_AllZeroEvent(self):
+    def testCalculateMutualInfoAllZeroEvents(self):
         data = range(10, 100, 10)
         # This gives [10, 20, 30, 40, 50, 60, 70, 80, 90]
         event = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -61,7 +79,7 @@ class TopPredictorsTest(ProfilingTestBase):
         mi, component_mi = globals()["calculateMutualInfo"](buckets, event)
         self.assertEqual(mi, 0)
         y = entropy(event)
-        for k, v in component_mi.iteritems():
+        for _, v in component_mi.iteritems():
             self.assertEqual(v, 0)
             self.assertEqual(y, 0)
             uc = globals()["uncertaintyCoefficient"](v, y)
@@ -70,8 +88,7 @@ class TopPredictorsTest(ProfilingTestBase):
         
         uc = globals()["uncertaintyCoefficient"](None, 0.5)
         self.assertEqual(uc, None)
-   
-        
+
 def classify_input(x):
     classification = 'unknown'
     if x > 0 and x <= 30:
@@ -80,6 +97,6 @@ def classify_input(x):
         classification = 'medium'
     elif x > 60 and x <= 90:
         classification = 'large'
-    return classification        
+    return classification
     
 

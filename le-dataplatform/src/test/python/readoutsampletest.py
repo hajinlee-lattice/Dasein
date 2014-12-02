@@ -1,36 +1,33 @@
-import os
-import sys
 import numpy
+import os
 import pandas
+import sys
 
 from trainingtestbase import TrainingTestBase
 
+
 class ReadoutSampleTest(TrainingTestBase):
 
-    def cleanup(self):
-        self.tearDown()
+    def tearDown(self):
+        super(TrainingTestBase, self).tearDown()
         self.tearDownClass()
         self.setUpClass()
 
     def testReadoutSample(self):
         self.launch("model.json")
         self.checkResults(expectedRows = 2000)
-        self.cleanup()
 
     def testReadoutSampleReadouts(self):
         self.launch("model-readouts.json")
         self.checkResults(expectedRows = 2000)
-        self.cleanup()
 
     def testReadoutSampleCSV(self):
         self.launch("model-csv.json")
         self.checkResults(expectedRows = 2000)
-        self.cleanup()
  
     def testReadoutSampleLegacy(self):
         self.launch("model-legacy.json")
         self.checkResults(expectedRows = 2000, includeReadouts = False)
-        self.cleanup()
 
     def launch(self, model):
         # Dynamically import launcher to make sure globals() is clean in launcher
