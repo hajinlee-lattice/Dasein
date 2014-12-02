@@ -7,9 +7,9 @@ public class GenerateLeadMetadataUrlProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        String baseUrl = exchange.getIn().getHeader(MarketoImportProperty.BASEURL, String.class);
-        String accessToken = exchange.getIn().getHeader(MarketoImportProperty.ACCESSTOKEN, String.class);
-        exchange.getIn().setHeader("leadMetadataUrl",
+        String baseUrl = exchange.getProperty(MarketoImportProperty.BASEURL, String.class);
+        String accessToken = exchange.getProperty(MarketoImportProperty.ACCESSTOKEN, String.class);
+        exchange.setProperty("leadMetadataUrl",
                 new MarketoUrlGenerator().getLeadMetadataUrl(baseUrl, accessToken));
     }
 }

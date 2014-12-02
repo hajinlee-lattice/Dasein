@@ -9,6 +9,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
+import com.foundationdb.sql.StandardException;
+import com.foundationdb.sql.parser.BinaryLogicalOperatorNode;
+import com.foundationdb.sql.parser.Visitable;
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.Table;
@@ -51,4 +54,19 @@ public class LeadImportStrategy extends MarketoImportStrategyBase {
         return super.importMetadata(template, table, ctx);
     }
     
+    @Override
+    public ExpressionParserVisitorBase getParser() {
+        return new LeadParserVisitor();
+    }
+    
+    protected static class LeadParserVisitor extends ExpressionParserVisitorBase {
+        @Override
+        public Visitable visit(Visitable parseTreeNode) throws StandardException {
+            if (parseTreeNode instanceof BinaryLogicalOperatorNode) {
+                throw new UnsupportedOperationException("Compound expressions for Marketo lead import are not supported.");
+            }
+            return super.visit(parseTreeNode);
+        }
+        
+    }
 }

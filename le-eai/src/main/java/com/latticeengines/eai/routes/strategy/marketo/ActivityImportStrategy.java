@@ -41,7 +41,7 @@ public class ActivityImportStrategy extends MarketoImportStrategyBase {
         }
         ctx.setProperty(MarketoImportProperty.ACTIVITYTYPES, activityTypeIds);
         Map<String, Object> headers = getHeaders(ctx);
-        Map<String, Object> result = template.requestBodyAndHeaders("direct:getLeadActivities", null, headers, Map.class);
+        Map<String, Object> result = template.requestBodyAndHeaders("direct:getAllLeadActivities", null, headers, Map.class);
         System.out.println(result);
     }
 

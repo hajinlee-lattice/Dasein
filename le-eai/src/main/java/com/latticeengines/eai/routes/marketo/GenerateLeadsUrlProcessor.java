@@ -10,12 +10,12 @@ public class GenerateLeadsUrlProcessor implements Processor {
     @SuppressWarnings("unchecked")
     @Override
     public void process(Exchange exchange) throws Exception {
-        String baseUrl = exchange.getIn().getHeader(MarketoImportProperty.BASEURL, String.class);
-        String accessToken = exchange.getIn().getHeader(MarketoImportProperty.ACCESSTOKEN, String.class);
-        String nextPageToken = exchange.getIn().getHeader(MarketoImportProperty.NEXTPAGETOKEN, String.class);
-        String filterType = exchange.getIn().getHeader(MarketoImportProperty.FILTERTYPE, String.class);
-        List<String> filterValues = exchange.getIn().getHeader(MarketoImportProperty.FILTERVALUES, List.class);
-        exchange.getIn().setHeader("leadsUrl",
+        String baseUrl = exchange.getProperty(MarketoImportProperty.BASEURL, String.class);
+        String accessToken = exchange.getProperty(MarketoImportProperty.ACCESSTOKEN, String.class);
+        String nextPageToken = exchange.getProperty(MarketoImportProperty.NEXTPAGETOKEN, String.class);
+        String filterType = exchange.getProperty(MarketoImportProperty.FILTERTYPE, String.class);
+        List<String> filterValues = exchange.getProperty(MarketoImportProperty.FILTERVALUES, List.class);
+        exchange.setProperty("leadsUrl",
                 new MarketoUrlGenerator().getLeadsUrl(baseUrl, accessToken, nextPageToken, filterType, filterValues));
     }
 }

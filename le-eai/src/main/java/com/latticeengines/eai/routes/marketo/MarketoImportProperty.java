@@ -12,4 +12,5 @@ public class MarketoImportProperty {
     public static final String FILTERTYPE = "filterType";
     public static final String FILTERVALUES = "filterValues";
     public static final String SINCEDATETIME = "sinceDateTime";
+    public static final String IMPORTCONTEXT = "importContext";
 }

@@ -12,7 +12,7 @@ public class MarketoUrlGenerator {
     private static final String GETACTIVITYTYPESURL = "/rest/v1/activities/types.json?access_token=$$ACCESSTOKEN$$";
     private static final String GETLEADMETADATAURL = "/rest/v1/leads/describe.json?access_token=$$ACCESSTOKEN$$";
     private static final String GETPAGINGTOKENURL = "/rest/v1/activities/pagingtoken.json?access_token=$$ACCESSTOKEN$$&sinceDatetime=$$SINCEDATETIME$$";
-    private static final String GETLEADSURL = "/rest/v1/leads.json?access_token=$$ACCESSTOKEN$$&nextPageToken=$$NEXTPAGETOKEN$$&filterType=$$FILTERTYPE$$&filterValues$$FILTERVALUES$$";
+    private static final String GETLEADSURL = "/rest/v1/leads.json?access_token=$$ACCESSTOKEN$$$$NEXTPAGETOKEN$$&filterType=$$FILTERTYPE$$&filterValues$$FILTERVALUES$$";
 
     public String getBaseUrl(String host) {
         return BASEURL.replace("$$HOST$$", host);
@@ -26,6 +26,7 @@ public class MarketoUrlGenerator {
 
     public String getActivitiesUrl(String baseUrl, String accessToken, String nextPageToken, List<String> activityTypes) {
         String activitiesUrl = GETACTIVITIESURL.replace("$$ACCESSTOKEN$$", accessToken);
+        // All invocations of the Marketo get activites API requires that a next page token is always available
         activitiesUrl = activitiesUrl.replace("$$NEXTPAGETOKEN$$", nextPageToken);
         activitiesUrl = activitiesUrl.replace("$$ACTIVITYTYPES$$", StringUtils.join(activityTypes, "&"));
         return baseUrl + activitiesUrl;
@@ -47,7 +48,14 @@ public class MarketoUrlGenerator {
     public String getLeadsUrl(String baseUrl, String accessToken, String nextPageToken, String filterType,
             List<String> filterValues) {
         String leadsUrl = GETLEADSURL.replace("$$ACCESSTOKEN$$", accessToken);
-        leadsUrl = leadsUrl.replace("$$NEXTPAGETOKEN$$", nextPageToken);
+        
+        // The first invocation of the Marketo get multiple leads API cannot have a next page token.
+        // Only subsequent invocations should have it if the number of returned leads is greater
+        // than the batch size.
+        if (nextPageToken != null) {
+            leadsUrl = leadsUrl.replace("$$NEXTPAGETOKEN$$", nextPageToken);
+        }
+        
         leadsUrl = leadsUrl.replace("$$FILTERTYPES$$", filterType);
         leadsUrl = leadsUrl.replace("$$FILTERVALUES$$", StringUtils.join(filterValues, ","));
         return baseUrl + leadsUrl;

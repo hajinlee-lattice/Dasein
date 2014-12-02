@@ -35,12 +35,10 @@ public abstract class MarketoImportStrategyBase extends ImportStrategy {
     }
     
     protected Map<String, Object> getHeaders(ImportContext ctx) {
-        Map<String, Object> headers = new HashMap<>();
-        for (Map.Entry<String, Object> entry : ctx.getEntries()) {
-            headers.put(entry.getKey(), entry.getValue());
-        }
-        headers.put(Exchange.CONTENT_TYPE, "application/json");
-        return headers;
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(MarketoImportProperty.IMPORTCONTEXT, ctx);
+        properties.put(Exchange.CONTENT_TYPE, "application/json");
+        return properties;
     }
     
     @Override

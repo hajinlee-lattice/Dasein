@@ -7,8 +7,8 @@ public class GenerateBaseUrlProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        String host = exchange.getIn().getHeader(MarketoImportProperty.HOST, String.class);
-        exchange.getIn().setHeader("baseUrl", new MarketoUrlGenerator().getBaseUrl(host));
+        String host = exchange.getProperty(MarketoImportProperty.HOST, String.class);
+        exchange.setProperty("baseUrl", new MarketoUrlGenerator().getBaseUrl(host));
     }
 
 }
