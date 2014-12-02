@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.eai;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class ImportContext {
 
@@ -10,7 +11,6 @@ public class ImportContext {
     public void setProperty(String name, Object value) {
         properties.put(name, value);
     }
-    
     
     public <T> T getProperty(String name, Class<T> valueClass) {
         Object value = properties.get(name);
@@ -24,5 +24,9 @@ public class ImportContext {
         } else {
             throw new RuntimeException("Value is not of type " + valueClass);
         }
+    }
+    
+    public Set<Map.Entry<String, Object>> getEntries() {
+        return properties.entrySet();
     }
 }

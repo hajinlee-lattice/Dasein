@@ -11,35 +11,35 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class AttributeOwner {
 
-	private List<Attribute> attributes = new ArrayList<>();
-	private Schema schema;
+    private List<Attribute> attributes = new ArrayList<>();
+    private Schema schema;
 
-	public void addAttribute(Attribute attribute) {
-		attributes.add(attribute);
-	}
-	
-	public List<Attribute> getAttributes() {
-		return attributes;
-	}
+    public void addAttribute(Attribute attribute) {
+        attributes.add(attribute);
+    }
 
-	@JsonIgnore
-	public Map<String, Attribute> getNameAttributeMap() {
-		Map<String, Attribute> map = new HashMap<String, Attribute>();
+    public List<Attribute> getAttributes() {
+        return attributes;
+    }
 
-		for (Attribute attribute : attributes) {
-			map.put(attribute.getName(), attribute);
-		}
-		return map;
-	}
+    @JsonIgnore
+    public Map<String, Attribute> getNameAttributeMap() {
+        Map<String, Attribute> map = new HashMap<String, Attribute>();
 
-	@JsonIgnore
-	public Schema getSchema() {
-		return schema;
-	}
+        for (Attribute attribute : attributes) {
+            map.put(attribute.getName(), attribute);
+        }
+        return map;
+    }
 
-	@JsonIgnore
-	public void setSchema(Schema schema) {
-		this.schema = schema;
-	}
+    @JsonIgnore
+    public Schema getSchema() {
+        return schema;
+    }
+
+    @JsonIgnore
+    public void setSchema(Schema schema) {
+        this.schema = schema;
+    }
 
 }
