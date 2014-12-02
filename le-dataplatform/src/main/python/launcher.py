@@ -66,8 +66,12 @@ class Launcher(object):
 
         # Extract data and scripts for execution
         runtimeProperties = parser.getRuntimeProperties()
-        progressReporter = ProgressReporter(runtimeProperties["host"], int(runtimeProperties["port"]))
+        if runtimeProperties is not None:
+            progressReporter = ProgressReporter(runtimeProperties["host"], int(runtimeProperties["port"]))
+        else:
+            progressReporter = ProgressReporter(None, 0)
         progressReporter.setTotalState(2)
+        
         (self.training, self.trainingNonScoringTargets) = parser.createList(self.stripPath(schema["training_data"]))
         progressReporter.nextStateForPreStateMachine(0, 0.1, 1)
         (self.test, self.testNonScoringTargets) = parser.createList(self.stripPath(schema["test_data"]))
