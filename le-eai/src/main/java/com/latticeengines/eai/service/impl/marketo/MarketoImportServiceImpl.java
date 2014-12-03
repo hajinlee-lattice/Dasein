@@ -9,10 +9,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.eai.DataExtractionConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
+import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
+import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.Table;
-import com.latticeengines.eai.routes.SourceType;
 import com.latticeengines.eai.routes.strategy.ImportStrategy;
 import com.latticeengines.eai.routes.strategy.marketo.MarketoImportStrategyBase;
 import com.latticeengines.eai.service.ImportService;
@@ -25,6 +25,7 @@ public class MarketoImportServiceImpl extends ImportService {
     private ProducerTemplate producer;
 
     public MarketoImportServiceImpl() {
+        super(SourceType.MARKETO);
     }
     
     private void setupAccessToken(ImportContext ctx) {
@@ -37,10 +38,10 @@ public class MarketoImportServiceImpl extends ImportService {
     }
 
     @Override
-    public List<Table> importMetadata(DataExtractionConfiguration extractionConfig, ImportContext ctx) {
+    public List<Table> importMetadata(SourceImportConfiguration srcImportConfig, ImportContext ctx) {
         setupAccessToken(ctx);
         List<Table> tablesWithMetadata = new ArrayList<>();
-        List<Table> tables = extractionConfig.getTables();
+        List<Table> tables = srcImportConfig.getTables();
         for (Table table : tables) {
             ImportStrategy strategy = ImportStrategy.getImportStrategy(SourceType.MARKETO, table);
             if (strategy == null) {
@@ -53,16 +54,16 @@ public class MarketoImportServiceImpl extends ImportService {
     }
 
     @Override
-    public void importDataAndWriteToHdfs(DataExtractionConfiguration extractionConfig, ImportContext ctx) {
+    public void importDataAndWriteToHdfs(SourceImportConfiguration srcImportConfig, ImportContext ctx) {
         setupAccessToken(ctx);
-        List<Table> tables = extractionConfig.getTables();
+        List<Table> tables = srcImportConfig.getTables();
         for (Table table : tables) {
             MarketoImportStrategyBase strategy = (MarketoImportStrategyBase) ImportStrategy.getImportStrategy(SourceType.MARKETO, table);
             if (strategy == null) {
                 log.error("No import strategy for Marketo table " + table.getName());
                 continue;
             }
-            strategy.importData(producer, table, extractionConfig.getFilter(table.getName()), ctx);
+            strategy.importData(producer, table, srcImportConfig.getFilter(table.getName()), ctx);
         }
     }
 

@@ -10,8 +10,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
-import com.latticeengines.domain.exposed.eai.DataExtractionConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
+import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
@@ -22,7 +22,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
     @Autowired
     private ImportService marketoImportService;
     
-    private DataExtractionConfiguration extractionConfig = new DataExtractionConfiguration();
+    private SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
     private ImportContext ctx = new ImportContext();
     
     @BeforeClass(groups = "functional")
@@ -39,14 +39,13 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
         tables.add(lead);
         tables.add(activity);
         
-        extractionConfig.setName("Extraction-" + System.currentTimeMillis());
-        extractionConfig.setTables(tables);
-        extractionConfig.putFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
+        marketoImportConfig.setTables(tables);
+        marketoImportConfig.putFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
     }
     
     @Test(groups = "functional")
     public void importMetadata() {
-        List<Table> tables = marketoImportService.importMetadata(extractionConfig, ctx);
+        List<Table> tables = marketoImportService.importMetadata(marketoImportConfig, ctx);
         
         for (Table table : tables) {
             for (Attribute attribute : table.getAttributes()) {
@@ -57,7 +56,7 @@ public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "importMetadata" })
     public void importDataAndWriteToHdfs() {
-        marketoImportService.importDataAndWriteToHdfs(extractionConfig, ctx);
+        marketoImportService.importDataAndWriteToHdfs(marketoImportConfig, ctx);
     }
 
     private Table createActivity() {

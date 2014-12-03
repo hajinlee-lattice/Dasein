@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
-import com.latticeengines.domain.exposed.eai.DataExtractionConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;
+import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.routes.ImportProperty;
@@ -38,9 +38,9 @@ public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
         ImportContext context = new ImportContext();
         context.setProperty(ImportProperty.HADOOPCONFIG, config);
         context.setProperty(ImportProperty.TARGETPATH, "/tmp");
-        DataExtractionConfiguration extractionConfig = new DataExtractionConfiguration();
+        SourceImportConfiguration extractionConfig = new SourceImportConfiguration();
         extractionConfig.setTables(tables);
-        dataExtractionService.extractAndImport(extractionConfig, context);
+        //dataExtractionService.extractAndImport(extractionConfig, context);
         Thread.sleep(60000L);
     }
     

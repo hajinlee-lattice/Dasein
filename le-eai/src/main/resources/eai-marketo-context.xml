@@ -23,16 +23,4 @@
       http://camel.apache.org/schema/spring
       http://camel.apache.org/schema/spring/camel-spring.xsd">
     
-    <bean id="salesforce" class="org.apache.camel.component.salesforce.SalesforceComponent">
-        <property name="loginConfig">
-            <bean class="org.apache.camel.component.salesforce.SalesforceLoginConfig">
-                <property name="loginUrl" value="${eai.salesforce.loginurl}"/>
-                <property name="clientId" value="${eai.salesforce.clientid}"/>
-                <property name="clientSecret" value="${eai.salesforce.clientsecret}"/>
-                <property name="userName" value="${eai.salesforce.username}"/>
-                <property name="password" value="${eai.salesforce.password}"/>
-            </bean>
-        </property>
-    </bean>
-    
 </beans>

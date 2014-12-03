@@ -1,4 +1,4 @@
-package com.latticeengines.eai.service.impl.salesforce;
+package com.latticeengines.eai.routes.strategy.salesforce;
 
 import static org.testng.Assert.assertEquals;
 
@@ -7,7 +7,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.Table;
 
-public class SalesforceImportServiceImplUnitTestNG {
+
+public class SalesforceImportStrategyBaseUnitTestNG {
 
     @Test(groups = "unit")
     public void createQuery() {
@@ -28,8 +29,8 @@ public class SalesforceImportServiceImplUnitTestNG {
         table.addAttribute(salutation);
         table.addAttribute(email);
 
-        SalesforceImportServiceImpl svc = new SalesforceImportServiceImpl();
-        String query = svc.createQuery(table, null);
+        SalesforceImportStrategyBase strategy = new SalesforceImportStrategyBase("Salesforce.AllTables");
+        String query = strategy.createQuery(table, null);
         assertEquals(query, "SELECT FirstName,LastName,Salutation,Email FROM Lead");
     }
 }
