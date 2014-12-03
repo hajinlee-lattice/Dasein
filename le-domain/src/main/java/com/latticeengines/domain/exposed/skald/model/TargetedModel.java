@@ -22,7 +22,7 @@ public class TargetedModel {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(91, 17).append(filter).append(model).toHashCode();
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override

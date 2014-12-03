@@ -35,8 +35,7 @@ public class ScoreDerivation {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(45, 13).append(target).append(averageProbability).append(percentiles)
-                .append(buckets).toHashCode();
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override

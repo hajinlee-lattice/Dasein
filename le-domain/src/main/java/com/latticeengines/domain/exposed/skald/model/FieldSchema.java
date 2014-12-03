@@ -26,7 +26,7 @@ public class FieldSchema {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(123, 31).append(source).append(type).append(interpretation).toHashCode();
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override

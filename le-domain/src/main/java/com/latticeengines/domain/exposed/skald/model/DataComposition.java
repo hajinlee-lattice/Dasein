@@ -33,7 +33,7 @@ public class DataComposition {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(11, 59).append(fields).append(transforms).toHashCode();
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override

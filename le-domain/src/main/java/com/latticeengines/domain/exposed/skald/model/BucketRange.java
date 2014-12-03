@@ -16,7 +16,7 @@ public class BucketRange {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 195).append(name).append(lower).append(upper).toHashCode();
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override

@@ -20,7 +20,7 @@ public class ModelIdentifier {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(33, 77).append(name).append(version).toHashCode();
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override

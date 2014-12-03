@@ -32,7 +32,7 @@ public class TransformDefinition {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(5, 201).append(name).append(output).append(type).append(arguments).toHashCode();
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
