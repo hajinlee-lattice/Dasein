@@ -1,5 +1,9 @@
 package com.latticeengines.domain.exposed.skald.model;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 public class FieldSchema {
     public FieldSchema(FieldSource source, FieldType type, FieldInterpretation interpretation) {
         this.source = source;
@@ -22,35 +26,16 @@ public class FieldSchema {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((interpretation == null) ? 0 : interpretation.hashCode());
-        result = prime * result + ((source == null) ? 0 : source.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
-        return result;
+        return new HashCodeBuilder(123, 31).append(source).append(type).append(interpretation).toHashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        FieldSchema other = (FieldSchema) obj;
-        if (interpretation != other.interpretation)
-            return false;
-        if (source != other.source)
-            return false;
-        if (type != other.type)
-            return false;
-        return true;
+        return EqualsBuilder.reflectionEquals(this, obj);
     }
 
     @Override
     public String toString() {
-        // TODO
-        return null;
+        return ToStringBuilder.reflectionToString(this);
     }
 }
