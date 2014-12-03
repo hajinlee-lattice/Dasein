@@ -29,11 +29,11 @@ public class EaiDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     private String customer = "Eai-" + suffix;
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void invokeEai() throws Exception {
         log.info("               info..............." + this.getClass().getSimpleName() + "eai");
         EaiConfiguration config = getLoadConfig();
-        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/eai", config,
+        AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/extractAndImport", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId appId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
