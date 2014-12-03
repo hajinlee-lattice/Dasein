@@ -17,8 +17,6 @@ public class CamilleTestEnvironment {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    public static final int NUMBER_OF_SERVERS_IN_CLUSTER = 5;
-
     private static TestingServer server;
 
     /**
