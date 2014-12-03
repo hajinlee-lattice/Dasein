@@ -21,9 +21,9 @@ class ConsoleCaptureTest(TestBase):
             print "building tree3"
             print "building forest1"
             print "creating forest2"
-            sleep(1)
             monitor = CaptureMonitor(capture, 5, None, "building tree.*")
             monitor.start()
+            sleep(1)
             self.assertEqual(monitor.currentStages, 3)
             
             monitor.shutdown()
