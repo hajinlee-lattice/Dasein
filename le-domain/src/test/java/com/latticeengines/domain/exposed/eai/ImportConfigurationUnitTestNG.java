@@ -9,24 +9,29 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 
-public class DataExtractionConfigurationUnitTestNG {
+public class ImportConfigurationUnitTestNG {
 
     @Test(groups = "unit")
     public void testSerDe() throws Exception {
         List<Table> tables = new ArrayList<>();
         Table activity = createActivity();
         tables.add(activity);
-        DataExtractionConfiguration extractionConfig = new DataExtractionConfiguration();
-        extractionConfig.setName("Extraction-" + System.currentTimeMillis());
-        extractionConfig.setTables(tables);
-        extractionConfig.putFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
+        ImportConfiguration importConfig = new ImportConfiguration();
+        importConfig.setName("Extraction-" + System.currentTimeMillis());
+        
+        SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
+        marketoImportConfig.setSourceType(SourceType.MARKETO);
+        marketoImportConfig.setTables(tables);
+        marketoImportConfig.putFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
+        
+        importConfig.addSourceConfiguration(marketoImportConfig);
 
-        String extractionConfigStr = extractionConfig.toString();
-        System.out.println(extractionConfigStr);
+        String importConfigStr = importConfig.toString();
+        System.out.println(importConfigStr);
 
-        DataExtractionConfiguration deserializedExtractionConfig = JsonUtils.deserialize(extractionConfigStr,
-                DataExtractionConfiguration.class);
-        assertEquals(deserializedExtractionConfig.toString(), extractionConfigStr);
+        ImportConfiguration deserializedImportConfig = JsonUtils.deserialize(importConfigStr,
+                ImportConfiguration.class);
+        assertEquals(deserializedImportConfig.toString(), importConfigStr);
     }
 
     private Table createActivity() {

@@ -6,24 +6,21 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.dataplatform.HasName;
 
-public class DataExtractionConfiguration implements HasName {
-    
-    private String name;
+public class SourceImportConfiguration {
+
+    private SourceType sourceType;
     private List<Table> tables;
     private Map<String, String> filters = new HashMap<>();
-
-    @Override
-    @JsonProperty("name")
-    public String getName() {
-        return name;
+    
+    @JsonProperty("source_type")
+    public SourceType getSourceType() {
+        return sourceType;
     }
 
-    @Override
-    @JsonProperty("name")
-    public void setName(String name) {
-        this.name = name;
+    @JsonProperty("source_type")
+    public void setSourceType(SourceType sourceType) {
+        this.sourceType = sourceType;
     }
 
     @JsonProperty("tables")
