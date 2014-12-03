@@ -11,8 +11,8 @@ import org.springframework.jdbc.support.JdbcUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
-import com.latticeengines.dataplatform.exposed.exception.LedpCode;
-import com.latticeengines.dataplatform.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 
 @SuppressWarnings("deprecation")

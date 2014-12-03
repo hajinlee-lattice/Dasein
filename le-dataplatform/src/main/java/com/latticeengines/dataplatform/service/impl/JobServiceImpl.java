@@ -24,13 +24,13 @@ import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.exposed.exception.LedpCode;
-import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 public abstract class JobServiceImpl implements JobService, ApplicationContextAware {
 

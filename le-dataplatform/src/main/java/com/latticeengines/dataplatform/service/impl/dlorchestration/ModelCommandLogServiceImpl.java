@@ -12,12 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
-import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("modelCommandLogService")
 public class ModelCommandLogServiceImpl implements ModelCommandLogService {

@@ -26,10 +26,10 @@ import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.client.yarn.YarnClientCustomization;
 import com.latticeengines.dataplatform.client.yarn.YarnClientCustomizationRegistry;
-import com.latticeengines.dataplatform.exposed.exception.LedpCode;
-import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("yarnClientCustomizationService")
 public class YarnClientCustomizationServiceImpl implements YarnClientCustomizationService {

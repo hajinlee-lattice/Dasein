@@ -61,10 +61,10 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.yarn.ProgressMonitor;
 import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
 import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
-import com.latticeengines.dataplatform.exposed.exception.LedpCode;
-import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.runtime.metric.LedpMetricsMgr;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmaster {
 

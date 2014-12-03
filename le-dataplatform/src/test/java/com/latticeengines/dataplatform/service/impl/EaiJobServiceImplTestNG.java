@@ -31,7 +31,7 @@ public class EaiJobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Autowired
     private EaiJobService eaiJobService;
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional", "functional.production" }, enabled = false)
     public void testSubmitEaiYarnJob() throws Exception {
         String metadata = FileUtils.readFileToString(new File("src/test/resources/testdata.json"));
         JSONParser parser = new JSONParser();

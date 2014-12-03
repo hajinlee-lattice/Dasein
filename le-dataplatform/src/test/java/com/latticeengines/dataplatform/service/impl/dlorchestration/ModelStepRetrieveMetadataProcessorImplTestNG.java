@@ -16,8 +16,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
-import com.latticeengines.dataplatform.exposed.exception.LedpCode;
-import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.functionalframework.EmptyResponseServlet;
 import com.latticeengines.dataplatform.functionalframework.StandaloneHttpServer;
@@ -25,6 +23,8 @@ import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataErrorRe
 import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataServlet;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 @SuppressWarnings("unused")
 public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {

@@ -34,7 +34,7 @@ public class EaiServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private String customer = "Eai-" + suffix;
 
-    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    @Test(groups = { "functional", "functional.production" }, enabled = false)
     public void invokeEai() throws Exception {
         String metadata = FileUtils.readFileToString(new File(
                 "src/test/resources/testdata.json"));

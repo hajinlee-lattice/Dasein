@@ -2,11 +2,11 @@ package com.latticeengines.dataplatform.service.dlorchestration;
 
 import java.util.List;
 
-import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 
 public interface ModelCommandLogService {

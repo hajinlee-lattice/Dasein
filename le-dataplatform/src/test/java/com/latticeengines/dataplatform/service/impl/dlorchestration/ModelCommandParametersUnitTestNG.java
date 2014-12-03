@@ -8,9 +8,9 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.exposed.exception.LedpException;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class ModelCommandParametersUnitTestNG {
 
