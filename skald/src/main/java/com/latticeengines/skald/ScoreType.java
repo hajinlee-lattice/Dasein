@@ -1,6 +1,5 @@
 package com.latticeengines.skald;
 
-import java.lang.reflect.Method;
 
 public enum ScoreType {
 
@@ -21,31 +20,25 @@ public enum ScoreType {
     public Class<?> type() {
         return type;
     }
-    
-    public static Object parse(ScoreType scoretype, String rawvalue) {
-        if (rawvalue == null) {
+
+    public static Object parse(ScoreType scoretype, String value) {
+        if (value == null) {
             return null;
         }
-        
-        Class<?> clazz = scoretype.type();
-        String underlying = clazz.getSimpleName();
-        Method method;
+
+        Class<?> type = scoretype.type();
         try {
-            switch (underlying) {
-            case "Double":
-                method = clazz.getMethod("parseDouble", String.class);
-                return method.invoke(null, rawvalue);
-            case "Integer":
-                method = clazz.getMethod("parseInteger", String.class);
-                return method.invoke(null, rawvalue);
-            case "String":
-                return rawvalue;
-            default:
-                throw new UnsupportedOperationException("Unsupported underlying type " + underlying);
+            if (type == Double.class) {
+                return Double.parseDouble(value);
+            } else if (type == Integer.class) {
+                return Integer.parseInt(value);
+            } else if (type == String.class) {
+                return value;
+            } else {
+                throw new RuntimeException("");
             }
-        }
-        catch (Exception e) {
-            throw new RuntimeException("Failure parsing value " + rawvalue + " to ScoreType " + scoretype);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Unable to parse " + value + " as " + type);
         }
     }
 }

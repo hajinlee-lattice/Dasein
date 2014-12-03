@@ -17,6 +17,7 @@ import org.jpmml.manager.PMMLManager;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.latticeengines.domain.exposed.skald.model.BucketRange;
 import com.latticeengines.domain.exposed.skald.model.ScoreDerivation;
 
 public class ModelEvaluator {
@@ -56,16 +57,38 @@ public class ModelEvaluator {
 
         @SuppressWarnings("unchecked")
         ClassificationMap<FieldName> classification = (ClassificationMap<FieldName>) results.get(new FieldName(target));
-        Object predicted = classification.get("1");
-
-        // TODO Create derived score elements.
+        double predicted = classification.get("1");
 
         Map<ScoreType, Object> result = new HashMap<ScoreType, Object>();
         result.put(ScoreType.PROBABILITY, predicted);
-        result.put(ScoreType.LIFT, 3.5);
-        result.put(ScoreType.PERCENTILE, 96);
-        result.put(ScoreType.BUCKET, "A");
+
+        if (derivation.averageProbability != 0) {
+            result.put(ScoreType.LIFT, predicted / derivation.averageProbability);
+        }
+
+        if (derivation.percentiles != null) {
+            for (int index = 0; index < derivation.percentiles.size(); index++) {
+                if (withinRange(derivation.percentiles.get(index), predicted)) {
+                    result.put(ScoreType.PERCENTILE, index);
+                    break;
+                }
+            }
+        }
+
+        if (derivation.buckets != null) {
+            for (BucketRange range : derivation.buckets) {
+                if (withinRange(range, predicted)) {
+                    result.put(ScoreType.BUCKET, range.name);
+                    break;
+                }
+            }
+        }
+
         return result;
+    }
+
+    private boolean withinRange(BucketRange range, double value) {
+        return (range.lower == null || value >= range.lower) && (range.upper == null || value < range.upper);
     }
 
     private final PMMLManager manager;
