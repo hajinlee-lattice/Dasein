@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.skald.scoringtest;
 
 import java.net.URL;
 import java.nio.file.Paths;

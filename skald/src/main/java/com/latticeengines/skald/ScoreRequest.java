@@ -3,15 +3,18 @@ package com.latticeengines.skald;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.skald.model.ModelTags;
 
 public class ScoreRequest {
     public ScoreRequest(CustomerSpace space, String combination, Map<String, Object> record) {
         this.space = space;
         this.combination = combination;
         this.record = record;
+        this.tag = ModelTags.ACTIVE;
     }
 
     public ScoreRequest() {
+        this.tag = ModelTags.ACTIVE;
     }
 
     public CustomerSpace space;

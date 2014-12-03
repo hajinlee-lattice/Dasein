@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.skald.scoringtest;
 
 import static org.mockito.Mockito.when;
 
@@ -16,6 +16,14 @@ import org.mockito.stubbing.Answer;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.skald.model.ModelIdentifier;
+import com.latticeengines.skald.CombinationElement;
+import com.latticeengines.skald.CombinationRetriever;
+import com.latticeengines.skald.ModelEvaluator;
+import com.latticeengines.skald.ModelRetriever;
+import com.latticeengines.skald.RecordTransformer;
+import com.latticeengines.skald.ScoreRequest;
+import com.latticeengines.skald.ScoreService;
+import com.latticeengines.skald.ScoreType;
 
 public class MockScoreService {
     @InjectMocks

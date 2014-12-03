@@ -13,6 +13,7 @@
         <le.domain.version>1.0.15-SNAPSHOT</le.domain.version>
         <guava.version>18.0</guava.version>
         <jpmml.version>2.0.0</jpmml.version>
+        <le.camille.version>1.0.15-SNAPSHOT</le.camille.version>
         <jackson.version>2.4.1</jackson.version>
     </properties>
 
@@ -29,6 +30,12 @@
             <artifactId>le-common</artifactId>
             <version>${le.common.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-camille</artifactId>
+            <version>${le.camille.version}</version>
         </dependency>
         
         <dependency>

@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.skald.scoringtest;
 
 import java.io.FileReader;
 import java.util.ArrayList;

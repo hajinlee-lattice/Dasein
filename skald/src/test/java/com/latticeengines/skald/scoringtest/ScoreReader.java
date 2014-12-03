@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.skald.scoringtest;
 
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -10,6 +10,8 @@ import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+
+import com.latticeengines.skald.ScoreType;
 
 public class ScoreReader {
     private String path;

@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.skald.scoringtest;
 
 import java.io.File;
 import java.io.FileReader;
@@ -19,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.skald.model.FieldSchema;
+import com.latticeengines.skald.CombinationElement;
+import com.latticeengines.skald.ScoreType;
 
 public class TestDirectoryReader {
     private static final Logger log = LoggerFactory.getLogger(new Object() {

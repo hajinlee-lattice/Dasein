@@ -1,9 +1,11 @@
-package com.latticeengines.skald;
+package com.latticeengines.skald.scoringtest;
 
 import java.util.Map;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import com.latticeengines.skald.ScoreType;
 
 public class ScoringTestExecutor {
     TestDefinition definition;
