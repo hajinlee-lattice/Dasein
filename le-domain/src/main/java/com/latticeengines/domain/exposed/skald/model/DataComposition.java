@@ -5,13 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 // Defines how to construct an input record for a PMML model.
 public class DataComposition {
     public DataComposition(Map<String, FieldSchema> fields, List<TransformDefinition> transforms) {
         this.fields = fields;
         this.transforms = transforms;
     }
-    
+
     // Serialization constructor.
     public DataComposition() {
         this.fields = new HashMap<String, FieldSchema>();
@@ -29,32 +33,16 @@ public class DataComposition {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((fields == null) ? 0 : fields.hashCode());
-        result = prime * result + ((transforms == null) ? 0 : transforms.hashCode());
-        return result;
+        return new HashCodeBuilder(11, 59).append(fields).append(transforms).toHashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        DataComposition other = (DataComposition) obj;
-        if (fields == null) {
-            if (other.fields != null)
-                return false;
-        } else if (!fields.equals(other.fields))
-            return false;
-        if (transforms == null) {
-            if (other.transforms != null)
-                return false;
-        } else if (!transforms.equals(other.transforms))
-            return false;
-        return true;
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 }
