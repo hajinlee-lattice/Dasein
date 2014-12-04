@@ -37,22 +37,48 @@ class ReadoutSampleGenerator(State):
         else:
             self.result = preTransform
 
-        # Map Targets (+1 offset due to score insertion)
-        targetColumn = self.result.columns.tolist()[self.mediator.schema["targetIndex"] + 1]
+        # Map Scores
+        percentileScores = []
+        if rows > 2000:
+            percentileScores = map(lambda e: self.percentile(e, top = True), self.result["Score"][:1000].as_matrix()) + \
+                               map(lambda e: self.percentile(e, top = False), self.result["Score"][1000:].as_matrix())
+        else:
+            percentileScores = map(lambda e: self.percentile(e), self.result["Score"].as_matrix())
+
+        # Insert PercentileScore
+        percentileScoreColumnName = "PercentileScore"
+        self.result = PandasUtil.insertIntoDataFrame(self.result, percentileScoreColumnName, percentileScores)
+
+        # Map Targets (+2 offset due to score insertions)
+        targetColumn = self.result.columns.tolist()[self.mediator.schema["targetIndex"] + 2]
         converted = map(lambda e: "Y" if e > 0 else "N", self.result[targetColumn].as_matrix())
 
-        # Insert Converted (+1 offset due to score insertion)
+        # Insert Converted (+2 offset due to score insertions)
         convertedColumName = "Converted"
-        self.result = PandasUtil.insertIntoDataFrame(self.result, convertedColumName, converted, 1)
+        self.result = PandasUtil.insertIntoDataFrame(self.result, convertedColumName, converted, 2)
 
-        # Shift Readouts (+2 offset due to score/converted insertion)
+        # Shift Readouts (+3 offset due to score/converted insertions)
         tailCount = len(nonScoringTargets)
         for column in nonScoringTargets[::-1]:
             if column in readouts:
-                (self.result, moved) = PandasUtil.moveTailColumn(self.result, tailCount, column, 2)
+                (self.result, moved) = PandasUtil.moveTailColumn(self.result, tailCount, column, 3)
             else:
                 (self.result, moved) = PandasUtil.moveTailColumn(self.result, tailCount, column)
             if moved: tailCount = tailCount - 1
 
         # Add Result to Mediator
         self.mediator.readoutsample = self.result
+
+    def percentile(self, score, top = True):
+        buckets = self.mediator.percentileBuckets
+        maxScore = buckets[0]["MaximumScore"] if len(buckets) != 0 else 1
+
+        if score >= maxScore:
+            return 100
+        else:
+            order = 1 if top else -1
+            for bucket in buckets[::order]:
+                if score >= bucket["MinimumScore"] and score < bucket["MaximumScore"]:
+                    return bucket["Percentile"]
+
+        return None

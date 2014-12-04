@@ -38,7 +38,10 @@ class PercentileBucketGenerator(State, JsonGenBase):
             if pct == 0:
                 self.percentileBuckets[len(self.percentileBuckets) - 1]["MinimumScore"] = 0.0
                 break;
-    
+
+        # Add Result to Mediator
+        self.mediator.percentileBuckets = self.percentileBuckets
+
     def createBucket(self, scoredSorted, i, indexForMin, pct):
         bucket = OrderedDict()
         bucket["Percentile"] = pct

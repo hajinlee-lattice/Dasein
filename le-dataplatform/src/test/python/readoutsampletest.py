@@ -5,7 +5,6 @@ import sys
 
 from trainingtestbase import TrainingTestBase
 
-
 class ReadoutSampleTest(TrainingTestBase):
 
     def tearDown(self):
@@ -24,7 +23,7 @@ class ReadoutSampleTest(TrainingTestBase):
     def testReadoutSampleCSV(self):
         self.launch("model-csv.json")
         self.checkResults(expectedRows = 2000)
- 
+
     def testReadoutSampleLegacy(self):
         self.launch("model-legacy.json")
         self.checkResults(expectedRows = 2000, includeReadouts = False)
@@ -39,14 +38,16 @@ class ReadoutSampleTest(TrainingTestBase):
 
     def checkResults(self, expectedRows, includeReadouts = True):
         targetColumnName = "P1_Event"
+        percentileScoreColumnName = "PercentileScore"
+        percentileScoreColumnIndex = 0
         scoreColumnName = "Score"
-        scoreColumnIndex = 0
+        scoreColumnIndex = 1
         convertedColumName = "Converted"
-        convertedColumIndex = 1
+        convertedColumIndex = 2
         leadIDColumnName = "LeadID"
-        leadIDColumnIndex = 2
+        leadIDColumnIndex = 3
         emailColumName = "Email"
-        emailColumIndex = 3
+        emailColumIndex = 4
 
         # Output File Exists?
         outputFile = "./results/readoutsample.csv"
@@ -60,10 +61,12 @@ class ReadoutSampleTest(TrainingTestBase):
         (rows, _) = dataFrame.shape
         self.assertEqual(expectedRows, rows)
 
-        # Score/Converted/Readout Columns as Expected?
+        # PercentileScore/Score/Converted/Readout Columns as Expected?
         columns = dataFrame.columns.tolist()
+        self.assertEqual(columns[percentileScoreColumnIndex], percentileScoreColumnName)
         self.assertEqual(columns[scoreColumnIndex], scoreColumnName)
         self.assertEqual(columns[convertedColumIndex], convertedColumName)
+        self.assertEqual(dataFrame.dtypes[percentileScoreColumnName], numpy.int64)
         self.assertEqual(dataFrame.dtypes[scoreColumnName], numpy.float64)
         self.assertEqual(dataFrame.dtypes[convertedColumIndex], numpy.object)
         if includeReadouts:
@@ -71,6 +74,11 @@ class ReadoutSampleTest(TrainingTestBase):
             self.assertEqual(columns[emailColumIndex], emailColumName)
             self.assertEqual(dataFrame.dtypes[leadIDColumnName], numpy.float64)
             self.assertEqual(dataFrame.dtypes[emailColumName], numpy.object)
+
+        # PercentileScore Range as Expected?
+        for value in dataFrame[percentileScoreColumnName].as_matrix():
+            self.assertLessEqual(value, 100)
+            self.assertGreaterEqual(value, 0)
 
         # Score Range as Expected?
         for value in dataFrame[scoreColumnName].as_matrix():
