@@ -27,17 +27,17 @@ class PercentileBucketGenerator(State, JsonGenBase):
         # This means that the test set length is less than 100
         if numElementsInBucket == 0:
             self.logger.info("Test set length is less than 100 so no buckets can be created.")
-            return
-        self.logger.info("Length of test set array = %d." % scoredSortedLen)
-        self.logger.info("Bucket size = %d." % numElementsInBucket)
-        while indexForMin < scoredSortedLen:
-            self.createBucket(scoredSorted, i, indexForMin, pct)
-            pct = pct - 1
-            i = indexForMin
-            indexForMin = i + numElementsInBucket - 1
-            if pct == 0:
-                self.percentileBuckets[len(self.percentileBuckets) - 1]["MinimumScore"] = 0.0
-                break;
+        else:
+            self.logger.info("Length of test set array = %d." % scoredSortedLen)
+            self.logger.info("Bucket size = %d." % numElementsInBucket)
+            while indexForMin < scoredSortedLen:
+                self.createBucket(scoredSorted, i, indexForMin, pct)
+                pct = pct - 1
+                i = indexForMin
+                indexForMin = i + numElementsInBucket - 1
+                if pct == 0:
+                    self.percentileBuckets[len(self.percentileBuckets) - 1]["MinimumScore"] = 0.0
+                    break;
 
         # Add Result to Mediator
         self.mediator.percentileBuckets = self.percentileBuckets
