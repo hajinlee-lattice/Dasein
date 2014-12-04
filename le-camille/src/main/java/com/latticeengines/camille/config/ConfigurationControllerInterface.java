@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
-public interface ConfigurationControllerImpl<T extends ConfigurationScope> {
+public interface ConfigurationControllerInterface<T extends ConfigurationScope> {
     public void create(Path path, Document document) throws Exception;
 
     public void set(Path path, Document document) throws Exception;

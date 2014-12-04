@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
 public class StandardConfigurationControllerImpl<T extends ConfigurationScope> implements
-        ConfigurationControllerImpl<T> {
+        ConfigurationControllerInterface<T> {
     protected T scope;
     protected PathTranslator translator;
     protected Camille camille;

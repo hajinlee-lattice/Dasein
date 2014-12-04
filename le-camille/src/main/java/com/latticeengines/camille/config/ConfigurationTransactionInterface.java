@@ -4,7 +4,7 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
-public interface ConfigurationTransactionImpl<T extends ConfigurationScope> {
+public interface ConfigurationTransactionInterface<T extends ConfigurationScope> {
     
     public void check(Path path, Document document) throws Exception;    
     public void create(Path path, Document document) throws Exception;

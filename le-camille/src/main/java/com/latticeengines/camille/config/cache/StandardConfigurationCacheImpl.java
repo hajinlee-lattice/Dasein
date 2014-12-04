@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
-public class StandardConfigurationCacheImpl<T extends ConfigurationScope> implements ConfigurationCacheImpl<T> {
+public class StandardConfigurationCacheImpl<T extends ConfigurationScope> implements ConfigurationCacheInterface<T> {
 
     protected final CamilleCache cache;
 

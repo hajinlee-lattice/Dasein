@@ -5,13 +5,13 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
-public class ConfigurationTransaction<T extends ConfigurationScope> implements ConfigurationTransactionImpl<T> {
-    private ConfigurationTransactionImpl<T> impl;
+public class ConfigurationTransaction<T extends ConfigurationScope> implements ConfigurationTransactionInterface<T> {
+    private ConfigurationTransactionInterface<T> impl;
 
     @SuppressWarnings("unchecked")
     public ConfigurationTransaction(T scope) throws Exception {
         if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
-            impl = (ConfigurationTransactionImpl<T>) new CustomerSpaceServiceConfigurationTransactionImpl(
+            impl = (ConfigurationTransactionInterface<T>) new CustomerSpaceServiceConfigurationTransactionImpl(
                     (CustomerSpaceServiceScope)scope);
         }
         impl = new StandardConfigurationTransactionImpl<T>(scope);

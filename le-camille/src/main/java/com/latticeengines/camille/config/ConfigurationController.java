@@ -11,13 +11,13 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
-public class ConfigurationController<T extends ConfigurationScope> implements ConfigurationControllerImpl<T> {
-    private ConfigurationControllerImpl<T> impl;
+public class ConfigurationController<T extends ConfigurationScope> implements ConfigurationControllerInterface<T> {
+    private ConfigurationControllerInterface<T> impl;
 
     @SuppressWarnings("unchecked")
     public ConfigurationController(T scope) throws Exception {
         if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
-            impl = (ConfigurationControllerImpl<T>) new CustomerSpaceServiceConfigurationControllerImpl(
+            impl = (ConfigurationControllerInterface<T>) new CustomerSpaceServiceConfigurationControllerImpl(
                     (CustomerSpaceServiceScope) scope);
         }
         impl = new StandardConfigurationControllerImpl<T>(scope);

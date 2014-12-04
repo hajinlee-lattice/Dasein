@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
-public class CustomerSpaceServiceConfigurationCacheImpl implements ConfigurationCacheImpl<CustomerSpaceServiceScope> {
+public class CustomerSpaceServiceConfigurationCacheImpl implements ConfigurationCacheInterface<CustomerSpaceServiceScope> {
     private CamilleCache cache;
     
     /**
