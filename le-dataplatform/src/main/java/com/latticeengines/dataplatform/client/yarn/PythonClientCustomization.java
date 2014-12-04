@@ -149,7 +149,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             throw new LedpException(LedpCode.LEDP_10002);
         }
 
-        if (targets == null || targets.size() != 1) {
+        if (targets == null || targets.size() == 0) {
             throw new LedpException(LedpCode.LEDP_10003);
         }
 
