@@ -2,9 +2,7 @@ package com.latticeengines.camille;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.imps.CuratorFrameworkState;

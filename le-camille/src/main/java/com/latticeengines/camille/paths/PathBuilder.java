@@ -2,7 +2,6 @@ package com.latticeengines.camille.paths;
 
 import java.util.Arrays;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public final class PathBuilder {

@@ -7,8 +7,6 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.zookeeper.KeeperException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -16,13 +14,10 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class DataInterfaceSubscriber extends DataInterfaceBase {
-    private static final Logger log = LoggerFactory.getLogger(new Object() {
-    }.getClass().getEnclosingClass());
-
     public DataInterfaceSubscriber(String interfaceName, CustomerSpace space) throws Exception {
         super(interfaceName, space);
     }
-    
+
     /**
      * @return The corresponding Document, or null if no such Document exists.
      */

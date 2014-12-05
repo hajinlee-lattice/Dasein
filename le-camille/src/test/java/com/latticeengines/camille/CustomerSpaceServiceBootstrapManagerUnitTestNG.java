@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -106,7 +105,7 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
                 scope);
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
-        
+
         Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
     }
 
@@ -130,7 +129,7 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
                 scope);
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
-        
+
         Assert.assertTrue(configurationEquals(configuration, getUpgradedConfiguration()));
     }
 
@@ -195,20 +194,20 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         CustomerSpaceServiceScope scope = getCustomerSpaceServiceScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
         CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
-        
+
         ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
                 getCustomerSpaceServiceScope());
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
 
         Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
     }
-    
+
     @Test(groups = "unit")
     public void testConfigurationTransactionBootstraps() throws Exception {
         CustomerSpaceServiceScope scope = getCustomerSpaceServiceScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
         CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
-        
+
         @SuppressWarnings("unused")
         ConfigurationTransaction<CustomerSpaceServiceScope> transaction = new ConfigurationTransaction<CustomerSpaceServiceScope>(
                 getCustomerSpaceServiceScope());
@@ -218,14 +217,13 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
 
         Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
     }
-    
-    
+
     @Test(groups = "unit")
     public void testConfigurationCacheBootstraps() throws Exception {
         CustomerSpaceServiceScope scope = getCustomerSpaceServiceScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
         CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
-        
+
         @SuppressWarnings("unused")
         ConfigurationCache<CustomerSpaceServiceScope> cache = new ConfigurationCache<CustomerSpaceServiceScope>(
                 getCustomerSpaceServiceScope(), new Path("/a"));
@@ -235,8 +233,7 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
 
         Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
     }
-    
-    
+
     private boolean configurationEquals(DocumentDirectory configurationFromZK, DocumentDirectory sourceConfiguration) {
         // TODO Eventually will not be necessary once ConfigurationControllers
         // omit hidden files

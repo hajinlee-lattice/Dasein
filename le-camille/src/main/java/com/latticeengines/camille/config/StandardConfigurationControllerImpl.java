@@ -7,10 +7,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.ZooDefs;
 
-import com.google.common.base.Predicate;
 import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
-import com.latticeengines.camille.paths.PathConstants;
 import com.latticeengines.camille.translators.PathTranslator;
 import com.latticeengines.camille.translators.PathTranslatorFactory;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -65,7 +63,7 @@ public class StandardConfigurationControllerImpl<T extends ConfigurationScope> i
         // TODO all of this should really be handled in the controller itself
         Path absolute = translator.getAbsolutePath(path);
         List<Pair<Document, Path>> children = camille.getChildren(absolute);
-        
+
         // Make paths local
         Iterator<Pair<Document, Path>> iter = children.iterator();
         while (iter.hasNext()) {
@@ -74,7 +72,7 @@ public class StandardConfigurationControllerImpl<T extends ConfigurationScope> i
         }
         return children;
     }
-    
+
     @Override
     public DocumentDirectory getDirectory(Path path) throws Exception {
         // TODO all of this should really be handled in the controller itself
