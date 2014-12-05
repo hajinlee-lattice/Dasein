@@ -1,6 +1,8 @@
 package com.latticeengines.skald;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -28,9 +30,16 @@ public class SkaldExceptionHandler extends ResponseEntityExceptionHandler {
         String trace = ExceptionUtils.getFullStackTrace(ex);
         log.error(trace);
 
+        List<String> messages = new ArrayList<String>();
+        Throwable cause = ex;
+        while (cause != null) {
+            messages.add(cause.getMessage());
+            cause = cause.getCause();
+        }
+
         Map<String, Object> details = new HashMap<String, Object>();
-        details.put("error", ex.getClass().getName());
-        details.put("message", ex.getMessage());
+        details.put("summary", ex.getMessage());
+        details.put("errors", messages);
         details.put("trace", trace);
 
         return details;
