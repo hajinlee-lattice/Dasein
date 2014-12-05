@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.Camille;
-import com.latticeengines.camille.CamilleCache;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.CamilleTransaction;
 import com.latticeengines.camille.paths.PathBuilder;
@@ -64,10 +63,10 @@ public class CustomerSpaceServiceBootstrapManager {
     }
 
     public static class Bootstrapper {
-        private String serviceName;
+        private final String serviceName;
         private Installer installer;
         private Upgrader upgrader;
-        private ConcurrentMap<CustomerSpace, CustomerBootstrapper> customerBootstrappers = new ConcurrentHashMap<CustomerSpace, CustomerBootstrapper>();
+        private final ConcurrentMap<CustomerSpace, CustomerBootstrapper> customerBootstrappers = new ConcurrentHashMap<CustomerSpace, CustomerBootstrapper>();
 
         public Bootstrapper(String serviceName, Installer installer, Upgrader upgrader) {
             this.serviceName = serviceName;
@@ -95,15 +94,15 @@ public class CustomerSpaceServiceBootstrapManager {
      * Bootstrapper for a specific customer space.
      */
     public static class CustomerBootstrapper {
-        private CustomerSpace space;
-        private String serviceName;
-        private Installer installer;
-        private Upgrader upgrader;
-        private Path serviceDirectoryPath;
-        private Path dataVersionFilePath;
+        private final CustomerSpace space;
+        private final String serviceName;
+        private final Installer installer;
+        private final Upgrader upgrader;
+        private final Path serviceDirectoryPath;
+        private final Path dataVersionFilePath;
         private boolean bootstrapped;
-        private Camille camille;
-        private String logPrefix;
+        private final Camille camille;
+        private final String logPrefix;
 
         public CustomerBootstrapper(CustomerSpace space, String serviceName, Installer installer, Upgrader upgrader) {
             this.space = space;
@@ -132,8 +131,8 @@ public class CustomerSpaceServiceBootstrapManager {
         private void install(int executableVersion) throws Exception {
             if (!camille.exists(serviceDirectoryPath)) {
                 try {
-                    log.info("{}Service directory {} does not exist. Running initial install of version {}", logPrefix,
-                            serviceDirectoryPath, executableVersion);
+                    log.info("{}Service directory {} does not exist. Running initial install of version {}",
+                            new Object[] { logPrefix, serviceDirectoryPath, executableVersion });
                     DocumentDirectory configurationDirectory = installer.getInitialConfiguration(executableVersion);
                     if (configurationDirectory == null) {
                         throw new NullPointerException("Installer returned a null document directory");
@@ -183,7 +182,8 @@ public class CustomerSpaceServiceBootstrapManager {
             }
 
             if (dataVersion < executableVersion) {
-                log.info("{}Running upgrade from version {} to version {}", logPrefix, dataVersion, executableVersion);
+                log.info("{}Running upgrade from version {} to version {}", new Object[] { logPrefix, dataVersion,
+                        executableVersion });
                 try {
                     Camille camille = CamilleEnvironment.getCamille();
                     DocumentDirectory source = camille.getDirectory(serviceDirectoryPath);
@@ -208,7 +208,7 @@ public class CustomerSpaceServiceBootstrapManager {
                     while (iter.hasNext()) {
                         DocumentDirectory.Node node = iter.next();
                         if (!node.getPath().equals(dataVersionFilePath.local(serviceDirectoryPath))) {
-                            transaction.delete(node.getPath().prefix(serviceDirectoryPath));                            
+                            transaction.delete(node.getPath().prefix(serviceDirectoryPath));
                         }
                     }
 
