@@ -18,11 +18,14 @@ public class ImportConfigurationUnitTestNG {
         tables.add(activity);
         ImportConfiguration importConfig = new ImportConfiguration();
         importConfig.setName("Extraction-" + System.currentTimeMillis());
+        importConfig.setCustomer("C1");
+        importConfig.setTargetPath("/a/b/c");
         
         SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
         marketoImportConfig.setSourceType(SourceType.MARKETO);
         marketoImportConfig.setTables(tables);
-        marketoImportConfig.putFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
+        marketoImportConfig.setFilter(activity.getName(), "activityDate > '2014-10-01' AND activityTypeId IN (1, 12)");
+        marketoImportConfig.setProperty("a", "a_value");
         
         importConfig.addSourceConfiguration(marketoImportConfig);
 
