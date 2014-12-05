@@ -134,7 +134,7 @@ def getSchema():
     }"""
     return schema.parse(metadataSchema)
 
-def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties = None):
+def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties = None, params = None):
     '''
     Profiles each feature column in the entire data set and performs bucketing on band columns
     Args:
@@ -185,7 +185,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
                                                      categoricalCols, eventVector, bucketDispatcher, dataWriter, index, colnameBucketMetadata.get(colName))
             dataDiagnostics.append(columnDiagnostics)
 
-    writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir)
+    writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir, params)
     dataWriter.close()
     return None
 
@@ -502,7 +502,7 @@ def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, av
     dataWriter.append(datum)
     return index
 
-def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir):
+def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir, params):
     '''
     Writes all diagnostics to a json file   
     Args:
@@ -518,11 +518,15 @@ def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features
     summary["SampleSize"] = len(eventVector)
     summary["ColumnSize"] = len(features)
     summary["PositiveEventRate"] = sum(eventVector)/float(len(eventVector))
-
+    if params is not None:
+        parser = params["parser"]
+        summary["NumberOfSkippedRows"] = parser.numOfSkippedRow
+            
     diagnostics = OrderedDict()
     diagnostics["Summary"] = summary
     diagnostics["MetadataDiagnostics"] = metadataDiagnostics
     diagnostics["ColumnDiagnostics"] = dataDiagnostics
+    
     with open(modelDir + "diagnostics.json", "wb") as fp:
         json.dump(diagnostics, fp)
 

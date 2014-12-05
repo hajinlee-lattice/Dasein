@@ -1,6 +1,6 @@
 from sklearn import tree
 
-def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties = None):
+def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties = None, params = None):
     X_train = trainingData.as_matrix()[:, schema["featureIndex"]]
     Y_train = trainingData.as_matrix()[:, schema["targetIndex"]]
 

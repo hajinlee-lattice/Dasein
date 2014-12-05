@@ -343,6 +343,12 @@ public class ModelCommandCallable implements Callable<Long> {
                     + positiveEventRateThresh[0] + "% or above " + positiveEventRateThresh[1] + "%).\n";
         }
 
+        // check if there's skipped rows
+        double numOfSkippedRows = (double) ((JSONObject) jsonObject.get("Summary")).get("NumberOfSkippedRows");
+        if (numOfSkippedRows > 0) {
+            warnings += "The number of skipped rows=" + numOfSkippedRows + "\n";
+        }
+        
         // Check any invalid column bucketing metadata
         JSONObject metadataDiagnostics = (JSONObject) jsonObject.get("MetadataDiagnostics");
         List<String> columns = new ArrayList<String>();

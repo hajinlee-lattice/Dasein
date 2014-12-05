@@ -124,7 +124,7 @@ class Launcher(object):
 
         # Passes runtime properties to report progress
         # training and testing data passed in as Pandas DataFrame
-        self.clf = globals()["train"](self.training, self.test, schema, modelLocalDir, algorithmProperties, parser.getRuntimeProperties())
+        self.clf = globals()["train"](self.training, self.test, schema, modelLocalDir, algorithmProperties, parser.getRuntimeProperties(), params)
 
         if postProcessClf:
             executor.postProcessClassifier(self.clf, params)

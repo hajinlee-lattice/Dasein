@@ -48,6 +48,7 @@ class ArgumentParser(object):
         self.algorithmProperties = self.__parseProperties("algorithm_properties")
         self.provenanceProperties = self.__parseProperties("provenance_properties")
         self.runtimeProperties = self.__parseRuntimeProperties(propertyFile)
+        self.numOfSkippedRow = 0
         logger.debug("reading runtime properties" + str(self.runtimeProperties))
 
     def extractTargets(self):
@@ -172,6 +173,7 @@ class ArgumentParser(object):
         else:
             reader = csv.reader(filedescriptor)
 
+        numberOfNullTarget = 0
         for row in reader:
             rowlist = []; nonScoringlist = []
             if len(row) != len(self.fields):
@@ -181,7 +183,7 @@ class ArgumentParser(object):
             if self.isAvro():
                 targetName = self.__getField(included[self.targetIndex])["name"]
                 if row[targetName] is None:
-                    logger.warn("Target value is None, skipping current row.")
+                    numberOfNullTarget += 1
                     continue
                 else:
                     row[targetName] = float(row[targetName])
@@ -194,6 +196,10 @@ class ArgumentParser(object):
 
             tmpData.append(rowlist); nonScoringData.append(nonScoringlist)
 
+        if numberOfNullTarget > 0:
+            self.numOfSkippedRow += numberOfNullTarget
+            logger.warn("Because target value is None, skipping the number of rows=" + str(numberOfNullTarget))
+            
         # Defense (Filter Scoring Columns)
         self.nonScoringTargets = filter(lambda e: e not in includedNames, self.nonScoringTargets)
         self.readouts = filter(lambda e: e not in includedNames, self.readouts)
