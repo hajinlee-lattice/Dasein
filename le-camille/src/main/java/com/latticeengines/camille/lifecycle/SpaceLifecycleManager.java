@@ -47,7 +47,7 @@ public class SpaceLifecycleManager {
 
         try {
             Path spacesPath = PathBuilder.buildCustomerSpacesPath(CamilleEnvironment.getPodId(), contractId, tenantId);
-            camille.create(spacesPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(spacesPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Spaces path @ {}", spacesPath);
         } catch (KeeperException.NodeExistsException e) {
         }
@@ -55,7 +55,7 @@ public class SpaceLifecycleManager {
         Path spacePath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
                 spaceId);
         try {
-            camille.create(spacePath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(spacePath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Space @ {}", spacePath);
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Space already existed @ {}, ignoring create", spacePath);
@@ -64,7 +64,7 @@ public class SpaceLifecycleManager {
         Path servicesPath = PathBuilder.buildCustomerSpaceServicesPath(CamilleEnvironment.getPodId(), contractId,
                 tenantId, spaceId);
         try {
-            camille.create(servicesPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(servicesPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Services directory @ {}", servicesPath);
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Services directory already existed @ {}, ignoring create", servicesPath);

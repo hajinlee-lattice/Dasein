@@ -1,5 +1,6 @@
 package com.latticeengines.camille.config;
 
+import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -8,7 +9,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.camille.CamilleEnvironment;
-import com.latticeengines.camille.config.ConfigurationController;
 import com.latticeengines.camille.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.lifecycle.PodLifecycleManager;
 import com.latticeengines.camille.lifecycle.SpaceLifecycleManager;
@@ -95,6 +95,20 @@ public class ConfigurationControllerUnitTestNG {
         ContractLifecycleManager.create(scope.getContractId());
         TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "DefaultSpace");
         SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), scope.getSpaceId());
+        Path path = new Path("/foo");
+        ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);
+        controller.create(path, new Document("foo"));
+        Assert.assertTrue(controller.exists(path));
+        Assert.assertTrue(CamilleEnvironment.getCamille().exists(
+                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), scope.getContractId(),
+                        scope.getTenantId(), scope.getSpaceId()).append(path)));
+        controller.delete(path);
+        Assert.assertFalse(controller.exists(path));
+    }
+
+    @Test(groups = "unit", expectedExceptions = KeeperException.NoNodeException.class)
+    public void testCreateFailsToCreateScopeDirectory() throws Exception {
+        CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant", "MySpace");
         Path path = new Path("/foo");
         ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);
         controller.create(path, new Document("foo"));

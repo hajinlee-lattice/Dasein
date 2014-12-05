@@ -7,13 +7,13 @@ import com.latticeengines.domain.exposed.camille.scopes.TenantScope;
 
 public class TenantPathTranslator extends PathTranslator {
     private TenantScope scope;
-    
+
     public TenantPathTranslator(TenantScope scope) {
         this.scope = scope;
     }
 
     @Override
-    public Path getAbsolutePath(Path p) throws Exception {
-        return PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), scope.getContractId(), scope.getTenantId()).append(p);  
+    public Path getBasePath() throws Exception {
+        return PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), scope.getContractId(), scope.getTenantId());
     }
 }

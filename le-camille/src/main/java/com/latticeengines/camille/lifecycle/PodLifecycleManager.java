@@ -29,14 +29,14 @@ public class PodLifecycleManager {
 
         try {
             Path podsPath = PathBuilder.buildPodsPath();
-            camille.create(podsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(podsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Pods path @ {}", podsPath);
         } catch (KeeperException.NodeExistsException e) {
         }
 
         Path podPath = PathBuilder.buildPodPath(podId);
         try {
-            camille.create(podPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(podPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Pod @ {}", podPath);
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Pod already existed @ {}, ignoring create", podPath);

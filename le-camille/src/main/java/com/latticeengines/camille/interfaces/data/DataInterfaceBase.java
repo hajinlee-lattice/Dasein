@@ -21,7 +21,7 @@ abstract class DataInterfaceBase {
 
         Camille c = CamilleEnvironment.getCamille();
         if (!c.exists(basePath)) {
-            c.createWithEmptyIntermediateNodes(basePath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            c.create(basePath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         }
     }
 

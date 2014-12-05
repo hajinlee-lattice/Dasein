@@ -46,14 +46,14 @@ public class TenantLifecycleManager {
 
         try {
             Path tenantsPath = PathBuilder.buildTenantsPath(CamilleEnvironment.getPodId(), contractId);
-            camille.create(tenantsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(tenantsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Tenants path @ {}", tenantsPath);
         } catch (KeeperException.NodeExistsException e) {
         }
 
         Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
         try {
-            camille.create(tenantPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(tenantPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Tenant @ {}", tenantPath);
 
             SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId);
@@ -62,7 +62,7 @@ public class TenantLifecycleManager {
             Path defaultSpacePath = tenantPath.append(PathConstants.DEFAULT_SPACE_FILE);
             Document defaultSpaceDoc = new Document(defaultSpaceId);
             try {
-                camille.create(defaultSpacePath, defaultSpaceDoc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                camille.create(defaultSpacePath, defaultSpaceDoc, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
                 log.debug("created .default-space @ {}", defaultSpacePath);
             } catch (KeeperException.NodeExistsException e) {
                 log.debug(".default-space already existed @ {}, forcing update", defaultSpacePath);

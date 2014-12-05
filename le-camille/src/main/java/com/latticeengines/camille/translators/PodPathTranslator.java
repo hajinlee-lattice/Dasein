@@ -10,7 +10,7 @@ public class PodPathTranslator extends PathTranslator {
     }
 
     @Override
-    public Path getAbsolutePath(Path p) throws Exception {
-        return PathBuilder.buildPodPath(CamilleEnvironment.getPodId()).append(p);
+    public Path getBasePath() throws Exception {
+        return PathBuilder.buildPodPath(CamilleEnvironment.getPodId());
     }
 }

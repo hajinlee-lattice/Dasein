@@ -113,11 +113,6 @@ public class CombinationRetrieverUnitTestNG {
         }
 
         public static void publishScoreOverride() throws Exception {
-            // TODO Camille should provide a mechanism to automatically create
-            // parents through this interface.
-            dataController.create(new Path("/Overrides"), new Document());
-            dataController.create(new Path("/Overrides/" + TestModel1_name), new Document());
-            dataController.create(new Path("/Overrides/" + TestModel1_name + "/" + 1), new Document());
             dataController.create(
                     new Path(String.format(DocumentConstants.SCORE_DERIVATION_OVERRIDE, TestModel1_name, 1)),
                     DocumentUtils.toDocument(TestModel1_ScoreDerivationOverride));

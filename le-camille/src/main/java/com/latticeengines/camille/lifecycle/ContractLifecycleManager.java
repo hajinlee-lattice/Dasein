@@ -29,14 +29,14 @@ public class ContractLifecycleManager {
 
         try {
             Path contractsPath = PathBuilder.buildContractsPath(CamilleEnvironment.getPodId());
-            camille.create(contractsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(contractsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Contracts path @ {}", contractsPath);
         } catch (KeeperException.NodeExistsException e) {
         }
 
         Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
         try {
-            camille.create(contractPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            camille.create(contractPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Contract @ {}", contractPath);
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Contract already existed @ {}, ignoring create", contractPath);

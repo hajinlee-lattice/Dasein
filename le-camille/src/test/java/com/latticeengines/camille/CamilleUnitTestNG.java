@@ -49,11 +49,11 @@ public class CamilleUnitTestNG {
         CamilleTestEnvironment.stop();
     }
 
-    @Test(groups = "unit", timeOut = timeOutMs)
-    public void createWithEmptyIntermediateNodesNoDoc() throws Exception {
+    @Test(groups = "unit")
+    public void createWithEmptyIntermediateNodes() throws Exception {
         Camille c = CamilleEnvironment.getCamille();
         Path fullPath = new Path("/0/1/2");
-        c.createWithEmptyIntermediateNodes(fullPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        c.create(fullPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         int i = 0;
         for (Path p : fullPath.getParentPaths()) {
@@ -63,21 +63,11 @@ public class CamilleUnitTestNG {
         Assert.assertEquals(i, 2);
     }
 
-    @Test(groups = "unit", timeOut = timeOutMs)
-    public void createWithEmptyIntermediateNodesWithDoc() throws Exception {
+    @Test(groups = "unit", expectedExceptions = Exception.class)
+    public void createWithoutIntermediateDocs() throws Exception {
         Camille c = CamilleEnvironment.getCamille();
         Path fullPath = new Path("/0/1/2");
-        Document doc = new Document("testData");
-        c.createWithEmptyIntermediateNodes(fullPath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-
-        int i = 0;
-        for (Path p : fullPath.getParentPaths()) {
-            Assert.assertTrue(c.exists(p));
-            ++i;
-        }
-        Assert.assertEquals(i, 2);
-
-        Assert.assertEquals(c.get(fullPath), doc);
+        c.create(fullPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
     }
 
     @Test(groups = "unit", timeOut = timeOutMs)

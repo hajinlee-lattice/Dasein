@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 
 import com.latticeengines.camille.Camille;
@@ -31,6 +32,10 @@ public class StandardConfigurationControllerImpl<T extends ConfigurationScope> i
     @Override
     public void create(Path path, Document document) throws Exception {
         Path absolute = translator.getAbsolutePath(path);
+        Path base = translator.getBasePath();
+        if (!camille.exists(base)) {
+            throw new KeeperException.NoNodeException(base.toString());
+        }
         camille.create(absolute, document, ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
 

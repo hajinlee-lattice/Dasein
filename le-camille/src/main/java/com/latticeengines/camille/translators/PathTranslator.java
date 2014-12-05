@@ -3,5 +3,9 @@ package com.latticeengines.camille.translators;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public abstract class PathTranslator {
-    public abstract Path getAbsolutePath(Path p) throws Exception;
+    public Path getAbsolutePath(Path p) throws Exception {
+        return getBasePath().append(p);
+    }
+
+    public abstract Path getBasePath() throws Exception;
 }

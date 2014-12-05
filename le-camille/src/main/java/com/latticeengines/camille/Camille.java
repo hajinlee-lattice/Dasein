@@ -11,7 +11,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.api.SetDataBuilder;
-import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
@@ -38,27 +37,25 @@ public class Camille {
         return client;
     }
 
-    public void createWithEmptyIntermediateNodes(Path path, List<ACL> acls) throws Exception {
-        createWithEmptyIntermediateNodes(path, new Document(), acls);
-    }
-
-    public void createWithEmptyIntermediateNodes(Path path, Document doc, List<ACL> acls) throws Exception {
-        for (Path p : path.getParentPaths()) {
-            try {
-                create(p, acls);
-            } catch (KeeperException.NodeExistsException e) {
-                log.debug("Path {} already existed, ignoring.", p);
-            }
-        }
-        create(path, doc, acls);
-    }
-
     public void create(Path path, List<ACL> acls) throws Exception {
-        create(path, new Document(), acls);
+        create(path, new Document(), acls, true);
     }
 
     public void create(Path path, Document doc, List<ACL> acls) throws Exception {
-        client.create().withACL(acls).forPath(path.toString(), doc.getData().getBytes());
+        create(path, doc, acls, true);
+    }
+
+    public void create(Path path, List<ACL> acls, boolean createParents) throws Exception {
+        create(path, new Document(), acls, createParents);
+    }
+
+    public void create(Path path, Document doc, List<ACL> acls, boolean createParents) throws Exception {
+        if (createParents) {
+            client.create().creatingParentsIfNeeded().withACL(acls).forPath(path.toString(), doc.getData().getBytes());
+        } else {
+            client.create().withACL(acls).forPath(path.toString(), doc.getData().getBytes());
+        }
+
         doc.setVersion(0);
     }
 
