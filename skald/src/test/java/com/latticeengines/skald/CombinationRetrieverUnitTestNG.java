@@ -8,11 +8,17 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.config.ConfigurationController;
+import com.latticeengines.camille.config.bootstrap.CustomerSpaceServiceBootstrapManager;
 import com.latticeengines.camille.interfaces.data.DataInterfacePublisher;
+import com.latticeengines.camille.lifecycle.ContractLifecycleManager;
+import com.latticeengines.camille.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.util.CamilleTestEnvironment;
 import com.latticeengines.camille.util.DocumentUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 import com.latticeengines.domain.exposed.skald.model.DataComposition;
 import com.latticeengines.domain.exposed.skald.model.ModelCombination;
 import com.latticeengines.domain.exposed.skald.model.ModelTags;
@@ -38,7 +44,7 @@ public class CombinationRetrieverUnitTestNG {
 
         public static final ScoreDerivation TestModel1_ScoreDerivationOverride;
 
-        private static DataInterfacePublisher registrationPublisher;
+        private static ConfigurationController<CustomerSpaceServiceScope> dataController;
         private static DataInterfacePublisher modelPublisher;
 
         static {
@@ -72,7 +78,6 @@ public class CombinationRetrieverUnitTestNG {
             TestModel1_ScoreDerivationOverride = new ScoreDerivation(TestModel1_name + "_overdrive!", 0.5, null, null);
 
             try {
-                registrationPublisher = new DataInterfacePublisher(DocumentConstants.REGISTRATION_INTERFACE, Space);
                 modelPublisher = new DataInterfacePublisher(DocumentConstants.MODEL_INTERFACE, Space);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -80,6 +85,9 @@ public class CombinationRetrieverUnitTestNG {
         }
 
         public static void publish() throws Exception {
+            CustomerSpaceServiceScope scope = new CustomerSpaceServiceScope(Space, DocumentConstants.SERVICE_NAME,
+                    DocumentConstants.DATA_VERSION);
+            dataController = new ConfigurationController<CustomerSpaceServiceScope>(scope);
 
             // Publish TestModel1
             modelPublisher.publish(new Path(String.format(DocumentConstants.SCORE_DERIVATION, TestModel1_name, 1)),
@@ -94,22 +102,40 @@ public class CombinationRetrieverUnitTestNG {
                     DocumentUtils.toDocument(TestModel2_DataComposition));
 
             // Publish TestCombination
-            registrationPublisher.publish(new Path(String.format(DocumentConstants.COMBINATION, TestCombination_name)),
+            // TODO Camille should provide a mechanism to automatically create
+            // parents through this interface.
+            dataController.create(new Path("/Combinations"), new Document());
+            dataController.create(new Path(String.format(DocumentConstants.COMBINATION, TestCombination_name)),
                     DocumentUtils.toDocument(TestCombination));
 
             // Publish ModelTags
-            registrationPublisher.publish(new Path(DocumentConstants.MODEL_TAGS), DocumentUtils.toDocument(Tags));
+            dataController.create(new Path(DocumentConstants.MODEL_TAGS), DocumentUtils.toDocument(Tags));
         }
 
         public static void publishScoreOverride() throws Exception {
-            registrationPublisher.publish(new Path(String.format(DocumentConstants.SCORE_DERIVATION, TestModel1_name, 1)),
+            // TODO Camille should provide a mechanism to automatically create
+            // parents through this interface.
+            dataController.create(new Path("/Overrides"), new Document());
+            dataController.create(new Path("/Overrides/" + TestModel1_name), new Document());
+            dataController.create(new Path("/Overrides/" + TestModel1_name + "/" + 1), new Document());
+            dataController.create(
+                    new Path(String.format(DocumentConstants.SCORE_DERIVATION_OVERRIDE, TestModel1_name, 1)),
                     DocumentUtils.toDocument(TestModel1_ScoreDerivationOverride));
         }
     }
 
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
+        // TODO It'd be nice to have a less error-prone mechanism for managing
+        // the ZooKeeper test environment.
         CamilleTestEnvironment.start();
+        ContractLifecycleManager.create(Documents.Space.getContractId());
+        TenantLifecycleManager.create(Documents.Space.getContractId(), Documents.Space.getTenantId(),
+                Documents.Space.getSpaceId());
+
+        SkaldBootstrapper.register();
+        CustomerSpaceServiceBootstrapManager.reset(DocumentConstants.SERVICE_NAME, Documents.Space);
+
         Documents.publish();
     }
 
@@ -144,7 +170,7 @@ public class CombinationRetrieverUnitTestNG {
     public void testScoreOverride() throws Exception {
         // Override ScoreDerivation for TestModel1
         Documents.publishScoreOverride();
-        
+
         CombinationRetriever retriever = new CombinationRetriever();
         List<CombinationElement> combination = retriever.getCombination(Documents.Space,
                 Documents.TestCombination_name, ModelTags.ACTIVE);
@@ -165,13 +191,12 @@ public class CombinationRetrieverUnitTestNG {
         Assert.assertTrue(model1Found && model2Found);
     }
 
-    
     @Test(groups = "unit", expectedExceptions = Exception.class)
     public void testNoSuchTag() throws Exception {
         CombinationRetriever retriever = new CombinationRetriever();
         retriever.getCombination(Documents.Space, Documents.TestCombination_name, "UnknownTag");
     }
-    
+
     @Test(groups = "unit", expectedExceptions = Exception.class)
     public void testNoSuchCombination() throws Exception {
         CombinationRetriever retriever = new CombinationRetriever();

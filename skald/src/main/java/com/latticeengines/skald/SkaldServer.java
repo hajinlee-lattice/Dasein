@@ -18,6 +18,9 @@ public class SkaldServer {
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure();
 
+        // TODO Start Camille environment.
+        SkaldBootstrapper.register();
+
         Properties properties = new Properties(System.getProperties());
         properties.setProperty("python.cachedir.skip", "true");
         PythonInterpreter.initialize(System.getProperties(), properties, new String[0]);

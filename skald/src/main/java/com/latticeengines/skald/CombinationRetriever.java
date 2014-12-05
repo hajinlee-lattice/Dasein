@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.zookeeper.KeeperException;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.camille.config.ConfigurationController;
 import com.latticeengines.camille.interfaces.data.DataInterfaceSubscriber;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 import com.latticeengines.domain.exposed.skald.model.DataComposition;
 import com.latticeengines.domain.exposed.skald.model.ModelCombination;
 import com.latticeengines.domain.exposed.skald.model.ModelIdentifier;
@@ -26,29 +29,33 @@ public class CombinationRetriever {
         try {
             // TODO Add a caching layer.
 
+            // TODO Add more aggressive combination name validation.
             if (combinationName.startsWith("/")) {
                 throw new RuntimeException("Invalid combination name: " + combinationName);
             }
 
-            // Retrieve the named ModelCombination structure from ZooKeeper.
-            DataInterfaceSubscriber registrationInterface = new DataInterfaceSubscriber(
-                    DocumentConstants.REGISTRATION_INTERFACE, space);
-            Document combinationDoc = registrationInterface.get(new Path(String.format(DocumentConstants.COMBINATION,
-                    combinationName)));
-            ModelCombination combination = JsonUtils.deserialize(combinationDoc.getData(), ModelCombination.class);
+            // Retrieve the ModelTags and the specified ModelCombination.
+            CustomerSpaceServiceScope scope = new CustomerSpaceServiceScope(space, DocumentConstants.SERVICE_NAME,
+                    DocumentConstants.DATA_VERSION);
+            ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
+                    scope);
 
-            Document modelTagsDoc = registrationInterface.get(new Path(DocumentConstants.MODEL_TAGS));
-            ModelTags modelTags = JsonUtils.deserialize(modelTagsDoc.getData(), ModelTags.class);
+            Path tagsPath = new Path(DocumentConstants.MODEL_TAGS);
+            ModelTags tags = JsonUtils.deserialize(controller.get(tagsPath).getData(), ModelTags.class);
 
-            DataInterfaceSubscriber modelInterface = new DataInterfaceSubscriber(DocumentConstants.MODEL_INTERFACE,
-                    space);
+            Path combinationPath = new Path(String.format(DocumentConstants.COMBINATION, combinationName));
+            ModelCombination combination = JsonUtils.deserialize(controller.get(combinationPath).getData(),
+                    ModelCombination.class);
 
             // For each entry in the combination, retrieve the DataComposition
             // and (default or override) ScoreDerivation from ZooKeeper.
+            DataInterfaceSubscriber modelInterface = new DataInterfaceSubscriber(DocumentConstants.MODEL_INTERFACE,
+                    space);
+
             List<CombinationElement> toReturn = new ArrayList<CombinationElement>();
             for (TargetedModel targetedModel : combination) {
                 // Bind to actual model version by looking in ModelTags
-                Map<String, Integer> tagmap = modelTags.get(targetedModel.model);
+                Map<String, Integer> tagmap = tags.get(targetedModel.model);
                 if (tagmap == null) {
                     // Documents are inconsistent. Since writing should be
                     // transactional this should not happen.
@@ -82,11 +89,15 @@ public class CombinationRetriever {
                         ScoreDerivation.class);
 
                 // Look up ScoreDerivationOverride
-                Document scoreDerivationOverrideDoc = registrationInterface.get(new Path(String.format(
-                        DocumentConstants.SCORE_DERIVATION, identifier.name, identifier.version)));
-                if (scoreDerivationOverrideDoc != null) {
-                    scoreDerivation = JsonUtils
-                            .deserialize(scoreDerivationOverrideDoc.getData(), ScoreDerivation.class);
+                Path overridePath = new Path(String.format(DocumentConstants.SCORE_DERIVATION_OVERRIDE,
+                        identifier.name, identifier.version));
+                try {
+                    Document override = controller.get(overridePath);
+                    if (override != null) {
+                        scoreDerivation = JsonUtils.deserialize(override.getData(), ScoreDerivation.class);
+                    }
+                } catch (KeeperException.NoNodeException ex) {
+                    // Pass
                 }
 
                 CombinationElement element = new CombinationElement(targetedModel.filter, composition, identifier,
