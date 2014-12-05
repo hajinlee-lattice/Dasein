@@ -20,7 +20,7 @@ import com.latticeengines.skald.exposed.SetScoreDerivationRequest;
 @RestController
 public class ActivationService {
     // There are no corresponding get methods because these structures will be
-    // exposed in ZooKeeper through a Camille data interface.
+    // exposed by Skald in ZooKeeper through a Camille data interface.
 
     @RequestMapping(value = "SetModelTags", method = RequestMethod.POST)
     public void setModelTags(@RequestBody SetModelTagsRequest request) {
