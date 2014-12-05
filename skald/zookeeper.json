@@ -1,0 +1,4 @@
+{
+	"podId" : "test",
+	"connectionString" : "localhost:2181"
+}
