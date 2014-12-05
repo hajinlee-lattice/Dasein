@@ -5,7 +5,7 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.skald.ScoreType;
+import com.latticeengines.skald.exposed.ScoreType;
 
 public class ScoringTestExecutor {
     TestDefinition definition;

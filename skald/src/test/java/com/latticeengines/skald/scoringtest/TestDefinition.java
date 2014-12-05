@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.skald.CombinationElement;
-import com.latticeengines.skald.ScoreType;
+import com.latticeengines.skald.exposed.ScoreType;
 
 public class TestDefinition {
     public String testName;

@@ -11,7 +11,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import com.latticeengines.skald.ScoreType;
+import com.latticeengines.skald.exposed.ScoreType;
 
 public class ScoreReader {
     private String path;

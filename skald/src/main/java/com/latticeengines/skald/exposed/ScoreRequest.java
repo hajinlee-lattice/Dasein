@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.skald.exposed;
 
 import java.util.Map;
 

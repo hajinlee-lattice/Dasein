@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.skald.model.FieldSchema;
 import com.latticeengines.domain.exposed.skald.model.FieldSource;
+import com.latticeengines.skald.exposed.ScoreRequest;
+import com.latticeengines.skald.exposed.ScoreType;
 
 @RestController
 public class ScoreService {

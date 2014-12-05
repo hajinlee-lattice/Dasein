@@ -21,9 +21,9 @@ import com.latticeengines.skald.CombinationRetriever;
 import com.latticeengines.skald.ModelEvaluator;
 import com.latticeengines.skald.ModelRetriever;
 import com.latticeengines.skald.RecordTransformer;
-import com.latticeengines.skald.ScoreRequest;
 import com.latticeengines.skald.ScoreService;
-import com.latticeengines.skald.ScoreType;
+import com.latticeengines.skald.exposed.ScoreRequest;
+import com.latticeengines.skald.exposed.ScoreType;
 
 public class MockScoreService {
     @InjectMocks

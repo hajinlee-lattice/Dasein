@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.skald.model.FieldSchema;
 import com.latticeengines.skald.CombinationElement;
-import com.latticeengines.skald.ScoreType;
+import com.latticeengines.skald.exposed.ScoreType;
 
 public class TestDirectoryReader {
     private static final Logger log = LoggerFactory.getLogger(new Object() {

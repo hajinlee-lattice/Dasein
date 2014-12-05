@@ -19,6 +19,7 @@ import org.xml.sax.SAXException;
 
 import com.latticeengines.domain.exposed.skald.model.BucketRange;
 import com.latticeengines.domain.exposed.skald.model.ScoreDerivation;
+import com.latticeengines.skald.exposed.ScoreType;
 
 public class ModelEvaluator {
     public ModelEvaluator(Reader pmml) {
