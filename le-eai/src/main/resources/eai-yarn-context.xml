@@ -23,8 +23,18 @@
       http://camel.apache.org/schema/spring
       http://camel.apache.org/schema/spring/camel-spring.xsd">
 
-    <context:component-scan base-package="com.latticeengines.eai"/>
-    <import resource="classpath:eai-yarn-context.xml"/>
-    <import resource="classpath:dataplatform-component-context.xml"/>
+    <context:component-scan base-package="com.latticeengines.eai.routes"/>
+    <context:component-scan base-package="com.latticeengines.eai.service"/>
+    <context:component-scan base-package="com.latticeengines.eai.yarn"/>
+    
+    <camel:camelContext id="eai">
+        <camel:package>com.latticeengines.eai.routes</camel:package>
+    </camel:camelContext>
 
+    <import resource="classpath:eai-yarn-client-context.xml"/>
+    
+    <import resource="classpath:eai-salesforce-context.xml"/>
+    <import resource="classpath:eai-marketo-context.xml"/>
+    <import resource="classpath:eai-eloqua-context.xml"/>
+    
 </beans>

@@ -12,12 +12,10 @@ import org.apache.avro.SchemaBuilder.FieldAssembler;
 import org.apache.avro.SchemaBuilder.FieldBuilder;
 import org.apache.avro.SchemaBuilder.RecordBuilder;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.Attribute;
 import com.latticeengines.domain.exposed.eai.AttributeOwner;
 
-@Component("avroSchemaBuilder")
 public class AvroSchemaBuilder {
     
     @SuppressWarnings("deprecation")

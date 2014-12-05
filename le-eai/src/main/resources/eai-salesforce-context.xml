@@ -23,6 +23,7 @@
       http://camel.apache.org/schema/spring
       http://camel.apache.org/schema/spring/camel-spring.xsd">
 
+
     <bean id="salesforce" class="org.apache.camel.component.salesforce.SalesforceComponent">
         <property name="loginConfig">
             <bean class="org.apache.camel.component.salesforce.SalesforceLoginConfig">
@@ -34,5 +35,5 @@
             </bean>
         </property>
     </bean>
-    
+
 </beans>

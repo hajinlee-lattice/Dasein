@@ -1,4 +1,4 @@
-package com.latticeengines.eai.exposed.service;
+package com.latticeengines.eai.service;
 
 import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportContext;

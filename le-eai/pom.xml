@@ -12,6 +12,8 @@
         <camel.version>2.14.0</camel.version>
         <le.common.version>1.0.16-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.16-SNAPSHOT</le.domain.version>
+        <le.dataplatform.version>1.0.15-SNAPSHOT</le.dataplatform.version>
+        <le.scheduler.version>1.0.15-SNAPSHOT</le.scheduler.version>
         <fdb.sql.parser.version>1.5.0</fdb.sql.parser.version>
         <parquet.avro.version>1.4.3</parquet.avro.version>
     </properties>
@@ -109,12 +111,33 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-common</artifactId>
             <version>${le.common.version}</version>
+            <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
             <version>${le.domain.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dataplatform</artifactId>
+            <version>${le.dataplatform.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dataplatform</artifactId>
+            <version>${le.dataplatform.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-scheduler</artifactId>
+            <version>${le.scheduler.version}</version>
+            <classifier>intf</classifier>
         </dependency>
     </dependencies>
 
 </project>
+
