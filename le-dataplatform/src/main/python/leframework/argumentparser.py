@@ -155,7 +155,7 @@ class ArgumentParser(object):
                     self.nameToFeatureIndex[fName] = k
                 if fName in self.keyCols:
                     self.keyColIndex.add(k)
-                if (fType == 'string' or fType == 'boolean' or fType == 'bytes') and fName not in self.targets:
+                if (fType == 'string' or fType == 'bytes') and fName not in self.targets:
                     self.stringColNames.add(fName)
                 k = k+1
             elif fName in self.readouts:
