@@ -24,8 +24,8 @@ import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
-import com.latticeengines.dataplatform.service.JobService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -172,7 +172,8 @@ public abstract class JobServiceImpl implements JobService, ApplicationContextAw
         return submitYarnJob(job.getClient(), job.getAppMasterPropertiesObject(), job.getContainerPropertiesObject());
     }
 
-    protected void setJobStatus(JobStatus jobStatus, String applicationId) {
+    @Override
+    public void populateJobStatusFromYarnAppReport(JobStatus jobStatus, String applicationId) {
         ApplicationReport appReport = getJobReportById(ConverterUtils.toApplicationId(applicationId));
         jobStatus.setId(applicationId);
         if (appReport != null) {

@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.client.yarn;
+package com.latticeengines.dataplatform.exposed.yarn.client;
 
 public enum ContainerProperty {
 
@@ -7,6 +7,7 @@ public enum ContainerProperty {
     MEMORY, //
     PRIORITY, //
     METADATA, //
+    METADATA_CONTENTS, //
     JOBDIR, //
     RUNTIME_CONFIG;
 }

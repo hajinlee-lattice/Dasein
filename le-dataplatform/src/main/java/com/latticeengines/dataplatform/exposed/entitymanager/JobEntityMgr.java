@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.entitymanager;
+package com.latticeengines.dataplatform.exposed.entitymanager;
 
 import java.util.List;
 
@@ -8,7 +8,6 @@ public interface JobEntityMgr extends BaseEntityMgr<Job> {
 
     final static int maxJobsMapping = 2000;
 
-    // Set<Job> getByIds(Set<String> jobIds);
     Job findByObjectId(String id);
 
     List<Job> findAllByObjectIds(List<String> ids);

@@ -22,10 +22,9 @@ import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
-import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
-import com.latticeengines.dataplatform.client.yarn.YarnClientCustomization;
-import com.latticeengines.dataplatform.client.yarn.YarnClientCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
+import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
+import com.latticeengines.dataplatform.exposed.yarn.client.YarnClientCustomization;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -40,9 +39,6 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     private Configuration yarnConfiguration;
 
     @Autowired
-    private YarnClientCustomizationRegistry yarnClientCustomizationRegistry;
-
-    @Autowired
     private JobNameService jobNameService;
 
     @Value("${dataplatform.yarn.job.basedir}")
@@ -55,7 +51,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties,
             Properties containerProperties) {
 
-        YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
+        YarnClientCustomization customization = YarnClientCustomization.getCustomization(clientName);
         if (customization == null) {
             return;
         }
@@ -147,7 +143,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     @Override
     public void validate(CommandYarnClient client, String clientName, Properties appMasterProperties,
             Properties containerProperties) {
-        YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
+        YarnClientCustomization customization = YarnClientCustomization.getCustomization(clientName);
         if (customization == null) {
             return;
         }
@@ -162,7 +158,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         } catch (IOException e) {
             log.warn("Could not delete local job directory.", e);
         }
-        YarnClientCustomization customization = yarnClientCustomizationRegistry.getCustomization(clientName);
+        YarnClientCustomization customization = YarnClientCustomization.getCustomization(clientName);
         customization.finalize(appMasterProperties, containerProperties);
     }
 

@@ -11,12 +11,17 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
+import com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCustomization;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -24,13 +29,16 @@ import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.Field;
 
+@Component("pythonClientCustomization")
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
-
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(PythonClientCustomization.class);
 
-    public PythonClientCustomization(Configuration yarnConfiguration) {
-        super(yarnConfiguration);
+    @Autowired
+    public PythonClientCustomization(Configuration yarnConfiguration,
+            @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,
+            @Value("${dataplatform.fs.web.defaultFS}") String webHdfs) {
+        super(yarnConfiguration, hdfsJobBaseDir, webHdfs);
     }
 
     @Override
@@ -40,7 +48,6 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
     @Override
     public String getContainerLauncherContextFile(Properties properties) {
-        //return "/batch-amjob/appmaster-context.xml";
         return "/python/dataplatform-python-appmaster-context.xml";
     }
 

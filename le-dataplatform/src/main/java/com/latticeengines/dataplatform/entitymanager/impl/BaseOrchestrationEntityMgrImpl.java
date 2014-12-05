@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
-import com.latticeengines.dataplatform.entitymanager.BaseEntityMgr;
+import com.latticeengines.dataplatform.exposed.entitymanager.BaseEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 public abstract class BaseOrchestrationEntityMgrImpl<T extends HasPid> implements BaseEntityMgr<T> {

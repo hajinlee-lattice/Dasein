@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.client.yarn;
+package com.latticeengines.dataplatform.exposed.yarn.client;
 
 public enum AppMasterProperty {
     

@@ -22,10 +22,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
-import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
-import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
+import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
+import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;

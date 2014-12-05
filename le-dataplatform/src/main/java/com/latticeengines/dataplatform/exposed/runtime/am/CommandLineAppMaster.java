@@ -25,9 +25,9 @@ import org.springframework.yarn.am.container.AbstractLauncher;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.yarn.ProgressMonitor;
 import com.latticeengines.common.exposed.yarn.RuntimeConfig;
-import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
-import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
+import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
+import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.runtime.metric.LedpMetricsMgr;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -39,18 +39,18 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
-    private YarnService yarnService;
-
     private LedpMetricsMgr ledpMetricsMgr = null;
-
-    private String containerId;
 
     private ProgressMonitor monitor;
 
-    private String priority;
+    private String containerId;
 
     private String customer;
+
+    private String priority;
+
+    @Autowired
+    private YarnService yarnService;
 
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
@@ -227,15 +227,15 @@ public class CommandLineAppMaster extends StaticEventingAppmaster implements Con
 
         IOFileFilter filter = new IOFileFilter() {
 
-			@Override
-			public boolean accept(File file) {
-				return true;
-			}
+            @Override
+            public boolean accept(File file) {
+                return true;
+            }
 
-			@Override
-			public boolean accept(File dir, String name) {
-				return true;
-			}
+            @Override
+            public boolean accept(File dir, String name) {
+                return true;
+            }
         };
         Iterator<File> it = FileUtils.iterateFilesAndDirs(new File("."), filter, filter);
         while (it.hasNext()) {

@@ -2,12 +2,15 @@ package com.latticeengines.dataplatform.client.yarn;
 
 import java.util.Properties;
 
-import org.apache.hadoop.conf.Configuration;
+import org.springframework.stereotype.Component;
 
+import com.latticeengines.dataplatform.exposed.yarn.client.DefaultYarnClientCustomization;
+
+@Component("RClientCustomization")
 public class RClientCustomization extends DefaultYarnClientCustomization {
 
-    public RClientCustomization(Configuration yarnConfiguration) {
-        super(yarnConfiguration);
+    public RClientCustomization() {
+        super(null, null, null);
     }
 
     @Override

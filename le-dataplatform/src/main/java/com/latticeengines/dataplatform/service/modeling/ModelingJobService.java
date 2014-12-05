@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
-import com.latticeengines.dataplatform.service.JobService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 

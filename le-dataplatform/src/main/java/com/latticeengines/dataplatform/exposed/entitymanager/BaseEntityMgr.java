@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.entitymanager;
+package com.latticeengines.dataplatform.exposed.entitymanager;
 
 import java.util.List;
 

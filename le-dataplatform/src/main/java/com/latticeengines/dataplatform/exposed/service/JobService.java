@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.service;
+package com.latticeengines.dataplatform.exposed.service;
 
 import java.util.List;
 import java.util.Properties;
@@ -28,4 +28,6 @@ public interface JobService {
     ApplicationId submitJob(Job job);
 
     JobStatus getJobStatus(String applicationId);
+
+    void populateJobStatusFromYarnAppReport(JobStatus jobStatus, String applicationId);
 }

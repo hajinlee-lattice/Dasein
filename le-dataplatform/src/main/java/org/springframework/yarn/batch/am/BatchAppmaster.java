@@ -1,18 +1,3 @@
-/*
- * Copyright 2013 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.springframework.yarn.batch.am;
 
 import java.io.File;
@@ -25,7 +10,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -59,9 +43,9 @@ import org.springframework.yarn.integration.ip.mind.binding.BaseResponseObject;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.yarn.ProgressMonitor;
-import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
-import com.latticeengines.dataplatform.client.yarn.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.service.YarnService;
+import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
+import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.runtime.metric.LedpMetricsMgr;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -73,7 +57,18 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
     @Autowired(required = false)
     private final Collection<PartitionHandler> partitionHandlers = Collections.emptySet();
 
+    @Autowired
+    private Configuration yarnConfiguration;
+
     private List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
+
+    private LedpMetricsMgr ledpMetricsMgr = null;
+    
+    private ProgressMonitor monitor;
+
+    private String priority;
+
+    private String customer;
 
     @Value("${dataplatform.yarn.job.runtime.config}")
     private String runtimeConfig;
@@ -83,17 +78,6 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
 
     @Autowired
     protected YarnService yarnService;
-
-    @Autowired
-    protected Configuration yarnConfiguration;
-
-    private LedpMetricsMgr ledpMetricsMgr = null;
-
-    protected String priority;
-
-    protected String customer;
-
-    protected ProgressMonitor monitor;
 
     @Override
     protected void onInit() throws Exception {
@@ -132,12 +116,12 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
 
     @Override
     public void submitApplication() {
-        log.info("submitApplication");
+        log.info("Submitting application.");
         registerAppmaster();
         start();
         ApplicationAttemptId appAttemptId = getApplicationAttemptId();
         if (getAllocator() instanceof AbstractAllocator) {
-            log.info("about to set app attempt id");
+            log.info("Setting application attempt id " + appAttemptId);
             ((AbstractAllocator) getAllocator()).setApplicationAttemptId(appAttemptId);
         }
         final String appId = appAttemptId.getApplicationId().toString();
@@ -147,7 +131,7 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         final long appStartTime = System.currentTimeMillis();
         ledpMetricsMgr.setAppStartTime(appStartTime);
 
-        log.info("Application submitted with Application id = " + appId);
+        log.info("Application submitted with app id = " + appId);
         new Thread(new Runnable() {
 
             @Override
@@ -176,7 +160,7 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         try {
             getYarnJobLauncher().run(getParameters());
         } catch (JobExecutionException e) {
-            log.error("Error in jobLauncherHelper", e);
+            log.error("Error in jobLauncherHelper.", e);
             setFinalApplicationStatus(FinalApplicationStatus.FAILED);
         }
         for (JobExecution jobExecution : jobExecutions) {
@@ -185,7 +169,6 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
                 break;
             }
         }
-        // Immediately publish
         ledpMetricsMgr.publishMetricsNow();
         notifyCompleted();
     }
@@ -204,7 +187,7 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
 
         AppmasterService service = getAppmasterService();
         if (log.isDebugEnabled() && service != null) {
-            log.debug("Appmaster service " + service + " Started");
+            log.debug("Appmaster service " + service + " started");
         }
 
         if (service instanceof BatchAppmasterService) {
@@ -269,11 +252,12 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
     public void doStop() {
         super.doStop();
         cleanupJobDir();
-        // Shut down monitor
         monitor.stop();
-        ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
-        // Immediately publish
-        ledpMetricsMgr.publishMetricsNow();
+        
+        if (ledpMetricsMgr != null) {
+            ledpMetricsMgr.setAppEndTime(System.currentTimeMillis());
+            ledpMetricsMgr.publishMetricsNow();
+        }
     }
 
     private void cleanupJobDir() {
@@ -281,7 +265,7 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         try {
             HdfsUtils.rmdir(yarnConfiguration, dir);
         } catch (Exception e) {
-            log.warn("Could not delete job dir " + dir + " due to exception:\n" + ExceptionUtils.getStackTrace(e));
+            log.warn("Could not delete job dir " + dir + ".", e);
         }
 
     }

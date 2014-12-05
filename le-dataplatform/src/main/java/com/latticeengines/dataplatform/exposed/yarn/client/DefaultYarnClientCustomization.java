@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.client.yarn;
+package com.latticeengines.dataplatform.exposed.yarn.client;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,24 +19,23 @@ import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
-import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
-
-public class DefaultYarnClientCustomization implements YarnClientCustomization {
+public class DefaultYarnClientCustomization extends YarnClientCustomization {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(DefaultYarnClientCustomization.class);
 
     protected Configuration yarnConfiguration;
 
-    protected String hdfsJobBaseDir;
+    private String hdfsJobBaseDir;
 
-    protected String webHdfs;
-
-    public DefaultYarnClientCustomization(Configuration yarnConfiguration) {
+    private String webHdfs;
+    
+    public DefaultYarnClientCustomization(Configuration yarnConfiguration, String hdfsJobBaseDir, String webHdfs) {
+        super();
         this.yarnConfiguration = yarnConfiguration;
-        this.hdfsJobBaseDir = yarnConfiguration.get("dataplatform.hdfsJobBaseDir");
-        this.webHdfs = yarnConfiguration.get("dataplatform.webHdfs");
+        this.hdfsJobBaseDir = hdfsJobBaseDir;
+        this.webHdfs = webHdfs;
     }
-
+    
     @Override
     public ResourceLocalizer getResourceLocalizer(Properties containerProperties) {
         return new DefaultResourceLocalizer(yarnConfiguration, getHdfsEntries(containerProperties),
@@ -146,7 +145,7 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
         Properties prop = new Properties();
         for (Map.Entry<Object, Object> entry : containerProperties.entrySet()) {
             // Exclude METADATA_CONTENT to avoid nested properties
-            if (!entry.getKey().toString().equals(PythonContainerProperty.METADATA_CONTENTS.name())) {
+            if (!entry.getKey().toString().equals(ContainerProperty.METADATA_CONTENTS.name())) {
                 prop.put(entry.getKey(), entry.getValue());
             }
         }
@@ -157,5 +156,25 @@ public class DefaultYarnClientCustomization implements YarnClientCustomization {
     @Override
     public Map<String, String> setEnvironment(Map<String, String> environment, Properties containerProperties) {
         return environment;
+    }
+    
+    public String getHdfsJobBaseDir() {
+        return hdfsJobBaseDir;
+    }
+    
+    public void setHdfsJobBaseDir(String hdfsJobBaseDir) {
+        this.hdfsJobBaseDir = hdfsJobBaseDir;
+    }
+
+    public String getWebHdfs() {
+        return webHdfs;
+    }
+
+    public void setWebHdfs(String webHdfs) {
+        this.webHdfs = webHdfs;
+    }
+    
+    public Configuration getConfiguration() {
+        return yarnConfiguration;
     }
 }

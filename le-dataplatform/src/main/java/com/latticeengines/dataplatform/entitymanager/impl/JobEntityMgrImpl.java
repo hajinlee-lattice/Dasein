@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.JobDao;
-import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 
 @Component("jobEntityMgr")

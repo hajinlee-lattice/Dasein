@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.dataplatform.client.yarn.AppMasterProperty;
-import com.latticeengines.dataplatform.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
+import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
+import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.MetadataService;
@@ -181,7 +181,7 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
                 }
             }
         }
-        super.setJobStatus(jobStatus, applicationId);
+        populateJobStatusFromYarnAppReport(jobStatus, applicationId);
         return jobStatus;
     }
 

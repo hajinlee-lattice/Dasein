@@ -267,11 +267,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-eai</artifactId>
-            <version>${le.eai.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-scheduler</artifactId>
             <version>${le.scheduler.version}</version>
             <classifier>intf</classifier>
