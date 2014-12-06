@@ -282,34 +282,6 @@ def runJsonExec():
         e = traceback.format_exc()
         updateExecutionDiary(str(request.data), e)
         return e
-"""
->>> exec("import os.path")
->>> os.path.join("~","test")
-'~/test'
->>> def getFoo(): return 5
-... 
->>> eval("getFoo()")
-5
->>> compile("getFoo()", "", "eval")
-<code object <module> at 0x7f2c510c18b0, file "", line 1>
->>> x = compile("getFoo()", "", "eval")
->>> x
-<code object <module> at 0x7f2c510c11b0, file "", line 1>
->>> x()
-Traceback (most recent call last):
-  File "<stdin>", line 1, in <module>
-TypeError: 'code' object is not callable
->>> exec(x)
->>> print exec(x)
-  File "<stdin>", line 1
-    print exec(x)
-             ^
-SyntaxError: invalid syntax
->>> x = eval("getFoo()")
->>> print x
-5
-
-"""
 
 @app.route('/cmd', methods = ['POST', 'GET'])
 def runJsonCommand():
