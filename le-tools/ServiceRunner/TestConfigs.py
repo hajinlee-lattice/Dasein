@@ -18,6 +18,14 @@ from collections import OrderedDict
 
 ConfigDLC = OrderedDict()
 
+ConfigDLC["Test Command"] = {"command": "-Test",
+                       "definition": "dlc -Test -s [DataLoader URL] -u [User Name] -p [Password] -li [Launch Id]",
+                       "-s": ("required", "DataLoader URL"),
+                       "-u": ("required", "User Name"),
+                       "-p": ("optional", "Password"),
+                       "-li": ("unknown", "Launch Id")
+                       }
+
 ConfigDLC["Launch"] = {"command": "-L",
                        "definition": "dlc -L -s [DataLoader URL] -u [User Name] -p [Password] -li [Launch Id]",
                        "-s": ("required", "DataLoader URL"),

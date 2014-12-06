@@ -23,11 +23,11 @@ from subprocess import Popen
 import argparse
 import json
 import os.path
-import time
+import datetime
 import traceback
 
 EXECUTION_DIARY = OrderedDict()
-EXECUTION_DIARY[time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))] = "And so it begins..."
+EXECUTION_DIARY[datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")] = "And so it begins..."
 EXECFILES = "/tmp/execfiles"
 INSTALLFILES = "/tmp/installfiles"
 STYLE = """
@@ -74,7 +74,7 @@ def add_file_footer(filename, footer):
     write_to_file(filename, content)
 
 def updateExecutionDiary(cmd, output):
-    timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
     key = "|%s| on %s" % (cmd, timestamp)
     EXECUTION_DIARY[key] = output
     app.logger.info("%s : %s" % (key, output))
@@ -85,6 +85,8 @@ def getExecutionDiary():
 def runCmd(cmd, from_dir=None):
     if from_dir is None:
         from_dir = os.getcwd()
+    if from_dir.startswith("~"):
+        from_dir = os.path.expanduser(from_dir)
     p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True, cwd=from_dir)
     out, err = p.communicate()
     return out, err
@@ -126,7 +128,7 @@ def shutdown_server():
 def reboot_server():
     # Debug has to be set to True for this to work
     filename = os.path.realpath(__file__)
-    footer = "# Rebooting on %s\n" % time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+    footer = "# Rebooting on %s\n" % datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
     add_file_footer(filename, footer)
     
 @app.route('/reboot', methods=['POST', 'GET'])
@@ -202,8 +204,14 @@ def runJsonCommandFromDir():
         if ((type(cmd) == str) or (type(cmd) == unicode)):
             print "You should have used /cmd instead of /cmdfromdir, since no 'from dir'"
             return runCommand(cmd)
-        elif type(cmd) == tuple:
-            return runCommand(cmd[0], cmd[1])
+        elif type(cmd) == dict:
+            output = ""
+            for cl in cmd.keys():
+                out, err = runCmd(cl, cmd[cl])
+                print cl, out, err
+                output += "%s\nSTDOUT:%s\nSTDERR:%s\n" % (cl, out, err)
+                updateExecutionDiary(cl, "STDOUT:%s\nSTDERR:%s\n" % (out, err))
+            return output
         elif type(cmd) == list:
             output = ""
             for cl in cmd:
@@ -213,11 +221,12 @@ def runJsonCommandFromDir():
                     print cl, out, err
                     output += "%s\nSTDOUT:%s\nSTDERR:%s\n" % (cl, out, err)
                     updateExecutionDiary(cl, "STDOUT:%s\nSTDERR:%s\n" % (out, err))
-                elif type(cl) == tuple:
-                    out, err = runCommand(cl[0], cl[1])
-                    print cl, out, err
-                    output += "%s\nSTDOUT:%s\nSTDERR:%s\n" % (cl, out, err)
-                    updateExecutionDiary(cl, "STDOUT:%s\nSTDERR:%s\n" % (out, err))
+                elif type(cl) == dict:
+                    for cl in cmd.keys():
+                        out, err = runCmd(cl, cmd[cl])
+                        print cl, out, err
+                        output += "%s\nSTDOUT:%s\nSTDERR:%s\n" % (cl, out, err)
+                        updateExecutionDiary(cl, "STDOUT:%s\nSTDERR:%s\n" % (out, err))
                 else:
                     output += "Unsupported request%s\n" % cl
                     updateExecutionDiary(cl, output) 
@@ -242,16 +251,18 @@ def runJsonEval():
         pycode = jdata["eval"]
         print pycode
         if ((type(pycode) == str) or (type(pycode) == unicode)):
-            return eval(pycode)
+            e = str(eval(pycode))
+            updateExecutionDiary(pycode, "%s" % e)
+            return e 
         if type(pycode) == list:
             output = ""
             for line in pycode:
                 if not ((type(line) == str) or (type(line) == unicode)):
                     continue
                 stdout = eval(line)
-                output += "%s\n" % stdout
+                output += "%s," % stdout
                 updateExecutionDiary(line, "%s\n" % stdout)
-            return output
+            return output.rstrip(",")
     except Exception:
         e = traceback.format_exc()
         updateExecutionDiary(str(request.data), e)
@@ -275,9 +286,9 @@ def runJsonExec():
             for line in pycode:
                 if not ((type(line) == str) or (type(line) == unicode)):
                     continue
-                output += "%s\n" % line
+                output += "%s," % line
                 updateExecutionDiary(line, "Executing\n")
-            return output
+            return output.rstrip(",")
     except Exception:
         e = traceback.format_exc()
         updateExecutionDiary(str(request.data), e)
@@ -480,3 +491,9 @@ def main():
 if __name__ == '__main__':
     main()
 
+# Rebooting on 2014-12-05 22:10:24
+# Rebooting on 2014-12-05 22:12:56
+# Rebooting on 2014-12-05 22:54:52
+# Rebooting on 2014-12-05 22:58:42
+# Rebooting on 2014-12-05 23:20:00
+# Rebooting on 2014-12-05 23:26:32

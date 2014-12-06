@@ -14,14 +14,16 @@ __status__ = "Alpha"
 
 # import modules
 import logging
+from copy import deepcopy
 from TestConfigs import ConfigDLC
 from TestRunner import SessionRunner
 
 class DLCRunner(SessionRunner):
 
     def __init__(self, host="http://localhost:5000", logfile=None, exception=False):
-        super.__init__(host, logfile)
+        super(DLCRunner, self).__init__(host, logfile)
         self.exception = exception
+        self.ignore = ["command", "definition"]
         self.command = ""
         self.params = {}
 
@@ -33,16 +35,19 @@ class DLCRunner(SessionRunner):
             return None
         required = []
         optional = []
-        for param in ConfigDLC[command].keys()[2:]:
+        for param in ConfigDLC[command].keys():
+            if param in self.ignore:
+                continue
             if ConfigDLC[command][param][0] == "required":
-                required.append(ConfigDLC[command][param][0])
+                required.append(param)
             elif ConfigDLC[command][param][0] == "optional":
-                optional.append(ConfigDLC[command][param][0])
+                optional.append(param)
             else:
-                logging.warning("Unknown param [%] for [%s] command" % (ConfigDLC[command][param][0], command))
+                logging.warning("Unknown param [%s] for [%s] command" % (param, command))
         return required, optional
 
     def validateInput(self, command, params):
+        params = deepcopy(params)
         if command not in ConfigDLC.keys():
             logging.error("No such command [%s] in DLC" % command)
             if self.exception:
@@ -60,7 +65,7 @@ class DLCRunner(SessionRunner):
                 del params[param]
                 optional.remove(param)
             else:
-                logging.warning("Unknown param [%] for [%s] command" % (param, command))
+                logging.warning("Unknown param [%s] for [%s] command" % (param, command))
                 del params[param]
         if len(required) != 0:
             logging.error("Required commands [%s] are missing" % required)
@@ -73,8 +78,8 @@ class DLCRunner(SessionRunner):
     def constructCommand(self, command, params):
         if self.validateInput(command, params):
             dlc = "dlc " + self.command
-            for param in params.keys():
-                dlc += " %s %s" % (param, params[param])
+            for param in self.params.keys():
+                dlc += " %s %s" % (param, self.params[param])
             return dlc
         else:
             return None
@@ -88,3 +93,29 @@ class DLCRunner(SessionRunner):
             return False
         return self.runCommand(cmd)
 
+    def testRun(self):
+        print "Starting tests. All should be True"
+        command = ""
+        params = {}
+        self.verify(self.validateInput(command, params), False, "1")
+        self.verify(self.constructCommand(command, params), None, "2")
+        self.verify(self.getParamsInfo(command), None, "3")
+        command = "Test Command"
+        r, o = self.getParamsInfo(command)
+        self.verify(r == ["-u","-s"] and o == ["-p"], True, "4")
+        self.verify(self.validateInput(command, params), False, "5")
+        self.verify(self.constructCommand(command, params), None, "6")
+        r, o = self.getParamsInfo(command)
+        params = {"-u":"user", "-s":"http://dataloader"}
+        self.verify(r == ["-u","-s"] and o == ["-p"], True, "7")
+        self.verify(self.validateInput(command, params), True, "8")
+        self.verify(self.constructCommand(command, params), "dlc -Test -u user -s http://dataloader", "9")
+        print "Test status: [%s]" % self.testStatus
+        return self.testStatus
+
+def main():
+    DLCRunner().testRun()
+        
+
+if __name__ == '__main__':
+    main()
