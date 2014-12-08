@@ -108,8 +108,7 @@ public class CommandLineSubmitModelSetup extends CommandLineSetup<SubmitModel> {
         alg.setSampleName("all");
         alg.setPriority(Integer.parseInt(priority));
         alg.setContainerProperties(new StringBuilder().append("VIRTUALCORES=")//
-                .append(virtualCores).append(" MEMORY=").append(memory)//
-                .append(" PRIORITY=").append(priority).toString());
+                .append(virtualCores).append(" MEMORY=").append(memory).toString());
     }
 
 }

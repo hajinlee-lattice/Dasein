@@ -174,17 +174,17 @@ public class DataPlatformFunctionalTestNGBase extends AbstractTestNGSpringContex
     protected ModelDefinition produceModelDefinition() {
         LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
         logisticRegressionAlgorithm.setPriority(0);
-        logisticRegressionAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
+        logisticRegressionAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64");
         logisticRegressionAlgorithm.setSampleName("s0");
 
         DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
         decisionTreeAlgorithm.setPriority(1);
-        decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
+        decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64");
         decisionTreeAlgorithm.setSampleName("s1");
 
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(2);
-        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
+        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64");
         randomForestAlgorithm.setSampleName("all");
 
         ModelDefinition modelDef = new ModelDefinition();

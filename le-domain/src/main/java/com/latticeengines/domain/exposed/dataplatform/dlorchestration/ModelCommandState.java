@@ -136,4 +136,5 @@ public class ModelCommandState extends AbstractTimestampEntity implements HasPid
     public void setElapsedTimeInMillis(Long elapsedTimeInMillis) {
         this.elapsedTimeInMillis = elapsedTimeInMillis;
     }
+
 }

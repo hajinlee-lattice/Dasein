@@ -170,6 +170,7 @@ public class ModelingServiceImplTestNG extends DataPlatformFunctionalTestNGBase 
         config.setMetadataTable(model.getMetadataTable());
         config.setSamplePrefix("all");
         config.setTargets(model.getTargetsList());
+        config.setContainerProperties("VIRTUALCORES=1 MEMORY=64");
         List<String> excludeList = new ArrayList<>();
         excludeList.add("IDX");
         excludeList.add("CustomerID");

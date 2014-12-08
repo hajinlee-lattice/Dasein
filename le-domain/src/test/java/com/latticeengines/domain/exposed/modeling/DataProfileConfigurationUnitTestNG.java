@@ -15,7 +15,7 @@ public class DataProfileConfigurationUnitTestNG {
         config.setTable("iris");
         config.setMetadataTable("iris_metadata");
         config.setSamplePrefix("all");
-        
+        config.setContainerProperties("VIRTUALCORES=1 MEMORY=64");
         String jsonString = config.toString();
         System.out.println(jsonString);
         DataProfileConfiguration deserializedConfig = JsonUtils.deserialize(jsonString, DataProfileConfiguration.class);

@@ -68,8 +68,8 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     protected ModelDefinition produceModelDef() {
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
-        randomForestAlgorithm.setPriority(0);
-        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
+        randomForestAlgorithm.setPriority(2);
+        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048");
         randomForestAlgorithm.setSampleName("all");
 
         ModelDefinition modelDef = new ModelDefinition();

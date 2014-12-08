@@ -50,7 +50,7 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
 
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
-        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
+        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048");
         randomForestAlgorithm.setSampleName("all");
 
         ModelDefinition modelDef = new ModelDefinition();

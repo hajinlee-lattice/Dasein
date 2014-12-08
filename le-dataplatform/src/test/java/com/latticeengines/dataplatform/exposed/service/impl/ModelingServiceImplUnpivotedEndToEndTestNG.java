@@ -99,8 +99,8 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         fs.delete(new Path(customerBaseDir + "/Nutanix"), true);
 
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
-        randomForestAlgorithm.setPriority(0);
-        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
+        randomForestAlgorithm.setPriority(1);
+        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64");
         randomForestAlgorithm.setSampleName("s0");
 
         ModelDefinition modelDef = new ModelDefinition();
@@ -225,6 +225,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
         config.setSamplePrefix("all");
         config.setTargets(model.getTargetsList());
+        config.setContainerProperties("VIRTUALCORES=1 MEMORY=64");
         ApplicationId appId = modelingService.profileData(config);
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);

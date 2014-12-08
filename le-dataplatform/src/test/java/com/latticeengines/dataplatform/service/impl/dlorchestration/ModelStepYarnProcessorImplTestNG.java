@@ -15,6 +15,7 @@ import com.google.common.base.Joiner;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 
@@ -38,22 +39,22 @@ public class ModelStepYarnProcessorImplTestNG extends DataPlatformFunctionalTest
     public void testExecuteYarnSteps() throws Exception {
         cleanUpHdfs("Nutanix");
         setupDBConfig();
-        List<ModelCommandParameter> listParameters = ModelingServiceTestUtils.createModelCommandWithCommandParameters()
-                .getCommandParameters();
+        ModelCommand modelCommand = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        List<ModelCommandParameter> listParameters = modelCommand.getCommandParameters();
         ModelCommandParameters commandParameters = new ModelCommandParameters(listParameters);
 
         List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.LOAD_DATA,
-                commandParameters);
+                commandParameters, modelCommand);
         waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.LOAD_DATA);
-
+        modelCommand.setDataSize(300);
         appIds = modelStepYarnProcessor
-                .executeYarnStep("Nutanix", ModelCommandStep.GENERATE_SAMPLES, commandParameters);
+                .executeYarnStep("Nutanix", ModelCommandStep.GENERATE_SAMPLES, commandParameters, modelCommand);
         waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.GENERATE_SAMPLES);
 
-        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.PROFILE_DATA, commandParameters);
+        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.PROFILE_DATA, commandParameters, modelCommand);
         waitForSuccess(1 * NUM_ALGORITHMS, appIds, ModelCommandStep.PROFILE_DATA);
 
-        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.SUBMIT_MODELS, commandParameters);
+        appIds = modelStepYarnProcessor.executeYarnStep("Nutanix", ModelCommandStep.SUBMIT_MODELS, commandParameters, modelCommand);
         waitForSuccess(ModelingServiceTestUtils.NUM_SAMPLES * NUM_ALGORITHMS, appIds, ModelCommandStep.SUBMIT_MODELS);
     }
 

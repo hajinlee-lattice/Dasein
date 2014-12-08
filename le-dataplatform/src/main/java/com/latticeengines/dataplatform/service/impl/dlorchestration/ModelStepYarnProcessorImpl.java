@@ -14,10 +14,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.ResourceUtils;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
@@ -71,9 +73,6 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     @Value("${dataplatform.container.virtualcores}")
     private int virtualCores;
 
-    @Value("${dataplatform.container.memory}")
-    private int memory;
-
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
@@ -89,7 +88,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
     @Override
     @SuppressWarnings("incomplete-switch")
-    public List<ApplicationId> executeYarnStep(String deploymentExternalId, ModelCommandStep currentStep, ModelCommandParameters commandParameters) {
+    public List<ApplicationId> executeYarnStep(String deploymentExternalId, ModelCommandStep currentStep,
+            ModelCommandParameters commandParameters, ModelCommand modelCommand) {
         List<ApplicationId> appIds = Collections.emptyList();
         switch (currentStep) {
         case LOAD_DATA:
@@ -99,10 +99,10 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
             appIds = generateSamples(deploymentExternalId, commandParameters);
             break;
         case PROFILE_DATA:
-            appIds = profileData(deploymentExternalId, commandParameters);
+            appIds = profileData(deploymentExternalId, commandParameters, modelCommand.getDataSize());
             break;
         case SUBMIT_MODELS:
-            appIds = submitModel(deploymentExternalId, commandParameters);
+            appIds = submitModel(deploymentExternalId, commandParameters, modelCommand.getDataSize());
             break;
         }
 
@@ -111,7 +111,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
     private List<ApplicationId> load(String customer, ModelCommandParameters commandParameters) {
         List<ApplicationId> appIds = new ArrayList<>();
-        ApplicationId unpivotedAppId = modelingService.loadData(generateLoadConfiguration(DataSetType.STANDARD, customer, commandParameters));
+        ApplicationId unpivotedAppId = modelingService.loadData(generateLoadConfiguration(DataSetType.STANDARD,
+                customer, commandParameters));
         appIds.add(unpivotedAppId);
         // No LR for now.
         // ApplicationId pivotedAppId =
@@ -122,7 +123,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         return appIds;
     }
 
-    private LoadConfiguration generateLoadConfiguration(DataSetType type, String customer, ModelCommandParameters commandParameters) {
+    private LoadConfiguration generateLoadConfiguration(DataSetType type, String customer,
+            ModelCommandParameters commandParameters) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).dbType(dbType);
@@ -163,7 +165,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         // ApplicationId lrAppId =
         // modelingService.createSamples(generateSamplingConfiguration(AlgorithmType.LOGISTIC_REGRESSION,
         // customer, commandParameters));
-        ApplicationId unpivotedAppId = modelingService.createSamples(generateSamplingConfiguration(DataSetType.STANDARD, customer, commandParameters));
+        ApplicationId unpivotedAppId = modelingService.createSamples(generateSamplingConfiguration(
+                DataSetType.STANDARD, customer, commandParameters));
 
         return Arrays.asList(/* lrAppId, */unpivotedAppId);
     }
@@ -173,7 +176,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     }
 
     @VisibleForTesting
-    SamplingConfiguration generateSamplingConfiguration(DataSetType type, String customer, ModelCommandParameters commandParameters) {
+    SamplingConfiguration generateSamplingConfiguration(DataSetType type, String customer,
+            ModelCommandParameters commandParameters) {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
 
@@ -196,9 +200,10 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     }
 
     /*
-     * No commented out code exists in this method to handle logistic regression.
+     * No commented out code exists in this method to handle logistic
+     * regression.
      */
-    private List<ApplicationId> profileData(String customer, ModelCommandParameters commandParameters) {
+    private List<ApplicationId> profileData(String customer, ModelCommandParameters commandParameters, long dataSize) {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(customer);
         config.setTable(commandParameters.getEventTable());
@@ -206,15 +211,18 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         config.setExcludeColumnList(commandParameters.getExcludeColumns());
         config.setSamplePrefix(SAMPLENAME_PREFIX + "100");
         config.setTargets(commandParameters.getModelTargets());
+        config.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY="
+                + ResourceUtils.getProfilingMemory(dataSize));
         ApplicationId appId = modelingService.profileData(config);
 
         return Arrays.asList(appId);
     }
 
-    private List<ApplicationId> submitModel(String customer, ModelCommandParameters commandParameters) {
+    private List<ApplicationId> submitModel(String customer, ModelCommandParameters commandParameters, long dataSize) {
         List<ApplicationId> appIds = new ArrayList<>();
         // No LR for now.
-        List<ApplicationId> unpivotedModelAppIds = modelingService.submitModel(generateModel(DataSetType.STANDARD, customer, commandParameters));
+        List<ApplicationId> unpivotedModelAppIds = modelingService.submitModel(generateModel(DataSetType.STANDARD,
+                customer, commandParameters, dataSize));
         // List<ApplicationId> lrAppIds =
         // modelingService.submitModel(generateModel(AlgorithmType.LOGISTIC_REGRESSION,
         // customer, commandParameters));
@@ -244,7 +252,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     }
 
     @VisibleForTesting
-    Model generateModel(DataSetType type, String customer, ModelCommandParameters commandParameters) {
+    Model generateModel(DataSetType type, String customer, ModelCommandParameters commandParameters, long dataSize) {
         List<Algorithm> algorithms = new ArrayList<>();
 
         int sampleIndex = 0;
@@ -261,9 +269,9 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
                 algorithm = new LogisticRegressionAlgorithm();
             }
 
-            int priority = calculatePriority(sampleIndex);
             algorithm.setPriority(calculatePriority(sampleIndex));
-            algorithm.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY=" + priority);
+            algorithm.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY="
+                    + ResourceUtils.getModelingMemory(dataSize));
             if (!Strings.isNullOrEmpty(commandParameters.getAlgorithmProperties())) {
                 algorithm.setAlgorithmProperties(commandParameters.getAlgorithmProperties());
             }
