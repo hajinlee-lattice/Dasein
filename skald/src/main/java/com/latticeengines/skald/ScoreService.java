@@ -1,6 +1,7 @@
 package com.latticeengines.skald;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,19 +29,36 @@ public class ScoreService {
         List<CombinationElement> combination = combinationRetriever.getCombination(request.space, request.combination,
                 request.tag);
 
-        // Verify all the model schemas against incoming record.
-        List<String> wrong = new ArrayList<String>();
+        // Create a combined schema for all models in the combination. This
+        // requires that all models in a combination have compatible field
+        // schema -- meaning that when they have fields with the same name,
+        // those fields have identical schema.
+        Map<String, FieldSchema> combined = new HashMap<String, FieldSchema>();
         for (CombinationElement element : combination) {
-            for (String name : element.data.fields.keySet()) {
-                FieldSchema field = element.data.fields.get(name);
-                if (field.source == FieldSource.Request) {
-                    if (!request.record.containsKey(name)) {
-                        wrong.add(String.format("%1$s [%2$s] was missing", name, field.type));
-                    } else {
-                        Object value = request.record.get(name);
-                        if (value != null && !field.type.type().isInstance(value)) {
-                            wrong.add(String.format("%1$s [%2$s] was not the correct type", name, field.type));
-                        }
+            for (Map.Entry<String, FieldSchema> entry : element.data.fields.entrySet()) {
+                if (combined.containsKey(entry.getKey())) {
+                    if (!entry.getValue().equals(combined.get(entry.getKey()))) {
+                        throw new RuntimeException(String.format(
+                                "Model combination %s has elements with incompatible schemas for field %s",
+                                request.combination, entry.getKey()));
+                    }
+                } else {
+                    combined.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        // Verify the combined schema against the incoming record.
+        List<String> wrong = new ArrayList<String>();
+        for (String name : combined.keySet()) {
+            FieldSchema field = combined.get(name);
+            if (field.source == FieldSource.Request) {
+                if (!request.record.containsKey(name)) {
+                    wrong.add(String.format("%1$s [%2$s] was missing", name, field.type));
+                } else {
+                    Object value = request.record.get(name);
+                    if (value != null && !field.type.type().isInstance(value)) {
+                        wrong.add(String.format("%1$s [%2$s] was not the correct type", name, field.type));
                     }
                 }
             }
@@ -50,7 +68,9 @@ public class ScoreService {
             throw new RuntimeException("Record had missing or invalid fields: " + StringUtils.join(wrong, ", "));
         }
 
-        // TODO Match and join Prop Data.
+        // Match and join Prop Data.
+        Map<String, Object> internal = matcher.match(combined, request.record);
+        request.record.putAll(internal);
 
         // TODO Query and join aggregate data.
 
@@ -75,6 +95,9 @@ public class ScoreService {
 
     @Autowired
     private ModelRetriever modelRetriever;
+
+    @Autowired
+    private InternalDataMatcher matcher;
 
     private static final Log log = LogFactory.getLog(ScoreService.class);
 }

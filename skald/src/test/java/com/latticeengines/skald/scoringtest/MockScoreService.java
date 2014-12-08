@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.skald.model.ModelIdentifier;
 import com.latticeengines.skald.CombinationElement;
 import com.latticeengines.skald.CombinationRetriever;
+import com.latticeengines.skald.InternalDataMatcher;
 import com.latticeengines.skald.ModelEvaluator;
 import com.latticeengines.skald.ModelRetriever;
 import com.latticeengines.skald.RecordTransformer;
@@ -38,8 +39,12 @@ public class MockScoreService {
     @Spy
     private RecordTransformer recordTransformer;
 
+    @Spy
+    private InternalDataMatcher matcher;
+
     public MockScoreService(final Map<String, String> modelsPMML, final List<CombinationElement> combination) {
         recordTransformer = new RecordTransformer();
+        matcher = new InternalDataMatcher();
 
         MockitoAnnotations.initMocks(this);
 
