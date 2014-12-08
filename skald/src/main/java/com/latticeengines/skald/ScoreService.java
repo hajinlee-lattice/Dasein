@@ -81,7 +81,9 @@ public class ScoreService {
 
         ModelEvaluator evaluator = modelRetriever.getEvaluator(request.space, selected.model);
 
-        return evaluator.evaluate(transformed, selected.derivation);
+        Map<ScoreType, Object> result = evaluator.evaluate(transformed, selected.derivation);
+        result.put(ScoreType.MODEL_NAME, selected.model.name);
+        return result;
 
         // TODO Write record and results to a score history database.
         // TODO Also do this for failures and capture error information.

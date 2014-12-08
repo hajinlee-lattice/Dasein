@@ -1,6 +1,5 @@
 package com.latticeengines.skald.exposed;
 
-
 public enum ScoreType {
 
     PROBABILITY(Double.class),
@@ -9,7 +8,9 @@ public enum ScoreType {
 
     PERCENTILE(Integer.class),
 
-    BUCKET(String.class);
+    BUCKET(String.class),
+
+    MODEL_NAME(String.class);
 
     private ScoreType(Class<?> type) {
         this.type = type;
