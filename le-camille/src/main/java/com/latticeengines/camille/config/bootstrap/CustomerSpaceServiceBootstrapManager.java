@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.camille.Camille;
 import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.CamilleTransaction;
+import com.latticeengines.camille.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.paths.PathBuilder;
 import com.latticeengines.camille.paths.PathConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -120,6 +121,9 @@ public class CustomerSpaceServiceBootstrapManager {
                 synchronized (this) {
                     if (!bootstrapped) {
                         log.info("{}Running bootstrap", logPrefix);
+                        if (!SpaceLifecycleManager.exists(space.getContractId(), space.getTenantId(), space.getSpaceId())) {
+                            throw new RuntimeException("Customerspace " + space + " does not exist");
+                        }
                         install(executableVersion);
                         upgrade(executableVersion);
                         bootstrapped = true;
@@ -133,6 +137,7 @@ public class CustomerSpaceServiceBootstrapManager {
                 try {
                     log.info("{}Service directory {} does not exist. Running initial install of version {}",
                             new Object[] { logPrefix, serviceDirectoryPath, executableVersion });
+
                     DocumentDirectory configurationDirectory = installer.getInitialConfiguration(executableVersion);
                     if (configurationDirectory == null) {
                         throw new NullPointerException("Installer returned a null document directory");
@@ -160,7 +165,7 @@ public class CustomerSpaceServiceBootstrapManager {
                 } catch (KeeperException.NodeExistsException e) {
                     log.warn("{}Another process already installed the initial configuration", logPrefix, e);
                 } catch (Exception e) {
-                    log.error("{}Unexpected failure occurred attempting to install initial configuration", logPrefix);
+                    log.error("{}Unexpected failure occurred attempting to install initial configuration", logPrefix, e);
                     throw e;
                 }
             }
