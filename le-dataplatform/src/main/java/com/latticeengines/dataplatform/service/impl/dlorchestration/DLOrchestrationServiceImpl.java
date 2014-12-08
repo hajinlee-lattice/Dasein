@@ -237,4 +237,12 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
     public void setResourceManagerWebAppAddress(String resourceManagerWebAppAddress) {
         this.resourceManagerWebAppAddress = resourceManagerWebAppAddress;
     }
+
+    public String getAppTimeLineWebAppAddress() {
+        return appTimeLineWebAppAddress;
+    }
+
+    public void setAppTimeLineWebAppAddress(String appTimeLineWebAppAddress) {
+        this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
+    }
 }
