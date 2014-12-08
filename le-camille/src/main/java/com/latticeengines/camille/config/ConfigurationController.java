@@ -15,7 +15,7 @@ public class ConfigurationController<T extends ConfigurationScope> implements Co
     private ConfigurationControllerInterface<T> impl;
 
     @SuppressWarnings("unchecked")
-    public ConfigurationController(T scope) throws Exception {
+    private ConfigurationController(T scope) throws Exception {
         if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
             impl = (ConfigurationControllerInterface<T>) new CustomerSpaceServiceConfigurationControllerImpl(
                     (CustomerSpaceServiceScope) scope);
@@ -23,9 +23,18 @@ public class ConfigurationController<T extends ConfigurationScope> implements Co
         impl = new StandardConfigurationControllerImpl<T>(scope);
     }
 
+    public static <T extends ConfigurationScope> ConfigurationController<T> construct(T scope) throws Exception {
+        return new ConfigurationController<T>(scope);
+    }
+
     @Override
     public void create(Path path, Document document) throws Exception {
         impl.create(path, document);
+    }
+
+    @Override
+    public void upsert(Path path, Document document) throws Exception {
+        impl.upsert(path, document);
     }
 
     @Override

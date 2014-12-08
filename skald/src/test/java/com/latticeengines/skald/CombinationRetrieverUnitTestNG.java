@@ -87,7 +87,7 @@ public class CombinationRetrieverUnitTestNG {
         public static void publish() throws Exception {
             CustomerSpaceServiceScope scope = new CustomerSpaceServiceScope(Space, DocumentConstants.SERVICE_NAME,
                     DocumentConstants.DATA_VERSION);
-            dataController = new ConfigurationController<CustomerSpaceServiceScope>(scope);
+            dataController = ConfigurationController.construct(scope);
 
             // Publish TestModel1
             modelPublisher.publish(new Path(String.format(DocumentConstants.SCORE_DERIVATION, TestModel1_name, 1)),

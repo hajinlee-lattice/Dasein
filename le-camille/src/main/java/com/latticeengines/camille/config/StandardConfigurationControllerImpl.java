@@ -40,6 +40,12 @@ public class StandardConfigurationControllerImpl<T extends ConfigurationScope> i
     }
 
     @Override
+    public void upsert(Path path, Document document) throws Exception {
+        Path absolute = translator.getAbsolutePath(path);
+        camille.upsert(absolute, document, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+    }
+
+    @Override
     public void set(Path path, Document document) throws Exception {
         Path absolute = translator.getAbsolutePath(path);
         camille.set(absolute, document);

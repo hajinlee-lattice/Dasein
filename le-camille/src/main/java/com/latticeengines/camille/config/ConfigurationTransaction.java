@@ -9,12 +9,16 @@ public class ConfigurationTransaction<T extends ConfigurationScope> implements C
     private ConfigurationTransactionInterface<T> impl;
 
     @SuppressWarnings("unchecked")
-    public ConfigurationTransaction(T scope) throws Exception {
+    private ConfigurationTransaction(T scope) throws Exception {
         if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
             impl = (ConfigurationTransactionInterface<T>) new CustomerSpaceServiceConfigurationTransactionImpl(
-                    (CustomerSpaceServiceScope)scope);
+                    (CustomerSpaceServiceScope) scope);
         }
         impl = new StandardConfigurationTransactionImpl<T>(scope);
+    }
+
+    public static <T extends ConfigurationScope> ConfigurationTransaction<T> construct(T scope) throws Exception {
+        return new ConfigurationTransaction<T>(scope);
     }
 
     @Override

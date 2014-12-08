@@ -27,11 +27,16 @@ public class PropertiesManager<T extends ConfigurationScope> {
 
     protected final ConfigurationCache<T> configCache;
     protected final ConfigurationController<T> configController;
-    protected final Path relativePath;
+    protected final Path localPath;
 
-    public PropertiesManager(T scope, Path relativePath) throws Exception {
-        configController = new ConfigurationController<T>(scope);
-        configCache = new ConfigurationCache<T>(scope, this.relativePath = relativePath);
+    private PropertiesManager(T scope, Path localPath) throws Exception {
+        configController = ConfigurationController.construct(scope);
+        configCache = ConfigurationCache.construct(scope, this.localPath = localPath);
+    }
+
+    public static <T extends ConfigurationScope> PropertiesManager<T> construct(T scope, Path localPath)
+            throws Exception {
+        return new PropertiesManager<T>(scope, localPath);
     }
 
     public String getStringProperty(String name) throws Exception {
@@ -100,9 +105,9 @@ public class PropertiesManager<T extends ConfigurationScope> {
         map.put(name, value);
         doc.setData(mapper.writeValueAsString(map));
         try {
-            configController.set(relativePath, doc);
+            configController.set(localPath, doc);
         } catch (KeeperException.NoNodeException e) {
-            configController.create(relativePath, doc);
+            configController.create(localPath, doc);
         }
         configCache.rebuild();
     }

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.api.SetDataBuilder;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
@@ -69,6 +70,18 @@ public class Camille {
             builder.withVersion(doc.getVersion());
         Stat stat = builder.forPath(path.toString(), doc.getData().getBytes());
         doc.setVersion(stat.getVersion());
+    }
+
+    public void upsert(Path path, Document doc, List<ACL> acls) throws Exception {
+        upsert(path, doc, acls, false);
+    }
+
+    public void upsert(Path path, Document doc, List<ACL> acls, boolean force) throws Exception {
+        try {
+            create(path, doc, acls);
+        } catch (KeeperException.NodeExistsException ex) {
+            set(path, doc, force);
+        }
     }
 
     public Document get(Path path) throws Exception {

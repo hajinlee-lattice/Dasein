@@ -41,11 +41,11 @@ public class ConfigurationTransactionUnitTestNG {
         PodScope scope = new PodScope();
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
         Path path = new Path("/foo");
-        ConfigurationTransaction<PodScope> transaction = new ConfigurationTransaction<PodScope>(scope);
+        ConfigurationTransaction<PodScope> transaction = ConfigurationTransaction.construct(scope);
         transaction.create(path, new Document("foo"));
         transaction.commit();
 
-        ConfigurationController<PodScope> controller = new ConfigurationController<PodScope>(scope);
+        ConfigurationController<PodScope> controller = ConfigurationController.construct(scope);
         Assert.assertTrue(controller.exists(path));
     }
 
@@ -56,11 +56,11 @@ public class ConfigurationTransactionUnitTestNG {
         ContractLifecycleManager.create(scope.getContractId());
         Path path = new Path("/foo");
 
-        ConfigurationTransaction<ContractScope> transaction = new ConfigurationTransaction<ContractScope>(scope);
+        ConfigurationTransaction<ContractScope> transaction = ConfigurationTransaction.construct(scope);
         transaction.create(path, new Document("foo"));
         transaction.commit();
 
-        ConfigurationController<ContractScope> controller = new ConfigurationController<ContractScope>(scope);
+        ConfigurationController<ContractScope> controller = ConfigurationController.construct(scope);
         Assert.assertTrue(controller.exists(path));
     }
 
@@ -72,11 +72,11 @@ public class ConfigurationTransactionUnitTestNG {
         TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
         Path path = new Path("/foo");
 
-        ConfigurationTransaction<TenantScope> transaction = new ConfigurationTransaction<TenantScope>(scope);
+        ConfigurationTransaction<TenantScope> transaction = ConfigurationTransaction.construct(scope);
         transaction.create(path, new Document("foo"));
         transaction.commit();
 
-        ConfigurationController<TenantScope> controller = new ConfigurationController<TenantScope>(scope);
+        ConfigurationController<TenantScope> controller = ConfigurationController.construct(scope);
         Assert.assertTrue(controller.exists(path));
     }
 
@@ -93,12 +93,11 @@ public class ConfigurationTransactionUnitTestNG {
         SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), scope.getSpaceId());
         Path path = new Path("/foo");
 
-        ConfigurationTransaction<CustomerSpaceScope> transaction = new ConfigurationTransaction<CustomerSpaceScope>(
-                scope);
+        ConfigurationTransaction<CustomerSpaceScope> transaction = ConfigurationTransaction.construct(scope);
         transaction.create(path, new Document("foo"));
         transaction.commit();
 
-        ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);
+        ConfigurationController<CustomerSpaceScope> controller = ConfigurationController.construct(scope);
         Assert.assertTrue(controller.exists(path));
     }
 }

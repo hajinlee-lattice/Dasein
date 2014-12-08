@@ -41,7 +41,7 @@ public class PropertiesManagerUnitTestNG {
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
         Path path = new Path("/foo");
 
-        PropertiesManager<PodScope> pm = new PropertiesManager<PodScope>(scope, path);
+        PropertiesManager<PodScope> pm = PropertiesManager.construct(scope, path);
 
         double d = 10;
         String dblName = "myDouble";
@@ -65,7 +65,7 @@ public class PropertiesManagerUnitTestNG {
         ContractLifecycleManager.create(scope.getContractId());
         Path path = new Path("/foo");
 
-        PropertiesManager<ContractScope> pm = new PropertiesManager<ContractScope>(scope, path);
+        PropertiesManager<ContractScope> pm = PropertiesManager.construct(scope, path);
 
         double d = 10;
         String dblName = "myDouble";
@@ -90,7 +90,7 @@ public class PropertiesManagerUnitTestNG {
         TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
         Path path = new Path("/foo");
 
-        PropertiesManager<TenantScope> pm = new PropertiesManager<TenantScope>(scope, path);
+        PropertiesManager<TenantScope> pm = PropertiesManager.construct(scope, path);
 
         double d = 10;
         String dblName = "myDouble";
@@ -116,7 +116,7 @@ public class PropertiesManagerUnitTestNG {
         SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), scope.getSpaceId());
         Path path = new Path("/foo");
 
-        PropertiesManager<CustomerSpaceScope> pm = new PropertiesManager<CustomerSpaceScope>(scope, path);
+        PropertiesManager<CustomerSpaceScope> pm = PropertiesManager.construct(scope, path);
 
         double d = 10;
         String dblName = "myDouble";

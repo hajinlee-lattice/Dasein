@@ -354,6 +354,15 @@ public class CamilleUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testUpsert() throws Exception {
+        Camille c = CamilleEnvironment.getCamille();
+        Path path = new Path("/foo/bar/baz");
+        c.upsert(path, new Document("foo"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        c.upsert(path, new Document("foo"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertTrue(c.exists(path));
+    }
+
+    @Test(groups = "unit")
     public void testCreateDirectory() throws IllegalArgumentException, Exception {
         File tempDir = Files.createTempDir();
 

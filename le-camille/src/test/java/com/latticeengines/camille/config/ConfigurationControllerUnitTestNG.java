@@ -43,7 +43,7 @@ public class ConfigurationControllerUnitTestNG {
         PodScope scope = new PodScope();
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
         Path path = new Path("/foo");
-        ConfigurationController<PodScope> controller = new ConfigurationController<PodScope>(scope);
+        ConfigurationController<PodScope> controller = ConfigurationController.construct(scope);
         controller.create(path, new Document("foo"));
         Assert.assertTrue(controller.exists(path));
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
@@ -58,7 +58,7 @@ public class ConfigurationControllerUnitTestNG {
         PodLifecycleManager.create(CamilleEnvironment.getPodId());
         ContractLifecycleManager.create(scope.getContractId());
         Path path = new Path("/foo");
-        ConfigurationController<ContractScope> controller = new ConfigurationController<ContractScope>(scope);
+        ConfigurationController<ContractScope> controller = ConfigurationController.construct(scope);
         controller.create(path, new Document("foo"));
         Assert.assertTrue(controller.exists(path));
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
@@ -74,7 +74,7 @@ public class ConfigurationControllerUnitTestNG {
         ContractLifecycleManager.create(scope.getContractId());
         TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
         Path path = new Path("/foo");
-        ConfigurationController<TenantScope> controller = new ConfigurationController<TenantScope>(scope);
+        ConfigurationController<TenantScope> controller = ConfigurationController.construct(scope);
         controller.create(path, new Document("foo"));
         Assert.assertTrue(controller.exists(path));
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
@@ -96,7 +96,7 @@ public class ConfigurationControllerUnitTestNG {
         TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "DefaultSpace");
         SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), scope.getSpaceId());
         Path path = new Path("/foo");
-        ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);
+        ConfigurationController<CustomerSpaceScope> controller = ConfigurationController.construct(scope);
         controller.create(path, new Document("foo"));
         Assert.assertTrue(controller.exists(path));
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
@@ -110,7 +110,7 @@ public class ConfigurationControllerUnitTestNG {
     public void testCreateFailsToCreateScopeDirectory() throws Exception {
         CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant", "MySpace");
         Path path = new Path("/foo");
-        ConfigurationController<CustomerSpaceScope> controller = new ConfigurationController<CustomerSpaceScope>(scope);
+        ConfigurationController<CustomerSpaceScope> controller = ConfigurationController.construct(scope);
         controller.create(path, new Document("foo"));
         Assert.assertTrue(controller.exists(path));
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(

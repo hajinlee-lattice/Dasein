@@ -8,9 +8,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.camille.config.ConfigurationController;
-import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.camille.util.DocumentUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 import com.latticeengines.skald.exposed.SetModelCombinationRequest;
@@ -53,16 +52,10 @@ public class ActivationService {
         try {
             CustomerSpaceServiceScope scope = new CustomerSpaceServiceScope(space, DocumentConstants.SERVICE_NAME,
                     DocumentConstants.DATA_VERSION);
-            ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
-                    scope);
+            ConfigurationController<CustomerSpaceServiceScope> controller = ConfigurationController.construct(scope);
 
-            Document document = new Document(JsonUtils.serialize(value));
+            controller.upsert(path, DocumentUtils.toDocument(value));
 
-            if (controller.exists(path)) {
-                controller.set(path, document);
-            } else {
-                controller.create(path, document);
-            }
         } catch (Exception ex) {
             throw new RuntimeException("Failed to set configuration document", ex);
         }

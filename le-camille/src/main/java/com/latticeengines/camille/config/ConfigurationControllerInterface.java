@@ -13,6 +13,8 @@ import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 public interface ConfigurationControllerInterface<T extends ConfigurationScope> {
     public void create(Path path, Document document) throws Exception;
 
+    public void upsert(Path path, Document document) throws Exception;
+
     public void set(Path path, Document document) throws Exception;
 
     public void set(Path path, Document document, boolean force) throws Exception;

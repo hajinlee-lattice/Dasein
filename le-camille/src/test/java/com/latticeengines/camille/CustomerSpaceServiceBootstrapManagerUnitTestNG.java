@@ -102,8 +102,7 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
 
         // Assert configuration is correct
-        ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
-                scope);
+        ConfigurationController<CustomerSpaceServiceScope> controller = ConfigurationController.construct(scope);
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
 
         Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
@@ -126,8 +125,7 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
 
         // Assert configuration is in the correct structure
-        ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
-                scope);
+        ConfigurationController<CustomerSpaceServiceScope> controller = ConfigurationController.construct(scope);
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
 
         Assert.assertTrue(configurationEquals(configuration, getUpgradedConfiguration()));
@@ -182,8 +180,7 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         }
 
         // Assert configuration is in the correct structure
-        ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
-                scope);
+        ConfigurationController<CustomerSpaceServiceScope> controller = ConfigurationController.construct(scope);
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
 
         Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
@@ -195,8 +192,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
         CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
 
-        ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
-                getCustomerSpaceServiceScope());
+        ConfigurationController<CustomerSpaceServiceScope> controller = ConfigurationController
+                .construct(getCustomerSpaceServiceScope());
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
 
         Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
@@ -209,10 +206,10 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
 
         @SuppressWarnings("unused")
-        ConfigurationTransaction<CustomerSpaceServiceScope> transaction = new ConfigurationTransaction<CustomerSpaceServiceScope>(
-                getCustomerSpaceServiceScope());
-        ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
-                getCustomerSpaceServiceScope());
+        ConfigurationTransaction<CustomerSpaceServiceScope> transaction = ConfigurationTransaction
+                .construct(getCustomerSpaceServiceScope());
+        ConfigurationController<CustomerSpaceServiceScope> controller = ConfigurationController
+                .construct(getCustomerSpaceServiceScope());
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
 
         Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
@@ -225,10 +222,10 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG {
         CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
 
         @SuppressWarnings("unused")
-        ConfigurationCache<CustomerSpaceServiceScope> cache = new ConfigurationCache<CustomerSpaceServiceScope>(
+        ConfigurationCache<CustomerSpaceServiceScope> cache = ConfigurationCache.construct(
                 getCustomerSpaceServiceScope(), new Path("/a"));
-        ConfigurationController<CustomerSpaceServiceScope> controller = new ConfigurationController<CustomerSpaceServiceScope>(
-                getCustomerSpaceServiceScope());
+        ConfigurationController<CustomerSpaceServiceScope> controller = ConfigurationController
+                .construct(getCustomerSpaceServiceScope());
         DocumentDirectory configuration = controller.getDirectory(new Path("/"));
 
         Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));

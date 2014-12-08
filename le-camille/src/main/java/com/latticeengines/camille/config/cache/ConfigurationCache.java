@@ -9,13 +9,18 @@ public class ConfigurationCache<T extends ConfigurationScope> implements Configu
     private ConfigurationCacheInterface<T> impl;
 
     @SuppressWarnings("unchecked")
-    public ConfigurationCache(T scope, Path relativePath) throws Exception {
+    private ConfigurationCache(T scope, Path localPath) throws Exception {
         if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
             impl = (ConfigurationCacheInterface<T>) new CustomerSpaceServiceConfigurationCacheImpl(
-                    (CustomerSpaceServiceScope) scope, relativePath);
+                    (CustomerSpaceServiceScope) scope, localPath);
         } else {
-            impl = new StandardConfigurationCacheImpl<T>(scope, relativePath);
+            impl = new StandardConfigurationCacheImpl<T>(scope, localPath);
         }
+    }
+
+    public static <T extends ConfigurationScope> ConfigurationCache<T> construct(T scope, Path localPath)
+            throws Exception {
+        return new ConfigurationCache<T>(scope, localPath);
     }
 
     @Override
