@@ -344,7 +344,7 @@ public class ModelCommandCallable implements Callable<Long> {
         }
 
         // check if there's skipped rows
-        double numOfSkippedRows = (double) ((JSONObject) jsonObject.get("Summary")).get("NumberOfSkippedRows");
+        long numOfSkippedRows = (long) ((JSONObject) jsonObject.get("Summary")).get("NumberOfSkippedRows");
         if (numOfSkippedRows > 0) {
             warnings += "The number of skipped rows=" + numOfSkippedRows + "\n";
         }
