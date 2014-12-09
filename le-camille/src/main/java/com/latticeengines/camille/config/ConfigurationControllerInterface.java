@@ -11,23 +11,23 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
 public interface ConfigurationControllerInterface<T extends ConfigurationScope> {
-    public void create(Path path, Document document) throws Exception;
+    void create(Path path, Document document) throws Exception;
 
-    public void upsert(Path path, Document document) throws Exception;
+    void upsert(Path path, Document document) throws Exception;
 
-    public void set(Path path, Document document) throws Exception;
+    void set(Path path, Document document) throws Exception;
 
-    public void set(Path path, Document document, boolean force) throws Exception;
+    void set(Path path, Document document, boolean force) throws Exception;
 
-    public Document get(Path path) throws Exception;
+    Document get(Path path) throws Exception;
 
-    public Document get(Path path, CuratorWatcher watcher) throws Exception;
+    Document get(Path path, CuratorWatcher watcher) throws Exception;
 
-    public List<Pair<Document, Path>> getChildren(Path path) throws Exception;
+    List<Pair<Document, Path>> getChildren(Path path) throws Exception;
 
-    public DocumentDirectory getDirectory(Path path) throws Exception;
+    DocumentDirectory getDirectory(Path path) throws Exception;
 
-    public void delete(Path path) throws Exception;
+    void delete(Path path) throws Exception;
 
-    public boolean exists(Path path) throws Exception;
+    boolean exists(Path path) throws Exception;
 }
