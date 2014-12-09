@@ -1,79 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<artifactId>le-camille</artifactId>
-	<packaging>jar</packaging>
-	<version>1.0.16-SNAPSHOT</version>
-	<name>${component-name}</name>
+    <artifactId>le-camille</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0.16-SNAPSHOT</version>
+    <name>${component-name}</name>
 
-	<properties>
-		<component-name>le-camille</component-name>
-		<le.domain.version>1.0.16-SNAPSHOT</le.domain.version>
-	</properties>
+    <properties>
+        <component-name>le-camille</component-name>
+        <le.domain.version>1.0.16-SNAPSHOT</le.domain.version>
+    </properties>
 
-	<parent>
-		<groupId>com.latticeengines</groupId>
-		<artifactId>le-parent</artifactId>
-		<version>1.0.16-SNAPSHOT</version>
-		<relativePath>../le-parent</relativePath>
-	</parent>
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>1.0.16-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.latticeengines</groupId>
-			<artifactId>le-domain</artifactId>
-			<version>1.0.16-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>slf4j-log4j12</artifactId>
-					<groupId>org.slf4j</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>1.0.16-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
-		<dependency>
-			<groupId>org.apache.curator</groupId>
-			<artifactId>curator-framework</artifactId>
-			<version>2.6.0</version>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+            <version>2.6.0</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.netflix.curator</groupId>
-			<artifactId>curator-test</artifactId>
-			<version>1.3.3</version>
-		</dependency>
+        <dependency>
+            <groupId>com.netflix.curator</groupId>
+            <artifactId>curator-test</artifactId>
+            <version>1.3.3</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.4.1</version>
-		</dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.4.1</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>2.4.1</version>
-		</dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.4.1</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.3.2</version>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.3.2</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.7</version>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.7</version>
+            <scope>provided</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>org.apache.curator</groupId>
-			<artifactId>curator-recipes</artifactId>
-			<version>2.6.0</version>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+    </dependencies>
 </project>
