@@ -1,9 +1,9 @@
-import os
 import httplib
-import urlparse
 import json
-import urllib
 import logging
+import os
+import urlparse
+
 
 logging.basicConfig(level = logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')

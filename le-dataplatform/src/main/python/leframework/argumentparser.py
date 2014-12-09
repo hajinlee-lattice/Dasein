@@ -156,7 +156,7 @@ class ArgumentParser(object):
                     self.nameToFeatureIndex[fName] = k
                 if fName in self.keyCols:
                     self.keyColIndex.add(k)
-                if (fType == 'string' or fType == 'bytes') and fName not in self.targets:
+                if (fType == 'string' or fType == 'bytes' or fType == 'boolean') and fName not in self.targets:
                     self.stringColNames.add(fName)
                 k = k+1
             elif fName in self.readouts:
@@ -225,6 +225,7 @@ class ArgumentParser(object):
         schema["nonScoringTargets"] = self.nonScoringTargets
         schema["readouts"] = self.readouts
         schema["stringColumns"] = self.stringColNames
+        schema["fields"] = { k['name']:k['type'][0] for k in self.fields }
 
     def isAvro(self):
         return self.metadataSchema["data_format"] == "avro"

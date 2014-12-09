@@ -1,0 +1,55 @@
+
+import glob
+import json
+import os
+import sys
+
+from leframework.executors.learningexecutor import LearningExecutor
+from trainingtestbase import TrainingTestBase
+
+
+class MulesoftProfilingThenTrainTest(TrainingTestBase):
+
+    def testExecuteProfilingThenTrain(self):
+        # Dynamically import launcher to make sure globals() is clean in launcher
+        if 'launcher' in sys.modules:
+            del sys.modules['launcher']
+        from launcher import Launcher
+
+        # These properties won't really be used since these are just unit tests.
+        # Functional and end-to-end tests should be done from java
+        profilinglauncher = Launcher("profiledriver-mulesoft.json")
+        profilinglauncher.execute(False)
+        learningExecutor = LearningExecutor()
+
+        results = learningExecutor.retrieveMetadata("./results/profile.avro", False)
+        self.assertTrue(results is not None)
+        
+        metadata = results[0]
+        
+        # Two values for a boolean
+        self.assertEquals(len(metadata['MKTOLead_SpamIndicator']), 2)
+        # Booleans should be categorical
+        self.assertEquals(metadata['MKTOLead_SpamIndicator'][0]['Dtype'], 'STR')
+        self.assertEquals(metadata['MKTOLead_SpamIndicator'][1]['Dtype'], 'STR')
+        
+        # Dynamically import launcher to make sure globals() is clean in launcher
+        if 'launcher' in sys.modules:
+            del sys.modules['launcher']
+        from launcher import Launcher
+        
+        os.symlink("./results/profile.avro", "profile-mulesoft.avro")
+
+        traininglauncher = Launcher("modeldriver-mulesoft.json")
+        traininglauncher.execute(False)
+        
+        jsonDict = json.loads(open(glob.glob("./results/PLSModel*.json")[0]).read())
+        
+        for k in jsonDict["InputColumnMetadata"]:
+            if k["Name"] == "MKTOLead_SpamIndicator":
+                self.assertEquals(k["ValueType"], 0)
+
+    def tearDown(self):
+        # Remove launcher module to restore its globals()
+        del sys.modules['launcher']
+

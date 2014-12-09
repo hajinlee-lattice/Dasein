@@ -1,8 +1,14 @@
 from collections import defaultdict
+import logging
 
 import encoder
 import numpy as np
 import pandas as pd
+
+
+logging.basicConfig(level = logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
+                    format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(name='pipeline')
 
 def dictfreq(doc):
     freq = defaultdict(int)
@@ -23,6 +29,7 @@ class EnumeratedColumnTransformStep:
                 encoder.classes_ = np.append(encoder.classes_, 'NULL')
             
             if column in outputFrame:
+                logger.info("Transforming column %s." % column)
                 outputFrame[column] = encoder.transform(outputFrame[column])
      
         return outputFrame
@@ -69,7 +76,7 @@ class ColumnTypeConversionStep:
                 if column in dataFrame and dataFrame[column].dtype == np.object_:
                     dataFrame[column] = pd.Series(pd.lib.maybe_convert_numeric(dataFrame[column].as_matrix(), set(), coerce_numeric=True))
                 else:
-                    print("Column %s cannot be transformed since it is not in the data frame." % column)
+                    logger.info("Column %s cannot be transformed since it is not in the data frame." % column)
         return dataFrame
     
 class ImputationStep:

@@ -11,6 +11,15 @@ class BadTargetProfilingTest(ProfilingTestBase):
         learningExecutor = LearningExecutor()
 
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)
+        
+        metadata = results[0]
+        
+        # Two values for a boolean
+        self.assertEquals(len(metadata['IsIT']), 2)
+        # Booleans should be categorical
+        self.assertEquals(metadata['IsIT'][0]['Dtype'], 'STR')
+        self.assertEquals(metadata['IsIT'][1]['Dtype'], 'STR')
+        
         self.assertTrue(results is not None)
     
 
