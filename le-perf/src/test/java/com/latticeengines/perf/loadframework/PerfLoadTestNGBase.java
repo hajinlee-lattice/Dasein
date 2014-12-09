@@ -198,6 +198,7 @@ public class PerfLoadTestNGBase {
         config.setSamplePrefix("all");
         config.setExcludeColumnList(Profile.createExcludeList());
         config.setTargets(model.getTargetsList());
+        config.setContainerProperties("VIRTUALCORES=1 MEMORY=64");
         return config;
     }
 
