@@ -34,7 +34,7 @@ class PD344ProfilingThenTrainTest(TrainingTestBase):
         traininglauncher = Launcher("modeldriver-pd344.json")
         traininglauncher.execute(False)
         
-        jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/Model_Submission1*.json")[0]).read())
         
         
 
