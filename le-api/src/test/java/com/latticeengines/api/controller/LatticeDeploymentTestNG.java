@@ -135,7 +135,6 @@ public class LatticeDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setSamplePrefix("all");
         config.setTargets(Arrays.<String>asList(new String[] { "P1_Event" }));
         config.setExcludeColumnList(ModelingServiceTestUtils.createExcludeList());
-        config.setContainerProperties("VIRTUALCORES=1 MEMORY=64");
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         ApplicationId profileAppId = platformTestBase.getApplicationId(submission.getApplicationIds().get(0));
