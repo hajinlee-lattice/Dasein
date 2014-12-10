@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Access(AccessType.FIELD)
 @Table(name = "LeadScoringCommand")
 public class ModelCommand implements HasPid, Serializable {
-
+    
     public static final String TAHOE = "Tahoe";
     private static final long serialVersionUID = 1L;
 
@@ -70,20 +70,17 @@ public class ModelCommand implements HasPid, Serializable {
     @LazyCollection(LazyCollectionOption.TRUE)
     @OrderBy("Created ASC")
     private List<ModelCommandState> commandStates;
-
+    
     @Column(name = "ModelId", nullable = false)
     private String modelId;
-
+    
     @OneToOne(mappedBy = "modelCommand", fetch = FetchType.LAZY)
     private ModelCommandResult modelCommandResult;
-
-    @Column(name = "DataSize")
-    private long dataSize = 1L;
-
+    
     ModelCommand() {
         super();
     }
-
+    
     @VisibleForTesting
     public ModelCommand(Long commandId, String deploymentExternalId, ModelCommandStatus commandStatus,
             List<ModelCommandParameter> commandParameters, String modelId) {
@@ -142,21 +139,13 @@ public class ModelCommand implements HasPid, Serializable {
     public List<ModelCommandLog> getCommandLogs() {
         return Collections.unmodifiableList(commandLogs);
     }
-
+    
     public List<ModelCommandState> getCommandStates() {
         return commandStates;
     }
 
     public String getModelId() {
         return modelId;
-    }
-
-    public long getDataSize() {
-        return dataSize;
-    }
-
-    public void setDataSize(long dataSize) {
-        this.dataSize = dataSize;
     }
 
     @Override

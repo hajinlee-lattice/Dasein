@@ -91,12 +91,12 @@ public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
         // model
         LogisticRegressionAlgorithm logisticRegressionAlgorithm = new LogisticRegressionAlgorithm();
         logisticRegressionAlgorithm.setPriority(0);
-        logisticRegressionAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64");
+        logisticRegressionAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=0");
         logisticRegressionAlgorithm.setSampleName("s0");
 
         DecisionTreeAlgorithm decisionTreeAlgorithm = new DecisionTreeAlgorithm();
         decisionTreeAlgorithm.setPriority(1);
-        decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64");
+        decisionTreeAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=64 PRIORITY=1");
         decisionTreeAlgorithm.setSampleName("s1");
 
         modelDef.setName("Model Definition_" + suffix);

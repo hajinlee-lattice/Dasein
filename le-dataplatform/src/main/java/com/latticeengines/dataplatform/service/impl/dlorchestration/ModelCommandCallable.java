@@ -1,7 +1,6 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import java.math.BigInteger;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -91,8 +90,7 @@ public class ModelCommandCallable implements Callable<Long> {
             ModelCommandLogService modelCommandLogService, ModelCommandResultEntityMgr modelCommandResultEntityMgr,
             ModelStepProcessor modelStepFinishProcessor, ModelStepProcessor modelStepOutputResultsProcessor,
             ModelStepProcessor modelStepRetrieveMetadataProcessor, DebugProcessorImpl debugProcessorImpl,
-            AlertService alertService, String httpFsPrefix, String resourceManagerWebAppAddress,
-            String appTimeLineWebAppAddress) {
+            AlertService alertService, String httpFsPrefix, String resourceManagerWebAppAddress, String appTimeLineWebAppAddress) {
         this.modelCommand = modelCommand;
         this.yarnConfiguration = yarnConfiguration;
         this.modelingJobService = modelingJobService;
@@ -144,17 +142,41 @@ public class ModelCommandCallable implements Callable<Long> {
 
             modelCommand.setModelCommandStep(ModelCommandStep.RETRIEVE_METADATA);
             modelCommand.setCommandStatus(ModelCommandStatus.IN_PROGRESS);
+            modelCommandEntityMgr.update(modelCommand);
 
             ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
 
             if (commandParameters.isDebug()) {
                 debugProcessorImpl.execute(modelCommand, commandParameters);
             }
-            populateDataSize(commandParameters);
-            modelCommandEntityMgr.update(modelCommand);
 
             executeStep(modelStepRetrieveMetadataProcessor, ModelCommandStep.RETRIEVE_METADATA, commandParameters);
             executeYarnStep(ModelCommandStep.LOAD_DATA, commandParameters);
+
+            JdbcTemplate dlOrchestrationJdbcTemplate = debugProcessorImpl.getDlOrchestrationJdbcTemplate();
+            String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData()
+                    .getDriverName();
+            if (dbDriverName.contains("Microsoft")) {
+                Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("EXEC sp_spaceused N'"
+                        + commandParameters.getEventTable() + "'");
+                String dataSize = (String) resMap.get("data");
+                String rowSize = (String) resMap.get("rows");
+                int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM sys.columns where object_id = OBJECT_ID('["
+                                + commandParameters.getEventTable() + "]')", Integer.class);
+                modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize
+                        + " Column count: " + columnSize);
+            } else {
+                Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("show table status where name = '"
+                        + commandParameters.getEventTable() + "'");
+                BigInteger dataSize = (BigInteger) resMap.get("Data_length");
+                BigInteger rowSize = (BigInteger) resMap.get("Rows");
+                int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
+                        "select count(*) from INFORMATION_SCHEMA.COLUMNS where table_name='"
+                                + commandParameters.getEventTable() + "'", Integer.class);
+                modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize
+                        + " Column count: " + columnSize);
+            }
         } else { // modelCommand IN_PROGRESS
             List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand,
                     modelCommand.getModelCommandStep());
@@ -188,41 +210,6 @@ public class ModelCommandCallable implements Callable<Long> {
             } else {
                 // Do nothing; job(s) in progress.
             }
-        }
-    }
-
-    @VisibleForTesting
-    void populateDataSize(ModelCommandParameters commandParameters) throws SQLException {
-        JdbcTemplate dlOrchestrationJdbcTemplate = debugProcessorImpl.getDlOrchestrationJdbcTemplate();
-        String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
-
-        if (dbDriverName.contains("Microsoft")) {
-            Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("EXEC sp_spaceused N'"
-                    + commandParameters.getEventTable() + "'");
-            String dataSize = (String) resMap.get("data");
-            int size = Integer.parseInt(dataSize.split("KB")[0].trim());
-            if (size > 1000) {
-                modelCommand.setDataSize(Math.round(size / 1000.0));
-            }
-            String rowSize = (String) resMap.get("rows");
-            int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM sys.columns where object_id = OBJECT_ID('["
-                            + commandParameters.getEventTable() + "]')", Integer.class);
-            modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize
-                    + " Column count: " + columnSize);
-        } else {
-            Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("show table status where name = '"
-                    + commandParameters.getEventTable() + "'");
-            long dataSize = ((BigInteger) resMap.get("Data_length")).longValue();
-            if (dataSize > 1000000L) {
-                modelCommand.setDataSize(Math.round(dataSize / 1000000.0));
-            }
-            BigInteger rowSize = (BigInteger) resMap.get("Rows");
-            int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
-                    "select count(*) from INFORMATION_SCHEMA.COLUMNS where table_name='"
-                            + commandParameters.getEventTable() + "'", Integer.class);
-            modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize
-                    + " Column count: " + columnSize);
         }
     }
 
@@ -266,8 +253,7 @@ public class ModelCommandCallable implements Callable<Long> {
             // Currently each step only generates one yarn job anyways so first
             // failed appId works
             clientUrl.append("app/").append(failedYarnApplicationIds.get(0));
-            modelCommandLogService.log(modelCommand, "Failed job link: " + appTimeLineWebAppAddress + "/app/"
-                    + failedYarnApplicationIds.get(0));
+            modelCommandLogService.log(modelCommand, "Failed job link: " + appTimeLineWebAppAddress + "/app/" + failedYarnApplicationIds.get(0));
         }
 
         List<BasicNameValuePair> details = new ArrayList<>();
@@ -292,7 +278,7 @@ public class ModelCommandCallable implements Callable<Long> {
         modelCommandLogService.logBeginStep(modelCommand, step);
 
         List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep(modelCommand.getDeploymentExternalId(),
-                step, commandParameters, modelCommand);
+                step, commandParameters);
         for (ApplicationId appId : appIds) {
             String appIdString = appId.toString();
             modelCommandLogService.logYarnAppId(modelCommand, appIdString, step);

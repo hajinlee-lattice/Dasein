@@ -2,11 +2,9 @@ package com.latticeengines.domain.exposed.modeling;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.StringTokenUtils;
 
 public class DataProfileConfiguration {
 
@@ -18,13 +16,12 @@ public class DataProfileConfiguration {
     private List<String> excludeColumnList = new ArrayList<String>();
     private List<String> includeColumnList = new ArrayList<String>();
     private List<String> targets = new ArrayList<String>();
-    private String containerProperties;
-
+    
     @JsonProperty("customer")
     public String getCustomer() {
         return customer;
     }
-
+    
     @JsonProperty("customer")
     public void setCustomer(String customer) {
         this.customer = customer;
@@ -105,19 +102,5 @@ public class DataProfileConfiguration {
         this.targets = targets;
     }
 
-    @JsonProperty("container_properties")
-    public String getContainerProperties() {
-        return containerProperties;
-    }
-
-    @JsonProperty("container_properties")
-    public void setContainerProperties(String containerProperties) {
-        this.containerProperties = containerProperties;
-    }
-
-    @JsonIgnore
-    public Properties getContainerProps() {
-        return StringTokenUtils.stringToProperty(getContainerProperties());
-    }
-
+    
 }

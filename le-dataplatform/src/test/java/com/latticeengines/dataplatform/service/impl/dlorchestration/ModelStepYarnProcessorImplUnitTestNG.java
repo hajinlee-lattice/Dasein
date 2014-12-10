@@ -29,8 +29,8 @@ public class ModelStepYarnProcessorImplUnitTestNG {
     }
 
     public ModelCommandParameters createModelCommandParameters() {
-        return new ModelCommandParameters(ModelingServiceTestUtils.createModelCommandWithCommandParameters()
-                .getCommandParameters());
+        return new ModelCommandParameters(ModelingServiceTestUtils
+                .createModelCommandWithCommandParameters().getCommandParameters());
     }
 
     @Test(groups = "unit")
@@ -44,7 +44,7 @@ public class ModelStepYarnProcessorImplUnitTestNG {
     @Test(groups = "unit")
     public void testGenerateModel() {
         Model model = processor.generateModel(ModelStepYarnProcessorImpl.DataSetType.STANDARD, "Nutanix",
-                createModelCommandParameters(), 10);
+                createModelCommandParameters());
         assertEquals(1, model.getModelDefinition().getAlgorithms().size());
     }
 

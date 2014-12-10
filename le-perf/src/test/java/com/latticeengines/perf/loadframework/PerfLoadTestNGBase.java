@@ -142,7 +142,7 @@ public class PerfLoadTestNGBase {
     protected ModelDefinition produceModelDef(int priority) {
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(priority);
-        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048");
+        randomForestAlgorithm.setContainerProperties("VIRTUALCORES=1 MEMORY=2048 PRIORITY=2");
         randomForestAlgorithm.setSampleName("all");
 
         ModelDefinition modelDef = new ModelDefinition();

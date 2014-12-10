@@ -80,10 +80,13 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Value("${dataplatform.modeling.row.threshold:50}")
     private int rowSizeThreshold;
-
+    
     @Value("${dataplatform.container.virtualcores}")
     private int virtualCores;
 
+    @Value("${dataplatform.container.memory}")
+    private int memory;
+    
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     /**
@@ -151,7 +154,7 @@ public class ModelingServiceImpl implements ModelingService {
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
-        long sampleSize = (long) ((JSONObject) jsonObject.get("Summary")).get("SampleSize");
+        long  sampleSize = (long) ((JSONObject) jsonObject.get("Summary")).get("SampleSize");
 
         if (sampleSize < rowSizeThreshold) {
             throw new LedpException(LedpCode.LEDP_15005, new String[] { Double.toString(sampleSize) });
@@ -306,8 +309,8 @@ public class ModelingServiceImpl implements ModelingService {
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
-        containerProperties.put(ContainerProperty.PRIORITY.name(), Integer.toString(algorithm.getPriority()));
-
+        // containerProperties.put(PythonContainerProperty.TABLE.name(),
+        // model.getTable());
         modelingJob.setClient("pythonClient");
         modelingJob.setAppMasterPropertiesObject(appMasterProperties);
         modelingJob.setContainerPropertiesObject(containerProperties);
@@ -418,8 +421,7 @@ public class ModelingServiceImpl implements ModelingService {
         modelDefinition.setName(m.getName());
         AlgorithmBase dataProfileAlgorithm = new DataProfilingAlgorithm();
         dataProfileAlgorithm.setSampleName(dataProfileConfig.getSamplePrefix());
-        dataProfileAlgorithm.setPriority(0);
-        dataProfileAlgorithm.setContainerProperties(dataProfileConfig.getContainerProperties());
+        dataProfileAlgorithm.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY=0");
         if (!StringUtils.isEmpty(dataProfileConfig.getScript())) {
             dataProfileAlgorithm.setScript(dataProfileConfig.getScript());
         }
