@@ -23,7 +23,6 @@
     <context:annotation-config/>
     <context:component-scan base-package="com.latticeengines.dataplatform"/>
 
-    <import resource="classpath:dataplatform-camille-context.xml"/>
     <import resource="classpath:dataplatform-yarn-config-context.xml"/>
     <import resource="classpath:dataplatform-yarn-client-context.xml"/>
     <import resource="classpath:sampling/dataplatform-mr-sampling-context.xml" />

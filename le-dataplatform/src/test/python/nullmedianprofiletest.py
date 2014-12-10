@@ -1,4 +1,3 @@
-import json
 from leframework.executors.learningexecutor import LearningExecutor
 from profilingtestbase import ProfilingTestBase
 
@@ -20,17 +19,4 @@ class NullMedianProfileTest(ProfilingTestBase):
                 self.assertTrue(v["category"] is not None)
                 self.assertTrue(v["displayname"] is not None)
                 self.assertTrue(v["approvedusage"] is not None)
-
-        # Show that the top predictor data type is different from schema data type
-        predictor = results[0]["Intelliscore"]
-        self.assertEquals(predictor[0]["Dtype"], "BND")
-        
-        
-        fields = json.loads(open("schema-okta.avsc", "rb").read())["fields"]
-        
-        for field in fields:
-            if field["name"] == "Intelliscore":
-                self.assertEquals(field["type"][0], "string")
-    
-            
 
