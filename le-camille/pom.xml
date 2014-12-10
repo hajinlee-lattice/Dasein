@@ -6,10 +6,10 @@
     <artifactId>le-camille</artifactId>
     <packaging>jar</packaging>
     <version>1.0.17-SNAPSHOT</version>
-    <name>${component-name}</name>
+    <name>le-${component-name}</name>
 
     <properties>
-        <component-name>le-camille</component-name>
+        <component-name>camille</component-name>
         <le.domain.version>1.0.17-SNAPSHOT</le.domain.version>
     </properties>
 

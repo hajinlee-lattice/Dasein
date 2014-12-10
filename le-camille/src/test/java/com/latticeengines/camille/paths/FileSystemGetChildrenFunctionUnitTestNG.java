@@ -16,6 +16,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.io.Files;
+import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
 import com.latticeengines.domain.exposed.camille.Path;

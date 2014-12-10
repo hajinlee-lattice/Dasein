@@ -9,7 +9,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.util.CamilleTestEnvironment;
+import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;

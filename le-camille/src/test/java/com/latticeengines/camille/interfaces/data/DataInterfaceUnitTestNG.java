@@ -10,9 +10,11 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.CamilleEnvironment;
-import com.latticeengines.camille.lifecycle.PodLifecycleManager;
-import com.latticeengines.camille.util.CamilleTestEnvironment;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.lifecycle.PodLifecycleManager;
+import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
+import com.latticeengines.camille.exposed.interfaces.data.DataInterfacePublisher;
+import com.latticeengines.camille.exposed.interfaces.data.DataInterfaceSubscriber;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
