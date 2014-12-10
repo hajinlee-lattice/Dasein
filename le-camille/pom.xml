@@ -5,18 +5,18 @@
 
     <artifactId>le-camille</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.17-SNAPSHOT</version>
+    <version>1.0.18-SNAPSHOT</version>
     <name>le-${component-name}</name>
 
     <properties>
         <component-name>camille</component-name>
-        <le.domain.version>1.0.17-SNAPSHOT</le.domain.version>
+        <le.domain.version>1.0.18-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.17-SNAPSHOT</version>
+        <version>1.0.18-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.latticeengines</groupId>
             <artifactId>le-domain</artifactId>
-            <version>1.0.17-SNAPSHOT</version>
+            <version>1.0.18-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>slf4j-log4j12</artifactId>
