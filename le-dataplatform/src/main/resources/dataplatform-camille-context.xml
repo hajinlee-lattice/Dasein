@@ -20,10 +20,18 @@
       http://www.springframework.org/schema/util
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
-
-    <import resource="classpath:dataplatform-context.xml"/>
-    <import resource="classpath:dataplatform-camille-context.xml"/>
-    <import resource="classpath:dataplatform-properties-context.xml"/>
-    <!-- <context:component-scan base-package="com.latticeengines.dataplatform.functionalframework"/> -->
+    <bean id="camilleEnvironment" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.camille.exposed.CamilleEnvironment" />
+        <property name="targetMethod" value="start" />
+	    <property name="arguments">
+            <list>
+                <value>BOOTSTRAP</value>
+                <bean class="com.latticeengines.camille.exposed.CamilleConfiguration">
+                    <constructor-arg value="${dataplatform.zk.pod.id:Default}" />
+                    <constructor-arg value="${dataplatform.zk.connectionString:localhost:2181}" />
+                </bean>
+            </list>
+        </property>
+    </bean>
 
 </beans>
