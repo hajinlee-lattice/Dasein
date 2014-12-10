@@ -19,8 +19,13 @@ import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.CamilleEnvironment.Mode;
 
 public class SkaldServer {
-    public static void main(String[] args) throws Exception {
+    // Need to configure logging statically so that it takes place before
+    // any log instances are created.
+    static {
         BasicConfigurator.configure();
+    }
+
+    public static void main(String[] args) throws Exception {
 
         // TODO Swap this to runtime mode once a provisioning tool exists.
         CamilleEnvironment.start(Mode.BOOTSTRAP, new FileReader("zookeeper.json"));
