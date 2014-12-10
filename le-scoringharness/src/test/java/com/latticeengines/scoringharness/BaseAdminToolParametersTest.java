@@ -41,7 +41,7 @@ public class BaseAdminToolParametersTest extends TestCase {
     	try {
 			assertEquals("-n argument does not match.", number.intValue(), tester.getNumber());
 		} catch (IllegalArgumentException e) {
-			assertTrue("-n argment is the wrong format.", false);
+			fail("-n argment is the wrong format.");
 		}
     }
 

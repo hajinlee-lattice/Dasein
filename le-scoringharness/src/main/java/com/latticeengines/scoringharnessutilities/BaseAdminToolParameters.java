@@ -4,8 +4,9 @@ import java.util.HashMap;
 
 public abstract class BaseAdminToolParameters {
 	
-	private String optionPrefix = "-";
-	private String optionPattern = "^" + optionPrefix + "[a-z|A-Z]{1}";
+	public static final String OPTION_PREFIX = "-";
+	
+	private String optionPattern = "^" + OPTION_PREFIX + "[a-z|A-Z]{1}";
 	private HashMap<String,String> parameters = new HashMap<String,String>();
 	
 	public String getParameterValue(String parameterName) {
@@ -14,6 +15,10 @@ public abstract class BaseAdminToolParameters {
 	
 	public boolean getSwitch(String parameterName) {
 		return parameters.containsKey(parameterName);
+	}
+	
+	public static String formatOption(String optionName) {
+		return OPTION_PREFIX + optionName;
 	}
 	
 	public BaseAdminToolParameters(String[] args) {
@@ -42,6 +47,6 @@ public abstract class BaseAdminToolParameters {
 	}
 	
 	private String getOptionName(String arg) {
-		return arg.replaceFirst(optionPrefix, "");
+		return arg.replaceFirst(OPTION_PREFIX, "");
 	}
 }
