@@ -15,6 +15,7 @@ public class ScoringHarnessTool {
 
 	private void validateParameters() {
 		if(parameters.getHelp()) {
+		} else if(parameters.getGenerate()) {
 		} else if(parameters.getLoad()) {
 			String file = parameters.getLoadFile();
 			if(file == null || file.trim().isEmpty())
@@ -43,17 +44,18 @@ public class ScoringHarnessTool {
 	private void executeArguments() {
 		if(parameters.getHelp()) {
 			System.out.println(parameters.toHelpString());
-		
+		} else if(parameters.getGenerate()) {
+			executeLoad();
 		} else if(parameters.getLoad()) {
 			executeLoad();
 		}
 	}
 	
-	private void executeLoad() {
+	private void executeGenerate() {
 		
 	}
 	
-	
-	
-
+	private void executeLoad() {
+		System.out.println("Load option is not currently supported.");
+	}
 }
