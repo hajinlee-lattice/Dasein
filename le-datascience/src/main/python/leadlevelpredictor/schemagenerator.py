@@ -1,7 +1,14 @@
 import csv
 import json
+import logging
 import sys
+
 import leadlevelpredictor.querybuilder as qbldr
+
+
+logging.basicConfig(level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(name='data_profile')
 
 class SchemaGenerator(object):
     
@@ -24,6 +31,7 @@ class SchemaGenerator(object):
         numRowsWithEvent = self.qb.executeQuery("SELECT COUNT(1) FROM dbo.%s WHERE %s = 1 AND %s" % (tableName, eventColumnName, whereClause))
         rowWithEventCount = numRowsWithEvent.fetchall()[0][0]
         if rowCount == 0:
+            logger.info("Issue with where clause: %s" % whereClause)
             return 0.0
         return float(rowWithEventCount)/float(rowCount)
 
@@ -31,14 +39,16 @@ class SchemaGenerator(object):
         avgLift = self.getAverageLift(eventColumnName, tableName)
         
         columnMetadataList = self.jsonObject["InputColumnMetadata"]
+        
         summaryElementList = self.jsonObject["Summary"]
+        
         columnMetadata = {}
     
         for columnMetadataElement in columnMetadataList:
             columnMetadata[columnMetadataElement['Description']] = columnMetadataElement
         
         predictorList = summaryElementList["Predictors"]
-    
+        logger.info("Number of input columns: %d" % len(predictorList))
         metadata = []
         for predictor in predictorList:
             name = predictor["Name"]
@@ -46,7 +56,7 @@ class SchemaGenerator(object):
             interpretation = 1
             colname = ""
             if name not in columnMetadata:
-                print("Column \"" + name + "\" not in metadata! Using interpretation = 1")
+                logger.info("Column \"" + name + "\" not in metadata! Using interpretation = 1")
                 continue
             else:
                 interpretation = columnMetadata[name]["Interpretation"]
@@ -91,7 +101,7 @@ class SchemaGenerator(object):
                 
                 metadata.append(row)
             
-            ofile = open(self.filename + '.out', 'wb')
+            ofile = open(self.filename + '.csv', 'wb')
             writer = csv.writer(ofile)
             
             for m in metadata:
