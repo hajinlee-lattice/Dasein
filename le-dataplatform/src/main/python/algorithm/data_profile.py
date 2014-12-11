@@ -238,7 +238,7 @@ def retrieveCategoricalColumns(columnsMetadata, features, categoricalMetadataFro
             if statType is not None:
                 if statType == "nominal" or statType == "ordinal":
                     categoricalMetadataFromSchema.add(colName)
-                elif colName in categoricalMetadataFromSchema:
+                elif (statType == "ratio" or statType == "interval") and colName in categoricalMetadataFromSchema:
                     categoricalMetadataFromSchema.remove(colName)
             else:
                 logger.warn("No statistical type for column %s." % colName)
