@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.camille.config.ConfigurationController;
 import com.latticeengines.camille.util.DocumentUtils;
+import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
@@ -23,29 +24,34 @@ public class ActivationService {
 
     @RequestMapping(value = "SetModelTags", method = RequestMethod.POST)
     public void setModelTags(@RequestBody SetModelTagsRequest request) {
-        log.info(String.format("Received a set model tags request for %s", request.space));
+        try (LogContext context = new LogContext("Space", request.space)) {
+            log.info("Received a set model tags request");
 
-        Path path = new Path(DocumentConstants.MODEL_TAGS);
-        setDocument(request.space, path, request.tags);
+            Path path = new Path(DocumentConstants.MODEL_TAGS);
+            setDocument(request.space, path, request.tags);
+        }
     }
 
     @RequestMapping(value = "SetModelCombination", method = RequestMethod.POST)
     public void setModelCombination(@RequestBody SetModelCombinationRequest request) {
-        log.info(String.format("Received a set model combination request for %s combination %s", request.space,
-                request.name));
+        try (LogContext context = new LogContext("Space", request.space)) {
+            log.info(String.format("Received a set model combination request for combination %s", request.name));
 
-        Path path = new Path(String.format(DocumentConstants.COMBINATION, request.name));
-        setDocument(request.space, path, request.combination);
+            Path path = new Path(String.format(DocumentConstants.COMBINATION, request.name));
+            setDocument(request.space, path, request.combination);
+        }
     }
 
     @RequestMapping(value = "SetScoreDerivation", method = RequestMethod.POST)
     public void setScoreDerivation(@RequestBody SetScoreDerivationRequest request) {
-        log.info(String.format("Received a set score derivation request for %s model %s version %d", request.space,
-                request.model.name, request.model.version));
+        try (LogContext context = new LogContext("Space", request.space)) {
+            log.info(String.format("Received a set score derivation request for model %s version %d",
+                    request.model.name, request.model.version));
 
-        Path path = new Path(String.format(DocumentConstants.SCORE_DERIVATION_OVERRIDE, request.model.name,
-                request.model.version));
-        setDocument(request.space, path, request.derivation);
+            Path path = new Path(String.format(DocumentConstants.SCORE_DERIVATION_OVERRIDE, request.model.name,
+                    request.model.version));
+            setDocument(request.space, path, request.derivation);
+        }
     }
 
     private static <T> void setDocument(CustomerSpace space, Path path, T value) {

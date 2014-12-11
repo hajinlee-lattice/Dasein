@@ -5,7 +5,6 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.BasicConfigurator;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -19,14 +18,7 @@ import com.latticeengines.camille.CamilleEnvironment;
 import com.latticeengines.camille.CamilleEnvironment.Mode;
 
 public class SkaldServer {
-    // Need to configure logging statically so that it takes place before
-    // any log instances are created.
-    static {
-        BasicConfigurator.configure();
-    }
-
     public static void main(String[] args) throws Exception {
-
         // TODO Swap this to runtime mode once a provisioning tool exists.
         CamilleEnvironment.start(Mode.BOOTSTRAP, new FileReader("zookeeper.json"));
         SkaldBootstrapper.register();
