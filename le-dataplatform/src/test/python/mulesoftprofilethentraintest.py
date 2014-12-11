@@ -45,6 +45,10 @@ class MulesoftProfilingThenTrainTest(TrainingTestBase):
         
         jsonDict = json.loads(open(glob.glob("./results/PLSModel*.json")[0]).read())
         
+        rocScore = jsonDict["Summary"]["RocScore"]
+        
+        self.assertTrue(rocScore > 0.83)
+        
         for k in jsonDict["InputColumnMetadata"]:
             if k["Name"] == "MKTOLead_SpamIndicator":
                 self.assertEquals(k["ValueType"], 0)
