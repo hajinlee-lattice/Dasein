@@ -13,6 +13,8 @@ import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.qos.logback.classic.LoggerContext;
+
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -23,157 +25,158 @@ import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 
-import ch.qos.logback.classic.LoggerContext;
-
 public class BatonTool {
-	private static final Logger log = LoggerFactory.getLogger(new Object() {
-	}.getClass().getEnclosingClass());
+    private static final Logger log = LoggerFactory.getLogger(new Object() {
+    }.getClass().getEnclosingClass());
 
-	static {
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			@Override
-			public void run() {
-				ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
-				if (loggerFactory instanceof LoggerContext) {
-					((LoggerContext) loggerFactory).stop();
-				}
-			}
-		});
-	}
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                ILoggerFactory loggerFactory = LoggerFactory.getILoggerFactory();
+                if (loggerFactory instanceof LoggerContext) {
+                    ((LoggerContext) loggerFactory).stop();
+                }
+            }
+        });
+    }
 
-	public static void main(String[] args) {
-		ArgumentParser parser = ArgumentParsers.newArgumentParser("Baton");
-		parser.addArgument("-createPod").action(Arguments.storeTrue()).help("Creates a new Pod.");
-		parser.addArgument("-createTenant").action(Arguments.storeTrue()).help("Creates a new tenant. Requires contractId, tenantID and spaceId");
+    public static void main(String[] args) {
+        ArgumentParser parser = ArgumentParsers.newArgumentParser("Baton");
+        parser.addArgument("-createPod").action(Arguments.storeTrue()).help("Creates a new Pod.");
+        parser.addArgument("-createTenant").action(Arguments.storeTrue())
+                .help("Creates a new tenant. Requires contractId, tenantID and spaceId");
 
-		parser.addArgument("--podId", "--pid").required(true).help("Camille PodId");
-		parser.addArgument("--connectionString", "--cs").required(true).help("Connection string for ZooKeeper");
+        parser.addArgument("--podId", "--pid").required(true).help("Camille PodId");
+        parser.addArgument("--connectionString", "--cs").required(true).help("Connection string for ZooKeeper");
 
-		parser.addArgument("--contractId");
-		parser.addArgument("--tenantId");
-		parser.addArgument("--spaceId");
+        parser.addArgument("--contractId");
+        parser.addArgument("--tenantId");
+        parser.addArgument("--spaceId");
 
-		// Don't let PLO know about this...
-		parser.addArgument("-loadDirectory").action(Arguments.storeTrue()).help(Arguments.SUPPRESS);
-		parser.addArgument("--source", "--S", "--s").help(Arguments.SUPPRESS);
-		parser.addArgument("--destination", "--D", "--d").help(Arguments.SUPPRESS);
-		parser.addArgument("--force", "--F", "--f").action(Arguments.storeTrue()).help(Arguments.SUPPRESS);
+        // Don't let PLO know about this...
+        parser.addArgument("-loadDirectory").action(Arguments.storeTrue()).help(Arguments.SUPPRESS);
+        parser.addArgument("--source", "--S", "--s").help(Arguments.SUPPRESS);
+        parser.addArgument("--destination", "--D", "--d").help(Arguments.SUPPRESS);
+        parser.addArgument("--force", "--F", "--f").action(Arguments.storeTrue()).help(Arguments.SUPPRESS);
 
-		Namespace namespace = null;
-		try {
-			namespace = parser.parseArgs(args);
-		} catch (ArgumentParserException e) {
-			log.error("Error parsing input arguments", e);
-			System.exit(1);
-		}
-		
-		String connectionString = (String) namespace.get("connectionString");
-		String podId = (String) namespace.get("podId");
-		
-		try {
-			CamilleConfiguration config = new CamilleConfiguration();
-			config.setConnectionString(connectionString);
-			config.setPodId(podId);
-			CamilleEnvironment.start(Mode.BOOTSTRAP, config);
+        Namespace namespace = null;
+        try {
+            namespace = parser.parseArgs(args);
+        } catch (ArgumentParserException e) {
+            log.error("Error parsing input arguments", e);
+            System.exit(1);
+        }
 
-		} catch (Exception e) {
-			log.error("Error starting Camille", e);
-			System.exit(1);
-		}
+        String connectionString = (String) namespace.get("connectionString");
+        String podId = (String) namespace.get("podId");
 
-		if (namespace.get("loadDirectory")) {
-			String source = namespace.get("source");
-			String destination = namespace.get("destination");
-			boolean force = namespace.get("force");
+        try {
+            CamilleConfiguration config = new CamilleConfiguration();
+            config.setConnectionString(connectionString);
+            config.setPodId(podId);
+            CamilleEnvironment.start(Mode.BOOTSTRAP, config);
 
-			if (source == null || destination == null) {
-				log.error("LoadDirectory requires source and destination");
-				System.exit(1);
-			}
+        } catch (Exception e) {
+            log.error("Error starting Camille", e);
+            System.exit(1);
+        }
 
-			else {
-				loadDirectory(source, destination, force);
-			}
-		}
+        if (namespace.get("loadDirectory")) {
+            String source = namespace.get("source");
+            String destination = namespace.get("destination");
+            boolean force = namespace.get("force");
 
-		else if (namespace.get("createPod")) {
-			log.info(String.format("Sucesfully created pod %s"), podId);
-		}
+            if (source == null || destination == null) {
+                log.error("LoadDirectory requires source and destination");
+                System.exit(1);
+            }
 
-		else if (namespace.get("createTenant")) {
-			String contractId = namespace.get("contractId");
-			String tenantId = namespace.get("tenantId");
-			String spaceId = namespace.get("spaceId");
+            else {
+                loadDirectory(source, destination, force);
+            }
+        }
 
-			if (contractId == null || tenantId == null || spaceId == null) {
-				log.error("createTenant requires contractId, tenantId and spaceId");
-				System.exit(1);
-			} else {
-				createTenant(contractId, tenantId, spaceId);
-			}
-		}
-	}
+        else if (namespace.get("createPod")) {
+            log.info(String.format("Sucesfully created pod %s", podId));
+        }
 
-	/**
-	 * Creates the contract if it does not exist, and then creates the tenant and space
-	 * @param contractId
-	 * @param tenantId
-	 * @param spaceId
-	 */
-	private static void createTenant(String contractId, String tenantId, String spaceId) {
-		try {
-			if (!ContractLifecycleManager.exists(contractId)) {
-				log.info(String.format("Creating contract %s", contractId));
-				ContractLifecycleManager.create(contractId);
-			}
-			if (TenantLifecycleManager.exists(contractId, tenantId)) {
-				log.error(String.format("Tenant %s already exists", tenantId));
-				System.exit(1);
-			}
-			TenantLifecycleManager.create(contractId, tenantId, spaceId);
-		} catch (Exception e) {
-			log.error("Error creating tenant", e);
-			System.exit(1);
-		}
+        else if (namespace.get("createTenant")) {
+            String contractId = namespace.get("contractId");
+            String tenantId = namespace.get("tenantId");
+            String spaceId = namespace.get("spaceId");
 
-		log.info(String.format("Sucesfully created tenant %s", tenantId));
-	}
+            if (contractId == null || tenantId == null || spaceId == null) {
+                log.error("createTenant requires contractId, tenantId and spaceId");
+                System.exit(1);
+            } else {
+                createTenant(contractId, tenantId, spaceId);
+            }
+        }
+    }
 
-	/**
-	 * Loads directory into ZooKeeper
-	 * 
-	 * @param source
-	 *            Path of files to load
-	 * @param destination
-	 *            Path in ZooKeeper to store files
-	 * @param force
-	 *            Bool of whether or not to override path in ZooKeeper if it
-	 *            already exists
-	 */
-	private static void loadDirectory(String source, String destination, boolean force) {
-		try {
-			Camille c = CamilleEnvironment.getCamille();
-			destination = String.format("/Pods/%s/%s", CamilleEnvironment.getPodId(), destination);
+    /**
+     * Creates the contract if it does not exist, and then creates the tenant
+     * and space
+     * 
+     * @param contractId
+     * @param tenantId
+     * @param spaceId
+     */
+    private static void createTenant(String contractId, String tenantId, String spaceId) {
+        try {
+            if (!ContractLifecycleManager.exists(contractId)) {
+                log.info(String.format("Creating contract %s", contractId));
+                ContractLifecycleManager.create(contractId);
+            }
+            if (TenantLifecycleManager.exists(contractId, tenantId)) {
+                log.error(String.format("Tenant %s already exists", tenantId));
+                System.exit(1);
+            }
+            TenantLifecycleManager.create(contractId, tenantId, spaceId);
+        } catch (Exception e) {
+            log.error("Error creating tenant", e);
+            System.exit(1);
+        }
 
-			File f = new File(source);
-			DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(f));
-			Path parent = new Path(destination);
+        log.info(String.format("Sucesfully created tenant %s", tenantId));
+    }
 
-			if (c.exists(parent)) {
-				if (force) {
-					c.delete(parent);
-				} else {
-					log.error(String.format("Error: Destination %s already exists", destination));
-					System.exit(1);
-				}
-			}
-			c.createDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+    /**
+     * Loads directory into ZooKeeper
+     * 
+     * @param source
+     *            Path of files to load
+     * @param destination
+     *            Path in ZooKeeper to store files
+     * @param force
+     *            Bool of whether or not to override path in ZooKeeper if it
+     *            already exists
+     */
+    private static void loadDirectory(String source, String destination, boolean force) {
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            destination = String.format("/Pods/%s/%s", CamilleEnvironment.getPodId(), destination);
 
-		} catch (Exception e) {
-			log.error("Error loading directory", e);
-			System.exit(1);
-		}
+            File f = new File(source);
+            DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(f));
+            Path parent = new Path(destination);
 
-		log.info("Sucesfully loaded files into directory");
-	}
+            if (c.exists(parent)) {
+                if (force) {
+                    c.delete(parent);
+                } else {
+                    log.error(String.format("Error: Destination %s already exists", destination));
+                    System.exit(1);
+                }
+            }
+            c.createDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        } catch (Exception e) {
+            log.error("Error loading directory", e);
+            System.exit(1);
+        }
+
+        log.info("Sucesfully loaded files into directory");
+    }
 }
