@@ -1,6 +1,5 @@
 package com.latticeengines.skald;
 
-import java.io.FileReader;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -14,15 +13,8 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import com.latticeengines.camille.CamilleEnvironment;
-import com.latticeengines.camille.CamilleEnvironment.Mode;
-
 public class SkaldServer {
     public static void main(String[] args) throws Exception {
-        // TODO Swap this to runtime mode once a provisioning tool exists.
-        CamilleEnvironment.start(Mode.BOOTSTRAP, new FileReader("zookeeper.json"));
-        SkaldBootstrapper.register();
-
         Properties properties = new Properties(System.getProperties());
         properties.setProperty("python.cachedir.skip", "true");
         PythonInterpreter.initialize(System.getProperties(), properties, new String[0]);

@@ -2,6 +2,8 @@ package com.latticeengines.skald;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +15,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.latticeengines.camille.exposed.CamilleConfiguration;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
 
 @Configuration
 @EnableWebMvc
 public class SkaldConfiguration extends WebMvcConfigurerAdapter {
+    @PostConstruct
+    public void initialize() throws Exception {
+        CamilleConfiguration config = new CamilleConfiguration(properties.getPod(), properties.getZooKeeperAddress());
+
+        // TODO Swap this to runtime mode once a provisioning tool exists.
+        CamilleEnvironment.start(Mode.BOOTSTRAP, config);
+        SkaldBootstrapper.register();
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(interceptor);
@@ -38,5 +52,8 @@ public class SkaldConfiguration extends WebMvcConfigurerAdapter {
     }
 
     @Autowired
-    public SkaldInterceptor interceptor;
+    private SkaldInterceptor interceptor;
+
+    @Autowired
+    private SkaldProperties properties;
 }

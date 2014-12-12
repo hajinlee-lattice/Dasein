@@ -1,8 +1,8 @@
 package com.latticeengines.skald;
 
-import com.latticeengines.camille.config.bootstrap.CustomerSpaceServiceBootstrapManager;
-import com.latticeengines.camille.config.bootstrap.Installer;
-import com.latticeengines.camille.config.bootstrap.Upgrader;
+import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
+import com.latticeengines.camille.exposed.config.bootstrap.Installer;
+import com.latticeengines.camille.exposed.config.bootstrap.Upgrader;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 public class SkaldBootstrapper implements Installer, Upgrader {

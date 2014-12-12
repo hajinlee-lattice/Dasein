@@ -7,8 +7,8 @@ import java.util.Map;
 import org.apache.zookeeper.KeeperException;
 import org.springframework.stereotype.Service;
 
-import com.latticeengines.camille.config.ConfigurationController;
-import com.latticeengines.camille.interfaces.data.DataInterfaceSubscriber;
+import com.latticeengines.camille.exposed.config.ConfigurationController;
+import com.latticeengines.camille.exposed.interfaces.data.DataInterfaceSubscriber;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;

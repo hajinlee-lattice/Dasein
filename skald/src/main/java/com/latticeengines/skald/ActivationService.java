@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.camille.config.ConfigurationController;
-import com.latticeengines.camille.util.DocumentUtils;
+import com.latticeengines.camille.exposed.config.ConfigurationController;
+import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
