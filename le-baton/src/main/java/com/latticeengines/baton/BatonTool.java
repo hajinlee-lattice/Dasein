@@ -17,6 +17,8 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
+import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -41,11 +43,15 @@ public class BatonTool {
 
 	public static void main(String[] args) {
 		ArgumentParser parser = ArgumentParsers.newArgumentParser("Baton");
-		parser.addArgument("-createPod").action(Arguments.storeTrue())
-				.help("Creates a Pod based on ZooKeeper.json file");
+		parser.addArgument("-createPod").action(Arguments.storeTrue()).help("Creates a new Pod.");
+		parser.addArgument("-createTenant").action(Arguments.storeTrue()).help("Creates a new tenant. Requires contractId, tenantID and spaceId");
 
-		parser.addArgument("--podID", "--pid").required(true).help("Camille PodID");
+		parser.addArgument("--podId", "--pid").required(true).help("Camille PodId");
 		parser.addArgument("--connectionString", "--cs").required(true).help("Connection string for ZooKeeper");
+
+		parser.addArgument("--contractId");
+		parser.addArgument("--tenantId");
+		parser.addArgument("--spaceId");
 
 		// Don't let PLO know about this...
 		parser.addArgument("-loadDirectory").action(Arguments.storeTrue()).help(Arguments.SUPPRESS);
@@ -60,11 +66,14 @@ public class BatonTool {
 			log.error("Error parsing input arguments", e);
 			System.exit(1);
 		}
-
+		
+		String connectionString = (String) namespace.get("connectionString");
+		String podId = (String) namespace.get("podId");
+		
 		try {
 			CamilleConfiguration config = new CamilleConfiguration();
-			config.setConnectionString((String) namespace.get("connectionString"));
-			config.setPodId((String) namespace.get("podID"));
+			config.setConnectionString(connectionString);
+			config.setPodId(podId);
 			CamilleEnvironment.start(Mode.BOOTSTRAP, config);
 
 		} catch (Exception e) {
@@ -78,7 +87,7 @@ public class BatonTool {
 			boolean force = namespace.get("force");
 
 			if (source == null || destination == null) {
-				log.error("LoadDirectory requires Source and Destination");
+				log.error("LoadDirectory requires source and destination");
 				System.exit(1);
 			}
 
@@ -87,9 +96,47 @@ public class BatonTool {
 			}
 		}
 
-		if (namespace.get("createPod")) {
-			log.info("Sucesfully created pod");
+		else if (namespace.get("createPod")) {
+			log.info(String.format("Sucesfully created pod %s"), podId);
 		}
+
+		else if (namespace.get("createTenant")) {
+			String contractId = namespace.get("contractId");
+			String tenantId = namespace.get("tenantId");
+			String spaceId = namespace.get("spaceId");
+
+			if (contractId == null || tenantId == null || spaceId == null) {
+				log.error("createTenant requires contractId, tenantId and spaceId");
+				System.exit(1);
+			} else {
+				createTenant(contractId, tenantId, spaceId);
+			}
+		}
+	}
+
+	/**
+	 * Creates the contract if it does not exist, and then creates the tenant and space
+	 * @param contractId
+	 * @param tenantId
+	 * @param spaceId
+	 */
+	private static void createTenant(String contractId, String tenantId, String spaceId) {
+		try {
+			if (!ContractLifecycleManager.exists(contractId)) {
+				log.info(String.format("Creating contract %s", contractId));
+				ContractLifecycleManager.create(contractId);
+			}
+			if (TenantLifecycleManager.exists(contractId, tenantId)) {
+				log.error(String.format("Tenant %s already exists", tenantId));
+				System.exit(1);
+			}
+			TenantLifecycleManager.create(contractId, tenantId, spaceId);
+		} catch (Exception e) {
+			log.error("Error creating tenant", e);
+			System.exit(1);
+		}
+
+		log.info(String.format("Sucesfully created tenant %s", tenantId));
 	}
 
 	/**
