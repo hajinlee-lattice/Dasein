@@ -317,7 +317,7 @@ public class ModelCommandCallable implements Callable<Long> {
         modelCommandStateEntityMgr.createOrUpdate(commandState);
     }
 
-    private void generateDataDiagnostics(ModelCommandState commandState, JobStatus jobStatus) throws Exception {
+    void generateDataDiagnostics(ModelCommandState commandState, JobStatus jobStatus) throws Exception {
         String diagnosticsPath = jobStatus.getDataDiagnosticsPath();
 
         if (!HdfsUtils.fileExists(yarnConfiguration, diagnosticsPath)) {
