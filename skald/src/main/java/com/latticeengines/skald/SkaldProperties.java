@@ -16,6 +16,10 @@ public class SkaldProperties {
         return env.getProperty("skald.zookeeper.address");
     }
 
+    public String getHdfsAddress() {
+        return env.getProperty("skald.hdfs.address");
+    }
+
     @Autowired
     private Environment env;
 }

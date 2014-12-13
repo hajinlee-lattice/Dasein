@@ -9,6 +9,7 @@ import java.util.AbstractMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.cache.CacheBuilder;
@@ -27,22 +28,18 @@ public class ModelRetriever {
                     @Override
                     public ModelEvaluator load(AbstractMap.SimpleEntry<CustomerSpace, ModelIdentifier> key)
                             throws Exception {
-                        // TODO Create a lookup path for PMML files
-                        // parameterized on just the space and model identifier.
+                        // TODO This path should be parameterized with the full
+                        // space, not just the contract.
 
-                        // TODO Look in a properties directory to get the
-                        // correct HDFS address.
-
-                        // TODO Build this URL in a less terrible way.
+                        // TODO This path should be parameterized with the model
+                        // version instead of random (and hard-coded) GUIDs.
 
                         URL address;
                         try {
-                            address = new URL(
-                                    String.format(
-                                            "http://%1$s:%2$d/webhdfs/v1/%3$s?op=OPEN",
-                                            "bodcdevvhort148.lattice.local",
-                                            50070,
-                                            "user/s-analytics/customers/Nutanix/models/Q_EventTable_Nutanix/68386ba1-0469-41ec-9663-ee7966dccf09/1414617158371_7241/rfpmml.xml"));
+                            String pattern = "http://%s/webhdfs/v1/user/s-analytics/customers/%s/models/%s/%s/rfpmml.xml?op=OPEN";
+                            address = new URL(String.format(pattern, properties.getHdfsAddress(), key.getKey()
+                                    .getContractId(), key.getValue().name,
+                                    "8a8285f6-0037-4dfc-b201-3c28d29bd9ab/1416355548818_8596"));
                         } catch (MalformedURLException ex) {
                             throw new RuntimeException("Failed to generate WebHDFS URL", ex);
                         }
@@ -61,6 +58,9 @@ public class ModelRetriever {
     public ModelEvaluator getEvaluator(CustomerSpace space, ModelIdentifier model) {
         return cache.getUnchecked(new AbstractMap.SimpleEntry<CustomerSpace, ModelIdentifier>(space, model));
     }
+
+    @Autowired
+    private SkaldProperties properties;
 
     private LoadingCache<AbstractMap.SimpleEntry<CustomerSpace, ModelIdentifier>, ModelEvaluator> cache;
 
