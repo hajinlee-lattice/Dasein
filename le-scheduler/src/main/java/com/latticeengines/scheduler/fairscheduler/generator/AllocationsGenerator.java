@@ -8,12 +8,12 @@ import javax.xml.bind.Marshaller;
 
 public class AllocationsGenerator {
 
-    private static final String MAX_RUNNING_APPS = "17";
+    private static final String MAX_RUNNING_APPS = "9";
     private static final int NUM_MR_LEAF_QUEUES = 12;
-    private static final int NUM_NON_MR_LEAF_QUEUES = 17;
+    private static final int NUM_NON_MR_LEAF_QUEUES = 9;
     private static final String FIFO = "fifo";
     private static final String MR_MIN_RESOURCES = "43008";
-    private static final String NON_MR_MIN_RESOURCES = "29696";
+    private static final String NON_MR_MIN_RESOURCES = "52224";
 
     public static void main(String[] args) throws Exception {
 
@@ -70,7 +70,7 @@ public class AllocationsGenerator {
             Queue leaf = factory.createQueue();
             leaf.setName(Integer.toString(i));
             if (minResources) {
-                leaf.setMinResources(NON_MR_MIN_RESOURCES + " mb, 4 vcores");
+                leaf.setMinResources(NON_MR_MIN_RESOURCES + " mb, 8 vcores");
             }
             leaf.setSchedulingPolicy(FIFO);
             q.getQueue().add(leaf);
