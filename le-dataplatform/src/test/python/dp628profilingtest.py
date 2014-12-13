@@ -25,14 +25,14 @@ class DP628ProfilingTest(ProfilingTestBase):
         self.assertEqual(metadata['MKTOLead_IsFirstLastNameSame'][0]['Dtype'], 'STR')
         self.assertEqual(metadata['MKTOLead_IsFirstLastNameSame'][1]['Dtype'], 'STR')
         # string to STR
-        self.assertEqual(metadata['AwardCategory'][0]['Dtype'], 'STR')
+        self.assertEqual(metadata['BusinessECommerceSite'][0]['Dtype'], 'STR')
         
         # int to BND
         self.assertEqual(metadata['CompanyNameLen'][0]['Dtype'], 'BND')
         # float to BND
         self.assertEqual(metadata['FundingAmount'][0]['Dtype'], 'BND')
         # long to BND
-        self.assertEqual(metadata['AssetsStartOfYear'][0]['Dtype'], 'BND')
+        self.assertEqual(metadata['RetirementAssetsYOY'][0]['Dtype'], 'BND')
         
         # String and Interval
         self.assertEqual(metadata['ExperianCreditRating'][0]['Dtype'], 'BND')

@@ -181,6 +181,8 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
         if colName in features:
             if not otherMetadata.has_key(colName):
                 otherMetadata[colName] = (colName, "", "")
+            if (otherMetadata[colName][1].upper() == "NONE"):
+                continue;
             index, columnDiagnostics = profileColumn(data[colName], colName, otherMetadata[colName], 
                                                      categoricalCols, eventVector, bucketDispatcher, dataWriter, index, colnameBucketMetadata.get(colName))
             dataDiagnostics.append(columnDiagnostics)

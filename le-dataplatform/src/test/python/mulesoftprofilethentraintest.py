@@ -52,6 +52,20 @@ class MulesoftProfilingThenTrainTest(TrainingTestBase):
         for k in jsonDict["InputColumnMetadata"]:
             if k["Name"] == "MKTOLead_SpamIndicator":
                 self.assertEquals(k["ValueType"], 0)
+                
+        self.assertProfileNoColumnsWithApprovedUsageEqualNone(metadata)
+        
+    def assertProfileNoColumnsWithApprovedUsageEqualNone(self, metadata):
+        columnsInProfile = set(metadata.keys())
+        configMetadataFile = "./data/metadata-mulesoft.avsc"
+        metadata = json.loads(open(configMetadataFile, "rb").read())["Metadata"]
+        columnsInMetadata = set()
+        for c in metadata:
+            u = c["ApprovedUsage"]
+            if isinstance(u, list) and u[0] == "None":
+                columnsInMetadata.add(c["ColumnName"])
+        
+        self.assertEqual(len(columnsInMetadata.intersection(columnsInProfile)), 0)
 
     def tearDown(self):
         # Remove launcher module to restore its globals()
