@@ -3,7 +3,7 @@
 	"combination": "realtime",
 	"record":
 	{
-		"Email_Domain_IsPublic" : 1.0,
+		"EmailAddress": "sorry@hotmail.com",
 		"ActiveRetirementParticipants" : 1.0,
 		"ActivitySources" : 1.0,
 		"AssetsStartOfYear" : 1.0,

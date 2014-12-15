@@ -1,7 +1,7 @@
 {
 	"fields":
 	{
-		"Email_Domain_IsPublic": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"},
+		"EmailAddress": {"source": "Request", "type": "STRING", "interpretation": "EmailAddress"},
 		"ActiveRetirementParticipants": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"},
 		"ActivitySources": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"},
 		"AssetsStartOfYear": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"},
@@ -187,5 +187,5 @@
 		"UCCFilings": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"},
 		"UCCFilingsPresent": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"}
 	},
-	"transforms": []
+	"transforms": [{"name": "public_domain_email", "output": "Email_Domain_IsPublic", "type": "FLOAT", "arguments": {"email_column": "EmailAddress"}}]
 }
