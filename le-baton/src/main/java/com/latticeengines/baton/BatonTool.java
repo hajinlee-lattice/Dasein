@@ -47,7 +47,7 @@ public class BatonTool {
         parser.addArgument("-createTenant").action(Arguments.storeTrue())
                 .help("Creates a new tenant. Requires contractId, tenantID and spaceId");
 
-        parser.addArgument("--podId", "--pid").required(true).help("Camille PodId");
+        parser.addArgument("--podId").required(true).help("Camille PodId");
         parser.addArgument("--connectionString", "--cs").required(true).help("Connection string for ZooKeeper");
 
         parser.addArgument("--contractId");
@@ -58,7 +58,6 @@ public class BatonTool {
         parser.addArgument("-loadDirectory").action(Arguments.storeTrue()).help(Arguments.SUPPRESS);
         parser.addArgument("--source", "--S", "--s").help(Arguments.SUPPRESS);
         parser.addArgument("--destination", "--D", "--d").help(Arguments.SUPPRESS);
-        parser.addArgument("--force", "--F", "--f").action(Arguments.storeTrue()).help(Arguments.SUPPRESS);
 
         Namespace namespace = null;
         try {
@@ -85,7 +84,6 @@ public class BatonTool {
         if (namespace.get("loadDirectory")) {
             String source = namespace.get("source");
             String destination = namespace.get("destination");
-            boolean force = namespace.get("force");
 
             if (source == null || destination == null) {
                 log.error("LoadDirectory requires source and destination");
@@ -93,7 +91,7 @@ public class BatonTool {
             }
 
             else {
-                loadDirectory(source, destination, force);
+                loadDirectory(source, destination);
             }
         }
 
@@ -123,7 +121,7 @@ public class BatonTool {
      * @param tenantId
      * @param spaceId
      */
-    private static void createTenant(String contractId, String tenantId, String spaceId) {
+    static void createTenant(String contractId, String tenantId, String spaceId) {
         try {
             if (!ContractLifecycleManager.exists(contractId)) {
                 log.info(String.format("Creating contract %s", contractId));
@@ -149,34 +147,31 @@ public class BatonTool {
      *            Path of files to load
      * @param destination
      *            Path in ZooKeeper to store files
-     * @param force
-     *            Bool of whether or not to override path in ZooKeeper if it
-     *            already exists
      */
-    private static void loadDirectory(String source, String destination, boolean force) {
-        try {
-            Camille c = CamilleEnvironment.getCamille();
-            destination = String.format("/Pods/%s/%s", CamilleEnvironment.getPodId(), destination);
+	static void loadDirectory(String source, String destination) {
+		String rawPath = "";
+		try {
+			Camille c = CamilleEnvironment.getCamille();
+			String podId = CamilleEnvironment.getPodId();
 
-            File f = new File(source);
-            DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(f));
-            Path parent = new Path(destination);
+			// handle case where we want root pod directory
+			if (destination.equals("")) {
+				rawPath = String.format("/Pods/%s", podId.substring(0, podId.length()));
+			} else {
+				rawPath = String.format("/Pods/%s/%s", podId, destination);
+			}
 
-            if (c.exists(parent)) {
-                if (force) {
-                    c.delete(parent);
-                } else {
-                    log.error(String.format("Error: Destination %s already exists", destination));
-                    System.exit(1);
-                }
-            }
-            c.createDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+			File f = new File(source);
+			DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(f));
+			Path parent = new Path(rawPath);
 
-        } catch (Exception e) {
-            log.error("Error loading directory", e);
-            System.exit(1);
-        }
+			c.upsertDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
-        log.info("Sucesfully loaded files into directory");
-    }
+		} catch (Exception e) {
+			log.error("Error loading directory", e);
+			System.exit(1);
+		}
+
+		log.info(String.format("Sucesfully loaded files into directory %s", rawPath));
+	}
 }

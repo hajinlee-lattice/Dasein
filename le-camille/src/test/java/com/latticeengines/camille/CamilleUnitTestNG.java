@@ -363,7 +363,7 @@ public class CamilleUnitTestNG {
         c.upsert(path, new Document("foo"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertTrue(c.exists(path));
     }
-
+    
     @Test(groups = "unit")
     public void testCreateDirectory() throws IllegalArgumentException, Exception {
         File tempDir = Files.createTempDir();
@@ -429,6 +429,46 @@ public class CamilleUnitTestNG {
             }
         }
 
+        FileUtils.deleteDirectory(tempDir);
+    }
+    
+    @Test(groups = "unit")
+    public void testUpsertDirectory() throws IllegalArgumentException, Exception {
+    	Camille c = CamilleEnvironment.getCamille();
+    	
+    	File tempDir = Files.createTempDir();
+    	Path parent = new Path("/parent");
+        c.create(parent, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        
+        //create directory + files. Make sure they exist.
+        createDirectory(tempDir + "/0");
+        createDirectory(tempDir + "/0/1");
+    	createTextFile(tempDir + "/0/0.txt", "zero");
+        createTextFile(tempDir + "/0/1/1.txt", "one");
+
+        DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(tempDir));
+        c.upsertDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertTrue(c.get(new Path("/parent/0/0.txt")).getData().equals("zero"));
+        Assert.assertTrue(c.get(new Path("/parent/0/1/1.txt")).getData().equals("one"));
+        
+        //re-create one of the files with a new value. Make sure only the changed file was affected.
+        createTextFile(tempDir + "/0/1/1.txt", "two");
+        docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(tempDir));
+        c.upsertDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertTrue(c.get(new Path("/parent/0/0.txt")).getData().equals("zero"));
+        Assert.assertTrue(c.get(new Path("/parent/0/1/1.txt")).getData().equals("two"));
+        FileUtils.deleteDirectory(tempDir);
+        
+        //delete the temp dir and create a new one with the same structure but missing a file. 
+        //make sure the missing file is still in Camille.
+        tempDir = Files.createTempDir();
+        createDirectory(tempDir + "/0");
+        createDirectory(tempDir + "/0/1");
+        createTextFile(tempDir + "/0/1/1.txt", "three");
+        docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(tempDir));
+        c.upsertDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Assert.assertTrue(c.get(new Path("/parent/0/0.txt")).getData().equals("zero"));
+        Assert.assertTrue(c.get(new Path("/parent/0/1/1.txt")).getData().equals("three"));
         FileUtils.deleteDirectory(tempDir);
     }
 

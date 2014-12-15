@@ -157,4 +157,16 @@ public class Camille {
             create(parent.append(node.getPath()), node.getDocument(), acls);
         }
     }
+    
+    public void upsertDirectory (Path parent, DocumentDirectory directory, List<ACL> acls) throws Exception {
+        for (Iterator<Node> iter = directory.breadthFirstIterator(); iter.hasNext();) {
+            Node node = iter.next();
+            if (exists(parent.append(node.getPath()))){
+            	set(parent.append(node.getPath()), node.getDocument());
+            }
+            else{
+            	create(parent.append(node.getPath()), node.getDocument(), acls);
+            }
+        }
+    }
 }
