@@ -3,10 +3,13 @@ package com.latticeengines.marketoharness;
 import org.apache.http.client.fluent.Content;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
-import org.json.simple.JSONArray;
+import org.apache.http.entity.ContentType;
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import java.util.*;
 
 
 
@@ -110,5 +113,62 @@ public final class MarketoUtilities {
 				"&client_secret=" +
 				customServiceClientSecret;
 	}
-
+	
+	public static Request getMarketoPostRequest(
+			String accessToken,
+			String objectEndpoint,
+			String bodyJson) {
+		Request toReturn = getMarketoObjectRequest(
+				accessToken,
+				objectEndpoint,
+				true);
+		toReturn.bodyString(bodyJson, ContentType.APPLICATION_JSON);
+		
+		return toReturn;
+	}
+	
+	public static Request getMarketoObjectRequest(
+			String accessToken,
+			String objectEndpoint,
+			boolean isPost) {
+		String objectEndpointUrl = getRestEndpointUrl() + objectEndpoint;
+		Request toReturn = isPost ?
+				Request.Post(objectEndpointUrl) :
+				Request.Get(objectEndpointUrl);
+				
+		toReturn.addHeader("Authorization", "Bearer " + accessToken);
+		return toReturn;
+	}
+	
+	public static Response insertMarketoLeads(
+			String accessToken,
+			ArrayList<HashMap<String,String>> leads) throws Exception {
+		if(leads == null || leads.isEmpty())
+			throw new IllegalArgumentException("Must specify at least one lead.");
+		
+		JSONObject json = new JSONObject();
+		json.put("action", "createOnly");
+		JSONArray jsonLeads = new JSONArray();
+		json.put("input", jsonLeads);
+		
+		for(HashMap<String,String> lead:leads) {
+			JSONObject jsonLead = new JSONObject();
+			jsonLead.putAll(lead);
+			jsonLeads.add(jsonLead);
+		}
+		
+		Request request = getMarketoPostRequest(
+				accessToken,
+				getLeadEndpoint(),
+				json.toJSONString());
+		
+		try {
+			Response toReturn = request.execute();
+			//TODO: parse/return toReturn.returnContent()
+			return toReturn;
+		} catch (Exception e) {
+			throw new Exception("Error making post request to insert Marketo Leads: " + e.getMessage());
+		}
+	}
+	
 }
