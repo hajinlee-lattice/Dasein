@@ -55,6 +55,7 @@ public class Camille {
         } else {
             client.create().withACL(acls).forPath(path.toString(), doc.getData().getBytes());
         }
+        log.info(String.format("Camille creating doc at %s", path));
 
         doc.setVersion(0);
     }
@@ -68,6 +69,7 @@ public class Camille {
         if (!force)
             builder.withVersion(doc.getVersion());
         Stat stat = builder.forPath(path.toString(), doc.getData().getBytes());
+        log.info(String.format("Camille setting doc at %s", path));
         doc.setVersion(stat.getVersion());
     }
 
@@ -86,6 +88,7 @@ public class Camille {
     public Document get(Path path) throws Exception {
         Stat stat = new Stat();
         Document doc = new Document(new String(client.getData().storingStatIn(stat).forPath(path.toString())));
+        log.info(String.format("Camille getting doc at %s", path));
         doc.setVersion(stat.getVersion());
         return doc;
     }
@@ -94,6 +97,7 @@ public class Camille {
         Stat stat = new Stat();
         Document doc = new Document(new String(client.getData().storingStatIn(stat).usingWatcher(watcher)
                 .forPath(path.toString())));
+        log.info(String.format("Camille getting doc at %s", path));
         doc.setVersion(stat.getVersion());
         return doc;
     }
@@ -105,6 +109,7 @@ public class Camille {
      */
     public List<Pair<Document, Path>> getChildren(Path path) throws Exception {
         List<String> relativeChildPaths = client.getChildren().forPath(path.toString());
+        log.info(String.format("Camille getting children at %s", path));
 
         List<Pair<Document, Path>> out = new ArrayList<Pair<Document, Path>>(relativeChildPaths.size());
 
@@ -139,6 +144,7 @@ public class Camille {
 
     public void delete(Path path) throws Exception {
         client.delete().deletingChildrenIfNeeded().forPath(path.toString());
+        log.info(String.format("Camille deleting doc at %s", path));
     }
 
     public boolean exists(Path path) throws Exception {
