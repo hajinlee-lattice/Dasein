@@ -143,20 +143,8 @@ public final class MarketoUtilities {
 	public static Response insertMarketoLeads(
 			String accessToken,
 			ArrayList<HashMap<String,String>> leads) throws Exception {
-		if(leads == null || leads.isEmpty())
-			throw new IllegalArgumentException("Must specify at least one lead.");
-		
-		JSONObject json = new JSONObject();
-		json.put("action", "createOnly");
-		JSONArray jsonLeads = new JSONArray();
-		json.put("input", jsonLeads);
-		
-		for(HashMap<String,String> lead:leads) {
-			JSONObject jsonLead = new JSONObject();
-			jsonLead.putAll(lead);
-			jsonLeads.add(jsonLead);
-		}
-		
+
+		JSONObject json = formatObjectAction(leads, "createOnly");
 		Request request = getMarketoPostRequest(
 				accessToken,
 				getLeadEndpoint(),
@@ -169,6 +157,27 @@ public final class MarketoUtilities {
 		} catch (Exception e) {
 			throw new Exception("Error making post request to insert Marketo Leads: " + e.getMessage());
 		}
+	}
+
+	private static JSONObject formatObjectAction(
+			ArrayList<HashMap<String, String>> objects, 
+			String action)
+			throws IllegalArgumentException {
+
+		if(objects == null || objects.isEmpty())
+			throw new IllegalArgumentException("Must specify at least one lead.");
+		
+		JSONObject toReturn = new JSONObject();
+		toReturn.put("action", action);
+		JSONArray jsonObjects = new JSONArray();
+		toReturn.put("input", jsonObjects);
+		
+		for(HashMap<String,String> lead:objects) {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.putAll(lead);
+			jsonObjects.add(jsonObject);
+		}
+		return toReturn;
 	}
 	
 }
