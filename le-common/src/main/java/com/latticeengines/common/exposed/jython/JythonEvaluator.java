@@ -12,11 +12,10 @@ import javax.script.ScriptException;
 import org.springframework.util.StreamUtils;
 
 public class JythonEvaluator {
-    private static ScriptEngine engine;
-
-    static {
-        engine = new ScriptEngineManager().getEngineByName("python");
-    }
+    // TODO Consider sharing this if instantiating many eventually causes
+    // issues. That would require some mechanism for sandboxing, probably with
+    // imports and aliasing.
+    private final ScriptEngine engine = new ScriptEngineManager().getEngineByName("python");
 
     public static JythonEvaluator fromResource(String... paths) {
         String[] scripts = new String[paths.length];

@@ -5,7 +5,7 @@
 	{
 		"EmailAddress": "sorry@hotmail.com",
 		"ActiveRetirementParticipants" : 1.0,
-		"ActivitySources" : 1.0,
+		"ActivitySources" : "This field probably isn't even a string!",
 		"AssetsStartOfYear" : 1.0,
 		"AwardCategory" : 1.0,
 		"AwardWebsite" : 1.0,

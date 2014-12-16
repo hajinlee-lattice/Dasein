@@ -3246,12 +3246,8 @@ public_domains = frozenset([
 
 
 def transform(args, record):
-    column = args["email_column"]
+    column = args["column"]
     email = record[column]
     domain = email.split("@")[-1]
 
-    # TODO This should return a boolean that gets coerced later.
-    if domain in public_domains:
-        return 1.0
-
-    return 0.0
+    return domain in public_domains

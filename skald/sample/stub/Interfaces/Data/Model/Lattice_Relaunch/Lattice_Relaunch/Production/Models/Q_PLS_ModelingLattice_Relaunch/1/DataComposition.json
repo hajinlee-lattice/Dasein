@@ -3,7 +3,7 @@
 	{
 		"EmailAddress": {"source": "Request", "type": "STRING", "interpretation": "EmailAddress"},
 		"ActiveRetirementParticipants": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"},
-		"ActivitySources": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"},
+		"ActivitySources": {"source": "Request", "type": "STRING", "interpretation": "Feature"},
 		"AssetsStartOfYear": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"},
 		"AwardCategory": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"},
 		"AwardWebsite": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"},
@@ -187,5 +187,13 @@
 		"UCCFilings": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"},
 		"UCCFilingsPresent": {"source": "Request", "type": "FLOAT", "interpretation": "Feature"}
 	},
-	"transforms": [{"name": "public_domain_email", "output": "Email_Domain_IsPublic", "type": "FLOAT", "arguments": {"email_column": "EmailAddress"}}]
+	"transforms":
+	[
+		{"name": "public_domain_email", "output": "Email_Domain_IsPublic", "type": "BOOLEAN", "arguments": {"column": "EmailAddress"}},
+		{"name": "make_float", "output": "Email_Domain_IsPublic", "type": "FLOAT", "arguments": {"column": "Email_Domain_IsPublic"}},
+		{"name": "replace_null_value", "output": "Email_Domain_IsPublic", "type": "FLOAT", "arguments": {"column": "Email_Domain_IsPublic", "value": 0.0}},
+		{"name": "encode_string", "output": "ActivitySources", "type": "INTEGER", "arguments": {"column": "ActivitySources"}},
+		{"name": "make_float", "output": "ActivitySources", "type": "FLOAT", "arguments": {"column": "ActivitySources"}},
+		{"name": "replace_null_value", "output": "ActivitySources", "type": "FLOAT", "arguments": {"column": "ActivitySources", "value": 0.0}}
+	]
 }
