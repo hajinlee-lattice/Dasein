@@ -1,8 +1,6 @@
 import logging
 import os
-
 from unittest import TestCase
-
 
 logging.basicConfig(level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -13,11 +11,10 @@ class TestBase(TestCase):
     @classmethod
     def setUpClass(cls):
         logger.info("=========Current test: " + str(cls) + " ===========")
-        
         removeLinks()
-        
         baseDir = os.path.dirname(os.path.abspath(__file__))
-        dataDir = baseDir + "/data/"
+        subDir = cls.getSubDir()
+        dataDir = os.path.join(baseDir, "data", subDir)
         
         # Creates symbolic links from data directory to current directory
         for f in os.listdir(dataDir):
@@ -29,12 +26,14 @@ class TestBase(TestCase):
     def tearDownClass(cls):
         logger.info( "=========Tear down test: " + str(cls) + " ===========")
         removeLinks()
-
+        
+    @classmethod
+    def getSubDir(cls):
+        return ""
+    
 def removeLinks():
     curDir = "."
     # Removes all symbolic links in current directory
     for f in os.listdir(curDir):
         if os.path.islink(f):
             os.unlink(f)
-
-

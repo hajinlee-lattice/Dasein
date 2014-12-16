@@ -6,9 +6,7 @@ from random import shuffle
 import shutil
 import sys
 import uuid
-
 from leframework import scoringengine as se
-
 from testbase import TestBase
 
 class TrainingTestBase(TestBase):
@@ -29,10 +27,8 @@ class TrainingTestBase(TestBase):
             shutil.rmtree(fwkdir)
         if os.path.exists(pipelinefwkdir):
             shutil.rmtree(pipelinefwkdir)
-
         os.makedirs(fwkdir + "/leframework")
         os.makedirs(pipelinefwkdir)
-
         enginedir = "/leframework/scoringengine.py"
 
         os.symlink("../../main/python/pipelinefwk.py", "./pipelinefwk.py")
@@ -48,12 +44,12 @@ class TrainingTestBase(TestBase):
             fPath = os.path.join(scriptDir, f)
             if os.path.isfile(fPath) and not os.path.exists(f):
                 os.symlink(fPath, f)
-
         results = "./results"
         if os.path.exists(results):
             shutil.rmtree(results)
     
     def tearDown(self):
+        super(TestBase, self).tearDown()
         if os.path.exists(self.fwkdir):
             shutil.rmtree(self.fwkdir)
         if os.path.exists(self.pipelinefwkdir):
@@ -67,10 +63,8 @@ class TrainingTestBase(TestBase):
     def getLineToScore(self, inputColumns, typeDict, value):
         columnWithValue = zip(inputColumns, value)
         line1 = self.getLine(columnWithValue, typeDict)
-
         shuffle(columnWithValue)
         line2 = self.getLine(columnWithValue, typeDict)
-
         return (line1, line2)
 
     def getLine(self, columnsWithValue, typeDict):
@@ -112,12 +106,10 @@ class TrainingTestBase(TestBase):
         with open(filename, "wb") as output:
             output.write(gzipByteArray)
         output.close()
-
         with gzip.GzipFile(filename, "rb") as compressed:
             data = compressed.read()
             with open(filename, "wb") as decompressed:
                 decompressed.write(data)
         compressed.close()
         decompressed.close()
-
         return decompressed.name
