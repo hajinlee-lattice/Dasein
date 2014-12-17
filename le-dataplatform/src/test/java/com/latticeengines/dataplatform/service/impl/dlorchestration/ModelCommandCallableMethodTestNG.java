@@ -78,6 +78,18 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
     @Value("${dataplatform.yarn.timeline-service.webapp.address}")
     private String appTimeLineWebAppAddress;
 
+    @Value("${dataplatform.dlorchestrationjob.row.fail.threshold}")
+    private int rowFailThreshold;
+
+    @Value("${dataplatform.dlorchestrationjob.row.warn.threshold}")
+    private int rowWarnThreshold;
+
+    @Value("${dataplatform.dlorchestrationjob.postiveevent.fail.threshold}")
+    private int positiveEventFailThreshold;
+
+    @Value("${dataplatform.dlorchestrationjob.postiveevent.warn.threshold}")
+    private int positiveEventWarnThreshold;
+    
     @BeforeClass(groups = "functional")
     public void setup() {
         alertService.enableTestMode();
@@ -100,7 +112,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
                 modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
                 modelStepRetrieveMetadataProcessor, debugProcessorImpl, alertService, httpFsPrefix,
-                resourceManagerWebAppAddress, appTimeLineWebAppAddress);
+                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold, positiveEventFailThreshold, positiveEventWarnThreshold);
 
         PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed());
 
@@ -119,7 +131,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
                 modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
                 modelStepRetrieveMetadataProcessor, debugProcessorImpl, alertService, httpFsPrefix,
-                resourceManagerWebAppAddress, appTimeLineWebAppAddress);
+                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold, positiveEventFailThreshold, positiveEventWarnThreshold);
         ModelCommandState commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);
         JobStatus jobStatus = new JobStatus();
 
@@ -130,7 +142,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
         HdfsUtils.writeToFile(yarnConfiguration, outputDir + "/diagnostics.json", contents);
         List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, "diagnostics_output");
         Assert.assertEquals(files.size(), 1);
-        
+
         jobStatus.setDataDiagnosticsPath(files.get(0));
 
         callable.generateDataDiagnostics(commandState, jobStatus);

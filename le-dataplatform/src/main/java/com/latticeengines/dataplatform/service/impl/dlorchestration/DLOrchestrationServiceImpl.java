@@ -69,6 +69,14 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     private String appTimeLineWebAppAddress;
 
+    private int rowFailThreshold;
+
+    private int rowWarnThreshold;
+
+    private int positiveEventFailThreshold;
+
+    private int positiveEventWarnThreshold;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         run(context);
@@ -90,7 +98,8 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
                     modelingJobService, modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor,
                     modelCommandLogService, modelCommandResultEntityMgr, modelStepFinishProcessor,
                     modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor, debugProcessorImpl,
-                    alertService, httpFsPrefix, resourceManagerWebAppAddress, appTimeLineWebAppAddress)));
+                    alertService, httpFsPrefix, resourceManagerWebAppAddress, appTimeLineWebAppAddress,
+                    rowFailThreshold, rowWarnThreshold, positiveEventFailThreshold, positiveEventWarnThreshold)));
         }
         for (Future<Long> future : futures) {
             try {
@@ -244,5 +253,37 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     public void setAppTimeLineWebAppAddress(String appTimeLineWebAppAddress) {
         this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
+    }
+
+    public int getRowFailThreshold() {
+        return rowFailThreshold;
+    }
+
+    public void setRowFailThreshold(int rowFailThreshold) {
+        this.rowFailThreshold = rowFailThreshold;
+    }
+
+    public int getRowWarnThreshold() {
+        return rowWarnThreshold;
+    }
+
+    public void setRowWarnThreshold(int rowWarnThreshold) {
+        this.rowWarnThreshold = rowWarnThreshold;
+    }
+
+    public int getPositiveEventFailThreshold() {
+        return positiveEventFailThreshold;
+    }
+
+    public void setPositiveEventFailThreshold(int positiveEventFailThreshold) {
+        this.positiveEventFailThreshold = positiveEventFailThreshold;
+    }
+
+    public int getPositiveEventWarnThreshold() {
+        return positiveEventWarnThreshold;
+    }
+
+    public void setPositiveEventWarnThreshold(int positiveEventWarnThreshold) {
+        this.positiveEventWarnThreshold = positiveEventWarnThreshold;
     }
 }

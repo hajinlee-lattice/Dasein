@@ -33,6 +33,7 @@ public class ModelCommandParameters {
     public static final String ALGORITHM_PROPERTIES = "AlgorithmProperties";
     public static final String ALGORITHM_SCRIPT = "AlgorithmScript";
     public static final String DEBUG = "Debug";
+    public static final String VALIDATE = "Validate";
 
     private String eventTable = null;
     private String depivotedEventTable = null;
@@ -48,6 +49,7 @@ public class ModelCommandParameters {
     private String dlTenant = null;
     private String dlQuery = null;
     private boolean debug = false;
+    private boolean validate = true;
 
     public ModelCommandParameters (List<ModelCommandParameter> commandParameters) {
         super();
@@ -89,6 +91,9 @@ public class ModelCommandParameters {
                 break;
             case ModelCommandParameters.DEBUG:
                 this.setDebug(Boolean.parseBoolean(parameter.getValue()));
+                break;
+            case ModelCommandParameters.VALIDATE:
+                this.setValidate(Boolean.parseBoolean(parameter.getValue()));
                 break;
 
             case ModelCommandParameters.DL_QUERY:
@@ -249,4 +254,11 @@ public class ModelCommandParameters {
         this.debug = debug;
     }
 
+    public boolean isValidate() {
+        return validate;
+    }
+    
+    public void setValidate(boolean validate) {
+        this.validate = validate;
+    }
 }
