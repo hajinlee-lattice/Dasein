@@ -21,9 +21,11 @@ from logging import FileHandler
 from subprocess import PIPE
 from subprocess import Popen
 import argparse
+import datetime
 import json
 import os.path
-import datetime
+import platform
+import shutil
 import traceback
 
 EXECUTION_DIARY = OrderedDict()
@@ -336,7 +338,35 @@ def runCommand(cmd):
         e = traceback.format_exc()
         updateExecutionDiary(cmd, e)
         return e
-    
+
+
+@app.route('/copyfile', methods = ['POST'])
+def copyFile():
+    try:
+        print("Data: %s" % request.data)
+        jdata = json.loads(request.data)
+        if "location" in jdata and "filename" in jdata:
+            uploadedFilePath = os.path.join(app.config['UPLOAD_FOLDER'], jdata["filename"])
+            location = jdata["location"]
+            if location.startswith("~"):
+                location = os.path.expanduser(location)
+            if platform.system() == "Windows":
+                location = location.replace("/", os.sep)
+            if not os.path.exists(location):
+                os.makedirs(location)
+            copy_to = os.path.join(location, jdata["filename"])
+            shutil.copyfile(uploadedFilePath, copy_to)
+            output = "File copied to %s" % copy_to
+            updateExecutionDiary("File copy [%s]" % copy_to, output)
+        else:
+            output = "No 'filename' or 'location' in request or you've tried to access this page manually"
+            updateExecutionDiary("File upload attempt", output)
+        return output
+    except Exception:
+        e = traceback.format_exc()
+        updateExecutionDiary("File Upload", e)
+        return e
+
 @app.route('/upload', methods = ['POST'])
 def upload():
     try:
@@ -456,10 +486,10 @@ def main():
     Here we have processing for installation_type and log_file args
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--host", nargs=1, default="0.0.0.0", help="Hostname for the server")
-    parser.add_argument("--port", nargs=1, default="5000", help="Hostname for the server")
-    parser.add_argument("--upload_folder", nargs=1, default="/tmp", help="Upload folder on the server")
-    parser.add_argument("--config_file", nargs=1, default="config.py", help="Config file (on the server side)")
+    parser.add_argument("--host", default="0.0.0.0", help="Hostname for the server")
+    parser.add_argument("--port", default="5000", help="Hostname for the server")
+    parser.add_argument("--upload_folder", default="/tmp", help="Upload folder on the server")
+    parser.add_argument("--config_file", default="config.py", help="Config file (on the server side)")
     parser.add_argument('--debug', dest='debug', action='store_true')
     parser.add_argument('--no-debug', dest='debug', action='store_false')
     parser.set_defaults(debug=True)
@@ -473,11 +503,11 @@ def main():
     EXECFILES = os.path.join(args.upload_folder, "EXECFILES")
     INSTALLFILES = os.path.join(args.upload_folder, "INSTALLFILES")
     if not os.path.isdir(args.upload_folder):
-        os.mkdir(args.upload_folder)
+        os.makedirs(args.upload_folder)
     if not os.path.isdir(EXECFILES):
-        os.mkdir(EXECFILES)
+        os.makedirs(EXECFILES)
     if not os.path.isdir(INSTALLFILES):
-        os.mkdir(INSTALLFILES)
+        os.makedirs(INSTALLFILES)
     preinstallFiles()
     
     file_handler = FileHandler(os.path.join(args.upload_folder,"SessionRunner.log"))
