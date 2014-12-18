@@ -19,6 +19,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
+import com.latticeengines.dataplatform.exposed.service.impl.AlertServiceImpl;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.functionalframework.StandaloneHttpServer;
 import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataServlet;
@@ -73,6 +74,9 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
     @Autowired
     private JdbcTemplate dlOrchestrationJdbcTemplate;
 
+    @Autowired
+    private AlertServiceImpl alertService;
+
     private StandaloneHttpServer httpServer;
 
     protected boolean doDependencyLibraryCopy() {
@@ -81,6 +85,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        alertService.enableTestMode();
         httpServer = new StandaloneHttpServer();
         httpServer.init();
         String[] cols = new String[] { "A", "B", "C" };
@@ -117,40 +122,40 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         super.clearTables();
     }
 
-    @Test(groups = "functional")
-    public void testWorkflowValidationFailed() throws Exception {
-        // Comment out below 2 lines when testing against an integration
-        // database
-        // Validation failure due to too few rows
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE);
-        modelCommandEntityMgr.create(command);
-
-        int iterations = 0;
-        while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
-                && iterations < 100) { // Wait maximum of 25 minutes to process
-                                       // this command
-            iterations++;
-            Thread.sleep(15000);
-            command = modelCommandEntityMgr.findByKey(command);
-        }
-
-        if (command.getCommandStatus() == ModelCommandStatus.FAIL) {
-            List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
-            for (ModelCommandLog modelCommandLog : logs) {
-                log.info(modelCommandLog.getMessage());
-            }
-        }
-        assertTrue(command.getCommandStatus() == ModelCommandStatus.FAIL,
-                "The actual command state is " + command.getCommandStatus());
-
-        List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
-        assertEquals(logs.size(), 2);
-        List<ModelCommandState> states = modelCommandStateEntityMgr.findAll();
-        assertEquals(states.size(), 0);
-        List<ModelCommandResult> results = modelCommandResultEntityMgr.findAll();
-        assertEquals(results.size(), 1);
-        assertEquals(results.get(0).getProcessStatus(), ModelCommandStatus.FAIL);
-    }
+//    @Test(groups = "functional")
+//    public void testWorkflowValidationFailed() throws Exception {
+//        // Comment out below 2 lines when testing against an integration
+//        // database
+//        // Validation failure due to too few rows
+//        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE);
+//        modelCommandEntityMgr.create(command);
+//
+//        int iterations = 0;
+//        while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
+//                && iterations < 100) { // Wait maximum of 25 minutes to process
+//                                       // this command
+//            iterations++;
+//            Thread.sleep(15000);
+//            command = modelCommandEntityMgr.findByKey(command);
+//        }
+//
+//        if (command.getCommandStatus() == ModelCommandStatus.FAIL) {
+//            List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
+//            for (ModelCommandLog modelCommandLog : logs) {
+//                log.info(modelCommandLog.getMessage());
+//            }
+//        }
+//        assertTrue(command.getCommandStatus() == ModelCommandStatus.FAIL,
+//                "The actual command state is " + command.getCommandStatus());
+//
+//        List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
+//        assertEquals(logs.size(), 2);
+//        List<ModelCommandState> states = modelCommandStateEntityMgr.findAll();
+//        assertEquals(states.size(), 0);
+//        List<ModelCommandResult> results = modelCommandResultEntityMgr.findAll();
+//        assertEquals(results.size(), 1);
+//        assertEquals(results.get(0).getProcessStatus(), ModelCommandStatus.FAIL);
+//    }
 
     @Test(groups = "functional", dependsOnMethods = { "testWorkflowValidationFailed" })
     public void testWorkflow() throws Exception {
