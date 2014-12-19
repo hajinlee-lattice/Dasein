@@ -9,7 +9,7 @@
 
     <properties>
         <component-name>camille</component-name>
-        <le.domain.version>1.0.19-SNAPSHOT</le.domain.version>
+        <le.domain.version>1.0.20-SNAPSHOT</le.domain.version>
     </properties>
 
     <parent>
