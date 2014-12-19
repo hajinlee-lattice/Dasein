@@ -26,10 +26,6 @@
                 <entry key="httpFsPrefix" value="${dataplatform.fs.web.defaultFS}" />
                 <entry key="resourceManagerWebAppAddress" value="${dataplatform.yarn.resourcemanager.webapp.address}" />
                 <entry key="appTimeLineWebAppAddress" value="${dataplatform.yarn.timeline-service.webapp.address}" />
-                <entry key="rowFailThreshold" value="${dataplatform.dlorchestrationjob.row.fail.threshold}" />
-                <entry key="rowWarnThreshold" value="${dataplatform.dlorchestrationjob.row.warn.threshold}" />
-                <entry key="positiveEventFailThreshold" value="${dataplatform.dlorchestrationjob.postiveevent.fail.threshold}" />
-                <entry key="positiveEventWarnThreshold" value="${dataplatform.dlorchestrationjob.postiveevent.warn.threshold}" />
             </map>
         </property>
     </bean>
