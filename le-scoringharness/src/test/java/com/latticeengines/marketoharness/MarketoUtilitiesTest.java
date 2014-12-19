@@ -8,6 +8,9 @@ import java.util.*;
 
 import org.apache.http.client.fluent.Response;
 
+import com.latticeengines.cloudmodel.BaseCloudResult;
+import com.latticeengines.cloudmodel.BaseCloudUpdate;
+
 public class MarketoUtilitiesTest extends TestCase {
 
 	public MarketoUtilitiesTest(String name) {
@@ -26,12 +29,16 @@ public class MarketoUtilitiesTest extends TestCase {
 	
 	public void testInsertMarketoLeads() throws Exception {
 		String accessToken = MarketoUtilities.getAccessToken();
-		ArrayList<HashMap<String,String>> leads = new ArrayList<HashMap<String,String>>();
-		HashMap<String,String> lead = new HashMap<String,String>();
-		leads.add(lead);
-		lead.put("email", "testharness2@lattice-engines.com");
+		BaseCloudUpdate update = new BaseCloudUpdate(
+				MarketoUtilities.OBJECT_TYPE_LEAD,
+				MarketoUtilities.OBJECT_ACTION_CREATE_ONLY);
+		update.addRow("{\"email\":\"testharness2@lattice-engines.com\"}");
 		
-		Response response = MarketoUtilities.insertMarketoLeads(accessToken, leads);
-		assertTrue(response != null);
+		BaseCloudResult result = MarketoUtilities.updateObjects(accessToken, update);
+		assertTrue("Result was null", result != null);
+		assertTrue("success was false", result.isSuccess);
+		assertTrue("requestId was null or empty", result.requestId != null && !result.requestId.trim().isEmpty());
+		assertTrue("Result row count did not match Update row count.", 
+				result.jsonObjectResults.size() == result.update.jsonObjects.size());
 	}
 }

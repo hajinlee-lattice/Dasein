@@ -9,15 +9,27 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.latticeengines.cloudmodel.BaseCloudResult;
+import com.latticeengines.cloudmodel.BaseCloudUpdate;
+
 import java.util.*;
 
 
-
 // TODO: Move hard-coded refs to config
+// TODO: Replace org.json.simple with fw that properly supports generics
 public final class MarketoUtilities {
 	
 	public static final String MARKETO_ACCESS_TOKEN_KEY = "access_token";
 
+	// Object Types
+	public static final String OBJECT_TYPE_LEAD = "lead";
+	
+	// Object Actions
+	public static final String OBJECT_ACTION_CREATE_ONLY = "createOnly";
+	public static final String OBJECT_ACTION_UPDATE_ONLY = "updateOnly";
+	public static final String OBJECT_ACTION_CREATE_OR_UPDATE = "createOrUpdate";
+	public static final String OBJECT_ACTION_CREATE_DUPLICATE = "createDuplicate";
+	
 	public MarketoUtilities() {
 	}
 	
@@ -29,6 +41,13 @@ public final class MarketoUtilities {
 		return "https://976-KKC-431.mktorest.com/rest";
 	}
 
+	public static String getObjectEndpoint(String objectType) throws IllegalArgumentException {
+		if(objectType == OBJECT_TYPE_LEAD)
+			return getLeadEndpoint();
+		else
+			throw new IllegalArgumentException("The object type [" + objectType + "] is not supported for Marketo.");
+	}
+	
 	public static String getLeadEndpoint() {
 		return "/v1/leads.json";
 	}
@@ -114,11 +133,11 @@ public final class MarketoUtilities {
 				customServiceClientSecret;
 	}
 	
-	public static Request getMarketoPostRequest(
+	public static Request getPostRequest(
 			String accessToken,
 			String objectEndpoint,
 			String bodyJson) {
-		Request toReturn = getMarketoObjectRequest(
+		Request toReturn = getObjectRequest(
 				accessToken,
 				objectEndpoint,
 				true);
@@ -127,7 +146,7 @@ public final class MarketoUtilities {
 		return toReturn;
 	}
 	
-	public static Request getMarketoObjectRequest(
+	public static Request getObjectRequest(
 			String accessToken,
 			String objectEndpoint,
 			boolean isPost) {
@@ -140,44 +159,107 @@ public final class MarketoUtilities {
 		return toReturn;
 	}
 	
-	public static Response insertMarketoLeads(
+	public static BaseCloudResult updateObjects(
 			String accessToken,
-			ArrayList<HashMap<String,String>> leads) throws Exception {
-
-		JSONObject json = formatObjectAction(leads, "createOnly");
-		Request request = getMarketoPostRequest(
+			BaseCloudUpdate update) throws Exception {
+		if(update == null)
+			throw new Exception("Must specify a non-trivial value for updateObjects() update parameter.");
+		JSONObject json = formatObjectUpdate(update);
+		Request request = getPostRequest(
 				accessToken,
-				getLeadEndpoint(),
+				getObjectEndpoint(update.objectType),
 				json.toJSONString());
 		
+		Response response;
 		try {
-			Response toReturn = request.execute();
-			//TODO: parse/return toReturn.returnContent()
-			return toReturn;
+			response = request.execute();
 		} catch (Exception e) {
-			throw new Exception("Error making post request to insert Marketo Leads: " + e.getMessage());
+			throw new Exception("Error making post request to insert Marketo objects: " + e.getMessage());
 		}
+		
+		if(response == null)
+			throw new Exception("A null response was returned from the Marketo object update request.");
+		
+        Content content = response.returnContent();
+        if (content == null) {
+			throw new Exception("A null content object was returned from the Marketo object update request.");
+        }
+
+        return parseUpdateResult(
+        		content.asString(),
+        		update);
 	}
-
-	private static JSONObject formatObjectAction(
-			ArrayList<HashMap<String, String>> objects, 
-			String action)
-			throws IllegalArgumentException {
-
-		if(objects == null || objects.isEmpty())
-			throw new IllegalArgumentException("Must specify at least one lead.");
+	
+	private static JSONObject formatObjectUpdate(
+			BaseCloudUpdate update)
+			throws Exception {
+		if(update.jsonObjects == null || update.jsonObjects.size() == 0)
+			throw new IllegalArgumentException("formatObjectUpdate() requires at least one row to update.");
 		
 		JSONObject toReturn = new JSONObject();
-		toReturn.put("action", action);
+		toReturn.put("action", update.action);
 		JSONArray jsonObjects = new JSONArray();
 		toReturn.put("input", jsonObjects);
-		
-		for(HashMap<String,String> lead:objects) {
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.putAll(lead);
-			jsonObjects.add(jsonObject);
+		JSONParser parser = new JSONParser();
+		for(String jsonObjectString:update.jsonObjects) {
+			try {
+				jsonObjects.add((JSONObject)parser.parse(jsonObjectString));
+			} catch (ParseException e) {
+				throw new Exception("formatObjectUpdate() failed to parse a json string object definition.");
+			}
 		}
+
 		return toReturn;
 	}
+	
+	private static BaseCloudResult parseUpdateResult(
+			String responseBody,
+			BaseCloudUpdate update) throws Exception {
+		JSONParser parser = new JSONParser();
+		JSONObject json;
+		try {
+			json = (JSONObject) parser.parse(responseBody);
+		} catch (ParseException e) {
+			throw new Exception("parseUpdateResult() failed to parse the response body to json.");
+		}
+		String requestId = (String) json.get("requestId");
+		Boolean isSuccess = (Boolean) json.get("success");
+		
+		BaseCloudResult toReturn;
+		if(isSuccess) {
+			JSONArray jsonArray = (JSONArray) json.get("result");
+			ArrayList<String> jsonObjectResults = new ArrayList<String>();
+			if(jsonArray != null) {
+				for(Object jsonRowObject:jsonArray.toArray()) {
+					JSONObject jsonRow = (JSONObject) jsonRowObject;
+					jsonObjectResults.add(jsonRow.toJSONString());
+				}
+			}
+			toReturn = new BaseCloudResult(
+					update,
+					isSuccess,
+					requestId,
+					jsonObjectResults);
+		} else {
+			JSONArray jsonArray = (JSONArray) json.get("errors");
+			String errors = "";
+			String separator = "";
+			if(jsonArray != null) {
+				for(Object jsonRowObject:jsonArray.toArray()) {
+					JSONObject jsonRow = (JSONObject) jsonRowObject;
+					errors += separator + (String) jsonRow.get("code") + ": " + (String) jsonRow.get("message");
+					separator = "; ";
+				}
+			}
+			toReturn = new BaseCloudResult(
+					update,
+					isSuccess,
+					requestId,
+					errors);
+		}
+		
+		return toReturn;
+	}
+
 	
 }
