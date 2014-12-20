@@ -4,10 +4,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import java.util.*;
-
-import org.apache.http.client.fluent.Response;
-
 import com.latticeengines.cloudmodel.BaseCloudResult;
 import com.latticeengines.cloudmodel.BaseCloudUpdate;
 
