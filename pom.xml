@@ -22,6 +22,7 @@
         <module>le-dataplatform</module>
         <module>le-eai</module>
         <module>le-camille</module>
+        <module>le-camille-wrapper</module>
         <module>le-api</module>
         <module>le-perf</module>
         <module>le-scoring</module>
