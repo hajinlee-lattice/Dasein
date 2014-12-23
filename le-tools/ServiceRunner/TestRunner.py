@@ -14,6 +14,8 @@ __email__ = "ivinnichenko@lattice-engines.com"
 __status__ = "Alpha"
 
 # import modules
+from subprocess import PIPE
+from subprocess import Popen
 
 import datetime
 import json
@@ -54,6 +56,20 @@ class SessionRunner(object):
         else:
             return False
 
+    def copyFile(self, filename, location):
+        status = self.processFile(filename, "upload")
+        request_url = "%s/copyfile" % self.host
+        print request_url
+        copy_dict = {"location": location, "filename": os.path.basename(filename)}
+        print copy_dict
+        request = requests.post(request_url, data=json.dumps(copy_dict))
+        logging.info("%s\n%s" % (request.status_code, request.text))
+        self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
+        if request.status_code == 200:
+            return status and True
+        else:
+            return status and False
+
     def execfileFile(self, filename):
         return self.processFile(filename, "execfile")
 
@@ -69,7 +85,29 @@ class SessionRunner(object):
             status = status and self.uploadFile(filename)
         return status
 
-    def runCommand(self, cmd):
+    def runCommand(self, cmd, local=False):
+        if local:
+            return self.runCommandLocally(cmd)
+        else:
+            return self.runCommandOnServer(cmd)
+
+    def runCommandLocally(self, cmd, from_dir=None):
+        if from_dir is None:
+            from_dir = os.getcwd()
+        if from_dir.startswith("~"):
+            from_dir = os.path.expanduser(from_dir)
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True, cwd=from_dir)
+        out, err = p.communicate()
+        if err:
+            logging.info(out)
+            logging.error(err)
+            print err
+            return False
+        else:
+            logging.info(out)
+            return True
+
+    def runCommandOnServer(self, cmd):
         request_url = self.host + "/cmd"
         print request_url
         logging.info(request_url)
@@ -158,11 +196,19 @@ class SessionRunner(object):
         self.testStatus = self.testStatus and status
         return status
  
-    def testRun(self):
+    def testRun(self, os_type="Linux"):
         print "Starting tests. All should be True"
         cmd_list = ["pwd", "ls -lah"]
         cmd_dict = {"pwd": "~"}
         cmd_str = "ls -lah ~"
+        cp_dir = "/tmp/t/m/p"
+        if os_type == "Windows":
+            cmd_list = ["echo %cd%", "dir"]
+            cmd_dict = {"echo %cd%": "C:\\"}
+            cmd_str = "dir"
+            cp_dir = "C:/temp/t/m"
+        self.verify(self.copyFile("tmp.log", cp_dir ), True, "0")
+        """
         self.verify(self.runCommand(cmd_dict), True, "1")
         self.verify(self.runCommand(cmd_list), True, "2")
         self.verify(self.runCommand(cmd_str), True, "3")
@@ -179,11 +225,13 @@ class SessionRunner(object):
         self.verify(self.installFile("execFile.py"), True, "14")
         self.verify(self.getEval("FooTest()").startswith(datetime.datetime.now().strftime("%Y-%m-%d")), True, "15")
         #self.flush()
+        """
         print "Test status: [%s]" % self.testStatus
         return self.testStatus
 
 def main():
-    SessionRunner("http://localhost:5000").testRun()
+    #SessionRunner("http://localhost:5000").testRun()
+    SessionRunner("http://10.41.1.57:5000").testRun("Windows")
 
 if __name__ == '__main__':
     main()
