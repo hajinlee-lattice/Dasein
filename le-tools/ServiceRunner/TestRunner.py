@@ -208,7 +208,6 @@ class SessionRunner(object):
             cmd_str = "dir"
             cp_dir = "C:/temp/t/m"
         self.verify(self.copyFile("tmp.log", cp_dir ), True, "0")
-        """
         self.verify(self.runCommand(cmd_dict), True, "1")
         self.verify(self.runCommand(cmd_list), True, "2")
         self.verify(self.runCommand(cmd_str), True, "3")
@@ -225,7 +224,6 @@ class SessionRunner(object):
         self.verify(self.installFile("execFile.py"), True, "14")
         self.verify(self.getEval("FooTest()").startswith(datetime.datetime.now().strftime("%Y-%m-%d")), True, "15")
         #self.flush()
-        """
         print "Test status: [%s]" % self.testStatus
         return self.testStatus
 

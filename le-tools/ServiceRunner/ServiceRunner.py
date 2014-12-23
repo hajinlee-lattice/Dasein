@@ -521,9 +521,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-# Rebooting on 2014-12-05 22:10:24
-# Rebooting on 2014-12-05 22:12:56
-# Rebooting on 2014-12-05 22:54:52
-# Rebooting on 2014-12-05 22:58:42
-# Rebooting on 2014-12-05 23:20:00
-# Rebooting on 2014-12-05 23:26:32
