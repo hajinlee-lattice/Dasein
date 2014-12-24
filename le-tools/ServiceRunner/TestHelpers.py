@@ -23,12 +23,21 @@ from TestRunner import SessionRunner
 
 class DLCRunner(SessionRunner):
 
-    def __init__(self, host="http://localhost:5000", logfile=None, exception=False):
+    def __init__(self, dlc_path=None, host="http://localhost:5000", logfile=None, exception=False):
         super(DLCRunner, self).__init__(host, logfile)
         self.exception = exception
         self.ignore = ["command", "definition"]
+        self.dlc_path = ""
+        if dlc_path is not None:
+            self.dlc_path = dlc_path
         self.command = ""
         self.params = {}
+
+    def setDlcPath(self, dlc_path):
+        self.dlc_path = dlc_path
+
+    def getDlcPath(self):
+        return self.dlc_path
 
     def getParamsInfo(self, command):
         if command not in ConfigDLC.keys():
@@ -80,21 +89,28 @@ class DLCRunner(SessionRunner):
 
     def constructCommand(self, command, params):
         if self.validateInput(command, params):
-            dlc = "dlc " + self.command
+            if self.dlc_path:
+                dlc = os.path.join(self.dlc_path, "dlc ")
+                # Should be re-worked after DLC becomes platform independent
+                dlc = dlc.replace("/", "\\")
+            else:
+                dlc = "dlc "
+            dlc += self.command
             for param in self.params.keys():
                 dlc += " %s %s" % (param, self.params[param])
+            print dlc
             return dlc
         else:
             return None
         
-    def runDLCcommand(self, command, params):
+    def runDLCcommand(self, command, params, local=False):
         cmd = self.constructCommand(command, params)
         if cmd is None:
             logging.error("There is something wrong with your command, please see logs for details")
             if self.exception:
                 raise "There is something wrong with your command, please see logs for details"
             return False
-        return self.runCommand(cmd)
+        return self.runCommand(cmd, local)
 
     def testRun(self):
         print "Starting tests. All should be True"
@@ -113,6 +129,8 @@ class DLCRunner(SessionRunner):
         self.verify(r == ["-u","-s"] and o == ["-p"], True, "7")
         self.verify(self.validateInput(command, params), True, "8")
         self.verify(self.constructCommand(command, params), "dlc -Test -u user -s http://dataloader", "9")
+        self.setDlcPath("D:\VisiDB")
+        self.verify(self.constructCommand(command, params), "D:\VisiDB\dlc -Test -u user -s http://dataloader", "9")
         print "Test status: [%s]" % self.testStatus
         return self.testStatus
 
@@ -232,23 +250,10 @@ class PretzelRunner(SessionRunner):
             status = status and self.setTopologyRevison(topology)
             return status
 
-def testHelperClasses():
-    DLCRunner().testRun()
-
-def basePretzelTest():
-    bp = "D:\B\spda0__DE-DT-BD_SQ-d__6_9_2_63971nE_2_6_1_63627r_1_3_3_0n\ADEDTBDd69263971nE26163627r1"
-    location = "%s\PLS_Templates" % bp
-    pretzel = PretzelRunner(host="http://10.41.1.57:5000",
-                            svn_location="~/Code/PLS_1.3.3", build_path=bp, specs_path=location)
-    pretzel.getMain()
-    # Test "EloquaAndSalesforceToEloqua"
-    pretzel.testTopology("EloquaAndSalesforceToEloqua")
-    # Test "MarketoAndSalesforceToMarketo"
-    pretzel.testTopology("MarketoAndSalesforceToMarketo")
-   
 
 def main():
-    basePretzelTest()
+    #basePretzelTest()
+    DLCRunner().testRun()
 
 
 if __name__ == '__main__':

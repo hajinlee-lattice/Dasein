@@ -229,7 +229,8 @@ class SessionRunner(object):
 
 def main():
     #SessionRunner("http://localhost:5000").testRun()
-    SessionRunner("http://10.41.1.57:5000").testRun("Windows")
+    #SessionRunner("http://10.41.1.57:5000").testRun("Windows")
+    SessionRunner("http://10.41.1.187:5000").testRun("Windows")
 
 if __name__ == '__main__':
     main()
