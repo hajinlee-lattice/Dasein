@@ -10,6 +10,7 @@ import org.apache.commons.cli.ParseException;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.perf.cli.setup.CommandLineOption;
 import com.latticeengines.perf.cli.setup.CommandLineSetup;
+import com.latticeengines.perf.job.properties.CommandLineProperties;
 import com.latticeengines.perf.job.runnable.impl.Profile;
 
 public class CommandLineProfileSetup extends CommandLineSetup<Profile> {
@@ -24,9 +25,10 @@ public class CommandLineProfileSetup extends CommandLineSetup<Profile> {
         Options ops = new Options();
         Option customer = new CommandLineOption(CUSTOMER_OPT, CUSTOMER_LONGOPT, true, true, CUSTOMER_DEF);
         Option table = new CommandLineOption(TABLE_OPT, TABLE_LONGOPT, true, true, TABLE_DEF);
+        Option target = new CommandLineOption(TARGET_OPT, TARGET_LONGOPT, true, false, TARGET_DEF);
         Option metadataTable = new CommandLineOption(METADATA_TABLE_OPT, METADATA_TABLE_LONGOPT, true, true,
                 METADATA_TABLE_DEF);
-        ops.addOption(customer).addOption(table).addOption(metadataTable);
+        ops.addOption(customer).addOption(table).addOption(target).addOption(metadataTable);
         cl = clp.parse(ops, args);
     }
 
@@ -47,7 +49,12 @@ public class CommandLineProfileSetup extends CommandLineSetup<Profile> {
         config.setMetadataTable(cl.getOptionValue(METADATA_TABLE_OPT));
         config.setSamplePrefix("all");
         config.setExcludeColumnList(Profile.createExcludeList());
-        config.setTargets(Arrays.<String> asList(new String[] { "P1_Event" }));
+        String targets = cl.getOptionValue(TARGET_OPT);
+        if (targets == null || targets.length() == 0) {
+            config.setTargets(Arrays.<String> asList(new String[] { "P1_Event" }));
+        } else {
+            config.setTargets(Arrays.<String> asList(targets.split(CommandLineProperties.VALUE_DELIMETER)));
+        }
         pf.setConfiguration(restEndpointHost, config);
     }
 }

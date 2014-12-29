@@ -41,6 +41,7 @@ public class Profile extends ModelingResourceJob<DataProfileConfiguration, List<
         excludeList.add("Domain");
         excludeList.add("Email");
         excludeList.add("LeadSource");
+        excludeList.add("Target");
         return excludeList;
     }
 }
