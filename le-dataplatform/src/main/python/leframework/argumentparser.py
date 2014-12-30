@@ -48,8 +48,9 @@ class ArgumentParser(object):
         self.algorithmProperties = self.__parseProperties("algorithm_properties")
         self.provenanceProperties = self.__parseProperties("provenance_properties")
         self.runtimeProperties = self.__parseRuntimeProperties(propertyFile)
-        self.numOfSkippedRow = 0
         logger.debug("reading runtime properties" + str(self.runtimeProperties))
+        self.numOfSkippedRow = 0
+        self.highUCThreshold = 0.2
 
     def extractTargets(self):
         specifiedTargets = self.metadataSchema["targets"]

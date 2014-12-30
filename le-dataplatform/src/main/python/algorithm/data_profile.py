@@ -17,7 +17,6 @@ import pandas as pd
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-
 logging.basicConfig(level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(name='data_profile')
@@ -317,7 +316,6 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
     diagnostics["Colname"] = colName
     diagnostics["DisplayName"] = otherMetadata[0]
     diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colName not in stringcols)/float(len(columnData))
-    
     if diagnostics["PopulationRate"] == 0.0:
         return (index, diagnostics)
 
@@ -332,8 +330,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         if uniqueValues > 200:
             logger.warn("String column name: " + colName + " is discarded due to more than 200 unique values.")
             return (index, diagnostics)
-
-        index = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colName, otherMetadata, index)
+        index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colName, otherMetadata, index)
     else:
         # Band column
         diagnostics["Type"] = "Band"
@@ -354,8 +351,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
             logger.debug("Using default bucketer for column name: " + colName)
             bands = bucketDispatcher.bucketColumn(columnData, eventVector)
             diagnostics["BucketingStrategy"] = None
-        index = writeBandsToAvro(dataWriter, columnData, eventVector, bands, mean, median, colName, otherMetadata, index)
-
+        index, diagnostics["UncertaintyCoefficient"] = writeBandsToAvro(dataWriter, columnData, eventVector, bands, mean, median, colName, otherMetadata, index)
     return (index, diagnostics)
 
 
@@ -404,7 +400,7 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
 
     # Create bucket for nulls if applicable
     index = writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, None, None, dataWriter, False, componentMi, entropyValue)
-    return index
+    return index, uncertaintyCoefficient(mi, entropyValue)
 
 def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median, colName, otherMetadata, index):
     '''
@@ -456,7 +452,7 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
 
     # Create bucket for nulls if applicable
     index = writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, avgProbability, mean, median, dataWriter, True, componentMi, entropyValue)
-    return index
+    return index, uncertaintyCoefficient(mi, entropyValue)
 
 def mapToBands(columnVector, bands):
     bucketsVector = []
@@ -516,14 +512,8 @@ def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features
     Returns:
         None 
     '''
-    summary = OrderedDict()
-    summary["SampleSize"] = len(eventVector)
-    summary["ColumnSize"] = len(features)
-    summary["PositiveEventRate"] = sum(eventVector)/float(len(eventVector))
-    if params is not None:
-        parser = params["parser"]
-        summary["NumberOfSkippedRows"] = parser.numOfSkippedRow
-            
+    summary = getSummaryDiagnostics(dataDiagnostics, eventVector, features, params)
+
     diagnostics = OrderedDict()
     diagnostics["Summary"] = summary
     diagnostics["MetadataDiagnostics"] = metadataDiagnostics
@@ -532,6 +522,25 @@ def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features
     with open(modelDir + "diagnostics.json", "wb") as fp:
         json.dump(diagnostics, fp)
 
+def getSummaryDiagnostics(dataDiagnostics, eventVector, features, params):
+    summary = OrderedDict()
+    summary["SampleSize"] = len(eventVector)
+    summary["ColumnSize"] = len(features)
+    summary["PositiveEventRate"] = sum(eventVector) / float(len(eventVector))
+    highUCThreshold = 0.2
+    if params is not None:
+        parser = params["parser"]
+        summary["NumberOfSkippedRows"] = parser.numOfSkippedRow
+
+        highUCThreshold = parser.highUCThreshold
+        
+    highUCColumns = []
+    for columnDiagnostics in dataDiagnostics:
+        if columnDiagnostics.has_key("UncertaintyCoefficient") and columnDiagnostics["UncertaintyCoefficient"] > highUCThreshold:
+            highUCColumns.append(columnDiagnostics['Colname'])
+    if (len(highUCColumns) > 0):
+        summary["HighUCColumns"] = ",".join(highUCColumns)
+    return summary        
 
 def getCountWhereEventIsOne(valueVector, eventVector):
     '''

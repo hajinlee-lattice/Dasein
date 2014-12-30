@@ -140,6 +140,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
         String warnLog = logs.get(warnIndex).getMessage();
         Assert.assertTrue(warnLog.contains("IsPublicDomain")
                 && warnLog.contains("Detected abnormal positive event rate"));
+        Assert.assertTrue(warnLog.contains("Uncertainty Coefficient"));
 
         int linkIndex = warnIndex == 0 ? 1 : 0;
         String linkLog = logs.get(linkIndex).getMessage();
@@ -149,7 +150,8 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
     }
 
     private String getContent() {
-        return " { \"Summary\": { \"SampleSize\": 130768, \"ColumnSize\": 317, \"PositiveEventRate\": 0.0094212651413189772, \"NumberOfSkippedRows\": 0, \"NumberOfSkippedRows\": 10} "
+        return " { \"Summary\": { \"SampleSize\": 130768, \"ColumnSize\": 317, \"PositiveEventRate\": 0.0094212651413189772, " 
+                + "\"NumberOfSkippedRows\": 0, \"NumberOfSkippedRows\": 10, \"HighUCColumns\": \"IsPublicDomain, AwardCategory\"} "
                 + " \"MetadataDiagnostics\": { \"IsPublicDomain\": \"DisplayDiscretizationStrategy\" }, "
                 + " \"ColumnDiagnostics\": [ { \"Colname\": \"IsPublicDomain\", \"DisplayName\": \"IsPublicDomain\", "
                 + " \"PopulationRate\": 1.0, \"Type\": \"Band\",\"BucketingStrategy\": null } ] }";

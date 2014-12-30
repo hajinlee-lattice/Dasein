@@ -349,6 +349,12 @@ public class ModelCommandCallable implements Callable<Long> {
             warnings += "The number of skipped rows=" + numOfSkippedRows + "\n";
         }
         
+        // check if there's high UC columns
+        String highUCColumns = (String) ((JSONObject) jsonObject.get("Summary")).get("HighUCColumns");
+        if (highUCColumns != null) {
+            warnings += "Columns with high Uncertainty Coefficient=" + highUCColumns + "\n";
+        }
+
         // Check any invalid column bucketing metadata
         JSONObject metadataDiagnostics = (JSONObject) jsonObject.get("MetadataDiagnostics");
         List<String> columns = new ArrayList<String>();
