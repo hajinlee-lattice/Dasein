@@ -13,10 +13,9 @@ logger = logging.getLogger(name='argumentparser')
 
 
 class ArgumentParser(object):
-    
-    
+
     """
-    This class is responsible for parsing the json file as understood by the 
+    This class is responsible for parsing the json file as understood by the
     LE data platform.
     """
     def __init__(self, metadataFile, propertyFile = None):
@@ -34,7 +33,7 @@ class ArgumentParser(object):
             logger.debug("JSON config metadata schema %s" % configMetadataJson)
         except:
             logger.warn("Config metadata does not exist!")
-        
+
         self.fields = dataSchema["fields"]
         self.features = set(self.metadataSchema["features"])
         (self.targets, self.readouts) = self.extractTargets()
@@ -44,7 +43,7 @@ class ArgumentParser(object):
         if "depivoted" in self.metadataSchema:
             self.depivoted = self.metadataSchema["depivoted"] == "True"
         self.transformer = None
-        
+
         self.algorithmProperties = self.__parseProperties("algorithm_properties")
         self.provenanceProperties = self.__parseProperties("provenance_properties")
         self.runtimeProperties = self.__parseRuntimeProperties(propertyFile)
@@ -87,7 +86,7 @@ class ArgumentParser(object):
                 else: logWarning(value, "target")
 
         return set(targets), readouts
-        
+
     def __parseProperties(self, name):
         element = {}
         try:
@@ -95,27 +94,27 @@ class ArgumentParser(object):
             element = dict(u.split("=") for u in properties.split(" "))
         except Exception, e:
             logger.error(str(e))
-    
+
         return element
-        
+
     def __parseRuntimeProperties(self, propertyFile):
         if propertyFile is None:
             logger.info("No runtime properties found")
             return None
-        
+
         logger.info("Reading properties file: " + propertyFile)
         properties = '[runtimeconfig]\n' + open(propertyFile, 'r').read()
         properties_fp = StringIO(properties)
         cf = ConfigParser.ConfigParser()
         cf.readfp(properties_fp)
         return dict(cf.items("runtimeconfig"))
-        
+
     def stripPath(self, fileName):
         return fileName[fileName.rfind('/')+1:len(fileName)]
-    
+
     def __getField(self, index):
         return self.fields[index]
-    
+
     def __convertType(self, cell, fieldType):
         if cell is None or len(str(cell)) == 0:
             return None
@@ -149,7 +148,7 @@ class ArgumentParser(object):
                 logger.info("Adding %s with index %d" % (fName, l))
                 includedNames.append(fName)
                 included.append(l)
-                
+
                 if fName in self.targets:
                     self.targetIndex = k
                 if fName in self.features:
@@ -164,7 +163,7 @@ class ArgumentParser(object):
                 nonScoringIncludedNames.append(fName)
                 nonScoringIncluded.append(l)
             l = l+1
-        
+
         tmpData = []; nonScoringData = []
 
         reader = None 
@@ -188,19 +187,20 @@ class ArgumentParser(object):
                     continue
                 else:
                     row[targetName] = float(row[targetName])
-                rowlist = [str(row[name]) if name in self.stringColNames else row[name] for name in includedNames]
+                rowlist = [str(row[name]) if name in self.stringColNames and row[name] is not None else row[name] for name in includedNames]
                 nonScoringlist = [row[name] for name in nonScoringIncludedNames]
             else:
                 # CSV format
                 rowlist = [float(row[i]) if self.__getField(i)["name"] in self.targets else self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]
                 nonScoringlist = [self.__convertType(row[i], self.__getField(i)["type"][0]) for i in nonScoringIncluded]
 
-            tmpData.append(rowlist); nonScoringData.append(nonScoringlist)
+            tmpData.append(rowlist)
+            nonScoringData.append(nonScoringlist)
 
         if numberOfNullTarget > 0:
             self.numOfSkippedRow += numberOfNullTarget
             logger.warn("Because target value is None, skipping the number of rows=" + str(numberOfNullTarget))
-            
+
         # Defense (Filter Scoring Columns)
         self.nonScoringTargets = filter(lambda e: e not in includedNames, self.nonScoringTargets)
         self.readouts = filter(lambda e: e not in includedNames, self.readouts)
@@ -218,7 +218,7 @@ class ArgumentParser(object):
         schema["targetIndex"] = parser.getTargetIndex()
         schema["keyColIndex"] = parser.getKeyColumns()
         schema["nameToFeatureIndex"] = parser.getNameToFeatureIndex()
-        
+
         if "data_profile" in self.metadataSchema:
             schema["data_profile"] = self.stripPath(self.metadataSchema["data_profile"]) 
         schema["config_metadata"] = parser.getConfigMetadata()
@@ -230,28 +230,28 @@ class ArgumentParser(object):
 
     def isAvro(self):
         return self.metadataSchema["data_format"] == "avro"
-    
+
     def isDepivoted(self):
         return self.depivoted
-    
+
     def getNameToFeatureIndex(self):
         return self.nameToFeatureIndex
-    
+
     def getSchema(self):
         return self.metadataSchema
-    
+
     def getFeatureTuple(self):
         return tuple(self.featureIndex)
-    
+
     def getTargetIndex(self):
         return self.targetIndex
-    
+
     def getAlgorithmProperties(self):
         return self.algorithmProperties
 
     def getKeyColumns(self):
         return tuple(self.keyColIndex)
-    
+
     def getStringColumns(self):
         return self.stringColNames
 
@@ -260,6 +260,6 @@ class ArgumentParser(object):
 
     def getRuntimeProperties(self):
         return self.runtimeProperties
-    
+
     def getConfigMetadata(self):
         return self.configMetadata

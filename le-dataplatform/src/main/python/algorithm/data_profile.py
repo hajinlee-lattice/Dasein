@@ -13,6 +13,7 @@ from leframework.progressreporter import ProgressReporter
 import numpy as np
 import itertools
 import pandas as pd
+from pandas.core.common import isnull
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -181,7 +182,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
             if not otherMetadata.has_key(colName):
                 otherMetadata[colName] = (colName, "", "")
             if (otherMetadata[colName][1].upper() == "NONE"):
-                continue;
+                continue
             index, columnDiagnostics = profileColumn(data[colName], colName, otherMetadata[colName], 
                                                      categoricalCols, eventVector, bucketDispatcher, dataWriter, index, colnameBucketMetadata.get(colName))
             dataDiagnostics.append(columnDiagnostics)
@@ -244,8 +245,8 @@ def retrieveCategoricalColumns(columnsMetadata, features, categoricalMetadataFro
             else:
                 logger.warn("No statistical type for column %s." % colName)
 
-    logger.info("Categorical columns from schema: " + str(categoricalMetadata))
-    logger.info("Categorical columns from metadata: " + str(categoricalMetadataFromSchema))
+    logger.info("Categorical columns from schema: " + str(categoricalMetadata) + " length: " + str(len(categoricalMetadata)))
+    logger.info("Categorical columns from metadata: " + str(categoricalMetadataFromSchema) + " length:" + str(len(categoricalMetadataFromSchema)))
     return categoricalMetadataFromSchema
 
 def retrieveColumnBucketMetadata(columnsMetadata):
@@ -315,14 +316,14 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
     diagnostics = OrderedDict()
     diagnostics["Colname"] = colName
     diagnostics["DisplayName"] = otherMetadata[0]
-    diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colName not in stringcols)/float(len(columnData))
+    diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colName not in stringcols)/float(len(columnData))    
     if diagnostics["PopulationRate"] == 0.0:
         return (index, diagnostics)
 
     logger.info("Processing column %s." % colName)
     if colName in stringcols:
         # Categorical column
-        columnData = columnData.astype(np.str)
+        columnData = columnData.apply(lambda col: None if isnull(col) else str(col))
         diagnostics["Type"] = "Categorical"
         uniqueValues = len(columnData.unique())
         mode = columnData.value_counts().idxmax()
