@@ -48,9 +48,9 @@ def main(argv):
     
     with open (CSVFilePath, "w") as csvFile:
         if debugFlag == "-debug":
-            csvFile.write("Column Name,Attribute Name,Category,Predictive Power,Attribute Value,Conversion Rate,Lift,Total Leads,Frequency(#),Frequency/Total Leads,ApprovedUsage\n")
+            csvFile.write("Column Name,Attribute Name,Category,FundamentalType,Predictive Power,Attribute Value,Conversion Rate,Lift,Total Leads,Frequency(#),Frequency/Total Leads,ApprovedUsage\n")
         else:        
-            csvFile.write("Attribute Name,Category,Predictive Power,Attribute Value,Conversion Rate,Lift,Total Leads,Frequency(#),Frequency/Total Leads\n")
+            csvFile.write("Attribute Name,Category,FundamentalType,Predictive Power,Attribute Value,Conversion Rate,Lift,Total Leads,Frequency(#),Frequency/Total Leads\n")
             
         #This section calculates the total #leads for each predictor. Ideally it should be the same for each predictor, but there seem to be some exceptions
         siddata = sorted(contentJSON["Summary"]["Predictors"], key=operator.itemgetter('Name'))
@@ -76,19 +76,21 @@ def main(argv):
                         csvFile.write(unicode(predictor["Name"]).replace('"', '""'))
                         csvFile.write('"')                        
                     csvFile.write(",")
-
                 if 'DisplayName' in predictor:   
                     csvFile.write('"')                    
                     csvFile.write(unicode(predictor["DisplayName"]).replace('"', '""'))
                     csvFile.write('"')                        
                 csvFile.write(",")
-                
                 if 'Category' in predictor:   
                     csvFile.write('"')                    
                     csvFile.write(unicode(predictor["Category"]).replace('"', '""'))
                     csvFile.write('"')                        
                 csvFile.write(",")
-                                                
+                if 'FundamentalType' in predictor:   
+                    csvFile.write('"')                    
+                    csvFile.write(unicode(predictor["FundamentalType"]).replace('"', '""'))
+                    csvFile.write('"')                        
+                csvFile.write(",")
                 if 'UncertaintyCoefficient' in predictor:
                     csvFile.write('"' + unicode(predictor["UncertaintyCoefficient"]) + '"')            
                 csvFile.write(",")           

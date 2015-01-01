@@ -65,6 +65,11 @@ def getSchema():
         "columnName" : "category",
         "sqlType" : "-9"
       }, {
+        "name" : "fundamentaltype",
+        "type" : [ "string", "null" ],
+        "columnName" : "fundamentaltype",
+        "sqlType" : "-9"
+      },{
         "name" : "columnvalue",
         "type" : [ "string", "null" ],
         "columnName" : "columnvalue",
@@ -180,7 +185,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
         progressReporter.nextState()
         if colName in features:
             if not otherMetadata.has_key(colName):
-                otherMetadata[colName] = (colName, "", "")
+                otherMetadata[colName] = (colName, "", "", "")
             if (otherMetadata[colName][1].upper() == "NONE"):
                 continue
             index, columnDiagnostics = profileColumn(data[colName], colName, otherMetadata[colName], 
@@ -200,23 +205,26 @@ def retrieveOtherMetadata(columnsMetadata):
 
     for columnMetadata in columnsMetadata:
         colName = columnMetadata['ColumnName']
-        try :
+        try:
             displayName = columnMetadata['DisplayName']
             approvedUsage = columnMetadata['ApprovedUsage']
             extensions = columnMetadata["Extensions"]
             category = ""
+            fundamentalType = ""
+            if columnMetadata.has_key("FundamentalType"):
+                fundamentalType = columnMetadata["FundamentalType"]
             for extension in extensions:
                 if extension["Key"] == "Category":
                     category = extension["Value"]
-            
+
             if displayName is None:
                 displayName = colName
             if approvedUsage is None:
                 approvedUsage = ""
             if isinstance(approvedUsage, list):
                 approvedUsage = ",".join(approvedUsage)
-            otherMetadata[colName] = (displayName, approvedUsage, category)
-        except :
+            otherMetadata[colName] = (displayName, approvedUsage, category, fundamentalType)
+        except:
             logger.warn("Invalid metadata format for column: " + colName)
             continue
 
@@ -384,6 +392,7 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
         datum["displayname"] = otherMetadata[0]
         datum["approvedusage"] = otherMetadata[1]
         datum["category"] = otherMetadata[2]
+        datum["fundamentaltype"] = otherMetadata[3]
         datum["columnvalue"] = value
         datum["Dtype"] = "STR"
         datum["minV"] = None
@@ -436,6 +445,7 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         datum["displayname"] = otherMetadata[0]
         datum["approvedusage"] = otherMetadata[1] 
         datum["category"] = otherMetadata[2]
+        datum["fundamentaltype"] = otherMetadata[3]
         datum["columnvalue"] = None
         datum["Dtype"] = "BND"
         datum["minV"] = band[0]
@@ -485,6 +495,7 @@ def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, av
     datum["displayname"] = otherMetadata[0]
     datum["approvedusage"] = otherMetadata[1]
     datum["category"] = otherMetadata[2]
+    datum["fundamentaltype"] = otherMetadata[3]
     datum["columnvalue"] = None
     datum["Dtype"] = "BND" if continuous else "STR"
     datum["minV"] = None

@@ -89,13 +89,19 @@ class SuiteHirevueProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     @classmethod
     def getSubDir(cls):
         return "PLS132_test_Hirevue"
-    
+
+
 class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteDocsignProfilingThenTrainTest, self).executeProfilingThenTrain()
         jsonDict = json.loads(open(glob.glob("./results/PLSModel*.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
-        
+        predictors = jsonDict["Summary"]["Predictors"]
+        for predictor in predictors:
+            if predictor['Name'] == 'AssetsStartOfYear':
+                startOfYearPredictor = predictor
+        self.assertIsNotNone(startOfYearPredictor)
+        self.assertEqual(startOfYearPredictor['FundamentalType'], "year")
         self.assertTrue(rocScore > 0.93)
 
     @classmethod

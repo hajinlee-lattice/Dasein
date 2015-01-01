@@ -111,8 +111,12 @@ class SummaryGenerator(State, JsonGenBase):
             predictor["Category"] = record["category"]
         else:
             predictor["Category"] = ""
-        
-        if hasNotNoneUC: 
+        if "fundamentaltype" in record:
+            predictor["FundamentalType"] = record["fundamentaltype"]
+        else:
+            predictor["FundamentalType"] = ""
+
+        if hasNotNoneUC:
             predictor["UncertaintyCoefficient"] = attrLevelUncertaintyCoeff
         else:
             predictor["UncertaintyCoefficient"] = -1
