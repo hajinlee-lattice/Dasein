@@ -5,6 +5,7 @@ import sys
 
 from leframework.executors.learningexecutor import LearningExecutor
 from trainingtestbase import TrainingTestBase
+import csv
 
 class SuiteProfilingThenTrainTest(TrainingTestBase):
     def executeProfilingThenTrain(self):
@@ -104,7 +105,21 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
         self.assertEqual(startOfYearPredictor['FundamentalType'], "year")
         self.assertTrue(rocScore > 0.93)
 
+        count = 0
+        hasOther = False
+        csvFile = csv.DictReader(open(glob.glob("./results/PLSModel*.csv")[0]))
+        for row in csvFile:
+            if row['Attribute Value'] == '["Other"]':
+                hasOther = True
+            else:
+                self.assertTrue(float(row['Frequency/Total Leads']) >= 0.01)
+            if row['Attribute Name'] == 'ELQContact_Industry':
+                count += 1
+            else:
+                break
+        self.assertTrue(count == 9)
+        self.assertTrue(hasOther)
+        
     @classmethod
     def getSubDir(cls):
         return "PLS132_test_Docusign"
-

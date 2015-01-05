@@ -69,89 +69,122 @@ def main(argv):
 
         for predictor in contentJSON["Summary"]["Predictors"]:
             if predictor["ApprovedUsage"] in ["None","Model"] and debugFlag != "-debug": continue;
-            for predictorElement in predictor["Elements"]:    
-                if debugFlag == "-debug":
-                    if 'Name' in predictor:
-                        csvFile.write('"')                    
-                        csvFile.write(unicode(predictor["Name"]).replace('"', '""'))
-                        csvFile.write('"')                        
-                    csvFile.write(",")
-                if 'DisplayName' in predictor:   
-                    csvFile.write('"')                    
-                    csvFile.write(unicode(predictor["DisplayName"]).replace('"', '""'))
-                    csvFile.write('"')                        
-                csvFile.write(",")
-                if 'Category' in predictor:   
-                    csvFile.write('"')                    
-                    csvFile.write(unicode(predictor["Category"]).replace('"', '""'))
-                    csvFile.write('"')                        
-                csvFile.write(",")
-                if 'FundamentalType' in predictor:   
-                    csvFile.write('"')                    
-                    csvFile.write(unicode(predictor["FundamentalType"]).replace('"', '""'))
-                    csvFile.write('"')                        
-                csvFile.write(",")
-                if 'UncertaintyCoefficient' in predictor:
-                    csvFile.write('"' + unicode(predictor["UncertaintyCoefficient"]) + '"')            
-                csvFile.write(",")           
+            otherPredictorElements = []
+            for predictorElement in predictor["Elements"]:
+                if isMergeWithOther(predictor, predictorElement, dictArray):
+                    otherPredictorElements.append(predictorElement)
+                    continue
+                writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predictor, predictorElement)
+                
+            if (len(otherPredictorElements)  > 0):
+                mergedPredictorElement = mergePredictorElements(otherPredictorElements)
+                writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predictor, mergedPredictorElement)
 
-                length = 0
-                if predictorElement["Values"] is not None:
-                    length = len(predictorElement["Values"])
-                
-                if (length == 0):   #This implies that value is of type bucket and not categorical
-                    if predictorElement["UpperExclusive"] is not None:
-                        csvFile.write("< ")
-                        csvFile.write(unicode(predictorElement["UpperExclusive"]))                        
-                    else:
-                        csvFile.write(">= ")
-                        csvFile.write(unicode(predictorElement["LowerInclusive"]))    
-                    csvFile.write(",")                    
-                else:
-                    if (predictorElement["Values"])[length - 1] is None:
-                        csvFile.write("Not Available,")                    
-                    else:
-                        csvFile.write('"[')
-                        for val in predictorElement["Values"]:    
-                            if val is not None:
-                                csvFile.write('""')                           
-                                csvFile.write(unicode(val).replace('"', '""'))
-                                csvFile.write('""')
-                                if val != (predictorElement["Values"])[length - 1]:
-                                    csvFile.write(';')                         
-                        csvFile.write(']",')
-                
-                if 'Lift' in predictorElement:
-                    csvFile.write(unicode(averageProb*predictorElement["Lift"]))
-                csvFile.write(",")
-                
-                if 'Lift' in predictorElement:
-                    csvFile.write(unicode(predictorElement["Lift"]))          
-                csvFile.write(",")
+def mergePredictorElements(otherElements):
+    mergedElement = dict()
+    mergedElement["Values"] = ["Other"]
+    mergedCount = 0
+    mergedLift = 0
+    for element in otherElements:
+        mergedCount += element["Count"] if element["Count"] is not None else 0
+        mergedLift += element["Lift"] if element["Lift"] is not None else 0
+        
+    mergedElement["Count"] = mergedCount
+    mergedElement["Lift"] = mergedLift / float(len(otherElements))
+    return mergedElement
+    
+def isMergeWithOther(predictor, element, dictArray):
+    length = 0
+    if element["Values"] is not None:
+        length = len(element["Values"])
+    if (length == 0):
+        return False
+    if element["Values"][0] == "Other":
+        return True
+    if "Count" in element:
+        if element["Count"] is None:
+            return True
+        else:
+            freq = element["Count"] / float(dictArray[predictor["Name"]])
+            return True if freq < 0.01 else False
+    return True
+                                                 
+def writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predictor, predictorElement):
+    if debugFlag == "-debug":
+        if 'Name' in predictor:
+            csvFile.write('"')
+            csvFile.write(unicode(predictor["Name"]).replace('"', '""'))
+            csvFile.write('"')
+        csvFile.write(",")
+    if 'DisplayName' in predictor:
+        csvFile.write('"')
+        csvFile.write(unicode(predictor["DisplayName"]).replace('"', '""'))
+        csvFile.write('"')
+    csvFile.write(",")
+    if 'Category' in predictor:
+        csvFile.write('"')
+        csvFile.write(unicode(predictor["Category"]).replace('"', '""'))
+        csvFile.write('"')
+    csvFile.write(",")
+    if 'FundamentalType' in predictor:
+        csvFile.write('"')
+        csvFile.write(unicode(predictor["FundamentalType"]).replace('"', '""'))
+        csvFile.write('"')
+    csvFile.write(",")
+    if 'UncertaintyCoefficient' in predictor:
+        csvFile.write('"' + unicode(predictor["UncertaintyCoefficient"]) + '"')
+    csvFile.write(",")
+    length = 0
+    if predictorElement["Values"] is not None:
+        length = len(predictorElement["Values"])
+    if (length == 0): #This implies that value is of type bucket and not categorical
+        if predictorElement["UpperExclusive"] is not None:
+            csvFile.write("< ")
+            csvFile.write(unicode(predictorElement["UpperExclusive"]))
+        else:
+            csvFile.write(">= ")
+            csvFile.write(unicode(predictorElement["LowerInclusive"]))
+        csvFile.write(",")
+    elif (predictorElement["Values"])[length - 1] is None:
+        csvFile.write("Not Available,")
+    else:
+        csvFile.write('"[')
+        for val in predictorElement["Values"]:
+            if val is not None:
+                csvFile.write('""')
+                csvFile.write(unicode(val).replace('"', '""'))
+                csvFile.write('""')
+                if val != (predictorElement["Values"])[length - 1]:
+                    csvFile.write(';')
+        
+        csvFile.write(']",')
+    if 'Lift' in predictorElement:
+        csvFile.write(unicode(averageProb * predictorElement["Lift"]))
+    csvFile.write(",")
+    if 'Lift' in predictorElement:
+        csvFile.write(unicode(predictorElement["Lift"]))
+    csvFile.write(",")
+    if predictor['Name'] in dictArray.keys():
+        if dictArray[predictor['Name']] is None:
+            csvFile.write("notFound")
+        else:
+            csvFile.write('"' + str(dictArray[predictor['Name']]) + '"') #write total #leads to csvFile
+    csvFile.write(",")
+    if 'Count' in predictorElement:
+        if predictorElement["Count"] is None:
+            csvFile.write("null")
+        else:
+            csvFile.write(unicode(predictorElement["Count"]))
+            csvFile.write(",")
+            csvFile.write(unicode(predictorElement["Count"] / float(dictArray[predictor['Name']])))
+    csvFile.write(",")
+    if debugFlag == "-debug":
+        if 'DisplayName' in predictor:
+            csvFile.write('"')
+            csvFile.write(unicode(predictor["ApprovedUsage"]).replace('"', '""'))
+            csvFile.write('"')
+    csvFile.write("\n")
 
-                if predictor['Name'] in dictArray.keys():
-                    if dictArray[predictor['Name']] is None:
-                        csvFile.write("notFound")
-                    else:                     
-                    #write total #leads to csvFile
-                        csvFile.write('"' + str(dictArray[predictor['Name']]) + '"')            
-                csvFile.write(",")    
-             
-                if 'Count' in predictorElement:
-                    if predictorElement["Count"] is None:
-                        csvFile.write("null")
-                    else:
-                        csvFile.write(unicode(predictorElement["Count"]))
-                        csvFile.write(",")     
-                        csvFile.write(unicode(predictorElement["Count"]/float(dictArray[predictor['Name']])))                   
-                csvFile.write(",")
-                
-                if debugFlag == "-debug":
-                    if 'DisplayName' in predictor: 
-                        csvFile.write('"')                    
-                        csvFile.write(unicode(predictor["ApprovedUsage"]).replace('"', '""'))
-                        csvFile.write('"')                                                
-                csvFile.write("\n")
     
     #print "----------------------------------------------------------------------------"
     #print "successfully extracted predictors information to " + CSVFilePath
