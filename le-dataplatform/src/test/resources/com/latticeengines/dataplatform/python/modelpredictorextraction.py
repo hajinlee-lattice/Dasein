@@ -101,6 +101,8 @@ def isMergeWithOther(predictor, element, dictArray):
         return False
     if element["Values"][0] == "Other":
         return True
+    if ("LowerInclusive" in element or "UpperExclusive" in element):
+        return False
     if "Count" in element:
         if element["Count"] is None:
             return True
