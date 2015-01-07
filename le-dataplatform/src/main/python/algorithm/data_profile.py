@@ -299,7 +299,7 @@ def retrieveColumnBucketMetadata(columnsMetadata):
 def getPopulatedRowCount(columnData, continuous):
     if continuous:
         return columnData.count()
-    return sum(map(lambda x: 1 if x is not None else 0, columnData))
+    return sum(map(lambda x: 1 if not isnull(x) else 0, columnData))
 
 def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, bucketDispatcher, dataWriter, index, bucketingParams = None):
     '''
