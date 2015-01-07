@@ -24,6 +24,7 @@ import com.latticeengines.eai.yarn.runtime.EaiContainerProperty;
 @Component("eaiClientCustomization")
 public class EaiClientCustomization extends DefaultYarnClientCustomization {
 
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(EaiClientCustomization.class);
 
     @Autowired

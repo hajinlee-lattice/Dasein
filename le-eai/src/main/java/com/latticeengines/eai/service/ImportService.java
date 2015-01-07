@@ -16,6 +16,7 @@ import com.latticeengines.eai.routes.ImportProperty;
 
 public abstract class ImportService {
     
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ImportService.class);
 
     private static Map<SourceType, ImportService> services = new HashMap<>();
