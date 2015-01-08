@@ -9,18 +9,18 @@
 
     <properties>
         <component-name>skald</component-name>
-        <le.common.version>1.0.21-SNAPSHOT</le.common.version>
-        <le.domain.version>1.0.21-SNAPSHOT</le.domain.version>
+        <le.common.version>1.0.22-SNAPSHOT</le.common.version>
+        <le.domain.version>1.0.22-SNAPSHOT</le.domain.version>
         <guava.version>18.0</guava.version>
         <jpmml.version>2.0.0</jpmml.version>
-        <le.camille.version>1.0.21-SNAPSHOT</le.camille.version>
+        <le.camille.version>1.0.22-SNAPSHOT</le.camille.version>
         <jackson.version>2.4.1</jackson.version>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.21-SNAPSHOT</version>
+        <version>1.0.22-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
     

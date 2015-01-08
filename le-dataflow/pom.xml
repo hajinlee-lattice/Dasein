@@ -13,8 +13,8 @@
         <spring.data.version>2.0.0.RELEASE-hdp21</spring.data.version>
         <avro.version>1.7.7</avro.version>
         <cascading.version>2.6.0</cascading.version>
-        <le.common.version>1.0.21-SNAPSHOT</le.common.version>
-        <le.domain.version>1.0.21-SNAPSHOT</le.domain.version>
+        <le.common.version>1.0.22-SNAPSHOT</le.common.version>
+        <le.domain.version>1.0.22-SNAPSHOT</le.domain.version>
     </properties>
 
     <repositories>
@@ -27,7 +27,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.21-SNAPSHOT</version>
+        <version>1.0.22-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
