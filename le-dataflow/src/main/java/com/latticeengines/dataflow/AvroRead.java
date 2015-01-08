@@ -46,7 +46,7 @@ import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
 
 public class AvroRead {
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({ "deprecation", "rawtypes", "unused" })
     public static void main(String[] args) throws Exception {
         String lead = "file://"
                 + ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
@@ -160,7 +160,7 @@ public class AvroRead {
 
         each = new Each(c4, new Fields("Domain", "MaxRevenue", "TotalEmployees"), new AddMD5Hash(new Fields("PropDataHash")), Fields.ALL);
         
-        each = new Each(each, Fields.GROUP, new JythonFunction("transform", Integer.class, new Fields("Domain"), new Fields("DomainAsInt")), Fields.ALL);
+        each = new Each(each, Fields.GROUP, new JythonFunction("com/latticeengines/domain/exposed/transforms/python/encoder.py", "transform", Integer.class, new Fields("Domain"), new Fields("DomainAsInt")), Fields.ALL);
 /*
         ExpressionFilter filter = new ExpressionFilter(
                 "(Email == null || Email.trim().isEmpty()) && (contact$Email == null || contact$Email.trim().isEmpty())", //

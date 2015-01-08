@@ -457,13 +457,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     }
     
     @Override
-    protected String addJythonFunction(String prior, String functionName, FieldList fieldsToApply, FieldMetadata targetField) {
+    protected String addJythonFunction(String prior, String scriptName, String functionName, FieldList fieldsToApply, FieldMetadata targetField) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
         }
         return addFunction(prior, //
-                new JythonFunction(functionName, //
+                new JythonFunction(scriptName, //
+                        functionName, //
                         targetField.getJavaType(), //
                         convertToFields(fieldsToApply.getFields()), //
                         convertToFields(targetField.getFieldName())), //

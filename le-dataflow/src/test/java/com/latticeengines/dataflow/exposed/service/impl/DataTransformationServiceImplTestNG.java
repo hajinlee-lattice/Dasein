@@ -17,6 +17,7 @@ public class DataTransformationServiceImplTestNG extends DataFlowFunctionalTestN
     
     private String lead;
     private String opportunity;
+    @SuppressWarnings("unused")
     private String contact;
     
     @BeforeClass(groups = "functional")

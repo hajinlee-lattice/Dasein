@@ -48,6 +48,7 @@ public class SampleDataFlowBuilder extends CascadingDataFlowBuilder {
         // SELECT Domain, MAX(AnnualRevenue) MaxRevenue, SUM(NumberOfEmployees) TotalEmployees, HashCode(Domain) DomainHashCode 
         // FROM T GROUP BY Domain
         String domainConverted = addJythonFunction(lastAggregatedOperatorName, //
+                "com/latticeengines/domain/exposed/transforms/python/encoder.py", //
                 "transform", //
                 new FieldList("Domain"), //
                 new FieldMetadata("DomainHashCode", Integer.class));

@@ -1,11 +1,8 @@
 package com.latticeengines.dataflow.runtime.cascading;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -18,7 +15,6 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
 import com.latticeengines.common.exposed.jython.JythonEvaluator;
-import com.latticeengines.common.exposed.util.JarUtils;
 
 @SuppressWarnings("rawtypes")
 public class JythonFunction extends BaseOperation implements Function {
@@ -26,34 +22,14 @@ public class JythonFunction extends BaseOperation implements Function {
     private static final long serialVersionUID = 7015322136073224137L;
     private static JythonEvaluator evaluator;
 
-    static {
-        if (evaluator == null) {
-            
-            String[] paths = new String[] {};
-            try {
-                paths = JarUtils.getResourceListing(JythonFunction.class, "pythonlib");
-            } catch (URISyntaxException | IOException e) {
-                log.error(ExceptionUtils.getFullStackTrace(e));
-            }
-            List<String> pyPaths = new ArrayList<>();
-            for (String path : paths) {
-                if (path.endsWith(".py")) {
-                    pyPaths.add(path);
-                }
-            }
-            paths = new String[pyPaths.size()];
-            pyPaths.toArray(paths);
-            evaluator = JythonEvaluator.fromResource(paths);
-        }
-
-    }
     private String functionName;
     private Class<?> returnType;
     private Fields fieldsToApply;
     private List<Integer> paramList;
 
-    public JythonFunction(String functionName, Class<?> returnType, Fields fieldsToApply, Fields fieldsDeclaration) {
+    public JythonFunction(String scriptName, String functionName, Class<?> returnType, Fields fieldsToApply, Fields fieldsDeclaration) {
         super(0, fieldsDeclaration);
+        evaluator = JythonEvaluator.fromResource(scriptName);
         this.functionName = functionName;
         this.fieldsToApply = fieldsToApply;
         this.returnType = returnType;
