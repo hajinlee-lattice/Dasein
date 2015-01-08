@@ -372,8 +372,9 @@ public class ModelingServiceImpl implements ModelingService {
         m.setTable(dataProfileConfig.getTable());
         m.setMetadataTable(dataProfileConfig.getMetadataTable());
         setupModelProperties(m);
+        String sampleDataPath = m.getDataHdfsPath() + "/samples";
         try {
-            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, m.getDataHdfsPath() + "/samples",
+            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, sampleDataPath,
                     new HdfsFilenameFilter() {
 
                         @Override
@@ -386,7 +387,7 @@ public class ModelingServiceImpl implements ModelingService {
                     });
 
             if (paths.size() == 0) {
-                throw new LedpException(LedpCode.LEDP_00002);
+                throw new LedpException(LedpCode.LEDP_15007, new String[] { sampleDataPath });
             }
             String schemaPath = paths.get(0);
             List<String> featureList = new ArrayList<String>();
