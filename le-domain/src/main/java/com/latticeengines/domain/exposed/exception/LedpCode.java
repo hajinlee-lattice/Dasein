@@ -42,6 +42,7 @@ public enum LedpCode {
     LEDP_15004("Could not find diagnostics for model input data."), //
     LEDP_15005("Input data has too few rows: {0}."), //
     LEDP_15006("Failed to validate the input data."), //
+    LEDP_15007("No sample avro files found in path {0}."), //
     // DLOrchestration service: 16000-16999
     LEDP_16000("Missing model command parameter(s) {0}."), //
     LEDP_16001("Problem deleting path {0} before load."), //
