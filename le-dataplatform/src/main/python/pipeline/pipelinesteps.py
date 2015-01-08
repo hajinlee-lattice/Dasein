@@ -17,8 +17,15 @@ def dictfreq(doc):
 
 class EnumeratedColumnTransformStep:
     _enumMappings = {}
+    postScoreStep_ = False
     def __init__(self, enumMappings):
         self._enumMappings = enumMappings
+        
+    def isPostScoreStep(self):
+        return self.postScoreStep_
+    
+    def setPostScoreStep(self, postScoreStep):
+        self.postScoreStep_ = postScoreStep
         
     def transform(self, dataFrame):
         outputFrame = dataFrame
@@ -36,8 +43,16 @@ class EnumeratedColumnTransformStep:
 
 class EnumeratedColumnTransformStep2:
     _enumMappings = {}
+    postScoreStep_ = False
+    
     def __init__(self, enumMappings):
         self._enumMappings = enumMappings
+        
+    def isPostScoreStep(self):
+        return self.postScoreStep_
+    
+    def setPostScoreStep(self, postScoreStep):
+        self.postScoreStep_ = postScoreStep
         
     def transform(self, dataFrame):
         outputFrame = dataFrame
@@ -57,18 +72,33 @@ class EnumeratedColumnTransformStep2:
     
 class ColumnReductionStep:
     outputColumns_ = []
+    postScoreStep_ = False
+    
     def __init__(self, outputColumns=[]):
         self.outputColumns_ = outputColumns
     
+    def isPostScoreStep(self):
+        return self.postScoreStep_
+    
+    def setPostScoreStep(self, postScoreStep):
+        self.postScoreStep_ = postScoreStep
+        
     def transform(self, dataFrame):
         outputFrame = dataFrame[self.outputColumns_]
         return outputFrame
 
 class ColumnTypeConversionStep:
     columnsToConvert_ = []
+    postScoreStep_ = False
     
     def __init__(self, columnsToConvert=[]):
         self.columnsToConvert_ = columnsToConvert
+
+    def isPostScoreStep(self):
+        return self.postScoreStep_
+    
+    def setPostScoreStep(self, postScoreStep):
+        self.postScoreStep_ = postScoreStep
         
     def transform(self, dataFrame):
         if len(self.columnsToConvert_) > 0:
@@ -81,9 +111,17 @@ class ColumnTypeConversionStep:
     
 class ImputationStep:
     _enumMappings = dict()
+    postScoreStep_ = False
+    
     def __init__(self, enumMappings):
         self._enumMappings = enumMappings
 
+    def isPostScoreStep(self):
+        return self.postScoreStep_
+    
+    def setPostScoreStep(self, postScoreStep):
+        self.postScoreStep_ = postScoreStep
+        
     def transform(self, dataFrame):
         outputFrame = dataFrame
         if len(self._enumMappings) > 0:
@@ -94,12 +132,19 @@ class ImputationStep:
         
 class BucketingStep:
     bucketRanges_ = []
+    postScoreStep_ = False
     
     def __init__(self, scoreColumn, bucketColumn, bucketRanges, defaultBucket):
         self.bucketRanges_ = bucketRanges
         self.scoreColumn_ = scoreColumn
         self.bucketColumn_ = bucketColumn
         self.defaultBucket_ = defaultBucket
+        
+    def isPostScoreStep(self):
+        return self.postScoreStep_
+    
+    def setPostScoreStep(self, postScoreStep):
+        self.postScoreStep_ = postScoreStep
         
     def transform(self, dataFrame):
         outputFrame = dataFrame
@@ -120,6 +165,7 @@ class EVModelStep:
     modelInputColumns_ = []
     outputColumns_ = []
     scoreColumnName_ = ''
+    postScoreStep_ = False
     
     def __init__(self, classificationModel, regressionModel, modelInputColumns, outputColumns=[], scoreColumnName="Score"):
         self.classificationModel_ = classificationModel
@@ -127,6 +173,12 @@ class EVModelStep:
         self.modelInputColumns_ = modelInputColumns
         self.outputColumns_ = outputColumns
         self.scoreColumnName_ = scoreColumnName
+
+    def isPostScoreStep(self):
+        return self.postScoreStep_
+    
+    def setPostScoreStep(self, postScoreStep):
+        self.postScoreStep_ = postScoreStep
         
     def transform(self, dataFrame):
         dataFrame = dataFrame.convert_objects()

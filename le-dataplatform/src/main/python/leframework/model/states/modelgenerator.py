@@ -9,6 +9,7 @@ from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
 from pipelinefwk import ModelStep
+from pipelinefwk import Pipeline
 
 class ModelGenerator(State, JsonGenBase):
     
@@ -30,10 +31,9 @@ class ModelGenerator(State, JsonGenBase):
         with open("leframework.tar.gz/leframework/scoringengine.py", "r") as pythonFile:
             model["Script"] = "".join(pythonFile.readlines())
 
-        mediator.pipeline.getPipeline().append(ModelStep(self.mediator.clf, self.mediator.schema["features"]))
-
         filename = mediator.modelLocalDir + '/STPipelineBinary.p'
-        pipeline = mediator.pipeline
+        pipeline = self.__getPipeline(mediator)
+        mediator.pipeline = pipeline
         pickle.dump(pipeline, open(filename, "w"), pickle.HIGHEST_PROTOCOL)
         filename = self.__compressFile(filename)
         pipelineFwkPkl = self.__getSerializedFile(self.__compressFile("pipelinefwk.py"))
@@ -53,6 +53,27 @@ class ModelGenerator(State, JsonGenBase):
             model["CompressedSupportFiles"].append({ "Value": filePkl, "Key": filename })
             
         self.model = model
+    
+    def __getPipeline(self, mediator):
+        pipeline = mediator.pipeline
+        pipelineSteps = pipeline.getPipeline()
+        steps = []
+        modelStepAdded = False
+        for step in pipelineSteps:
+            if step.isPostScoreStep() and not modelStepAdded:
+                steps.append(ModelStep(mediator.clf, mediator.schema["features"]))
+                modelStepAdded = True
+                
+                for propName in step.getRequiredProperties():
+                    if propName in mediator.__dict__:
+                        step.setProperty(propName, mediator.__dict__[propName])
+                    else:
+                        self.logger.warn("Could not get mediator property %s for %s." % (propName, str(step)))
+            steps.append(step)
+
+        if not modelStepAdded:
+            steps.append(ModelStep(mediator.clf, mediator.schema["features"]))
+        return Pipeline(steps)
     
     def __compressFile(self, filename):
         with open(filename, "rb") as uncompressedFile:

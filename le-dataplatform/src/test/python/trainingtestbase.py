@@ -1,12 +1,16 @@
 import base64
 import csv
 import gzip
+import numpy as np
 import os
 from random import shuffle
 import shutil
 import sys
 import uuid
+
 from leframework import scoringengine as se
+from leframework.argumentparser import ArgumentParser
+
 from testbase import TestBase
 
 class TrainingTestBase(TestBase):
@@ -27,8 +31,10 @@ class TrainingTestBase(TestBase):
             shutil.rmtree(fwkdir)
         if os.path.exists(pipelinefwkdir):
             shutil.rmtree(pipelinefwkdir)
+
         os.makedirs(fwkdir + "/leframework")
         os.makedirs(pipelinefwkdir)
+
         enginedir = "/leframework/scoringengine.py"
 
         os.symlink("../../main/python/pipelinefwk.py", "./pipelinefwk.py")
@@ -44,12 +50,12 @@ class TrainingTestBase(TestBase):
             fPath = os.path.join(scriptDir, f)
             if os.path.isfile(fPath) and not os.path.exists(f):
                 os.symlink(fPath, f)
+
         results = "./results"
         if os.path.exists(results):
             shutil.rmtree(results)
     
     def tearDown(self):
-        super(TestBase, self).tearDown()
         if os.path.exists(self.fwkdir):
             shutil.rmtree(self.fwkdir)
         if os.path.exists(self.pipelinefwkdir):
@@ -63,8 +69,10 @@ class TrainingTestBase(TestBase):
     def getLineToScore(self, inputColumns, typeDict, value):
         columnWithValue = zip(inputColumns, value)
         line1 = self.getLine(columnWithValue, typeDict)
+
         shuffle(columnWithValue)
         line2 = self.getLine(columnWithValue, typeDict)
+
         return (line1, line2)
 
     def getLine(self, columnsWithValue, typeDict):
@@ -82,13 +90,49 @@ class TrainingTestBase(TestBase):
         line += "]"
         line = '{"key":"%s","value":%s}' % (str(uuid.uuid4()), line)
         return line
-
+    
     def createCSV(self, inputColumns, values):
         with open('./results/test.csv', 'wb') as csvfile:
             csvWriter = csv.writer(csvfile)
             csvWriter.writerow(['id'] + inputColumns)
             for i in range(len(values)):
                 csvWriter.writerow([i + 1] + values[i])
+                
+    def stripPath(self, fileName):
+        return fileName[fileName.rfind('/') + 1:len(fileName)]
+                
+    
+    def createCSVFromModel(self, modelFile, scoringFile):
+        parser = ArgumentParser(modelFile, None)
+        schema = parser.getSchema()
+        (test, _) = parser.createList(self.stripPath(schema["test_data"]))
+        test.reset_index()
+        fields = { k['name']:k['type'][0] for k in parser.fields }
+        
+        with open(scoringFile, "w") as fp:
+            for row in test.iterrows():
+                line = "["
+                first = True
+                for field in fields.keys():
+                    value = None
+                    if field in row[1]:
+                        value = row[1][field]
+                    else:
+                        continue
+                    if first:
+                        first = False
+                    else:
+                        line += ","
+                    dataType = 'String' if fields[field] == 'string' or fields[field] == 'bytes' else 'Float'
+                    if row[1][field] is None or (dataType == 'Float' and np.isnan(row[1][field])):
+                        line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"%s|\"}}" % (field, dataType)
+                    elif dataType == 'String':
+                        line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"String|'%s'\"}}" % (field, value)
+                    else:
+                        line += "{\"Key\":\"%s\",\"Value\":{\"SerializedValueAndType\":\"Float|%s\"}}" % (field, str(value))
+                line += "]"
+                line = '{"key":"%s","value":%s}' % (str(uuid.uuid4()), line)
+                fp.write(line + "\n")
 
     def getPredictScore(self, pipeline, typeDict, values):
         scores = []
@@ -105,11 +149,10 @@ class TrainingTestBase(TestBase):
         gzipByteArray = bytearray(base64.decodestring(data))
         with open(filename, "wb") as output:
             output.write(gzipByteArray)
-        output.close()
+
         with gzip.GzipFile(filename, "rb") as compressed:
             data = compressed.read()
             with open(filename, "wb") as decompressed:
                 decompressed.write(data)
-        compressed.close()
-        decompressed.close()
+
         return decompressed.name

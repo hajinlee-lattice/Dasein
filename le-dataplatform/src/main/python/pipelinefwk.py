@@ -8,11 +8,12 @@ class Pipeline:
     def getPipeline(self):
         return self.pipelineSteps_
     
-    def predict(self, dataFrame):
+    def predict(self, dataFrame, forModeling=True):
         transformed = dataFrame
 
         for step in self.pipelineSteps_:
-            transformed = step.transform(transformed)
+            if not forModeling or not step.isPostScoreStep():
+                transformed = step.transform(transformed)
             
         return transformed
 
@@ -28,10 +29,9 @@ class ModelStep:
     def getModelInputColumns(self):
         return self.modelInputColumns_
     
-    def __init__(self, model, modelInputColumns, outputColumns=[], scoreColumnName="Score"):
+    def __init__(self, model, modelInputColumns, scoreColumnName="Score"):
         self.model_ = model
         self.modelInputColumns_ = modelInputColumns
-        self.outputColumns_ = outputColumns
         self.scoreColumnName_ = scoreColumnName
         
     def transform(self, dataFrame):
@@ -48,7 +48,7 @@ class ModelStep:
         scoreColumn = scoreColumn[:, index]
         outputFrame = pd.DataFrame(scoreColumn, columns=[self.scoreColumnName_])
         
-        for columnName in self.outputColumns_:
+        for columnName in self.modelInputColumns_:
             outputFrame[columnName] = pd.Series(dataFrame[columnName].values, index=outputFrame.index)
             
         return outputFrame

@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from unittest import TestCase
 
 logging.basicConfig(level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -37,3 +38,10 @@ def removeLinks():
     for f in os.listdir(curDir):
         if os.path.islink(f):
             os.unlink(f)
+
+def removeFiles(curDir):
+    # Removes all symbolic links in current directory
+    for f in os.listdir(curDir):
+        if re.search('.*.py.gz.*', f) or re.search('.*.p.gz.*', f):
+            os.remove(os.path.join(curDir, f))
+

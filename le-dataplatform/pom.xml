@@ -139,6 +139,17 @@
                             <goal>single</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>evpipeline</id>
+                        <configuration>
+                            <descriptor>src/assembly/evpipeline.xml</descriptor>
+                            <finalName>evpipeline</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

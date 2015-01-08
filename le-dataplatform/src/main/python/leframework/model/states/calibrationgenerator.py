@@ -16,7 +16,7 @@ class CalibrationGenerator(State, JsonGenBase):
     @overrides(State)
     def execute(self):    
         # reconstruct the array into a list of (prob, target)
-        orderedScore = zip(self.mediator.scored,self.mediator.target)
+        orderedScore = zip(self.mediator.scored, self.mediator.target)
         orderedScore.sort(key=lambda score: (score[0], score[1]), reverse=True) 
             
         # get test size and range width 
@@ -88,7 +88,7 @@ class CalibrationGenerator(State, JsonGenBase):
         widthRange = self.__getWidthRange(indexRange)
         # prepare calibration with specified format
         self.calibration = []
-        self.logger.info("number of calibration ranges generated: "+str(len(probRange))) 
+        self.logger.info("number of calibration ranges generated: " + str(len(probRange))) 
         for i in range(len(calibrationRange)):
             element = OrderedDict()
             element["MaximumScore"] = calibrationRange[i][0]
@@ -101,6 +101,7 @@ class CalibrationGenerator(State, JsonGenBase):
         self.mediator.probRange = probRange
         self.mediator.widthRange = widthRange
         self.mediator.averageProbability = self.averageProbability
+        self.mediator.calibration = self.calibration
         
     @overrides(JsonGenBase)
     def getKey(self):
@@ -142,7 +143,7 @@ class CalibrationGenerator(State, JsonGenBase):
     
         return probRange
     
-    def __getWidthRange(self,indexRange):   
+    def __getWidthRange(self,indexRange):
         widthRange = [] 
         for i in range(len(indexRange)):
             widthRange.append(indexRange[i][1]-indexRange[i][0]+1)
