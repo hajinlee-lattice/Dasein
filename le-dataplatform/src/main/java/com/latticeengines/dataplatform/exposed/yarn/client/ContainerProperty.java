@@ -9,5 +9,6 @@ public enum ContainerProperty {
     METADATA, //
     METADATA_CONTENTS, //
     JOBDIR, //
-    RUNTIME_CONFIG;
+    RUNTIME_CONFIG, //
+    JOB_TYPE;
 }

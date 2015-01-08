@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.YarnClientCustomization;
+import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -46,6 +47,9 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
 
     @Value("${dataplatform.yarn.job.runtime.config}")
     private String runtimeConfig;
+
+    @Value("${dataplatform.customer.basedir}")
+    private String customerBaseDir;
 
     @Override
     public void addCustomizations(CommandYarnClient client, String clientName, Properties appMasterProperties,
@@ -112,6 +116,19 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
             client.setEnvironment(environment);
         }
 
+        //copy the metadata.json file to HDFS data directory
+        String jobType = containerProperties.getProperty(ContainerProperty.JOB_TYPE.name());
+        if (jobType != null) {
+            String hdfsDir = customerBaseDir + "/" + appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()) + "/data/EventMetadata/";
+            String localDir = containerProperties.getProperty(PythonContainerProperty.METADATA.name());
+            String random = "-" + UUID.randomUUID().toString();
+            String metaDataFileName = "metadata-" + jobType + random + ".json";
+            try {
+                HdfsUtils.copyLocalToHdfs(yarnConfiguration, localDir, hdfsDir + metaDataFileName);
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_00000, e, new String[] { hdfsDir });
+            }
+        }
     }
 
     private String createContainerLauncherContextFile(YarnClientCustomization customization,

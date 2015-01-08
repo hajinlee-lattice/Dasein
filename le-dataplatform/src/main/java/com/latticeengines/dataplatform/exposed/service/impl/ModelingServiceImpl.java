@@ -127,7 +127,7 @@ public class ModelingServiceImpl implements ModelingService {
                 continue;
             }
 
-            ModelingJob modelingJob = createJob(model, algorithm);
+            ModelingJob modelingJob = createJob(model, algorithm, "modeling");
             model.addModelingJob(modelingJob);
             // JobService is responsible for persistence during submitJob
             applicationIds.add(modelingJobService.submitJob(modelingJob));
@@ -295,12 +295,12 @@ public class ModelingServiceImpl implements ModelingService {
         return null;
     }
 
-    private ModelingJob createJob(Model model, Algorithm algorithm) {
+    private ModelingJob createJob(Model model, Algorithm algorithm, String jobType) {
         String assignedQueue = LedpQueueAssigner.getNonMRQueueNameForSubmission(algorithm.getPriority());
-        return createJob(model, algorithm, assignedQueue);
+        return createJob(model, algorithm, assignedQueue, jobType);
     }
 
-    private ModelingJob createJob(Model model, Algorithm algorithm, String assignedQueue) {
+    private ModelingJob createJob(Model model, Algorithm algorithm, String assignedQueue, String jobType) {
         ModelingJob modelingJob = new ModelingJob();
         Classifier classifier = createClassifier(model, algorithm);
         Properties appMasterProperties = new Properties();
@@ -309,6 +309,7 @@ public class ModelingServiceImpl implements ModelingService {
         appMasterProperties.put(AppMasterProperty.QUEUE.name(), assignedQueue);
         Properties containerProperties = algorithm.getContainerProps();
         containerProperties.put(ContainerProperty.METADATA.name(), classifier.toString());
+        containerProperties.put(ContainerProperty.JOB_TYPE.name(), jobType);
         // containerProperties.put(PythonContainerProperty.TABLE.name(),
         // model.getTable());
         modelingJob.setClient("pythonClient");
@@ -428,7 +429,7 @@ public class ModelingServiceImpl implements ModelingService {
         modelDefinition.addAlgorithms(Arrays.<Algorithm> asList(new Algorithm[] { dataProfileAlgorithm }));
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         m.setModelDefinition(modelDefinition);
-        ModelingJob modelingJob = createJob(m, dataProfileAlgorithm, assignedQueue);
+        ModelingJob modelingJob = createJob(m, dataProfileAlgorithm, assignedQueue, "profiling");
         m.addModelingJob(modelingJob);
         return modelingJobService.submitJob(modelingJob);
     }
