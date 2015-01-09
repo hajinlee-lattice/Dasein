@@ -107,19 +107,24 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
 
         count = 0
         hasOther = False
+        binarySet = set()
         csvFile = csv.DictReader(open(glob.glob("./results/PLSModel*.csv")[0]))
         for row in csvFile:
-            if row['Attribute Value'] == '["Other"]':
-                hasOther = True
-            else:
-                self.assertTrue(float(row['Frequency/Total Leads']) >= 0.01)
             if row['Attribute Name'] == 'ELQContact_Industry':
+                if row['Attribute Value'] == '["Other"]':
+                    hasOther = True
+                else:
+                    self.assertTrue(float(row['Frequency/Total Leads']) >= 0.01)
                 count += 1
-            else:
-                break
+            if row['Attribute Name'] == 'Open Source Adoption':
+                binarySet.add(row['Attribute Value'])
+                    
         self.assertTrue(count == 9)
         self.assertTrue(hasOther)
         
+        self.assertEqual(len(binarySet), 3)
+        self.assertTrue(binarySet == set(['["Yes"]', '["No"]', 'Not Available']))
+
     @classmethod
     def getSubDir(cls):
         return "PLS132_test_Docusign"

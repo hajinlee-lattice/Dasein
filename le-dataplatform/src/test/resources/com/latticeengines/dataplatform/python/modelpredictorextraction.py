@@ -156,7 +156,8 @@ def writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predi
         for val in predictorElement["Values"]:
             if val is not None:
                 csvFile.write('""')
-                csvFile.write(unicode(val).replace('"', '""'))
+                newVal = mapBinaryValue(predictor, val)
+                csvFile.write(unicode(newVal).replace('"', '""'))
                 csvFile.write('""')
                 if val != (predictorElement["Values"])[length - 1]:
                     csvFile.write(';')
@@ -189,6 +190,22 @@ def writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predi
             csvFile.write('"')
     csvFile.write("\n")
 
+
+def mapBinaryValue(predictor, val):
+    if 'FundamentalType' not in predictor:
+        return val
+    fundamentalType = predictor["FundamentalType"].upper()
+    if fundamentalType != "BOOLEAN":
+        return val
+    upperVal = str(val).upper()
+    if upperVal in ["TRUE", "T", "YES", "Y", "C", "D", "1"]:
+        return "Yes"
+    if upperVal in ["FALSE", "F", "NO", "N", "0"]:
+        return "No"
+    if upperVal in ["", "NA", "N/A", "-1", "NULL", "NOT AVAILABLE"]:
+        return "Not Available"
+    return val
+    
     
     #print "----------------------------------------------------------------------------"
     #print "successfully extracted predictors information to " + CSVFilePath
