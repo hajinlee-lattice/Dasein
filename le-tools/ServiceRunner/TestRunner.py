@@ -43,6 +43,24 @@ class SessionRunner(object):
         for key in sorted(self.activity_log.keys()):
             print "%s || %s" % (key, self.activity_log[key])
 
+    def getFiles(self, location, suffix_list=None):
+        if not os.path.exists(location):
+            return None
+        file_list = []
+        #### Get all files
+        for f in os.listdir(location):
+            if suffix_list is not None:
+                suffix_check = False
+                for s in suffix_list:
+                    if f.endswith(s):
+                        suffix_check = True
+                        break
+                if suffix_check:
+                    file_list.append(os.path.join(location, f))
+            else:
+                file_list.append(os.path.join(location, f))
+        return file_list
+
     def processFile(self, filename, process):
         request_url = self.host + "/%s" % process
         print request_url

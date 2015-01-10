@@ -250,6 +250,69 @@ class PretzelRunner(SessionRunner):
             status = status and self.setTopologyRevison(topology)
             return status
 
+class BardAdminRunner(SessionRunner):
+
+    def __init__(self, bard_path=None, host="http://localhost:5000", logfile=None, exception=False):
+        super(BardAdminRunner, self).__init__(host, logfile)
+        self.exception = exception
+        self.bard_path = ""
+        if bard_path is not None:
+            self.bard_path = bard_path
+
+    def setProperty(self, config_key, config_property, config_value):
+        bard_command = os.path.join(os.path.expanduser(self.bard_path), "BardAdminTool.exe")
+        bard_command = "%s ConfigStore -SetProperty -Key %s -Property %s -Value %s" % (bard_command, config_key,
+                                                                                       config_property, config_value)
+        bard_command = bard_command.replace("/", "\\")
+        print(bard_command)
+        return bard_command
+
+    def getDocument(self, config_key):
+        bard_command = os.path.join(os.path.expanduser(self.bard_path), "BardAdminTool.exe")
+        bard_command = "%s ConfigStore -GetDocument -Key %s" % (bard_command, config_key)
+        bard_command = bard_command.replace("/", "\\")
+        print(bard_command)
+        return bard_command
+
+    def listModels(self):
+        bard_command = os.path.join(os.path.expanduser(self.bard_path), "BardAdminTool.exe")
+        bard_command = "%s Model -List" % bard_command
+        bard_command = bard_command.replace("/", "\\")
+        print(bard_command)
+        return bard_command
+
+    def downloadModels(self):
+        bard_command = os.path.join(os.path.expanduser(self.bard_path), "BardAdminTool.exe")
+        bard_command = "%s Model -Download" % bard_command
+        bard_command = bard_command.replace("/", "\\")
+        print(bard_command)
+        return bard_command
+
+    def activateModel(self, model_id):
+        bard_command = os.path.join(os.path.expanduser(self.bard_path), "BardAdminTool.exe")
+        bard_command = "%s Model -Activate -ID %s" % (bard_command, model_id)
+        bard_command = bard_command.replace("/", "\\")
+        print(bard_command)
+        return bard_command
+
+    def runSetProperty(self, config_key, config_property, config_value):
+        cmd = self.setProperty(config_key, config_property, config_value)
+        return self.runCommand(cmd)
+
+    def runGetDocument(self, config_key):
+        cmd = self.getDocument(config_key)
+        return self.runCommand(cmd)
+
+    def runActivateModel(self, model_id):
+        cmd = self.activateModel(model_id)
+        return self.runCommand(cmd)
+
+    def runListModels(self):
+        return self.runCommand(self.listModels())
+
+    def runDownloadModels(self):
+        return self.runCommand(self.listModels())
+
 
 def main():
     #basePretzelTest()
