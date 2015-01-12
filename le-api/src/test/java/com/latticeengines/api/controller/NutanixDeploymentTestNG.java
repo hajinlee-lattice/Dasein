@@ -2,6 +2,7 @@ package com.latticeengines.api.controller;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
 
@@ -78,10 +79,10 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
         return modelDef;
     }
 
-    private Pair<String, List<String>> getTargetAndFeatures() {
+    private AbstractMap.SimpleEntry<String, List<String>> getTargetAndFeatures() {
         StringList features = restTemplate.postForObject("http://" + restEndpointHost + "/rest/features", model,
                 StringList.class, new Object[] {});
-        return new Pair<String, List<String>>("P1_Event", features.getElements());
+        return new AbstractMap.SimpleEntry<String, List<String>>("P1_Event", features.getElements());
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -152,7 +153,7 @@ public class NutanixDeploymentTestNG extends ApiFunctionalTestNGBase {
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "profile" })
     public void submit() throws Exception {
-        Pair<String, List<String>> targetAndFeatures = getTargetAndFeatures();
+        AbstractMap.SimpleEntry<String, List<String>> targetAndFeatures = getTargetAndFeatures();
         this.model.setFeaturesList(targetAndFeatures.getValue());
         this.model.setTargetsList(Arrays.<String> asList(new String[] { targetAndFeatures.getKey() }));
         AppSubmission submission = restTemplate.postForObject("http://" + restEndpointHost + "/rest/submit",
