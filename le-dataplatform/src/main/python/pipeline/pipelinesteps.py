@@ -4,6 +4,7 @@ import logging
 import encoder
 import numpy as np
 import pandas as pd
+from pipelinefwk import PipelineStep
 
 
 logging.basicConfig(level = logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -15,17 +16,11 @@ def dictfreq(doc):
     freq[doc] += 1
     return freq
 
-class EnumeratedColumnTransformStep:
+class EnumeratedColumnTransformStep(PipelineStep):
     _enumMappings = {}
-    postScoreStep_ = False
+
     def __init__(self, enumMappings):
         self._enumMappings = enumMappings
-        
-    def isPostScoreStep(self):
-        return self.postScoreStep_
-    
-    def setPostScoreStep(self, postScoreStep):
-        self.postScoreStep_ = postScoreStep
         
     def transform(self, dataFrame):
         outputFrame = dataFrame
@@ -41,36 +36,7 @@ class EnumeratedColumnTransformStep:
      
         return outputFrame
 
-class EnumeratedColumnTransformStep2:
-    _enumMappings = {}
-    postScoreStep_ = False
-    
-    def __init__(self, enumMappings):
-        self._enumMappings = enumMappings
-        
-    def isPostScoreStep(self):
-        return self.postScoreStep_
-    
-    def setPostScoreStep(self, postScoreStep):
-        self.postScoreStep_ = postScoreStep
-        
-    def transform(self, dataFrame):
-        outputFrame = dataFrame
-        if self._enumMappings['method'] == 1:
-            for column, encoder in self._enumMappings['list'].iteritems():
-                outputFrame[column] = outputFrame[column].fillna('missing')
-                df = pd.DataFrame(encoder.transform(dictfreq(d) for d in outputFrame[column]).todense(), columns=(column + '_' + p for p in encoder.feature_names_))
-                outputFrame = outputFrame.join(df)
-                outputFrame = outputFrame.drop(column, axis=1)
-        elif self._enumMappings['method'] == 2:
-            for column, encoder in self._enumMappings['list'].iteritems():
-                outputFrame[column] = outputFrame[column].map(lambda s: 'NULL' if s not in encoder.classes_.tolist() else s)
-                encoder.classes_ = np.append(encoder.classes_, 'NULL')
-                outputFrame[column] = encoder.transform(outputFrame[column])
-         
-        return outputFrame
-    
-class ColumnReductionStep:
+class ColumnReductionStep(PipelineStep):
     outputColumns_ = []
     postScoreStep_ = False
     
@@ -87,19 +53,12 @@ class ColumnReductionStep:
         outputFrame = dataFrame[self.outputColumns_]
         return outputFrame
 
-class ColumnTypeConversionStep:
+class ColumnTypeConversionStep(PipelineStep):
     columnsToConvert_ = []
-    postScoreStep_ = False
     
     def __init__(self, columnsToConvert=[]):
         self.columnsToConvert_ = columnsToConvert
 
-    def isPostScoreStep(self):
-        return self.postScoreStep_
-    
-    def setPostScoreStep(self, postScoreStep):
-        self.postScoreStep_ = postScoreStep
-        
     def transform(self, dataFrame):
         if len(self.columnsToConvert_) > 0:
             for column in self.columnsToConvert_:
@@ -109,19 +68,12 @@ class ColumnTypeConversionStep:
                     logger.info("Column %s cannot be transformed since it is not in the data frame." % column)
         return dataFrame
     
-class ImputationStep:
+class ImputationStep(PipelineStep):
     _enumMappings = dict()
-    postScoreStep_ = False
     
     def __init__(self, enumMappings):
         self._enumMappings = enumMappings
 
-    def isPostScoreStep(self):
-        return self.postScoreStep_
-    
-    def setPostScoreStep(self, postScoreStep):
-        self.postScoreStep_ = postScoreStep
-        
     def transform(self, dataFrame):
         outputFrame = dataFrame
         if len(self._enumMappings) > 0:
@@ -130,21 +82,14 @@ class ImputationStep:
                     outputFrame[column] = outputFrame[column].fillna(value)
         return outputFrame
         
-class BucketingStep:
+class BucketingStep(PipelineStep):
     bucketRanges_ = []
-    postScoreStep_ = False
     
     def __init__(self, scoreColumn, bucketColumn, bucketRanges, defaultBucket):
         self.bucketRanges_ = bucketRanges
         self.scoreColumn_ = scoreColumn
         self.bucketColumn_ = bucketColumn
         self.defaultBucket_ = defaultBucket
-        
-    def isPostScoreStep(self):
-        return self.postScoreStep_
-    
-    def setPostScoreStep(self, postScoreStep):
-        self.postScoreStep_ = postScoreStep
         
     def transform(self, dataFrame):
         outputFrame = dataFrame
@@ -159,13 +104,12 @@ class BucketingStep:
                 return bucketName
         return self.defaultBucket_
             
-class EVModelStep:
+class EVModelStep(PipelineStep):
     classificationModel_ = None
     regressionModel_ = None
     modelInputColumns_ = []
     outputColumns_ = []
     scoreColumnName_ = ''
-    postScoreStep_ = False
     
     def __init__(self, classificationModel, regressionModel, modelInputColumns, outputColumns=[], scoreColumnName="Score"):
         self.classificationModel_ = classificationModel
@@ -174,12 +118,6 @@ class EVModelStep:
         self.outputColumns_ = outputColumns
         self.scoreColumnName_ = scoreColumnName
 
-    def isPostScoreStep(self):
-        return self.postScoreStep_
-    
-    def setPostScoreStep(self, postScoreStep):
-        self.postScoreStep_ = postScoreStep
-        
     def transform(self, dataFrame):
         dataFrame = dataFrame.convert_objects()
         dataFrame.fillna(0, inplace=True)

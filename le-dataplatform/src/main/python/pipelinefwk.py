@@ -17,7 +17,28 @@ class Pipeline:
             
         return transformed
 
-class ModelStep:
+class PipelineStep:
+    postScoreStep_ = False
+    props_ = {}
+
+    def __init__(self, props):
+        self.props_ = props
+    
+    def isPostScoreStep(self):
+        return self.postScoreStep_
+    
+    def setPostScoreStep(self, postScoreStep):
+        self.postScoreStep_ = postScoreStep
+        
+    def transform(self, dataFrame): pass
+
+    def setProperty(self, propertyName, propertyValue):
+        self.props_[propertyName] = propertyValue
+        
+    def getProperty(self, propertyName):
+        return self.props_[propertyName]
+
+class ModelStep(PipelineStep):
     model_ = None
     modelInputColumns_ = []
     outputColumns_ = []

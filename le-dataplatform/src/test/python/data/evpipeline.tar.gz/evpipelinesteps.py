@@ -2,6 +2,7 @@ import encoder
 import logging
 import numpy as np
 import pandas as pd
+from pipelinefwk import PipelineStep
 import statsmodels.tsa.ar_model as am
 
 
@@ -32,17 +33,11 @@ def get_predicted_revenue(row, colList):
         return rev
     return rev
 
-class EnumeratedColumnTransformStep:
+class EnumeratedColumnTransformStep(PipelineStep):
     _enumMappings = {}
-    postScoreStep_ = False
+
     def __init__(self, enumMappings):
         self._enumMappings = enumMappings
-        
-    def isPostScoreStep(self):
-        return self.postScoreStep_
-    
-    def setPostScoreStep(self, postScoreStep):
-        self.postScoreStep_ = postScoreStep
         
     def transform(self, dataFrame):
         outputFrame = dataFrame
@@ -58,19 +53,12 @@ class EnumeratedColumnTransformStep:
      
         return outputFrame
 
-class ColumnTypeConversionStep:
+class ColumnTypeConversionStep(PipelineStep):
     columnsToConvert_ = []
-    postScoreStep_ = False
     
     def __init__(self, columnsToConvert=[]):
         self.columnsToConvert_ = columnsToConvert
 
-    def isPostScoreStep(self):
-        return self.postScoreStep_
-    
-    def setPostScoreStep(self, postScoreStep):
-        self.postScoreStep_ = postScoreStep
-        
     def transform(self, dataFrame):
         if len(self.columnsToConvert_) > 0:
             for column in self.columnsToConvert_:
@@ -80,19 +68,12 @@ class ColumnTypeConversionStep:
                     logger.warn("Column %s cannot be transformed since it is not in the data frame." % column)
         return dataFrame
     
-class ImputationStep:
+class ImputationStep(PipelineStep):
     _enumMappings = dict()
-    postScoreStep_ = False
     
     def __init__(self, enumMappings):
         self._enumMappings = enumMappings
 
-    def isPostScoreStep(self):
-        return self.postScoreStep_
-    
-    def setPostScoreStep(self, postScoreStep):
-        self.postScoreStep_ = postScoreStep
-        
     def transform(self, dataFrame):
         outputFrame = dataFrame
         if len(self._enumMappings) > 0:
@@ -101,28 +82,14 @@ class ImputationStep:
                     outputFrame[column] = outputFrame[column].fillna(value)
         return outputFrame
         
-class EVModelStep:
-    props_ = {}
-    postScoreStep_ = False
+class EVModelStep(PipelineStep):
     
     def __init__(self, props):
-        self.props_ = props
-        self.postScoreStep_ = True
+        PipelineStep.__init__(self, props)
+        self.setPostScoreStep(True)
         
     def getRequiredProperties(self):
-        return ["provenanceProperties", "xyz"]
-        
-    def setProperty(self, propertyName, propertyValue):
-        self.props_[propertyName] = propertyValue
-        
-    def getProperty(self, propertyName):
-        return self.props_[propertyName]
-
-    def isPostScoreStep(self):
-        return self.postScoreStep_
-    
-    def setPostScoreStep(self, postScoreStep):
-        self.postScoreStep_ = postScoreStep
+        return ["provenanceProperties"]
         
     def transform(self, dataFrame):
         provenanceProps = self.props_["provenanceProperties"]
