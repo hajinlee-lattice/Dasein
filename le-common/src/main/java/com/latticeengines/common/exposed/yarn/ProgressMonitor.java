@@ -43,7 +43,7 @@ public class ProgressMonitor {
             }
         }
         if (listener == null) {
-            log.error("Couldn't find open port after " + MAX_ATTEMPT + "attempts, aborting progress monitor");
+            log.error("Couldn't find open port after " + MAX_ATTEMPT + " attempts; aborting progress monitor");
         }
 
         executor = Executors.newSingleThreadScheduledExecutor();
@@ -76,7 +76,7 @@ public class ProgressMonitor {
                         }
                         connectionSocket.close();
                     } catch (Exception e) {
-                        log.error("Can't recieve progress status due to: " + ExceptionUtils.getStackTrace(e));
+                        log.error("Can't receive progress status due to: " + ExceptionUtils.getStackTrace(e));
                     }
                 }
                 log.info("Listening thread terminated");
