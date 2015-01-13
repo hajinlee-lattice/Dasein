@@ -40,8 +40,9 @@ def removeLinks():
             os.unlink(f)
 
 def removeFiles(curDir):
-    # Removes all symbolic links in current directory
-    for f in os.listdir(curDir):
-        if re.search('.*.py.gz.*', f) or re.search('.*.p.gz.*', f):
-            os.remove(os.path.join(curDir, f))
+    if os.path.exists(curDir):
+        # Removes all symbolic links in current directory
+        for f in os.listdir(curDir):
+            if re.search('.*.py.gz.*', f) or re.search('.*.p.gz.*', f):
+                os.remove(os.path.join(curDir, f))
 

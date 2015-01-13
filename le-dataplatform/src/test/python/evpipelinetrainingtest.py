@@ -7,8 +7,9 @@ from sklearn.ensemble import RandomForestClassifier
 import subprocess
 import sys
 
-from trainingtestbase import TrainingTestBase
 from testbase import removeFiles
+from trainingtestbase import TrainingTestBase
+
 
 class EVPipelineTrainingTest(TrainingTestBase):
     
@@ -19,7 +20,6 @@ class EVPipelineTrainingTest(TrainingTestBase):
     
     def tearDown(self):
         super(EVPipelineTrainingTest, self).tearDown()
-        removeFiles("./results")
         removeFiles("./evpipeline.tar.gz")
 
     def testExecuteLearning(self):

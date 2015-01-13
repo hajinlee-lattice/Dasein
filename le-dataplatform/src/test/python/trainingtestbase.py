@@ -1,7 +1,6 @@
 import base64
 import csv
 import gzip
-import numpy as np
 import os
 from random import shuffle
 import shutil
@@ -10,8 +9,10 @@ import uuid
 
 from leframework import scoringengine as se
 from leframework.argumentparser import ArgumentParser
-
+import numpy as np
 from testbase import TestBase
+from testbase import removeFiles
+
 
 class TrainingTestBase(TestBase):
 
@@ -60,6 +61,8 @@ class TrainingTestBase(TestBase):
             shutil.rmtree(self.fwkdir)
         if os.path.exists(self.pipelinefwkdir):
             shutil.rmtree(self.pipelinefwkdir)
+        removeFiles(".")
+        removeFiles("./results")
 
     def getLineToScore2(self, inputColumns, typeDict, value):
         columnWithValue = zip(inputColumns, value)
