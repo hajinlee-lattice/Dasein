@@ -3,7 +3,7 @@ import sys
 
 from trainingtestbase import TrainingTestBase
 
-class EnhancedSummaryTest(TrainingTestBase):
+class EnhancedFilesTest(TrainingTestBase):
 
     def tearDown(self):
         super(TrainingTestBase, self).tearDown()
@@ -12,7 +12,9 @@ class EnhancedSummaryTest(TrainingTestBase):
 
     def testEnhancedSummary(self):
         self.launch("model.json")
-        self.checkResults()
+        self.check_model_summary()
+        self.check_data_composition()
+        self.check_score_derivation()
 
     def launch(self, model):
         # Dynamically import launcher to make sure globals() is clean in launcher
@@ -22,7 +24,17 @@ class EnhancedSummaryTest(TrainingTestBase):
         launcher.execute(False)
         launcher.training
 
-    def checkResults(self):
+    def check_model_summary(self):
         # Output File Exists?
         outputFile = "./results/enhancements/modelsummary.json"
+        self.assertTrue(os.path.isfile(outputFile))
+
+    def check_data_composition(self):
+        # Output File Exists?        
+        outputFile = "./results/enhancements/DataComposition.json"
+        self.assertTrue(os.path.isfile(outputFile))
+
+    def check_score_derivation(self):
+        # Output File Exists?       
+        outputFile = "./results/enhancements/ScoreDerivation.json"
         self.assertTrue(os.path.isfile(outputFile))

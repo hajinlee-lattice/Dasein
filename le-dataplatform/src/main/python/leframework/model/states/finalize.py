@@ -2,6 +2,7 @@ from collections import OrderedDict
 import json
 import logging
 import numpy
+import os
 import subprocess
 import sys
 
@@ -21,7 +22,7 @@ class Finalize(State):
         self.writeScoredText(self.getMediator())
         self.invokeModelPredictorsExtraction(self.getMediator())
         self.writeReadoutSample(self.getMediator())
-        self.writeEnhancedModelSummary(self.getMediator())
+        self.writeEnhancedFiles(self.getMediator())
 
     def writeScoredText(self, mediator):
         scored = mediator.scored
@@ -55,7 +56,15 @@ class Finalize(State):
         csvFilePath = mediator.modelLocalDir + "readoutsample.csv"
         self.mediator.readoutsample.to_csv(csvFilePath, index = False)
 
-    def writeEnhancedModelSummary(self, mediator):
-        with open(self.mediator.modelEnhancementsLocalDir + "modelsummary.json", "wb") as fp:
-            json.dump(self.mediator.enhancedsummary, fp)
+    def writeEnhancedFiles(self, mediator):
+        base = self.mediator.modelEnhancementsLocalDir
+        
+        with open(os.path.join(base, "modelsummary.json"), "wb") as f:
+            json.dump(self.mediator.enhancedsummary, f, indent=4)
+        
+        with open(os.path.join(base, "DataComposition.json"), "wb") as f:
+            json.dump(self.mediator.data_composition, f, indent=4)
+            
+        with open(os.path.join(base, "ScoreDerivation.json"), "wb") as f:
+            json.dump(self.mediator.score_derivation, f, indent=4)
 

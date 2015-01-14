@@ -17,6 +17,8 @@ from leframework.model.states.percentilebucketgenerator import PercentileBucketG
 from leframework.model.states.pmmlmodelgenerator import PMMLModelGenerator
 from leframework.model.states.readoutsamplegenerator import ReadoutSampleGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
+from leframework.model.states.datacompositiongenerator import DataCompositionGenerator
+from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
 from leframework.model.states.enhancedsummarygenerator import EnhancedSummaryGenerator
 
 
@@ -54,8 +56,10 @@ class LearningExecutor(Executor):
         stateMachine.addState(NameGenerator(), 9)
         stateMachine.addState(PercentileBucketGenerator(), 10)
         stateMachine.addState(ReadoutSampleGenerator(), 11)
-        stateMachine.addState(EnhancedSummaryGenerator(), 12)
-        stateMachine.addState(Finalize(), 13)
+        stateMachine.addState(DataCompositionGenerator(), 12)
+        stateMachine.addState(ScoreDerivationGenerator(), 13)
+        stateMachine.addState(EnhancedSummaryGenerator(), 14)
+        stateMachine.addState(Finalize(), 15)
         return stateMachine
 
     def retrieveMetadata(self, schema, depivoted):
