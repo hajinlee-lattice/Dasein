@@ -15,7 +15,6 @@ public class ModelingServiceValidationAspectUnitTestNG {
     public void setup() {
     }
 
-
     @Test(groups = "unit", dataProvider = "validateNameData")
     public void validateName(String value, boolean result, LedpCode ledpCode) {
         ModelingServiceValidationAspect aop = new ModelingServiceValidationAspect();
@@ -25,20 +24,19 @@ public class ModelingServiceValidationAspectUnitTestNG {
         config.setTable("goodName");
         config.setMetadataTable("goodName");
         assertLoadValidation(result, ledpCode, aop, config);
-        
+
         config = new LoadConfiguration();
         config.setCustomer("goodName");
         config.setTable(value);
         config.setMetadataTable("goodName");
         assertLoadValidation(result, ledpCode, aop, config);
-        
+
         config = new LoadConfiguration();
         config.setCustomer("goodName");
         config.setTable("goodName");
         config.setMetadataTable(value);
         assertLoadValidation(result, ledpCode, aop, config);
-        
-        
+
     }
 
     private void assertLoadValidation(boolean result, LedpCode ledpCode, ModelingServiceValidationAspect aop,
@@ -59,18 +57,17 @@ public class ModelingServiceValidationAspectUnitTestNG {
 
     @DataProvider(name = "validateNameData")
     public static Object[][] getValidateNameData() {
-        return new Object[][] { 
-                { "goodName", true, null }, 
-                { "good_Name", true, null },
-                { "good.Name", true, null }, 
-                { "{badName}", false, LedpCode.LEDP_10007 },
-                { "[badName]", false, LedpCode.LEDP_10007 }, 
-                { "bad/Name", false, LedpCode.LEDP_10007 },
-                { "bad:Name", false, LedpCode.LEDP_10007 }, 
-                { "", false, LedpCode.LEDP_10007 },
-                { ".", false, LedpCode.LEDP_10007 }, 
-                { "..", false, LedpCode.LEDP_10007 },
-                { "/", false, LedpCode.LEDP_10007 },
+        return new Object[][] { { "goodName", true, null }, //
+                { "good_Name", true, null }, //
+                { "good.Name", true, null }, //
+                { "{badName}", false, LedpCode.LEDP_10007 }, //
+                { "[badName]", false, LedpCode.LEDP_10007 }, //
+                { "bad/Name", false, LedpCode.LEDP_10007 }, //
+                { "bad:Name", false, LedpCode.LEDP_10007 }, //
+                { "", false, LedpCode.LEDP_10007 }, //
+                { ".", false, LedpCode.LEDP_10007 }, //
+                { "..", false, LedpCode.LEDP_10007 }, //
+                { "/", false, LedpCode.LEDP_10007 }, //
 
         };
     }
