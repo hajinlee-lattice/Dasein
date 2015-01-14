@@ -54,7 +54,7 @@ public class ModelingServiceTestUtils {
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE, "Q_EventTableDepivot_Nutanix"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, eventTable));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_NAME, "Model Submission1"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_NAME, "Model_Submission1"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "P1_Event"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.NUM_SAMPLES, String.valueOf(NUM_SAMPLES)));
         String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());

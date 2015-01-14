@@ -2,6 +2,8 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +13,15 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.StringTokenUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
+import com.latticeengines.camille.exposed.interfaces.data.DataInterfacePublisher;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandOutput;
@@ -62,18 +69,137 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                 ModelCommandStep.SUBMIT_MODELS);
         String appId = commandStates.get(0).getYarnApplicationId();
         JobStatus jobStatus = modelingService.getJobStatus(appId);
-        String modelFilePath = "";
+
+        String modelFilePath = getModelFilePath(modelCommand, jobStatus, appId);
+
+        publishModel(modelCommand, jobStatus, modelCommandParameters, modelFilePath, appId);
+        publishModelSummary(modelCommand, jobStatus, appId);
+        publishLinks(modelCommand, jobStatus, modelFilePath);
+        updateEventTable(modelCommand, modelCommandParameters, modelFilePath);
+    }
+
+    private String getModelFilePath(
+            ModelCommand modelCommand,
+            JobStatus jobStatus,
+            String appId) throws LedpException {
         try {
-            for (String filePath : HdfsUtils.getFilesForDir(yarnConfiguration, jobStatus.getResultDirectory())) {
-                if (filePath.endsWith(JSON_SUFFIX)) {
-                    modelFilePath = filePath;
-                    break;
-                }
+
+            String hdfsResultDirectory = jobStatus.getResultDirectory();
+
+            //Assume one non-diagnostic json file in hdfsResultDirectory!
+            List<String> jsonFiles = HdfsUtils.getFilesForDir(
+                    yarnConfiguration,
+                    hdfsResultDirectory,
+                    new HdfsFilenameFilter() {
+                        @Override
+                        public boolean accept(String filename) {
+                            if (filename.equals("diagnostics" + JSON_SUFFIX)) { return false; }
+                            Pattern p = Pattern.compile(".*" + JSON_SUFFIX);
+                            Matcher matcher = p.matcher(filename.toString());
+                            return matcher.matches();
+                        }});
+
+            if (jsonFiles.size() == 1) {
+                return jsonFiles.get(0);
+            } else if (jsonFiles.size() == 0) {
+                throw new Exception("Model file does not exist.");
+            } else {
+                throw new Exception("Too many model files exist.");
             }
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_16002, e,
-                    new String[] { String.valueOf(modelCommand.getPid()), appId });
+
         }
+        catch (Exception e) {
+          throw new LedpException(LedpCode.LEDP_16002, e,
+                  new String[] { String.valueOf(modelCommand.getPid()), appId });
+        }
+    }
+
+    private void publishModel(
+            ModelCommand modelCommand,
+            JobStatus jobStatus,
+            ModelCommandParameters modelCommandParameters,
+            String modelFilePath,
+            String appId) throws LedpException {
+        try {
+
+            String hdfsResultDirectory = jobStatus.getResultDirectory();
+
+            String[] tokens = hdfsResultDirectory.split("/");
+
+            if (tokens.length > 7) { //Chances are, this is good.
+
+                //This is apparently a BARD restriction.
+                int modelIdLengthLimit = 45;
+
+                String consumer = "BARD";
+                String modelName = modelCommandParameters.getModelName();
+
+                StringBuilder hdfsConsumerDirectory = new StringBuilder();
+                for (int i = 0; i < 5; i++) {
+                    hdfsConsumerDirectory.append(tokens[i]).append("/");
+                }
+
+                String modelId = tokens[7] + "-" + modelName;
+                if (modelId.length() > modelIdLengthLimit) {
+                    modelId = modelId.substring(0, modelIdLengthLimit);
+                }
+
+                hdfsConsumerDirectory.append(consumer).append("/").append(modelId);
+                String hdfsConsumerFile = hdfsConsumerDirectory + "/1.json";
+
+                if (HdfsUtils.fileExists(yarnConfiguration, hdfsConsumerFile)) {
+                    HdfsUtils.rmdir(yarnConfiguration, hdfsConsumerFile);
+                }
+
+                String modelContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFilePath);
+                HdfsUtils.writeToFile(yarnConfiguration, hdfsConsumerFile, modelContent);
+
+            } else {
+                throw new Exception("Unexpected result directory: " + hdfsResultDirectory);
+            }
+        }
+        catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_16010, e,
+                  new String[] { String.valueOf(modelCommand.getPid()), appId });
+        }
+    }
+
+    private void publishModelSummary(
+            ModelCommand modelCommand,
+            JobStatus jobStatus,
+            String appId) throws LedpException {
+        try {
+
+            String hdfsPath = jobStatus.getResultDirectory() + "/enhancements/modelsummary.json";
+
+            if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+
+                String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath);
+
+                String interfaceName = "ModelSummary";
+                String deploymentExternalId = modelCommand.getDeploymentExternalId();
+                CustomerSpace space = new CustomerSpace(deploymentExternalId);
+                DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName, space);
+
+                Path relativePath = new Path("/ModelSummary");
+                Document pubDoc = new Document(content);
+                pub.publish(relativePath, pubDoc);
+
+            } else {
+                throw new Exception("Model-summary does not exist: " + hdfsPath);
+            }
+        }
+        catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_16011, e,
+                  new String[] { String.valueOf(modelCommand.getPid()), appId });
+        }
+    }
+
+    private void publishLinks(
+            ModelCommand modelCommand,
+            JobStatus jobStatus,
+            String modelFilePath) {
+
         // Provide link to result files
         String modelJsonFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath);
         modelCommandLogService.log(modelCommand, "Model json file download link: " + httpFsPrefix + modelJsonFileHdfsPath
@@ -90,8 +216,13 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         String readOutSampleFileHdfsPath = jobStatus.getResultDirectory() + "/readoutsample.csv";
         modelCommandLogService.log(modelCommand, "ReadOutSample file download link: " + httpFsPrefix + readOutSampleFileHdfsPath
                 + HTTPFS_SUFFIX);
-        
-        
+    }
+
+    private void updateEventTable(
+            ModelCommand modelCommand,
+            ModelCommandParameters modelCommandParameters,
+            String modelFilePath) {
+
         ModelCommandOutput output = new ModelCommandOutput(1, modelCommand.getPid().intValue(), SAMPLE_SIZE,
                 RANDOM_FOREST, modelFilePath, new Date());
         dlOrchestrationJdbcTemplate.execute("drop table " + modelCommandParameters.getEventTable());

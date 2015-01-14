@@ -9,7 +9,6 @@ from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
 
-
 class Finalize(State):
 
     def __init__(self):
@@ -22,6 +21,7 @@ class Finalize(State):
         self.writeScoredText(self.getMediator())
         self.invokeModelPredictorsExtraction(self.getMediator())
         self.writeReadoutSample(self.getMediator())
+        self.writeEnhancedModelSummary(self.getMediator())
 
     def writeScoredText(self, mediator):
         scored = mediator.scored
@@ -54,3 +54,8 @@ class Finalize(State):
     def writeReadoutSample(self, mediator):
         csvFilePath = mediator.modelLocalDir + "readoutsample.csv"
         self.mediator.readoutsample.to_csv(csvFilePath, index = False)
+
+    def writeEnhancedModelSummary(self, mediator):
+        with open(self.mediator.modelEnhancementsLocalDir + "modelsummary.json", "wb") as fp:
+            json.dump(self.mediator.enhancedsummary, fp)
+

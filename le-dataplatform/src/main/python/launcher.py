@@ -1,7 +1,6 @@
 import logging
 import os
 import pwd
-import string
 import sys
 from urlparse import urlparse
 from pandas.core.frame import DataFrame
@@ -84,6 +83,12 @@ class Launcher(object):
         if not os.path.exists(modelLocalDir):
             os.mkdir(modelLocalDir)
 
+        # Create directory for model enhancements
+        modelEnhancementsLocalDir = modelLocalDir + "enhancements/"
+
+        if not os.path.exists(modelEnhancementsLocalDir):
+            os.mkdir(modelEnhancementsLocalDir)
+
         # Get algorithm properties
         algorithmProperties = parser.getAlgorithmProperties()
 
@@ -97,9 +102,14 @@ class Launcher(object):
 
         # Get hdfs model dir
         modelHdfsDir = executor.getModelDirPath(schema)
+        if not modelHdfsDir.endswith("/"): modelHdfsDir += "/"
+
+        # Get hdfs model enhancements dir
+        modelEnhancementsHdfsDir = modelHdfsDir + "enhancements/"
 
         params = dict()
         params["modelLocalDir"] = modelLocalDir
+        params["modelEnhancementsLocalDir"] = modelEnhancementsLocalDir
         params["modelHdfsDir"] = modelHdfsDir
         params["training"] = self.training
         params["test"] = self.test
@@ -133,33 +143,19 @@ class Launcher(object):
             # Create webhdfs instance for writing to hdfs
             webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
             hdfs = WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
-            hdfs.mkdir(modelHdfsDir)
 
             # Copy the model data files from local to hdfs
+            hdfs.mkdir(modelHdfsDir)
             (_, _, filenames) = os.walk(modelLocalDir).next()
-            for filename in filenames:
-                if executor.accept(filename) is False:
-                    continue
-                hdfs.copyFromLocal(modelLocalDir + filename, "%s/%s" % (modelHdfsDir, filename))
-                if filename.endswith(".json") and filename != "diagnostics.json":
-                    modelName = parser.getSchema()["name"]
-                    self.__publishToConsumer(hdfs, modelLocalDir + filename, modelHdfsDir, "BARD", modelName)
+            for filename in filter(lambda e: executor.accept(e), filenames):
+                hdfs.copyFromLocal(modelLocalDir + filename, "%s%s" % (modelHdfsDir, filename))
 
-    def __publishToConsumer(self, hdfs, modelLocalPath, modelHdfsDir, consumer, modelName):
-        # Id length cap by Bard, 120 for release
-        modelIdLengthLimit = 45 
-        tokens = string.split(modelHdfsDir, "/")
-        modelToConsumerHdfsPath = ""
-        for index in range(0, 5):
-            modelToConsumerHdfsPath = modelToConsumerHdfsPath + tokens[index] + "/"
-
-        modelId = tokens[7] + "-" + modelName 
-        if len(modelId) > modelIdLengthLimit:
-            modelId = modelId[:modelIdLengthLimit]
-        modelToConsumerHdfsPath = modelToConsumerHdfsPath + consumer + "/" + modelId
-        hdfs.rmdir(modelToConsumerHdfsPath + "/1.json")
-        hdfs.copyFromLocal(modelLocalPath, "%s/%s" % (modelToConsumerHdfsPath, "1.json"))
-        
+            # Copy the enhanced model data files from local to hdfs?
+            if self.clf != None:
+                hdfs.mkdir(modelEnhancementsHdfsDir)
+                (_, _, filenames) = os.walk(modelEnhancementsLocalDir).next()
+                for filename in filter(lambda e: executor.accept(e), filenames):
+                    hdfs.copyFromLocal(modelEnhancementsLocalDir + filename, "%s%s" % (modelEnhancementsHdfsDir, filename))
 
 def traverse(directory):
     (dirpath, directories, filenames) = os.walk(directory).next()

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -27,6 +28,12 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
+
+import com.latticeengines.camille.exposed.interfaces.data.DataInterfaceSubscriber;
+import com.latticeengines.camille.exposed.interfaces.data.DataInterfacePublisher;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.Path;
 
 public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
@@ -50,17 +57,23 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
     private RestTemplate restTemplate = new RestTemplate();
 
-    private List<String> contents = Arrays.<String> asList(new String[] { "a", "b", "c", "d" });
+    private List<String> linkContents = Arrays.<String> asList(new String[] { "a", "b", "c", "d" });
+    private String modelSummaryContents = "MSC";
+
+    private String resultDirectory = "/user/s-analytics/customers/Nutanix/models/Q_EventTable_Nutanix/58e6de15-5448-4009-a512-bd27d59abcde/";
+    private String consumerDirectory = "/user/s-analytics/customers/Nutanix/BARD/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/";
 
     @BeforeClass(groups = "functional")
     public void beforeClass() throws Exception {
         initMocks(this);
         JobStatus jobStatus = new JobStatus();
-        jobStatus.setResultDirectory("/test/dl");
-        HdfsUtils.writeToFile(yarnConfiguration, "/test/dl/testmodel.json", contents.get(0));
-        HdfsUtils.writeToFile(yarnConfiguration, "/test/dl/testmodel.csv", contents.get(1));
-        HdfsUtils.writeToFile(yarnConfiguration, "/test/dl/scored.txt", contents.get(2));
-        HdfsUtils.writeToFile(yarnConfiguration, "/test/dl/readoutsample.csv", contents.get(3));
+        jobStatus.setResultDirectory(resultDirectory);
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testmodel.json", linkContents.get(0));
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testmodel.csv", linkContents.get(1));
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "scored.txt", linkContents.get(2));
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "readoutsample.csv", linkContents.get(3));
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "diagnostics.json", "diagnostics");
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/modelsummary.json", modelSummaryContents);
         when(modelingService.getJobStatus(YARN_APPLICATION_ID)).thenReturn(jobStatus);
 
         ReflectionTestUtils.setField(modelStepOutputResultsProcessor, "modelingService", modelingService);
@@ -80,7 +93,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     @AfterClass(groups = { "functional" })
     public void cleanup() throws Exception {
         dlOrchestrationJdbcTemplate.execute("drop table " + TEMP_EVENTTABLE);
-        HdfsUtils.rmdir(yarnConfiguration, "/test/dl");
+        HdfsUtils.rmdir(yarnConfiguration, resultDirectory);
         super.clearTables();
     }
 
@@ -105,7 +118,33 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         assertEquals(outputLogs.size(), 4);
         for (int i = 0; i < outputLogs.size(); i++) {
             String link = outputLogs.get(i).substring(outputLogs.get(i).indexOf("http://"));
-            assertEquals(restTemplate.getForObject(link, String.class), contents.get(i));
+            assertEquals(restTemplate.getForObject(link, String.class), linkContents.get(i));
         }
+
+        checkModel(command);
+        checkModelSummary(command);
+    }
+
+    private void checkModel(ModelCommand command) throws Exception {
+
+        String modelFile = consumerDirectory + "1.json";
+        String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
+        Assert.assertEquals(content, linkContents.get(0));
+    }
+
+    private void checkModelSummary(ModelCommand command) throws Exception {
+
+        String interfaceName = "ModelSummary";
+        String deploymentExternalId = command.getDeploymentExternalId();
+        CustomerSpace space = new CustomerSpace(deploymentExternalId);
+        DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName, space);
+        DataInterfaceSubscriber sub = new DataInterfaceSubscriber(interfaceName, space);
+
+        Path relativePath = new Path("/ModelSummary");
+        Document document = sub.get(relativePath);
+        Assert.assertEquals(document.getData(), modelSummaryContents);
+
+        pub.remove(relativePath);
+        Assert.assertNull(sub.get(relativePath));
     }
 }

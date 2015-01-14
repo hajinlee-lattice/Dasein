@@ -56,6 +56,8 @@ public enum LedpCode {
     LEDP_16007("LeadScoringCommand failed."), //
     LEDP_16008("Error message received in DL metadata columns response: {0}"), //
     LEDP_16009("Problem writing metadata to HDFS path: {0}, metadata content: (1)"),//
+    LEDP_16010("Problem publishing JSON model for model command:{0}, yarnAppId:{1}."), //
+    LEDP_16011("Problem publishing JSON model-summary for model command:{0}, yarnAppId:{1}."), //
     // Eai Service 17000-17999
     LEDP_17000("At least one attribute required."); //
 

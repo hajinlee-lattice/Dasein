@@ -17,6 +17,7 @@ from leframework.model.states.percentilebucketgenerator import PercentileBucketG
 from leframework.model.states.pmmlmodelgenerator import PMMLModelGenerator
 from leframework.model.states.readoutsamplegenerator import ReadoutSampleGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
+from leframework.model.states.enhancedsummarygenerator import EnhancedSummaryGenerator
 
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
@@ -53,7 +54,8 @@ class LearningExecutor(Executor):
         stateMachine.addState(NameGenerator(), 9)
         stateMachine.addState(PercentileBucketGenerator(), 10)
         stateMachine.addState(ReadoutSampleGenerator(), 11)
-        stateMachine.addState(Finalize(), 12)
+        stateMachine.addState(EnhancedSummaryGenerator(), 12)
+        stateMachine.addState(Finalize(), 13)
         return stateMachine
 
     def retrieveMetadata(self, schema, depivoted):
@@ -113,6 +115,7 @@ class LearningExecutor(Executor):
             mediator = stateMachine.getMediator()
             mediator.clf = clf
             mediator.modelLocalDir = params["modelLocalDir"]
+            mediator.modelEnhancementsLocalDir = params["modelEnhancementsLocalDir"]
             mediator.modelHdfsDir = params["modelHdfsDir"]
             mediator.allDataPreTransform = params["allDataPreTransform"]
             mediator.allDataPostTransform = params["allDataPostTransform"]

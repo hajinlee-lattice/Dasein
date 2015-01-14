@@ -15,6 +15,12 @@ public class CustomerSpace {
         this.spaceId = spaceId;
     }
 
+    public CustomerSpace(String deploymentExternalId) {
+        this.contractId = deploymentExternalId;
+        this.tenantId = deploymentExternalId;
+        this.spaceId = "Prod";
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
