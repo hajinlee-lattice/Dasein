@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.skald.model.FieldSource;
 import com.latticeengines.domain.exposed.skald.model.FieldType;
 
 @Service
-public class InternalDataMatcher {
+public class ProprietaryDataMatcher {
     public Map<String, Object> match(Map<String, FieldSchema> fields, Map<String, Object> record) {
         // TODO Inspect the schema and record to find the best way to join with
         // internal data. Right now it's all email based, which makes it easy.
@@ -21,13 +21,13 @@ public class InternalDataMatcher {
         String email = null;
         List<String> columns = new ArrayList<String>();
         for (Map.Entry<String, FieldSchema> entry : fields.entrySet()) {
-            if (entry.getValue().interpretation == FieldInterpretation.EmailAddress
+            if (entry.getValue().interpretation == FieldInterpretation.EMAIL_ADDRESS
                     && entry.getValue().type == FieldType.STRING) {
                 // Cast should be safe because type checking already happened.
                 email = (String) record.get(entry.getKey());
             }
 
-            if (entry.getValue().source == FieldSource.Internal) {
+            if (entry.getValue().source == FieldSource.PROPRIETARY) {
                 columns.add(entry.getKey());
             }
         }

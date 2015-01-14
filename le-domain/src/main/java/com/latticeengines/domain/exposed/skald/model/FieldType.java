@@ -1,11 +1,9 @@
 package com.latticeengines.domain.exposed.skald.model;
 
-import java.lang.reflect.Method;
-
 public enum FieldType {
     BOOLEAN(Boolean.class),
 
-    INTEGER(Integer.class),
+    INTEGER(Long.class),
 
     // Typical stored as a double precision value.
     FLOAT(Double.class),
@@ -25,42 +23,33 @@ public enum FieldType {
     public Class<?> type() {
         return type;
     }
-    
+
     public static Object parse(FieldType fieldtype, String rawvalue) {
         if (rawvalue == null) {
             return null;
         }
-        
-        Class<?> clazz = fieldtype.type();
-        Method method;
+
         try {
-            switch (fieldtype){
+            switch (fieldtype) {
             case BOOLEAN:
                 if (rawvalue.equals("1") || rawvalue.equalsIgnoreCase("true")) {
                     return Boolean.TRUE;
-                }
-                else if (rawvalue.equals("0") || rawvalue.equalsIgnoreCase("false")) {
+                } else if (rawvalue.equals("0") || rawvalue.equalsIgnoreCase("false")) {
                     return Boolean.FALSE;
-                }
-                else {
+                } else {
                     throw new RuntimeException("Invalid value for BOOLEAN " + rawvalue);
                 }
             case FLOAT:
-                method = clazz.getMethod("parseDouble", String.class);
-                return method.invoke(null, rawvalue);
+                return Double.parseDouble(rawvalue);
             case INTEGER:
-                method = clazz.getMethod("parseInt", String.class);
-                return method.invoke(null, rawvalue);
+            case TEMPORAL:
+                return Long.parseLong(rawvalue);
             case STRING:
                 return rawvalue;
-            case TEMPORAL:
-                method = clazz.getMethod("parseLong", String.class);
-                return method.invoke(null, rawvalue);
             default:
                 throw new UnsupportedOperationException("Unsupported field type " + fieldtype);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Failure converting value " + rawvalue + " to FieldType " + fieldtype, e);
         }
     }

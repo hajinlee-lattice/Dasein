@@ -2,11 +2,11 @@ package com.latticeengines.domain.exposed.skald.model;
 
 public enum FieldSource {
     // Provided along with the scoring request.
-    Request,
+    REQUEST,
 
     // Available through the internal Prop Data system.
-    Internal,
+    PROPRIETARY,
 
     // Extracted from customer systems through a secondary process.
-    Customer
+    CUSTOMER
 }

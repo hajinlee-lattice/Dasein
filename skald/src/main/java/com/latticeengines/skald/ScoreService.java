@@ -53,7 +53,7 @@ public class ScoreService {
             List<String> wrong = new ArrayList<String>();
             for (String name : combined.keySet()) {
                 FieldSchema field = combined.get(name);
-                if (field.source == FieldSource.Request) {
+                if (field.source == FieldSource.REQUEST) {
                     if (!request.record.containsKey(name)) {
                         wrong.add(String.format("%1$s [%2$s] was missing", name, field.type));
                     } else {
@@ -101,7 +101,7 @@ public class ScoreService {
     private ModelRetriever modelRetriever;
 
     @Autowired
-    private InternalDataMatcher matcher;
+    private ProprietaryDataMatcher matcher;
 
     private static final Log log = LogFactory.getLog(ScoreService.class);
 }
