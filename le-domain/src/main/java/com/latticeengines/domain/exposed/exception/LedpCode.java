@@ -13,6 +13,7 @@ public enum LedpCode {
     LEDP_10004("Feature {0} not found in schema."), //
     LEDP_10005("Could not deserialize data schema."), //
     LEDP_10006("Name is null."), //
+    LEDP_10007("Invalid name: {0} to be in HDFS path"), //
     // Metadata service: 11000-11999
     LEDP_11000("Could not load driver class {0}."), //
     LEDP_11001("Failed connecting to db."), //
@@ -28,6 +29,7 @@ public enum LedpCode {
     LEDP_12006("Parameter QUEUE undefined for analytics job."), //
     LEDP_12007("Parameter CUSTOMER undefined for analytics job."), //
     LEDP_12008("Table {0} does not exist for analytics load job."), //
+    LEDP_12009("Failed to submit MapReduce job."), //
     // Metric system: 13000-13999
     LEDP_13000("Tag {0} does not have a value."), //
     // Persistence service: 14000-14999

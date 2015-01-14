@@ -143,6 +143,7 @@ public abstract class JobServiceImpl implements JobService, ApplicationContextAw
             runner.call();
         } catch (Exception e) {
             log.error("Failed to submit MapReduce job " + mrJobName, e);
+            throw new LedpException(LedpCode.LEDP_12009, e, new String[] { mrJobName });
         }
         return TypeConverter.toYarn(job.getJobID()).getAppId();
     }
