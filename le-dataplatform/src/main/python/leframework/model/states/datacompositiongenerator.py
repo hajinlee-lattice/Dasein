@@ -14,14 +14,16 @@ class DataCompositionGenerator(State):
     
     @overrides(State)
     def execute(self):
-        # TODO Need to handle derived fields.
-        fields = OrderedDict(self._get_fields())
-        transforms = list(self._get_transforms(fields))
-        
         structure = OrderedDict()
-        structure["fields"] = fields
-        structure["transforms"] = transforms
-        
+
+        if self.mediator.schema["config_metadata"] != None:
+            # TODO Need to handle derived fields.
+            fields = OrderedDict(self._get_fields())
+            transforms = list(self._get_transforms(fields))
+
+            structure["fields"] = fields
+            structure["transforms"] = transforms
+
         self.getMediator().data_composition = structure
     
     def _get_fields(self):
