@@ -19,6 +19,8 @@ public enum LedpCode {
     LEDP_11001("Failed connecting to db."), //
     LEDP_11002("Issue running query {0}."), //
     LEDP_11003("Could not retrieve keys for table {0}."), //
+    LEDP_11004("Could not retrieve metadata for table {0}."), //
+    LEDP_11005("SQL column name {0} is different from the avro column name {1}."), //
     // Runtime service: 12000-12999
     LEDP_12000("Parameter PRIORITY undefined for analytics job."), //
     LEDP_12001("Could not create runtime configuration."), //

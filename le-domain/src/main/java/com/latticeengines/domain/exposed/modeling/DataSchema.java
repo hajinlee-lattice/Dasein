@@ -26,6 +26,7 @@ public class DataSchema implements HasName {
         for (org.apache.avro.Schema.Field field : fields) {
             Field f = new Field();
             f.setName(field.name());
+            f.setColumnName(field.getProp("columnName"));
             f.setSqlType(Integer.parseInt(field.getProp("sqlType")));
             addField(f);
         }

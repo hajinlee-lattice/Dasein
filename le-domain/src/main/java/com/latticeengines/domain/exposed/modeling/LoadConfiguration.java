@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.modeling;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -13,11 +15,12 @@ public class LoadConfiguration {
     private String customer;
     private DbCreds creds;
     private List<String> keyCols = new ArrayList<String>();
-    
+    private Map<String, String> properties = new HashMap<>();
+
     public String getTable() {
         return table;
     }
-    
+
     public void setTable(String table) {
         this.table = table;
     }
@@ -26,7 +29,7 @@ public class LoadConfiguration {
     public String getMetadataTable() {
         return metadataTable;
     }
-    
+
     @JsonProperty("metadata_table")
     public void setMetadataTable(String metadataTable) {
         this.metadataTable = metadataTable;
@@ -54,13 +57,26 @@ public class LoadConfiguration {
     }
 
     @JsonProperty("key_columns")
-	public List<String> getKeyCols() {
-		return keyCols;
-	}
+    public List<String> getKeyCols() {
+        return keyCols;
+    }
 
     @JsonProperty("key_columns")
-	public void setKeyCols(List<String> keyCols) {
-		this.keyCols = keyCols;
-	}
+    public void setKeyCols(List<String> keyCols) {
+        this.keyCols = keyCols;
+    }
 
+    @JsonProperty("properties")
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    @JsonProperty("properties")
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
+    public void setProperty(String propertyName, String propertyValue) {
+        properties.put(propertyName, propertyValue);
+    }
 }

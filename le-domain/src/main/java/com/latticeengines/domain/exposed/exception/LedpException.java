@@ -39,4 +39,8 @@ public class LedpException extends RuntimeException {
         return msg;
     }
 
+    public static String buildMessageWithCode(LedpCode code, String[] params) {
+        String msg = buildMessage(code, params);
+        return code.name() + ": " + msg;
+    }
 }
