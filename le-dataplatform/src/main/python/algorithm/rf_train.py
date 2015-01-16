@@ -43,13 +43,15 @@ def writeModel(schema, modelDir, clf):
     fo.write("binarySplit\n")
     fo.write(str(numInputs) + "\n")
 
+    features = {}
+    
     for i in range(0, numInputs):
-        fo.write(schema["features"][i] + ",double,continuous,NA,NA,asMissing\n")
+        features[schema["features"][i]] = importances[i]
+    features = sorted(features.items(), key = lambda x: x[1], reverse = True)
+    
+    for i in features:
+        fo.write("%s, %f\n" % (i[0], i[1]))
         
-    for i in range(0, numInputs):
-        fo.write("%f\n" % importances[i])
-        
-
     fo.write(str(numClasses) + "\n")
 
     for i in range(0, numClasses):

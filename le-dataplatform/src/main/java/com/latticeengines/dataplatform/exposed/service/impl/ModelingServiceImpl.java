@@ -530,8 +530,9 @@ public class ModelingServiceImpl implements ModelingService {
         model.setMetadataTable(config.getMetadataTable());
         setupModelProperties(model);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        
         return modelingJobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
-                model.getCustomer(), config.getKeyCols());
+                model.getCustomer(), config.getKeyCols(), config.getProperties());
     }
 
     @Override

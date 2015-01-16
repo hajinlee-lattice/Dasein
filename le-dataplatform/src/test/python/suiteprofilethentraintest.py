@@ -1,11 +1,15 @@
+import csv
 import glob
 import json
+import math
 import os
+import subprocess
 import sys
 
+from leframework import scoringengine as se
 from leframework.executors.learningexecutor import LearningExecutor
 from trainingtestbase import TrainingTestBase
-import csv
+
 
 class SuiteProfilingThenTrainTest(TrainingTestBase):
     def executeProfilingThenTrain(self):
@@ -90,6 +94,85 @@ class SuiteHirevueProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     @classmethod
     def getSubDir(cls):
         return "PLS132_test_Hirevue"
+
+class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
+    def testExecuteProfilingThenTrain(self):
+        super(SuiteLatticeRelaunchProfilingThenTrainTest, self).executeProfilingThenTrain()
+        jsonDict = json.loads(open(glob.glob("./results/PLSModel*.json")[0]).read())
+        rocScore = jsonDict["Summary"]["RocScore"]
+        self.assertTrue(rocScore > 0.79)
+        
+        self.createCSVFromModel("metadata-model.json", "./results/scorefilefortrainingdata.txt", True)
+        for index in range(0, len(jsonDict["Model"]["CompressedSupportFiles"])):
+            entry = jsonDict["Model"]["CompressedSupportFiles"][index]
+            fileName = "./results/" + entry["Key"] + ".gz"
+            self.decodeBase64ThenDecompressToFile(entry["Value"], fileName)
+            os.rename(fileName, "./results/" + entry["Key"])
+
+        with open("./results/scoringengine.py", "w") as scoringScript:
+            scoringScript.write(jsonDict["Model"]["Script"])
+
+        
+        with open("./results/scorefileforonerow.txt", "w") as fw:
+            with open("./results/scorefilefortrainingdata.txt", "r") as fr:
+                for line in fr:
+                    fw.write(line)
+                    break
+        
+        predictors = jsonDict["Summary"]["Predictors"]
+        oneRowData = json.loads(open("./results/scorefileforonerow.txt", "r").read())
+        for data in oneRowData["value"]:
+            # Modify top 5 predictors
+            for i in range(0, 9):
+                if data["Key"] == predictors[i]["Name"]:
+                    typeAndValue = data["Value"]["SerializedValueAndType"].split("|")
+                    valueType = typeAndValue[0]
+                    value = 1.0
+                    if len(typeAndValue) == 2:
+                        value = float(typeAndValue[1])
+                    if valueType == "Float":
+                        data["Value"]["SerializedValueAndType"] = "%s|%f" % (valueType, value * 100)
+                    elif valueType == "String":
+                        data["Value"]["SerializedValueAndType"] = "%s|'SomeRandomString'" % valueType
+        with open("./results/scorefileforonerowchanged.txt", "w") as fp:
+            json.dump(oneRowData, fp)
+        os.environ["PYTHONPATH"] = ''
+        subprocess.call([sys.executable, './results/scoringengine.py', "./results/scorefileforonerow.txt", "./results/scorefileforonerow.output.txt"])
+        subprocess.call([sys.executable, './results/scoringengine.py', "./results/scorefileforonerowchanged.txt", "./results/scorefileforonerowchanged.output.txt"])
+        score1 = float(csv.reader(open("./results/scorefileforonerow.output.txt", "r")).next()[1])
+        score2 = float(csv.reader(open("./results/scorefileforonerowchanged.output.txt", "r")).next()[1])
+        
+        self.assertTrue(math.fabs(score1 - score2) > 0.001)
+ 
+ 
+        subprocess.call([sys.executable, './results/scoringengine.py', "./results/scorefilefortrainingdata.txt", "./results/scoreoutputfilefortrainingdata.txt"])
+        self.__writePercentileBucketsFile("./results/scoreoutputfilefortrainingdata.txt", "./results/pctilescoreoutputfilefortrainingdata.csv", jsonDict)
+        self.__writePercentileBucketsFile("./results/scored.txt", "./results/pctilescoreoutputfilefortestdata.csv", jsonDict)
+
+    def __writePercentileBucketsFile(self, inputFileName, outputFileName, jsonDict):
+        with open(outputFileName, "w") as fw:
+            csvwriter = csv.writer(fw)
+            with open(inputFileName, "r") as csvreader:
+                for row in csv.reader(csvreader):
+                    rawScore = float(row[1])
+                    csvwriter.writerow((row[0], rawScore, self.__getPercentileScore(jsonDict["PercentileBuckets"], rawScore)))
+    
+    def __getPercentileScore(self, percentileBuckets, rawScore):
+        for percentileBucket in percentileBuckets:
+            minScore = percentileBucket["MinimumScore"]
+            maxScore = percentileBucket["MaximumScore"]
+            percentile = percentileBucket["Percentile"]
+            
+            if percentile == 100 and rawScore >= maxScore:
+                return 100
+            if percentile == 1 and rawScore <= minScore:
+                return 1
+            elif rawScore > minScore and rawScore < maxScore:
+                return percentile
+
+    @classmethod
+    def getSubDir(cls):
+        return "Lattice_Relaunch"
 
 
 class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):

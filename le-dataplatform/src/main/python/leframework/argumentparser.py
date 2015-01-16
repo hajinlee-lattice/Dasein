@@ -47,7 +47,7 @@ class ArgumentParser(object):
         self.algorithmProperties = self.__parseProperties("algorithm_properties")
         self.provenanceProperties = self.__parseProperties("provenance_properties")
         self.runtimeProperties = self.__parseRuntimeProperties(propertyFile)
-        logger.debug("reading runtime properties" + str(self.runtimeProperties))
+        logger.debug("Reading runtime properties %s" % str(self.runtimeProperties))
         self.numOfSkippedRow = 0
         self.highUCThreshold = 0.2
 
@@ -199,7 +199,7 @@ class ArgumentParser(object):
 
         if numberOfNullTarget > 0:
             self.numOfSkippedRow += numberOfNullTarget
-            logger.warn("Because target value is None, skipping the number of rows=" + str(numberOfNullTarget))
+            logger.warn("Because target value is None, skipping %s rows." % str(numberOfNullTarget))
 
         # Defense (Filter Scoring Columns)
         self.nonScoringTargets = filter(lambda e: e not in includedNames, self.nonScoringTargets)

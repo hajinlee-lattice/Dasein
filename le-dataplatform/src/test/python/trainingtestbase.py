@@ -105,15 +105,19 @@ class TrainingTestBase(TestBase):
         return fileName[fileName.rfind('/') + 1:len(fileName)]
                 
     
-    def createCSVFromModel(self, modelFile, scoringFile):
+    def createCSVFromModel(self, modelFile, scoringFile, training=False):
         parser = ArgumentParser(modelFile, None)
         schema = parser.getSchema()
-        (test, _) = parser.createList(self.stripPath(schema["test_data"]))
-        test.reset_index()
+        
+        if training:
+            (data, _) = parser.createList(self.stripPath(schema["training_data"]))
+        else:
+            (data, _) = parser.createList(self.stripPath(schema["test_data"]))
+        data.reset_index()
         fields = { k['name']:k['type'][0] for k in parser.fields }
         
         with open(scoringFile, "w") as fp:
-            for row in test.iterrows():
+            for row in data.iterrows():
                 line = "["
                 first = True
                 for field in fields.keys():

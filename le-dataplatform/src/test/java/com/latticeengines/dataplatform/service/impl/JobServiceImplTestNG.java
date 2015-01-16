@@ -10,6 +10,7 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -233,14 +234,15 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
         NumberFormat appIdFormat = getAppIdFormat();
         String jobId = applicationId.getClusterTimestamp() + "_" + appIdFormat.format(applicationId.getId());
-        String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, baseDir + "/datascientist1/result/" + jobId, new HdfsFilenameFilter() {
+        String modelFile = HdfsUtils.getFilesForDir(yarnConfiguration, baseDir + "/datascientist1/result/" + jobId,
+                new HdfsFilenameFilter() {
 
-            @Override
-            public boolean accept(String filename) {
-                return filename.contains(".");
-            }
+                    @Override
+                    public boolean accept(String filename) {
+                        return filename.contains(".");
+                    }
 
-        }).get(0);
+                }).get(0);
 
         String modelContents = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFile);
         assertEquals(modelContents.trim(), "this is the generated model.");
@@ -275,7 +277,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         assertEquals(4, files.size());
     }
 
-//    @Test(groups = { "functional", "functional.production" }, enabled = true)
+    // @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void testSubmitMRJobWithBadCustomerName() throws Exception {
         Properties properties = new Properties();
         properties.setProperty(EventDataSamplingProperty.QUEUE.name(), "Priority0.MapReduce.0");
@@ -284,16 +286,16 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
         properties.setProperty(EventDataSamplingProperty.CUSTOMER.name(), "{Dell}");
         properties.setProperty(EventDataSamplingProperty.INPUT.name(), baseDir + "/{Dell}/eventTable");
-        
+
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.mkdirs(new Path(baseDir + "/{Dell}/eventTable"));
-        String newDir = ClassLoader.getSystemResource("com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE")
-                .getPath();
+        String newDir = ClassLoader.getSystemResource(
+                "com/latticeengines/dataplatform/runtime/mapreduce/DELL_EVENT_TABLE").getPath();
         List<CopyEntry> copyEntries = new ArrayList<CopyEntry>();
         File[] avroFiles = getAvroFilesForDir(newDir);
         copyEntries.add(new CopyEntry("file:" + avroFiles[0].getAbsolutePath(), baseDir + "/{Dell}/eventTable", false));
         doCopy(fs, copyEntries);
-        
+
         try {
             modelingJobService.submitMRJob("samplingJob", properties);
         } catch (LedpException ex) {
@@ -311,7 +313,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
      * src/test/resources/com/latticeengines/dataplatform/
      * service/impl/mysql/create.sql should have been run before executing this
      * test.
-     *
+     * 
      * @throws Exception
      */
     @Test(groups = { "functional", "functional.production" }, enabled = true)
@@ -321,7 +323,8 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
                 .password(dataSourcePasswd).dbType(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
         ApplicationId appId = modelingJobService.loadData("iris", baseDir + "/tmp/import", creds,
-                "Priority0.MapReduce.0", "Dell", Arrays.<String> asList(new String[] { "ID" }));
+                "Priority0.MapReduce.0", "Dell", Arrays.<String> asList(new String[] { "ID" }),
+                new HashMap<String, String>());
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, baseDir + "/tmp/import",

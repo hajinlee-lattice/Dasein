@@ -1,6 +1,8 @@
 package com.latticeengines.dataplatform.service.impl.modeling;
 
+import java.sql.Types;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -20,6 +22,7 @@ import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEnt
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
+import com.latticeengines.dataplatform.runtime.load.LoadProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.MetadataService;
@@ -29,7 +32,9 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
+import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
@@ -57,18 +62,18 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
 
     @Override
     public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
-            List<String> splitCols) {
+            List<String> splitCols, Map<String, String> properties) {
         int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 4);
-        return loadData(table, targetDir, creds, queue, customer, splitCols, numDefaultMappers);
+        return loadData(table, targetDir, creds, queue, customer, splitCols, properties, numDefaultMappers);
     }
 
     @Override
     public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
-            List<String> splitCols, int numMappers) {
+            List<String> splitCols, Map<String, String> properties, int numMappers) {
 
         final String jobName = jobNameService.createJobName(customer, "data-load");
 
-        Future<Integer> future = loadAsync(table, targetDir, creds, queue, jobName, splitCols, numMappers);
+        Future<Integer> future = loadAsync(table, targetDir, creds, queue, jobName, splitCols, properties, numMappers);
 
         int tries = 0;
         ApplicationId appId = null;
@@ -109,7 +114,51 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
     }
 
     private Future<Integer> loadAsync(final String table, final String targetDir, final DbCreds creds,
-            final String queue, final String jobName, final List<String> splitCols, final int numMappers) {
+            final String queue, final String jobName, final List<String> splitCols,
+            final Map<String, String> properties, final int numMappers) {
+        StringBuilder lb = new StringBuilder();
+        try {
+            DataSchema dataSchema = metadataService.createDataSchema(creds, table);
+            List<Field> fields = dataSchema.getFields();
+            
+            boolean excludeTimestampCols = Boolean.parseBoolean(LoadProperty.EXCLUDETIMESTAMPCOLUMNS.getValue(properties));
+            boolean first = true;
+            for (Field field : fields) {
+                
+                // The scoring engine does not know how to convert datetime columns into a numeric value, 
+                // which Sqoop does automatically. This should not be a problem now since dates are
+                // typically not predictive anyway so we can safely exclude them for now.
+                // We can start including TIMESTAMP and TIME columns by explicitly setting EXCLUDETIMESTAMPCOLUMNS=false
+                // in the load configuration.
+                if (excludeTimestampCols && (field.getSqlType() == Types.TIMESTAMP || field.getSqlType() == Types.TIME)) {
+                    continue;
+                }
+                String name = field.getName();
+                String colName = field.getColumnName();
+                
+                if (name == null) {
+                    log.warn("Field name is null.");
+                    continue;
+                }
+                if (colName == null) {
+                    log.warn("Column name is null.");
+                    continue;
+                }
+                if (!first) {
+                    lb.append(",");
+                } else {
+                    first = false;
+                }
+                lb.append(colName);
+                if (!colName.equals(name)) {
+                    log.warn(LedpException.buildMessageWithCode(LedpCode.LEDP_11005, new String[] { colName, name }));
+                }
+            }
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_11004, new String[] { table });
+        }
+        final String colList = lb.toString();
+ 
         return sqoopJobTaskExecutor.submit(new Callable<Integer>() {
 
             @Override
@@ -128,6 +177,8 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
                                 "--compress", //
                                 "--mapreduce-job-name", //
                                 jobName, //
+                                "--columns", //
+                                colList, //
                                 "--split-by", //
                                 StringUtils.join(splitCols, ","), //
                                 "--target-dir", //

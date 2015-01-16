@@ -1,9 +1,11 @@
 from avro import schema, datafile, io
 import codecs
 from collections import OrderedDict
+import itertools
 import json
 import logging
 import math
+from pandas.core.common import isnull
 from sklearn.metrics.cluster.supervised import entropy
 import sys
 
@@ -11,9 +13,8 @@ from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
 from leframework.executors.dataprofilingexecutor import DataProfilingExecutor
 from leframework.progressreporter import ProgressReporter
 import numpy as np
-import itertools
 import pandas as pd
-from pandas.core.common import isnull
+
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -324,7 +325,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
     diagnostics = OrderedDict()
     diagnostics["Colname"] = colName
     diagnostics["DisplayName"] = otherMetadata[0]
-    diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colName not in stringcols)/float(len(columnData))    
+    diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colName not in stringcols)/float(len(columnData))
     if diagnostics["PopulationRate"] == 0.0:
         return (index, diagnostics)
 
@@ -550,9 +551,9 @@ def getSummaryDiagnostics(dataDiagnostics, eventVector, features, params):
     for columnDiagnostics in dataDiagnostics:
         if columnDiagnostics.has_key("UncertaintyCoefficient") and columnDiagnostics["UncertaintyCoefficient"] > highUCThreshold:
             highUCColumns.append(columnDiagnostics['Colname'])
-    if (len(highUCColumns) > 0):
+    if len(highUCColumns) > 0:
         summary["HighUCColumns"] = ",".join(highUCColumns)
-    return summary        
+    return summary
 
 def getCountWhereEventIsOne(valueVector, eventVector):
     '''
