@@ -31,7 +31,10 @@ class ScoringEngineTest(TrainingTestBase):
 
         self.createCSVFromModel("model.json", "./results/scoreinputfile.txt")
         os.environ["PYTHONPATH"] = ''
-        subprocess.call([sys.executable, './results/scoringengine.py', "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"])
+        popen = subprocess.Popen([sys.executable, "./results/scoringengine.py", "./results/scoreinputfile.txt", "./results/scoreoutputfile.txt"], \
+                         stdout = subprocess.PIPE, stderr=subprocess.PIPE)
+        _, stderr = popen.communicate()
+        self.assertEquals(len(stderr), 0)
 
         tokens = csv.reader(open("./results/scoreoutputfile.txt", "r")).next()
         self.assertEquals(len(tokens), 2)

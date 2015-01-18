@@ -1,4 +1,17 @@
+import logging
+import sys
+
 import pandas as pd
+
+def get_logger(name):
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+    return logger
 
 class Pipeline:
     pipelineSteps_ = []
@@ -62,7 +75,9 @@ class ModelStep(PipelineStep):
         for columnName, columnData in dataFrame.iteritems():
             if columnData.dtype == object:
                 dataFrame[columnName] = 0
-        
+
+        if "verbose" in self.model_.__dict__:
+            self.model_.verbose = 0
         scoreColumn = self.model_.predict_proba(dataFrame[self.modelInputColumns_])
         # Check number of event classes 
         index = 1 if len(scoreColumn[0]) == 2 else 0

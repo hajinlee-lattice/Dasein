@@ -1,20 +1,13 @@
 import json
-import logging
 import os
 import pickle
 import sys
 import numpy as np
 import pandas as pd
 from pipelinefwk import ModelStep
+from pipelinefwk import get_logger
 
-logger = logging.getLogger("scoringengine")
-logger.setLevel(logging.DEBUG)
-
-ch = logging.StreamHandler(sys.stdout)
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+logger = get_logger("scoringengine")
 
 def decodeDataValue(serializedValueAndType):
     serializedType, _, serializedValue = serializedValueAndType.partition('|')
@@ -32,7 +25,7 @@ def main(argv):
     inputFileName = argv[1]
     outputFileName = argv[2]
     
-    pickleFile = os.path.join(currentPath, 'STPipelineBinary.p')
+    pickleFile = os.path.join(currentPath, "STPipelineBinary.p")
     logger.info(pickleFile)
        
     pipeline = pickle.load(open(pickleFile, "rb"))
@@ -57,7 +50,7 @@ def generateScore(pipeline, inputFileName, outputFileName):
     
     if not isinstance(pipeline.getPipeline()[-1], ModelStep):
         headers = list(resultFrame.columns.values)
-    logger.info('writing score \r\n')
+    logger.info("writing score \r\n")
     
     
     for index in range(0, len(resultFrame)):
@@ -67,10 +60,10 @@ def generateScore(pipeline, inputFileName, outputFileName):
 
 def getRowToScore(line):
     try:
-        decoder = json.decoder.JSONDecoder(encoding='Latin1')
+        decoder = json.decoder.JSONDecoder(encoding="Latin1")
         dataRow = decoder.decode(line)
-        rowId = dataRow['key']
-        colValues = dataRow['value']
+        rowId = dataRow["key"]
+        colValues = dataRow["value"]
     except Exception:
         raise
 
@@ -78,8 +71,8 @@ def getRowToScore(line):
 
     try:
         for i in colValues:
-            serializedValue = decodeDataValue(i['Value']['SerializedValueAndType'])
-            rowDict[i['Key']] = serializedValue
+            serializedValue = decodeDataValue(i["Value"]["SerializedValueAndType"])
+            rowDict[i["Key"]] = serializedValue
     except Exception:
         raise
 

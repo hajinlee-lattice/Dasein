@@ -1,14 +1,11 @@
 import encoder
-import logging
 import numpy as np
 import pandas as pd
 from pipelinefwk import PipelineStep
+from pipelinefwk import get_logger
 import statsmodels.tsa.ar_model as am
 
-
-logging.basicConfig(level = logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
-                    format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(name='pipeline')
+logger = get_logger("evpipeline")
 
 def get_predicted_revenue(row, colList):
     y = row[colList].as_matrix()
