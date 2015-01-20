@@ -19,7 +19,7 @@ public class MarketoAdapterServer
 	    BasicConfigurator.configure();
 	    
 	    AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
-	    context.setConfigLocation("com.latticeengines.skald");
+	    context.setConfigLocation("com.latticeengines.marketoadapter");
 	    
         ServletContextHandler handler = new ServletContextHandler();
         handler.setErrorHandler(null);
