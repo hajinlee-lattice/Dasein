@@ -3,12 +3,12 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>le-skald</artifactId>
+    <artifactId>marketoadapter</artifactId>
     <packaging>jar</packaging>
     <name>${component-name}</name>
 
     <properties>
-        <component-name>le-skald</component-name>
+        <component-name>marketoadapter</component-name>
     </properties>
 
     <parent>
