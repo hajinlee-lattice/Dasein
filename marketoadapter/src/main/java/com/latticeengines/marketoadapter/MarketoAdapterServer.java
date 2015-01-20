@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.marketoadapter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,7 +11,7 @@ import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-public class SkaldServer
+public class MarketoAdapterServer
 {
 	public static void main(String[] args) throws Exception
 	{
@@ -39,5 +39,5 @@ public class SkaldServer
 		server.join();
 	}
 
-	private static final Log log = LogFactory.getLog(SkaldServer.class);
+	private static final Log log = LogFactory.getLog(MarketoAdapterServer.class);
 }

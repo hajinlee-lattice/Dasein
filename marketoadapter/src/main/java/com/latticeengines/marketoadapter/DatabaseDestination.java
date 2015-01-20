@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.marketoadapter;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

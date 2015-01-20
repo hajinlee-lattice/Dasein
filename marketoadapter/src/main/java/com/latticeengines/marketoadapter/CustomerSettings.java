@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.marketoadapter;
 
 public class CustomerSettings
 {

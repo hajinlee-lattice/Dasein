@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.marketoadapter;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

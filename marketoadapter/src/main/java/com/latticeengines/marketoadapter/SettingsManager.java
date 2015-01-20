@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.marketoadapter;
 
 import java.io.File;
 import java.io.IOException;
