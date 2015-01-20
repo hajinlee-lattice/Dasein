@@ -32,6 +32,16 @@ CREATE TABLE Q_EventTableDepivot_Nutanix (
   PRIMARY KEY(ID)
 );
 
+CREATE TABLE Q_EventTableDepivot_Nutanix_FewRows (
+  ID INT NOT NULL AUTO_INCREMENT,
+  SEPAL_LENGTH FLOAT,
+  SEPAL_WIDTH FLOAT,
+  PETAL_LENGTH FLOAT,
+  PETAL_WIDTH FLOAT,
+  CATEGORY INT NOT NULL,
+  PRIMARY KEY(ID)
+);
+
 CREATE TABLE EventMetadata_Nutanix (
   `QueryForMacro` INT NOT NULL,
   barecolumnname nvarchar(510),
@@ -79,6 +89,7 @@ LINES TERMINATED BY '\n'
 insert into EventMetadata_Nutanix select * from iris_metadata;
 insert into Q_EventTable_Nutanix select * from iris;
 insert into Q_EventTableDepivot_Nutanix select * from iris;
+insert into Q_EventTableDepivot_Nutanix_FewRows select * from iris;
 alter table Q_EventTable_Nutanix CHANGE ID Nutanix_EventTable_Clean INT;
 alter table Q_EventTable_Nutanix CHANGE CATEGORY P1_Event INT;
 alter table Q_EventTableDepivot_Nutanix CHANGE ID Nutanix_EventTable_Clean INT;

@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -81,6 +82,14 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private String appTimeLineWebAppAddress;
 
+    private int rowFailThreshold;
+
+    private int rowWarnThreshold;
+
+    private int positiveEventFailThreshold;
+
+    private int positiveEventWarnThreshold;
+
     public ModelCommandCallable() {
     }
 
@@ -90,7 +99,9 @@ public class ModelCommandCallable implements Callable<Long> {
             ModelCommandLogService modelCommandLogService, ModelCommandResultEntityMgr modelCommandResultEntityMgr,
             ModelStepProcessor modelStepFinishProcessor, ModelStepProcessor modelStepOutputResultsProcessor,
             ModelStepProcessor modelStepRetrieveMetadataProcessor, DebugProcessorImpl debugProcessorImpl,
-            AlertService alertService, String httpFsPrefix, String resourceManagerWebAppAddress, String appTimeLineWebAppAddress) {
+            AlertService alertService, String httpFsPrefix, String resourceManagerWebAppAddress,
+            String appTimeLineWebAppAddress, int rowFailThreshold, int rowWarnThreshold,
+            int positiveEventFailThreshold, int positiveEventWarnThreshold) {
         this.modelCommand = modelCommand;
         this.yarnConfiguration = yarnConfiguration;
         this.modelingJobService = modelingJobService;
@@ -107,6 +118,10 @@ public class ModelCommandCallable implements Callable<Long> {
         this.httpFsPrefix = httpFsPrefix;
         this.resourceManagerWebAppAddress = resourceManagerWebAppAddress;
         this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
+        this.rowFailThreshold = rowFailThreshold;
+        this.rowWarnThreshold = rowWarnThreshold;
+        this.positiveEventFailThreshold = positiveEventFailThreshold;
+        this.positiveEventWarnThreshold = positiveEventWarnThreshold;
     }
 
     @Override
@@ -148,6 +163,15 @@ public class ModelCommandCallable implements Callable<Long> {
 
             if (commandParameters.isDebug()) {
                 debugProcessorImpl.execute(modelCommand, commandParameters);
+            }
+
+            // Validation is turned off during tests
+            if (commandParameters.isValidate()) {
+                boolean validationFailed = validateDataSize(commandParameters);
+                if (validationFailed) {
+                    handleJobFailed();
+                    return;
+                }
             }
 
             executeStep(modelStepRetrieveMetadataProcessor, ModelCommandStep.RETRIEVE_METADATA, commandParameters);
@@ -213,6 +237,40 @@ public class ModelCommandCallable implements Callable<Long> {
         }
     }
 
+    private boolean validateDataSize(ModelCommandParameters commandParameters) throws SQLException {
+        JdbcTemplate dlOrchestrationJdbcTemplate = debugProcessorImpl.getDlOrchestrationJdbcTemplate();
+        String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
+        int rowCount;
+        int positiveEventCount;
+        if (dbDriverName.contains("Microsoft")) {
+            rowCount = dlOrchestrationJdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM " + commandParameters.getEventTable(), Integer.class);
+            positiveEventCount = dlOrchestrationJdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM " + commandParameters.getEventTable() + " WHERE "
+                            + commandParameters.getModelTargets().get(0) + " = 1", Integer.class);
+
+        } else {
+            rowCount = dlOrchestrationJdbcTemplate.queryForObject(
+                    "select count(*) from " + commandParameters.getEventTable(), Integer.class);
+            positiveEventCount = dlOrchestrationJdbcTemplate.queryForObject(
+                    "select count(*) from " + commandParameters.getEventTable() + " where "
+                            + commandParameters.getModelTargets().get(0) + " = 1", Integer.class);
+        }
+
+        if (rowCount < rowFailThreshold && positiveEventCount < positiveEventFailThreshold) {
+            modelCommandLogService.log(modelCommand,
+                    "Failing modeling job due to insufficient rows or positive events. " + "Row count: " + rowCount
+                            + " Positive event count: " + positiveEventCount);
+            return true;
+        } else if (rowCount < rowWarnThreshold || positiveEventCount < positiveEventWarnThreshold) {
+            modelCommandLogService.log(modelCommand,
+                    "Model quality may be low due to insufficient rows or positive events. " + "Row count: " + rowCount
+                            + " Positive event count: " + positiveEventCount);
+        }
+
+        return false;
+    }
+
     private void handleAllJobsSucceeded() {
         modelCommandLogService.logCompleteStep(modelCommand, modelCommand.getModelCommandStep(),
                 ModelCommandStatus.SUCCESS);
@@ -253,7 +311,8 @@ public class ModelCommandCallable implements Callable<Long> {
             // Currently each step only generates one yarn job anyways so first
             // failed appId works
             clientUrl.append("app/").append(failedYarnApplicationIds.get(0));
-            modelCommandLogService.log(modelCommand, "Failed job link: " + appTimeLineWebAppAddress + "/app/" + failedYarnApplicationIds.get(0));
+            modelCommandLogService.log(modelCommand, "Failed job link: " + appTimeLineWebAppAddress + "/app/"
+                    + failedYarnApplicationIds.get(0));
         }
 
         List<BasicNameValuePair> details = new ArrayList<>();
@@ -348,7 +407,7 @@ public class ModelCommandCallable implements Callable<Long> {
         if (numOfSkippedRows > 0) {
             warnings += "The number of skipped rows=" + numOfSkippedRows + "\n";
         }
-        
+
         // check if there's high UC columns
         String highUCColumns = (String) ((JSONObject) jsonObject.get("Summary")).get("HighUCColumns");
         if (highUCColumns != null) {

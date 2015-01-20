@@ -40,6 +40,8 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
     private static final String TEMP_EVENTTABLE = "ModelCommandCallableTestNG_eventtable";
 
+	private static final String TEMP_EVENTTABLE_FEW_ROWS = "ModelCommandCallableTestNG_eventtable_fewrows";
+
     @Autowired
     private ModelingJobService modelingJobService;
 
@@ -89,18 +91,23 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         httpServer.start();
 
         super.clearTables();
-
         String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
         if (dbDriverName.contains("Microsoft")) {
             // Microsoft JDBC Driver 4.0 for SQL Server
             dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE + "', 'U') IS NOT NULL DROP TABLE "
                     + TEMP_EVENTTABLE);
             dlOrchestrationJdbcTemplate.execute("select * into " + TEMP_EVENTTABLE + " from Q_EventTable_Nutanix");
+            dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE_FEW_ROWS + "', 'U') IS NOT NULL DROP TABLE "
+                    + TEMP_EVENTTABLE_FEW_ROWS);
+            dlOrchestrationJdbcTemplate.execute("select * into " + TEMP_EVENTTABLE_FEW_ROWS + " from Q_EventTableDepivot_Nutanix_FewRows");
         } else {
             // MySQL Connector Java
             dlOrchestrationJdbcTemplate.execute("drop table if exists " + TEMP_EVENTTABLE);
             dlOrchestrationJdbcTemplate.execute("create table " + TEMP_EVENTTABLE
                     + " select * from Q_EventTable_Nutanix");
+            dlOrchestrationJdbcTemplate.execute("drop table if exists " + TEMP_EVENTTABLE_FEW_ROWS);
+            dlOrchestrationJdbcTemplate.execute("create table " + TEMP_EVENTTABLE_FEW_ROWS
+                    + " select * from Q_EventTableDepivot_Nutanix_FewRows");
         }
 
     }
@@ -109,6 +116,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
     public void cleanup() throws Exception {
         httpServer.stop();
         dlOrchestrationJdbcTemplate.execute("drop table " + TEMP_EVENTTABLE);
+        dlOrchestrationJdbcTemplate.execute("drop table " + TEMP_EVENTTABLE_FEW_ROWS);
     }
 
     @Override
@@ -117,11 +125,50 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
         super.clearTables();
     }
 
-    @Test(groups = "functional")
-    public void testWorkflow() throws Exception {
+    @Test(groups = "functional", enabled = true)
+    public void testWorkflowValidationFailed() throws Exception {
         // Comment out below 2 lines when testing against an integration
         // database
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE);
+        // Validation failure due to too few rows
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithFewRows(TEMP_EVENTTABLE_FEW_ROWS, false, true);
+        modelCommandEntityMgr.create(command);
+
+        int iterations = 0;
+        while ((command.getCommandStatus() == ModelCommandStatus.NEW || command.getCommandStatus() == ModelCommandStatus.IN_PROGRESS)
+                && iterations < 100) { // Wait maximum of 25 minutes to process
+                                       // this command
+            iterations++;
+            Thread.sleep(15000);
+            command = modelCommandEntityMgr.findByKey(command);
+        }
+
+        if (command.getCommandStatus() == ModelCommandStatus.FAIL) {
+            List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
+            for (ModelCommandLog modelCommandLog : logs) {
+                log.info(modelCommandLog.getMessage());
+            }
+        }
+        assertTrue(command.getCommandStatus() == ModelCommandStatus.FAIL,
+                "The actual command state is " + command.getCommandStatus());
+
+        List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
+        assertEquals(logs.size(), 2);
+        List<ModelCommandState> states = modelCommandStateEntityMgr.findAll();
+        assertEquals(states.size(), 0);
+        List<ModelCommandResult> results = modelCommandResultEntityMgr.findAll();
+        assertEquals(results.size(), 1);
+        assertEquals(results.get(0).getProcessStatus(), ModelCommandStatus.FAIL);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testWorkflowValidationFailed" })
+    public void testWorkflow() throws Exception {
+        // Note that this test changes the event table that is shared with first
+        // test case and has to be run after
+        // Comment out below 2 lines when testing against an integration
+        // database
+        // Set test flag to disable validation
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE, false,
+                false);
         modelCommandEntityMgr.create(command);
 
         int iterations = 0;
