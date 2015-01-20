@@ -6,6 +6,8 @@ public interface CommandLineProperties {
 
     public static final String VALUE_DELIMETER = ",";
 
+    public static final String ALGORITHM_NAME_PROFILE = "pf";
+    
     public static final String ALGORITHM_NAME_DT = "dt";
 
     public static final String ALGORITHM_NAME_LR = "lr";

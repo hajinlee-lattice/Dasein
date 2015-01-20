@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,6 +55,7 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
 import com.latticeengines.domain.exposed.modeling.algorithm.DataProfilingAlgorithm;
+import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 @Component("modelingService")
@@ -80,13 +82,13 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Value("${dataplatform.modeling.row.threshold:50}")
     private int rowSizeThreshold;
-    
+
     @Value("${dataplatform.container.virtualcores}")
     private int virtualCores;
 
     @Value("${dataplatform.container.memory}")
     private int memory;
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     /**
@@ -103,13 +105,15 @@ public class ModelingServiceImpl implements ModelingService {
         List<ApplicationId> applicationIds = new ArrayList<ApplicationId>();
         ModelDefinition modelDefinition = model.getModelDefinition();
 
-        List<Algorithm> algorithms = new ArrayList<Algorithm>();
+        List<Algorithm> algorithms = null;
 
         if (modelDefinition != null) {
             algorithms = modelDefinition.getAlgorithms();
         } else {
             throw new LedpException(LedpCode.LEDP_12005);
         }
+
+        algorithms = checkModelAndAlgorithm(model, algorithms);
 
         Collections.sort(algorithms, new Comparator<Algorithm>() {
             @Override
@@ -127,13 +131,36 @@ public class ModelingServiceImpl implements ModelingService {
                 continue;
             }
 
+            if (StringUtils.isEmpty(algorithm.getContainerProperties())) {
+                algorithm.setContainerProperties(getDefaultContainerProperties());
+            }
             ModelingJob modelingJob = createJob(model, algorithm, "modeling");
             model.addModelingJob(modelingJob);
+
             // JobService is responsible for persistence during submitJob
             applicationIds.add(modelingJobService.submitJob(modelingJob));
         }
 
         return applicationIds;
+    }
+
+    private List<Algorithm> checkModelAndAlgorithm(Model model, List<Algorithm> algorithms) {
+        if (CollectionUtils.isEmpty(model.getFeaturesList())) {
+            model.setFeaturesList(getFeatures(model, false));
+        }
+        if (CollectionUtils.isEmpty(algorithms)) {
+            algorithms = new ArrayList<Algorithm>();
+            RandomForestAlgorithm algorithm = new RandomForestAlgorithm();
+            algorithm.setSampleName("all");
+            algorithm.setPriority(0);
+            algorithm.setContainerProperties(getDefaultContainerProperties());
+            algorithms.add(algorithm);
+        }
+        return algorithms;
+    }
+
+    private String getDefaultContainerProperties() {
+        return "VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY=0";
     }
 
     private void setupModelProperties(Model model) {
@@ -154,7 +181,7 @@ public class ModelingServiceImpl implements ModelingService {
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, diagnosticsPath);
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(content);
-        long  sampleSize = (long) ((JSONObject) jsonObject.get("Summary")).get("SampleSize");
+        long sampleSize = (long) ((JSONObject) jsonObject.get("Summary")).get("SampleSize");
 
         if (sampleSize < rowSizeThreshold) {
             throw new LedpException(LedpCode.LEDP_15005, new String[] { Double.toString(sampleSize) });
@@ -374,17 +401,16 @@ public class ModelingServiceImpl implements ModelingService {
         setupModelProperties(m);
         String sampleDataPath = m.getDataHdfsPath() + "/samples";
         try {
-            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, sampleDataPath,
-                    new HdfsFilenameFilter() {
+            List<String> paths = HdfsUtils.getFilesForDir(yarnConfiguration, sampleDataPath, new HdfsFilenameFilter() {
 
-                        @Override
-                        public boolean accept(String filename) {
-                            Pattern p = Pattern.compile(".*.avro");
-                            Matcher matcher = p.matcher(filename.toString());
-                            return matcher.matches();
-                        }
+                @Override
+                public boolean accept(String filename) {
+                    Pattern p = Pattern.compile(".*.avro");
+                    Matcher matcher = p.matcher(filename.toString());
+                    return matcher.matches();
+                }
 
-                    });
+            });
 
             if (paths.size() == 0) {
                 throw new LedpException(LedpCode.LEDP_15007, new String[] { sampleDataPath });
@@ -423,7 +449,11 @@ public class ModelingServiceImpl implements ModelingService {
         modelDefinition.setName(m.getName());
         AlgorithmBase dataProfileAlgorithm = new DataProfilingAlgorithm();
         dataProfileAlgorithm.setSampleName(dataProfileConfig.getSamplePrefix());
-        dataProfileAlgorithm.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY=0");
+        if (StringUtils.isEmpty(dataProfileConfig.getContainerProperties())) {
+            dataProfileAlgorithm.setContainerProperties(getDefaultContainerProperties());
+        } else {
+            dataProfileAlgorithm.setContainerProperties(dataProfileConfig.getContainerProperties());
+        }
         if (!StringUtils.isEmpty(dataProfileConfig.getScript())) {
             dataProfileAlgorithm.setScript(dataProfileConfig.getScript());
         }
@@ -530,7 +560,7 @@ public class ModelingServiceImpl implements ModelingService {
         model.setMetadataTable(config.getMetadataTable());
         setupModelProperties(model);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        
+
         return modelingJobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
                 model.getCustomer(), config.getKeyCols(), config.getProperties());
     }

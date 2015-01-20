@@ -6,6 +6,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang.StringUtils;
 
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.perf.cli.setup.CommandLineOption;
@@ -28,7 +29,9 @@ public class CommandLineProfileSetup extends CommandLineSetup<Profile> {
         Option target = new CommandLineOption(TARGET_OPT, TARGET_LONGOPT, true, false, TARGET_DEF);
         Option metadataTable = new CommandLineOption(METADATA_TABLE_OPT, METADATA_TABLE_LONGOPT, true, true,
                 METADATA_TABLE_DEF);
-        ops.addOption(customer).addOption(table).addOption(target).addOption(metadataTable);
+        Option algorithmProps = new CommandLineOption(ALGORITHM_PROP_OPT, ALGORITHM_PROP_LONGOPT, true, false,
+                ALGORITHM_PROP_DEF);
+        ops.addOption(customer).addOption(table).addOption(target).addOption(metadataTable).addOption(algorithmProps);
         cl = clp.parse(ops, args);
     }
 
@@ -56,5 +59,26 @@ public class CommandLineProfileSetup extends CommandLineSetup<Profile> {
             config.setTargets(Arrays.<String> asList(targets.split(CommandLineProperties.VALUE_DELIMETER)));
         }
         pf.setConfiguration(restEndpointHost, config);
+
+        String algorithmProps = cl.getOptionValue(ALGORITHM_PROP_OPT);
+        if (StringUtils.isNotEmpty(algorithmProps)) {
+            String[] propList = algorithmProps.split(CommandLineProperties.VALUE_DELIMETER);
+            String name = propList.length > 0 ? propList[0] : "";
+            String virtualCores = propList.length > 1 ? propList[1] : "";
+            String memory = propList.length > 2 ? propList[2] : "";
+            String priority = propList.length > 3 ? propList[3] : "";
+            if (name.equalsIgnoreCase(ALGORITHM_NAME_PROFILE)) {
+                configAlgorithm(config, virtualCores, memory, priority);
+            }
+        }
+    }
+
+    static void configAlgorithm(DataProfileConfiguration cponfig, String virtualCores, String memory, String priority) {
+        if (StringUtils.isEmpty(virtualCores) || StringUtils.isEmpty(memory) || StringUtils.isEmpty(priority)) {
+            return;
+        }
+        cponfig.setContainerProperties(new StringBuilder().append("VIRTUALCORES=")//
+                .append(virtualCores).append(" MEMORY=").append(memory)//
+                .append(" PRIORITY=").append(priority).toString());
     }
 }

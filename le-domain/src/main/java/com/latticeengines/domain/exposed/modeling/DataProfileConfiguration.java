@@ -13,6 +13,7 @@ public class DataProfileConfiguration {
     private String metadataTable;
     private String samplePrefix;
     private String script;
+    private String containerProperties;
     private List<String> excludeColumnList = new ArrayList<String>();
     private List<String> includeColumnList = new ArrayList<String>();
     private List<String> targets = new ArrayList<String>();
@@ -90,6 +91,16 @@ public class DataProfileConfiguration {
     @JsonProperty("script")
     public void setScript(String script) {
         this.script = script;
+    }
+
+    @JsonProperty("containerProperties")
+    public String getContainerProperties() {
+        return containerProperties;
+    }
+
+    @JsonProperty("containerProperties")
+    public void setContainerProperties(String containerProperties) {
+        this.containerProperties = containerProperties;
     }
 
     @JsonProperty("targets")
