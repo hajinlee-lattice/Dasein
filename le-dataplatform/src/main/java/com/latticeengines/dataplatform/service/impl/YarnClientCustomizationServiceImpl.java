@@ -22,6 +22,7 @@ import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.YarnClientCustomization;
@@ -30,6 +31,7 @@ import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.modeling.Classifier;
 
 @Component("yarnClientCustomizationService")
 public class YarnClientCustomizationServiceImpl implements YarnClientCustomizationService {
@@ -119,7 +121,10 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
         //copy the metadata.json file to HDFS data directory
         String jobType = containerProperties.getProperty(ContainerProperty.JOB_TYPE.name());
         if (jobType != null) {
-            String hdfsDir = customerBaseDir + "/" + appMasterProperties.getProperty(AppMasterProperty.CUSTOMER.name()) + "/data/EventMetadata/";
+            String metadata = containerProperties.getProperty(PythonContainerProperty.METADATA_CONTENTS.name());
+            Classifier classifier = JsonUtils.deserialize(metadata, Classifier.class);
+            String hdfsDir = classifier.getDataDiagnosticsPath();
+            hdfsDir = hdfsDir.substring(0, hdfsDir.lastIndexOf('/') + 1);
             String localDir = containerProperties.getProperty(PythonContainerProperty.METADATA.name());
             String random = "-" + UUID.randomUUID().toString();
             String metaDataFileName = "metadata-" + jobType + random + ".json";
