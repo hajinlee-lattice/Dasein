@@ -20,6 +20,10 @@ public class SkaldProperties {
         return env.getProperty("skald.hdfs.address");
     }
 
+    public String getMatcherAddress() {
+        return env.getProperty("skald.matcher.address");
+    }
+
     @Autowired
     private Environment env;
 }

@@ -12,7 +12,7 @@
 		"BusinessECommerceSite": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
 		"BusinessEstablishedYear": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
 		"BusinessEstimatedAnnualSales_k": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
-		"BusinessEstimatedEmployees": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
+		"BusinessEstimatedEmployees": {"source": "PROPRIETARY", "type": "INTEGER", "interpretation": "FEATURE"},
 		"BusinessFacebook": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
 		"BusinessFirmographicsParentEmployees": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
 		"BusinessFirmographicsParentRevenue": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
@@ -53,7 +53,7 @@
 		"BusinessTechnologiesWebMaster": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
 		"BusinessTechnologiesWebServer": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
 		"BusinessTechnologiesWidgets": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
-		"BusinessTwitter": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
+		"BusinessTwitter": {"source": "PROPRIETARY", "type": "STRING", "interpretation": "FEATURE"},
 		"BusinessUrlNumPages": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
 		"BusinessVCFunded": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
 		"CloudTechnologies_CRM_One": {"source": "REQUEST", "type": "FLOAT", "interpretation": "FEATURE"},
@@ -194,6 +194,11 @@
 		{"name": "replace_null_value", "output": "Email_Domain_IsPublic", "type": "FLOAT", "arguments": {"column": "Email_Domain_IsPublic", "value": 0.0}},
 		{"name": "encode_string", "output": "ActivitySources", "type": "INTEGER", "arguments": {"column": "ActivitySources"}},
 		{"name": "make_float", "output": "ActivitySources", "type": "FLOAT", "arguments": {"column": "ActivitySources"}},
-		{"name": "replace_null_value", "output": "ActivitySources", "type": "FLOAT", "arguments": {"column": "ActivitySources", "value": 0.0}}
+		{"name": "replace_null_value", "output": "ActivitySources", "type": "FLOAT", "arguments": {"column": "ActivitySources", "value": 0.0}},
+		{"name": "make_float", "output": "BusinessEstimatedEmployees", "type": "FLOAT", "arguments": {"column": "BusinessEstimatedEmployees"}},
+		{"name": "replace_null_value", "output": "BusinessEstimatedEmployees", "type": "FLOAT", "arguments": {"column": "BusinessEstimatedEmployees", "value": 0.0}},
+		{"name": "encode_string", "output": "BusinessTwitter", "type": "INTEGER", "arguments": {"column": "BusinessTwitter"}},
+		{"name": "make_float", "output": "BusinessTwitter", "type": "FLOAT", "arguments": {"column": "BusinessTwitter"}},
+		{"name": "replace_null_value", "output": "BusinessTwitter", "type": "FLOAT", "arguments": {"column": "BusinessTwitter", "value": 0.0}}
 	]
 }

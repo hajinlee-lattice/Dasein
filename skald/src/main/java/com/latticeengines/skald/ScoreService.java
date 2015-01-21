@@ -70,8 +70,8 @@ public class ScoreService {
             }
 
             // Match and join Prop Data.
-            Map<String, Object> internal = matcher.match(combined, request.record);
-            request.record.putAll(internal);
+            Map<String, Object> properietary = matcher.match(request.space, combined, request.record);
+            request.record.putAll(properietary);
 
             // TODO Query and join aggregate data.
 
