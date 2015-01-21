@@ -10,6 +10,6 @@
 
     <import resource="classpath:api-context.xml"/>
     <import resource="classpath:api-properties-context.xml"/>
-    <bean class="com.mangofactory.swagger.configuration.SpringSwaggerConfig" />
+    <bean class="com.latticeengines.api.swagger.SwaggerConfig" />
 
 </beans>
