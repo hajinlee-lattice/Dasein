@@ -10,6 +10,9 @@ import org.apache.log4j.MDC;
 // This guarantees removal of entries from the MDC, which prevents memory leaks.
 // Currently handles duplicate keys by keeping the first entry, but that will
 // probably be replaced with better behavior later.
+//
+// Note that for MDC information to be included in a log message, the log pattern
+// needs to include %X -- this is not present by default!
 public class LogContext implements AutoCloseable {
     public LogContext(String key, Object value) {
         add(key, value);
