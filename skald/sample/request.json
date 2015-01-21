@@ -3,7 +3,7 @@
 	"combination": "realtime",
 	"record":
 	{
-		"EmailAddress": "sorry@hotmail.com",
+		"EmailAddress": "sorry@stonybrook.edu",
 		"ActiveRetirementParticipants" : 1.0,
 		"ActivitySources" : "This field probably isn't even a string!",
 		"AssetsStartOfYear" : 1.0,
@@ -14,7 +14,6 @@
 		"BusinessECommerceSite" : 1.0,
 		"BusinessEstablishedYear" : 1.0,
 		"BusinessEstimatedAnnualSales_k" : 1.0,
-		"BusinessEstimatedEmployees" : 1.0,
 		"BusinessFacebook" : 1.0,
 		"BusinessFirmographicsParentEmployees" : 1.0,
 		"BusinessFirmographicsParentRevenue" : 1.0,
@@ -55,7 +54,6 @@
 		"BusinessTechnologiesWebMaster" : 1.0,
 		"BusinessTechnologiesWebServer" : 1.0,
 		"BusinessTechnologiesWidgets" : 1.0,
-		"BusinessTwitter" : 1.0,
 		"BusinessUrlNumPages" : 1.0,
 		"BusinessVCFunded" : 1.0,
 		"CloudTechnologies_CRM_One" : 1.0,
