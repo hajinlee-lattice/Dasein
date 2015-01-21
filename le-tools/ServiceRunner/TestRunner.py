@@ -28,6 +28,7 @@ class SessionRunner(object):
     def __init__(self, host="http://localhost:5000", logfile=None):
         self.host = host
         self.activity_log = {}
+        self.request_text = []
         if logfile is None:
             logfile = os.path.join(os.getcwd(), "Session.log")
         if not os.path.isfile(logfile):
@@ -69,6 +70,7 @@ class SessionRunner(object):
         request = requests.post(request_url, files=files)
         logging.info("%s\n%s" % (request.status_code, request.text))
         self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
+        self.request_text.append(request.text)
         if request.status_code == 200:
             return True
         else:
@@ -83,6 +85,7 @@ class SessionRunner(object):
         request = requests.post(request_url, data=json.dumps(copy_dict))
         logging.info("%s\n%s" % (request.status_code, request.text))
         self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
+        self.request_text.append(request.text)
         if request.status_code == 200:
             return status and True
         else:
@@ -136,6 +139,7 @@ class SessionRunner(object):
             request = requests.post(request_url, data=json.dumps(command_dict))
             logging.info("%s\n%s" % (request.status_code, request.text))
             self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
+            self.request_text.append(request.text)
             if request.status_code == 200:
                 return True
             else:
@@ -155,6 +159,7 @@ class SessionRunner(object):
             request = requests.post(request_url, data=json.dumps(evals_dict))
             logging.info("%s\n%s" % (request.status_code, request.text))
             self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
+            self.request_text.append(request.text)
             if request.status_code == 200:
                 return True
             else:
@@ -174,6 +179,7 @@ class SessionRunner(object):
             request = requests.post(request_url, data=json.dumps(execs_dict))
             logging.info("%s\n%s" % (request.status_code, request.text))
             self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
+            self.request_text.append(request.text)
             if request.status_code == 200:
                 return True
             else:
@@ -199,6 +205,7 @@ class SessionRunner(object):
             request = requests.post(request_url, data=json.dumps(evals_dict))
             logging.info("%s\n%s" % (request.status_code, request.text))
             self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
+            self.request_text.append(request.text)
             if request.status_code == 200:
                 return request.text
             else:
