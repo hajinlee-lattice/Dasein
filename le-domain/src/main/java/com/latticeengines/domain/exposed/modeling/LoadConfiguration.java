@@ -66,12 +66,12 @@ public class LoadConfiguration {
         this.keyCols = keyCols;
     }
 
-    @JsonProperty("properties")
+    @JsonProperty(value = "properties", required = false)
     public Map<String, String> getProperties() {
         return properties;
     }
 
-    @JsonProperty("properties")
+    @JsonProperty(value = "properties", required = false)
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
