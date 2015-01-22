@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.skald.model.FieldSchema;
 import com.latticeengines.domain.exposed.skald.model.FieldSource;
+import com.latticeengines.domain.exposed.skald.model.FieldType;
 import com.latticeengines.skald.exposed.ScoreRequest;
 import com.latticeengines.skald.exposed.ScoreType;
 
@@ -58,6 +59,14 @@ public class ScoreService {
                         wrong.add(String.format("%1$s [%2$s] was missing", name, field.type));
                     } else {
                         Object value = request.record.get(name);
+
+                        // Automatically widen integers into longs; Jackson
+                        // bases the types on actual width.
+                        if (field.type == FieldType.INTEGER && value instanceof Integer) {
+                            value = ((Integer) value).longValue();
+                            request.record.put(name, value);
+                        }
+
                         if (value != null && !field.type.type().isInstance(value)) {
                             wrong.add(String.format("%1$s [%2$s] was not the correct type", name, field.type));
                         }
