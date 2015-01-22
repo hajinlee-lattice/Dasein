@@ -78,6 +78,17 @@ public class ScoreService {
                 throw new RuntimeException("Record had missing or invalid fields: " + StringUtils.join(wrong, ", "));
             }
 
+            List<String> extra = new ArrayList<String>();
+            for (String name : request.record.keySet()) {
+                if (!combined.containsKey(name)) {
+                    extra.add(name);
+                }
+            }
+
+            if (extra.size() > 0) {
+                log.info("Record had extra fields: " + StringUtils.join(extra, ", "));
+            }
+
             // Match and join Prop Data.
             Map<String, Object> properietary = matcher.match(request.space, combined, request.record);
             request.record.putAll(properietary);
