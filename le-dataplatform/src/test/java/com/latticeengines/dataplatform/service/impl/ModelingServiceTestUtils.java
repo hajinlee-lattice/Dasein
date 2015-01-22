@@ -71,14 +71,14 @@ public class ModelingServiceTestUtils {
         return command;
     }
     
-    public static ModelCommand createModelCommandWithFewRows(String eventTable, boolean debug, boolean validate) {
+    public static ModelCommand createModelCommandWithFewRowsAndReadoutTargets(String eventTable, boolean debug, boolean validate) {
         List<ModelCommandParameter> parameters = new ArrayList<>();
         ModelCommand command = new ModelCommand(1L, "FewRowsNutanix", ModelCommandStatus.NEW, parameters, ModelCommand.TAHOE);
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE, "Q_EventTableDepivot_Nutanix_FewRows"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, eventTable));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_NAME, "Model Submission1"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "CATEGORY"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "Event: CATEGORY, Readouts: LeadID | Email"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.NUM_SAMPLES, String.valueOf(NUM_SAMPLES)));
         String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));

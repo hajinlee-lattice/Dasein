@@ -205,6 +205,18 @@ public class ModelCommandParameters {
     private void setModelName(String modelName) {
         this.modelName = modelName;
     }
+    
+    public String getEventColumnName() {
+        String eventColumn = getModelTargets().get(0);
+        
+        String[] cols = eventColumn.split(":");
+        
+        if (cols.length == 2) {
+            return cols[1].trim();
+        } else {
+            return cols[0].trim();
+        }
+    }
 
     public List<String> getModelTargets() {
         return modelTargets;

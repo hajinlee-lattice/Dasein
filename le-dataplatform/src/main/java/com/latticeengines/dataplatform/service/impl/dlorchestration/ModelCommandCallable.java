@@ -247,14 +247,14 @@ public class ModelCommandCallable implements Callable<Long> {
                     "SELECT COUNT(*) FROM " + commandParameters.getEventTable(), Integer.class);
             positiveEventCount = dlOrchestrationJdbcTemplate.queryForObject(
                     "SELECT COUNT(*) FROM " + commandParameters.getEventTable() + " WHERE "
-                            + commandParameters.getModelTargets().get(0) + " = 1", Integer.class);
+                            + commandParameters.getEventColumnName() + " = 1", Integer.class);
 
         } else {
             rowCount = dlOrchestrationJdbcTemplate.queryForObject(
                     "select count(*) from " + commandParameters.getEventTable(), Integer.class);
             positiveEventCount = dlOrchestrationJdbcTemplate.queryForObject(
                     "select count(*) from " + commandParameters.getEventTable() + " where "
-                            + commandParameters.getModelTargets().get(0) + " = 1", Integer.class);
+                            + commandParameters.getEventColumnName() + " = 1", Integer.class);
         }
 
         if (rowCount < rowFailThreshold && positiveEventCount < positiveEventFailThreshold) {

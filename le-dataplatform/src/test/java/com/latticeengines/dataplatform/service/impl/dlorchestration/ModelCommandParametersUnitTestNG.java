@@ -9,14 +9,15 @@ import java.util.List;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class ModelCommandParametersUnitTestNG {
 
     public ModelCommandParameters createModelCommandParameters() {
-        return new ModelCommandParameters(ModelingServiceTestUtils
-                .createModelCommandWithCommandParameters().getCommandParameters());
+        return new ModelCommandParameters(ModelingServiceTestUtils.createModelCommandWithCommandParameters()
+                .getCommandParameters());
     }
 
     @Test(groups = "unit", expectedExceptions = LedpException.class)
@@ -45,6 +46,21 @@ public class ModelCommandParametersUnitTestNG {
         assertEquals("two", splits.get(1));
         assertEquals("three", splits.get(2));
         assertEquals("four", splits.get(3));
+    }
+
+    @Test(groups = "unit")
+    public void testGetEventColumnWithoutReadoutParams() {
+        ModelCommand modelCommand = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
+        assertEquals(commandParameters.getEventColumnName(), "P1_Event");
+    }
+
+    @Test(groups = "unit")
+    public void testGetEventColumnWithReadoutParams() {
+        ModelCommand modelCommand = ModelingServiceTestUtils.createModelCommandWithFewRowsAndReadoutTargets(
+                "ModelCommandCallableTestNG_eventtable_fewrows", false, true);
+        ModelCommandParameters commandParameters = new ModelCommandParameters(modelCommand.getCommandParameters());
+        assertEquals(commandParameters.getEventColumnName(), "CATEGORY");
     }
 
 }

@@ -19,14 +19,13 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 public abstract class MetadataProvider {
 
     private AvroSchemaGenerator avroSchemaGenerator;
-    
+
     public abstract String getName();
 
     public abstract String getConnectionString(DbCreds creds);
-   
-    
-	public abstract ConnManager getConnectionManager(SqoopOptions options);
-   
+
+    public abstract ConnManager getConnectionManager(SqoopOptions options);
+
     public Schema getSchema(DbCreds dbCreds, String tableName) {
         SqoopOptions options = new SqoopOptions();
         options.setConnectString(getConnectionString(dbCreds));
@@ -38,13 +37,12 @@ public abstract class MetadataProvider {
             return null;
         }
     }
-    
+
     protected String replaceUrlWithParamsAndTestConnection(String url, DbCreds creds) {
         Connection conn = null;
         try {
             url = url.replaceFirst("\\$\\$HOST\\$\\$", creds.getHost());
-            url = url.replaceFirst("\\$\\$PORT\\$\\$",
-                    Integer.toString(creds.getPort()));
+            url = url.replaceFirst("\\$\\$PORT\\$\\$", Integer.toString(creds.getPort()));
             url = url.replaceFirst("\\$\\$DB\\$\\$", creds.getDb());
             url = url.replaceFirst("\\$\\$USER\\$\\$", creds.getUser());
             url = url.replaceFirst("\\$\\$PASSWD\\$\\$", creds.getPassword());
@@ -57,7 +55,7 @@ public abstract class MetadataProvider {
             }
         }
         return url;
-        
+
     }
 
 }

@@ -127,10 +127,9 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
     @Test(groups = "functional", enabled = true)
     public void testWorkflowValidationFailed() throws Exception {
-        // Comment out below 2 lines when testing against an integration
-        // database
+        // Comment out below 2 lines when testing against an integration database
         // Validation failure due to too few rows
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithFewRows(TEMP_EVENTTABLE_FEW_ROWS, false, true);
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithFewRowsAndReadoutTargets(TEMP_EVENTTABLE_FEW_ROWS, false, true);
         modelCommandEntityMgr.create(command);
 
         int iterations = 0;
