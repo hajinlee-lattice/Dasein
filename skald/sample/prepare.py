@@ -25,7 +25,7 @@ def main(args):
     defaultZooKeeperConnectionString = "localhost:2181"
     defaultSkaldConnectionString = "http://localhost:8040"
 
-    default_model_name = "Q_PLS_ModelingLattice_Relaunch"
+    default_model_name = "Q_PLS_Modeling_Lattice_Relaunch"
 
     defaultContractId = "Lattice_Relaunch"
     defaultTenantId = "Lattice_Relaunch"

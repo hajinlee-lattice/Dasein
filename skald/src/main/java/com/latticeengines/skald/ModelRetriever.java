@@ -39,7 +39,7 @@ public class ModelRetriever {
                             String pattern = "http://%s/webhdfs/v1/user/s-analytics/customers/%s/models/%s/%s/rfpmml.xml?op=OPEN";
                             address = new URL(String.format(pattern, properties.getHdfsAddress(), key.getKey()
                                     .getContractId(), key.getValue().name,
-                                    "8a8285f6-0037-4dfc-b201-3c28d29bd9ab/1416355548818_8596"));
+                                    "b2d0c3f4-b767-4483-8c3c-f36d5cbe197d/1416355548818_22888"));
                         } catch (MalformedURLException ex) {
                             throw new RuntimeException("Failed to generate WebHDFS URL", ex);
                         }
