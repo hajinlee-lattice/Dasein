@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.exposed.entitymanager;
 
 import java.util.List;
 
+import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 
 public interface JobEntityMgr extends BaseEntityMgr<Job> {

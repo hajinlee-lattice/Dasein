@@ -5,8 +5,8 @@ import org.hibernate.Session;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.dataplatform.dao.impl.BaseDaoImpl;
 import com.latticeengines.dataplatform.dao.modeling.ModelDao;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.modeling.Model;
 
 public class ModelDaoImpl extends BaseDaoImpl<Model> implements ModelDao {

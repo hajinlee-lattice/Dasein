@@ -18,8 +18,8 @@ import com.latticeengines.dataplatform.entitymanager.modeling.AlgorithmEntityMgr
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
-import com.latticeengines.dataplatform.exposed.entitymanager.BaseEntityMgr;
 import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Configuration

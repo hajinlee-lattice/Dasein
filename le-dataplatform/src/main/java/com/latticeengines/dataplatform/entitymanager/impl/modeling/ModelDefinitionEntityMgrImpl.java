@@ -5,10 +5,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.modeling.ModelDefinitionDao;
-import com.latticeengines.dataplatform.entitymanager.impl.BaseEntityMgrImpl;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelDefinitionEntityMgr;
+import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 
 @Component("modelDefinitionEntityMgr")

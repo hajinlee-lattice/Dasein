@@ -1,6 +1,6 @@
 package com.latticeengines.dataplatform.entitymanager.modeling;
 
-import com.latticeengines.dataplatform.exposed.entitymanager.BaseEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.modeling.Model;
 
 public interface ModelEntityMgr extends BaseEntityMgr<Model> {

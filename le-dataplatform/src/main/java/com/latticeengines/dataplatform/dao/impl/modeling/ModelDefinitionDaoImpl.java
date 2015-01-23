@@ -5,8 +5,8 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-import com.latticeengines.dataplatform.dao.impl.BaseDaoImpl;
 import com.latticeengines.dataplatform.dao.modeling.ModelDefinitionDao;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 
 public class ModelDefinitionDaoImpl extends BaseDaoImpl<ModelDefinition> implements ModelDefinitionDao {

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.dataplatform.dao.JobDao;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 
 public class JobDaoImpl extends BaseDaoImpl<Job> implements JobDao {

@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.dataplatform.dao.BaseDao;
 import com.latticeengines.dataplatform.dao.ModelCommandDao;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
+import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 
 @Component("modelCommandEntityMgr")
