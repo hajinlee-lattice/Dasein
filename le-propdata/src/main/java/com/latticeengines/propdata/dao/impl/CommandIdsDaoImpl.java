@@ -1,6 +1,6 @@
 package com.latticeengines.propdata.dao.impl;
 
-import com.latticeengines.dataplatform.dao.impl.BaseDaoImpl;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.propdata.CommandIds;
 import com.latticeengines.propdata.dao.CommandIdsDao;
 

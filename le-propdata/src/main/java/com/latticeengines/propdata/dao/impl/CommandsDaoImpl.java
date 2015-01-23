@@ -7,7 +7,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 
-import com.latticeengines.dataplatform.dao.impl.BaseDaoImpl;
+import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.propdata.dao.CommandsDao;
 
