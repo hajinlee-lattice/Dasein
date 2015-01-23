@@ -15,7 +15,9 @@ public class MetadataProviderMapping {
         SQLServerMetadataProvider ssMdProvider = new SQLServerMetadataProvider();
         MySQLServerMetadataProvider mysqlMdProvider = new MySQLServerMetadataProvider();
         mappings.put(ssMdProvider.getName(), ssMdProvider);
+        mappings.put(ssMdProvider.getDriverName(), ssMdProvider);
         mappings.put(mysqlMdProvider.getName(), mysqlMdProvider);
+        mappings.put(mysqlMdProvider.getDriverName(), mysqlMdProvider);
         return mappings;
     }
 }

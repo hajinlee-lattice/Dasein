@@ -1,12 +1,11 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
-import java.math.BigInteger;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
@@ -27,6 +26,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.AlertService;
+import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
@@ -89,6 +89,8 @@ public class ModelCommandCallable implements Callable<Long> {
     private int positiveEventFailThreshold;
 
     private int positiveEventWarnThreshold;
+    
+    private MetadataService metadataService;
 
     public ModelCommandCallable() {
     }
@@ -101,7 +103,7 @@ public class ModelCommandCallable implements Callable<Long> {
             ModelStepProcessor modelStepRetrieveMetadataProcessor, DebugProcessorImpl debugProcessorImpl,
             AlertService alertService, String httpFsPrefix, String resourceManagerWebAppAddress,
             String appTimeLineWebAppAddress, int rowFailThreshold, int rowWarnThreshold,
-            int positiveEventFailThreshold, int positiveEventWarnThreshold) {
+            int positiveEventFailThreshold, int positiveEventWarnThreshold, MetadataService metadataService) {
         this.modelCommand = modelCommand;
         this.yarnConfiguration = yarnConfiguration;
         this.modelingJobService = modelingJobService;
@@ -122,6 +124,7 @@ public class ModelCommandCallable implements Callable<Long> {
         this.rowWarnThreshold = rowWarnThreshold;
         this.positiveEventFailThreshold = positiveEventFailThreshold;
         this.positiveEventWarnThreshold = positiveEventWarnThreshold;
+        this.metadataService = metadataService;
     }
 
     @Override
@@ -147,6 +150,15 @@ public class ModelCommandCallable implements Callable<Long> {
             }
         }
         return modelCommand.getPid();
+    }
+    
+    private static String readableFileSize(long size) {
+        if (size <= 0) {
+            return "0";
+        }
+        final String[] units = new String[] { "B", "kB", "MB", "GB", "TB" };
+        int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
     private void executeWorkflow() throws Exception {
@@ -178,29 +190,10 @@ public class ModelCommandCallable implements Callable<Long> {
             executeYarnStep(ModelCommandStep.LOAD_DATA, commandParameters);
 
             JdbcTemplate dlOrchestrationJdbcTemplate = debugProcessorImpl.getDlOrchestrationJdbcTemplate();
-            String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData()
-                    .getDriverName();
-            if (dbDriverName.contains("Microsoft")) {
-                Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("EXEC sp_spaceused N'"
-                        + commandParameters.getEventTable() + "'");
-                String dataSize = (String) resMap.get("data");
-                String rowSize = (String) resMap.get("rows");
-                int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
-                        "SELECT COUNT(*) FROM sys.columns where object_id = OBJECT_ID('["
-                                + commandParameters.getEventTable() + "]')", Integer.class);
-                modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize
-                        + " Column count: " + columnSize);
-            } else {
-                Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("show table status where name = '"
-                        + commandParameters.getEventTable() + "'");
-                BigInteger dataSize = (BigInteger) resMap.get("Data_length");
-                BigInteger rowSize = (BigInteger) resMap.get("Rows");
-                int columnSize = dlOrchestrationJdbcTemplate.queryForObject(
-                        "select count(*) from INFORMATION_SCHEMA.COLUMNS where table_name='"
-                                + commandParameters.getEventTable() + "'", Integer.class);
-                modelCommandLogService.log(modelCommand, "Data Size: " + dataSize + " Row count: " + rowSize
-                        + " Column count: " + columnSize);
-            }
+            Long rowSize = metadataService.getRowCount(dlOrchestrationJdbcTemplate, commandParameters.getEventTable());
+            Long dataSize = metadataService.getDataSize(dlOrchestrationJdbcTemplate, commandParameters.getEventTable());
+            Integer columnSize = metadataService.getColumnCount(dlOrchestrationJdbcTemplate, commandParameters.getEventTable());
+            modelCommandLogService.log(modelCommand, "Data Size: " + readableFileSize(dataSize) + " Row count: " + rowSize + " Column count: " + columnSize);
         } else { // modelCommand IN_PROGRESS
             List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand,
                     modelCommand.getModelCommandStep());
@@ -239,23 +232,9 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private boolean validateDataSize(ModelCommandParameters commandParameters) throws SQLException {
         JdbcTemplate dlOrchestrationJdbcTemplate = debugProcessorImpl.getDlOrchestrationJdbcTemplate();
-        String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName();
-        int rowCount;
-        int positiveEventCount;
-        if (dbDriverName.contains("Microsoft")) {
-            rowCount = dlOrchestrationJdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM " + commandParameters.getEventTable(), Integer.class);
-            positiveEventCount = dlOrchestrationJdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM " + commandParameters.getEventTable() + " WHERE "
-                            + commandParameters.getEventColumnName() + " = 1", Integer.class);
-
-        } else {
-            rowCount = dlOrchestrationJdbcTemplate.queryForObject(
-                    "select count(*) from " + commandParameters.getEventTable(), Integer.class);
-            positiveEventCount = dlOrchestrationJdbcTemplate.queryForObject(
-                    "select count(*) from " + commandParameters.getEventTable() + " where "
-                            + commandParameters.getEventColumnName() + " = 1", Integer.class);
-        }
+        Long rowCount = metadataService.getRowCount(dlOrchestrationJdbcTemplate, commandParameters.getEventTable());
+        Long positiveEventCount = metadataService.getPositiveEventCount(dlOrchestrationJdbcTemplate, 
+                commandParameters.getEventTable(), commandParameters.getEventColumnName());
 
         if (rowCount < rowFailThreshold && positiveEventCount < positiveEventFailThreshold) {
             modelCommandLogService.log(modelCommand,
@@ -434,4 +413,5 @@ public class ModelCommandCallable implements Callable<Long> {
                 + diagnosticsPath + HTTPFS_SUFFIX);
 
     }
+
 }

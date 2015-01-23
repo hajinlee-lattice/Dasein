@@ -1,5 +1,10 @@
 package com.latticeengines.dataplatform.service.impl.metadata;
 
+import java.math.BigInteger;
+import java.util.Map;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.MySQLManager;
@@ -31,5 +36,24 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     public ConnManager getConnectionManager(SqoopOptions options) {
         return new MySQLManager(options);
+    }
+
+    @Override
+    public Long getRowCount(JdbcTemplate jdbcTemplate, String tableName) {
+        Map<String, Object> resMap = jdbcTemplate.queryForMap("show table status where name = '" + tableName + "'");
+        BigInteger numRows = (BigInteger) resMap.get("Rows");
+        return numRows.longValue();
+    }
+
+    @Override
+    public Long getDataSize(JdbcTemplate jdbcTemplate, String tableName) {
+        Map<String, Object> resMap = jdbcTemplate.queryForMap("show table status where name = '" + tableName + "'");
+        BigInteger dataSize = (BigInteger) resMap.get("Data_length");
+        return dataSize.longValue();
+    }
+
+    @Override
+    public String getDriverName() {
+        return "MySQL Connector Java";
     }
 }

@@ -22,6 +22,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.AlertService;
+import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.dlorchestration.DLOrchestrationService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
@@ -76,6 +77,8 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
     private int positiveEventFailThreshold;
 
     private int positiveEventWarnThreshold;
+    
+    private MetadataService metadataService;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -99,7 +102,8 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
                     modelCommandLogService, modelCommandResultEntityMgr, modelStepFinishProcessor,
                     modelStepOutputResultsProcessor, modelStepRetrieveMetadataProcessor, debugProcessorImpl,
                     alertService, httpFsPrefix, resourceManagerWebAppAddress, appTimeLineWebAppAddress,
-                    rowFailThreshold, rowWarnThreshold, positiveEventFailThreshold, positiveEventWarnThreshold)));
+                    rowFailThreshold, rowWarnThreshold, positiveEventFailThreshold, positiveEventWarnThreshold,
+                    metadataService)));
         }
         for (Future<Long> future : futures) {
             try {
@@ -285,5 +289,13 @@ public class DLOrchestrationServiceImpl extends QuartzJobBean implements DLOrche
 
     public void setPositiveEventWarnThreshold(int positiveEventWarnThreshold) {
         this.positiveEventWarnThreshold = positiveEventWarnThreshold;
+    }
+
+    public MetadataService getMetadataService() {
+        return metadataService;
+    }
+
+    public void setMetadataService(MetadataService metadataService) {
+        this.metadataService = metadataService;
     }
 }

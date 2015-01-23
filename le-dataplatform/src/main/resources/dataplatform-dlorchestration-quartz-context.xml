@@ -30,6 +30,7 @@
                 <entry key="rowWarnThreshold" value="${dataplatform.dlorchestrationjob.row.warn.threshold}" />
                 <entry key="positiveEventFailThreshold" value="${dataplatform.dlorchestrationjob.postiveevent.fail.threshold}" />
                 <entry key="positiveEventWarnThreshold" value="${dataplatform.dlorchestrationjob.postiveevent.warn.threshold}" />
+                <entry key="metadataService" value-ref="metadataService" />
             </map>
         </property>
     </bean>

@@ -1,5 +1,9 @@
 package com.latticeengines.dataplatform.service.impl.metadata;
 
+import java.util.Map;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;
 import com.cloudera.sqoop.manager.SQLServerManager;
@@ -31,6 +35,25 @@ public class SQLServerMetadataProvider extends MetadataProvider {
 
     public ConnManager getConnectionManager(SqoopOptions options) {
         return new SQLServerManager(options);
+    }
+
+    @Override
+    public Long getRowCount(JdbcTemplate jdbcTemplate, String tableName) {
+        Map<String, Object> resMap = jdbcTemplate.queryForMap("EXEC sp_spaceused N'" + tableName + "'");
+        String rowCount = (String) resMap.get("rows");
+        return Long.valueOf(rowCount.trim());
+    }
+
+    @Override
+    public Long getDataSize(JdbcTemplate jdbcTemplate, String tableName) {
+        Map<String, Object> resMap = jdbcTemplate.queryForMap("EXEC sp_spaceused N'" + tableName + "'");
+        String dataSize = ((String) resMap.get("data")).trim().split(" ")[0];
+        return 1024 * Long.valueOf(dataSize);
+    }
+
+    @Override
+    public String getDriverName() {
+        return "Microsoft JDBC Driver 4.0 for SQL Server";
     }
 
 }

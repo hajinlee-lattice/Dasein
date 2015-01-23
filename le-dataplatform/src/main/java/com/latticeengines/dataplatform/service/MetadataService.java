@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.service;
 
 import org.apache.avro.Schema;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -12,4 +13,13 @@ public interface MetadataService {
     Schema getAvroSchema(DbCreds creds, String tableName);
 
     String getJdbcConnectionUrl(DbCreds creds);
+    
+    Long getRowCount(JdbcTemplate jdbcTemplate, String tableName);
+    
+    Long getDataSize(JdbcTemplate jdbcTemplate, String tableName);
+    
+    Integer getColumnCount(JdbcTemplate jdbcTemplate, String tableName);
+
+    Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName);
+    
 }

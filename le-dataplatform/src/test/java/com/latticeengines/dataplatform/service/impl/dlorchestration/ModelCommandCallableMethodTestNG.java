@@ -19,6 +19,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.impl.AlertServiceImpl;
 import com.latticeengines.dataplatform.exposed.service.impl.PagerDutyTestUtils;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
@@ -90,6 +91,9 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
     @Value("${dataplatform.dlorchestrationjob.postiveevent.warn.threshold}")
     private int positiveEventWarnThreshold;
     
+    @Autowired
+    private MetadataService metadataService;
+    
     @BeforeClass(groups = "functional")
     public void setup() {
         alertService.enableTestMode();
@@ -112,7 +116,8 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
                 modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
                 modelStepRetrieveMetadataProcessor, debugProcessorImpl, alertService, httpFsPrefix,
-                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold, positiveEventFailThreshold, positiveEventWarnThreshold);
+                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold, 
+                positiveEventFailThreshold, positiveEventWarnThreshold, metadataService);
 
         PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed());
 
@@ -131,7 +136,8 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
                 modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
                 modelStepRetrieveMetadataProcessor, debugProcessorImpl, alertService, httpFsPrefix,
-                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold, positiveEventFailThreshold, positiveEventWarnThreshold);
+                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold, 
+                positiveEventFailThreshold, positiveEventWarnThreshold, metadataService);
         ModelCommandState commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);
         JobStatus jobStatus = new JobStatus();
 

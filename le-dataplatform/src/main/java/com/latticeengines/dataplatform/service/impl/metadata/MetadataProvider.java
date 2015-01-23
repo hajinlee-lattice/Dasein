@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import org.apache.avro.Schema;
 import org.apache.sqoop.orm.AvroSchemaGenerator;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.JdbcUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -21,10 +22,16 @@ public abstract class MetadataProvider {
     private AvroSchemaGenerator avroSchemaGenerator;
 
     public abstract String getName();
+    
+    public abstract String getDriverName();
 
     public abstract String getConnectionString(DbCreds creds);
 
     public abstract ConnManager getConnectionManager(SqoopOptions options);
+    
+    public abstract Long getRowCount(JdbcTemplate jdbcTemplate, String tableName);
+    
+    public abstract Long getDataSize(JdbcTemplate jdbcTemplate, String tableName);
 
     public Schema getSchema(DbCreds dbCreds, String tableName) {
         SqoopOptions options = new SqoopOptions();
