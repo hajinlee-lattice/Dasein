@@ -82,8 +82,7 @@ public class ProprietaryDataMatcher {
         String pattern = "http://%s/ResultsCacheData.aspx?TenantID=%s&Domain=%s";
         URL address;
         try {
-            // TODO Pass along the actual space!
-            address = new URL(String.format(pattern, properties.getMatcherAddress(), "Test", domain));
+            address = new URL(String.format(pattern, properties.getMatcherAddress(), space, domain));
         } catch (MalformedURLException ex) {
             throw new RuntimeException("Failed to generate matcher URL", ex);
         }
