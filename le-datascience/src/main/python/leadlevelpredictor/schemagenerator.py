@@ -3,12 +3,12 @@ import json
 import logging
 import sys
 
-import leadlevelpredictor.querybuilder as qbldr
+import util.querybuilder as qbldr
 
 
 logging.basicConfig(level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(name='data_profile')
+logger = logging.getLogger(name='schema_generator')
 
 class SchemaGenerator(object):
     
@@ -48,7 +48,7 @@ class SchemaGenerator(object):
             columnMetadata[columnMetadataElement['Description']] = columnMetadataElement
         
         predictorList = summaryElementList["Predictors"]
-        logger.info("Number of input columns: %d" % len(predictorList))
+        logger.info("Number of input columns: %d." % len(predictorList))
         metadata = []
         for predictor in predictorList:
             name = predictor["Name"]
@@ -56,7 +56,7 @@ class SchemaGenerator(object):
             interpretation = 1
             colname = ""
             if name not in columnMetadata:
-                logger.info("Column \"" + name + "\" not in metadata! Using interpretation = 1")
+                logger.info("Column \"%s\" not in metadata! Using interpretation = 1" % name)
                 continue
             else:
                 interpretation = columnMetadata[name]["Interpretation"]

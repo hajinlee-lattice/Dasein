@@ -7,7 +7,7 @@ class QueryBuilder(object):
     '''
     
     def __init__(self, dsn, username, password, database):
-        conn_string = 'DSN=%s;UID=%s;PWD=%s;DATABASE=%s;' % (dsn, username, password, database)
+        conn_string = "DSN=%s;UID=%s;PWD=%s;DATABASE=%s;" % (dsn, username, password, database)
         self.conn = pyodbc.connect(conn_string)
        
     def executeQuery(self, query):
