@@ -21,7 +21,6 @@
         <classes.directory.dataplatform>../le-dataplatform/target/classes</classes.directory.dataplatform>
         <classes.directory.common>../le-common/target/classes</classes.directory.common>
         <classes.directory.api>../le-api/target/classes</classes.directory.api>
-        <classes.directory.scoring>../le-scoring/target/classes</classes.directory.scoring>
         <classes.directory.domain>../le-domain/target/classes</classes.directory.domain>
         <classes.directory.perf>../le-perf/target/classes</classes.directory.perf>
         <classes.directory.scheduler>../le-scheduler/target/classes</classes.directory.scheduler>
@@ -30,7 +29,6 @@
         <sources.directory.dataplatform>../le-dataplatform/src/main/java</sources.directory.dataplatform>
         <sources.directory.common>../le-common/src/main/java</sources.directory.common>
         <sources.directory.api>../le-api/src/main/java</sources.directory.api>
-        <sources.directory.scoring>../le-scoring/src/main/java</sources.directory.scoring>
         <sources.directory.domain>../le-domain/src/main/java</sources.directory.domain>
         <sources.directory.perf>../le-perf/src/main/java</sources.directory.perf>
         <sources.directory.scheduler>../le-scheduler/src/main/java</sources.directory.scheduler>
@@ -96,7 +94,6 @@
                                                 <fileset dir="${classes.directory.dataplatform}" />
                                                 <fileset dir="${classes.directory.api}" />
                                                 <fileset dir="${classes.directory.common}" />
-                                                <fileset dir="${classes.directory.scoring}" />
                                                 <fileset dir="${classes.directory.domain}" />
                                                 <fileset dir="${classes.directory.perf}" />
                                                 <fileset dir="${classes.directory.scheduler}" />
@@ -105,7 +102,6 @@
                                                 <fileset dir="${sources.directory.dataplatform}" />
                                                 <fileset dir="${sources.directory.api}"/>
                                                 <fileset dir="${sources.directory.common}"/>
-                                                <fileset dir="${sources.directory.scoring}"/>
                                                 <fileset dir="${sources.directory.domain}"/>
                                                 <fileset dir="${sources.directory.perf}"/>
                                                 <fileset dir="${sources.directory.scheduler}"/>
