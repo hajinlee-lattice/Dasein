@@ -1,4 +1,4 @@
-package com.latticeengines.cloudmodel;
+package com.latticeengines.scoringharness.cloudmodel;
 
 import java.util.ArrayList;
 

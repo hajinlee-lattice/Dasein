@@ -1,4 +1,4 @@
-package com.latticeengines.marketoharness;
+package com.latticeengines.scoringharness.marketoharness;
 
 public class LeadGenerator {
 
