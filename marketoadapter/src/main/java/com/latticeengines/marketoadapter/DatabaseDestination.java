@@ -15,6 +15,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+
 @Service
 public class DatabaseDestination implements RecordDestination
 {
@@ -31,7 +33,7 @@ public class DatabaseDestination implements RecordDestination
     }
     
     @Override
-    public String receiveRecord(String customerID, Map<String, Object> record)
+    public String receiveRecord(CustomerSpace customerSpace, Map<String, Object> record)
     {
         // Check that there are no special characters in the field names, because
         // those will get used as column identifiers and won't be escaped.
@@ -39,19 +41,19 @@ public class DatabaseDestination implements RecordDestination
         {
             if (!key.matches("^[a-zA-Z0-9_]+$"))
             {
-                log.error("Received invalid field name: " + key + " for customer ID: " + customerID);
+                log.error("Received invalid field name: " + key + " for customer : " + customerSpace.toString());
                 throw new RuntimeException("Invalid field name: " + key);
             }
         }
         
-        CustomerSettings settings = manager.getCustomerSettingsByID(customerID);
+        CustomerSettings settings = manager.getCustomerSettingsByCustomerSpace(customerSpace);
         
-        if (record.containsKey("CustomerID"))
+        if (record.containsKey("CustomerSpace"))
         {
-            log.warn("Received a request that contained a CustomerID");
-            throw new RuntimeException("CustomerID is not a valid field name.");
+            log.warn("Received a request that contained a CustomerSpace");
+            throw new RuntimeException("CustomerSpace is not a valid field name.");
         }
-        record.put("CustomerID", settings.customerID);
+        record.put("CustomerSpace", customerSpace);
         
         List<String> sortedKeys = new ArrayList<String>(record.keySet());
         String names = StringUtils.collectionToCommaDelimitedString(sortedKeys);

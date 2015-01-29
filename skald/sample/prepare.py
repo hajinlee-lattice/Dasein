@@ -16,14 +16,16 @@ def log(someString):
 def make_request(url, header, data):
     request = urllib2.Request(url, headers=header, data=data)
     response = urllib2.urlopen(request)
-    if response.code != 200:
+    if response.code == 200:
+        log("call to {0} successful".format(url))
+    else:
         raise Exception("Received code {0} from request".format(response.code))
 
 
 def main(args):
     defaultPodId = "test"
+    defaultSkaldConnectionString = "http://localhost:8000"
     defaultZooKeeperConnectionString = "localhost:2181"
-    defaultSkaldConnectionString = "http://localhost:8040"
 
     default_model_name = "Q_PLS_Modeling_Lattice_Relaunch"
 

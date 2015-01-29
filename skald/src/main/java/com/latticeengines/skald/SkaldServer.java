@@ -40,7 +40,7 @@ public class SkaldServer {
         server.join();
     }
 
-    private static final int port = 8040;
+    private static final int port = 8000;
     private static final String path = "/";
 
     private static final Log log = LogFactory.getLog(SkaldServer.class);

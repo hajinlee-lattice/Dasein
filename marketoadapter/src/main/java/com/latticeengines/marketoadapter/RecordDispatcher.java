@@ -19,6 +19,7 @@ public class RecordDispatcher
         destinations = new HashMap<String, RecordDestination>();
         destinations.put("Console", consoleDestination);
         destinations.put("Database", databaseDestination);
+        destinations.put("Skald", skaldDestination);
     }
     
     public String receiveRecord(String key, Map<String, Object> record)
@@ -39,7 +40,7 @@ public class RecordDispatcher
             throw new RuntimeException("Encountered an internal configuration error");
         }
         
-        return destination.receiveRecord(settings.customerID, record);
+        return destination.receiveRecord(settings.customerSpace, record);
     }
     
     @Autowired
@@ -48,6 +49,8 @@ public class RecordDispatcher
     private ConsoleDestination consoleDestination;
     @Autowired
     private DatabaseDestination databaseDestination;
+    @Autowired
+    private SkaldDestination skaldDestination;
     
     private Map<String, RecordDestination> destinations;
     

@@ -1,8 +1,8 @@
 [
 {
-	"customerID": "Test_Customer",
 	"customerKey": "test",
-	"destination": "Database",
+	"customerSpace": {"contractId": "Lattice_Relaunch", "tenantId": "Lattice_Relaunch", "spaceId": "Production"},
+	"destination": "Skald",
 	"databaseServer": "jdbc:jtds:sqlserver://localhost;DatabaseName=BardDB;useNTLMv2=true;domain=Lattice"
 }
 ]

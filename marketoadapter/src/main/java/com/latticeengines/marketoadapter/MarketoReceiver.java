@@ -64,7 +64,7 @@ public class MarketoReceiver
         // Explicitly set those defaults to a sentinel value, and replace them with null.
         for (String field : data.keySet())
         {
-            if ("LatticeNull".equals(data.get(field)))
+            if (nullField.equals(data.get(field)))
             {
                 data.put(field,  null);
             }
@@ -81,6 +81,7 @@ public class MarketoReceiver
     private RecordDispatcher dispatcher;
     
     private static final String keyField = "LatticeKey";
+    private static final String nullField = "_null";
     
     private static final Log log = LogFactory.getLog(MarketoReceiver.class);
 }

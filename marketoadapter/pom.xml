@@ -8,6 +8,8 @@
     <name>${component-name}</name>
 
     <properties>
+        <le.common.version>1.0.23-SNAPSHOT</le.common.version>
+        <le.camille.version>1.0.23-SNAPSHOT</le.camille.version>
         <component-name>marketoadapter</component-name>
     </properties>
 
@@ -18,7 +20,71 @@
         <relativePath>../le-parent</relativePath>
     </parent>
     
+    <build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<shadedArtifactAttached>true</shadedArtifactAttached>
+					<createDependencyReducedPom>false</createDependencyReducedPom>
+					
+					<transformers>
+						<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+							<mainClass>com.latticeengines.marketoadapter.MarketoAdapterServer</mainClass>
+						</transformer>
+              		</transformers>
+              		
+              		<artifactSet>
+              			<excludes>
+              				<!-- Remove the largest of the unfortunate unused dependencies. -->
+              				<!-- TODO Refactor POMs and overall dependencies to avoid this situation. -->
+              				<exclude>org.hibernate:*</exclude>
+              				<exclude>org.apache.hadoop:*</exclude>
+              				<exclude>org.springframework.data:*</exclude>
+              				<exclude>org.apache.avro:*</exclude>
+              			</excludes>
+              		</artifactSet>
+              		
+					<filters>
+						<!-- Strip any signatures to avoid security errors running the shaded JAR. -->
+					    <filter>
+					        <artifact>*:*</artifact>
+					        <excludes>
+					            <exclude>META-INF/*.SF</exclude>
+					            <exclude>META-INF/*.DSA</exclude>
+					            <exclude>META-INF/*.RSA</exclude>
+					        </excludes>
+					    </filter>
+					</filters>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+    
     <dependencies>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-common</artifactId>
+            <version>${le.common.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        
+        <dependency>
+			<groupId>com.latticeengines</groupId>
+			<artifactId>le-camille</artifactId>
+            <version>${le.camille.version}</version>
+		</dependency>
+        
 		<dependency>
 	      <groupId>org.eclipse.jetty</groupId>
 	      <artifactId>jetty-server</artifactId>

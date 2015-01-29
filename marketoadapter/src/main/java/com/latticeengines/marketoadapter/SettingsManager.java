@@ -8,12 +8,14 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 // TODO: This has a terrible name.
 @Service
 public class SettingsManager {
     public SettingsManager() throws IOException
     {
+    	//TODO: get this from Camille instead
         File input = new File(customerSettingsPath);
         
         ObjectMapper serializer = new ObjectMapper();
@@ -21,11 +23,11 @@ public class SettingsManager {
                 new TypeReference<List<CustomerSettings>>() {});
     }
     
-    public CustomerSettings getCustomerSettingsByID(String customerID)
+    public CustomerSettings getCustomerSettingsByKey(String customerKey)
     {
         for (CustomerSettings settings : customerSettings)
         {
-            if (settings.customerID.equals(customerID))
+            if (settings.customerKey.equals(customerKey))
             {
                 return settings;
             }
@@ -34,11 +36,11 @@ public class SettingsManager {
         return null;
     }
     
-    public CustomerSettings getCustomerSettingsByKey(String customerKey)
+    public CustomerSettings getCustomerSettingsByCustomerSpace(CustomerSpace customerSpace)
     {
         for (CustomerSettings settings : customerSettings)
         {
-            if (settings.customerKey.equals(customerKey))
+            if (settings.customerSpace.equals(customerSpace))
             {
                 return settings;
             }
