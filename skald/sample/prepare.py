@@ -24,7 +24,7 @@ def make_request(url, header, data):
 
 def main(args):
     defaultPodId = "test"
-    defaultSkaldConnectionString = "http://localhost:8000"
+    defaultSkaldConnectionString = "http://localhost:8050"
     defaultZooKeeperConnectionString = "localhost:2181"
 
     default_model_name = "Q_PLS_Modeling_Lattice_Relaunch"

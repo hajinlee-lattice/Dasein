@@ -1,5 +1,7 @@
 package com.latticeengines.skald;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -15,13 +17,25 @@ import org.springframework.web.servlet.DispatcherServlet;
 
 public class SkaldServer {
     public static void main(String[] args) throws Exception {
+        // Load port from the properties file; can't use the nice Spring wrapper
+        // because of some circular initialization nonsense with Jetty.
+        int port;
+        try (FileInputStream input = new FileInputStream(new File("skald.properties"))) {
+            Properties properties = new Properties();
+            properties.load(input);
+            port = Integer.parseInt(properties.getProperty("skald.server.port"));
+        }
+
+        // Initialize the python interpreter.
         Properties properties = new Properties(System.getProperties());
         properties.setProperty("python.cachedir.skip", "true");
         PythonInterpreter.initialize(System.getProperties(), properties, new String[0]);
 
+        // Initialize a web context for Spring.
         AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
         context.setConfigLocation("com.latticeengines.skald");
 
+        // Start the standalone Jetty server.
         ServletContextHandler handler = new ServletContextHandler();
         handler.setErrorHandler(null);
         handler.setContextPath(path);
@@ -40,7 +54,6 @@ public class SkaldServer {
         server.join();
     }
 
-    private static final int port = 8000;
     private static final String path = "/";
 
     private static final Log log = LogFactory.getLog(SkaldServer.class);
