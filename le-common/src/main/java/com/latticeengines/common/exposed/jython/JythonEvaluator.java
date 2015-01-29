@@ -62,6 +62,16 @@ public class JythonEvaluator {
             }
         }
 
+        // Explicitly widen integers if required.
+        if (type == Long.class && result instanceof Integer) {
+            result = ((Integer) result).longValue();
+        }
+
+        // Explicitly widen floats if required.
+        if (type == Double.class && result instanceof Float) {
+            result = ((Float) result).doubleValue();
+        }
+
         return type.cast(result);
     }
 }
