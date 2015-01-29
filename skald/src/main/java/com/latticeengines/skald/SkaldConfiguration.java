@@ -26,8 +26,7 @@ public class SkaldConfiguration extends WebMvcConfigurerAdapter {
     public void initialize() throws Exception {
         CamilleConfiguration config = new CamilleConfiguration(properties.getPod(), properties.getZooKeeperAddress());
 
-        // TODO Swap this to runtime mode once a provisioning tool exists.
-        CamilleEnvironment.start(Mode.BOOTSTRAP, config);
+        CamilleEnvironment.start(Mode.RUNTIME, config);
         SkaldBootstrapper.register();
     }
 
