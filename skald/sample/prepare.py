@@ -111,7 +111,6 @@ def main(args):
             log("Waiting for Skald to initialize...")
             time.sleep(5)
 
-
         baton_path = make_path(script_dir, "le-baton-.*-SNAPSHOT-shaded\\.jar")
         if baton_path is None:
             baton_path = make_path(
@@ -157,7 +156,6 @@ def main(args):
         make_request("{0}/ScoreRecord".format(skald_connection_string),
                      {"Content-Type": "application/json"},
                      record)
-
 
     except Exception as e:
         log(traceback.format_exc())
