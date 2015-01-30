@@ -97,7 +97,8 @@ def main(args):
 
         if not no_skald:
             log("Starting Skald process...")
-            skald_path = make_path(script_dir, "skald-.*-SNAPSHOT-shaded\\.jar")
+            skald_path = make_path(os.path.join(script_dir, ".."),
+                                   "skald-.*-SNAPSHOT-shaded\\.jar")
             if skald_path is None:
                 skald_path = make_path(os.path.join(script_dir, "..", "target"),
                                        "skald-.*-SNAPSHOT-shaded\\.jar")
@@ -111,7 +112,8 @@ def main(args):
             log("Waiting for Skald to initialize...")
             time.sleep(5)
 
-        baton_path = make_path(script_dir, "le-baton-.*-SNAPSHOT-shaded\\.jar")
+        baton_path = make_path(
+            os.path.join(script_dir, ".."), "le-baton-.*-SNAPSHOT-shaded\\.jar")
         if baton_path is None:
             baton_path = make_path(
                 os.path.join(script_dir, "..", "..", "le-baton", "target"),
