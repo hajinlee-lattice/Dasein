@@ -124,6 +124,7 @@ class LearningExecutor(Executor):
             mediator.allDataPreTransform = params["allDataPreTransform"]
             mediator.allDataPostTransform = params["allDataPostTransform"]
             mediator.data = params["test"].as_matrix()
+            mediator.rowCount = len(params["test"].index) + len(params["training"].index)
             mediator.schema = params["schema"]
             mediator.target = mediator.data[:, mediator.schema["targetIndex"]]
             mediator.pipeline = params["pipeline"]

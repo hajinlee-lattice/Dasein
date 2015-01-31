@@ -39,7 +39,7 @@ class SummaryGenerator(State, JsonGenBase):
         if rocScore is not None:
             self.summary["RocScore"] = rocScore 
         self.summary["SegmentChart"] = self.__getSegmentChart(mediator.probRange, mediator.widthRange, mediator.buckets, mediator.averageProbability)
-        self.summary["DLEventTableData"] = self.__getDLEventTableData(self.mediator.provenanceProperties)
+        self.summary["DLEventTableData"] = self.__getDLEventTableData(self.mediator.provenanceProperties, mediator.rowCount)
         self.summary["ConstructionInfo"] = self.__getConstructionInfo()
         
     @overrides(JsonGenBase)
@@ -193,7 +193,7 @@ class SummaryGenerator(State, JsonGenBase):
         self.logger.info("Theoretical best area = %f" % theoreticalBestArea)
         return actualBestArea / float(theoreticalBestArea)
         
-    def __getDLEventTableData(self, provenanceProperties):
+    def __getDLEventTableData(self, provenanceProperties, rowCount):
         if len(provenanceProperties) == 0:
             self.logger.error("Provenance property is null.")
             return OrderedDict()
@@ -202,7 +202,7 @@ class SummaryGenerator(State, JsonGenBase):
         element["DataLoaderURL"] = provenanceProperties["DataLoader_Instance"] 
         element["TenantName"] = provenanceProperties["DataLoader_TenantName"]
         element["QueryName"] = provenanceProperties["DataLoader_Query"]
-        
+        element["SourceRowCount"] = rowCount
         return element
     
     def __getConstructionInfo(self):
