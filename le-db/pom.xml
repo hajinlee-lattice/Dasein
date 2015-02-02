@@ -1,24 +1,23 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
     <artifactId>le-db</artifactId>
-    <version>1.0.23-SNAPSHOT</version>
+    <version>1.0.23</version>
     <name>le-${component-name}</name>
     <description>LE DB</description>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.23-SNAPSHOT</version>
+        <version>1.0.23</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
     <properties>
         <component-name>db</component-name>
-        <le.common.version>1.0.23-SNAPSHOT</le.common.version>
-        <le.domain.version>1.0.23-SNAPSHOT</le.domain.version>
+        <le.common.version>1.0.23</le.common.version>
+        <le.domain.version>1.0.23</le.domain.version>
     </properties>
 
     <profiles>
