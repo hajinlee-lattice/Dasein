@@ -3,21 +3,21 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
     <artifactId>le-db</artifactId>
-    <version>1.0.23</version>
+    <version>1.0.24-SNAPSHOT</version>
     <name>le-${component-name}</name>
     <description>LE DB</description>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.23</version>
+        <version>1.0.24-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
     <properties>
         <component-name>db</component-name>
-        <le.common.version>1.0.23</le.common.version>
-        <le.domain.version>1.0.23</le.domain.version>
+        <le.common.version>1.0.24-SNAPSHOT</le.common.version>
+        <le.domain.version>1.0.24-SNAPSHOT</le.domain.version>
     </properties>
 
     <profiles>
