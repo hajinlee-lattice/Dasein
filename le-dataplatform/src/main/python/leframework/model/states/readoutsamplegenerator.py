@@ -14,7 +14,7 @@ class ReadoutSampleGenerator(State):
     @overrides(State)
     def execute(self):
         preTransform = self.mediator.allDataPreTransform.copy()
-        postTransform = self.mediator.allDataPostTransform.as_matrix()
+        postTransform = self.mediator.allDataPostTransform
         nonScoringTargets = self.mediator.schema["nonScoringTargets"]
         readouts = self.mediator.schema["readouts"]
 
@@ -49,9 +49,8 @@ class ReadoutSampleGenerator(State):
         percentileScoreColumnName = "PercentileScore"
         self.result = PandasUtil.insertIntoDataFrame(self.result, percentileScoreColumnName, percentileScores)
 
-        # Map Targets (+2 offset due to score insertions)
-        targetColumn = self.result.columns.tolist()[self.mediator.schema["targetIndex"] + 2]
-        converted = map(lambda e: "Y" if e > 0 else "N", self.result[targetColumn].as_matrix())
+        # Map Targets
+        converted = map(lambda e: "Y" if e > 0 else "N", self.result[self.mediator.schema["target"]].as_matrix())
 
         # Insert Converted (+2 offset due to score insertions)
         convertedColumName = "Converted"

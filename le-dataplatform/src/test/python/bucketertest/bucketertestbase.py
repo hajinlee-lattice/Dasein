@@ -10,7 +10,7 @@ class BucketerTestBase(object):
         schema = parser.getSchema()
         (training, _) = parser.createList(parser.stripPath(schema["training_data"]))
         self.data = training[:testSize]
-        self.target = self.data.iloc[:,schema["targetIndex"]]
+        self.target = self.data[schema["target"]]
         self.stringcols = set(schema["stringColumns"])
         self.features = set(schema["features"])
         self.dispatcher = BucketerDispatcher()

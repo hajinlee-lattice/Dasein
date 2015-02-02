@@ -123,10 +123,10 @@ class LearningExecutor(Executor):
             mediator.modelHdfsDir = params["modelHdfsDir"]
             mediator.allDataPreTransform = params["allDataPreTransform"]
             mediator.allDataPostTransform = params["allDataPostTransform"]
-            mediator.data = params["test"].as_matrix()
+            mediator.data = params["test"]
             mediator.rowCount = len(params["test"].index) + len(params["training"].index)
             mediator.schema = params["schema"]
-            mediator.target = mediator.data[:, mediator.schema["targetIndex"]]
+            mediator.target = mediator.data[mediator.schema["target"]]
             mediator.pipeline = params["pipeline"]
             mediator.depivoted = parser.isDepivoted()
             mediator.provenanceProperties = parser.getProvenanceProperties()

@@ -18,17 +18,17 @@ class ColumnMetadataGenerator(State, JsonGenBase):
         mediator = self.mediator
         
         metadata = mediator.metadata[1]
-        fields = sorted(mediator.schema["nameToFeatureIndex"].items(), key = lambda x: [x[1]])
+        fields = mediator.schema["features"]
         
         fieldsWithTypes = mediator.schema["fields"]
         
         for field in fields:
             f = OrderedDict()
             record = None
-            f["Description"] = field[0]
+            f["Description"] = field
             
-            if field[0] in metadata:
-                record = metadata[field[0]][0]
+            if field in metadata:
+                record = metadata[field][0]
             else:
                 continue 
             
@@ -37,12 +37,12 @@ class ColumnMetadataGenerator(State, JsonGenBase):
             else:
                 f["Interpretation"] = 1
             
-            f["Name"] = field[0]
+            f["Name"] = field
             f["Purpose"] = 3
-            if field[0] in mediator.schema["targets"]:
+            if field in mediator.schema["targets"]:
                 f["Purpose"] = 4
             
-            f["ValueType"] = self.__getValueType(fieldsWithTypes[field[0]])
+            f["ValueType"] = self.__getValueType(fieldsWithTypes[field])
             
             self.inputColumnMetadata.append(f)
     

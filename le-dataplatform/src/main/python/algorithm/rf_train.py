@@ -4,8 +4,8 @@ from leframework.consolecapture import Capture
 from leframework.consolecapture import CaptureMonitor
 
 def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties=None, params = None):
-    X_train = trainingData.as_matrix()[:, schema["featureIndex"]]
-    Y_train = trainingData.as_matrix()[:, schema["targetIndex"]]
+    X_train = trainingData[schema["features"]]
+    Y_train = trainingData[schema["target"]]
     
     estimators = int(algorithmProperties.get("n_estimators", 100))
     clf = ensemble.RandomForestClassifier(criterion=algorithmProperties.get("criterion", "gini"),

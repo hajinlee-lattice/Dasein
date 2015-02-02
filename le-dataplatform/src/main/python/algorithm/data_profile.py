@@ -172,7 +172,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     colNames = list(data.columns.values)
     categoricalCols = set(schema["stringColumns"])
     features = set(schema["features"])
-    eventVector = data.iloc[:, schema["targetIndex"]]
+    eventVector = data[schema["target"]]
     configMetadata = schema["config_metadata"]
     otherMetadata = retrieveOtherMetadata(configMetadata)
     categoricalCols = retrieveCategoricalColumns(configMetadata, features, categoricalCols)

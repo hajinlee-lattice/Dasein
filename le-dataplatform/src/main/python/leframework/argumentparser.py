@@ -35,10 +35,10 @@ class ArgumentParser(object):
             logger.warn("Config metadata does not exist!")
 
         self.fields = dataSchema["fields"]
-        self.features = set(self.metadataSchema["features"])
-        (self.targets, self.readouts) = self.extractTargets()
-        self.nonScoringTargets = list(self.readouts)
-        self.keyCols = set(self.metadataSchema["key_columns"])
+        self.features = self.metadataSchema["features"]
+        (self.target, self.readouts) = self.extractTargets()
+        self.nonScoringTargets = self.readouts
+        self.keys = self.metadataSchema["key_columns"]
         self.depivoted = False
         if "depivoted" in self.metadataSchema:
             self.depivoted = self.metadataSchema["depivoted"] == "True"
@@ -65,14 +65,14 @@ class ArgumentParser(object):
         eventKey = "Event".lower()
         readoutKey = "Readouts".lower()
 
-        targets = []; readouts = []
-        for target in specifiedTargets:
-            pair = target.split(":")
+        target = None; readouts = []
+        for sTarget in specifiedTargets:
+            pair = sTarget.split(":")
             if len(pair) == 2:
                 key = pair[0].strip().lower()
                 value = pair[1].strip()
                 if key == eventKey:
-                    if columnExists(value): targets.append(value)
+                    if columnExists(value): target = value
                     else: logWarning(value, "target")
                 elif key == readoutKey:
                     for value in [e.strip() for e in value.split("|")]:
@@ -82,10 +82,10 @@ class ArgumentParser(object):
             # Legacy
             elif len(pair) == 1:
                 value = pair[0]
-                if columnExists(value): targets.append(value)
+                if columnExists(value): target = value
                 else: logWarning(value, "target")
 
-        return set(targets), readouts
+        return target, readouts
 
     def __parseProperties(self, name):
         element = {}
@@ -128,41 +128,27 @@ class ArgumentParser(object):
         '''
           Creates a pandas dataframe from the data set in dataFileName. It only creates data in memory for features and targets.
         '''
-        # k is the index of the features/target in the resulting data
-        k = 0
-        # l is the index in the original data set
-        l = 0
         includedNames = []
         included = []
         nonScoringIncludedNames = []
         nonScoringIncluded = []
-        self.featureIndex = set()
-        self.nameToFeatureIndex = dict()
-        self.keyColIndex = set()
         self.stringColNames = set()
 
-        for f in self.fields:
+        scoringColumns = set(self.features) | set([self.target]) | set(self.keys)
+        nonScoringColumns = set(self.readouts)
+
+        for i, f in enumerate(self.fields):
             fType = f["type"][0]
             fName = f["name"]
-            if fName in self.features or fName in self.targets or fName in self.keyCols:
-                logger.info("Adding %s with index %d" % (fName, l))
+            if fName in scoringColumns:
+                logger.info("Adding %s with index %d" % (fName, i))
                 includedNames.append(fName)
-                included.append(l)
-
-                if fName in self.targets:
-                    self.targetIndex = k
-                if fName in self.features:
-                    self.featureIndex.add(k)
-                    self.nameToFeatureIndex[fName] = k
-                if fName in self.keyCols:
-                    self.keyColIndex.add(k)
-                if (fType == 'string' or fType == 'bytes' or fType == 'boolean') and fName not in self.targets:
+                included.append(i)
+                if (fType == 'string' or fType == 'bytes' or fType == 'boolean') and fName != self.target:
                     self.stringColNames.add(fName)
-                k = k+1
-            elif fName in self.readouts:
+            elif fName in nonScoringColumns:
                 nonScoringIncludedNames.append(fName)
-                nonScoringIncluded.append(l)
-            l = l+1
+                nonScoringIncluded.append(i)
 
         tmpData = []; nonScoringData = []
 
@@ -181,7 +167,7 @@ class ArgumentParser(object):
                 raise Exception(msg)
 
             if self.isAvro():
-                targetName = self.__getField(included[self.targetIndex])["name"]
+                targetName = self.target
                 if row[targetName] is None:
                     numberOfNullTarget += 1
                     continue
@@ -191,7 +177,7 @@ class ArgumentParser(object):
                 nonScoringlist = [row[name] for name in nonScoringIncludedNames]
             else:
                 # CSV format
-                rowlist = [float(row[i]) if self.__getField(i)["name"] in self.targets else self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]
+                rowlist = [float(row[i]) if self.__getField(i)["name"] == self.target else self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]
                 nonScoringlist = [self.__convertType(row[i], self.__getField(i)["type"][0]) for i in nonScoringIncluded]
 
             tmpData.append(rowlist)
@@ -213,16 +199,12 @@ class ArgumentParser(object):
         return scoringFrame, nonScoringFrame
 
     def __populateSchemaWithMetadata(self, schema, parser):
-        schema["featureIndex"] = parser.getFeatureTuple()
         schema["features"] = self.metadataSchema["features"]
-        schema["targetIndex"] = parser.getTargetIndex()
-        schema["keyColIndex"] = parser.getKeyColumns()
-        schema["nameToFeatureIndex"] = parser.getNameToFeatureIndex()
-
+        schema["keys"] = parser.getKeys()
         if "data_profile" in self.metadataSchema:
             schema["data_profile"] = self.stripPath(self.metadataSchema["data_profile"]) 
         schema["config_metadata"] = parser.getConfigMetadata()
-        schema["targets"] = self.targets
+        schema["target"] = self.target
         schema["nonScoringTargets"] = self.nonScoringTargets
         schema["readouts"] = self.readouts
         schema["stringColumns"] = self.stringColNames
@@ -234,23 +216,14 @@ class ArgumentParser(object):
     def isDepivoted(self):
         return self.depivoted
 
-    def getNameToFeatureIndex(self):
-        return self.nameToFeatureIndex
-
     def getSchema(self):
         return self.metadataSchema
-
-    def getFeatureTuple(self):
-        return tuple(self.featureIndex)
-
-    def getTargetIndex(self):
-        return self.targetIndex
 
     def getAlgorithmProperties(self):
         return self.algorithmProperties
 
-    def getKeyColumns(self):
-        return tuple(self.keyColIndex)
+    def getKeys(self):
+        return self.keys
 
     def getStringColumns(self):
         return self.stringColNames

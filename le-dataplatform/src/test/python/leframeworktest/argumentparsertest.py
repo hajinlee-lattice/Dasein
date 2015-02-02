@@ -15,6 +15,5 @@ class ArgumentParserTest(TestBase):
         algorithmProperties = parser.getAlgorithmProperties()
         self.assertTrue(algorithmProperties["criterion"] == "gini")
         self.assertTrue(algorithmProperties["n_estimators"] == "10")
-        keyCols = parser.getKeyColumns()
-        self.assertEquals(keyCols, (0,))
+        self.assertEqual(len(parser.getKeys()), 1)
 

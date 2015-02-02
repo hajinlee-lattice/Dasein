@@ -22,12 +22,11 @@ class SummaryGenerator(State, JsonGenBase):
         mediator = self.mediator
         self.summary = OrderedDict()
         predictors = []
-        eventData = mediator.data[:, mediator.schema["targetIndex"]]
         for key, value in mediator.metadata[0].iteritems():
-            if key + "_1" in mediator.schema["targets"]:
+            if key + "_1" == mediator.schema["target"]:
                 continue
             self.logger.info("Generating predictors for " + key)
-            predictors.append(self.generatePredictors(key, value, eventData))
+            predictors.append(self.generatePredictors(key, value))
         
         # Sort predictor by UncertaintyCoefficient
         predictors = sorted(predictors, key = lambda x: x["UncertaintyCoefficient"], reverse = True)
@@ -50,7 +49,7 @@ class SummaryGenerator(State, JsonGenBase):
     def getJsonProperty(self):
         return self.summary
 
-    def generatePredictors(self, colname, metadata, eventData):
+    def generatePredictors(self, colname, metadata):
         elements = []
 
         attrLevelUncertaintyCoeff = 0
