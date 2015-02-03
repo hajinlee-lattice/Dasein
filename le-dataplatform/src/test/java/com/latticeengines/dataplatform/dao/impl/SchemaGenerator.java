@@ -127,6 +127,10 @@ public class SchemaGenerator {
         }
 
         if (scriptOnly) {
+            gen = new SchemaGenerator("pls", DBDialect.MYSQLINNODB5, "com.latticeengines.domain.exposed.pls",
+                    "com.latticeengines.domain.exposed.security");
+            gen.generateToScript();
+
             gen = new SchemaGenerator("ledp", DBDialect.MYSQL, "com.latticeengines.domain.exposed.dataplatform",
                     "com.latticeengines.domain.exposed.modeling",
                     "com.latticeengines.domain.exposed.modeling.algorithm",
@@ -335,6 +339,7 @@ public class SchemaGenerator {
          **/
         SQLSERVER("com.latticeengines.dataplatform.dao.impl.LeSQLServer2008Dialect"), //
         MYSQL("org.hibernate.dialect.MySQLDialect"), //
+        MYSQLINNODB5("org.hibernate.dialect.MySQL5InnoDBDialect"), //
         HSQL("org.hibernate.dialect.HSQLDialect");
 
         private String dialectClass;
