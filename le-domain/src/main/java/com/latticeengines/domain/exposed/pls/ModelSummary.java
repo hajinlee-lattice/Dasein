@@ -113,6 +113,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant {
     public void addPredictor(Predictor predictor) {
         predictors.add(predictor);
         predictor.setModelSummary(this);
+        predictor.setTenant(getTenant());
     }
 
     @Override

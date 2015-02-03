@@ -19,12 +19,15 @@ import javax.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "PREDICTOR")
-public class Predictor implements HasName, HasPid {
+public class Predictor implements HasName, HasPid, HasTenant {
 
     private Long pid;
     private String name;
@@ -35,6 +38,7 @@ public class Predictor implements HasName, HasPid {
     private Double uncertaintyCoefficient;
     private ModelSummary modelSummary;
     private List<PredictorElement> predictorElements = new ArrayList<>();
+    private Tenant tenant;
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -129,5 +133,20 @@ public class Predictor implements HasName, HasPid {
     public void addPredictorElement(PredictorElement predictorElement) {
         predictorElements.add(predictorElement);
         predictorElement.setPredictor(this);
+        predictorElement.setTenant(getTenant());
+    }
+
+    @Override
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
+
+    @Override
+    @JsonProperty("Tenant")
+    @ManyToOne(cascade = { CascadeType.MERGE })
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public Tenant getTenant() {
+        return tenant;
     }
 }

@@ -15,12 +15,15 @@ import javax.persistence.Table;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "PREDICTOR_ELEMENT")
-public class PredictorElement implements HasPid, HasName {
+public class PredictorElement implements HasPid, HasName, HasTenant {
     
     private String name;
     private Long pid;
@@ -34,6 +37,7 @@ public class PredictorElement implements HasPid, HasName {
     private Double revenue;
     private Boolean visible;
     private Predictor predictor;
+    private Tenant tenant;
 
     @Override
     @Column(name = "NAME", nullable = false)
@@ -153,5 +157,18 @@ public class PredictorElement implements HasPid, HasName {
         this.predictor = predictor;
     }
 
+    @Override
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
+
+    @Override
+    @JsonProperty("Tenant")
+    @ManyToOne(cascade = { CascadeType.MERGE })
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    public Tenant getTenant() {
+        return tenant;
+    }
     
 }
