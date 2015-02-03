@@ -79,7 +79,12 @@ def updateExecutionDiary(cmd, output):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
     key = "|%s| on %s" % (cmd, timestamp)
     EXECUTION_DIARY[key] = output
-    app.logger.info("%s : %s" % (key, output))
+    try:
+        app.logger.info("%s : %s" % (key, output))
+    except Exception:
+        e = traceback.format_exc()
+        app.logger.error(e)
+        print e
 
 def getExecutionDiary():
     return EXECUTION_DIARY
