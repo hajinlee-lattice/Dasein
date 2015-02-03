@@ -1,0 +1,47 @@
+package com.latticeengines.pls.security;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.security.core.GrantedAuthority;
+
+public enum GrantedRight implements GrantedAuthority {
+
+    VIEW_PLS_CONFIGURATION {
+        @Override
+        public String getAuthority() {
+            return "View_PLS_Configuration";
+        }
+    }, //
+    EDIT_PLS_CONFIGURATION {
+        @Override
+        public String getAuthority() {
+            return "Edit_PLS_Configuration";
+        }
+    }, //
+    VIEW_PLS_REPORTING {
+        @Override
+        public String getAuthority() {
+            return "View_PLS_Reporting";
+        }
+    }, //
+    VIEW_PLS_MODELS {
+        @Override
+        public String getAuthority() {
+            return "View_PLS_Models";
+        }
+    };
+
+    private static Map<String, GrantedRight> grantedRightsMap = new HashMap<>();
+    
+    static {
+        for (GrantedRight grantedRight : GrantedRight.values()) {
+            grantedRightsMap.put(grantedRight.getAuthority(), grantedRight);
+        }
+    }
+    
+    public static GrantedRight getGrantedRight(String value) {
+        return grantedRightsMap.get(value);
+    }
+
+}

@@ -61,7 +61,15 @@ public enum LedpCode {
     LEDP_16010("Problem publishing JSON model for model command:{0}, yarnAppId:{1}."), //
     LEDP_16011("Problem publishing JSON model-summary for model command:{0}, yarnAppId:{1}."), //
     // Eai Service 17000-17999
-    LEDP_17000("At least one attribute required."); //
+    LEDP_17000("At least one attribute required."), //
+    // PLS 18000-18999
+    LEDP_18000("Problem with Global Auth URL {0}."), //
+    LEDP_18001("Could not authenticate user {0}."), //
+    LEDP_18002("Could not authenticate ticket {0}."), //
+    LEDP_18003("Access denied."), //
+    LEDP_18004("Could not register user {0}."), //
+    LEDP_18005("Could not grant right {0} to user {1} for tenant {2}."), //
+    LEDP_18006("Could not revoke right {0} from user {1} for tenant {2}.");
 
     private String message;
 
