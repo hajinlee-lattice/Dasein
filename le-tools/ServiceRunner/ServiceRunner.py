@@ -25,6 +25,7 @@ import datetime
 import json
 import os.path
 import platform
+import sys
 import shutil
 import traceback
 
@@ -500,7 +501,13 @@ def main():
     parser.set_defaults(debug=True)
     #parser.add_argument("logfile", help="Log file for output")
     args = parser.parse_args()
+
+    # PyDev is wrong this part works
+    reload(sys)  
+    sys.setdefaultencoding('utf8')
+    # ------------------------------
     
+    print sys.getdefaultencoding()
     # Load the config
     #execfile(args.config_file, globals())
     global INSTALLFILES
