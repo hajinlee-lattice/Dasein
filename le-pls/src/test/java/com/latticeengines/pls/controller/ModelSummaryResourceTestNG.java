@@ -17,9 +17,13 @@ import org.springframework.http.ResponseEntity;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
@@ -55,6 +59,12 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private GlobalUserManagementServiceImpl globalUserManagementService;
+    
+    @Autowired
+    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -71,6 +81,38 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "bnguyen");
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
+        
+        setupDb(tenant1, tenant2);
+    }
+    
+    private void setupDb(String tenant1Name, String tenant2Name) {
+        List<Tenant> tenants = tenantEntityMgr.findAll();
+
+        for (Tenant tenant : tenants) {
+            tenantEntityMgr.delete(tenant);
+        }
+
+        Tenant tenant1 = new Tenant();
+        tenant1.setId(tenant1Name);
+        tenant1.setName(tenant1Name);
+        tenantEntityMgr.create(tenant1);
+        
+        ModelSummary summary1 = new ModelSummary();
+        summary1.setId("123");
+        summary1.setName("Model1");
+        summary1.setTenant(tenant1);
+        modelSummaryEntityMgr.create(summary1);
+
+        Tenant tenant2 = new Tenant();
+        tenant2.setId(tenant2Name);
+        tenant2.setName(tenant2Name);
+        tenantEntityMgr.create(tenant2);
+        
+        ModelSummary summary2 = new ModelSummary();
+        summary2.setId("456");
+        summary2.setName("Model2");
+        summary2.setTenant(tenant2);
+        modelSummaryEntityMgr.create(summary2);
     }
 
     @Test(groups = "functional")
@@ -115,6 +157,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         ResponseEntity<List> response = restTemplate.exchange( //
                     "http://localhost:8080/pls/modelsummaries/", HttpMethod.GET, entity, List.class, new HashMap<>());
         assertNotNull(response);
+        assertEquals(response.getBody().size(), 1);
     }
 
 }
