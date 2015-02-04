@@ -12,18 +12,19 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.security.HasTenant;
-import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
 @Table(name = "PREDICTOR_ELEMENT")
-public class PredictorElement implements HasPid, HasName, HasTenant {
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+public class PredictorElement implements HasPid, HasName, HasTenantId {
     
     private String name;
     private Long pid;
@@ -37,7 +38,7 @@ public class PredictorElement implements HasPid, HasName, HasTenant {
     private Double revenue;
     private Boolean visible;
     private Predictor predictor;
-    private Tenant tenant;
+    private Long tenantId;
 
     @Override
     @Column(name = "NAME", nullable = false)
@@ -158,17 +159,15 @@ public class PredictorElement implements HasPid, HasName, HasTenant {
     }
 
     @Override
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-    }
-
-    @Override
-    @JsonProperty("Tenant")
-    @ManyToOne(cascade = { CascadeType.MERGE })
-    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public Tenant getTenant() {
-        return tenant;
+    @JsonIgnore
+    @Column(name = "TENANT_ID", nullable = false)
+    public Long getTenantId() {
+        return tenantId;
     }
     
+    @Override
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
 }

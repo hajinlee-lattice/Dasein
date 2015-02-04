@@ -5,4 +5,6 @@ public interface HasTenant {
     void setTenant(Tenant tenant);
     
     Tenant getTenant();
+    
+    
 }

@@ -16,18 +16,19 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
-import com.latticeengines.domain.exposed.security.HasTenant;
-import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.HasTenantId;
 
 @Entity
 @Table(name = "PREDICTOR")
-public class Predictor implements HasName, HasPid, HasTenant {
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+public class Predictor implements HasName, HasPid, HasTenantId {
 
     private Long pid;
     private String name;
@@ -38,7 +39,7 @@ public class Predictor implements HasName, HasPid, HasTenant {
     private Double uncertaintyCoefficient;
     private ModelSummary modelSummary;
     private List<PredictorElement> predictorElements = new ArrayList<>();
-    private Tenant tenant;
+    private Long tenantId;
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -133,20 +134,19 @@ public class Predictor implements HasName, HasPid, HasTenant {
     public void addPredictorElement(PredictorElement predictorElement) {
         predictorElements.add(predictorElement);
         predictorElement.setPredictor(this);
-        predictorElement.setTenant(getTenant());
+        predictorElement.setTenantId(getTenantId());
     }
 
     @Override
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
+    @JsonIgnore
+    @Column(name = "TENANT_ID", nullable = false)
+    public Long getTenantId() {
+        return tenantId;
+    }
+    
+    @Override
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
-    @Override
-    @JsonProperty("Tenant")
-    @ManyToOne(cascade = { CascadeType.MERGE })
-    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public Tenant getTenant() {
-        return tenant;
-    }
 }

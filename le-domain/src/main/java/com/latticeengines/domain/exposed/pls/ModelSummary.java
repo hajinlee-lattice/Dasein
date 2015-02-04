@@ -17,10 +17,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.hibernate.annotations.ParamDef;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,25 +27,26 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
+import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "MODEL_SUMMARY")
-@FilterDef(name = "tenantFilter", parameters = @ParamDef(name = "tenantFilterId", type = "java.lang.Integer"))
-@Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant {
+@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
+public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId {
     
     private String id;
     private String name;
     private Long pid;
     private Tenant tenant;
+    private Long tenantId;
     private List<Predictor> predictors = new ArrayList<>();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
-    @Column(name = "MODELSUMMARY_PID", unique = true, nullable = false)
+    @Column(name = "MODEL_SUMMARY_PID", unique = true, nullable = false)
     @Override
     public Long getPid() {
         return pid;
@@ -89,11 +88,12 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant {
     @JsonProperty("Tenant")
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
+        setTenantId(tenant.getPid());
     }
 
     @Override
     @JsonProperty("Tenant")
-    @ManyToOne(cascade = { CascadeType.MERGE })
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     public Tenant getTenant() {
@@ -113,12 +113,24 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant {
     public void addPredictor(Predictor predictor) {
         predictors.add(predictor);
         predictor.setModelSummary(this);
-        predictor.setTenant(getTenant());
+        predictor.setTenantId(getTenantId());
     }
 
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    @Override
+    @JsonIgnore
+    @Column(name = "TENANT_ID", nullable = false)
+    public Long getTenantId() {
+        return tenantId;
+    }
+    
+    @Override
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
     }
 
 }
