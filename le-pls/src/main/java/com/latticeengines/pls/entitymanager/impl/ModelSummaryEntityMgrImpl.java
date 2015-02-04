@@ -64,18 +64,6 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public ModelSummary findByKey(ModelSummary id) {
-        ModelSummary summary = super.findByKey(id);
-        
-        if (summary.getTenantId() != getTenantId()) {
-            return null;
-        }
-        inflatePredictors(summary);
-        return summary; 
-    }
-    
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findByModelId(String modelId) {
         ModelSummary summary = modelSummaryDao.findByModelId(modelId);
         
@@ -96,7 +84,10 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         List<Predictor> predictors = summary.getPredictors();
         Hibernate.initialize(predictors);
         if (predictors.size() > 0) {
-            Hibernate.initialize(predictors.get(0).getPredictorElements());
+            for (Predictor predictor : predictors) {
+                Hibernate.initialize(predictor.getPredictorElements());
+            }
+            
         }
     }
     

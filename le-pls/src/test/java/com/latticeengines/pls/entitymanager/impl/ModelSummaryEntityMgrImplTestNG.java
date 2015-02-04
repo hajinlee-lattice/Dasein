@@ -149,10 +149,9 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     }
     
     @Test(groups = "functional")
-    public void findByKey() {
-        ModelSummary key = new ModelSummary();
-        key.setPid(modelSummaryPid1);
-        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByKey(key);
+    public void findByModelId() {
+        setupSecurityContext(summary1);
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId());
         List<Predictor> predictors = retrievedSummary.getPredictors();
         
         assertEquals(retrievedSummary.getId(), summary1.getId());
@@ -200,18 +199,25 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     
     @Test(groups = "functional")
     public void findAll() {
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
-        Session session = Mockito.mock(Session.class);
-        Tenant tenant = Mockito.mock(Tenant.class);
-        Mockito.when(session.getTenant()).thenReturn(tenant);
-        Mockito.when(tenant.getId()).thenReturn(summary2.getTenant().getId());
-        Mockito.when(token.getSession()).thenReturn(session);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
-        SecurityContextHolder.setContext(securityContext);
+        setupSecurityContext(summary2);
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
         assertEquals(summaries.size(), 1);
         assertEquals(summaries.get(0).getName(), summary2.getName());
     }
     
+    private void setupSecurityContext(ModelSummary summary) {
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
+        Session session = Mockito.mock(Session.class);
+        Tenant tenant = Mockito.mock(Tenant.class);
+        Mockito.when(session.getTenant()).thenReturn(tenant);
+        Mockito.when(tenant.getId()).thenReturn(summary.getTenant().getId());
+        Mockito.when(tenant.getPid()).thenReturn(summary.getTenant().getPid());
+        Mockito.when(token.getSession()).thenReturn(session);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
+        SecurityContextHolder.setContext(securityContext);
+
+    }
+    
 }
+
