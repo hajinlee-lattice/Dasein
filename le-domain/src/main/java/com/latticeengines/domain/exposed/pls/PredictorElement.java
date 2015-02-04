@@ -150,10 +150,12 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "FK_PREDICTOR_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     public Predictor getPredictor() {
         return predictor;
     }
 
+    @JsonIgnore
     public void setPredictor(Predictor predictor) {
         this.predictor = predictor;
     }

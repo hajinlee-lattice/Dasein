@@ -111,12 +111,14 @@ public class Predictor implements HasName, HasPid, HasTenantId {
         this.uncertaintyCoefficient = uncertaintyCoefficient;
     }
 
+    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE, CascadeType.REMOVE })
     @JoinColumn(name = "FK_MODELSUMMARY_ID", nullable = false)
     public ModelSummary getModelSummary() {
         return modelSummary;
     }
 
+    @JsonIgnore
     public void setModelSummary(ModelSummary modelSummary) {
         this.modelSummary = modelSummary;
     }
