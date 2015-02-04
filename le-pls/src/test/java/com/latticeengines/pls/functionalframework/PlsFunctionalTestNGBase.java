@@ -13,7 +13,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
-import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,7 +23,7 @@ import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManage
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
 import com.latticeengines.pls.security.GrantedRight;
 
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class, TransactionalTestExecutionListener.class })
+@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
 public class PlsFunctionalTestNGBase extends AbstractTransactionalTestNGSpringContextTests {
 

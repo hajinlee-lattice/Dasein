@@ -2,6 +2,7 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.AbstractMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,71 +26,132 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
     
-    private ModelSummary summary;
-    private Long modelSummaryPid;
+    private ModelSummary summary1;
+    private ModelSummary summary2;
+    private Long modelSummaryPid1;
+    private Long modelSummaryPid2;
     
     
     @BeforeClass(groups = "functional")
     public void setup() {
         List<Tenant> tenants = tenantEntityMgr.findAll();
-        
+
         for (Tenant tenant : tenants) {
             tenantEntityMgr.delete(tenant);
         }
         
-        Tenant tenant = new Tenant();
-        tenant.setId("TENANT1");
-        tenant.setName("TENANT1");
-        summary = new ModelSummary();
-        summary.setId("123");
-        summary.setName("This is a model");
-        summary.setTenant(tenant);
-        Predictor p1 = new Predictor();
-        p1.setApprovedUsage("Model");
-        p1.setCategory("XYZ");
-        p1.setName("LeadSource");
-        p1.setDisplayName("LeadSource");
-        p1.setFundamentalType("");
-        p1.setUncertaintyCoefficient(0.151911);
-        summary.addPredictor(p1);
         
-        PredictorElement el1 = new PredictorElement();
-        el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
-        el1.setCorrelationSign(-1);
-        el1.setCount(311L);
-        el1.setLift(0.0);
-        el1.setLowerInclusive(0.0);
-        el1.setUpperExclusive(10.0);
-        el1.setUncertaintyCoefficient(0.00313);
-        el1.setRevenue(284788700000.0);
-        el1.setVisible(true);
-        p1.addPredictorElement(el1);
+        AbstractMap.SimpleEntry<Long, ModelSummary> s1 = createTenant1();
+        AbstractMap.SimpleEntry<Long, ModelSummary> s2 = createTenant2();
+        
+        modelSummaryPid1 = s1.getKey();
+        summary1 = s1.getValue();
+        
+        modelSummaryPid2 = s2.getKey();
+        summary2 = s2.getValue();
+    }
+        
+    private AbstractMap.SimpleEntry<Long, ModelSummary> createTenant1() {
+        Tenant tenant1 = new Tenant();
+        tenant1.setId("TENANT1");
+        tenant1.setName("TENANT1");
+        tenantEntityMgr.create(tenant1);
+        summary1 = new ModelSummary();
+        summary1.setId("123");
+        summary1.setName("This is a model");
+        summary1.setTenant(tenant1);
+        Predictor s1p1 = new Predictor();
+        s1p1.setApprovedUsage("Model");
+        s1p1.setCategory("XYZ");
+        s1p1.setName("LeadSource");
+        s1p1.setDisplayName("LeadSource");
+        s1p1.setFundamentalType("");
+        s1p1.setUncertaintyCoefficient(0.151911);
+        summary1.addPredictor(s1p1);
+        
+        PredictorElement s1el1 = new PredictorElement();
+        s1el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
+        s1el1.setCorrelationSign(-1);
+        s1el1.setCount(311L);
+        s1el1.setLift(0.0);
+        s1el1.setLowerInclusive(0.0);
+        s1el1.setUpperExclusive(10.0);
+        s1el1.setUncertaintyCoefficient(0.00313);
+        s1el1.setRevenue(284788700000.0);
+        s1el1.setVisible(true);
+        s1p1.addPredictorElement(s1el1);
 
-        PredictorElement el2 = new PredictorElement();
-        el2.setName("7ade3995-f3da-4b83-87e6-c358ba3bdc00");
-        el2.setCorrelationSign(1);
-        el2.setCount(704L);
-        el2.setLift(1.3884292375950742);
-        el2.setLowerInclusive(10.0);
-        el2.setUpperExclusive(1000.0);
-        el2.setUncertaintyCoefficient(0.000499);
-        el2.setRevenue(1682345087923.0);
-        el2.setVisible(true);
-        p1.addPredictorElement(el2);
+        PredictorElement s1el2 = new PredictorElement();
+        s1el2.setName("7ade3995-f3da-4b83-87e6-c358ba3bdc00");
+        s1el2.setCorrelationSign(1);
+        s1el2.setCount(704L);
+        s1el2.setLift(1.3884292375950742);
+        s1el2.setLowerInclusive(10.0);
+        s1el2.setUpperExclusive(1000.0);
+        s1el2.setUncertaintyCoefficient(0.000499);
+        s1el2.setRevenue(1682345087923.0);
+        s1el2.setVisible(true);
+        s1p1.addPredictorElement(s1el2);
         
-        modelSummaryEntityMgr.create(summary);
-        modelSummaryPid = summary.getPid();
+        modelSummaryEntityMgr.create(summary1);
+        return new AbstractMap.SimpleEntry<>(summary1.getPid(), summary1);
+    }
+    
+    private AbstractMap.SimpleEntry<Long, ModelSummary> createTenant2() {
+        Tenant tenant2 = new Tenant();
+        tenant2.setId("TENANT2");
+        tenant2.setName("TENANT2");
+        tenantEntityMgr.create(tenant2);
+        ModelSummary summary2 = new ModelSummary();
+        summary2.setId("123");
+        summary2.setName("This is a model");
+        summary2.setTenant(tenant2);
+        Predictor s1p1 = new Predictor();
+        s1p1.setApprovedUsage("Model");
+        s1p1.setCategory("XYZ");
+        s1p1.setName("LeadSource");
+        s1p1.setDisplayName("LeadSource");
+        s1p1.setFundamentalType("");
+        s1p1.setUncertaintyCoefficient(0.151911);
+        summary2.addPredictor(s1p1);
+        
+        PredictorElement s2el1 = new PredictorElement();
+        s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
+        s2el1.setCorrelationSign(-1);
+        s2el1.setCount(311L);
+        s2el1.setLift(0.0);
+        s2el1.setLowerInclusive(0.0);
+        s2el1.setUpperExclusive(10.0);
+        s2el1.setUncertaintyCoefficient(0.00313);
+        s2el1.setRevenue(284788700000.0);
+        s2el1.setVisible(true);
+        s1p1.addPredictorElement(s2el1);
+
+        PredictorElement s2el2 = new PredictorElement();
+        s2el2.setName("7ade3995-f3da-4b83-87e6-c358ba3bdc00");
+        s2el2.setCorrelationSign(1);
+        s2el2.setCount(704L);
+        s2el2.setLift(1.3884292375950742);
+        s2el2.setLowerInclusive(10.0);
+        s2el2.setUpperExclusive(1000.0);
+        s2el2.setUncertaintyCoefficient(0.000499);
+        s2el2.setRevenue(1682345087923.0);
+        s2el2.setVisible(true);
+        s1p1.addPredictorElement(s2el2);
+        
+        modelSummaryEntityMgr.create(summary2);
+        return new AbstractMap.SimpleEntry<>(summary2.getPid(), summary2);
     }
     
     @Test(groups = "functional")
-    private void findByKey() {
+    public void findByKey() {
         ModelSummary key = new ModelSummary();
-        key.setPid(modelSummaryPid);
+        key.setPid(modelSummaryPid1);
         ModelSummary retrievedSummary = modelSummaryEntityMgr.findByKey(key);
         List<Predictor> predictors = retrievedSummary.getPredictors();
         
-        assertEquals(retrievedSummary.getId(), summary.getId());
-        assertEquals(retrievedSummary.getName(), summary.getName());
+        assertEquals(retrievedSummary.getId(), summary1.getId());
+        assertEquals(retrievedSummary.getName(), summary1.getName());
         assertEquals(predictors.size(), 1);
         
         String[] predictorFields = new String[] {
@@ -116,11 +178,11 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         for (int i = 0; i < predictors.size(); i++) {
             for (String field : predictorFields) {
                 assertEquals(ReflectionTestUtils.getField(predictors.get(i), field),
-                        ReflectionTestUtils.getField(summary.getPredictors().get(i), field));
+                        ReflectionTestUtils.getField(summary1.getPredictors().get(i), field));
                 
             }
             List<PredictorElement> retrievedElements = predictors.get(i).getPredictorElements(); 
-            List<PredictorElement> summaryElements = summary.getPredictors().get(i).getPredictorElements();
+            List<PredictorElement> summaryElements = summary1.getPredictors().get(i).getPredictorElements();
             for (int j = 0; j < retrievedElements.size(); j++) {
                 for (String field : predictorElementFields) {
                     assertEquals(ReflectionTestUtils.getField(retrievedElements.get(j), field),

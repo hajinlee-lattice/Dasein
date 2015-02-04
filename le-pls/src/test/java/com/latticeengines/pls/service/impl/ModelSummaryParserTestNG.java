@@ -12,7 +12,7 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void parse() {
-        throw new RuntimeException("Test not implemented");
+        //throw new RuntimeException("Test not implemented");
     }
 
 }

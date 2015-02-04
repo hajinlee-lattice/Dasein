@@ -3,13 +3,13 @@ package com.latticeengines.pls.entitymanager.impl;
 import java.util.List;
 
 import org.hibernate.Hibernate;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
@@ -21,7 +21,7 @@ import com.latticeengines.pls.dao.TenantDao;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 
 @Component("modelSummaryEntityMgr")
-public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
+public class ModelSummaryEntityMgrImpl extends MultiTenantEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
 
     @Autowired
     private ModelSummaryDao modelSummaryDao;
@@ -34,6 +34,9 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
 
     @Autowired
     private PredictorElementDao predictorElementDao;
+    
+    @Autowired
+    private SessionFactory sessionFactory;
 
     @Override
     public BaseDao<ModelSummary> getDao() {
@@ -41,7 +44,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, readOnly=true)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void create(ModelSummary summary) {
         Tenant tenant = summary.getTenant();
         tenantDao.createOrUpdate(tenant);
@@ -57,7 +60,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
     
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly=true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findByKey(ModelSummary id) {
         ModelSummary summary = super.findByKey(id);
         List<Predictor> predictors = summary.getPredictors();
