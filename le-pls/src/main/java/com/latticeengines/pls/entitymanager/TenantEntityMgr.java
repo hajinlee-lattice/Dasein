@@ -5,4 +5,5 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface TenantEntityMgr extends BaseEntityMgr<Tenant> {
 
+    Tenant findByTenantId(String tenantId);
 }

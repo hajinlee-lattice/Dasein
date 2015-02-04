@@ -5,7 +5,10 @@ import static org.testng.Assert.assertEquals;
 import java.util.AbstractMap;
 import java.util.List;
 
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -13,10 +16,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.security.TicketAuthenticationToken;
 
 public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     
@@ -58,11 +63,11 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         tenantEntityMgr.create(tenant1);
         summary1 = new ModelSummary();
         summary1.setId("123");
-        summary1.setName("This is a model");
+        summary1.setName("Model1");
         summary1.setTenant(tenant1);
         Predictor s1p1 = new Predictor();
         s1p1.setApprovedUsage("Model");
-        s1p1.setCategory("XYZ");
+        s1p1.setCategory("Banking");
         s1p1.setName("LeadSource");
         s1p1.setDisplayName("LeadSource");
         s1p1.setFundamentalType("");
@@ -103,12 +108,12 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         tenant2.setName("TENANT2");
         tenantEntityMgr.create(tenant2);
         ModelSummary summary2 = new ModelSummary();
-        summary2.setId("123");
-        summary2.setName("This is a model");
+        summary2.setId("456");
+        summary2.setName("Model2");
         summary2.setTenant(tenant2);
         Predictor s1p1 = new Predictor();
         s1p1.setApprovedUsage("Model");
-        s1p1.setCategory("XYZ");
+        s1p1.setCategory("Construction");
         s1p1.setName("LeadSource");
         s1p1.setDisplayName("LeadSource");
         s1p1.setFundamentalType("");
@@ -191,6 +196,22 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
                 }
             }
         }
+    }
+    
+    @Test(groups = "functional")
+    public void findAll() {
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
+        Session session = Mockito.mock(Session.class);
+        Tenant tenant = Mockito.mock(Tenant.class);
+        Mockito.when(session.getTenant()).thenReturn(tenant);
+        Mockito.when(tenant.getId()).thenReturn(summary2.getTenant().getId());
+        Mockito.when(token.getSession()).thenReturn(session);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
+        SecurityContextHolder.setContext(securityContext);
+        List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+        assertEquals(summaries.size(), 1);
+        assertEquals(summaries.get(0).getName(), summary2.getName());
     }
     
 }

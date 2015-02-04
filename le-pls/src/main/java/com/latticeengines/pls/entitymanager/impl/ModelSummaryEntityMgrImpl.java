@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
@@ -21,7 +22,7 @@ import com.latticeengines.pls.dao.TenantDao;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 
 @Component("modelSummaryEntityMgr")
-public class ModelSummaryEntityMgrImpl extends MultiTenantEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
+public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
 
     @Autowired
     private ModelSummaryDao modelSummaryDao;
@@ -71,5 +72,12 @@ public class ModelSummaryEntityMgrImpl extends MultiTenantEntityMgrImpl<ModelSum
         
         return summary;
     }
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ModelSummary> findAll() {
+        return super.findAll();
+    }
+
 
 }

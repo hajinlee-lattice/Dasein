@@ -5,4 +5,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface TenantDao extends BaseDao<Tenant> {
 
+    Tenant findByTenantId(String tenantId);
+
 }
