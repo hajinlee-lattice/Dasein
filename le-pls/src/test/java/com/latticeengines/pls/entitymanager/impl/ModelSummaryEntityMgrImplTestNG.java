@@ -111,14 +111,14 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         summary2.setId("456");
         summary2.setName("Model2");
         summary2.setTenant(tenant2);
-        Predictor s1p1 = new Predictor();
-        s1p1.setApprovedUsage("Model");
-        s1p1.setCategory("Construction");
-        s1p1.setName("LeadSource");
-        s1p1.setDisplayName("LeadSource");
-        s1p1.setFundamentalType("");
-        s1p1.setUncertaintyCoefficient(0.151911);
-        summary2.addPredictor(s1p1);
+        Predictor s2p1 = new Predictor();
+        s2p1.setApprovedUsage("Model");
+        s2p1.setCategory("Construction");
+        s2p1.setName("LeadSource");
+        s2p1.setDisplayName("LeadSource");
+        s2p1.setFundamentalType("");
+        s2p1.setUncertaintyCoefficient(0.151911);
+        summary2.addPredictor(s2p1);
         
         PredictorElement s2el1 = new PredictorElement();
         s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
@@ -130,7 +130,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s2el1.setUncertaintyCoefficient(0.00313);
         s2el1.setRevenue(284788700000.0);
         s2el1.setVisible(true);
-        s1p1.addPredictorElement(s2el1);
+        s2p1.addPredictorElement(s2el1);
 
         PredictorElement s2el2 = new PredictorElement();
         s2el2.setName("7ade3995-f3da-4b83-87e6-c358ba3bdc00");
@@ -142,7 +142,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s2el2.setUncertaintyCoefficient(0.000499);
         s2el2.setRevenue(1682345087923.0);
         s2el2.setVisible(true);
-        s1p1.addPredictorElement(s2el2);
+        s2p1.addPredictorElement(s2el2);
         
         modelSummaryEntityMgr.create(summary2);
         return new AbstractMap.SimpleEntry<>(summary2.getPid(), summary2);

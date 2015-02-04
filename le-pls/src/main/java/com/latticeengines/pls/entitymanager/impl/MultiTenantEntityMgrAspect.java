@@ -21,7 +21,7 @@ public class MultiTenantEntityMgrAspect {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.findAll(..))")
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.find*(..))")
     public void enableMultiTenantFilter(JoinPoint joinPoint) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!(auth instanceof TicketAuthenticationToken)) {
@@ -31,9 +31,14 @@ public class MultiTenantEntityMgrAspect {
         Tenant tenant = token.getSession().getTenant();
         Tenant tenantWithPid = tenantEntityMgr.findByTenantId(tenant.getId());
         
+        
         if (tenantWithPid == null) {
             throw new RuntimeException("No tenant found with id " + tenant.getId());
         }
+        if (tenantWithPid.getPid() == null) {
+            throw new RuntimeException("No tenant pid found for tenant with id " + tenant.getId());
+        }
+        tenant.setPid(tenantWithPid.getPid());
         sessionFactory.getCurrentSession().enableFilter("tenantFilter")
                 .setParameter("tenantFilterId", tenantWithPid.getPid());
     }

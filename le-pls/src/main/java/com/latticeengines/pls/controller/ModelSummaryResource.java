@@ -29,10 +29,8 @@ public class ModelSummaryResource {
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get summary for specific model")
-    public ModelSummary getModelSummary(@PathVariable Long modelId) {
-        ModelSummary s = new ModelSummary();
-        s.setPid(modelId);
-        return modelSummaryEntityMgr.findByKey(s);
+    public ModelSummary getModelSummary(@PathVariable String modelId) {
+        return modelSummaryEntityMgr.findByModelId(modelId);
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")

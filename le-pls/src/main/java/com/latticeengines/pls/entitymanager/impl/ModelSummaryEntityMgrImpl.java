@@ -5,6 +5,7 @@ import java.util.List;
 import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,7 @@ import com.latticeengines.pls.dao.PredictorDao;
 import com.latticeengines.pls.dao.PredictorElementDao;
 import com.latticeengines.pls.dao.TenantDao;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.security.TicketAuthenticationToken;
 
 @Component("modelSummaryEntityMgr")
 public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
@@ -64,13 +66,24 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findByKey(ModelSummary id) {
         ModelSummary summary = super.findByKey(id);
-        List<Predictor> predictors = summary.getPredictors();
-        Hibernate.initialize(predictors);
-        if (predictors.size() > 0) {
-            Hibernate.initialize(predictors.get(0).getPredictorElements());
-        }
         
-        return summary;
+        if (summary.getTenantId() != getTenantId()) {
+            return null;
+        }
+        inflatePredictors(summary);
+        return summary; 
+    }
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public ModelSummary findByModelId(String modelId) {
+        ModelSummary summary = modelSummaryDao.findByModelId(modelId);
+        
+        if (summary.getTenantId() != getTenantId()) {
+            return null;
+        }
+        inflatePredictors(summary);
+        return summary; 
     }
     
     @Override
@@ -78,6 +91,21 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     public List<ModelSummary> findAll() {
         return super.findAll();
     }
-
+    
+    private void inflatePredictors(ModelSummary summary) {
+        List<Predictor> predictors = summary.getPredictors();
+        Hibernate.initialize(predictors);
+        if (predictors.size() > 0) {
+            Hibernate.initialize(predictors.get(0).getPredictorElements());
+        }
+    }
+    
+    private Long getTenantId()  {
+        // By the time this method is invoked, the aspec joinpoint in MultiTenantEntityMgrAspect would
+        // have been invoked, and any exceptions with respect to nulls would already
+        // have been caught there, which is why there is no defensive checking here
+        TicketAuthenticationToken token = (TicketAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        return token.getSession().getTenant().getPid();
+    }
 
 }
