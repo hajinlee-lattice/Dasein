@@ -1,4 +1,4 @@
-package com.latticeengines.marketoharness;
+package com.latticeengines.scoringharness.marketoharness;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -9,8 +9,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudRead;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudResult;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudUpdate;
-import com.latticeengines.scoringharness.marketoharness.MarketoHarness;
-import com.latticeengines.scoringharness.marketoharness.MarketoProperties;
 
 // TODO Find a way to not have to explicitly mention each class here and instead scan a package
 @ContextConfiguration(classes = { MarketoHarness.class, MarketoProperties.class })

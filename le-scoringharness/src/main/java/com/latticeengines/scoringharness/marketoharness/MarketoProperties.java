@@ -9,11 +9,15 @@ import org.springframework.core.env.Environment;
 @PropertySource("file:scoringharness.properties")
 public class MarketoProperties {
     public String getClientId() {
-        return env.getProperty("scoringharness.marketo.authentication.clientid");
+        return env.getProperty("scoringharness.marketo.authentication.clientid").trim();
     }
 
     public String getClientSecret() {
-        return env.getProperty("scoringharness.marketo.authentication.clientsecret");
+        return env.getProperty("scoringharness.marketo.authentication.clientsecret").trim();
+    }
+
+    public String getScoreField() {
+        return env.getProperty("scoringharness.marketo.scorefield").trim();
     }
 
     @Autowired
