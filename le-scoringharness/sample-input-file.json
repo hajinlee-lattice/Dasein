@@ -9,5 +9,16 @@
 		"@type":"readscore",
 		"offsetMilliseconds":500,
 		"externalId":"ksoze@lattice-engines.com"
+	},
+	{
+		"@type":"write",
+		"offsetMilliseconds":100,
+		"externalId":"scoring-harness-sample1@lattice-engines.com",
+		"object":{}
+	},
+	{
+		"@type":"readscore",
+		"offsetMilliseconds":500,
+		"externalId":"scoring-harness-sample1@lattice-engines.com"
 	}
 ]

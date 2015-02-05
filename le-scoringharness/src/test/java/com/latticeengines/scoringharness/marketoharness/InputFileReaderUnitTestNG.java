@@ -22,4 +22,20 @@ public class InputFileReaderUnitTestNG {
             Assert.fail("Unexpected exception thrown: " + e);
         }
     }
+
+    @Test(groups = "unit")
+    public void testSortInputFile() {
+        try {
+            URL fileResourceURL = getClass().getClassLoader().getResource("valid-input-file-reversed.json");
+            InputFileReader reader = new InputFileReader(Paths.get(fileResourceURL.toURI()).toString());
+            List<OperationSpec> specs = reader.read();
+            long previousOffset = -1;
+            for (OperationSpec spec : specs) {
+                Assert.assertTrue(previousOffset <= spec.offsetMilliseconds);
+                previousOffset = spec.offsetMilliseconds;
+            }
+        } catch (Exception e) {
+            Assert.fail("Unexpected exception thrown: " + e);
+        }
+    }
 }

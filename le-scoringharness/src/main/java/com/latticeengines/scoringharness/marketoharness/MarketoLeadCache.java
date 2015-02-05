@@ -17,14 +17,14 @@ public class MarketoLeadCache {
         return s_instance == null ? s_instance = new MarketoLeadCache() : s_instance;
     }
 
-    public void put(String externalId, String marketoId) {
+    public synchronized void put(String externalId, String marketoId) {
         if (marketoId == null || externalId == null) {
             throw new IllegalArgumentException("marketoId and externalId must be non-null");
         }
         dictionary.put(externalId, marketoId);
     }
 
-    public String get(String externalId) {
+    public synchronized String get(String externalId) {
         if (externalId == null) {
             throw new IllegalArgumentException("externalId must be non-null");
         }

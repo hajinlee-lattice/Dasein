@@ -1,24 +1,22 @@
 package com.latticeengines.scoringharness.marketoharness;
 
-import java.util.ArrayList;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.fluent.Content;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
 import org.apache.http.entity.ContentType;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudRead;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudResult;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudUpdate;
+import com.latticeengines.scoringharness.util.JsonUtil;
 
-// TODO: Replace org.json.simple with fw that properly supports generics
 @Service
 public class MarketoHarness {
 
@@ -96,18 +94,17 @@ public class MarketoHarness {
     }
 
     private String parseAccessToken(String responseBody) throws Exception {
-        JSONParser parser = new JSONParser();
-        JSONObject jsonObject = null;
+        JsonNode jsonObject = null;
         try {
-            jsonObject = (JSONObject) parser.parse(responseBody);
-        } catch (ParseException e) {
+            jsonObject = JsonUtil.parseObject(responseBody);
+        } catch (Exception e) {
             throw new Exception("Failed to parse access token from Marketo response: " + e.getMessage());
         }
 
         if (jsonObject == null)
             throw new Exception("Failed to parse a non-null json object from Marketo token response.");
 
-        return (String) jsonObject.get(MARKETO_ACCESS_TOKEN_KEY);
+        return jsonObject.get(MARKETO_ACCESS_TOKEN_KEY).asText();
     }
 
     public String getAccessTokenUrl(String identityServiceUrl, String customServiceClientID,
@@ -170,8 +167,8 @@ public class MarketoHarness {
     public BaseCloudResult updateObjects(String accessToken, BaseCloudUpdate update) throws Exception {
         if (update == null)
             throw new Exception("Must specify a non-trivial value for updateObjects() update parameter.");
-        JSONObject json = formatObjectUpdate(update);
-        Request request = getPostRequest(accessToken, getObjectEndpoint(update.objectType), json.toJSONString());
+
+        Request request = getPostRequest(accessToken, getObjectEndpoint(update.objectType), formatObjectUpdate(update));
 
         Response response;
         try {
@@ -191,72 +188,41 @@ public class MarketoHarness {
         return parseResult(content.asString());
     }
 
-    private JSONObject formatObjectUpdate(BaseCloudUpdate update) throws Exception {
-        if (update.jsonObjects == null || update.jsonObjects.size() == 0)
+    private String formatObjectUpdate(BaseCloudUpdate update) throws Exception {
+        if (update.objects == null || update.objects.size() == 0)
             throw new IllegalArgumentException("formatObjectUpdate() requires at least one row to update.");
 
-        JSONObject toReturn = new JSONObject();
+        ObjectNode toReturn = new ObjectMapper().createObjectNode();
         toReturn.put("action", update.action);
-        JSONArray jsonObjects = new JSONArray();
-        toReturn.put("input", jsonObjects);
-        JSONParser parser = new JSONParser();
-        for (String jsonObjectString : update.jsonObjects) {
-            try {
-                jsonObjects.add((JSONObject) parser.parse(jsonObjectString));
-            } catch (ParseException e) {
-                throw new Exception("formatObjectUpdate() failed to parse a json string object definition.");
-            }
-        }
-
-        return toReturn;
+        toReturn.set("input", update.objects);
+        return toReturn.toString();
     }
 
     private BaseCloudResult parseResult(String responseBody) throws Exception {
-        JSONParser parser = new JSONParser();
-        JSONObject json;
+        ObjectNode json;
         try {
-            json = (JSONObject) parser.parse(responseBody);
-        } catch (ParseException e) {
+            json = JsonUtil.parseObject(responseBody);
+        } catch (Exception e) {
             throw new Exception("parseUpdateResult() failed to parse the response body to json.");
         }
-        String requestId = (String) json.get("requestId");
-        Boolean isSuccess = (Boolean) json.get("success");
+        String requestId = json.get("requestId").asText();
+        Boolean isSuccess = json.get("success").asBoolean();
 
         BaseCloudResult toReturn;
         if (isSuccess) {
-            JSONArray jsonArray = (JSONArray) json.get("result");
-            ArrayList<String> jsonObjectResults = new ArrayList<String>();
-            if (jsonArray != null) {
-                for (Object jsonRowObject : jsonArray.toArray()) {
-                    JSONObject jsonRow = (JSONObject) jsonRowObject;
-                    jsonObjectResults.add(jsonRow.toJSONString());
-                }
-            }
-            toReturn = new BaseCloudResult(isSuccess, requestId, jsonObjectResults);
+            toReturn = new BaseCloudResult(isSuccess, requestId, (ArrayNode) json.get("result"));
         } else {
-            JSONArray jsonArray = (JSONArray) json.get("errors");
+            ArrayNode jsonArray = (ArrayNode) json.get("errors");
             String errors = "";
             String separator = "";
             if (jsonArray != null) {
-                for (Object jsonRowObject : jsonArray.toArray()) {
-                    JSONObject jsonRow = (JSONObject) jsonRowObject;
-                    errors += separator + (String) jsonRow.get("code") + ": " + (String) jsonRow.get("message");
+                for (JsonNode errorJson : jsonArray) {
+                    errors += separator + errorJson.get("code").asText() + ": " + errorJson.get("message").asText();
                     separator = "; ";
                 }
             }
             toReturn = new BaseCloudResult(isSuccess, requestId, errors);
         }
-
-        return toReturn;
-    }
-
-    private JSONObject formatObjectRead(BaseCloudRead read) throws Exception {
-        JSONObject toReturn = new JSONObject();
-        toReturn.put("id", read.ids.get(0));
-        if (read.fields.size() > 0) {
-            toReturn.put("fields", StringUtils.join(read.fields, ","));
-        }
-        toReturn.put("_method", "POST");
 
         return toReturn;
     }
