@@ -2,6 +2,7 @@ import numpy
 import os
 import pandas
 import sys
+import glob
 
 from trainingtestbase import TrainingTestBase
 
@@ -50,7 +51,7 @@ class ReadoutSampleTest(TrainingTestBase):
         emailColumIndex = 4
 
         # Output File Exists?
-        outputFile = "./results/readoutsample.csv"
+        outputFile = glob.glob("./results/*readoutsample.csv")[0]
         self.assertTrue(os.path.isfile(outputFile))
 
         # Construct DataFrame?

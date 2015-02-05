@@ -31,9 +31,9 @@ class Finalize(State):
         eventData = mediator.data[mediator.schema["target"]].as_matrix().astype(str)
         scored = numpy.insert(keyData, len(keyData[0]), scored, axis=1)
         # write the scored data to file
-        numpy.savetxt(mediator.modelLocalDir + "scored.txt", scored, delimiter=",", fmt="%s")
+        numpy.savetxt(mediator.modelLocalDir + mediator.name + "_scored.txt", scored, delimiter=",", fmt="%s")
         # write the target data to file
-        numpy.savetxt(mediator.modelLocalDir + "target.txt", eventData, delimiter=",", fmt="%s")
+        numpy.savetxt(mediator.modelLocalDir + mediator.name + "_target.txt", eventData, delimiter=",", fmt="%s")
         
     def writeJson(self, mediator):
         stateMachine = self.getStateMachine()
@@ -44,16 +44,16 @@ class Finalize(State):
                 key = state.getKey()
                 value = state.getJsonProperty()
                 jsonDict[key] = value
-        with open(mediator.modelLocalDir + mediator.name+ ".json", "wb") as fp:
+        with open(mediator.modelLocalDir + mediator.name + "_model.json", "wb") as fp:
             json.dump(jsonDict, fp)
             
     def invokeModelPredictorsExtraction(self, mediator):
-        modelJSONFilePath = mediator.modelLocalDir + mediator.name+ ".json"
-        csvFilePath = mediator.modelLocalDir + mediator.name+ ".csv"
+        modelJSONFilePath = mediator.modelLocalDir + mediator.name+ "_model.json"
+        csvFilePath = mediator.modelLocalDir + mediator.name+ "_model.csv"
         subprocess.call([sys.executable, 'modelpredictorextraction.py', modelJSONFilePath, csvFilePath])
 
     def writeReadoutSample(self, mediator):
-        csvFilePath = mediator.modelLocalDir + "readoutsample.csv"
+        csvFilePath = mediator.modelLocalDir + mediator.name + "_readoutsample.csv"
         self.mediator.readoutsample.to_csv(csvFilePath, index = False)
 
     def writeEnhancedFiles(self, mediator):

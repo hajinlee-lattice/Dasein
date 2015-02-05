@@ -12,7 +12,10 @@ class NameGenerator(State, JsonGenBase):
     
     @overrides(State)
     def execute(self):
-        self.mediator.name = self.mediator.schema["name"] + "_" + time.strftime("%Y-%m-%d_%H-%M")
+        modelPrefix = ""
+        if "DataLoader_TenantName" in self.mediator.provenanceProperties and self.mediator.provenanceProperties["DataLoader_TenantName"] != None:
+            modelPrefix = self.mediator.provenanceProperties["DataLoader_TenantName"]+ "_"
+        self.mediator.name = modelPrefix + self.mediator.schema["name"] + "_" + time.strftime("%Y-%m-%d_%H-%M")
         
     @overrides(JsonGenBase)
     def getKey(self):

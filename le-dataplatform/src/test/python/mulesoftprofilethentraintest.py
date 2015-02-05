@@ -43,7 +43,7 @@ class MulesoftProfilingThenTrainTest(TrainingTestBase):
         traininglauncher = Launcher("modeldriver-mulesoft.json")
         traininglauncher.execute(False)
         
-        jsonDict = json.loads(open(glob.glob("./results/PLSModel*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
         
         rocScore = jsonDict["Summary"]["RocScore"]
         

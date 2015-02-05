@@ -12,11 +12,11 @@ import numpy as np
 
 
 class SummaryGenerator(State, JsonGenBase):
-    
+
     def __init__(self):
         State.__init__(self, "SummaryGenerator")
         self.logger = logging.getLogger(name = 'summarygenerator')
-    
+
     @overrides(State)
     def execute(self):
         mediator = self.mediator
@@ -27,14 +27,14 @@ class SummaryGenerator(State, JsonGenBase):
                 continue
             self.logger.info("Generating predictors for " + key)
             predictors.append(self.generatePredictors(key, value))
-        
+
         # Sort predictor by UncertaintyCoefficient
         predictors = sorted(predictors, key = lambda x: x["UncertaintyCoefficient"], reverse = True)
         self.summary["SchemaVersion"] = 1
         self.summary["Predictors"] = predictors
-        
+
         rocScore = self.getRocScore(zip(self.mediator.scored, self.mediator.target))
-        
+
         if rocScore is not None:
             self.summary["RocScore"] = rocScore 
         self.summary["SegmentChart"] = self.__getSegmentChart(mediator.probRange, mediator.widthRange, mediator.buckets, mediator.averageProbability)
@@ -59,7 +59,7 @@ class SummaryGenerator(State, JsonGenBase):
             element = OrderedDict()
             element["CorrelationSign"] = 1 if record["lift"] > 1 else -1
             element["Count"] = record["count"]
-            
+
             # Lift value
             if record["lift"] is not None:
                 element["Lift"] = record["lift"]
@@ -72,7 +72,7 @@ class SummaryGenerator(State, JsonGenBase):
 
             # Name
             element["Name"] = str(uuid.uuid4())
-            
+
             # Uncertainty coefficient
             if record["uncertaintyCoefficient"] is not None:
                 element["UncertaintyCoefficient"] = record["uncertaintyCoefficient"] 
@@ -90,14 +90,14 @@ class SummaryGenerator(State, JsonGenBase):
                 element["Values"] = [None]
             if "discreteNullBucket" in record and record["discreteNullBucket"] == True:
                 element["Values"] = [None]
-            
+
             element["IsVisible"] = True
             elements.append(element)
 
         predictor = OrderedDict()
         predictor["Elements"] = elements
         predictor["Name"] = colname
-        
+
         if "displayname" in record:
             predictor["DisplayName"] = record["displayname"]
         else:
@@ -130,7 +130,7 @@ class SummaryGenerator(State, JsonGenBase):
             for i in range (1, len(probRange) - 1):
                 inclusive.append(((probRange[i] + probRange[i + 1]) / 2, inclusive[i - 1][0]))
             inclusive.append((0, inclusive[len(probRange) - 2][0]))
-                  
+    
         # Generate name for each segment
         names = []
         for i in range(len(probRange)):
@@ -146,7 +146,7 @@ class SummaryGenerator(State, JsonGenBase):
                 elif buckets[j]["Maximum"] is not None and curProb < buckets[j]["Maximum"]:    
                         names.append(buckets[j]["Name"])
                         break
-                            
+           
         # Generate segments
         segments = []
         for i in range(len(probRange)):
@@ -162,7 +162,7 @@ class SummaryGenerator(State, JsonGenBase):
         segmentChart = OrderedDict()
         segmentChart["AverageProbability"] = averageProbability
         segmentChart["Segments"] = segments
-        
+
         return segmentChart
 
     def getRocScore(self, score):
@@ -173,37 +173,37 @@ class SummaryGenerator(State, JsonGenBase):
         for i in range(len(score)):
             theoreticalBestCounter += score[i][1]
             theoreticalBestArea += theoreticalBestCounter
-        
+
         # Sort by score
         score.sort(key = lambda rowScore: (rowScore[0], rowScore[1]), reverse = True)
         weightedEventDict = {k : np.mean(map(lambda x: x[1], rows)) for k, rows in itertools.groupby(score, lambda x: x[0])}
-        
+
         actualBestCounter = 0
         actualBestArea = 0
         for i in range(len(score)):
             actualBestCounter += weightedEventDict[score[i][0]]
             actualBestArea += actualBestCounter
-        
+
         if theoreticalBestArea == 0:
             self.logger.warn("All events are 0, could not calculate ROC score.")
             return None
-        
+
         self.logger.info("Actual best area = %f" % actualBestArea)
         self.logger.info("Theoretical best area = %f" % theoreticalBestArea)
         return actualBestArea / float(theoreticalBestArea)
-        
+
     def __getDLEventTableData(self, provenanceProperties, rowCount):
         if len(provenanceProperties) == 0:
             self.logger.error("Provenance property is null.")
             return OrderedDict()
-        
+
         element = OrderedDict()
         element["DataLoaderURL"] = provenanceProperties["DataLoader_Instance"] 
         element["TenantName"] = provenanceProperties["DataLoader_TenantName"]
         element["QueryName"] = provenanceProperties["DataLoader_Query"]
         element["SourceRowCount"] = rowCount
         return element
-    
+
     def __getConstructionInfo(self):
         constructionTime = OrderedDict()
         # DateTime returns UTC epoch in milliseconds
@@ -214,6 +214,5 @@ class SummaryGenerator(State, JsonGenBase):
         element["Source"] = 1
         element["ConstructionTime"] = constructionTime
         element["VersionNumber"] = 1
-        
+
         return element
-        

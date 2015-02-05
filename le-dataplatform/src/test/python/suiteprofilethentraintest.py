@@ -34,7 +34,7 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
         os.symlink("../resources/com/latticeengines/dataplatform/python/modelpredictorextraction.py", "modelpredictorextraction.py")
         traininglauncher = Launcher("metadata-model.json")
         traininglauncher.execute(False)
-        jsonDict = json.loads(open(glob.glob("./results/PLSModel*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
         self.assertIsNotNone(jsonDict)
         self.assertModelOutput(results[0], jsonDict)
         
@@ -76,7 +76,7 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
 class SuiteMuleSoftProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteMuleSoftProfilingThenTrainTest, self).executeProfilingThenTrain()
-        jsonDict = json.loads(open(glob.glob("./results/PLSModel*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
         self.assertTrue(rocScore > 0.83)
         
@@ -87,7 +87,7 @@ class SuiteMuleSoftProfilingThenTrainTest(SuiteProfilingThenTrainTest):
 class SuiteHirevueProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteHirevueProfilingThenTrainTest, self).executeProfilingThenTrain()
-        jsonDict = json.loads(open(glob.glob("./results/PLSModel*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
         self.assertTrue(rocScore > 0.91)
 
@@ -98,10 +98,10 @@ class SuiteHirevueProfilingThenTrainTest(SuiteProfilingThenTrainTest):
 class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteLatticeRelaunchProfilingThenTrainTest, self).executeProfilingThenTrain()
-        jsonDict = json.loads(open(glob.glob("./results/PLSModel*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
         self.assertTrue(rocScore > 0.79)
-        
+
         self.createCSVFromModel("metadata-model.json", "./results/scorefilefortrainingdata.txt", True)
         for index in range(0, len(jsonDict["Model"]["CompressedSupportFiles"])):
             entry = jsonDict["Model"]["CompressedSupportFiles"][index]
@@ -147,7 +147,7 @@ class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
  
         subprocess.call([sys.executable, './results/scoringengine.py', "./results/scorefilefortrainingdata.txt", "./results/scoreoutputfilefortrainingdata.txt"])
         self.__writePercentileBucketsFile("./results/scoreoutputfilefortrainingdata.txt", "./results/pctilescoreoutputfilefortrainingdata.csv", jsonDict)
-        self.__writePercentileBucketsFile("./results/scored.txt", "./results/pctilescoreoutputfilefortestdata.csv", jsonDict)
+        self.__writePercentileBucketsFile(glob.glob("./results/*scored.txt")[0], "./results/pctilescoreoutputfilefortestdata.csv", jsonDict)
 
     def __writePercentileBucketsFile(self, inputFileName, outputFileName, jsonDict):
         with open(outputFileName, "w") as fw:
@@ -178,7 +178,7 @@ class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
 class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteDocsignProfilingThenTrainTest, self).executeProfilingThenTrain()
-        jsonDict = json.loads(open(glob.glob("./results/PLSModel*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
         predictors = jsonDict["Summary"]["Predictors"]
         for predictor in predictors:
@@ -191,7 +191,7 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
         count = 0
         hasOther = False
         binarySet = set()
-        csvFile = csv.DictReader(open(glob.glob("./results/PLSModel*.csv")[0]))
+        csvFile = csv.DictReader(open(glob.glob("./results/*PLSModel*.csv")[0]))
         for row in csvFile:
             if row['Attribute Name'] == 'ELQContact_Industry':
                 if row['Attribute Value'] == '["Other"]':
