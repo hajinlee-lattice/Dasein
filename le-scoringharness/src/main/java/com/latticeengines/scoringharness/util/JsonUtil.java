@@ -13,4 +13,8 @@ public class JsonUtil {
             throw new RuntimeException(String.format("Failed to parse %s as json", json), e);
         }
     }
+
+    public static ObjectNode createObject() {
+        return (ObjectNode) new ObjectMapper().createObjectNode();
+    }
 }

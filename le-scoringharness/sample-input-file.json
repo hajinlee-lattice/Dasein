@@ -12,13 +12,13 @@
 	},
 	{
 		"@type":"write",
-		"offsetMilliseconds":100,
+		"offsetMilliseconds":600,
 		"externalId":"scoring-harness-sample1@lattice-engines.com",
 		"object":{}
 	},
 	{
 		"@type":"readscore",
-		"offsetMilliseconds":500,
+		"offsetMilliseconds":900,
 		"externalId":"scoring-harness-sample1@lattice-engines.com"
 	}
 ]

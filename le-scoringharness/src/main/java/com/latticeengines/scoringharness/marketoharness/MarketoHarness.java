@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudRead;
@@ -192,7 +191,7 @@ public class MarketoHarness {
         if (update.objects == null || update.objects.size() == 0)
             throw new IllegalArgumentException("formatObjectUpdate() requires at least one row to update.");
 
-        ObjectNode toReturn = new ObjectMapper().createObjectNode();
+        ObjectNode toReturn = JsonUtil.createObject();
         toReturn.put("action", update.action);
         toReturn.set("input", update.objects);
         return toReturn.toString();

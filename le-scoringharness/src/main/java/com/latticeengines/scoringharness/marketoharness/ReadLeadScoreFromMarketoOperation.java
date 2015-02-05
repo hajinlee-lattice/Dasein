@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.scoringharness.OutputFileWriter;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudRead;
@@ -51,7 +52,7 @@ public class ReadLeadScoreFromMarketoOperation extends Operation<ReadLeadScoreOp
                         spec.externalId, result.errorMessage));
             }
 
-            outputResult.additionalFields.add(result.results.toString());
+            outputResult.additionalFields.add(getScoreFields(result.results).toString());
         } catch (Exception e) {
             outputResult.additionalFields.add(e.getMessage());
         }
@@ -62,35 +63,29 @@ public class ReadLeadScoreFromMarketoOperation extends Operation<ReadLeadScoreOp
     /**
      * Peel out only the fields that we requested
      */
-    private List<String> getScoreFields(List<String> results) {
-        // TODO
-        return results;
-/*        
+    private JsonNode getScoreFields(ArrayNode results) {
         if (results.size() == 0) {
             throw new RuntimeException(String.format("Invalid output returned from Marketo '%s'", results));
         }
 
-        String result = results.get(0);
-        ObjectNode json = JsonUtil.parseObject(result);
-
-        List<String> toReturn = new ArrayList<String>();
-        JsonNode jsonNode;
-
+        // Collect requested fields
         List<String> requestedFields = new ArrayList<String>();
         requestedFields.add(properties.getScoreField());
         if (spec.additionalFields != null) {
             requestedFields.addAll(spec.additionalFields);
         }
 
+        // Create new object node with just those fields
+        ObjectNode toReturn = JsonUtil.createObject();
         for (String field : requestedFields) {
-            jsonNode = json.get(field);
-            if (jsonNode == null) {
+            JsonNode jsonField = results.get(0).get(field);
+            if (jsonField == null) {
                 throw new RuntimeException(String.format("Requested field %s was not provided in output from Marketo",
                         field));
             }
-
+            toReturn.put(field, jsonField.asText());
         }
-*/
+        return toReturn;
     }
 
     @Override
