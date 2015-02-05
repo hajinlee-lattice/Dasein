@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.security;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class Credentials {
 
@@ -27,4 +28,8 @@ public class Credentials {
         this.password = password;
     }
     
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 }
