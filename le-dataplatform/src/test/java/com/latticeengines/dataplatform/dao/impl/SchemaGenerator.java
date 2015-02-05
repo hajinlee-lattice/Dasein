@@ -58,7 +58,7 @@ public class SchemaGenerator {
 
     private void init(String name, String... packages) throws Exception {
         this.schemaName = name;
-        cfg.setProperty("hibernate.hbm2ddl.auto", "create");
+        cfg.setProperty("hibernate.hbm2ddl.auto", "create-drop");
         cfg.setProperty("hibernate.globally_quoted_identifiers", "true");
         cfg.setProperty("connection.autocommit", "true");
 
