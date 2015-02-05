@@ -17,6 +17,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -74,6 +75,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @Override
     @JsonProperty("Id")
     @Column(name = "ID", nullable = false)
+    @Index(name = "MODEL_SUMMARY_ID_IDX")
     public String getId() {
         return id;
     }
