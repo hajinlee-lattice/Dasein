@@ -3,21 +3,33 @@ package com.latticeengines.pls.functionalframework;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
@@ -25,7 +37,7 @@ import com.latticeengines.pls.security.GrantedRight;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
-public class PlsFunctionalTestNGBase extends AbstractTransactionalTestNGSpringContextTests {
+public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(PlsFunctionalTestNGBase.class);
     
@@ -38,7 +50,17 @@ public class PlsFunctionalTestNGBase extends AbstractTransactionalTestNGSpringCo
     @Autowired
     private GlobalUserManagementServiceImpl globalUserManagementService;
     
+    @Autowired
+    private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
+    
+    @Autowired
+    private SessionFactory sessionFactory;
+    
     protected RestTemplate restTemplate = new RestTemplate();
+    protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor("");
     
     protected void createUser(String username, String email, String firstName, String lastName) {
         try {
@@ -90,6 +112,96 @@ public class PlsFunctionalTestNGBase extends AbstractTransactionalTestNGSpringCo
             throw new RuntimeException("" + response.getStatusCode());
         }
     }
-
     
+    public static class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+        
+        private String headerValue;
+
+        public AuthorizationHeaderHttpRequestInterceptor(String headerValue) 
+        {
+            this.headerValue = headerValue;
+        }
+
+        @Override
+        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+                throws IOException {
+            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
+            requestWrapper.getHeaders().add("Authorization", headerValue);
+         
+            return execution.execute(requestWrapper, body);
+        }
+        
+        public void setAuthValue(String headerValue) {
+            this.headerValue = headerValue;
+        }
+    }
+
+    protected void setupDb(String tenant1Name, String tenant2Name) {
+        List<Tenant> tenants = tenantEntityMgr.findAll();
+
+        for (Tenant tenant : tenants) {
+            tenantEntityMgr.delete(tenant);
+        }
+
+        if (tenant1Name != null) {
+            Tenant tenant1 = new Tenant();
+            tenant1.setId(tenant1Name);
+            tenant1.setName(tenant1Name);
+            tenantEntityMgr.create(tenant1);
+            
+            ModelSummary summary1 = new ModelSummary();
+            summary1.setId("123");
+            summary1.setName("Model1");
+            summary1.setTenant(tenant1);
+            modelSummaryEntityMgr.create(summary1);
+        }
+
+        if (tenant2Name != null) {
+            Tenant tenant2 = new Tenant();
+            tenant2.setId(tenant2Name);
+            tenant2.setName(tenant2Name);
+            tenantEntityMgr.create(tenant2);
+            
+            ModelSummary summary2 = new ModelSummary();
+            summary2.setId("456");
+            summary2.setName("Model2");
+            summary2.setTenant(tenant2);
+            Predictor s2p1 = new Predictor();
+            s2p1.setApprovedUsage("Model");
+            s2p1.setCategory("Construction");
+            s2p1.setName("LeadSource");
+            s2p1.setDisplayName("LeadSource");
+            s2p1.setFundamentalType("");
+            s2p1.setUncertaintyCoefficient(0.151911);
+            summary2.addPredictor(s2p1);
+            
+            PredictorElement s2el1 = new PredictorElement();
+            s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
+            s2el1.setCorrelationSign(-1);
+            s2el1.setCount(311L);
+            s2el1.setLift(0.0);
+            s2el1.setLowerInclusive(0.0);
+            s2el1.setUpperExclusive(10.0);
+            s2el1.setUncertaintyCoefficient(0.00313);
+            s2el1.setRevenue(284788700000.0);
+            s2el1.setVisible(true);
+            s2p1.addPredictorElement(s2el1);
+
+            PredictorElement s2el2 = new PredictorElement();
+            s2el2.setName("7ade3995-f3da-4b83-87e6-c358ba3bdc00");
+            s2el2.setCorrelationSign(1);
+            s2el2.setCount(704L);
+            s2el2.setLift(1.3884292375950742);
+            s2el2.setLowerInclusive(10.0);
+            s2el2.setUpperExclusive(1000.0);
+            s2el2.setUncertaintyCoefficient(0.000499);
+            s2el2.setRevenue(1682345087923.0);
+            s2el2.setVisible(true);
+            s2p1.addPredictorElement(s2el2);
+            
+            modelSummaryEntityMgr.create(summary2);
+            
+        }
+    }
+
 }

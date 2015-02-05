@@ -30,6 +30,12 @@ public enum GrantedRight implements GrantedAuthority {
         public String getAuthority() {
             return "View_PLS_Models";
         }
+    }, //
+    EDIT_PLS_USERS {
+        @Override
+        public String getAuthority() {
+            return "Edit_PLS_Users";
+        }
     };
 
     private static Map<String, GrantedRight> grantedRightsMap = new HashMap<>();

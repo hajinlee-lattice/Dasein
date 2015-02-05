@@ -7,7 +7,7 @@ public interface GlobalUserManagementService {
 
     Boolean registerUser(User user, Credentials creds);
     
-    Boolean grantRight(String user, String tenant, String right);
+    Boolean grantRight(String right, String tenant, String username);
 
     Boolean revokeRight(String right, String tenant, String username);
 }
