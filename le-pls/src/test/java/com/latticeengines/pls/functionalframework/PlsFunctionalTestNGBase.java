@@ -5,6 +5,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -135,6 +137,17 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             this.headerValue = headerValue;
         }
     }
+    
+    protected Session login(String username) {
+        Credentials creds = new Credentials();
+        creds.setUsername(username);
+        creds.setPassword(DigestUtils.sha256Hex("admin"));
+
+        return restTemplate.postForObject("http://localhost:8080/pls/login", creds, Session.class,
+                new Object[] {});
+    }
+    
+    
 
     protected void setupDb(String tenant1Name, String tenant2Name) {
         List<Tenant> tenants = tenantEntityMgr.findAll();

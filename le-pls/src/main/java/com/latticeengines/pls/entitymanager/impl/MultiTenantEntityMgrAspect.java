@@ -22,7 +22,21 @@ public class MultiTenantEntityMgrAspect {
     private TenantEntityMgr tenantEntityMgr;
 
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.find*(..))")
-    public void enableMultiTenantFilter(JoinPoint joinPoint) {
+    public void find(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint);
+    }
+    
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.update*(..))")
+    public void update(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.delete*(..))")
+    public void delete(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint);
+    }
+
+    private void enableMultiTenantFilter(JoinPoint joinPoint) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!(auth instanceof TicketAuthenticationToken)) {
             throw new RuntimeException("Problem with multi-tenancy framework.");

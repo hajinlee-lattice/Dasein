@@ -1,8 +1,10 @@
 package com.latticeengines.pls.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
-import java.util.AbstractMap;
 import java.util.List;
 
 import org.mockito.Mockito;
@@ -13,6 +15,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
@@ -33,9 +37,6 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     
     private ModelSummary summary1;
     private ModelSummary summary2;
-    private Long modelSummaryPid1;
-    private Long modelSummaryPid2;
-    
     
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -44,19 +45,11 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         for (Tenant tenant : tenants) {
             tenantEntityMgr.delete(tenant);
         }
-        
-        
-        AbstractMap.SimpleEntry<Long, ModelSummary> s1 = createTenant1();
-        AbstractMap.SimpleEntry<Long, ModelSummary> s2 = createTenant2();
-        
-        modelSummaryPid1 = s1.getKey();
-        summary1 = s1.getValue();
-        
-        modelSummaryPid2 = s2.getKey();
-        summary2 = s2.getValue();
+        summary1 = createModelSummaryForTenant1();
+        summary2 = createModelSummaryForTenant2();
     }
         
-    private AbstractMap.SimpleEntry<Long, ModelSummary> createTenant1() {
+    private ModelSummary createModelSummaryForTenant1() {
         Tenant tenant1 = new Tenant();
         tenant1.setId("TENANT1");
         tenant1.setName("TENANT1");
@@ -99,10 +92,10 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s1p1.addPredictorElement(s1el2);
         
         modelSummaryEntityMgr.create(summary1);
-        return new AbstractMap.SimpleEntry<>(summary1.getPid(), summary1);
+        return summary1;
     }
     
-    private AbstractMap.SimpleEntry<Long, ModelSummary> createTenant2() {
+    private ModelSummary createModelSummaryForTenant2() {
         Tenant tenant2 = new Tenant();
         tenant2.setId("TENANT2");
         tenant2.setName("TENANT2");
@@ -145,7 +138,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s2p1.addPredictorElement(s2el2);
         
         modelSummaryEntityMgr.create(summary2);
-        return new AbstractMap.SimpleEntry<>(summary2.getPid(), summary2);
+        return summary2;
     }
     
     @Test(groups = "functional")
@@ -217,6 +210,58 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Mockito.when(securityContext.getAuthentication()).thenReturn(token);
         SecurityContextHolder.setContext(securityContext);
 
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "findByModelId", "findAll" })
+    public void updateModelSummaryForModelInTenant() {
+        setupSecurityContext(summary1);
+        ModelSummary s = modelSummaryEntityMgr.findByModelId(summary1.getId());
+        s.setName("XYZ");
+        modelSummaryEntityMgr.updateModelSummary(s);
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId());
+        assertEquals(retrievedSummary.getName(), "XYZ");
+    }
+
+    /**
+     * Update summary from tenant 2 but using tenant 1 security context.
+     */
+    @Test(groups = "functional", dependsOnMethods = { "updateModelSummaryForModelInTenant" })
+    public void updateModelSummaryForModelNotInTenant() {
+
+        ModelSummary summaryToUpdate = new ModelSummary();
+        summaryToUpdate.setId(summary2.getId());
+        summaryToUpdate.setName("ABC");
+        
+        setupSecurityContext(summary1);
+        boolean exception = false;
+        try {
+            modelSummaryEntityMgr.updateModelSummary(summaryToUpdate);
+        } catch (LedpException e) {
+            exception = true;
+            assertEquals(e.getCode(), LedpCode.LEDP_18007);
+        }
+        assertTrue(exception);
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = { "updateModelSummaryForModelNotInTenant" })
+    public void deleteForModelInTenant() {
+        setupSecurityContext(summary1);
+        assertNotNull(modelSummaryEntityMgr.findByModelId(summary1.getId()));
+        modelSummaryEntityMgr.deleteByModelId(summary1.getId());
+        assertNull(modelSummaryEntityMgr.findByModelId(summary1.getId()));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "deleteForModelInTenant" })
+    public void deleteForModelNotInTenant() {
+        setupSecurityContext(summary1);
+        boolean exception = false;
+        try {
+            modelSummaryEntityMgr.deleteByModelId(summary1.getId());
+        } catch (LedpException e) {
+            exception = true;
+            assertEquals(e.getCode(), LedpCode.LEDP_18007);
+        }
+        assertTrue(exception);
     }
     
 }

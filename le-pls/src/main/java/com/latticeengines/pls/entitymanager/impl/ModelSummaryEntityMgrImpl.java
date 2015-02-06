@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
@@ -67,6 +69,10 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     public ModelSummary findByModelId(String modelId) {
         ModelSummary summary = modelSummaryDao.findByModelId(modelId);
         
+        if (summary == null) {
+            return null;
+        }
+
         if (summary.getTenantId() != getTenantId()) {
             return null;
         }
@@ -92,11 +98,46 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
     
     private Long getTenantId()  {
-        // By the time this method is invoked, the aspec joinpoint in MultiTenantEntityMgrAspect would
+        // By the time this method is invoked, the aspect joinpoint in MultiTenantEntityMgrAspect would
         // have been invoked, and any exceptions with respect to nulls would already
         // have been caught there, which is why there is no defensive checking here
         TicketAuthenticationToken token = (TicketAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
         return token.getSession().getTenant().getPid();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteByModelId(String modelId) {
+        ModelSummary summary = findByModelId(modelId);
+        
+        if (summary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+        super.delete(summary);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateModelSummary(ModelSummary modelSummary) {
+        String modelId = modelSummary.getId();
+        
+        if (modelId == null) {
+            throw new LedpException(LedpCode.LEDP_18008, new String[] { "Id" });
+        }
+        ModelSummary summary = findByModelId(modelSummary.getId());
+        
+        if (summary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+        
+        // Support renaming only
+        String name = modelSummary.getName();
+        if (name == null) {
+            throw new LedpException(LedpCode.LEDP_18008, new String[] { "Name" });
+        }
+        
+        summary.setName(name);
+        super.update(summary);
     }
 
 }

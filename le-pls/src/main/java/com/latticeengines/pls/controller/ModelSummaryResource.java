@@ -6,11 +6,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -45,4 +47,24 @@ public class ModelSummaryResource {
         return summaries;
     }
 
+    @RequestMapping(value = "/{modelId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete a model summary")
+    @PreAuthorize("hasRole('Edit_PLS_Models')")
+    public Boolean delete(@PathVariable String modelId) {
+        modelSummaryEntityMgr.deleteByModelId(modelId);
+        return true;
+    }
+
+    @RequestMapping(value = "/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update a model summary")
+    @PreAuthorize("hasRole('Edit_PLS_Models')")
+    public Boolean update(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
+        ModelSummary modelSummary = new ModelSummary();
+        modelSummary.setId(modelId);
+        modelSummary.setName(attrMap.get("Name"));
+        modelSummaryEntityMgr.updateModelSummary(modelSummary);
+        return true;
+    }
 }

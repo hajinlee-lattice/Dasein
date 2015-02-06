@@ -2,7 +2,9 @@ package com.latticeengines.pls.controller;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,15 +13,12 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -41,6 +40,10 @@ import com.latticeengines.pls.security.GrantedRight;
  * 
  * It also ensures that bnguyen can indeed access the model summaries since it does
  * have the View_PLS_Models right.
+ * 
+ * It also ensures that updates can only be done by bnguyen since this user 
+ * has Edit_PLS_Models right.
+ * 
  * @author rgonzalez
  *
  */
@@ -81,29 +84,35 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "bnguyen");
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
+        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "bnguyen");
         
         setupDb(tenant1, tenant2);
     }
     
     @Test(groups = "functional")
     public void getModelSummariesNoViewPlsModelsRight() {
-        Credentials creds = new Credentials();
-        creds.setUsername("rgonzalez");
-        creds.setPassword(DigestUtils.sha256Hex("admin"));
-
-        Session session = restTemplate.postForObject("http://localhost:8080/pls/login", creds, Session.class,
-                new Object[] {});
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", session.getTicket().getData());
-
-        HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
-
+        Session session = login("rgonzalez");
+        addAuthHeader.setAuthValue(session.getTicket().getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
         try {
-            restTemplate.exchange( //
-                    "http://localhost:8080/pls/modelsummaries/", HttpMethod.GET, entity, List.class, new HashMap<>());
+            restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/", List.class);
+        } catch (Exception e) {
+            String code = e.getMessage();
+            assertEquals(code, "403");
+        }
+    }
+
+    @Test(groups = "functional")
+    public void deleteModelSummaryNoEditPlsModelsRight() {
+        Session session = login("rgonzalez");
+        addAuthHeader.setAuthValue(session.getTicket().getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+
+        try {
+            restTemplate.delete("http://localhost:8080/pls/modelsummaries/123");
         } catch (Exception e) {
             String code = e.getMessage();
             assertEquals(code, "403");
@@ -113,29 +122,51 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = "functional")
     public void getModelSummariesHasViewPlsModelsRight() {
-        Credentials creds = new Credentials();
-        creds.setUsername("bnguyen");
-        creds.setPassword(DigestUtils.sha256Hex("admin"));
-
-        Session session = restTemplate.postForObject("http://localhost:8080/pls/login", creds, Session.class,
-                new Object[] {});
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", session.getTicket().getData());
-
-        HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
-        ResponseEntity<List> response = restTemplate.exchange( //
-                    "http://localhost:8080/pls/modelsummaries/", HttpMethod.GET, entity, List.class, new HashMap<>());
+        Session session = login("bnguyen");
+        addAuthHeader.setAuthValue(session.getTicket().getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+        List response = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/", List.class);
         assertNotNull(response);
-        assertEquals(response.getBody().size(), 1);
-        Map<String, String> map = (Map) response.getBody().get(0);
-        ResponseEntity<ModelSummary> msResponse = restTemplate.exchange( //
-                "http://localhost:8080/pls/modelsummaries/" + map.get("Id"), HttpMethod.GET, entity, ModelSummary.class, new HashMap<>());
-        
-        ModelSummary summary = msResponse.getBody(); 
+        assertEquals(response.size(), 1);
+        Map<String, String> map = (Map) response.get(0);
+        ModelSummary summary = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
         assertEquals(summary.getName(), "Model2");
         assertEquals(summary.getPredictors().size(), 1);
         assertEquals(summary.getPredictors().get(0).getPredictorElements().size(), 2);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test(groups = "functional", dependsOnMethods = { "getModelSummariesHasViewPlsModelsRight" })
+    public void updateModelSummaryHasEditPlsModelsRight() {
+        Session session = login("bnguyen");
+        addAuthHeader.setAuthValue(session.getTicket().getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+        List response = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/", List.class);
+        assertNotNull(response);
+        assertEquals(response.size(), 1);
+        Map<String, String> map = (Map) response.get(0);
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put("Name", "xyz");
+        restTemplate.put("http://localhost:8080/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
+        
+        ModelSummary summary = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
+        assertEquals(summary.getName(), "xyz");
+        assertEquals(summary.getPredictors().size(), 1);
+        assertEquals(summary.getPredictors().get(0).getPredictorElements().size(), 2);
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = { "updateModelSummaryHasEditPlsModelsRight" })
+    public void deleteModelSummaryHasEditPlsModelsRight() {
+        Session session = login("bnguyen");
+        addAuthHeader.setAuthValue(session.getTicket().getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+
+        restTemplate.delete("http://localhost:8080/pls/modelsummaries/456");
+        ModelSummary summary = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/456", ModelSummary.class);
+        assertNull(summary);
+    }
+    
 }

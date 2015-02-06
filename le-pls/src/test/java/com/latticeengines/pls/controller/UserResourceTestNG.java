@@ -70,15 +70,6 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(summaries.size(), 1);
     }
     
-    private Session login(String username) {
-        Credentials creds = new Credentials();
-        creds.setUsername(username);
-        creds.setPassword(DigestUtils.sha256Hex("admin"));
-
-        return restTemplate.postForObject("http://localhost:8080/pls/login", creds, Session.class,
-                new Object[] {});
-    }
-    
     private UserRegistration createUserRegistration(Tenant tenant) {
         UserRegistration userReg = new UserRegistration();
         

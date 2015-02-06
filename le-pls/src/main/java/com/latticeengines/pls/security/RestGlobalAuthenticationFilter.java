@@ -29,6 +29,7 @@ public class RestGlobalAuthenticationFilter extends AbstractAuthenticationProces
         return this.getAuthenticationManager().authenticate(authRequest);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
         boolean retVal = false;
