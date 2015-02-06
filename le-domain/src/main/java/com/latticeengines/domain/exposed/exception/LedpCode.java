@@ -69,7 +69,9 @@ public enum LedpCode {
     LEDP_18003("Access denied."), //
     LEDP_18004("Could not register user {0}."), //
     LEDP_18005("Could not grant right {0} to user {1} for tenant {2}."), //
-    LEDP_18006("Could not revoke right {0} from user {1} for tenant {2}.");
+    LEDP_18006("Could not revoke right {0} from user {1} for tenant {2}."), //
+    LEDP_18007("Model with id {0} not found."), //
+    LEDP_18008("Attribute {0} cannot be null.");
 
     private String message;
 

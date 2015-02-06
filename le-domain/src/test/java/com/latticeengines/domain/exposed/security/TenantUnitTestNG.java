@@ -12,8 +12,8 @@ public class TenantUnitTestNG {
     public void testSerDe() {
         Tenant tenant = new Tenant();
         tenant.setName("Tenant1");
-        String deserializedStr = tenant.toString();
-        Tenant deserializedTenant = JsonUtils.deserialize(deserializedStr, Tenant.class);
+        String serializedStr = tenant.toString();
+        Tenant deserializedTenant = JsonUtils.deserialize(serializedStr, Tenant.class);
         
         assertEquals(tenant.getName(), deserializedTenant.getName());
     }

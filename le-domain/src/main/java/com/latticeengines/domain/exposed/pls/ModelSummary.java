@@ -119,11 +119,6 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     }
 
     @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
-    }
-
-    @Override
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
     public Long getTenantId() {
@@ -133,6 +128,11 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @Override
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }

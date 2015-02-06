@@ -31,9 +31,8 @@ public class UserRegistrationUnitTestNG {
         userReg.setCredentials(creds);
         userReg.setTenant(tenant);
         
-        String deserializedStr = userReg.toString();
-        System.out.println(deserializedStr);
-        UserRegistration deserializedUserReg = JsonUtils.deserialize(deserializedStr, UserRegistration.class);
+        String serializedStr = userReg.toString();
+        UserRegistration deserializedUserReg = JsonUtils.deserialize(serializedStr, UserRegistration.class);
         
         assertEquals(deserializedUserReg.getUser().toString(), userReg.getUser().toString());
         assertEquals(deserializedUserReg.getCredentials().toString(), userReg.getCredentials().toString());
