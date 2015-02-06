@@ -3,6 +3,8 @@ package com.latticeengines.scoringharness.marketoharness;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,9 @@ import com.latticeengines.scoringharness.util.JsonUtil;
 
 @Component
 public class ReadLeadScoreFromMarketoOperation extends Operation<ReadLeadScoreOperationSpec> {
+    private static final Log log = LogFactory.getLog(new Object() {
+    }.getClass().getEnclosingClass());
+
     @Autowired
     private MarketoHarness harness;
 
@@ -54,6 +59,7 @@ public class ReadLeadScoreFromMarketoOperation extends Operation<ReadLeadScoreOp
 
             outputResult.additionalFields.add(getScoreFields(result.results).toString());
         } catch (Exception e) {
+            log.error(String.format("Failed to read score of lead %s from Marketo", spec.externalId), e);
             outputResult.additionalFields.add(e.getMessage());
         }
 

@@ -1,5 +1,7 @@
 package com.latticeengines.scoringharness.marketoharness;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,9 @@ import com.latticeengines.scoringharness.operationmodel.WriteLeadOperationSpec;
 
 @Component
 public class WriteLeadToMarketoOperation extends Operation<WriteLeadOperationSpec> {
+    private static final Log log = LogFactory.getLog(new Object() {
+    }.getClass().getEnclosingClass());
+
     @Autowired
     private MarketoHarness harness;
 
@@ -44,6 +49,7 @@ public class WriteLeadToMarketoOperation extends Operation<WriteLeadOperationSpe
                         result.errorMessage));
             }
         } catch (Exception e) {
+            log.error(String.format("Failed to write lead %s to Marketo", spec.externalId), e);
             outputResult.additionalFields.add(e.getMessage());
         }
 
