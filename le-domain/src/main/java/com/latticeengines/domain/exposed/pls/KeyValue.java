@@ -8,10 +8,15 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+import org.apache.commons.net.util.Base64;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 
@@ -22,8 +27,8 @@ public class KeyValue implements HasTenantId, HasPid {
 
     private Long pid;
     private Long tenantId;
-    private Long entityPid;
     private byte[] data;
+    private String ownerType = ModelSummary.class.getSimpleName();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +49,7 @@ public class KeyValue implements HasTenantId, HasPid {
     @Override
     @JsonIgnore
     @Column(name = "TENANT_ID", nullable = false)
+    @Index(name = "KEY_VALUE_TENANT_ID_IDX")
     public Long getTenantId() {
         return tenantId;
     }
@@ -55,22 +61,41 @@ public class KeyValue implements HasTenantId, HasPid {
 
     @Column(name = "DATA", nullable = false)
     @Lob
+    @JsonIgnore
     public byte[] getData() {
         return data;
     }
 
+    @JsonIgnore
     public void setData(byte[] data) {
         this.data = data;
     }
-
-    @Column(name = "ENTITY_PID", nullable = false)
-    @JsonIgnore
-    public Long getEntityPid() {
-        return entityPid;
+    
+    @JsonProperty("Payload")
+    @Transient
+    public String getPayload() {
+        return Base64.encodeBase64URLSafeString(getData());
+    }
+    
+    @JsonProperty("Payload")
+    @Transient
+    public void setPayload(String payload) {
+        setData(Base64.decodeBase64(payload));
     }
 
-    public void setEntityPid(Long entityPid) {
-        this.entityPid = entityPid;
+    @JsonIgnore
+    @Column(name = "OWNER_TYPE", nullable = false)
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }

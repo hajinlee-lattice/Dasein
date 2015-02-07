@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Filter;
@@ -51,6 +52,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private Long trainingConversionCount;
     private Long testConversionCount;
     private Long totalConversionCount;
+    private KeyValue details;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -122,9 +124,11 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     }
     
     public void addPredictor(Predictor predictor) {
-        predictors.add(predictor);
-        predictor.setModelSummary(this);
-        predictor.setTenantId(getTenantId());
+        if (predictor != null) {
+            predictors.add(predictor);
+            predictor.setModelSummary(this);
+            predictor.setTenantId(getTenantId());
+        }
     }
 
     @Override
@@ -241,6 +245,22 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("TotalConversionCount")
     public void setTotalConversionCount(Long totalConversionCount) {
         this.totalConversionCount = totalConversionCount;
+    }
+
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "FK_KEY_VALUE_ID", nullable = false)
+    @JsonProperty("Details")
+    public KeyValue getDetails() {
+        return details;
+    }
+
+    @JsonProperty("Details")
+    public void setDetails(KeyValue details) {
+        this.details = details;
+        if (details != null) {
+            details.setTenantId(getTenantId());
+        }
     }
 
 }
