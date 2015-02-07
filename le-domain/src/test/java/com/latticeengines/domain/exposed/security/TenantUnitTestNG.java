@@ -12,7 +12,9 @@ public class TenantUnitTestNG {
     public void testSerDe() {
         Tenant tenant = new Tenant();
         tenant.setName("Tenant1");
+        tenant.setId("Tenant1");
         String serializedStr = tenant.toString();
+        System.out.println(serializedStr);
         Tenant deserializedTenant = JsonUtils.deserialize(serializedStr, Tenant.class);
         
         assertEquals(tenant.getName(), deserializedTenant.getName());

@@ -54,7 +54,7 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "PREDICTOR_EL_PID", unique = true, nullable = false)
+    @Column(name = "PID", unique = true, nullable = false)
     @Override
     public Long getPid() {
         return pid;

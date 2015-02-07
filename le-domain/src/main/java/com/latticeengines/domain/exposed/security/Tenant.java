@@ -25,7 +25,7 @@ public class Tenant implements HasName, HasId<String>, HasPid {
 
     @Override
     @JsonProperty("name")
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", nullable = false, unique = true)
     public String getName() {
         return name;
     }
@@ -38,7 +38,7 @@ public class Tenant implements HasName, HasId<String>, HasPid {
     
     @Override
     @JsonProperty("Id")
-    @Column(name = "TENANT_ID", nullable = false)
+    @Column(name = "TENANT_ID", nullable = false, unique = true)
     public String getId() {
         return id;
     }

@@ -44,7 +44,7 @@ public class Predictor implements HasName, HasPid, HasTenantId {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "PREDICTOR_PID", unique = true, nullable = false)
+    @Column(name = "PID", unique = true, nullable = false)
     @Override
     public Long getPid() {
         return pid;

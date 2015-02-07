@@ -42,12 +42,21 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private Tenant tenant;
     private Long tenantId;
     private List<Predictor> predictors = new ArrayList<>();
+    private Double rocScore;
+    private String lookupId;
+    private Boolean downloaded = false;
+    private Long trainingRowCount;
+    private Long testRowCount;
+    private Long totalRowCount;
+    private Long trainingConversionCount;
+    private Long testConversionCount;
+    private Long totalConversionCount;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     @Basic(optional = false)
-    @Column(name = "MODEL_SUMMARY_PID", unique = true, nullable = false)
+    @Column(name = "PID", unique = true, nullable = false)
     @Override
     public Long getPid() {
         return pid;
@@ -133,6 +142,105 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    @JsonProperty("RocScore")
+    public Double getRocScore() {
+        return rocScore;
+    }
+
+    @JsonProperty("RocScore")
+    @Column(name = "ROC_SCORE", nullable = false)
+    public void setRocScore(Double rocScore) {
+        this.rocScore = rocScore;
+    }
+
+    @JsonIgnore
+    @Column(name = "LOOKUP_ID", nullable = false)
+    public String getLookupId() {
+        return lookupId;
+    }
+
+    @JsonIgnore
+    public void setLookupId(String lookupId) {
+        this.lookupId = lookupId;
+    }
+
+    @JsonIgnore
+    @Column(name = "DOWNLOADED", nullable = false)
+    public Boolean getDownloaded() {
+        return downloaded;
+    }
+
+    @JsonIgnore
+    public void setDownloaded(Boolean downloaded) {
+        this.downloaded = downloaded;
+    }
+
+    @JsonProperty("TrainingRowCount")
+    @Column(name = "TRAINING_ROW_COUNT", nullable = false)
+    public Long getTrainingRowCount() {
+        return trainingRowCount;
+    }
+
+    @JsonProperty("TrainingRowCount")
+    public void setTrainingRowCount(Long trainingRowCount) {
+        this.trainingRowCount = trainingRowCount;
+    }
+
+    @JsonProperty("TestRowCount")
+    @Column(name = "TEST_ROW_COUNT", nullable = false)
+    public Long getTestRowCount() {
+        return testRowCount;
+    }
+
+    @JsonProperty("TestRowCount")
+    public void setTestRowCount(Long testRowCount) {
+        this.testRowCount = testRowCount;
+    }
+
+    @JsonProperty("TotalRowCount")
+    @Column(name = "TOTAL_ROW_COUNT", nullable = false)
+    public Long getTotalRowCount() {
+        return totalRowCount;
+    }
+
+    @JsonProperty("TotalRowCount")
+    public void setTotalRowCount(Long totalRowCount) {
+        this.totalRowCount = totalRowCount;
+    }
+
+    @JsonProperty("TrainingConversionCount")
+    @Column(name = "TRAINING_CONVERSION_COUNT", nullable = false)
+    public Long getTrainingConversionCount() {
+        return trainingConversionCount;
+    }
+
+    @JsonProperty("TrainingConversionCount")
+    public void setTrainingConversionCount(Long trainingConversionCount) {
+        this.trainingConversionCount = trainingConversionCount;
+    }
+
+    @JsonProperty("TestConversionCount")
+    @Column(name = "TEST_CONVERSION_COUNT", nullable = false)
+    public Long getTestConversionCount() {
+        return testConversionCount;
+    }
+
+    @JsonProperty("TestConversionCount")
+    public void setTestConversionCount(Long testConversionCount) {
+        this.testConversionCount = testConversionCount;
+    }
+
+    @JsonProperty("TotalConversionCount")
+    @Column(name = "TOTAL_CONVERSION_COUNT", nullable = false)
+    public Long getTotalConversionCount() {
+        return totalConversionCount;
+    }
+
+    @JsonProperty("TotalConversionCount")
+    public void setTotalConversionCount(Long totalConversionCount) {
+        this.totalConversionCount = totalConversionCount;
     }
 
 }
