@@ -9,9 +9,9 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public final class CompressionUtil {
+public final class CompressionUtils {
 
-    private final static Log log = LogFactory.getLog(CompressionUtil.class);
+    private final static Log log = LogFactory.getLog(CompressionUtils.class);
 
     public static byte[] decompressByteArray(final byte[] input) {
         return decompressByteArray(input, 1024);
