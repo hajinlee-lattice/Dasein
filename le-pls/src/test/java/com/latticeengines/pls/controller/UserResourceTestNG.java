@@ -47,7 +47,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings("rawtypes")
     @Test(groups = "functional")
-    public void registerUser() {
+    public void registerUser() throws Exception {
         Session session = login("admin");
         Tenant tenant = session.getTenant();
         UserRegistration userReg = createUserRegistration(tenant);

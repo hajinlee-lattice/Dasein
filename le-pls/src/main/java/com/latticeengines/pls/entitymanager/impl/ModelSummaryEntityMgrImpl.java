@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
+import org.hibernate.proxy.HibernateProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -14,10 +15,12 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.dao.KeyValueDao;
 import com.latticeengines.pls.dao.ModelSummaryDao;
 import com.latticeengines.pls.dao.PredictorDao;
 import com.latticeengines.pls.dao.PredictorElementDao;
@@ -29,10 +32,7 @@ import com.latticeengines.pls.security.TicketAuthenticationToken;
 public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
 
     @Autowired
-    private ModelSummaryDao modelSummaryDao;
-
-    @Autowired
-    private TenantDao tenantDao;
+    private KeyValueDao keyValueDao;
 
     @Autowired
     private PredictorDao predictorDao;
@@ -40,6 +40,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Autowired
     private PredictorElementDao predictorElementDao;
     
+    @Autowired
+    private ModelSummaryDao modelSummaryDao;
+
+    @Autowired
+    private TenantDao tenantDao;
+
     @Autowired
     private SessionFactory sessionFactory;
 
@@ -53,6 +59,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     public void create(ModelSummary summary) {
         Tenant tenant = summary.getTenant();
         tenantDao.createOrUpdate(tenant);
+        KeyValue details = summary.getDetails();
+        
+        if (details != null) {
+            keyValueDao.create(details);
+        }
+
         modelSummaryDao.create(summary);
 
         for (Predictor predictor : summary.getPredictors()) {
@@ -64,26 +76,21 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         }
     }
     
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public ModelSummary findByModelId(String modelId) {
-        ModelSummary summary = modelSummaryDao.findByModelId(modelId);
-        
-        if (summary == null) {
-            return null;
-        }
-
-        if (summary.getTenantId() != getTenantId()) {
-            return null;
-        }
-        inflatePredictors(summary);
-        return summary; 
-    }
     
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> findAll() {
         return super.findAll();
+    }
+    
+    private void inflateDetails(ModelSummary summary) {
+        KeyValue kv = summary.getDetails();
+        Hibernate.initialize(kv);
+        if (kv instanceof HibernateProxy) {
+            kv = (KeyValue) ((HibernateProxy) kv).getHibernateLazyInitializer().getImplementation();
+            summary.setDetails(kv);
+        }
+        kv.setTenantId(summary.getTenantId());
     }
     
     private void inflatePredictors(ModelSummary summary) {
@@ -140,4 +147,31 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         super.update(summary);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument) {
+        ModelSummary summary = modelSummaryDao.findByModelId(modelId);
+        
+        if (summary == null) {
+            return null;
+        }
+
+        if (summary.getTenantId() != getTenantId()) {
+            return null;
+        }
+        if (returnRelational) {
+            inflatePredictors(summary);
+        }
+        if (returnDocument) {
+            inflateDetails(summary);
+        }
+        
+        return summary; 
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public ModelSummary findByModelId(String modelId) {
+        return findByModelId(modelId, false, true);
+    }
 }

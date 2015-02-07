@@ -60,4 +60,8 @@
     <bean id="tenantDao" class="com.latticeengines.pls.dao.impl.TenantDaoImpl">
         <property name="sessionFactory" ref="sessionFactory" />
     </bean>
+
+    <bean id="keyValueDao" class="com.latticeengines.pls.dao.impl.KeyValueDaoImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
 </beans>

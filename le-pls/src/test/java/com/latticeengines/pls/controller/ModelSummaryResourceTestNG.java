@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
@@ -66,11 +65,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
     
-    @Autowired
-    private TenantEntityMgr tenantEntityMgr;
-
     @BeforeClass(groups = "functional")
-    public void setup() {
+    public void setup() throws Exception {
         ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         assertEquals(ticket.getTenants().size(), 2);
         assertNotNull(ticket);
@@ -89,7 +85,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         setupDb(tenant1, tenant2);
     }
     
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = true)
     public void getModelSummariesNoViewPlsModelsRight() {
         Session session = login("rgonzalez");
         addAuthHeader.setAuthValue(session.getTicket().getData());
@@ -104,7 +100,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = true)
     public void deleteModelSummaryNoEditPlsModelsRight() {
         Session session = login("rgonzalez");
         addAuthHeader.setAuthValue(session.getTicket().getData());
@@ -120,7 +116,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = true)
     public void getModelSummariesHasViewPlsModelsRight() {
         Session session = login("bnguyen");
         addAuthHeader.setAuthValue(session.getTicket().getData());
@@ -132,8 +128,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         Map<String, String> map = (Map) response.get(0);
         ModelSummary summary = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
         assertEquals(summary.getName(), "Model2");
-        assertEquals(summary.getPredictors().size(), 1);
-        assertEquals(summary.getPredictors().get(0).getPredictorElements().size(), 2);
+        assertNotNull(summary.getDetails());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -153,8 +148,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         
         ModelSummary summary = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
         assertEquals(summary.getName(), "xyz");
-        assertEquals(summary.getPredictors().size(), 1);
-        assertEquals(summary.getPredictors().get(0).getPredictorElements().size(), 2);
+        assertNotNull(summary.getDetails());
     }
     
     @Test(groups = "functional", dependsOnMethods = { "updateModelSummaryHasEditPlsModelsRight" })

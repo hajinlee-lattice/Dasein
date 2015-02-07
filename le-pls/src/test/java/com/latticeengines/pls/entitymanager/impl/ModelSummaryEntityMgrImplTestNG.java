@@ -5,27 +5,26 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.InputStream;
 import java.util.List;
 
-import org.mockito.Mockito;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
-import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.security.TicketAuthenticationToken;
 
 public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     
@@ -39,17 +38,24 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     private ModelSummary summary2;
     
     @BeforeClass(groups = "functional")
-    public void setup() {
-        List<Tenant> tenants = tenantEntityMgr.findAll();
+    public void setup() throws Exception {
+        tenantEntityMgr.deleteAll();
 
-        for (Tenant tenant : tenants) {
-            tenantEntityMgr.delete(tenant);
-        }
         summary1 = createModelSummaryForTenant1();
         summary2 = createModelSummaryForTenant2();
     }
+    
+    private void setDetails(ModelSummary summary) throws Exception {
+        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
+                "com/latticeengines/pls/functionalframework/modelsummary.json");
+        byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
+        data = CompressionUtils.compressByteArray(data);
+        KeyValue details = new KeyValue();
+        details.setData(data);
+        summary.setDetails(details);
+    }
         
-    private ModelSummary createModelSummaryForTenant1() {
+    private ModelSummary createModelSummaryForTenant1() throws Exception {
         Tenant tenant1 = new Tenant();
         tenant1.setId("TENANT1");
         tenant1.setName("TENANT1");
@@ -66,6 +72,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         summary1.setTrainingConversionCount(80L);
         summary1.setTestConversionCount(20L);
         summary1.setTotalConversionCount(100L);
+        setDetails(summary1);
         Predictor s1p1 = new Predictor();
         s1p1.setApprovedUsage("Model");
         s1p1.setCategory("Banking");
@@ -103,7 +110,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         return summary1;
     }
     
-    private ModelSummary createModelSummaryForTenant2() {
+    private ModelSummary createModelSummaryForTenant2() throws Exception {
         Tenant tenant2 = new Tenant();
         tenant2.setId("TENANT2");
         tenant2.setName("TENANT2");
@@ -120,6 +127,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         summary2.setTrainingConversionCount(800L);
         summary2.setTestConversionCount(200L);
         summary2.setTotalConversionCount(1000L);
+        setDetails(summary2);
         Predictor s2p1 = new Predictor();
         s2p1.setApprovedUsage("Model");
         s2p1.setCategory("Construction");
@@ -160,12 +168,17 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void findByModelId() {
         setupSecurityContext(summary1);
-        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId());
-        List<Predictor> predictors = retrievedSummary.getPredictors();
-        
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true);
         assertEquals(retrievedSummary.getId(), summary1.getId());
         assertEquals(retrievedSummary.getName(), summary1.getName());
+        
+        List<Predictor> predictors = retrievedSummary.getPredictors();
         assertEquals(predictors.size(), 1);
+        
+        KeyValue details = retrievedSummary.getDetails();
+        String uncompressedStr = new String(CompressionUtils.decompressByteArray(details.getData()));
+        assertEquals(details.getTenantId(), summary1.getTenantId());
+        assertTrue(uncompressedStr.contains("\"Segmentations\":"));
         
         String[] predictorFields = new String[] {
                 "name", //
@@ -214,20 +227,6 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(summaries.get(0).getName(), summary2.getName());
     }
     
-    private void setupSecurityContext(ModelSummary summary) {
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
-        Session session = Mockito.mock(Session.class);
-        Tenant tenant = Mockito.mock(Tenant.class);
-        Mockito.when(session.getTenant()).thenReturn(tenant);
-        Mockito.when(tenant.getId()).thenReturn(summary.getTenant().getId());
-        Mockito.when(tenant.getPid()).thenReturn(summary.getTenant().getPid());
-        Mockito.when(token.getSession()).thenReturn(session);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
-        SecurityContextHolder.setContext(securityContext);
-
-    }
-
     @Test(groups = "functional", dependsOnMethods = { "findByModelId", "findAll" })
     public void updateModelSummaryForModelInTenant() {
         setupSecurityContext(summary1);

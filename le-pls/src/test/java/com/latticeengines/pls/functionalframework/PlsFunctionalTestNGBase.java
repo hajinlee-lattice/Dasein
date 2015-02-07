@@ -3,12 +3,14 @@ package com.latticeengines.pls.functionalframework;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
-import java.util.List;
+import java.io.InputStream;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.support.HttpRequestWrapper;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -23,6 +27,8 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
@@ -37,6 +43,7 @@ import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticatio
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
 import com.latticeengines.pls.security.GrantedRight;
+import com.latticeengines.pls.security.TicketAuthenticationToken;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
@@ -172,14 +179,18 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                 new Object[] {});
     }
     
-    
+    private KeyValue getDetails() throws Exception {
+        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
+                "com/latticeengines/pls/functionalframework/modelsummary.json");
+        byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
+        data = CompressionUtils.compressByteArray(data);
+        KeyValue details = new KeyValue();
+        details.setData(data);
+        return details;
+    }
 
-    protected void setupDb(String tenant1Name, String tenant2Name) {
-        List<Tenant> tenants = tenantEntityMgr.findAll();
-
-        for (Tenant tenant : tenants) {
-            tenantEntityMgr.delete(tenant);
-        }
+    protected void setupDb(String tenant1Name, String tenant2Name) throws Exception {
+        tenantEntityMgr.deleteAll();
 
         if (tenant1Name != null) {
             Tenant tenant1 = new Tenant();
@@ -199,6 +210,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             summary1.setTrainingConversionCount(80L);
             summary1.setTestConversionCount(20L);
             summary1.setTotalConversionCount(100L);
+            summary1.setDetails(getDetails());
             
             modelSummaryEntityMgr.create(summary1);
         }
@@ -221,6 +233,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             summary2.setTrainingConversionCount(800L);
             summary2.setTestConversionCount(200L);
             summary2.setTotalConversionCount(1000L);
+            summary2.setDetails(getDetails());
             Predictor s2p1 = new Predictor();
             s2p1.setApprovedUsage("Model");
             s2p1.setCategory("Construction");
@@ -258,5 +271,24 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             
         }
     }
+    
+    protected void setupSecurityContext(ModelSummary summary) {
+        setupSecurityContext(summary.getTenant());
+    }
+    
+    protected void setupSecurityContext(Tenant t) {
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
+        Session session = Mockito.mock(Session.class);
+        Tenant tenant = Mockito.mock(Tenant.class);
+        Mockito.when(session.getTenant()).thenReturn(tenant);
+        Mockito.when(tenant.getId()).thenReturn(t.getId());
+        Mockito.when(tenant.getPid()).thenReturn(t.getPid());
+        Mockito.when(token.getSession()).thenReturn(session);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
+        SecurityContextHolder.setContext(securityContext);
+
+    }
+
 
 }

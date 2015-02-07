@@ -16,7 +16,6 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
-import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -30,17 +29,18 @@ public class ModelSummaryResource {
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
     
-    @Autowired
-    private KeyValueEntityMgr keyValueEntityMgr;
-    
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get summary for specific model")
     public ModelSummary getModelSummary(@PathVariable String modelId) {
-        return modelSummaryEntityMgr.findByModelId(modelId);
+        ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId);
+        if (summary != null) {
+            summary.setPredictors(new ArrayList<Predictor>());
+        }
+        return summary;
     }
 
-    @RequestMapping(value = "/detail/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/details/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get compressed binary JSON for specific model")
     public KeyValue getModelDetail(@PathVariable String modelId) {
@@ -48,7 +48,7 @@ public class ModelSummaryResource {
         if (summary == null) {
             return null;
         }
-        return keyValueEntityMgr.getDataByRelatedEntityId(summary.getPid());
+        return summary.getDetails();
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -59,6 +59,7 @@ public class ModelSummaryResource {
         
         for (ModelSummary summary : summaries) {
             summary.setPredictors(new ArrayList<Predictor>());
+            summary.setDetails(null);
         }
         return summaries;
     }

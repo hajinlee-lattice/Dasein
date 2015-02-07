@@ -26,6 +26,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     
     @BeforeClass(groups = "functional")
     public void setup() {
+        tenantEntityMgr.deleteAll();
         tenant = new Tenant();
         tenant.setId("T1");
         tenant.setName("T1");

@@ -2,8 +2,6 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -19,12 +17,8 @@ public class TenantEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     
     @BeforeClass(groups = "functional")
     public void setup() {
-        List<Tenant> tenants = tenantEntityMgr.findAll();
+        tenantEntityMgr.deleteAll();
 
-        for (Tenant tenant : tenants) {
-            tenantEntityMgr.delete(tenant);
-        }
-        
         Tenant tenant = new Tenant();
         tenant.setId("TENANT1");
         tenant.setName("TENANT1");

@@ -37,12 +37,6 @@ public class MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint);
     }
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.KeyValueEntityMgrImpl.get*(..))")
-    public void get(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint);
-    }
-    
-
     public void enableMultiTenantFilter(JoinPoint joinPoint) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!(auth instanceof TicketAuthenticationToken)) {
