@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
@@ -30,6 +31,9 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private KeyValueEntityMgr keyValueEntityMgr;
     
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -39,6 +43,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        keyValueEntityMgr.deleteAll();
         tenantEntityMgr.deleteAll();
 
         summary1 = createModelSummaryForTenant1();

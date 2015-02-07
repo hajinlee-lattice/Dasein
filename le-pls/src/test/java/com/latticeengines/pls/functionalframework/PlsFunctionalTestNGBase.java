@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.globalauth.authentication.impl.Constants;
@@ -62,6 +63,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+    
+    @Autowired
+    private KeyValueEntityMgr keyValueEntityMgr;
     
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -190,6 +194,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected void setupDb(String tenant1Name, String tenant2Name) throws Exception {
+        keyValueEntityMgr.deleteAll();
         tenantEntityMgr.deleteAll();
 
         if (tenant1Name != null) {
