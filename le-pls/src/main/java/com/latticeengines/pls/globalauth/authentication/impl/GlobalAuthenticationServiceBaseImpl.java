@@ -24,7 +24,8 @@ public abstract class GlobalAuthenticationServiceBaseImpl {
         System.setProperty("javax.xml.bind.JAXBContext", "com.sun.xml.internal.bind.v2.ContextFactory");
         BindingProvider bp = (BindingProvider) servicePort;
         Map<String, List<String>> requestHeaders = new HashMap<>();
-        requestHeaders.put("MagicAuthentication", Arrays.<String> asList("Security through obscurity!"));
+        requestHeaders.put(Constants.INTERNAL_SERVICE_HEADERNAME, //
+                Arrays.<String> asList(Constants.INTERNAL_SERVICE_HEADERVALUE));
         bp.getRequestContext().put(MessageContext.HTTP_REQUEST_HEADERS, requestHeaders);
     }
 

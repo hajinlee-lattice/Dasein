@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
+import com.latticeengines.pls.globalauth.authentication.impl.Constants;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
@@ -63,6 +64,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     
     protected RestTemplate restTemplate = new RestTemplate();
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor("");
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor("");
     
     protected void createUser(String username, String email, String firstName, String lastName) {
         try {
@@ -138,6 +140,29 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
     }
     
+    public static class MagicAuthenticationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+        
+        private String headerValue;
+
+        public MagicAuthenticationHeaderHttpRequestInterceptor(String headerValue) 
+        {
+            this.headerValue = headerValue;
+        }
+
+        @Override
+        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+                throws IOException {
+            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
+            requestWrapper.getHeaders().add(Constants.INTERNAL_SERVICE_HEADERNAME, headerValue);
+         
+            return execution.execute(requestWrapper, body);
+        }
+        
+        public void setAuthValue(String headerValue) {
+            this.headerValue = headerValue;
+        }
+    }
+
     protected Session login(String username) {
         Credentials creds = new Credentials();
         creds.setUsername(username);
@@ -166,6 +191,15 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             summary1.setId("123");
             summary1.setName("Model1");
             summary1.setTenant(tenant1);
+            summary1.setRocScore(0.75);
+            summary1.setLookupId(tenant1Name + "|Q_EventTable_" + tenant1Name + "|abcde");
+            summary1.setTrainingRowCount(8000L);
+            summary1.setTestRowCount(2000L);
+            summary1.setTotalRowCount(10000L);
+            summary1.setTrainingConversionCount(80L);
+            summary1.setTestConversionCount(20L);
+            summary1.setTotalConversionCount(100L);
+            
             modelSummaryEntityMgr.create(summary1);
         }
 
@@ -179,6 +213,14 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             summary2.setId("456");
             summary2.setName("Model2");
             summary2.setTenant(tenant2);
+            summary2.setRocScore(0.80);
+            summary2.setLookupId(tenant2Name + "|Q_EventTable_" + tenant2Name + "|fghij");
+            summary2.setTrainingRowCount(80000L);
+            summary2.setTestRowCount(20000L);
+            summary2.setTotalRowCount(100000L);
+            summary2.setTrainingConversionCount(800L);
+            summary2.setTestConversionCount(200L);
+            summary2.setTotalConversionCount(1000L);
             Predictor s2p1 = new Predictor();
             s2p1.setApprovedUsage("Model");
             s2p1.setCategory("Construction");

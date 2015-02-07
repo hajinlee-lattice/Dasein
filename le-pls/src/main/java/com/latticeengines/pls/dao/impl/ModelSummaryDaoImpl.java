@@ -17,6 +17,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         return ModelSummary.class;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public ModelSummary findByModelId(String modelId) {
         Session session = getSessionFactory().getCurrentSession();

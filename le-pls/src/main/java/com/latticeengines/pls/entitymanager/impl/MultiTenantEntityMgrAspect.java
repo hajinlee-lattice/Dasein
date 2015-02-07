@@ -21,6 +21,7 @@ public class MultiTenantEntityMgrAspect {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
+    
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.find*(..))")
     public void find(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint);
@@ -36,7 +37,13 @@ public class MultiTenantEntityMgrAspect {
         enableMultiTenantFilter(joinPoint);
     }
 
-    private void enableMultiTenantFilter(JoinPoint joinPoint) {
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.KeyValueEntityMgrImpl.get*(..))")
+    public void get(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint);
+    }
+    
+
+    public void enableMultiTenantFilter(JoinPoint joinPoint) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!(auth instanceof TicketAuthenticationToken)) {
             throw new RuntimeException("Problem with multi-tenancy framework.");
