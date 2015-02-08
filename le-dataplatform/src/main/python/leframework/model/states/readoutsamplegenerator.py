@@ -1,9 +1,9 @@
 import logging
+import pandas as pd
 
 from leframework.codestyle import overrides
 from leframework.model.state import State
-from leframework.util.scoringutil import ScoringUtil
-from leframework.util.pandasutil import PandasUtil
+from leframework.util.reservedfieldutil import ReservedFieldUtil
 
 class ReadoutSampleGenerator(State):
 
@@ -13,22 +13,12 @@ class ReadoutSampleGenerator(State):
 
     @overrides(State)
     def execute(self):
-        preTransform = self.mediator.allDataPreTransform.copy()
-        postTransform = self.mediator.allDataPostTransform
-        nonScoringTargets = self.mediator.schema["nonScoringTargets"]
-        readouts = self.mediator.schema["readouts"]
+        preTransform = self.mediator.allDataPreTransform.copy(deep=False)
+        rows = preTransform.shape[0]
 
-        (rows, _) = preTransform.shape
-
-        # Score PostTransform Matrix
-        scores = ScoringUtil.score(self.mediator, postTransform, self.logger)
-
-        # Insert Score
-        scoreColumnName = "Score"
-        preTransform = PandasUtil.insertIntoDataFrame(preTransform, scoreColumnName, scores)
-
-        # Sort
-        preTransform.sort(scoreColumnName, axis = 0, ascending = False, inplace = True)
+        # Sort PreTransform
+        scoreColumnName = self.mediator.schema["reserved"]["score"]
+        preTransform.sort(scoreColumnName, axis=0, ascending=False, inplace=True)
 
         # Extract Rows
         if rows > 2000:
@@ -40,30 +30,24 @@ class ReadoutSampleGenerator(State):
         # Map Scores
         percentileScores = []
         if rows > 2000:
-            percentileScores = map(lambda e: self.percentile(e, top = True), self.result["Score"][:1000].as_matrix()) + \
-                               map(lambda e: self.percentile(e, top = False), self.result["Score"][1000:].as_matrix())
+            percentileScores = map(lambda e: self.percentile(e, top = True), self.result[scoreColumnName][:1000].as_matrix()) + \
+                               map(lambda e: self.percentile(e, top = False), self.result[scoreColumnName][1000:].as_matrix())
         else:
-            percentileScores = map(lambda e: self.percentile(e), self.result["Score"].as_matrix())
+            percentileScores = map(lambda e: self.percentile(e), self.result[scoreColumnName].as_matrix())
 
-        # Insert PercentileScore
-        percentileScoreColumnName = "PercentileScore"
-        self.result = PandasUtil.insertIntoDataFrame(self.result, percentileScoreColumnName, percentileScores)
+        # Update PercentileScores
+        percentileScores = pd.Series(percentileScores, index=self.result.index)
+        self.result[self.mediator.schema["reserved"]["percentilescore"]].update(percentileScores)
 
         # Map Targets
         converted = map(lambda e: "Y" if e > 0 else "N", self.result[self.mediator.schema["target"]].as_matrix())
 
-        # Insert Converted (+2 offset due to score insertions)
-        convertedColumName = "Converted"
-        self.result = PandasUtil.insertIntoDataFrame(self.result, convertedColumName, converted, 2)
+        # Update Converted
+        converted = pd.Series(converted, index=self.result.index)
+        self.result[self.mediator.schema["reserved"]["converted"]].update(converted)
 
-        # Shift Readouts (+3 offset due to score/converted insertions)
-        tailCount = len(nonScoringTargets)
-        for column in nonScoringTargets[::-1]:
-            if column in readouts:
-                (self.result, moved) = PandasUtil.moveTailColumn(self.result, tailCount, column, 3)
-            else:
-                (self.result, moved) = PandasUtil.moveTailColumn(self.result, tailCount, column)
-            if moved: tailCount = tailCount - 1
+        # Clean Reserved Fields
+        self.cleanReservedFields(self.result)
 
         # Add Result to Mediator
         self.mediator.readoutsample = self.result
@@ -81,3 +65,13 @@ class ReadoutSampleGenerator(State):
                     return bucket["Percentile"]
 
         return None
+
+    def cleanReservedFields(self, dataFrame):
+        columns = dataFrame.columns.tolist()
+        reserved = self.mediator.schema["reserved"]
+
+        for key in reserved.keys():
+            index = columns.index(reserved[key])
+            columns[index] = ReservedFieldUtil.extractDisplayName(columns[index])
+
+        dataFrame.columns = columns

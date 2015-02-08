@@ -1,37 +1,38 @@
-from testbase import TestBase
 import random
 
+from leframeworktest.modeltest.statestest.scoretargetbase import ScoreTargetBase
 from leframework.model.states.calibrationgenerator import CalibrationGenerator
 from leframework.model.states.bucketgenerator import BucketGenerator
-from leframework.model.mediator import Mediator
 
-class BucketGeneratorTest(TestBase):
+class BucketGeneratorTest(ScoreTargetBase):
     
     def testExecute(self):
         test_size = 5000
         
         calibrationGenerator = CalibrationGenerator()
-        mediator = Mediator()  
-        mediator.scored = [] 
-        mediator.target = []
-        for i in range(test_size):
+
+        scored = [] 
+        target = []
+        for _ in xrange(test_size):
             prob = random.random()
-            mediator.scored.append(prob)
+            scored.append(prob)
             if prob > 0.7:
-                mediator.target.append(1 if random.random() > 0.1 else 0)
+                target.append(1 if random.random() > 0.1 else 0)
             elif prob > 0.5:
-                mediator.target.append(1 if random.random() > 0.5 else 0)
+                target.append(1 if random.random() > 0.5 else 0)
             elif prob > 0.3:
-                mediator.target.append(1 if random.random() > 0.2 else 0)
+                target.append(1 if random.random() > 0.2 else 0)
             else:
-                mediator.target.append(1 if random.random() > 0.7 else 0)
-        
-        calibrationGenerator.setMediator(mediator)
+                target.append(1 if random.random() > 0.7 else 0)
+
+        scoreTarget = zip(scored, target)
+
+        self.loadMediator(calibrationGenerator, scoreTarget)
         calibrationGenerator.execute()
         
         # Generate buckets and get probRange and indexRange
         bucketGenerator = BucketGenerator()
-        bucketGenerator.setMediator(mediator)
+        bucketGenerator.setMediator(calibrationGenerator.getMediator())
         bucketGenerator.execute()
         buckets = bucketGenerator.buckets
         probRange = bucketGenerator.mediator.probRange

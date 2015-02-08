@@ -1,5 +1,5 @@
 import logging
-
+import pandas as pd
 
 from leframework.codestyle import overrides
 from leframework.model.state import State
@@ -14,6 +14,13 @@ class Initialize(State):
     @overrides(State)
     def execute(self):
         mediator = self.getMediator()
-        scored = ScoringUtil.score(mediator, mediator.data, self.logger)
-        mediator.scored = scored
+
+        #Score and Update Data
+        dataScores = ScoringUtil.score(mediator, mediator.data, self.logger)
+        mediator.data[mediator.schema["reserved"]["score"]].update(pd.Series(dataScores))
+
+        # Score PostTransform And Update PreTransform
+        allScores = ScoringUtil.score(self.mediator, mediator.allDataPostTransform, self.logger)
+        mediator.allDataPreTransform[mediator.schema["reserved"]["score"]].update(pd.Series(allScores))
+
         

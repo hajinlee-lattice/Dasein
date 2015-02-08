@@ -25,7 +25,7 @@ class Finalize(State):
         self.writeEnhancedFiles(self.getMediator())
 
     def writeScoredText(self, mediator):
-        scored = mediator.scored
+        scored = mediator.data[mediator.schema["reserved"]["score"]].as_matrix()
         # add the key data and append the scored data
         keyData = mediator.data[mediator.schema["keys"]].as_matrix().astype(str)
         eventData = mediator.data[mediator.schema["target"]].as_matrix().astype(str)

@@ -1,6 +1,5 @@
 from collections import OrderedDict
 from datetime import datetime
-import itertools
 import logging
 import time
 import uuid
@@ -8,8 +7,6 @@ import uuid
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
-import numpy as np
-
 
 class SummaryGenerator(State, JsonGenBase):
 
@@ -33,12 +30,12 @@ class SummaryGenerator(State, JsonGenBase):
         self.summary["SchemaVersion"] = 1
         self.summary["Predictors"] = predictors
 
-        rocScore = self.getRocScore(zip(self.mediator.scored, self.mediator.target))
+        rocScore = mediator.rocscore
 
         if rocScore is not None:
             self.summary["RocScore"] = rocScore 
         self.summary["SegmentChart"] = self.__getSegmentChart(mediator.probRange, mediator.widthRange, mediator.buckets, mediator.averageProbability)
-        self.summary["DLEventTableData"] = self.__getDLEventTableData(self.mediator.provenanceProperties, mediator.rowCount)
+        self.summary["DLEventTableData"] = self.__getDLEventTableData(self.mediator.provenanceProperties, mediator.allDataPreTransform.shape[0])
         self.summary["ConstructionInfo"] = self.__getConstructionInfo()
         
     @overrides(JsonGenBase)
@@ -133,9 +130,9 @@ class SummaryGenerator(State, JsonGenBase):
     
         # Generate name for each segment
         names = []
-        for i in range(len(probRange)):
+        for i in xrange(len(probRange)):
             curProb = probRange[i] if self.mediator.type == 0 else probRange[i] / averageProbability
-            for j in range(len(buckets)): 
+            for j in xrange(len(buckets)): 
                 if buckets[j]["Minimum"] is not None and buckets[j]["Maximum"] is not None:
                     if curProb >= buckets[j]["Minimum"] and curProb < buckets[j]["Maximum"]:
                         names.append(buckets[j]["Name"])
@@ -149,7 +146,7 @@ class SummaryGenerator(State, JsonGenBase):
            
         # Generate segments
         segments = []
-        for i in range(len(probRange)):
+        for i in xrange(len(probRange)):
             element = OrderedDict()
             element["AverageProbability"] = probRange[i]
             element["LowerInclusive"] = inclusive[i][0]
@@ -164,33 +161,6 @@ class SummaryGenerator(State, JsonGenBase):
         segmentChart["Segments"] = segments
 
         return segmentChart
-
-    def getRocScore(self, score):
-        # Sort by target
-        score.sort(key = lambda rowScore: (rowScore[1], rowScore[0]), reverse = True)
-        theoreticalBestCounter = 0
-        theoreticalBestArea = 0
-        for i in range(len(score)):
-            theoreticalBestCounter += score[i][1]
-            theoreticalBestArea += theoreticalBestCounter
-
-        # Sort by score
-        score.sort(key = lambda rowScore: (rowScore[0], rowScore[1]), reverse = True)
-        weightedEventDict = {k : np.mean(map(lambda x: x[1], rows)) for k, rows in itertools.groupby(score, lambda x: x[0])}
-
-        actualBestCounter = 0
-        actualBestArea = 0
-        for i in range(len(score)):
-            actualBestCounter += weightedEventDict[score[i][0]]
-            actualBestArea += actualBestCounter
-
-        if theoreticalBestArea == 0:
-            self.logger.warn("All events are 0, could not calculate ROC score.")
-            return None
-
-        self.logger.info("Actual best area = %f" % actualBestArea)
-        self.logger.info("Theoretical best area = %f" % theoreticalBestArea)
-        return actualBestArea / float(theoreticalBestArea)
 
     def __getDLEventTableData(self, provenanceProperties, rowCount):
         if len(provenanceProperties) == 0:

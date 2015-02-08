@@ -46,9 +46,9 @@ class ReadoutSampleTest(TrainingTestBase):
         convertedColumName = "Converted"
         convertedColumIndex = 2
         leadIDColumnName = "LeadID"
-        leadIDColumnIndex = 3
+        leadIDColumnIndex = 4
         emailColumName = "Email"
-        emailColumIndex = 4
+        emailColumIndex = 6
 
         # Output File Exists?
         outputFile = glob.glob("./results/*readoutsample.csv")[0]
@@ -101,6 +101,6 @@ class ReadoutSampleTest(TrainingTestBase):
 
         # Sorted as Expected?
         dataFrameCopy = dataFrame.copy()
-        dataFrameCopy.sort(scoreColumnName, axis = 0, ascending = False, inplace = True)
+        dataFrameCopy.sort(scoreColumnName, axis=0, ascending=False, inplace=True)
         for value, copyValue in zip(dataFrame[scoreColumnName].as_matrix(), dataFrameCopy[scoreColumnName].as_matrix()):
             self.assertEqual(value, copyValue)

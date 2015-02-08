@@ -110,9 +110,9 @@ class TrainingTestBase(TestBase):
         schema = parser.getSchema()
         
         if training:
-            (data, _) = parser.createList(self.stripPath(schema["training_data"]))
+            data = parser.createList(self.stripPath(schema["training_data"]))
         else:
-            (data, _) = parser.createList(self.stripPath(schema["test_data"]))
+            data = parser.createList(self.stripPath(schema["test_data"]))
         data.reset_index()
         fields = { k['name']:k['type'][0] for k in parser.fields }
         

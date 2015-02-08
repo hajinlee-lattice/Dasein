@@ -16,6 +16,7 @@ from leframework.model.states.namegenerator import NameGenerator
 from leframework.model.states.percentilebucketgenerator import PercentileBucketGenerator
 from leframework.model.states.pmmlmodelgenerator import PMMLModelGenerator
 from leframework.model.states.readoutsamplegenerator import ReadoutSampleGenerator
+from leframework.model.states.rocgenerator import ROCGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
 from leframework.model.states.datacompositiongenerator import DataCompositionGenerator
 from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
@@ -52,14 +53,15 @@ class LearningExecutor(Executor):
         stateMachine.addState(ColumnMetadataGenerator(), 5)
         stateMachine.addState(ModelGenerator(), 6)
         stateMachine.addState(PMMLModelGenerator(), 7)
-        stateMachine.addState(SummaryGenerator(), 8)
-        stateMachine.addState(NameGenerator(), 9)
-        stateMachine.addState(PercentileBucketGenerator(), 10)
-        stateMachine.addState(ReadoutSampleGenerator(), 11)
-        stateMachine.addState(DataCompositionGenerator(), 12)
-        stateMachine.addState(ScoreDerivationGenerator(), 13)
-        stateMachine.addState(EnhancedSummaryGenerator(), 14)
-        stateMachine.addState(Finalize(), 15)
+        stateMachine.addState(ROCGenerator(), 8)
+        stateMachine.addState(SummaryGenerator(), 9)
+        stateMachine.addState(NameGenerator(), 10)
+        stateMachine.addState(PercentileBucketGenerator(), 11)
+        stateMachine.addState(ReadoutSampleGenerator(), 12)
+        stateMachine.addState(DataCompositionGenerator(), 13)
+        stateMachine.addState(ScoreDerivationGenerator(), 14)
+        stateMachine.addState(EnhancedSummaryGenerator(), 15)
+        stateMachine.addState(Finalize(), 16)
         return stateMachine
 
     def retrieveMetadata(self, schema, depivoted):
@@ -124,9 +126,7 @@ class LearningExecutor(Executor):
             mediator.allDataPreTransform = params["allDataPreTransform"]
             mediator.allDataPostTransform = params["allDataPostTransform"]
             mediator.data = params["test"]
-            mediator.rowCount = len(params["test"].index) + len(params["training"].index)
             mediator.schema = params["schema"]
-            mediator.target = mediator.data[mediator.schema["target"]]
             mediator.pipeline = params["pipeline"]
             mediator.depivoted = parser.isDepivoted()
             mediator.provenanceProperties = parser.getProvenanceProperties()

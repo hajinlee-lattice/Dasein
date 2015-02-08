@@ -15,9 +15,9 @@ class PercentileBucketGenerator(State, JsonGenBase):
     @overrides(State)
     def execute(self):
         mediator = self.getMediator()
-        scored = mediator.scored
-        scoredSorted = sorted(set(scored), reverse=True)
-        scoredSortedLen = len(scoredSorted)
+        scoredSorted = mediator.data[[mediator.schema["reserved"]["score"]]]
+        scoredSorted.sort([mediator.schema["reserved"]["score"]], axis=0, ascending=False, inplace=True)
+        scoredSortedLen = scoredSorted.shape[0]
         numElementsInBucket = int(scoredSortedLen/100.0)
 
         i = 0
@@ -31,7 +31,7 @@ class PercentileBucketGenerator(State, JsonGenBase):
             self.logger.info("Length of test set array = %d." % scoredSortedLen)
             self.logger.info("Bucket size = %d." % numElementsInBucket)
             while indexForMin < scoredSortedLen:
-                self.createBucket(scoredSorted, i, indexForMin, pct)
+                self.createBucket(scoredSorted, scoredSortedLen, i, indexForMin, pct)
                 pct = pct - 1
                 i = indexForMin
                 indexForMin = i + numElementsInBucket - 1
@@ -42,18 +42,18 @@ class PercentileBucketGenerator(State, JsonGenBase):
         # Add Result to Mediator
         self.mediator.percentileBuckets = self.percentileBuckets
 
-    def createBucket(self, scoredSorted, i, indexForMin, pct):
+    def createBucket(self, scoredSorted, scoredSortedLen, i, indexForMin, pct):
         bucket = OrderedDict()
         bucket["Percentile"] = pct
         
         try:
-            if indexForMin > len(scoredSorted):
-                indexForMin = len(scoredSorted) - 1
-            bucket["MinimumScore"] = scoredSorted[indexForMin]
-            bucket["MaximumScore"] = scoredSorted[i]
+            if indexForMin > scoredSortedLen:
+                indexForMin = scoredSortedLen - 1
+            bucket["MinimumScore"] = scoredSorted[self.mediator.schema["reserved"]["score"]].iloc[indexForMin]
+            bucket["MaximumScore"] = scoredSorted[self.mediator.schema["reserved"]["score"]].iloc[i]
             self.percentileBuckets.append(bucket)
         except Exception:
-            self.logger.info("Length of list = %d indexForMin = %d i = %d" % (len(scoredSorted), indexForMin, i))
+            self.logger.info("Length of list = %d indexForMin = %d i = %d" % (scoredSortedLen, indexForMin, i))
 
     @overrides(JsonGenBase)
     def getKey(self):

@@ -7,7 +7,6 @@ from pandas.core.frame import DataFrame
 
 from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
-from leframework.util.pandasutil import PandasUtil
 from leframework.webhdfs import WebHDFS
 from leframework.progressreporter import ProgressReporter
 
@@ -71,9 +70,9 @@ class Launcher(object):
             progressReporter = ProgressReporter(None, 0)
         progressReporter.setTotalState(2)
         
-        (self.training, self.trainingNonScoringTargets) = parser.createList(self.stripPath(schema["training_data"]))
+        self.training = parser.createList(self.stripPath(schema["training_data"]))
         progressReporter.nextStateForPreStateMachine(0, 0.1, 1)
-        (self.test, self.testNonScoringTargets) = parser.createList(self.stripPath(schema["test_data"]))
+        self.test = parser.createList(self.stripPath(schema["test_data"]))
         script = self.stripPath(schema["python_script"])
         progressReporter.nextStateForPreStateMachine(0, 0.1, 2)
         
@@ -122,10 +121,6 @@ class Launcher(object):
         params["allDataPreTransform"] = DataFrame.append(self.training, self.test)
         (self.training, self.test, metadata) = executor.transformData(params)
         params["allDataPostTransform"] = DataFrame.append(self.training, self.test)
-
-        # Append NonScoringTargets
-        nonScoringTargets = DataFrame.append(self.trainingNonScoringTargets, self.testNonScoringTargets)
-        params["allDataPreTransform"] = PandasUtil.appendDataFrame(params["allDataPreTransform"], nonScoringTargets)
 
         params["readouts"] = parser.readouts
         params["training"] = self.training

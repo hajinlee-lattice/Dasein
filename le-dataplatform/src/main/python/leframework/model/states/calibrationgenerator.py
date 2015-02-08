@@ -15,30 +15,32 @@ class CalibrationGenerator(State, JsonGenBase):
     
     @overrides(State)
     def execute(self):    
-        # reconstruct the array into a list of (prob, target)
-        orderedScore = zip(self.mediator.scored, self.mediator.target)
-        orderedScore.sort(key=lambda score: (score[0], score[1]), reverse=True) 
+        mediator = self.mediator
+        schema = mediator.schema
+
+        orderedScore = self.mediator.data[[schema["reserved"]["score"], schema["target"]]]
+        orderedScore.sort([schema["reserved"]["score"], schema["target"]], axis=0, ascending=False, inplace=True)
             
         # get test size and range width 
-        numTest = len(orderedScore)                 
+        numTest = orderedScore.shape[0]
         defaultRangeWidth = int(math.ceil(float(numTest) / 100))
         self.logger.info("Generating calibration with test size: "+str(numTest)+" range width: "+str(defaultRangeWidth))
         
         # calculate cumulative target count, sum of targets from 0 to i 
         cumulativeCount = [0] * (numTest + 1)  # add a sentinel at index 0
         cumulativeCount[0] = 0  # sentinel = 0
-        for i in range(numTest):
-            cumulativeCount[i + 1] = cumulativeCount[i] + orderedScore[i][1]
+        for i in xrange(numTest):
+            cumulativeCount[i + 1] = cumulativeCount[i] + orderedScore.iloc[i][1]
         
         # calculate the average conversion probability
         self.averageProbability = cumulativeCount[numTest] / float(numTest)
         
         # distinct score count, a list of (score, count)
         distinctScoreCount = []
-        curScore = orderedScore[0][0] 
+        curScore = orderedScore.iloc[0][0] 
         count = 0
-        for i in range(numTest):
-            tmpScore = orderedScore[i][0]
+        for i in xrange(numTest):
+            tmpScore = orderedScore.iloc[i][0]
             if curScore != tmpScore:
                 distinctScoreCount.append((curScore, count))
                 curScore = tmpScore
@@ -54,7 +56,7 @@ class CalibrationGenerator(State, JsonGenBase):
         curMax = None  # first range's max is null
         curWidth = 0
         curIdx = 1
-        for i in range(len(distinctScoreCount)):
+        for i in xrange(len(distinctScoreCount)):
             tmpScoreCount = distinctScoreCount[i]
             # end of current calibration range
             if curWidth + tmpScoreCount[1] >= defaultRangeWidth or i == len(distinctScoreCount) - 1:
@@ -89,7 +91,7 @@ class CalibrationGenerator(State, JsonGenBase):
         # prepare calibration with specified format
         self.calibration = []
         self.logger.info("number of calibration ranges generated: " + str(len(probRange))) 
-        for i in range(len(calibrationRange)):
+        for i in xrange(len(calibrationRange)):
             element = OrderedDict()
             element["MaximumScore"] = calibrationRange[i][0]
             element["MinimumScore"] = calibrationRange[i][1]
@@ -138,14 +140,14 @@ class CalibrationGenerator(State, JsonGenBase):
 
     def __getProbRange(self, indexRange, cumulateCount):
         probRange = []
-        for i in range(len(indexRange)):
+        for i in xrange(len(indexRange)):
             probRange.append(self.__getProb(indexRange[i][0], indexRange[i][1], cumulateCount))
     
         return probRange
     
     def __getWidthRange(self,indexRange):
         widthRange = [] 
-        for i in range(len(indexRange)):
+        for i in xrange(len(indexRange)):
             widthRange.append(indexRange[i][1]-indexRange[i][0]+1)
     
         return widthRange

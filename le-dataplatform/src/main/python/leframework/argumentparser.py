@@ -7,6 +7,8 @@ import logging
 import fastavro as avro
 import pandas as pd
 
+from leframework.util.reservedfieldutil import ReservedFieldUtil
+
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(name='argumentparser')
@@ -37,7 +39,6 @@ class ArgumentParser(object):
         self.fields = dataSchema["fields"]
         self.features = self.metadataSchema["features"]
         (self.target, self.readouts) = self.extractTargets()
-        self.nonScoringTargets = self.readouts
         self.keys = self.metadataSchema["key_columns"]
         self.depivoted = False
         if "depivoted" in self.metadataSchema:
@@ -130,8 +131,6 @@ class ArgumentParser(object):
         '''
         includedNames = []
         included = []
-        nonScoringIncludedNames = []
-        nonScoringIncluded = []
         self.stringColNames = set()
 
         scoringColumns = set(self.features) | set([self.target]) | set(self.keys)
@@ -140,17 +139,14 @@ class ArgumentParser(object):
         for i, f in enumerate(self.fields):
             fType = f["type"][0]
             fName = f["name"]
-            if fName in scoringColumns:
+            if fName in scoringColumns | nonScoringColumns:
                 logger.info("Adding %s with index %d" % (fName, i))
                 includedNames.append(fName)
                 included.append(i)
                 if (fType == 'string' or fType == 'bytes' or fType == 'boolean') and fName != self.target:
                     self.stringColNames.add(fName)
-            elif fName in nonScoringColumns:
-                nonScoringIncludedNames.append(fName)
-                nonScoringIncluded.append(i)
 
-        tmpData = []; nonScoringData = []
+        tmpData = []
 
         reader = None 
         filedescriptor = open(dataFileName, 'rb')
@@ -159,9 +155,11 @@ class ArgumentParser(object):
         else:
             reader = csv.reader(filedescriptor)
 
+        (self.reserved, reservedFields, reservedFieldDefaultValues) = ReservedFieldUtil.configureReservedFields()       
+        
         numberOfNullTarget = 0
         for row in reader:
-            rowlist = []; nonScoringlist = []
+            rowlist = list(reservedFieldDefaultValues)
             if len(row) != len(self.fields):
                 msg = "Data-metadata mismatch. Metadata has %s, while data has %s fields." % (len(self.fields), len(row))
                 raise Exception(msg)
@@ -173,30 +171,23 @@ class ArgumentParser(object):
                     continue
                 else:
                     row[targetName] = float(row[targetName])
-                rowlist = [str(row[name]) if name in self.stringColNames and row[name] is not None else row[name] for name in includedNames]
-                nonScoringlist = [row[name] for name in nonScoringIncludedNames]
+                rowlist += [str(row[name]) if name in self.stringColNames and row[name] is not None else row[name] for name in includedNames]
             else:
                 # CSV format
-                rowlist = [float(row[i]) if self.__getField(i)["name"] == self.target else self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]
-                nonScoringlist = [self.__convertType(row[i], self.__getField(i)["type"][0]) for i in nonScoringIncluded]
+                rowlist += [float(row[i]) if self.__getField(i)["name"] == self.target else self.__convertType(row[i], self.__getField(i)["type"][0]) for i in included]
 
             tmpData.append(rowlist)
-            nonScoringData.append(nonScoringlist)
 
         if numberOfNullTarget > 0:
             self.numOfSkippedRow += numberOfNullTarget
             logger.warn("Because target value is None, skipping %s rows." % str(numberOfNullTarget))
 
         # Defense (Filter Scoring Columns)
-        self.nonScoringTargets = filter(lambda e: e not in includedNames, self.nonScoringTargets)
-        self.readouts = filter(lambda e: e not in includedNames, self.readouts)
+        self.readouts = filter(lambda e: e not in scoringColumns, self.readouts)
 
         self.__populateSchemaWithMetadata(self.getSchema(), self)
 
-        scoringFrame = pd.DataFrame(tmpData, columns=includedNames)
-        nonScoringFrame = pd.DataFrame(nonScoringData, columns=nonScoringIncludedNames)
-
-        return scoringFrame, nonScoringFrame
+        return pd.DataFrame(tmpData, columns=reservedFields+includedNames)
 
     def __populateSchemaWithMetadata(self, schema, parser):
         schema["features"] = self.metadataSchema["features"]
@@ -205,7 +196,7 @@ class ArgumentParser(object):
             schema["data_profile"] = self.stripPath(self.metadataSchema["data_profile"]) 
         schema["config_metadata"] = parser.getConfigMetadata()
         schema["target"] = self.target
-        schema["nonScoringTargets"] = self.nonScoringTargets
+        schema["reserved"] = self.reserved
         schema["readouts"] = self.readouts
         schema["stringColumns"] = self.stringColNames
         schema["fields"] = { k['name']:k['type'][0] for k in self.fields }
