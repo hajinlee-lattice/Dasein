@@ -2,6 +2,8 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
 import org.hibernate.proxy.HibernateProxy;
@@ -31,6 +33,8 @@ import com.latticeengines.pls.security.TicketAuthenticationToken;
 @Component("modelSummaryEntityMgr")
 public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
 
+    private static final Log log = LogFactory.getLog(ModelSummaryEntityMgrImpl.class);
+    
     @Autowired
     private KeyValueDao keyValueDao;
 
@@ -121,6 +125,24 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
         super.delete(summary);
+
+        // We need to have a separate call to delete from the KeyValue table
+        // because the idea is that multiple entities should be able to use
+        // the KeyValue table so we cannot create a foreign key from KEY_VALUE to
+        // the owning entity to get the delete cascade effect.
+        // Instead a delete of a model summary needs to reach into the KEY_VALUE
+        // table, and delete the associated KeyValue instance
+        Long detailsPid = summary.getDetails().getPid();
+        
+        if (detailsPid == null) {
+            log.warn("No details related to the model summary with model id = " + modelId);
+        }
+ 
+        KeyValue kv = keyValueDao.findByKey(KeyValue.class, detailsPid);
+        if (kv.getTenantId() != summary.getTenantId()) {
+            log.error("Model and detail tenants are different!");
+        }
+        keyValueDao.delete(kv);
     }
 
     @Override

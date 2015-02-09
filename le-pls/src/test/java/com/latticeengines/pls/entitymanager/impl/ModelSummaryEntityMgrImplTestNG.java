@@ -268,9 +268,13 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "updateModelSummaryForModelNotInTenant" })
     public void deleteForModelInTenant() {
         setupSecurityContext(summary1);
-        assertNotNull(modelSummaryEntityMgr.findByModelId(summary1.getId()));
+        ModelSummary retrievedSummary  = modelSummaryEntityMgr.findByModelId(summary1.getId());
+        assertNotNull(retrievedSummary);
         modelSummaryEntityMgr.deleteByModelId(summary1.getId());
         assertNull(modelSummaryEntityMgr.findByModelId(summary1.getId()));
+        KeyValue kv = new KeyValue();
+        kv.setPid(retrievedSummary.getDetails().getPid());
+        assertNull(keyValueEntityMgr.findByKey(kv));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "deleteForModelInTenant" })
