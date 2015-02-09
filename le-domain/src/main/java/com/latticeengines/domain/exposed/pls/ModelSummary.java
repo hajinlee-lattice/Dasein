@@ -53,6 +53,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private Long testConversionCount;
     private Long totalConversionCount;
     private KeyValue details;
+    private Long constructionTime;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -261,6 +262,17 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         if (details != null) {
             details.setTenantId(getTenantId());
         }
+    }
+
+    @JsonProperty("ConstructionTime")
+    @Column(name = "CONSTRUCTION_TIME", nullable = false)
+    public Long getConstructionTime() {
+        return constructionTime;
+    }
+
+    @JsonProperty("ConstructionTime")
+    public void setConstructionTime(Long constructionTime) {
+        this.constructionTime = constructionTime;
     }
 
 }
