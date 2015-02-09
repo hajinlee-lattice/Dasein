@@ -18,7 +18,7 @@ class ROCGeneratorTest(ScoreTargetBase):
         generator = ROCGenerator()
         scoreData = np.loadtxt("scored.txt", delimiter=",")[:,1]
         targetData = np.loadtxt("target.txt")
-        scoreTarget = (zip(scoreData, targetData))
+        scoreTarget = zip(scoreData, targetData)
 
         self.loadMediator(generator, scoreTarget)
         generator.execute()
