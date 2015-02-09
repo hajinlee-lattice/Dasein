@@ -77,6 +77,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         summary1.setTrainingConversionCount(80L);
         summary1.setTestConversionCount(20L);
         summary1.setTotalConversionCount(100L);
+        summary1.setConstructionTime(System.currentTimeMillis());
         setDetails(summary1);
         Predictor s1p1 = new Predictor();
         s1p1.setApprovedUsage("Model");
@@ -132,6 +133,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         summary2.setTrainingConversionCount(800L);
         summary2.setTestConversionCount(200L);
         summary2.setTotalConversionCount(1000L);
+        summary2.setConstructionTime(System.currentTimeMillis());
         setDetails(summary2);
         Predictor s2p1 = new Predictor();
         s2p1.setApprovedUsage("Model");

@@ -32,13 +32,13 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private GlobalAuthenticationServiceImpl globalAuthenticationService;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = { "functional", "deployment" })
     public void setup() {
         Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         grantRight(GrantedRight.EDIT_PLS_USERS, ticket.getTenants().get(0).getId(), "admin");
     }
 
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = { "functional", "deployment" })
     public void tearDown() {
         Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         revokeRight(GrantedRight.EDIT_PLS_USERS, ticket.getTenants().get(0).getId(), "admin");
@@ -46,7 +46,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
 
 
     @SuppressWarnings("rawtypes")
-    @Test(groups = "functional")
+    @Test(groups = { "functional", "deployment" })
     public void registerUser() throws Exception {
         Session session = login("admin");
         Tenant tenant = session.getTenant();
@@ -56,7 +56,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         
         try {
-            Boolean response = restTemplate.postForObject("http://localhost:8080/pls/users/add", userReg, Boolean.class, new HashMap<>());
+            Boolean response = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users/add", userReg, Boolean.class, new HashMap<>());
             assertTrue(response);
         } catch (Exception e) {
             log.info("User has already been created.");
@@ -66,7 +66,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
 
         session = login(userReg.getCredentials().getUsername());
         addAuthHeader.setAuthValue(session.getTicket().getData());
-        List summaries = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/", List.class);
+        List summaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertEquals(summaries.size(), 1);
     }
     

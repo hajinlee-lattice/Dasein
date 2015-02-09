@@ -24,7 +24,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
     
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = { "functional", "deployment" })
     public void setup() {
         tenantEntityMgr.deleteAll();
         tenant = new Tenant();
@@ -32,18 +32,18 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         tenant.setName("T1");
     }
     
-    @Test(groups = "functional")
+    @Test(groups = { "functional", "deployment" })
     public void addTenantWithProperMagicAuthenticationHeader() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        Boolean result = restTemplate.postForObject("http://localhost:8080/pls/admin/tenants/add", tenant, Boolean.class, new HashMap<>());
+        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants/add", tenant, Boolean.class, new HashMap<>());
         assertTrue(result);
         
         Tenant t = tenantEntityMgr.findByTenantId("T1");
         assertNotNull(t);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = { "functional", "deployment" })
     public void addTenantWithoutProperMagicAuthenticationHeader() {
         addMagicAuthHeader.setAuthValue("xyz");
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
@@ -51,7 +51,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
 
         boolean exception = false;
         try {
-            restTemplate.postForObject("http://localhost:8080/pls/admin/tenants/add", tenant, Boolean.class, new HashMap<>());
+            restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants/add", tenant, Boolean.class, new HashMap<>());
         } catch (Exception e) {
             exception = true;
             String code = e.getMessage();

@@ -65,7 +65,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
     
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         assertEquals(ticket.getTenants().size(), 2);
@@ -85,7 +85,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         setupDb(tenant1, tenant2);
     }
     
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = { "functional", "deployment" })
     public void getModelSummariesNoViewPlsModelsRight() {
         Session session = login("rgonzalez");
         addAuthHeader.setAuthValue(session.getTicket().getData());
@@ -93,14 +93,14 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
         try {
-            restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/", List.class);
+            restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         } catch (Exception e) {
             String code = e.getMessage();
             assertEquals(code, "403");
         }
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = { "functional", "deployment" })
     public void deleteModelSummaryNoEditPlsModelsRight() {
         Session session = login("rgonzalez");
         addAuthHeader.setAuthValue(session.getTicket().getData());
@@ -108,7 +108,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
         try {
-            restTemplate.delete("http://localhost:8080/pls/modelsummaries/123");
+            restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/123");
         } catch (Exception e) {
             String code = e.getMessage();
             assertEquals(code, "403");
@@ -116,50 +116,50 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = { "functional", "deployment" })
     public void getModelSummariesHasViewPlsModelsRight() {
         Session session = login("bnguyen");
         addAuthHeader.setAuthValue(session.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
-        List response = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/", List.class);
+        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), 1);
         Map<String, String> map = (Map) response.get(0);
-        ModelSummary summary = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
+        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
         assertEquals(summary.getName(), "Model2");
         assertNotNull(summary.getDetails());
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test(groups = "functional", dependsOnMethods = { "getModelSummariesHasViewPlsModelsRight" })
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "getModelSummariesHasViewPlsModelsRight" })
     public void updateModelSummaryHasEditPlsModelsRight() {
         Session session = login("bnguyen");
         addAuthHeader.setAuthValue(session.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
-        List response = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/", List.class);
+        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), 1);
         Map<String, String> map = (Map) response.get(0);
         AttributeMap attrMap = new AttributeMap();
         attrMap.put("Name", "xyz");
-        restTemplate.put("http://localhost:8080/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
+        restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
         
-        ModelSummary summary = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
+        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
         assertEquals(summary.getName(), "xyz");
         assertNotNull(summary.getDetails());
     }
     
-    @Test(groups = "functional", dependsOnMethods = { "updateModelSummaryHasEditPlsModelsRight" })
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateModelSummaryHasEditPlsModelsRight" })
     public void deleteModelSummaryHasEditPlsModelsRight() {
         Session session = login("bnguyen");
         addAuthHeader.setAuthValue(session.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
-        restTemplate.delete("http://localhost:8080/pls/modelsummaries/456");
-        ModelSummary summary = restTemplate.getForObject("http://localhost:8080/pls/modelsummaries/456", ModelSummary.class);
+        restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/456");
+        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort()  + "/pls/modelsummaries/456", ModelSummary.class);
         assertNull(summary);
     }
     

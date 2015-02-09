@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -73,6 +74,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     @Autowired
     private SessionFactory sessionFactory;
     
+    @Value("${pls.api.hostport}")
+    private String hostPort;
+    
     protected RestTemplate restTemplate = new RestTemplate();
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor("");
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor("");
@@ -91,6 +95,10 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         } catch (Exception e) {
             log.info("User " + username + " already created.");
         }
+    }
+    
+    protected String getRestAPIHostPort() {
+        return hostPort;
     }
     
     protected void grantRight(GrantedRight right, String tenant, String username) {
@@ -216,6 +224,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             summary1.setTestConversionCount(20L);
             summary1.setTotalConversionCount(100L);
             summary1.setDetails(getDetails());
+            summary1.setConstructionTime(System.currentTimeMillis());
             
             modelSummaryEntityMgr.create(summary1);
         }
@@ -239,6 +248,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             summary2.setTestConversionCount(200L);
             summary2.setTotalConversionCount(1000L);
             summary2.setDetails(getDetails());
+            summary2.setConstructionTime(System.currentTimeMillis());
             Predictor s2p1 = new Predictor();
             s2p1.setApprovedUsage("Model");
             s2p1.setCategory("Construction");
