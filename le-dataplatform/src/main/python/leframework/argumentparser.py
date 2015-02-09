@@ -125,7 +125,7 @@ class ArgumentParser(object):
             return float(cell)
         return cell
 
-    def createList(self, dataFileName):
+    def createList(self, dataFileName, postProcessClf=True):
         '''
           Creates a pandas dataframe from the data set in dataFileName. It only creates data in memory for features and targets.
         '''
@@ -136,10 +136,17 @@ class ArgumentParser(object):
         scoringColumns = set(self.features) | set([self.target]) | set(self.keys)
         nonScoringColumns = set(self.readouts)
 
+        if postProcessClf:
+            specifiedColumns = scoringColumns | nonScoringColumns
+            (self.reserved, reservedFields, reservedFieldDefaultValues) = ReservedFieldUtil.configureReservedFields()
+        else:
+            specifiedColumns = scoringColumns
+            self.reserved = None
+
         for i, f in enumerate(self.fields):
             fType = f["type"][0]
             fName = f["name"]
-            if fName in scoringColumns | nonScoringColumns:
+            if fName in specifiedColumns:
                 logger.info("Adding %s with index %d" % (fName, i))
                 includedNames.append(fName)
                 included.append(i)
@@ -154,12 +161,10 @@ class ArgumentParser(object):
             reader = avro.reader(filedescriptor)
         else:
             reader = csv.reader(filedescriptor)
-
-        (self.reserved, reservedFields, reservedFieldDefaultValues) = ReservedFieldUtil.configureReservedFields()       
         
         numberOfNullTarget = 0
         for row in reader:
-            rowlist = list(reservedFieldDefaultValues)
+            rowlist = list(reservedFieldDefaultValues) if postProcessClf else []
             if len(row) != len(self.fields):
                 msg = "Data-metadata mismatch. Metadata has %s, while data has %s fields." % (len(self.fields), len(row))
                 raise Exception(msg)
@@ -187,7 +192,8 @@ class ArgumentParser(object):
 
         self.__populateSchemaWithMetadata(self.getSchema(), self)
 
-        return pd.DataFrame(tmpData, columns=reservedFields+includedNames)
+        dataFrameColumns = reservedFields + includedNames if postProcessClf else includedNames
+        return pd.DataFrame(tmpData, columns=dataFrameColumns)
 
     def __populateSchemaWithMetadata(self, schema, parser):
         schema["features"] = self.metadataSchema["features"]

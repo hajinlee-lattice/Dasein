@@ -7,7 +7,7 @@ class DP628ProfilingTest(ProfilingTestBase):
     def testExecuteProfiling(self):
         from launcher import Launcher
         profilinglauncher = Launcher("profiledriver-dp628.json")
-        profilinglauncher.execute(False)
+        profilinglauncher.execute(False, postProcessClf=False)
         learningExecutor = LearningExecutor()
 
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)

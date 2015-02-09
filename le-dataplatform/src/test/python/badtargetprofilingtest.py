@@ -7,7 +7,7 @@ class BadTargetProfilingTest(ProfilingTestBase):
     def testExecuteProfiling(self):
         from launcher import Launcher
         profilinglauncher = Launcher("bad-target-dataprofile.json")
-        profilinglauncher.execute(False)
+        profilinglauncher.execute(False, postProcessClf=False)
         learningExecutor = LearningExecutor()
 
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)

@@ -70,9 +70,9 @@ class Launcher(object):
             progressReporter = ProgressReporter(None, 0)
         progressReporter.setTotalState(2)
         
-        self.training = parser.createList(self.stripPath(schema["training_data"]))
+        self.training = parser.createList(self.stripPath(schema["training_data"]), postProcessClf)
         progressReporter.nextStateForPreStateMachine(0, 0.1, 1)
-        self.test = parser.createList(self.stripPath(schema["test_data"]))
+        self.test = parser.createList(self.stripPath(schema["test_data"]), postProcessClf)
         script = self.stripPath(schema["python_script"])
         progressReporter.nextStateForPreStateMachine(0, 0.1, 2)
         
@@ -118,9 +118,12 @@ class Launcher(object):
         schema["python_pipeline_script"] = params["pipelineScript"]
         schema["python_pipeline_lib"] = self.stripPath(schema["python_pipeline_lib"])
 
-        params["allDataPreTransform"] = DataFrame.append(self.training, self.test)
-        (self.training, self.test, metadata) = executor.transformData(params)
-        params["allDataPostTransform"] = DataFrame.append(self.training, self.test)
+        if postProcessClf:
+            params["allDataPreTransform"] = DataFrame.append(self.training, self.test)
+            (self.training, self.test, metadata) = executor.transformData(params)
+            params["allDataPostTransform"] = DataFrame.append(self.training, self.test)
+        else:
+            (self.training, self.test, metadata) = executor.transformData(params)
 
         params["readouts"] = parser.readouts
         params["training"] = self.training

@@ -7,7 +7,7 @@ class FailedBucketingTest(ProfilingTestBase):
     def testExecuteProfiling(self):
         from launcher import Launcher
         profilinglauncher = Launcher("badprofile.json")
-        profilinglauncher.execute(False)
+        profilinglauncher.execute(False, postProcessClf=False)
         learningExecutor = LearningExecutor()
 
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)

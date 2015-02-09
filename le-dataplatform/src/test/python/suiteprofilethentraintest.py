@@ -21,7 +21,7 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
         # These properties won't really be used since these are just unit tests.
         # Functional and end-to-end tests should be done from java
         profilinglauncher = Launcher("metadata-profile.json")
-        profilinglauncher.execute(False)
+        profilinglauncher.execute(False, postProcessClf=False)
         learningExecutor = LearningExecutor()
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)
         self.assertIsNotNone(results)

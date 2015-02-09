@@ -21,7 +21,7 @@ class ProfilingThenTrainTest(TrainingTestBase):
         profilinglauncher = Launcher("model-badlift-profiling.json")
         profilinglauncher.parser.highUCThreshold = 0.000001
         
-        profilinglauncher.execute(False)
+        profilinglauncher.execute(False, postProcessClf=False)
         learningExecutor = LearningExecutor()
 
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)
