@@ -1,0 +1,9 @@
+<div data-ng-controller="CollapsiblePanelWidgetController">
+    <div class='collapsible-panel-container'>
+    <div class='collapsible-panel-header'>
+        <span class='collapsible-panel-title-container'>{{panelTitle}}</span>
+        <span class="collapsible-panel-button float-right fa {{panelOpen ? 'fa-chevron-down' : 'fa-chevron-up'}}" data-ng-click="panelClicked()"></span>
+    </div>
+    <div class='js-collapsible-panel-content collapsible-panel-content'></div>
+</div>
+</div>

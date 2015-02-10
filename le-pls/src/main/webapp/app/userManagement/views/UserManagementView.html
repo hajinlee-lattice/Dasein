@@ -1,0 +1,36 @@
+<section class="panel panel-base" data-ng-controller="UserManagementController">
+    <div class="panel-body main-panel-body">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row">
+                    <h1>{{ResourceUtility.getString('USER_MANAGEMENT_TITLE')}}</h1>
+                    <div class="col-md-7">
+                        <div id="userManagementError" class="alert alert-danger">
+                            {{errorMessage}}
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_FIRST_NAME')}}</th>
+                                    <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_LAST_NAME')}}</th>
+                                    <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_USERNAME')}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="user in Users | orderBy: 'Email'">
+                                    <td>{{user.FirstName}} </td>
+                                    <td>{{user.LastName}}</td>
+                                    <td>{{user.Email}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    <a class="btn btn-primary" data-toggle="modal" href="#" data-ng-click="addUserClicked($event)">{{ResourceUtility.getString('USER_MANAGEMENT_ADD_USER_BUTTON')}}</a> 
+                    </div>
+                    <div class="col-md-5"> <img src="assets/images/ss-implement-2.png" alt="" style="width:100%; padding-top:35px"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

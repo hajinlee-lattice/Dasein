@@ -1,0 +1,42 @@
+<header data-ng-controller="MainHeaderController" class="header fixed-top clearfix">
+    <div class="header-wrapper">
+      <div class="brand"> 
+          <a class="logo" href="#" data-ng-click="dropdownClicked($event)"> <img src="assets/images/logo_lattice.png" alt=""> </a> 
+      </div>
+        <ul class="top-nav">
+            <li class="dropdown li-nav-personal"> 
+                <a data-toggle="dropdown" class="dropdown-toggle nav-personal" href="#" data-ng-click="dropdownClicked($event)"> 
+                    <span class="username">{{userDisplayName}}</span> <b class="fa fa-angle-down"></b> 
+                </a>
+                <ul class="dropdown-menu dropdown-menu-2">
+                    <li><a href="#" data-ng-click="updatePasswordClicked($event)">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
+                    <li><a href="#" data-ng-click="logoutClicked($event)">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
+                </ul>
+            </li>
+        </ul>
+        <div class="horizontal-menu navbar-collapse" id="global-nav">
+            <ul class="nav pull-left navbar-nav">
+
+                <li class="dropdown"> 
+                    <a  data-toggle="dropdown" 
+                        data-hover="dropdown" 
+                        class="dropdown-toggle" 
+                        href="#" 
+                        data-ng-click="modelListClicked($event)"
+                        data-ng-show="shouldShowModels">
+                            {{ResourceUtility.getString('HEADER_MODELS_LABEL')}}</b>
+                    </a>
+                </li>
+                <li class="dropdown"> 
+                    <a data-toggle="dropdown" data-hover="dropdown" class="dropdown-toggle" href="#" data-ng-click="dropdownClicked($event)">
+                        {{ResourceUtility.getString('HEADER_SETUP_LABEL')}} <b class=" fa fa-angle-down"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#" data-ng-click="userManagementClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_USERS')}}</a></li>
+                        <li><a href="#" data-ng-click="manageCredentialsClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_CREDENTIALS')}}</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
