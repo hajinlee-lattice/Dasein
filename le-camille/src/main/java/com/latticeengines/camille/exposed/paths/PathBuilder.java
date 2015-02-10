@@ -13,6 +13,10 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId);
     }
 
+    public static Path buildServicesPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.SERVICES);
+    }
+
     public static Path buildServicePath(String podId, String serviceName) {
         return new Path(PathConstants.PODS, podId, PathConstants.SERVICES, serviceName);
     }

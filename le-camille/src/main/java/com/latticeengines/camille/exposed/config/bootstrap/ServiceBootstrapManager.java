@@ -1,0 +1,78 @@
+package com.latticeengines.camille.exposed.config.bootstrap;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
+
+public class ServiceBootstrapManager {
+    private static final Logger log = LoggerFactory.getLogger(new Object() {
+    }.getClass().getEnclosingClass());
+
+    private static Map<String, Bootstrapper> bootstrappers = new ConcurrentHashMap<String, Bootstrapper>();
+
+    public static void register(String serviceName, Installer installer) {
+        if (installer == null) {
+            throw new IllegalArgumentException("Installer cannot be null");
+        }
+
+        Bootstrapper bootstrapper = bootstrappers.get(serviceName);
+        if (bootstrapper == null) {
+            bootstrapper = new Bootstrapper(serviceName, installer);
+            bootstrappers.put(serviceName, bootstrapper);
+        } else {
+            bootstrapper.setInstaller(installer);
+        }
+    }
+
+    public static void bootstrap(ServiceScope scope) throws Exception {
+        Bootstrapper bootstrapper = bootstrappers.get(scope.getServiceName());
+        if (bootstrapper == null) {
+            throw new IllegalArgumentException("Must register installer for service " + scope.getServiceName());
+        }
+        bootstrapper.bootstrap(scope.getDataVersion());
+    }
+
+    public static void reset(String serviceName) {
+        bootstrappers.remove(serviceName);
+    }
+
+    public static class Bootstrapper {
+        private boolean bootstrapped;
+        private Installer installer;
+        private final String logPrefix;
+        private final Path serviceDirectoryPath;
+
+        public Bootstrapper(String serviceName, Installer installer) {
+            this.installer = installer;
+            this.logPrefix = String.format("[Service=%s] ", serviceName);
+            this.serviceDirectoryPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), serviceName);
+        }
+
+        public void setInstaller(Installer installer) {
+            this.installer = installer;
+        }
+
+        public void bootstrap(int executableVersion) throws Exception {
+            if (!bootstrapped) {
+                synchronized (this) {
+                    if (!bootstrapped) {
+                        log.info("{}Running bootstrap", logPrefix);
+                        install(executableVersion);
+                        bootstrapped = true;
+                    }
+                }
+            }
+        }
+
+        private void install(int executableVersion) throws Exception {
+            BootstrapUtil.install(installer, executableVersion, serviceDirectoryPath, true, logPrefix);
+        }
+    }
+}

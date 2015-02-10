@@ -36,7 +36,7 @@ public class Camille {
     public CuratorFramework getCuratorClient() {
         return client;
     }
-    
+
     public void create(Path path, List<ACL> acls) throws Exception {
         create(path, new Document(), acls, true);
     }
@@ -71,6 +71,10 @@ public class Camille {
         Stat stat = builder.forPath(path.toString(), doc.getData().getBytes());
         log.info(String.format("Camille setting doc at %s", path));
         doc.setVersion(stat.getVersion());
+    }
+
+    public void upsert(Path path, List<ACL> acls) throws Exception {
+        upsert(path, new Document(), acls);
     }
 
     public void upsert(Path path, Document doc, List<ACL> acls) throws Exception {
@@ -157,15 +161,14 @@ public class Camille {
             create(parent.append(node.getPath()), node.getDocument(), acls);
         }
     }
-    
-    public void upsertDirectory (Path parent, DocumentDirectory directory, List<ACL> acls) throws Exception {
+
+    public void upsertDirectory(Path parent, DocumentDirectory directory, List<ACL> acls) throws Exception {
         for (Iterator<Node> iter = directory.breadthFirstIterator(); iter.hasNext();) {
             Node node = iter.next();
-            if (exists(parent.append(node.getPath()))){
-            	set(parent.append(node.getPath()), node.getDocument());
-            }
-            else{
-            	create(parent.append(node.getPath()), node.getDocument(), acls);
+            if (exists(parent.append(node.getPath()))) {
+                set(parent.append(node.getPath()), node.getDocument());
+            } else {
+                create(parent.append(node.getPath()), node.getDocument(), acls);
             }
         }
     }

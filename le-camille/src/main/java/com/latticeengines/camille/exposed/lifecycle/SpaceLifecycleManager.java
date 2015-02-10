@@ -60,15 +60,6 @@ public class SpaceLifecycleManager {
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Space already existed @ {}, ignoring create", spacePath);
         }
-
-        Path servicesPath = PathBuilder.buildCustomerSpaceServicesPath(CamilleEnvironment.getPodId(), contractId,
-                tenantId, spaceId);
-        try {
-            camille.create(servicesPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
-            log.debug("created Services directory @ {}", servicesPath);
-        } catch (KeeperException.NodeExistsException e) {
-            log.debug("Services directory already existed @ {}, ignoring create", servicesPath);
-        }
     }
 
     public static void delete(String contractId, String tenantId, String spaceId) throws Exception {

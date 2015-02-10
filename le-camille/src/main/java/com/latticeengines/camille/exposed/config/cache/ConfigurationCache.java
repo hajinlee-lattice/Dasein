@@ -4,6 +4,7 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
+import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 
 public class ConfigurationCache<T extends ConfigurationScope> implements ConfigurationCacheInterface<T> {
     private ConfigurationCacheInterface<T> impl;
@@ -13,6 +14,8 @@ public class ConfigurationCache<T extends ConfigurationScope> implements Configu
         if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
             impl = (ConfigurationCacheInterface<T>) new CustomerSpaceServiceConfigurationCacheImpl(
                     (CustomerSpaceServiceScope) scope, localPath);
+        } else if (scope.getType() == ConfigurationScope.Type.SERVICE) {
+            impl = (ConfigurationCacheInterface<T>) new ServiceConfigurationCacheImpl((ServiceScope) scope, localPath);
         } else {
             impl = new StandardConfigurationCacheImpl<T>(scope, localPath);
         }

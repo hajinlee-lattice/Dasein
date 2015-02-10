@@ -4,6 +4,7 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
+import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 
 public class ConfigurationTransaction<T extends ConfigurationScope> implements ConfigurationTransactionInterface<T> {
     private ConfigurationTransactionInterface<T> impl;
@@ -13,6 +14,8 @@ public class ConfigurationTransaction<T extends ConfigurationScope> implements C
         if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
             impl = (ConfigurationTransactionInterface<T>) new CustomerSpaceServiceConfigurationTransactionImpl(
                     (CustomerSpaceServiceScope) scope);
+        } else if (scope.getType() == ConfigurationScope.Type.SERVICE) {
+            impl = (ConfigurationTransactionInterface<T>) new ServiceConfigurationTransactionImpl((ServiceScope) scope);
         }
         impl = new StandardConfigurationTransactionImpl<T>(scope);
     }

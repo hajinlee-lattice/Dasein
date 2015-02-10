@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
+import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 
 public class ConfigurationController<T extends ConfigurationScope> implements ConfigurationControllerInterface<T> {
     private ConfigurationControllerInterface<T> impl;
@@ -19,6 +20,8 @@ public class ConfigurationController<T extends ConfigurationScope> implements Co
         if (scope.getType() == ConfigurationScope.Type.CUSTOMER_SPACE_SERVICE) {
             impl = (ConfigurationControllerInterface<T>) new CustomerSpaceServiceConfigurationControllerImpl(
                     (CustomerSpaceServiceScope) scope);
+        } else if (scope.getType() == ConfigurationScope.Type.SERVICE) {
+            impl = (ConfigurationControllerInterface<T>) new ServiceConfigurationControllerImpl((ServiceScope) scope);
         }
         impl = new StandardConfigurationControllerImpl<T>(scope);
     }

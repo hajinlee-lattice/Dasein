@@ -11,7 +11,6 @@ import org.apache.curator.framework.api.transaction.CuratorTransactionResult;
 import org.apache.curator.framework.api.transaction.OperationType;
 import org.apache.zookeeper.data.ACL;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
@@ -182,6 +181,10 @@ public class CamilleTransaction {
      */
     public void create(Path path, Document document, List<ACL> acl) {
         operations.add(new CreateOperation(path, document, acl));
+    }
+
+    public void create(Path path, List<ACL> acl) {
+        operations.add(new CreateOperation(path, new Document(), acl));
     }
 
     /**
