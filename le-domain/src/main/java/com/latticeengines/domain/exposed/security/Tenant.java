@@ -22,6 +22,7 @@ public class Tenant implements HasName, HasId<String>, HasPid {
     private String id;
     private String name;
     private Long pid;
+    private Long registeredTime;
 
     @Override
     @JsonProperty("DisplayName")
@@ -70,4 +71,14 @@ public class Tenant implements HasName, HasId<String>, HasPid {
         return JsonUtils.serialize(this);
     }
 
+    @JsonIgnore
+    @Column(name = "REGISTERED_TIME", nullable = false)
+    public Long getRegisteredTime() {
+        return registeredTime;
+    }
+
+    public void setRegisteredTime(Long registeredTime) {
+        this.registeredTime = registeredTime;
+    }
+    
 }

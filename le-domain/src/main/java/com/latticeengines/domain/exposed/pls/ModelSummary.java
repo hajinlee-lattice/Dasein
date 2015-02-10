@@ -150,12 +150,12 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     }
 
     @JsonProperty("RocScore")
+    @Column(name = "ROC_SCORE", nullable = false)
     public Double getRocScore() {
         return rocScore;
     }
 
     @JsonProperty("RocScore")
-    @Column(name = "ROC_SCORE", nullable = false)
     public void setRocScore(Double rocScore) {
         this.rocScore = rocScore;
     }
