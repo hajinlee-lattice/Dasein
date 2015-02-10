@@ -9,6 +9,7 @@
         <property name="jobClass" value="com.latticeengines.pls.service.impl.ModelSummaryDownloadServiceImpl" />
         <property name="jobDataAsMap">
             <map>
+                <entry key="tenantEntityMgr" value-ref="tenantEntityMgr" />
             </map>
         </property>
     </bean>

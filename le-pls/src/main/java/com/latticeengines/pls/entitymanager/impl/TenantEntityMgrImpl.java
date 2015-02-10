@@ -1,5 +1,7 @@
 package com.latticeengines.pls.entitymanager.impl;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,6 +28,15 @@ public class TenantEntityMgrImpl extends BaseEntityMgrImpl<Tenant> implements Te
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Tenant findByTenantId(String tenantId) {
         return tenantDao.findByTenantId(tenantId);
+    }
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void create(Tenant tenant) {
+        if (tenant.getRegisteredTime() == null) {
+            tenant.setRegisteredTime(new Date().getTime());
+        }
+        super.create(tenant);
     }
     
 }
