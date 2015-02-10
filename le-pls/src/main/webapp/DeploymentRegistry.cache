@@ -1,0 +1,223 @@
+﻿{
+    "ComponentID": -2,
+    "CurrentVersion": "Trunk",
+    "DeploymentDisplayName": "WidgetTech Griot",
+    "DeploymentExternalID": "WTGriot",
+    "DeploymentID": -1,
+    "DeploymentType": 9,
+    "DeploymentUID": "b02f63ea-7432-48d6-8458-c84a2bab947d",
+    "EngagementExternalID": "WidgetTech",
+    "EngagementStates": [
+        {
+            "Key": "salesprism",
+            "Value": "None"
+        },
+        {
+            "Key": "WidgetTech",
+            "Value": "Started"
+        }
+    ],
+    "FacetValues": [
+        {
+            "key": "CrmIntegration",
+            "value": true
+        },
+        {
+            "key": "DelayedTickets",
+            "value": true
+        },
+        {
+            "key": "RedirectUsers",
+            "value": false
+        },
+        {
+            "key": "SendEmail",
+            "value": true
+        },
+        {
+            "key": "SystemTasks",
+            "value": true
+        }
+    ],
+    "HostName": "localhost",
+    "IPAddress": "0.0.0.0",
+    "MessageListeners": [
+        [
+            {
+                "key": "LEComponentID",
+                "value": "-1"
+            },
+            {
+                "key": "Type",
+                "value": "2"
+            },
+            {
+                "key": "ServerAddress",
+                "value": "localhost"
+            },
+            {
+                "key": "QueueName",
+                "value": "Griot_Log"
+            },
+            {
+                "key": "Threads",
+                "value": "1"
+            }
+        ],
+        [
+            {
+                "key": "LEComponentID",
+                "value": "-2"
+            },
+            {
+                "key": "Type",
+                "value": "2"
+            },
+            {
+                "key": "ServerAddress",
+                "value": "localhost"
+            },
+            {
+                "key": "QueueName",
+                "value": "Griot_Log"
+            },
+            {
+                "key": "Threads",
+                "value": "1"
+            }
+        ]
+    ],
+    "MessageListenersByComponent": [
+        [
+            {
+                "key": "LEComponentID",
+                "value": "-2"
+            },
+            {
+                "key": "Type",
+                "value": "0"
+            },
+            {
+                "key": "ServerAddress",
+                "value": "localhost"
+            },
+            {
+                "key": "QueueName",
+                "value": "Griot_Log"
+            },
+            {
+                "key": "Threads",
+                "value": "1"
+            }
+        ]
+    ],
+    "RedirectorUrl": "non_functional_url_89043b4f-3843-4b9c-bd46-b944a2fc1add",
+    "ServerAddress": "localhost",
+    "ServerID": 1,
+    "SystemStatus": {
+        "Key": {
+            "Key": true,
+            "Value": true
+        },
+        "Value": [
+            {
+                "Value": "Validations are disabled until a connection to the deployment service has been established."
+            },
+            {
+                "Value": "Validations are disabled until a connection to the deployment service has been established."
+            }
+        ]
+    },
+	"DomainIDTable": [
+		{
+			"Key": "WTGriot",
+			"Value": "-1"
+		},
+		{
+			"Key": "Tenant1",
+			"Value": "1"
+		},
+		{
+			"Key": "Tenant2",
+			"Value": "2"
+		},
+		{
+			"Key": "Tenant3",
+			"Value": "3"
+		}
+	],
+	"ServiceRoutingTable":
+	[
+		{
+			"Key": "Tenant1",
+			"Value": [
+				{
+					"Key": 6,
+					"Value": {
+						"Url": "localhost/Bard/ConfigurationStore"
+					}
+				}
+			]
+		},
+		{
+			"Key": "Tenant2",
+			"Value": [
+				{
+					"Key": 6,
+					"Value": {
+						"Url": "localhost/Bard/ConfigurationStore"
+					}
+				}
+			]
+		},
+		{
+			"Key": "Tenant3",
+			"Value": [
+				{
+					"Key": 6,
+					"Value": {
+						"Url": "localhost/Bard/ConfigurationStore"
+					}
+				}
+			]
+		}
+	],
+	"ConnectionRoutingTable": [
+    {
+        "Key": "Tenant1",
+        "Value": [
+            {
+                "Key": "BardReportsDB",
+                "Value": {
+                    "ConnectionString": "data source=localhost;initial catalog=BardDB;Trusted_Connection=Yes;Connection Timeout=10;packet size=4096",
+                    "ProviderName": ""
+                }
+            }
+        ]
+    },
+    {
+        "Key": "Tenant2",
+        "Value": [
+            {
+                "Key": "BardReportsDB",
+                "Value": {
+                    "ConnectionString": "data source=localhost;initial catalog=BardDB;Trusted_Connection=Yes;Connection Timeout=10;packet size=4096",
+                    "ProviderName": ""
+                }
+            }
+        ]
+    },
+    {
+        "Key": "Tenant3",
+        "Value": [
+            {
+                "Key": "BardReportsDB",
+                "Value": {
+                    "ConnectionString": "data source=localhost;initial catalog=BardDB;Trusted_Connection=Yes;Connection Timeout=10;packet size=4096",
+                    "ProviderName": ""
+                }
+            }
+        ]
+    }
+	]
+}

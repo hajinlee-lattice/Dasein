@@ -10,12 +10,17 @@ public class Session {
     private Tenant tenant;
     private List<String> rights;
     private Ticket ticket;
-    
+    private String displayName;
+    private String identifier;
+    private String emailAddress;
+    private String locale;
+    private String title;
+
     @JsonProperty("Tenant")
     public Tenant getTenant() {
         return tenant;
     }
-    
+
     @JsonProperty("Tenant")
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
@@ -40,7 +45,57 @@ public class Session {
     public void setTicket(Ticket ticket) {
         this.ticket = ticket;
     }
-    
+
+    @JsonProperty("DisplayName")
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @JsonProperty("DisplayName")
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    @JsonProperty("Identifier")
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    @JsonProperty("Identifier")
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    @JsonProperty("EmailAddress")
+    public String getEmailAddress() {
+        return emailAddress;
+    }
+
+    @JsonProperty("EmailAddress")
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
+    }
+
+    @JsonProperty("Locale")
+    public String getLocale() {
+        return locale;
+    }
+
+    @JsonProperty("Locale")
+    public void setLocale(String locale) {
+        this.locale = locale;
+    }
+
+    @JsonProperty("Title")
+    public String getTitle() {
+        return title;
+    }
+
+    @JsonProperty("Title")
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);

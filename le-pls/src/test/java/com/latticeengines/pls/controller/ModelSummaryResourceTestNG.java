@@ -19,7 +19,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.security.Session;
+import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
@@ -30,19 +30,19 @@ import com.latticeengines.pls.security.GrantedRight;
 
 /**
  * This test has two users with particular privileges:
- * 
+ *
  * rgonzalez - View_PLS_Reporting for tenant1
  * bnguyen - View_PLS_Reporting, View_PLS_Models for tenant2
- * 
+ *
  * It ensures that rgonzalez cannot access any model summaries since it does not
  * have the View_PLS_Models right.
- * 
+ *
  * It also ensures that bnguyen can indeed access the model summaries since it does
  * have the View_PLS_Models right.
- * 
- * It also ensures that updates can only be done by bnguyen since this user 
+ *
+ * It also ensures that updates can only be done by bnguyen since this user
  * has Edit_PLS_Models right.
- * 
+ *
  * @author rgonzalez
  *
  */
@@ -50,7 +50,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ModelSummaryResourceTestNG.class);
-    
+
     private Ticket ticket = null;
 
     @Autowired
@@ -61,10 +61,10 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private GlobalUserManagementServiceImpl globalUserManagementService;
-    
+
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
-    
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
@@ -81,14 +81,14 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "bnguyen");
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "bnguyen");
-        
+
         setupDb(tenant1, tenant2);
     }
-    
+
     @Test(groups = { "functional", "deployment" })
     public void getModelSummariesNoViewPlsModelsRight() {
-        Session session = login("rgonzalez");
-        addAuthHeader.setAuthValue(session.getTicket().getData());
+        UserDocument doc = loginAndAttach("rgonzalez");
+        addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
@@ -102,8 +102,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = { "functional", "deployment" })
     public void deleteModelSummaryNoEditPlsModelsRight() {
-        Session session = login("rgonzalez");
-        addAuthHeader.setAuthValue(session.getTicket().getData());
+        UserDocument doc = loginAndAttach("rgonzalez");
+        addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
@@ -118,8 +118,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = { "functional", "deployment" })
     public void getModelSummariesHasViewPlsModelsRight() {
-        Session session = login("bnguyen");
-        addAuthHeader.setAuthValue(session.getTicket().getData());
+        UserDocument doc = loginAndAttach("bnguyen");
+        addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
@@ -134,8 +134,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "getModelSummariesHasViewPlsModelsRight" })
     public void updateModelSummaryHasEditPlsModelsRight() {
-        Session session = login("bnguyen");
-        addAuthHeader.setAuthValue(session.getTicket().getData());
+        UserDocument doc = loginAndAttach("bnguyen");
+        addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
@@ -145,16 +145,16 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         AttributeMap attrMap = new AttributeMap();
         attrMap.put("Name", "xyz");
         restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
-        
+
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
         assertEquals(summary.getName(), "xyz");
         assertNotNull(summary.getDetails());
     }
-    
+
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateModelSummaryHasEditPlsModelsRight" })
     public void deleteModelSummaryHasEditPlsModelsRight() {
-        Session session = login("bnguyen");
-        addAuthHeader.setAuthValue(session.getTicket().getData());
+        UserDocument doc = loginAndAttach("bnguyen");
+        addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
@@ -162,5 +162,5 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort()  + "/pls/modelsummaries/456", ModelSummary.class);
         assertNull(summary);
     }
-    
+
 }

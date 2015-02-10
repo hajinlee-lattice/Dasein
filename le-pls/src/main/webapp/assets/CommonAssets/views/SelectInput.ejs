@@ -1,0 +1,12 @@
+<div class="select-input" title="<%=title%>">
+  <p>
+    <%=message%>
+  </p>
+  <select id="<%=id%>" value="<%=selectedValue%>" <%= disabled === true ? 'disabled' : ''%>>
+    <% for(var i=0; i<dataProvider.length; i++) {%>
+      <option value= <%=dataProvider[i].value%> <%= dataProvider[i].value == selectedValue ? 'selected' : ''%>>
+        <%=dataProvider[i].label%>
+      </option>
+    <% } %>
+  </select>
+</div>

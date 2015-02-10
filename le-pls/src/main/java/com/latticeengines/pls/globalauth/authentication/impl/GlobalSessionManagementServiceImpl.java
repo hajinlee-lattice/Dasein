@@ -23,7 +23,7 @@ import com.latticeengines.pls.globalauth.generated.sessionmgr.SessionManagementS
 public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl implements GlobalSessionManagementService {
 
     private static final Log log = LogFactory.getLog(GlobalSessionManagementServiceImpl.class);
-    
+
     private ISessionManagementService getService() {
         SessionManagementService service;
         try {
@@ -56,7 +56,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             throw new LedpException(LedpCode.LEDP_18002, e, new String[] { ticket.getData() });
         }
     }
-    
+
     @Override
     public Session attach(Ticket ticket) {
         if (ticket == null) {
@@ -75,7 +75,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         addMagicHeaderAndSystemProperty(service);
         try {
             log.info("Attaching ticket " + ticket.toString() + " against Global Auth.");
-            
+
             Session s = new SessionBuilder(service.attach( //
                             new SoapTicketBuilder(ticket).build(), //
                             new SoapTenantBuilder(ticket.getTenants().get(0)).build())).build();
@@ -85,19 +85,19 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             throw new LedpException(LedpCode.LEDP_18001, e, new String[] { ticket.toString() });
         }
     }
-    
+
     static class SoapTicketBuilder {
         private Ticket ticket;
-        
+
         public SoapTicketBuilder(Ticket ticket) {
             this.ticket = ticket;
         }
-        
+
         public com.latticeengines.pls.globalauth.generated.sessionmgr.Ticket build() {
             com.latticeengines.pls.globalauth.generated.sessionmgr.Ticket t = new ObjectFactory().createTicket();
             t.setUniquness(ticket.getUniqueness());
             t.setRandomness(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Randomness"), // 
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Randomness"), //
                     String.class, ticket.getRandomness()));
             return t;
         }
@@ -105,18 +105,18 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
     static class SoapTenantBuilder {
         private Tenant tenant;
-        
+
         public SoapTenantBuilder(Tenant tenant) {
             this.tenant = tenant;
         }
-        
+
         public com.latticeengines.pls.globalauth.generated.sessionmgr.Tenant build() {
             com.latticeengines.pls.globalauth.generated.sessionmgr.Tenant t = new ObjectFactory().createTenant();
             t.setIdentifier(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Identifier"), // 
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Identifier"), //
                     String.class, tenant.getId()));
             t.setDisplayName(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "DisplayName"), // 
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "DisplayName"), //
                     String.class, tenant.getName()));
             return t;
         }
@@ -124,19 +124,24 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
     static class SessionBuilder {
         private com.latticeengines.pls.globalauth.generated.sessionmgr.Session session;
-        
+
         public SessionBuilder(com.latticeengines.pls.globalauth.generated.sessionmgr.Session session) {
             this.session = session;
         }
-        
+
         public Session build() {
             Session s = new Session();
             s.setTenant(new TenantBuilder(session.getTenant()).build());
             s.setRights(session.getRights().getValue().getString());
+            s.setDisplayName(session.getDisplayName().getValue());
+            s.setEmailAddress(session.getEmailAddress().getValue());
+            s.setIdentifier(session.getIdentifier().getValue());
+            s.setLocale(session.getLocale().getValue());
+            s.setTitle(session.getTitle().getValue());
             return s;
         }
     }
-    
+
     static class TenantBuilder {
         private com.latticeengines.pls.globalauth.generated.sessionmgr.Tenant tenant;
 
@@ -151,5 +156,5 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             return t;
         }
     }
-    
+
 }

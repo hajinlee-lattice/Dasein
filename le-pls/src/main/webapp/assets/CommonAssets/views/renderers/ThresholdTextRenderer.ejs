@@ -1,0 +1,8 @@
+<%== $.View('assets/CommonAssets/views/renderers/BaseRenderer.ejs',{itemValue: data, renderType: RenderWorker.THRESHOLD_TEXT_KEY_RENDERER}) %>
+<input type="hidden" name="Probability" value="<%= probability %>"/>
+<%
+    var elementName = StringUtil.GenerateUniqueExternalID("string");
+%>
+<div class='fixed-width-string single-line-ellipsis' name="<%= elementName %>" title='<%= data %>' style="width:<%= width %>px" >
+    <%= (data != null && typeof data == "string") ? data : "" %>
+</div>

@@ -18,33 +18,33 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Table(name = "TENANT")
 public class Tenant implements HasName, HasId<String>, HasPid {
-    
+
     private String id;
     private String name;
     private Long pid;
 
     @Override
-    @JsonProperty("name")
+    @JsonProperty("DisplayName")
     @Column(name = "NAME", nullable = false, unique = true)
     public String getName() {
         return name;
     }
 
     @Override
-    @JsonProperty("Name")
+    @JsonProperty("DisplayName")
     public void setName(String name) {
         this.name = name;
     }
-    
+
     @Override
-    @JsonProperty("Id")
+    @JsonProperty("Identifier")
     @Column(name = "TENANT_ID", nullable = false, unique = true)
     public String getId() {
         return id;
     }
 
     @Override
-    @JsonProperty("Id")
+    @JsonProperty("Identifier")
     public void setId(String id) {
         this.id = id;
     }

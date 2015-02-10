@@ -4,6 +4,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -30,9 +31,11 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.domain.exposed.pls.KeyValue;
+import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
+import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -45,6 +48,7 @@ import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticatio
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
 import com.latticeengines.pls.security.GrantedRight;
+import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.security.TicketAuthenticationToken;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -52,42 +56,44 @@ import com.latticeengines.pls.security.TicketAuthenticationToken;
 public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(PlsFunctionalTestNGBase.class);
-    
+
     @Autowired
     private GlobalAuthenticationServiceImpl globalAuthenticationService;
 
     @Autowired
     private GlobalSessionManagementServiceImpl globalSessionManagementService;
-    
+
     @Autowired
     private GlobalUserManagementServiceImpl globalUserManagementService;
-    
+
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
-    
+
     @Autowired
     private KeyValueEntityMgr keyValueEntityMgr;
-    
+
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
-    
+
     @Autowired
     private SessionFactory sessionFactory;
-    
+
     @Value("${pls.api.hostport}")
     private String hostPort;
-    
+
     protected RestTemplate restTemplate = new RestTemplate();
-    protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor("");
-    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor("");
-    
+    protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
+            "");
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
+            "");
+
     protected void createUser(String username, String email, String firstName, String lastName) {
         try {
             User user1 = new User();
             user1.setFirstName(firstName);
             user1.setLastName(lastName);
             user1.setEmail(email);
-            
+
             Credentials user1Creds = new Credentials();
             user1Creds.setUsername(username);
             user1Creds.setPassword("EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
@@ -96,11 +102,11 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             log.info("User " + username + " already created.");
         }
     }
-    
+
     protected String getRestAPIHostPort() {
         return hostPort;
     }
-    
+
     protected void grantRight(GrantedRight right, String tenant, String username) {
         try {
             globalUserManagementService.grantRight(right.getAuthority(), tenant, username);
@@ -118,7 +124,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected static class GetHttpStatusErrorHandler implements ResponseErrorHandler {
-        
+
         public GetHttpStatusErrorHandler() {
         }
 
@@ -135,13 +141,12 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             throw new RuntimeException("" + response.getStatusCode());
         }
     }
-    
+
     public static class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
-        
+
         private String headerValue;
 
-        public AuthorizationHeaderHttpRequestInterceptor(String headerValue) 
-        {
+        public AuthorizationHeaderHttpRequestInterceptor(String headerValue) {
             this.headerValue = headerValue;
         }
 
@@ -149,22 +154,21 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
                 throws IOException {
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
-            requestWrapper.getHeaders().add("Authorization", headerValue);
-         
+            requestWrapper.getHeaders().add(RestGlobalAuthenticationFilter.AUTHORIZATION, headerValue);
+
             return execution.execute(requestWrapper, body);
         }
-        
+
         public void setAuthValue(String headerValue) {
             this.headerValue = headerValue;
         }
     }
-    
+
     public static class MagicAuthenticationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
-        
+
         private String headerValue;
 
-        public MagicAuthenticationHeaderHttpRequestInterceptor(String headerValue) 
-        {
+        public MagicAuthenticationHeaderHttpRequestInterceptor(String headerValue) {
             this.headerValue = headerValue;
         }
 
@@ -173,27 +177,33 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                 throws IOException {
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
             requestWrapper.getHeaders().add(Constants.INTERNAL_SERVICE_HEADERNAME, headerValue);
-         
+
             return execution.execute(requestWrapper, body);
         }
-        
+
         public void setAuthValue(String headerValue) {
             this.headerValue = headerValue;
         }
     }
 
-    protected Session login(String username) {
+    protected UserDocument loginAndAttach(String username) {
         Credentials creds = new Credentials();
         creds.setUsername(username);
         creds.setPassword(DigestUtils.sha256Hex("admin"));
 
-        return restTemplate.postForObject("http://localhost:8080/pls/login", creds, Session.class,
-                new Object[] {});
+        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds,
+                LoginDocument.class, new Object[] {});
+
+        addAuthHeader.setAuthValue(doc.getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+
+        return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", doc.getResult().getTenants().get(0),
+                UserDocument.class, new Object[] {});
     }
-    
+
     private KeyValue getDetails() throws Exception {
-        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
-                "com/latticeengines/pls/functionalframework/modelsummary.json");
+        InputStream modelSummaryFileAsStream = ClassLoader
+                .getSystemResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary.json");
         byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
         data = CompressionUtils.compressByteArray(data);
         KeyValue details = new KeyValue();
@@ -210,7 +220,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             tenant1.setId(tenant1Name);
             tenant1.setName(tenant1Name);
             tenantEntityMgr.create(tenant1);
-            
+
             ModelSummary summary1 = new ModelSummary();
             summary1.setId("123");
             summary1.setName("Model1");
@@ -225,7 +235,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             summary1.setTotalConversionCount(100L);
             summary1.setDetails(getDetails());
             summary1.setConstructionTime(System.currentTimeMillis());
-            
+
             modelSummaryEntityMgr.create(summary1);
         }
 
@@ -234,7 +244,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             tenant2.setId(tenant2Name);
             tenant2.setName(tenant2Name);
             tenantEntityMgr.create(tenant2);
-            
+
             ModelSummary summary2 = new ModelSummary();
             summary2.setId("456");
             summary2.setName("Model2");
@@ -257,7 +267,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             s2p1.setFundamentalType("");
             s2p1.setUncertaintyCoefficient(0.151911);
             summary2.addPredictor(s2p1);
-            
+
             PredictorElement s2el1 = new PredictorElement();
             s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
             s2el1.setCorrelationSign(-1);
@@ -281,16 +291,16 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             s2el2.setRevenue(1682345087923.0);
             s2el2.setVisible(true);
             s2p1.addPredictorElement(s2el2);
-            
+
             modelSummaryEntityMgr.create(summary2);
-            
+
         }
     }
-    
+
     protected void setupSecurityContext(ModelSummary summary) {
         setupSecurityContext(summary.getTenant());
     }
-    
+
     protected void setupSecurityContext(Tenant t) {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
@@ -304,6 +314,5 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         SecurityContextHolder.setContext(securityContext);
 
     }
-
 
 }
