@@ -1,5 +1,7 @@
 package com.latticeengines.pls.controller;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,11 +14,12 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.pls.exception.LoginException;
-import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
+import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.GrantedRight;
+import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -29,7 +32,7 @@ public class UserResource {
     private GlobalUserManagementService globalUserManagementService;
 
     @Autowired
-    private GlobalSessionManagementService globalSessionManagementService;
+    private GlobalAuthenticationService globalAuthenticationService;
 
     @RequestMapping(value = "/add", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -50,17 +53,13 @@ public class UserResource {
     @RequestMapping(value = "/logout", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Logout the user")
-    public UserDocument logout() {
+    public UserDocument logout(HttpServletRequest request) {
         UserDocument doc = new UserDocument();
 
-        try {
-            doc.setSuccess(true);
-        } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
-                throw new LoginException(e);
-            }
-            throw e;
-        }
+        Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+        globalAuthenticationService.discard(ticket);
+        doc.setSuccess(true);
+
         return doc;
     }
 }

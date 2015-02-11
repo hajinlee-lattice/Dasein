@@ -4,6 +4,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -18,9 +21,9 @@ import com.latticeengines.pls.globalauth.generated.service.IAuthenticationServic
 
 @Component("globalAuthenticationService")
 public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationServiceBaseImpl implements GlobalAuthenticationService {
-    
+
     private static final Log log = LogFactory.getLog(GlobalAuthenticationServiceImpl.class);
-    
+
     @Override
     public Ticket authenticateUser(String user, String password) {
         AuthenticationService service;
@@ -38,7 +41,45 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18001, e, new String[] { user });
         }
-        
+
+    }
+
+    @Override
+    public boolean discard(Ticket ticket) {
+        AuthenticationService service;
+        try {
+            service = new AuthenticationService(new URL(globalAuthUrl + "/GlobalAuthService?wsdl"));
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18000, e, new String[] { globalAuthUrl });
+        }
+
+        IAuthenticationService ias = service.getBasicHttpBindingIAuthenticationService();
+        addMagicHeaderAndSystemProperty(ias);
+        try {
+            log.info("Discarding ticket " + ticket + " against Global Auth.");
+
+            return ias.discard(new SoapTicketBuilder(ticket).build());
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18009, e, new String[] { ticket.toString() });
+        }
+
+    }
+
+    static class SoapTicketBuilder {
+        private Ticket ticket;
+
+        public SoapTicketBuilder(Ticket ticket) {
+            this.ticket = ticket;
+        }
+
+        public com.latticeengines.pls.globalauth.generated.service.Ticket build() {
+            com.latticeengines.pls.globalauth.generated.service.Ticket t = new com.latticeengines.pls.globalauth.generated.service.ObjectFactory().createTicket();
+            t.setUniquness(ticket.getUniqueness());
+            t.setRandomness(new JAXBElement<String>( //
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Randomness"), //
+                    String.class, ticket.getRandomness()));
+            return t;
+        }
     }
 
     static class TicketBuilder {

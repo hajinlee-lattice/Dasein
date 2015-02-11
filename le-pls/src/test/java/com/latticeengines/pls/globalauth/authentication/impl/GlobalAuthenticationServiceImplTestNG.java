@@ -14,16 +14,19 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class GlobalAuthenticationServiceImplTestNG extends PlsFunctionalTestNGBase {
-    
+
     @Autowired
     private GlobalAuthenticationServiceImpl globalAuthenticationService;
 
     @Test(groups = "functional")
-    public void authenticateUser() {
+    public void authenticateThenDiscardUser() {
         String passwd = DigestUtils.sha256Hex("admin");
         Ticket ticket = globalAuthenticationService.authenticateUser("admin", passwd);
         assertNotNull(ticket);
         assertEquals(ticket.getTenants().size(), 2);
+
+        boolean result = globalAuthenticationService.discard(ticket);
+        assertTrue(result);
     }
 
     @Test(groups = "functional")
@@ -35,6 +38,6 @@ public class GlobalAuthenticationServiceImplTestNG extends PlsFunctionalTestNGBa
             assertTrue(e instanceof LedpException);
             assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18001);
         }
-    
+
     }
 }
