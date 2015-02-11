@@ -268,7 +268,7 @@
             <version>${le.camille.version}</version>
             <classifier>intf</classifier>
         </dependency>
-        <!-- use this instead of <artifactId>persistence-api</artifactId>
+        <!-- use this instead of <artifactId>persistence-api</artifactId> 
             1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
@@ -317,6 +317,11 @@
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>sqljdbc4</artifactId>
             <version>4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>1.4</version>
         </dependency>
     </dependencies>
 

@@ -10,6 +10,11 @@
         <property name="jobDataAsMap">
             <map>
                 <entry key="tenantEntityMgr" value-ref="tenantEntityMgr" />
+                <entry key="modelingServiceHdfsBaseDir" value="${pls.modelingservice.basedir}" />
+                <entry key="modelSummaryDownloadExecutor" value-ref="modelSummaryDownloadExecutor" />
+                <entry key="modelSummaryEntityMgr" value-ref="modelSummaryEntityMgr" />
+                <entry key="yarnConfiguration" value-ref="yarnConfiguration" />
+                <entry key="modelSummaryParser" value-ref="modelSummaryParser" />
             </map>
         </property>
     </bean>
@@ -27,4 +32,5 @@
             </list>
         </property>
     </bean>
+    
 </beans>

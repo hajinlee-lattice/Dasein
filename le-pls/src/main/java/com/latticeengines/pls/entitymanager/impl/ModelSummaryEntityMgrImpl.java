@@ -66,6 +66,9 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         KeyValue details = summary.getDetails();
         
         if (details != null) {
+            if (details.getTenantId() == null) {
+                details.setTenantId(tenant.getPid());
+            }
             keyValueDao.create(details);
         }
 
