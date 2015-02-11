@@ -90,8 +90,6 @@ def main(argv):
     offset = 0
     while offset < scenario_length_ms - args.read_sla:
         external_id = generate_external_id()
-        print(external_id)
-
         operations.append(WriteLeadOperation(offset, external_id))
         operations.append(ReadLeadScoreOperation(offset + args.read_sla, external_id, None))
         offset += write_cadence_ms
