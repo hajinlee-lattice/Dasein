@@ -19,8 +19,12 @@ import org.springframework.util.StreamUtils;
 
 public class HdfsUtils {
 
-    public static interface HdfsFilenameFilter {
+    public interface HdfsFilenameFilter {
         boolean accept(String filename);
+    }
+
+    public interface HdfsFileFilter {
+        boolean accept(FileStatus file);
     }
 
     public static enum LogFileEncodingType {
@@ -80,7 +84,7 @@ public class HdfsUtils {
     }
 
     public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir) throws Exception {
-        return getFilesForDir(configuration, hdfsDir, null);
+        return getFilesForDir(configuration, hdfsDir, (HdfsFilenameFilter) null);
     }
 
     public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir,
@@ -100,6 +104,40 @@ public class HdfsUtils {
             }
         }
 
+        return filePaths;
+    }
+    
+    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter) throws Exception {
+        FileSystem fs = FileSystem.get(configuration);
+        FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
+        List<String> filePaths = new ArrayList<String>();
+        for (FileStatus status : statuses) {
+            Path filePath = status.getPath();
+            boolean accept = true;
+
+            if (filter != null) {
+                accept = filter.accept(status);
+            }
+            if (accept) {
+                filePaths.add(filePath.toString());
+            }
+        }
+
+        return filePaths;
+    }
+    
+    public static final List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter) throws Exception {
+        FileSystem fs = FileSystem.get(configuration);
+        FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
+        List<String> filePaths = new ArrayList<String>();
+        for (FileStatus status : statuses) {
+            if (status.isDirectory()) {
+                filePaths.addAll(getFilesForDir(configuration, status.getPath().toString(), filter));
+                filePaths.addAll(getFilesForDirRecursive(configuration, status.getPath().toString(), filter));
+            }
+        }
         return filePaths;
     }
 
