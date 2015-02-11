@@ -200,7 +200,6 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
                 "lowerInclusive", //
                 "upperExclusive", //
                 "uncertaintyCoefficient", //
-                "revenue", //
                 "visible"
         };
 
