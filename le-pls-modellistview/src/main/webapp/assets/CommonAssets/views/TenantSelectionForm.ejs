@@ -1,9 +1,0 @@
-<div id="tenantSelectionFormContainer" title="<%= ResourceUtil.getString("TENANT_SELECTION_FORM_TITLE") %>">
-    <select id="tenantSelectionInput">
-    <% for(var i=0; i<tenantList.length; i++) {%>
-      <option value= <%=tenantList[i].Identifier%> >
-        <%=tenantList[i].DisplayName%>
-      </option>
-    <% } %>
-  </select>   
-</div>

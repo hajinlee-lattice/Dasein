@@ -1,8 +1,0 @@
-<%== $.View('assets/CommonAssets/views/renderers/BaseRenderer.ejs',{itemValue: imageKey, renderType: RenderWorker.PLAY_TEMPLATE_IMAGE_RENDERER}) %>
-<div id ="<%= id %>">
-    <div class="play-template-image-thumbnail play-template-<%= imageKey %>-thumbnail"
-         title="<%= message %>"
-         alt="<%= message %>">
-    </div>
-    <% if (showMessage) { %> <p><%= message %></p> <% } %>
-</div>
