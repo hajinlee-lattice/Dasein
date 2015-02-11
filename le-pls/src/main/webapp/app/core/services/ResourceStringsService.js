@@ -13,7 +13,7 @@ angular.module('mainApp.core.services.ResourceStringsService', [
             locale = this.DefaultLocale;
         }
         
-        var webServer = URLUtility.GetWebServerAddress("index.html") + "/assets/resources/" + locale + "/" + "ResourceStrings.txt";
+        var webServer = URLUtility.GetWebServerAddress("/") + "/assets/resources/" + locale + "/" + "ResourceStrings.txt";
         
         $http({
             method: 'GET', 
