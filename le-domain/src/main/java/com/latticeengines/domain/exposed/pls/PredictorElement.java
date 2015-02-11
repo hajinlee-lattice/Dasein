@@ -35,7 +35,6 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     private Double upperExclusive;
     private Double uncertaintyCoefficient;
     private String values;
-    private Double revenue;
     private Boolean visible;
     private Predictor predictor;
     private Long tenantId;
@@ -127,15 +126,6 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
 
     public void setValues(String values) {
         this.values = values;
-    }
-
-    @Column(name = "REVENUE", nullable = false)
-    public Double getRevenue() {
-        return revenue;
-    }
-
-    public void setRevenue(Double revenue) {
-        this.revenue = revenue;
     }
 
     @Column(name = "VISIBLE", nullable = false)
