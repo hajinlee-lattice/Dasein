@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -55,12 +56,17 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         modelSummaryDownloadService.setModelSummaryDownloadExecutor(modelSummaryDownloadExecutor);
         modelSummaryDownloadService.setModelSummaryParser(modelSummaryParser);
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
-        tenantEntityMgr.deleteAll();
+    }
+    
+    @BeforeMethod(groups = "functional")
+    public void setupMethod() {
         keyValueEntityMgr.deleteAll();
+        modelSummaryEntityMgr.deleteAll();
+        tenantEntityMgr.deleteAll();
     }
 
     @Test(groups = "functional")
-    public void executeInternal() throws Exception {
+    public void executeInternalWithTenantRegistrationEarlierThanHdfsModelCreation() throws Exception {
         Tenant tenant = new Tenant();
         tenant.setId("TENANT1");
         tenant.setName("TENANT1");
@@ -80,5 +86,26 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
         assertEquals(summaries.size(), 1);
         
+    }
+
+    @Test(groups = "functional")
+    public void executeInternalWithTenantRegistrationLaterThanHdfsModelCreation() throws Exception {
+        String dir = modelingServiceHdfsBaseDir
+                + "/TENANT1/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0002/enhancements";
+        URL modelSummaryUrl = ClassLoader.getSystemResource(
+                "com/latticeengines/pls/functionalframework/modelsummary.json");
+        HdfsUtils.mkdir(yarnConfiguration, dir);
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
+
+        Thread.sleep(5000L);
+        Tenant tenant = new Tenant();
+        tenant.setId("TENANT1");
+        tenant.setName("TENANT1");
+        tenantEntityMgr.create(tenant);
+        
+        modelSummaryDownloadService.executeInternal(null);
+        setupSecurityContext(tenant);
+        List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
+        assertEquals(summaries.size(), 0);
     }
 }
