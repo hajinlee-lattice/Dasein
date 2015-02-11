@@ -2,7 +2,9 @@ package com.latticeengines.pls.service.impl;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.logging.Log;
@@ -64,15 +66,22 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         }
         
         
-        
+        Set<String> set = new HashSet<>();
+        List<ModelSummary> summaries = modelSummaryEntityMgr.noAspectsFindAll();
+        for (ModelSummary summary : summaries) {
+            set.add(summary.getId());
+        }
         boolean foundFilesToDownload = false;
         try {
             for (String file : files) {
                 String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
                 ModelSummary summary = parser.parse(file, contents);
                 summary.setTenant(tenant);
-                modelSummaryEntityMgr.create(summary);
-                foundFilesToDownload = true;
+                
+                if (!set.contains(summary.getId())) {
+                    modelSummaryEntityMgr.create(summary);
+                    foundFilesToDownload = true;
+                }
             }
         } catch (Exception e) {
             log.error(e);

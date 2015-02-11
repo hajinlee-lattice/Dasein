@@ -83,6 +83,11 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         }
     }
     
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ModelSummary> noAspectsFindAll() {
+        return super.findAll();
+    }
     
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)

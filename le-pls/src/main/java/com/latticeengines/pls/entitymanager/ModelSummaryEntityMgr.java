@@ -1,5 +1,7 @@
 package com.latticeengines.pls.entitymanager;
 
+import java.util.List;
+
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 
@@ -12,5 +14,7 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
     void deleteByModelId(String modelId);
     
     void updateModelSummary(ModelSummary modelSummary);
+
+    List<ModelSummary> noAspectsFindAll();
 
 }

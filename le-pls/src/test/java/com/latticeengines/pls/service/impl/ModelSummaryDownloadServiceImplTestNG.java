@@ -86,6 +86,12 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
         assertEquals(summaries.size(), 1);
         
+        modelSummaryDownloadService.executeInternal(null);
+        summaries = modelSummaryEntityMgr.findAll();
+        // No new summaries should have been created
+        assertEquals(summaries.size(), 1);
+        
+        
     }
 
     @Test(groups = "functional")
