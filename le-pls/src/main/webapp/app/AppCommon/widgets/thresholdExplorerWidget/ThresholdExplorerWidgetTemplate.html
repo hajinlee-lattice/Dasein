@@ -1,8 +1,14 @@
-<div data-ng-controller="ThresholdExplorerWidgetController" class="col-md-12">
+<style>
+    .threshold-explorer-container {
+        background-color: white;
+        width: 99%;
+        margin: 11px;
+    }
+</style>
+<div data-ng-controller="ThresholdExplorerWidgetController" class="col-md-12 threshold-explorer-container">
     <section class="panel">
         <div class="panel-body">
-            <div data-threshold-explorer-chart 
-                 data-chart-data="{{chartData}}"></div>
+            <div id="thresholdExplorerChart"></div>
         </div>
     </section>
 </div>

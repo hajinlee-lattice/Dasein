@@ -28,6 +28,10 @@
                             "Type": "SimpleTabWidget",
                             "DefaultTab": 0,
                             "Widgets": [{
+                                    "ID" : "modelDetailsAttributesWidget",
+                                    "Type" : "TopPredictorWidget",
+                                    "TitleString": "TOP_PREDICTORS_TAB_TITLE"
+                                }, {
                                     "ID" : "modelDetailsExplorerWidget",
                                     "Type" : "ThresholdExplorerWidget",
                                     "TitleString": "THRESHOLD_EXPLORER_TAB_TITLE"

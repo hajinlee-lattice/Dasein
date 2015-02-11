@@ -1,0 +1,45 @@
+<style>
+    .top-predictor-container {
+        background-color: white;
+        width: 99%;
+    }
+    
+    .top-predictor-panel {
+        margin-left: 11px;
+        display: inline-block;
+        vertical-align: text-top;
+    }
+    
+    .top-predictor-panel.middle {
+        margin-left: 250px;
+    }
+    
+    .top-predictor-panel.right {
+        margin-left: 250px;
+    }
+    
+    .top-predictor-donut-text
+    {
+        text-anchor:        middle;
+        font-size:          14px;
+        font-weight:        bold;
+    }
+</style>
+<div class="top-predictor-container float-left" data-ng-controller="TopPredictorWidgetController">
+    <div>
+        <h1>{{topPredictorTitle}} </h1>
+        <hr/>
+    </div>
+    <div>
+        <span class="top-predictor-panel">
+            <h3>{{internalPredictorTotal}}</h3>
+            <h3>{{ResourceUtility.getString('TOP_PREDICTORS_CATEGORY_LABEL')}}</h3>
+        </span>
+        <span class="js-top-predictor-donut top-predictor-panel middle">
+        </span>
+        <span class="top-predictor-panel right">
+            <h3>{{externalPredictorTotal}}</h3>
+            <h3>{{ResourceUtility.getString('TOP_PREDICTORS_CATEGORY_LABEL')}}</h3>
+        </span>
+    </div>
+</div>

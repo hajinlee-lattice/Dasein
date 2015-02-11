@@ -7,7 +7,8 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
     'mainApp.appCommon.widgets.CollapsiblePanelWidget',
     'mainApp.appCommon.widgets.ScreenHeaderWidget',
     'mainApp.appCommon.widgets.SimpleTabWidget',
-    'mainApp.appCommon.widgets.TabWidget'
+    'mainApp.appCommon.widgets.TabWidget',
+    'mainApp.appCommon.widgets.TopPredictorWidget'
 ])
 .service('WidgetFrameworkService', function ($compile, $rootScope, WidgetConfigUtility, MetadataUtility) {
 
@@ -81,6 +82,9 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
                 break;
             case WidgetConfigUtility.THRESHOLD_EXPLORER_WIDGET:
                 $compile(options.element.html('<div data-threshold-explorer-widget></div>'))(scope);
+                break;
+            case WidgetConfigUtility.TOP_PREDICTOR_WIDGET:
+                $compile(options.element.html('<div data-top-predictor-widget></div>'))(scope);
                 break;
             default:
                 return;

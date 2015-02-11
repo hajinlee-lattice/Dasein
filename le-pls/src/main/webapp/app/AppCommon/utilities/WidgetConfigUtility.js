@@ -24,6 +24,7 @@ angular.module('mainApp.appCommon.utilities.WidgetConfigUtility', [
     this.TEST_WIDGET = 'TestWidget';
     this.TAB_WIDGET = 'TabWidget';
     this.THRESHOLD_EXPLORER_WIDGET = 'ThresholdExplorerWidget';
+    this.TOP_PREDICTOR_WIDGET = 'TopPredictorWidget';
 
     // Values for "ActiveWidgets" WidgetConfig property
     this.ACTIVE_WIDGET_ALL = "All";

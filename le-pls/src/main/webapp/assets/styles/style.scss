@@ -7802,3 +7802,15 @@ background-size: contain;
 .update-button {
   min-width: 91px;
 }
+
+.tab-pane {
+  display: none;
+}
+.tab-pane.active {
+  display: block;
+}
+.nav-tabs .dropdown-menu {
+  margin-top: -1px;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+}
