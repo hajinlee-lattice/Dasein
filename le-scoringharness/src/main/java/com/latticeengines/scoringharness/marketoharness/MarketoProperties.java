@@ -20,6 +20,10 @@ public class MarketoProperties {
         return env.getProperty("scoringharness.marketo.scorefield").trim();
     }
 
+    public String getGuidField() {
+        return env.getProperty("scoringharness.marketo.guidfield").trim();
+    }
+
     @Autowired
     private Environment env;
 }

@@ -1,5 +1,7 @@
 package com.latticeengines.scoringharness.marketoharness;
 
+import java.util.UUID;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ public class WriteLeadToMarketoOperation extends Operation<WriteLeadOperationSpe
         ObjectNode json = spec.object;
         json.put("email", spec.externalId);
         json.put(properties.getScoreField(), (String) null);
+        json.put(properties.getGuidField(), UUID.randomUUID().toString());
 
         BaseCloudUpdate update = new BaseCloudUpdate(MarketoHarness.OBJECT_TYPE_LEAD,
                 MarketoHarness.OBJECT_ACTION_CREATE_OR_UPDATE);
