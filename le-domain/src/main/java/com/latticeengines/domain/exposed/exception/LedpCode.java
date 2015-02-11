@@ -72,7 +72,8 @@ public enum LedpCode {
     LEDP_18006("Could not revoke right {0} from user {1} for tenant {2}."), //
     LEDP_18007("Model with id {0} not found."), //
     LEDP_18008("Attribute {0} cannot be null."), //
-    LEDP_18009("Could not log out user ticket {0}."); //
+    LEDP_18009("Could not log out user ticket {0}."), //
+    LEDP_18020("Cannot parse file {0}.");
 
     private String message;
 
