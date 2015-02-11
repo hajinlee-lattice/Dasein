@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -38,17 +37,6 @@ public class ModelSummaryResource {
             summary.setPredictors(new ArrayList<Predictor>());
         }
         return summary;
-    }
-
-    @RequestMapping(value = "/details/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get compressed binary JSON for specific model")
-    public KeyValue getModelDetail(@PathVariable String modelId) {
-        ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId);
-        if (summary == null) {
-            return null;
-        }
-        return summary.getDetails();
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
