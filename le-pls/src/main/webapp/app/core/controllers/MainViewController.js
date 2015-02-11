@@ -37,10 +37,8 @@ angular.module('mainApp.core.controllers.MainViewController', [
             var configDoc = result.resultObj;
             if ($scope.directToPassword) {
                 createUpdatePasswordView();
-            } else if (configDoc != null && configDoc.CrmApiCredentials != null && configDoc.MapApiCredentials != null) {
-                createModelListView();
             } else {
-                createManageCredentialsView();
+                createModelListView();
             }
         } else {
             //TODO:handle error

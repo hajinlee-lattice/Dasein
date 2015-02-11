@@ -29,12 +29,6 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     //TODO:pierce Field names subject to change
     $scope.displayName = data[widgetConfig.NameProperty];
     $scope.status = data[widgetConfig.StatusProperty];
-    $scope.score = data[widgetConfig.ScoreProperty];
-    if ($scope.score != null && $scope.score < 1) {
-        $scope.score = Math.round($scope.score * 100);
-    }
-    $scope.externalAttributes = data[widgetConfig.ExternalAttributesProperty];
-    $scope.internalAttributes = data[widgetConfig.InternalAttributesProperty];
     
     $scope.createdDate = null;
     var rawDate = data[widgetConfig.CreatedDateProperty];

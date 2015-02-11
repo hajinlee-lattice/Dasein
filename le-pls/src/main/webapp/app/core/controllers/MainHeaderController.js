@@ -15,14 +15,6 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     
     $scope.userDisplayName = clientSession.DisplayName;
     
-    // Only show the Models tab if the credentials have been filled out
-    var configDoc = BrowserStorageUtility.getConfigDocument();
-    $scope.shouldShowModels = configDoc != null && configDoc.CrmApiCredentials != null && configDoc.MapApiCredentials != null;
-    
-    $scope.$on(GriotNavUtility.SYSTEM_CONFIGURED_COMPLETE_EVENT, function (event, data) {
-        $scope.shouldShowModels = true;
-    });
-    
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {
             $event.preventDefault();

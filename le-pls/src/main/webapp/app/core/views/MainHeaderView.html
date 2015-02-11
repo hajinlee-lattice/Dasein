@@ -22,8 +22,7 @@
                         data-hover="dropdown" 
                         class="dropdown-toggle" 
                         href="#" 
-                        data-ng-click="modelListClicked($event)"
-                        data-ng-show="shouldShowModels">
+                        data-ng-click="modelListClicked($event)">
                             {{ResourceUtility.getString('HEADER_MODELS_LABEL')}}</b>
                     </a>
                 </li>
@@ -33,7 +32,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a href="#" data-ng-click="userManagementClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_USERS')}}</a></li>
-                        <li><a href="#" data-ng-click="manageCredentialsClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_CREDENTIALS')}}</a></li>
+                        <!--<li><a href="#" data-ng-click="manageCredentialsClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_CREDENTIALS')}}</a></li>-->
                     </ul>
                 </li>
             </ul>

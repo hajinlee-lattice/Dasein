@@ -58,15 +58,16 @@ var mainApp = angular.module('mainApp', [
     
     $scope.getLocaleSpecificResourceStrings = function (locale) {
         ResourceStringsService.GetResourceStrings(locale).then(function(result) {
-            $scope.getConfigDoc();
-        });
-    };
-    
-    $scope.getConfigDoc = function () {
-        GriotConfigService.GetConfigDocument().then(function(result) {
             $scope.getWidgetConfigDoc();
         });
     };
+    
+    //TODO:pierce Add this back when we can configure credentials in PLS
+    /*$scope.getConfigDoc = function () {
+        GriotConfigService.GetConfigDocument().then(function(result) {
+            $scope.getWidgetConfigDoc();
+        });
+    };*/
     
     $scope.getWidgetConfigDoc = function () {
         GriotConfigService.GetWidgetConfigDocument().then(function(result) {

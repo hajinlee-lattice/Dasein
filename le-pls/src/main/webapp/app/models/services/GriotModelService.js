@@ -7,8 +7,23 @@ angular.module('mainApp.models.services.GriotModelService', [
     this.GetAllModels = function () {
         var deferred = $q.defer();
         var result = null;
-       
-        $http({
+        
+        //TODO:Pierce Remove when the actual service call is working
+        var model1 = {
+            DisplayName: "TestModel",
+            CreatedDate: new Date().toLocaleDateString(),
+            Status: "Active"
+        };
+        var modelList = [model1];
+        
+        result = {
+            success: true,
+            resultObj: modelList,
+            resultErrors: null
+        };
+        deferred.resolve(result);
+        
+        /*$http({
             method: "GET", 
             url: "./GriotService.svc/GetModels"
         })
@@ -42,7 +57,7 @@ angular.module('mainApp.models.services.GriotModelService', [
                 resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
             };
             deferred.resolve(result);
-        });
+        });*/
         
         return deferred.promise;
     };

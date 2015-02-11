@@ -1,0 +1,57 @@
+{
+	"Applications" : [{
+			"ID" : "PredictiveLeadScoring",
+			"Type" : "ApplicationWidget",
+			"Version" : "1",
+			"Widgets" : [{
+					"ID" : "modelDetailsScreenWidget",
+					"Type" : "ScreenWidget",
+					"Widgets" : [{
+							"ID" : "modelDetailsWidget",
+							"Type" : "ModelDetailsWidget",
+							"ScoreProperty" : "RocScore",
+							"NameProperty" : "DisplayName",
+							"StatusProperty" : "Status",
+							"ExternalAttributesProperty" : "ExternalAttributes",
+							"InternalAttributesProperty" : "InternalAttributes",
+							"CreatedDateProperty" : "CreatedDate",
+							"TotalLeadsProperty" : "TotalLeads",
+							"TestSetProperty" : "TestSet",
+							"TrainingSetProperty" : "TrainingSet",
+							"TotalSuccessEventsProperty" : "TotalSuccessEvents",
+							"ConversionRateProperty" : "ConversionRate",
+							"LeadSourceProperty" : "LeadSource",
+							"OpportunityProperty" : "Opportunity",
+							"Widgets" : []
+						}, {
+							"ID" : "modelDetailsExplorerWidget",
+							"Type" : "ThresholdExplorerWidget"
+						}
+					]
+				}, {
+					"ID" : "modelListScreenWidget",
+					"Type" : "ScreenWidget",
+					"Widgets" : [{
+							"ID" : "modelListTileRepeater",
+							"Type" : "RepeaterWidget",
+							"Sorts" : [{
+									"Property" : "DisplayName",
+									"IsAscending" : true
+								}
+							],
+							"Widgets" : [{
+									"ID" : "modelListTileWidget",
+									"Type" : "ModelListTileWidget",
+									"NameProperty" : "DisplayName",
+									"StatusProperty" : "Status",
+									"CreatedDateProperty" : "CreatedDate",
+									"Widgets" : []
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -1,9 +1,10 @@
 angular.module('mainApp.config.services.GriotConfigService', [
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.appCommon.utilities.ResourceUtility'
+    'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.appCommon.utilities.URLUtility'
 ])
-.service('GriotConfigService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility) {
+.service('GriotConfigService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, URLUtility) {
     
     this.GetConfigDocument = function () {
         var deferred = $q.defer();
@@ -20,7 +21,6 @@ angular.module('mainApp.config.services.GriotConfigService', [
             deferred.resolve(result);
             return deferred.promise;
         }
-        
         $http({
             method: "GET", 
             url: "./GriotService.svc/GetConfigDocument"
@@ -77,40 +77,36 @@ angular.module('mainApp.config.services.GriotConfigService', [
             return deferred.promise;
         }
         
+        var webServer = URLUtility.GetWebServerAddress("index.html") + "assets/resources/WidgetConfigurationDocument.json";
+        
         $http({
-            method: "GET", 
-            url: "./GriotService.svc/GetWidgetConfigDocument"
+            method: 'GET', 
+            url: webServer
         })
         .success(function(data, status, headers, config) {
             if (data == null) {
                 result = {
                     success: false,
                     resultObj: null,
-                    resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
-                };
-                
-                deferred.resolve(result);
-            } else {
-                result = {
-                    success: data.Success,
-                    resultObj: null,
                     resultErrors: null
                 };
-                if (data.Success === true) {
-                    var parsedResult = JSON.parse(data.Result);
-                    result.resultObj = parsedResult;
-                    BrowserStorageUtility.setWidgetConfigDocument(parsedResult);
-                } else {
-                    result.resultErrors = ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
-                }
+                deferred.resolve(result);
+                return;
             }
+            
+            BrowserStorageUtility.setWidgetConfigDocument(data);
+            result = {
+                success: true,
+                resultObj: data,
+                resultErrors: null
+            };
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
-            var result = {
+            result = {
                 success: false,
                 resultObj: null,
-                resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                resultErrors: null
             };
             deferred.resolve(result);
         });
