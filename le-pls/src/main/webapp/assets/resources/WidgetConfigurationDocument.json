@@ -24,9 +24,16 @@
 							"OpportunityProperty" : "Opportunity",
 							"Widgets" : []
 						}, {
-							"ID" : "modelDetailsExplorerWidget",
-							"Type" : "ThresholdExplorerWidget"
-						}
+                            "ID": "modelDetailsTabWidget",
+                            "Type": "SimpleTabWidget",
+                            "DefaultTab": 0,
+                            "Widgets": [{
+                                    "ID" : "modelDetailsExplorerWidget",
+                                    "Type" : "ThresholdExplorerWidget",
+                                    "TitleString": "THRESHOLD_EXPLORER_TAB_TITLE"
+                                }
+                            ]
+                        }
 					]
 				}, {
 					"ID" : "modelListScreenWidget",

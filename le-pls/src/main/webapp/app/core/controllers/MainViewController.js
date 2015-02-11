@@ -16,6 +16,18 @@ angular.module('mainApp.core.controllers.MainViewController', [
 .controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, GriotNavUtility, HelpService, GriotConfigService) {
     $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
     $scope.ResourceUtility = ResourceUtility;
+
+    // Handle Initial View
+    $http.get('./app/core/views/MainHeaderView.html').success(function (html) {
+        var scope = $rootScope.$new();
+        $compile($("#mainHeaderView").html(html))(scope);
+    });
+    
+    if ($scope.directToPassword) {
+        createUpdatePasswordView();
+    } else {
+        createModelListView();
+    }
     
     $scope.privacyPolicyClick = function ($event) {
         if ($event != null) {
@@ -23,27 +35,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
         }
         HelpService.OpenPrivacyPolicy();
     };
-    
-    // Handle Initial View
-    GriotConfigService.GetConfigDocument().then(function(result) {
-        
-        // Add the Main Header
-        $http.get('./app/core/views/MainHeaderView.html').success(function (html) {
-            var scope = $rootScope.$new();
-            $compile($("#mainHeaderView").html(html))(scope);
-        });
-        
-        if (result != null && result.success === true) {
-            var configDoc = result.resultObj;
-            if ($scope.directToPassword) {
-                createUpdatePasswordView();
-            } else {
-                createModelListView();
-            }
-        } else {
-            //TODO:handle error
-        }
-    });
     
     // Handle when the Manage Credentials link is clicked
     $scope.$on(GriotNavUtility.MANAGE_CREDENTIALS_NAV_EVENT, function (event, data) {

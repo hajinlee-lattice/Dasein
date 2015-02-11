@@ -6,6 +6,7 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
     'mainApp.appCommon.widgets.ArcChartWidget',
     'mainApp.appCommon.widgets.CollapsiblePanelWidget',
     'mainApp.appCommon.widgets.ScreenHeaderWidget',
+    'mainApp.appCommon.widgets.SimpleTabWidget',
     'mainApp.appCommon.widgets.TabWidget'
 ])
 .service('WidgetFrameworkService', function ($compile, $rootScope, WidgetConfigUtility, MetadataUtility) {
@@ -65,6 +66,9 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
                 break;
             case WidgetConfigUtility.SCREEN_HEADER_WIDGET:
                 $compile(options.element.html('<div data-screen-header-widget></div>'))(scope);
+                break;
+            case WidgetConfigUtility.SIMPLE_TAB_WIDGET:
+                $compile(options.element.html('<div data-simple-tab-widget></div>'))(scope);
                 break;
             case WidgetConfigUtility.TALKING_POINT_WIDGET:
                 $compile(options.element.html('<div data-talking-point-widget></div>'))(scope);

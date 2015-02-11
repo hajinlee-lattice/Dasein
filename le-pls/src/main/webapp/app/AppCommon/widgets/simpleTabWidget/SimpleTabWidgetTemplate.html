@@ -1,0 +1,12 @@
+<div data-ng-controller="SimpleTabWidgetController" class="tab-container">
+    <ul class="nav nav-tabs">
+        <li class="{{tab.IsActive ? 'active' : ''}}" data-ng-repeat="tab in tabs">
+            <a href="#{{tab.ID}}" data-ng-click="tabClicked($event, tab)">{{tab.Title}}</a>
+        </li>
+    </ul>
+  
+    <div class="tab-pane {{tab.IsActive ? 'active' : ''}}" id="{{tab.ID}}" data-ng-repeat="tab in tabs">
+        <div class="tab-pane {{tab.IsActive ? 'active' : ''}}" id="{{tab.ID}}" data-ng-repeat="tab in tabs">
+        </div>
+    </div>
+</div>

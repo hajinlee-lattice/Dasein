@@ -95,8 +95,8 @@ mainApp.factory('authInterceptor', function ($rootScope, $q, $window, BrowserSto
       return response || $q.when(response);
     }
   };
-})
+});
 
 mainApp.config(function ($httpProvider) {
   $httpProvider.interceptors.push('authInterceptor');
-})
+});

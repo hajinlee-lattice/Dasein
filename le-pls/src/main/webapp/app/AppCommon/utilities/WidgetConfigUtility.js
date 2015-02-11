@@ -19,6 +19,7 @@ angular.module('mainApp.appCommon.utilities.WidgetConfigUtility', [
     this.RICH_TEXT_WIDGET = 'RichTextWidget';
     this.SCREEN_WIDGET = 'ScreenWidget';
     this.SCREEN_HEADER_WIDGET = 'ScreenHeaderWidget';
+    this.SIMPLE_TAB_WIDGET = 'SimpleTabWidget';
     this.TALKING_POINT_WIDGET = 'TalkingPointWidget';
     this.TEST_WIDGET = 'TestWidget';
     this.TAB_WIDGET = 'TabWidget';
