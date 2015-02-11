@@ -79,8 +79,8 @@ def add_file_footer(filename, footer):
 def updateExecutionDiary(cmd, output):
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
     key = "|%s| on %s" % (cmd, timestamp)
-    if len(output) > 300:
-        EXECUTION_DIARY[key] = "%s ...\n Please see the log for the rest" % output[:300]
+    if len(output) > 555:
+        EXECUTION_DIARY[key] = "%s ...\n Please see the log for the rest" % output[:555]
     else:
         EXECUTION_DIARY[key] = output
     try:
