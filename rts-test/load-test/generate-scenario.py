@@ -58,24 +58,24 @@ def generate_external_id():
 def main(argv):
     parser = argparse.ArgumentParser(argv)
     parser.add_argument("scenario_name", help = "The name of the scenario folder to generate in the current directory.")
-    parser.add_argument("-w", "--writes", type = int, dest = "writes", help = "Number of write operations to perform per hour.  Defaults to 60.")
-    parser.add_argument("-s", "--read-sla", type = int, dest = "read_sla", help = "The number of milliseconds to wait after a write before performing a read.  Defaults to 1000.")
-    parser.add_argument("-l", "--scenario-length", type = int, dest = "scenario_length", help = "The scenario length in minutes.  Defaults to 15.  Note that the scenario may last a bit longer or shorter than this amount of time.")
+    parser.add_argument("-w", "--writes", type = int, dest = "writes_per_hour", help = "Number of write operations to perform per hour.  Defaults to 60.")
+    parser.add_argument("-s", "--read-sla", type = int, dest = "read_sla_ms", help = "The number of milliseconds to wait after a write before performing a read.  Defaults to 1000.")
+    parser.add_argument("-l", "--scenario-length", type = int, dest = "scenario_length_minutes", help = "The scenario length in minutes.  Defaults to 15.  Note that the scenario may last a bit longer or shorter than this amount of time.")
 
     args = parser.parse_args()
         
     # Set defaults
-    if args.writes is None:
-        args.writes = 60
-    if args.read_sla is None:
-        args.read_sla = 1000
-    if args.scenario_length is None:
-        args.scenario_length = 15
+    if args.writes_per_hour is None:
+        args.writes_per_hour = 60
+    if args.read_sla_ms is None:
+        args.read_sla_ms = 1000
+    if args.scenario_length_minutes is None:
+        args.scenario_length_minutes = 15
 
     # TODO Validate parameters
 
-    scenario_length_ms = args.scenario_length * 1000
-    write_cadence_ms = scenario_length_ms / (args.writes * args.scenario_length / 60)
+    scenario_length_ms = args.scenario_length_minutes * 60 * 1000
+    write_cadence_ms = scenario_length_ms / (args.writes_per_hour * args.scenario_length_minutes / 60)
 
     try:
         os.mkdir(args.scenario_name)
@@ -88,10 +88,11 @@ def main(argv):
     operations = []
       
     offset = 0
-    while offset < scenario_length_ms - args.read_sla:
+    while offset < scenario_length_ms - args.read_sla_ms:
         external_id = generate_external_id()
+        print("Generating write of {0} at t={1}".format(external_id, offset))
         operations.append(WriteLeadOperation(offset, external_id))
-        operations.append(ReadLeadScoreOperation(offset + args.read_sla, external_id, None))
+        operations.append(ReadLeadScoreOperation(offset + args.read_sla_ms, external_id, None))
         offset += write_cadence_ms
     
     # Sort
