@@ -25,7 +25,8 @@ angular.module('mainApp.appCommon.utilities.EvergageUtility', [])
         if (options.datasetPrefix != null) {
             dataset = options.datasetPrefix + dataset;
         }
-        
+
+        //TODO: entry point for Evergage user title story.
         // _aaq is created on the salesprism.aspx page so it becomes a global variable.
         // This is required by Evergage and has to be name _aaq.
         _aaq.push(['setEvergageAccount', evergageAccount], 

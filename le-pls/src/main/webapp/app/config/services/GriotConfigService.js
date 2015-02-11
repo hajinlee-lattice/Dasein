@@ -77,7 +77,7 @@ angular.module('mainApp.config.services.GriotConfigService', [
             return deferred.promise;
         }
         
-        var webServer = URLUtility.GetWebServerAddress("index.html") + "assets/resources/WidgetConfigurationDocument.json";
+        var webServer = URLUtility.GetWebServerAddress("index.html") + "/assets/resources/WidgetConfigurationDocument.json";
         
         $http({
             method: 'GET', 
