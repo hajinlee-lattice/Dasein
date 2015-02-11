@@ -96,7 +96,6 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s1el1.setLowerInclusive(0.0);
         s1el1.setUpperExclusive(10.0);
         s1el1.setUncertaintyCoefficient(0.00313);
-        s1el1.setRevenue(284788700000.0);
         s1el1.setVisible(true);
         s1p1.addPredictorElement(s1el1);
 
@@ -108,7 +107,6 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s1el2.setLowerInclusive(10.0);
         s1el2.setUpperExclusive(1000.0);
         s1el2.setUncertaintyCoefficient(0.000499);
-        s1el2.setRevenue(1682345087923.0);
         s1el2.setVisible(true);
         s1p1.addPredictorElement(s1el2);
         
@@ -152,7 +150,6 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s2el1.setLowerInclusive(0.0);
         s2el1.setUpperExclusive(10.0);
         s2el1.setUncertaintyCoefficient(0.00313);
-        s2el1.setRevenue(284788700000.0);
         s2el1.setVisible(true);
         s2p1.addPredictorElement(s2el1);
 
@@ -164,7 +161,6 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s2el2.setLowerInclusive(10.0);
         s2el2.setUpperExclusive(1000.0);
         s2el2.setUncertaintyCoefficient(0.000499);
-        s2el2.setRevenue(1682345087923.0);
         s2el2.setVisible(true);
         s2p1.addPredictorElement(s2el2);
         
