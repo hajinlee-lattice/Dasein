@@ -54,6 +54,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private Long totalConversionCount;
     private KeyValue details;
     private Long constructionTime;
+    private Boolean active = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -273,6 +274,16 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonProperty("ConstructionTime")
     public void setConstructionTime(Long constructionTime) {
         this.constructionTime = constructionTime;
+    }
+
+    @JsonProperty("Active")
+    @Column(name = "ACTIVE", nullable = false)
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
 }
