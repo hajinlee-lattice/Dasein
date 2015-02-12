@@ -9,7 +9,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     var widgetConfig = $scope.widgetConfig;
     var metadata = $scope.metadata;
     var data = $scope.data;
-    
+
     //TODO:pierce Field names subject to change
     $scope.displayName = data[widgetConfig.NameProperty];
     $scope.status = data[widgetConfig.StatusProperty];
@@ -19,13 +19,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     }
     $scope.externalAttributes = data[widgetConfig.ExternalAttributesProperty];
     $scope.internalAttributes = data[widgetConfig.InternalAttributesProperty];
-    
-    $scope.createdDate = null;
-    var rawDate = data[widgetConfig.CreatedDateProperty];
-    var convertedDate = DateTimeFormatUtility.ConvertCSharpDateTimeOffsetToJSDate(rawDate);
-    if (convertedDate != null) {
-        $scope.createdDate = convertedDate.toLocaleDateString();
-    }
+    $scope.createdDate = data[widgetConfig.CreatedDateProperty];
     
     $scope.totalLeads = data[widgetConfig.TotalLeadsProperty];
     $scope.testSet = data[widgetConfig.TestSetProperty];

@@ -5,9 +5,8 @@ angular.module('mainApp.models.controllers.ModelListController', [
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.GriotWidgetService',
     'mainApp.models.services.GriotModelService',
-    'mainApp.appCommon.widgets.ModelListTileWidget'
+    'mainApp.appCommon.widgets.ModelListTileWidget',
 ])
-
 .controller('ModelListController', function ($scope, ResourceUtility, BrowserStorageUtility, WidgetConfigUtility, WidgetFrameworkService, GriotWidgetService, GriotModelService) {
     $scope.ResourceUtility = ResourceUtility;
     
@@ -24,9 +23,8 @@ angular.module('mainApp.models.controllers.ModelListController', [
     if (screenWidgetConfig == null) {
         return;
     }
-    
+
     GriotModelService.GetAllModels().then(function(result) {
-        
         if (result != null && result.success === true) {
             var modelList = result.resultObj;
             var contentContainer = $('#modelListContainer');
@@ -38,7 +36,7 @@ angular.module('mainApp.models.controllers.ModelListController', [
                 parentData: modelList
             });
         }
-        
+
     });
-    
+
 });

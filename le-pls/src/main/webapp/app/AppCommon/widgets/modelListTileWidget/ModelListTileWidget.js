@@ -13,7 +13,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     var widgetConfig = $scope.widgetConfig;
     var metadata = $scope.metadata;
     var data = $scope.data;
-    
+
     if (widgetConfig == null || data == null) {
         return;
     }
@@ -29,14 +29,8 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     //TODO:pierce Field names subject to change
     $scope.displayName = data[widgetConfig.NameProperty];
     $scope.status = data[widgetConfig.StatusProperty];
-    
-    $scope.createdDate = null;
-    var rawDate = data[widgetConfig.CreatedDateProperty];
-    var convertedDate = DateTimeFormatUtility.ConvertCSharpDateTimeOffsetToJSDate(rawDate);
-    if (convertedDate != null) {
-        $scope.createdDate = convertedDate.toLocaleDateString();
-    }
-    
+    $scope.createdDate = data[widgetConfig.CreatedDateProperty];
+
     $scope.tileClick = function () {
         $rootScope.$broadcast(GriotNavUtility.MODEL_DETAIL_NAV_EVENT, data);
     };
