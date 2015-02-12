@@ -43,8 +43,7 @@ public class WriteLeadToMarketoOperation extends Operation<WriteLeadOperationSpe
         outputResult.additionalFields.add(spec.externalId);
 
         try {
-            String accessToken = harness.getAccessToken();
-            BaseCloudResult result = harness.updateObjects(accessToken, update);
+            BaseCloudResult result = harness.updateObjects(update);
             outputResult.isSuccess = result.isSuccess;
             addToCache(result);
             if (!result.isSuccess) {

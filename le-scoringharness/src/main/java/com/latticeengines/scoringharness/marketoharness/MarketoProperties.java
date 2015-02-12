@@ -24,6 +24,14 @@ public class MarketoProperties {
         return env.getProperty("scoringharness.marketo.guidfield").trim();
     }
 
+    public String getRestIdentityURL() {
+        return env.getProperty("scoringharness.marketo.restIdentityURL").trim();
+    }
+
+    public String getRestEndpointURL() {
+        return env.getProperty("scoringharness.marketo.restEndpointURL").trim();
+    }
+
     @Autowired
     private Environment env;
 }

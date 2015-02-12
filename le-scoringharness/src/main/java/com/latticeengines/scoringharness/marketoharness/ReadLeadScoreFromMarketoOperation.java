@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.scoringharness.OutputFileWriter;
-import com.latticeengines.scoringharness.cloudmodel.BaseCloudRead;
+import com.latticeengines.scoringharness.cloudmodel.BaseCloudQuery;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudResult;
 import com.latticeengines.scoringharness.operationmodel.Operation;
 import com.latticeengines.scoringharness.operationmodel.ReadLeadScoreOperationSpec;
@@ -43,14 +43,13 @@ public class ReadLeadScoreFromMarketoOperation extends Operation<ReadLeadScoreOp
                         + spec.externalId);
             }
 
-            BaseCloudRead read = new BaseCloudRead(MarketoHarness.OBJECT_TYPE_LEAD, id);
-            read.fields.add(properties.getScoreField());
+            BaseCloudQuery query = new BaseCloudQuery(MarketoHarness.OBJECT_TYPE_LEAD, id);
+            query.fields.add(properties.getScoreField());
             if (spec.additionalFields != null) {
-                read.fields.addAll(spec.additionalFields);
+                query.fields.addAll(spec.additionalFields);
             }
 
-            String accessToken = harness.getAccessToken();
-            BaseCloudResult result = harness.getObjects(accessToken, read);
+            BaseCloudResult result = harness.getObjects(query);
             outputResult.isSuccess = result.isSuccess;
             if (!result.isSuccess) {
                 throw new RuntimeException(String.format("Failed to read the lead %s from Marketo: %s",
