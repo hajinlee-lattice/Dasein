@@ -16,12 +16,15 @@ __status__ = "Alpha"
 # import modules
 from subprocess import PIPE
 from subprocess import Popen
-
+from suds.client import Client
 import datetime
 import json
 import logging
 import os.path
 import requests
+import shutil
+import traceback
+
 
 class SessionRunner(object):
     
@@ -35,6 +38,8 @@ class SessionRunner(object):
             logfile = os.path.join(os.getcwd(), "Session.log")
         self.logfile = logfile
         self.testStatus = True
+        self.stdout = ""
+        self.stderr = ""
         logging.basicConfig(filename=self.logfile, level=logging.DEBUG)
 
     def stamp(self):
@@ -44,7 +49,50 @@ class SessionRunner(object):
         for key in sorted(self.activity_log.keys()):
             print "%s || %s" % (key, self.activity_log[key])
 
+    def write_to_file(self, filename, updates, utf=False):
+        try:
+            f = open(filename, "w+")
+            if type(updates) == list:
+                for line in updates:
+                    if utf:
+                        f.write(line.encode('utf8', 'replace'))
+                    else:
+                        f.write(line)
+            else:
+                if utf:
+                    f.write(updates.encode('utf8', 'replace'))
+                else:
+                    f.write(updates)
+            f.close()
+            return True
+        except IOError:
+            e = traceback.format_exc()
+            print("Unable to modify the file: %s" % filename, e)
+            return False
+    
+    def get_file_content(self, filename):
+        content = []
+        try:
+            f = open(filename, "r+")
+            content = f.readlines()
+            f.close()
+        except IOError:
+            e = traceback.format_exc()
+            print("Unable to read the file: %s" % filename, e)
+        return content
+    
+    def add_file_footer(self, filename, footer):
+        content = []
+        content += self.get_file_content(filename)
+        if type(footer) == list:
+            content = content + footer
+        else:
+            content.append(footer) 
+        self.write_to_file(filename, content)
+
     def getFiles(self, location, suffix_list=None):
+        if location.startswith("~"):
+            location = os.path.expanduser(location)
         if not os.path.exists(location):
             return None
         file_list = []
@@ -57,10 +105,26 @@ class SessionRunner(object):
                         suffix_check = True
                         break
                 if suffix_check:
-                    file_list.append(os.path.join(location, f))
+                    file_list.append(f)
             else:
-                file_list.append(os.path.join(location, f))
+                file_list.append(f)
         return file_list
+
+    def getWsdlClient(self, wsdl):
+        # SOAP https://qatest2.dev.lattice.local/BD2_ADEDTBDd70064254nD26163627r12/DataLoaderShim?wsdl
+        """
+        wsdl = "https://%s/%s/DataLoaderShim?wsdl" % (soap_host, tenant)
+        print wsdl
+        client = Client(wsdl, headers={"MagicAuthentication": "Security through obscurity!"})
+        print client
+        result = client.service.GetLoadGroupStatus("ExecuteModelBuilding")
+        print result
+        result = client.service.ConfigureDataLoaderAndVisiDB(config_string, specs_string)
+        print result
+        """
+        client = Client(wsdl, headers={"MagicAuthentication": "Security through obscurity!"})
+        print client
+        return client
 
     def processFile(self, filename, process):
         request_url = self.host + "/%s" % process
@@ -91,6 +155,16 @@ class SessionRunner(object):
         else:
             return status and False
 
+    def cpFile(self, filename, location, local=False):
+        if local:
+            # Local copy
+            if not os.path.exists(location):
+                os.makedirs(location)
+            shutil.copy(filename, location)
+        else:
+            # Copy over HTTP to win server
+            self.copyFile(filename, location)
+
     def execfileFile(self, filename):
         return self.processFile(filename, "execfile")
 
@@ -118,14 +192,14 @@ class SessionRunner(object):
         if from_dir.startswith("~"):
             from_dir = os.path.expanduser(from_dir)
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True, cwd=from_dir)
-        out, err = p.communicate()
-        if err:
-            logging.info(out)
-            logging.error(err)
-            print err
+        self.stdout, self.stderr = p.communicate()
+        if self.stderr:
+            logging.info(self.stdout)
+            logging.error(self.stderr)
+            print self.stderr
             return False
         else:
-            logging.info(out)
+            logging.info(self.stdout)
             return True
 
     def runCommandOnServer(self, cmd):

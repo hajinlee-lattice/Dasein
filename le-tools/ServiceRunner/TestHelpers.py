@@ -13,12 +13,14 @@ __email__ = "ivinnichenko@lattice-engines.com"
 __status__ = "Alpha"
 
 # import modules
-import os
-import shutil
-import traceback
 import logging
+import os
+import traceback
 from copy import deepcopy
+from datetime import datetime
+from TestConfigs import ConfigCSV
 from TestConfigs import ConfigDLC
+from TestConfigs import EtlConfig
 from TestRunner import SessionRunner
 
 class DLCRunner(SessionRunner):
@@ -88,6 +90,8 @@ class DLCRunner(SessionRunner):
             return True
 
     def constructCommand(self, command, params):
+        self.command = ""
+        self.params = {}
         if self.validateInput(command, params):
             if self.dlc_path:
                 dlc = os.path.join(self.dlc_path, "dlc ")
@@ -154,27 +158,22 @@ class PretzelRunner(SessionRunner):
         self.build_path = os.path.expanduser(build_path)
         self.specs_path = os.path.expanduser(specs_path)
         self.revision = 1
+        self.pretzel_tool = os.path.join(self.build_path,"Pretzel", "Install", "bin", "PretzelAdminTool.exe")
+        self.main_py = os.path.join(self.svn_location, "Python script", "main.py")
+        self.build_location = os.path.join(self.build_path, "Pretzel", "PretzelDaemon", "bin", "scripts", "production")
 
     def isValidTopology(self, topology):
         if topology in self.topologies:
             return True
         return False
 
-    def cpFile(self, filename, location, local=False):
-        if local:
-            # Local copy
-            shutil.copyfile(filename, location)
-        else:
-            # Copy over HTTP to win server
-            self.copyFile(filename, location)
-
     def getMain(self, localCopy=False):
         # SVN can be both on Linux and Windows, so this way:
-        main_py = os.path.join(self.svn_location, "Templates", "Python script", "main.py")
+        main_py = self.main_py
         print main_py
         if os.path.exists(main_py):
             print "It exists"
-            build_location = os.path.join(self.build_path, "Pretzel", "PretzelDaemon", "bin", "scripts", "production")
+            build_location = self.build_location
             try:
                 print build_location
                 self.cpFile(main_py, build_location, localCopy)
@@ -190,15 +189,16 @@ class PretzelRunner(SessionRunner):
             return False
 
     def getSpecs(self, topology, localCopy=False):
-        location = os.path.join(self.svn_location,"Templates", topology)
+        location = os.path.join(self.svn_location, topology)
         status = False
         if not os.path.exists(location):
             return status
         #### Get all .specs and  .config files
+        specs_location = os.path.join(self.specs_path, topology)
         for f in os.listdir(location):
             if f.endswith(".specs") or f.endswith(".config"):
                 filename = os.path.join(location, f)
-                self.cpFile(filename, self.specs_path, localCopy)
+                self.cpFile(filename, specs_location, localCopy)
                 status = True
         return status
 
@@ -206,12 +206,14 @@ class PretzelRunner(SessionRunner):
         if command not in ["add", "set"]:
             logging.error("invalid Pretzel command %s" % command)
             return None
-        pretzel_tool = os.path.join(self.build_path,"Pretzel", "Install", "bin", "PretzelAdminTool.exe")
+        pretzel_tool = self.pretzel_tool
+        specs_location = os.path.join(self.specs_path, topology)
         # If Pretzel ever become platform independent this will not be needed
         pretzel_tool = pretzel_tool.replace("/", "\\")
+        specs_location = specs_location.replace("/", "\\")
         if command == "add":
             cmd = ("%s Revision -Add -Topology %s -DirectoryPath %s -Description %s" % (pretzel_tool, topology,
-                                                                                        self.specs_path, topology))
+                                                                                        specs_location, topology))
         elif command == "set":
             cmd = ("%s Revision -SetProduction -Topology %s -Revision %s" % (pretzel_tool, topology, self.revision))
         return cmd
@@ -258,6 +260,70 @@ class BardAdminRunner(SessionRunner):
         self.bard_path = ""
         if bard_path is not None:
             self.bard_path = bard_path
+
+    def getModelListInfo(self, output):
+        output = output.replace("<br/>", "\n")
+        latest_output = output.split("\n")
+        #print latest_output
+        model_info = {}
+        for line in latest_output:
+            if len(line) > 0:
+                if line.startswith("ID:"):
+                    name_index = line.find("Name:")
+                    id_index = line.find("ID:")
+                    if name_index == -1 or id_index == -1:
+                        warning_str =  "Info string incorrectly formatted '%s'" % line
+                        print warning_str
+                        logging.warning(warning_str)
+                    else:
+                        print "~"*20
+                        model_id = line[id_index+4:name_index-1].strip(" ")
+                        model_name = line[name_index+6:]
+                        model_info[model_name] = model_id
+                        print "%s : %s" % (model_name, model_id)
+        return model_info
+
+    def getLatestModelInfo(self):
+        if len(self.request_text) < 1:
+            warning_str =  "There is nothing in the request_text list!!!"
+            print warning_str
+            logging.error(warning_str)
+            return None 
+        return self.getModelListInfo(self.request_text[-1])
+
+    def getModelId(self, name, model_info):
+        if name in model_info:
+            return model_info[name]
+        else:
+            warning_str =  "No such model can be found"
+            print warning_str
+            logging.warning(warning_str)
+            return None
+
+    def getLatestModelId(self):
+        model_info = self.getLatestModelInfo()
+        #print model_info
+        if len(model_info.keys()) < 1:
+            return None
+        if len(model_info.keys()) == 1:
+            return model_info[model_info.keys()[0]]
+        date_dict = {}
+        for name in model_info:
+            try:
+                t = name.split(" ")[0]
+                t = t.split("_")
+                #print t
+                date_key = datetime.strptime("%s %s" % (t[-2], t[-1]), "%Y-%m-%d %H-%M")
+                date_dict[date_key] = model_info[name]
+            except ValueError:
+                e = traceback.format_exc()
+                print "Model name formatting is not incorrect: %s" % name
+                print e
+        if len(date_dict.keys()) > 0:
+            return date_dict[max(date_dict.keys())]
+        else:
+            return None
+        
 
     def setProperty(self, config_key, config_property, config_value):
         bard_command = os.path.join(os.path.expanduser(self.bard_path), "BardAdminTool.exe")
@@ -311,7 +377,163 @@ class BardAdminRunner(SessionRunner):
         return self.runCommand(self.listModels())
 
     def runDownloadModels(self):
-        return self.runCommand(self.listModels())
+        return self.runCommand(self.downloadModels())
+
+
+class UtilsRunner(SessionRunner):
+
+    def __init__(self, host="http://localhost:5000", logfile=None, exception=False):
+        super(UtilsRunner, self).__init__(host, logfile)
+        self.exception = exception
+
+    def createSchemaDir(self, original_location, file_list, tag=""):
+        schema_map = {}
+        if original_location.startswith("~"):
+            original_location = os.path.expanduser(original_location)
+        file_map = ConfigCSV[tag]
+        for filename in file_list:
+            if filename not in file_map:
+                print "No known schema for %s" % filename
+                continue
+            if file_map[filename] in schema_map:
+                schema_map[file_map[filename]].append(os.path.join(original_location, filename))
+            else:
+                schema_map[file_map[filename]] = [os.path.join(original_location, filename)]
+        return schema_map
+
+    def relocateCsvFile(self, new_location, schema_map, tag, local=False, cp=True):
+        relocation_map = {}
+        for schema in schema_map:
+            new_directory = os.path.join(new_location, "%s_%s" % (tag, schema))
+            relocation_map[schema] = new_directory
+            for fname in schema_map[schema]:
+                if cp:
+                    print "copying %s to %s" % (fname, new_directory)
+                    self.cpFile(fname, new_directory, local)
+        return relocation_map
+
+
+class EtlRunner(PretzelRunner):
+
+    def __init__(self, svn_location, etl_dir,
+                 host="http://localhost:5000",
+                 logfile=None, exception=False):
+        super(EtlRunner, self).__init__(svn_location, ".", ".", host, logfile, exception)
+        self.exception = exception
+        self.svn_location = os.path.expanduser(svn_location)
+        self.etl_dir = os.path.expanduser(etl_dir)
+        self.python_code = ""
+        self.etl_py_filename = "emulatePretzelETL.py"
+
+    def generatePretzelEtlScript(self, tenant, marketting_app):
+        print "Yeahh!!! Let's write some Python!!!"
+        indent = " " * 4
+        config_filename = "Template.config"
+        specs_filename = "Template.specs"
+    
+        etl_settings = EtlConfig[marketting_app]
+        etl_settings["DeploymentExternalID"] = tenant
+        etl_settings["DataLoaderTenantName"] = tenant
+    
+        if marketting_app == "Marketo":
+            config_filename = "Template_MKTO.config"
+            specs_filename = "Template_MKTO.specs"
+        if marketting_app == "Eloqua":
+            config_filename = "Template_ELQ.config"
+            specs_filename = "Template_ELQ.specs"
+    
+        # Set footer
+        python_code = "%s\n\n%s\n" % ("import main", "class ETL_Settings:")
+    
+        # Populate ETL_Settings class
+        for param in sorted(etl_settings):
+            value = etl_settings[param]
+            if value != "None":
+                value = '"%s"' % value
+            python_code += "%s%s = %s\n" % (indent, param, value)
+    
+        python_code += "\n%s\n%s%s\n%s%s\n" % ("class Template:",
+                                               indent,'Spec = ""', 
+                                               indent,'Config = ""')
+    
+        # Populate Template class
+        python_code += "\n%s\n" % "target_template = Template()"
+    
+        # Populate Config
+        python_code += "\n%s\n" % ('with open("%s", "r") as configfile :' % config_filename)
+        python_code += "%s%s\n" % (indent, "target_template.Config = configfile.read()")
+    
+        # Populate Spec
+        python_code += "\n%s\n" % ('with open("%s", "r") as configfile :' % specs_filename)
+        python_code += "%s%s\n" % (indent, "target_template.Spec = configfile.read()")
+    
+        # Run ETL
+        python_code += "\n%s\n" % "temp = main.ConfigureDefinition()"
+        python_code += "%s\n" % "returnValue = temp.Run(ETL_Settings(), target_template)"
+    
+        # Save populated Spec file
+        python_code += "\n%s\n" % 'specFile = open("output.specs", "w")'
+        python_code += "%s\n" % "specFile.write(returnValue.Spec)"
+        python_code += "%s\n" % "specFile.close()"
+    
+        # Save populated Config file
+        python_code += "\n%s\n" % 'configFile = open("output.config", "w")'
+        python_code += "%s\n" % "configFile.write(returnValue.Config)"
+        python_code += "%s\n" % "configFile.close()"
+
+        python_code += '\nprint "Ilya\'s Framework rocks!!!"\n'
+        self.python_code = python_code
+        return python_code
+
+    def savePythonFile(self, python_code=None, localCopy=False):
+        if python_code is None:
+            python_code = self.python_code
+        return self.write_to_file(self.etl_py_filename, python_code)
+
+    def copyEtlFiles(self, topology, localCopy=False):
+        etl_dir = os.path.join(self.etl_dir, topology)
+        # Copy "emulatePretzelETL.py"
+        if not os.path.exists(self.etl_py_filename):
+            self.savePythonFile()
+        self.cpFile(self.etl_py_filename, etl_dir, localCopy)
+
+        # Copy main.py
+        self.build_location = etl_dir
+        self.getMain(localCopy)
+
+        # Copy specs
+        self.specs_path = self.etl_dir
+        self.getSpecs(topology, localCopy)
+
+    def verifyOutputExists(self, topology, filename):
+        output = os.path.join(self.etl_dir, topology, filename)
+        output = output.replace("/", "\\")
+        py_eval = "os.path.exists('%s')" % output
+        result = self.getEval(py_eval)
+        return bool(result)
+
+    def runEtlEmulator(self, topology, localCopy=False):
+        work_dir = os.path.join(self.etl_dir, topology)
+        work_dir = work_dir.replace("/", "\\")
+        cmd_dict = {"python %s" % self.etl_py_filename: work_dir}
+        print self.runCommand(cmd_dict, localCopy)
+        print self.verifyOutputExists(topology, "output.specs")
+        print self.verifyOutputExists(topology, "output.config")
+
+    def getConfigString(self, topology):
+        return self.getXmlStirng(topology, "output.config")
+
+    def getSpecsString(self, topology):
+        return self.getXmlStirng(topology, "output.specs")
+
+    def getXmlStirng(self, topology, filename):
+        output = os.path.join(self.etl_dir, topology, filename)
+        output = output.replace("/", "\\")
+        py_eval = "''.join(get_file_content('%s'))" % output
+        print py_eval
+        xml = self.getEval(py_eval)
+        print type(xml)
+        return xml
 
 
 def main():
