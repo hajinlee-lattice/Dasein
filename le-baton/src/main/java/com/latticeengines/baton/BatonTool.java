@@ -148,30 +148,30 @@ public class BatonTool {
      * @param destination
      *            Path in ZooKeeper to store files
      */
-	static void loadDirectory(String source, String destination) {
-		String rawPath = "";
-		try {
-			Camille c = CamilleEnvironment.getCamille();
-			String podId = CamilleEnvironment.getPodId();
+    static void loadDirectory(String source, String destination) {
+        String rawPath = "";
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
 
-			// handle case where we want root pod directory
-			if (destination.equals("")) {
-				rawPath = String.format("/Pods/%s", podId.substring(0, podId.length()));
-			} else {
-				rawPath = String.format("/Pods/%s/%s", podId, destination);
-			}
+            // handle case where we want root pod directory
+            if (destination.equals("")) {
+                rawPath = String.format("/Pods/%s", podId.substring(0, podId.length()));
+            } else {
+                rawPath = String.format("/Pods/%s/%s", podId, destination);
+            }
 
-			File f = new File(source);
-			DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(f));
-			Path parent = new Path(rawPath);
+            File f = new File(source);
+            DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(f));
+            Path parent = new Path(rawPath);
 
-			c.upsertDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            c.upsertDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
-		} catch (Exception e) {
-			log.error("Error loading directory", e);
-			System.exit(1);
-		}
+        } catch (Exception e) {
+            log.error("Error loading directory", e);
+            System.exit(1);
+        }
 
-		log.info(String.format("Sucesfully loaded files into directory %s", rawPath));
-	}
+        log.info(String.format("Sucesfully loaded files into directory %s", rawPath));
+    }
 }
