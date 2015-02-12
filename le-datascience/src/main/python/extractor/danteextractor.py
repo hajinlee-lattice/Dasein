@@ -1,4 +1,5 @@
 import csv
+import itertools
 import json
 from optparse import OptionParser
 
@@ -36,7 +37,45 @@ class DanteExtractor(object):
                 lead = json.loads(row[0])
                 if lead["ModelID"] != options["modelname"]:
                     continue
-                csvwriter.writerow([lead["LeadID"], lead["Probability"], lead["Percentile"]])
+                analyticAttributes = lead["AnalyticAttributes"]
+                
+                internal = []
+                external = []
+                for analyticAttr in analyticAttributes:
+                    name = analyticAttr["AttributeName"]
+                    predictor = predictors[name]
+                    
+                    for pe in predictor["Elements"]:
+                        value = analyticAttr["AttributeValue"]
+                        if value is not None and pe["LowerInclusive"] is None and pe["UpperExclusive"] is None and pe["Values"][0] == value:
+                            t = (name, value, pe["Lift"])
+                            if columnToTag[name] == "External":
+                                external.append(t)
+                            else:
+                                internal.append(t)
+                        lowerInclusive = pe["LowerInclusive"]
+                        upperExclusive = pe["UpperExclusive"]
+                        if value is not None and (lowerInclusive is not None or upperExclusive is not None):
+                            if lowerInclusive is not None and upperExclusive is not None and value >= lowerInclusive and value < upperExclusive:
+                                t = (name, value, pe["Lift"])
+                            elif lowerInclusive is None and value < upperExclusive:
+                                t = (name, value, pe["Lift"])
+                            elif upperExclusive is None and value >= lowerInclusive:
+                                t = (name, value, pe["Lift"])
+                
+                e = sorted(external, key = lambda x: x[2], reverse=True)
+                i = sorted(internal, key = lambda x: x[2], reverse=True)
+                
+                if len(e) > 5:
+                    e = e[0:4]
+                if len(i) > 5:
+                    i = i[0:4]
+                merged_e = list(itertools.chain.from_iterable(e))
+                merged_i = list(itertools.chain.from_iterable(i))
+                l = [lead["LeadID"], "%d" % (lead["Probability"] * 100), lead["Percentile"]]
+                l.extend(merged_i)
+                l.extend(merged_e)
+                csvwriter.writerow(l)
                 
             
 
