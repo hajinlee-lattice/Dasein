@@ -110,6 +110,9 @@
                                 <source>
                                     <location>${pls.properties.path}/pls.properties</location>
                                 </source>
+                                <source>
+                                    <location>certificates/bodcdevvint57.dev.lattice.local.jks</location>
+                                </source>
                             </sources>
                         </mapping>
                         <mapping>
