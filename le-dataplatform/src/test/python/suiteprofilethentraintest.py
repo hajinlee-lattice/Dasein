@@ -34,7 +34,7 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
         os.symlink("../resources/com/latticeengines/dataplatform/python/modelpredictorextraction.py", "modelpredictorextraction.py")
         traininglauncher = Launcher("metadata-model.json")
         traininglauncher.execute(False)
-        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*model.json")[0]).read())
         self.assertIsNotNone(jsonDict)
         self.assertModelOutput(results[0], jsonDict)
         
@@ -76,7 +76,7 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
 class SuiteMuleSoftProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteMuleSoftProfilingThenTrainTest, self).executeProfilingThenTrain()
-        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*model.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
         self.assertTrue(rocScore > 0.83)
         
@@ -87,7 +87,7 @@ class SuiteMuleSoftProfilingThenTrainTest(SuiteProfilingThenTrainTest):
 class SuiteHirevueProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteHirevueProfilingThenTrainTest, self).executeProfilingThenTrain()
-        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*model.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
         self.assertTrue(rocScore > 0.91)
 
@@ -98,7 +98,7 @@ class SuiteHirevueProfilingThenTrainTest(SuiteProfilingThenTrainTest):
 class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteLatticeRelaunchProfilingThenTrainTest, self).executeProfilingThenTrain()
-        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*model.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
         self.assertTrue(rocScore > 0.79)
 
@@ -178,7 +178,7 @@ class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
 class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
         super(SuiteDocsignProfilingThenTrainTest, self).executeProfilingThenTrain()
-        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
+        jsonDict = json.loads(open(glob.glob("./results/*model.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
         predictors = jsonDict["Summary"]["Predictors"]
         for predictor in predictors:
@@ -191,7 +191,7 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
         count = 0
         hasOther = False
         binarySet = set()
-        csvFile = csv.DictReader(open(glob.glob("./results/*PLSModel*.csv")[0]))
+        csvFile = csv.DictReader(open(glob.glob("./results/*model.csv")[0]))
         for row in csvFile:
             if row['Attribute Name'] == 'ELQContact_Industry':
                 if row['Attribute Value'] == '["Other"]':
