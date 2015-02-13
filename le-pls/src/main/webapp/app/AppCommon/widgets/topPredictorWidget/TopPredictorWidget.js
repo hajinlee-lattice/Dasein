@@ -96,7 +96,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
               if (d.depth === 1) {
                 return 1;
             } else if (d.depth === 2) {
-                return .6;
+                return 0.6;
             }
           })
           .style("fill", function(d) {
