@@ -24,6 +24,27 @@
         font-size:          14px;
         font-weight:        bold;
     }
+    .top-predictor-category-count
+    {
+        display: inline-block;
+        padding: 5px;
+        color: #FFFFFF;
+        border-radius: 3px;
+    }
+    
+    .top-predictor-category
+    {
+        padding: 7px;
+        height: 41px;
+        color: #000000;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    
+    .top-predictor-category:hover
+    {
+        background-color: #EDEFF3;
+    }
 </style>
 <div class="top-predictor-container float-left" data-ng-controller="TopPredictorWidgetController">
     <div>
@@ -34,12 +55,18 @@
         <span class="top-predictor-panel">
             <h3>{{externalPredictorTotal}}</h3>
             <h3>{{ResourceUtility.getString('TOP_PREDICTORS_CATEGORY_LABEL')}}</h3>
+            <div class="top-predictor-category" data-ng-repeat="category in externalCategories" data-ng-click="categoryClicked(category)">
+                <p class="top-predictor-category-count" style="background-color:{{category.color}}">{{category.count}}</p> {{category.name}}
+            </div>
         </span>
         <span class="js-top-predictor-donut top-predictor-panel middle">
         </span>
         <span class="top-predictor-panel right">
             <h3>{{internalPredictorTotal}}</h3>
             <h3>{{ResourceUtility.getString('TOP_PREDICTORS_CATEGORY_LABEL')}}</h3>
+            <div class="top-predictor-category" data-ng-repeat="category in internalCategories">
+                <p class="top-predictor-category-count">{{category.count}}</p> {{category.name}}
+            </div>
         </span>
     </div>
 </div>

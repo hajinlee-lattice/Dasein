@@ -200,11 +200,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             children: topCategories
         };
         
-        
-        
-        
         return toReturn;
-
     };
  })
 
@@ -246,6 +242,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     // Calculate total
     var totalAttributes = internalCategoryObj.total + externalCategoryObj.total;
     $scope.topPredictorTitle = totalAttributes + " " + ResourceUtility.getString("TOP_PREDICTORS_TITLE");
+    
+    $scope.categoryClicked = function (category) {
+        var categoryList = TopPredictorService.GetAttributesByCategory(data.Predictors, category.name, category.color, 50);
+    };
     
     //Draw Donut chart
     var width = 300,
