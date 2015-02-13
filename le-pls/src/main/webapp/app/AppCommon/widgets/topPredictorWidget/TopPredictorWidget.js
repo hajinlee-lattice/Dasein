@@ -1,22 +1,210 @@
 angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.appCommon.utilities.AnalyticAttributeUtility',
     'mainApp.appCommon.services.WidgetFrameworkService'
 ])
 
-.service('TopPredictorService', function () {
-    this.GetCategoryListByType = function (fullList, type) {
-        var toReturn = [];
-        if (fullList == null || type == null) {
-            return toReturn;
+.service('TopPredictorService', function (StringUtility, AnalyticAttributeUtility) {
+    
+    this.ShowBasedOnTags = function (predictor, tag) {
+        
+        //TODO:pierce This is a hack because DataLoader is not providing internal metadata
+        if (predictor.Tags == null) {
+            predictor.Tags = ["External"];
         }
         
-        for (var i = 0; i < fullList.length; i++) {
-            if (fullList[i].Type == type) {
-                toReturn.push(fullList[i]);
+        var toReturn = false;
+        for (var x=0; x<predictor.Tags.length; x++) {
+            if (tag == predictor.Tags[x]) {
+                toReturn = true;
+                break;
             }
         }
         
         return toReturn;
+    };
+    
+    this.GetCategoryListByType = function (categoryList, type, fullPredictorList) {
+        var toReturn = {
+            total: 0,
+            categories: []
+        };
+        if (categoryList == null || type == null || fullPredictorList == null) {
+            return toReturn;
+        }
+        for (var x = 0; x < categoryList.length; x++) {
+            var category = categoryList[x];
+            var displayCategory = {
+                name: category.name,
+                count: 0,
+                color: category.color
+            };
+            for (var i = 0; i < fullPredictorList.length; i++) {
+                var predictor = fullPredictorList[i];
+                if (predictor.Category == category.name && 
+                    this.ShowBasedOnTags(predictor, type) &&
+                    AnalyticAttributeUtility.IsAllowedForInsights(predictor)) {
+                        //TODO:pierce Might need to check frequency on categoricals before adding the number
+                        toReturn.total += predictor.Elements.length;
+                        displayCategory.count = displayCategory.count + predictor.Elements.length;
+                    }
+            }
+            
+            if (displayCategory.count > 0) {
+                toReturn.categories.push(displayCategory);
+            }
+        }
+        
+        return toReturn;
+    };
+    
+    this.GetColorByCategory = function (categoryName) {
+        var toReturn;
+        switch (categoryName) {
+            case "Firmographics":
+                toReturn = "#27D2AE";
+                break;
+            case "Growth Trends":
+                toReturn = "#3279DF";
+                break;
+            case "Online Presence":
+                toReturn = "#FF9403";
+                break;
+            case "Technologies":
+                toReturn = "#BD8DF6";
+                break;
+            case "Behind Firewall Tech":
+                toReturn = "#96E01E";
+                break;
+            case "Financial":
+                toReturn = "#A8A8A8";
+                break;
+            case "Marketing Activity":
+                toReturn = "#3279DF";
+                break;
+            case "Lead Information":
+                toReturn = "#FF7A44";
+                break;
+            default:
+                toReturn = "#000000";
+                break;
+        }
+        
+        return toReturn;
+    };
+    
+    this.SortByPredictivePower = function (a, b) {
+        if (a.UncertaintyCoefficient > b.UncertaintyCoefficient) {
+            return -1;
+        }
+        if (a.UncertaintyCoefficient < b.UncertaintyCoefficient) {
+            return 1;
+        }
+        // a must be equal to b
+        return 0;
+    };
+    
+    this.GetAttributesByCategory = function (predictorList, categoryName, categoryColor, maxNumber) {
+        if (StringUtility.IsEmptyString(categoryName) || predictorList == null) {
+            return [];
+        }
+        
+        var totalPredictors = [];
+        for (var i = 0; i < predictorList.length; i++) {
+            if (categoryName == predictorList[i].Category) {
+                totalPredictors.push(predictorList[i]);
+            }
+        }
+        totalPredictors = totalPredictors.sort(this.SortByPredictivePower);
+        
+        var toReturn = [];
+        for (var y = 0; y < totalPredictors.length; y++) {
+            var predictor = totalPredictors[y];
+            if (maxNumber == null || toReturn.length < maxNumber) {
+                var displayPredictor = {
+                  name: predictor.Name,
+                  power: predictor.UncertaintyCoefficient,
+                  size: 1,
+                  color: categoryColor
+                };
+                toReturn.push(displayPredictor);
+            } else {
+                break;
+            }
+        }
+        return toReturn;
+        
+    };
+    
+    this.FormatDataForChart = function (modelSummary) {
+        if (modelSummary == null || modelSummary.Predictors == null || modelSummary.Predictors.length === 0) {
+            return null;
+        }
+        
+        // First sort all predictors by UncertaintyCoefficient
+        modelSummary.Predictors = modelSummary.Predictors.sort(this.SortByPredictivePower);
+        
+        // Then pull all unique categories
+        var topCategories = [];
+        var topCategoryNames = [];
+        for (var i = 0; i < modelSummary.Predictors.length; i++) {
+            var predictor = modelSummary.Predictors[i];
+            if (!StringUtility.IsEmptyString(predictor.Category) &&  topCategoryNames.indexOf(predictor.Category) === -1 && topCategoryNames.length < 8) {
+                topCategoryNames.push(predictor.Category);
+                var category = {
+                    name: predictor.Category,
+                    power: predictor.UncertaintyCoefficient,
+                    size: 1, // This doesn't matter because the inner ring takes on the saze of the outer
+                    color: this.GetColorByCategory(predictor.Category),
+                    children: []
+                };
+                topCategories.push(category);
+            }
+        }
+        
+        //And finally calculate the size based on predictive power
+        var attributesPerCategory = topCategories.length >= 7 ? 3 : 5;
+        var numLargeCategories = Math.round((topCategories.length * attributesPerCategory) * .16);
+        var numMediumCategories = Math.round((topCategories.length * attributesPerCategory) * .32);
+        var totalAttributes = [];
+        for (var x = 0; x < topCategories.length; x++) {
+            var category = topCategories[x];
+            category.children = this.GetAttributesByCategory(modelSummary.Predictors, category.name, category.color, attributesPerCategory);
+            for (var y = 0; y < category.children.length; y++) {
+                totalAttributes.push(category.children[y]);
+            }
+        }
+        
+        totalAttributes.Predictors = totalAttributes.sort(this.SortByPredictivePower);
+        
+        for (var z = 0; z < totalAttributes.length; z++) {
+            var attribute = totalAttributes[z];
+            if (numLargeCategories > 0) {
+                attribute.size = 6.55;
+                numLargeCategories--;
+            } else if (numMediumCategories > 0) {
+                attribute.size = 2.56;
+                numMediumCategories--;
+            } else {
+                attribute.size = 1;
+            }
+            
+        }
+        
+        var toReturn = {
+            name: "root",
+            size : 1,
+            color: "#FFFFFF",
+            attributesPerCategory: attributesPerCategory,
+            children: topCategories
+        };
+        
+        
+        
+        
+        return toReturn;
+
     };
  })
 
@@ -24,9 +212,9 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     
     var widgetConfig = $scope.widgetConfig;
     var metadata = $scope.metadata;
-    //var data = $scope.data;
-    //TODO:pierce temp
-    var data = {"name":"root","TotalInternal":354,"TotalExternal":51,"Color":"#FFFFFF","children":[{"name":"Firmographics","Color":"#27D2AE","Count":143,"Size":6.55,"Type":"Internal","children":[{"name":"Attribute1","Size":16.768,"Color":"#27D2AE"},{"name":"Attribute2","Size":16.768,"Color":"#27D2AE"},{"name":"Attribute3","Size":1,"Color":"#27D2AE"}]},{"name":"Growth Trends","Color":"#3279DF","Count":45,"Size":1,"Type":"Internal","children":[{"name":"Attribute1","Size":6.55,"Color":"#3279DF"},{"name":"Attribute2","Size":2.56,"Color":"#3279DF"},{"name":"Attribute3","Size":1,"Color":"#3279DF"}]},{"name":"Online Presence","Color":"#FF9403","Count":72,"Size":1,"Type":"Internal","children":[{"name":"Attribute1","Size":6.55,"Color":"#FF9403"},{"name":"Attribute2","Size":2.56,"Color":"#FF9403"},{"name":"Attribute3","Size":1,"Color":"#FF9403"}]},{"name":"Website Technologies","Color":"#BD8DF6","Count":14,"Size":2.56,"Type":"Internal","children":[{"name":"Attribute1","Size":6.5536,"Color":"#BD8DF6"},{"name":"Attribute2","Size":6.5536,"Color":"#BD8DF6"},{"name":"Attribute3","Size":6.5536,"Color":"#BD8DF6"}]},{"name":"Behind Firewll Tech","Color":"#96E01E","Count":52,"Size":2.56,"Type":"Internal","children":[{"name":"Attribute1","Size":6.5536,"Color":"#96E01E"},{"name":"Attribute2","Size":2.56,"Color":"#96E01E"},{"name":"Attribute3","Size":2.56,"Color":"#96E01E"}]},{"name":"Financials","Color":"#A8A8A8","Count":129,"Size":2.56,"Type":"Internal","children":[{"name":"Attribute1","Size":2.56,"Color":"#A8A8A8"},{"name":"Attribute2","Size":6.5536,"Color":"#A8A8A8"},{"name":"Attribute3","Size":2.56,"Color":"#A8A8A8"}]},{"name":"Marketing Activity","Color":"#3279DF","Count":42,"Size":1,"Type":"External","children":[{"name":"Attribute1","Size":1,"Color":"#3279DF"},{"name":"Attribute2","Size":1,"Color":"#3279DF"},{"name":"Attribute3","Size":1,"Color":"#3279DF"}]},{"name":"Lead Information","Color":"#FF7A44","Count":19,"Size":1,"Type":"External","children":[{"name":"Attribute1","Size":6.55,"Color":"#FF7A44"},{"name":"Attribute2","Size":1,"Color":"#FF7A44"},{"name":"Attribute3","Size":1,"Color":"#FF7A44"}]}]};
+    var data = $scope.data;
+    $scope.ResourceUtility = ResourceUtility;
+    
     var parentData = $scope.parentData;
     
     var container = $('<div></div>');
@@ -41,19 +229,29 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     };
     WidgetFrameworkService.CreateChildWidgets(options, $scope.data);
     
-    $scope.ResourceUtility = ResourceUtility;
-    var totalAttributes = data.TotalInternal + data.TotalExternal;
+    var chartData = TopPredictorService.FormatDataForChart(data);
+    var chartTitle1 = ResourceUtility.getString("TOP_PREDICTORS_CHART_TITLE_1", [chartData.attributesPerCategory]);
+    var chartTitle2 = ResourceUtility.getString("TOP_PREDICTORS_CHART_TITLE_2");
+    
+    // Get Internal category list
+    var internalCategoryObj = TopPredictorService.GetCategoryListByType(chartData.children, "Internal", data.Predictors);
+    $scope.internalPredictorTotal = internalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_INTERNAL_TITLE");
+    $scope.internalCategories = internalCategoryObj.categories;
+    
+    // Get External category list
+    var externalCategoryObj = TopPredictorService.GetCategoryListByType(chartData.children, "External", data.Predictors);
+    $scope.externalPredictorTotal = externalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_EXTERNAL_TITLE");
+    $scope.externalCategories = externalCategoryObj.categories;
+    
+    // Calculate total
+    var totalAttributes = internalCategoryObj.total + externalCategoryObj.total;
     $scope.topPredictorTitle = totalAttributes + " " + ResourceUtility.getString("TOP_PREDICTORS_TITLE");
-    $scope.internalPredictorTotal = data.TotalInternal + " " + ResourceUtility.getString("TOP_PREDICTORS_INTERNAL_TITLE");
-    $scope.externalPredictorTotal = data.TotalExternal + " " + ResourceUtility.getString("TOP_PREDICTORS_EXTERNAL_TITLE");
-    $scope.internalCategories = TopPredictorService.GetCategoryListByType(data.children, "Internal");
-    $scope.externalCategories = TopPredictorService.GetCategoryListByType(data.children, "External");
     
     //Draw Donut chart
     var width = 300,
         height = 300,
         radius = Math.min(width, height) / 2;
-        
+    
     $(".js-top-predictor-donut").empty();
     var svg = d3.select(".js-top-predictor-donut").append("svg")
         .attr("width", width)
@@ -64,7 +262,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     var partition = d3.layout.partition()
         .sort(null)
         .size([2 * Math.PI, radius * radius])
-        .value(function(d) { return d.Size; });
+        .value(function(d) { return d.size; });
         
     var arc = d3.svg.arc()
         .startAngle(function(d) { return d.x; })
@@ -74,23 +272,27 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 return 70;
             } else if (d.depth === 2) {
                 return 81;
-            } 
+            }  else {
+                return 0;
+            }
         })
         .outerRadius(function(d) { 
             if (d.depth === 1) {
                 return 80;
             } else if (d.depth === 2) {
                 return 120;
+            } else {
+                return 0;
             }
         });
     
-    var path = svg.datum(data).selectAll("path")
+    var path = svg.datum(chartData).selectAll("path")
           .data(partition.nodes)
         .enter().append("path")
           .attr("display", function(d) { 
               return d.depth ? null : "none"; 
           }) // hide inner ring
-          .attr("d", arc)
+          .attr("d", arc)   
           .style("stroke", "#fff")
           .attr('opacity', function(d) {
               if (d.depth === 1) {
@@ -100,7 +302,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             }
           })
           .style("fill", function(d) {
-              return d.Color;
+              return d.color;
           });
     
     // Add value to the middle of the arc
@@ -108,13 +310,13 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         .attr("class", "top-predictor-donut-text")
         .style("fill", "#555555")
         .attr("dy", ".10em")
-        .text("Top 3 Attributes");
+        .text(chartTitle1);
         
     svg.append("text")
         .attr("class", "top-predictor-donut-text")
         .style("fill", "#555555")
         .attr("dy", "1.250em")
-        .text("per Category");
+        .text(chartTitle2);
     
     // Interpolate the arcs in data space.
     function arcTween(a) {
