@@ -4,10 +4,10 @@ angular.module('mainApp.models.controllers.ModelListController', [
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.GriotWidgetService',
-    'mainApp.models.services.GriotModelService',
     'mainApp.appCommon.widgets.ModelListTileWidget',
+    'mainApp.models.services.ModelService'
 ])
-.controller('ModelListController', function ($scope, ResourceUtility, BrowserStorageUtility, WidgetConfigUtility, WidgetFrameworkService, GriotWidgetService, GriotModelService) {
+.controller('ModelListController', function ($scope, ResourceUtility, BrowserStorageUtility, WidgetConfigUtility, WidgetFrameworkService, GriotWidgetService, ModelService) {
     $scope.ResourceUtility = ResourceUtility;
     
     var widgetConfig = GriotWidgetService.GetApplicationWidgetConfig();
@@ -24,7 +24,7 @@ angular.module('mainApp.models.controllers.ModelListController', [
         return;
     }
 
-    GriotModelService.GetAllModels().then(function(result) {
+    ModelService.GetAllModels().then(function(result) {
         if (result != null && result.success === true) {
             var modelList = result.resultObj;
             var contentContainer = $('#modelListContainer');

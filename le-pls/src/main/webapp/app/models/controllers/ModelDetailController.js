@@ -6,15 +6,17 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.GriotWidgetService',
     'mainApp.appCommon.widgets.ModelDetailsWidget',
-    'mainApp.appCommon.widgets.ThresholdExplorerWidget'
+    'mainApp.appCommon.widgets.ThresholdExplorerWidget',
+    'mainApp.models.controllers.ModelDetailController',
+    'mainApp.models.services.ModelService'
 ])
 
-.controller('ModelDetailController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, WidgetConfigUtility, GriotNavUtility, WidgetFrameworkService, GriotWidgetService) {
+.controller('ModelDetailController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, WidgetConfigUtility, GriotNavUtility, WidgetFrameworkService, GriotWidgetService, ModelService) {
     $scope.ResourceUtility = ResourceUtility;
     
-    var model = $scope.data;
-    $scope.displayName = model.DisplayName;
-    
+    var modelId = $scope.data.Id;
+    $scope.displayName = $scope.data.DisplayName;
+
     var widgetConfig = GriotWidgetService.GetApplicationWidgetConfig();
     if (widgetConfig == null) {
         return;
@@ -29,13 +31,22 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         return;
     }
 
-    var contentContainer = $('#modelDetailContainer');
-    WidgetFrameworkService.CreateWidget({
-        element: contentContainer,
-        widgetConfig: screenWidgetConfig,
-        metadata: null,
-        data: model,
-        parentData: model
+    ModelService.GetModelById(modelId).then(function(result) {
+        if (result != null && result.success === true) {
+            var model = result.resultObj;
+
+            var contentContainer = $('#modelDetailContainer');
+            WidgetFrameworkService.CreateWidget({
+                element: contentContainer,
+                widgetConfig: screenWidgetConfig,
+                metadata: null,
+                data: model,
+                parentData: model
+            });
+        }
+
     });
-    
+
+
+
 });

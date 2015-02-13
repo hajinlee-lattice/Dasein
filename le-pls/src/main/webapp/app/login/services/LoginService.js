@@ -16,7 +16,7 @@ angular.module('mainApp.login.services.LoginService', [
         $http({
             method: 'POST', 
             url: '/pls/login',
-            data: JSON.stringify({ Username: username, Password: passwordHash.toString() }),
+            data: JSON.stringify({ Username: username, Password: passwordHash.toString() })
  //           headers: httpHeaders
         })
         .success(function(data, status, headers, config) {
