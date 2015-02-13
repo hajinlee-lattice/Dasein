@@ -61,33 +61,39 @@ public class UserResource {
         return doc;
     }
 
-    @RequestMapping(value = "/changepassword", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/{userName}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Change password")
-    public Boolean update(@RequestBody AttributeMap attrMap) {
+    @ApiOperation(value = "Update a user")
+    public Boolean update(@PathVariable String userName, @RequestBody AttributeMap attrMap) {
+        boolean success = false;
 
-        String userName     = attrMap.get("userName");
-        String oldPassword  = attrMap.get("oldPassword");
-        String newPassword  = attrMap.get("newPassword");
+        // change password
+        if (attrMap.containsKey("OldPassword") && attrMap.containsKey("NewPassword")) {
+            String oldPassword  = attrMap.get("OldPassword");
+            String newPassword  = attrMap.get("NewPassword");
 
-        Credentials oldCreds = new Credentials();
-        oldCreds.setUsername(userName);
-        oldCreds.setPassword(oldPassword);
+            Credentials oldCreds = new Credentials();
+            oldCreds.setUsername(userName);
+            oldCreds.setPassword(oldPassword);
 
-        Credentials newCreds = new Credentials();
-        newCreds.setUsername(userName);
-        newCreds.setPassword(newPassword);
+            Credentials newCreds = new Credentials();
+            newCreds.setUsername(userName);
+            newCreds.setPassword(newPassword);
 
-        boolean success;
-        try {
-            Ticket ticket = globalAuthenticationService.authenticateUser(userName, oldPassword);
-            success = globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
-        } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
-                throw new LoginException(e);
+            try {
+                Ticket ticket = globalAuthenticationService.authenticateUser(userName, oldPassword);
+                success = globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
+            } catch (LedpException e) {
+                if (e.getCode() == LedpCode.LEDP_18001) {
+                    throw new LoginException(e);
+                }
+                throw e;
             }
-            throw e;
         }
+
+
+        //TODO:[13Feb2015] update other User attributes
+
         return success;
     }
 }

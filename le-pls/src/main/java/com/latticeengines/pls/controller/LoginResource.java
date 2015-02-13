@@ -26,7 +26,6 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.exception.LoginException;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
-import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.security.RightsUtilities;
 import com.wordnik.swagger.annotations.Api;
@@ -41,9 +40,6 @@ public class LoginResource {
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
-
-    @Autowired
-    private GlobalUserManagementService globalUserManagementService;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody

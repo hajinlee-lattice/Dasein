@@ -137,15 +137,17 @@ angular.module('mainApp.login.services.LoginService', [
         }
         
         var loginDoc = BrowserStorageUtility.getLoginDocument();
+        var username = loginDoc.UserName;
         var creds = {
-            userName    : loginDoc.UserName,
             oldPassword : CryptoJS.SHA256(oldPassword).toString(),
             newPassword : CryptoJS.SHA256(newPassword).toString()
         };
-        
+
+        console.log(BrowserStorageUtility.getLoginDocument());
+
         $http({
             method: 'PUT',
-            url: "/pls/users/changepassword",
+            url: "/pls/users/" + username,
             data: angular.toJson(creds),
             headers: {
                 "Content-Type": "application/json"
