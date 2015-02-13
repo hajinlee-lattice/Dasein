@@ -4,18 +4,16 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.UserRegistration;
+import com.latticeengines.pls.exception.LoginException;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.GrantedRight;
@@ -61,5 +59,35 @@ public class UserResource {
         doc.setSuccess(true);
 
         return doc;
+    }
+
+    @RequestMapping(value = "/changepassword", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Change password")
+    public Boolean update(@RequestBody AttributeMap attrMap) {
+
+        String userName     = attrMap.get("userName");
+        String oldPassword  = attrMap.get("oldPassword");
+        String newPassword  = attrMap.get("newPassword");
+
+        Credentials oldCreds = new Credentials();
+        oldCreds.setUsername(userName);
+        oldCreds.setPassword(oldPassword);
+
+        Credentials newCreds = new Credentials();
+        newCreds.setUsername(userName);
+        newCreds.setPassword(newPassword);
+
+        boolean success;
+        try {
+            Ticket ticket = globalAuthenticationService.authenticateUser(userName, oldPassword);
+            success = globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
+        }
+        return success;
     }
 }

@@ -39,7 +39,7 @@ angular.module('mainApp.models.services.ModelService', [
                                     Id          : rawObj.Id,
                                     DisplayName : rawObj.Name,
                                     CreatedDate : new Date(rawObj.ConstructionTime).toLocaleDateString(),
-                                    Status      : "Active"    //TODO:[2015Feb11] read Status from DB
+                                    Status      : rawObj.Active ? 'Active' : 'Inactive'
                                 };}
                         );
 
@@ -105,7 +105,7 @@ angular.module('mainApp.models.services.ModelService', [
                             TotalSuccessEvents  : data.TotalConversionCount,
                             TrainingSet         : data.TrainingRowCount,
                             ConversionRate      : data.TotalConversionCount/data.TotalRowCount,
-                            Status              : "Active",   //TODO:[2015Feb11] read Status from DB
+                            Status              : data.Active ? 'Active' : 'Inactive',
 
                             Details             : data.Details,
                             Tenent              : data.Tenent,

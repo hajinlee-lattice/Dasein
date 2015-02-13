@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller;
 
 import java.util.Arrays;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -105,28 +104,6 @@ public class LoginResource {
             throw e;
         }
         return doc;
-    }
-
-    @RequestMapping(value = "/changepassword", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Change password")
-    public Boolean changePassword(@RequestBody List<Credentials> credPair) {
-        Credentials oldCreds = credPair.get(0);
-        Credentials newCreds = credPair.get(1);
-
-        boolean success;
-        try {
-            Ticket ticket = globalAuthenticationService.authenticateUser(
-                    oldCreds.getUsername(), oldCreds.getPassword()
-            );
-            success = globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
-        } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
-                throw new LoginException(e);
-            }
-            throw e;
-        }
-        return success;
     }
 
 }

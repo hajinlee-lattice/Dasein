@@ -81,6 +81,7 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
                 $scope.saveInProgess = false;
                 if (result.success) {
                     $("#changePasswordSuccessAlert").fadeIn();
+                    setTimeout(LoginService.Logout(), 1000);
                 } else {
                     if (result.status == 401) {
                         $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_BAD_CREDS");
