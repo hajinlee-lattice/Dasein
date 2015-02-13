@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.exception.LoginException;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
+import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.security.RightsUtilities;
 import com.wordnik.swagger.annotations.Api;
@@ -40,6 +42,9 @@ public class LoginResource {
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
+
+    @Autowired
+    private GlobalUserManagementService globalUserManagementService;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -100,6 +105,28 @@ public class LoginResource {
             throw e;
         }
         return doc;
+    }
+
+    @RequestMapping(value = "/changepassword", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Change password")
+    public Boolean changePassword(@RequestBody List<Credentials> credPair) {
+        Credentials oldCreds = credPair.get(0);
+        Credentials newCreds = credPair.get(1);
+
+        boolean success;
+        try {
+            Ticket ticket = globalAuthenticationService.authenticateUser(
+                    oldCreds.getUsername(), oldCreds.getPassword()
+            );
+            success = globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
+        }
+        return success;
     }
 
 }

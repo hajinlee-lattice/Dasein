@@ -5,6 +5,9 @@ import java.net.URL;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.pls.globalauth.generated.usermgr.ArrayOfTenant;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -73,6 +76,22 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
     }
 
+    @Override
+    public Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds) {
+        IUserManagementService service = getService();
+        addMagicHeaderAndSystemProperty(service);
+        try {
+            log.info("Modify credential for " + oldCreds.getUsername());
+            return service.modifyLatticeCredentials(
+                new SoapTicketBuilder(ticket).build(),
+                new SoapCredentialsBuilder(oldCreds).build(),
+                new SoapCredentialsBuilder(newCreds).build()
+            );
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18006, e, new String[] {oldCreds.getUsername()});
+        }
+    }
+
 
     static class SoapUserBuilder {
         private User user;
@@ -104,11 +123,11 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     
     static class SoapCredentialsBuilder {
         private Credentials creds;
-        
+
         public SoapCredentialsBuilder(Credentials creds) {
             this.creds = creds;
         }
-        
+
         public com.latticeengines.pls.globalauth.generated.usermgr.Credentials build() {
             com.latticeengines.pls.globalauth.generated.usermgr.Credentials c = new ObjectFactory().createCredentials();
             c.setUsername(new JAXBElement<String>( //
@@ -119,7 +138,43 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                     String.class, creds.getPassword()));
 
             return c;
-            
+
+        }
+    }
+
+    static class SoapTicketBuilder {
+        private Ticket ticket;
+
+        public SoapTicketBuilder(Ticket ticket) {
+            this.ticket = ticket;
+        }
+
+        public com.latticeengines.pls.globalauth.generated.usermgr.Ticket build() {
+            com.latticeengines.pls.globalauth.generated.usermgr.Ticket t = new ObjectFactory().createTicket();
+            t.setUniquness(ticket.getUniqueness());
+            t.setRandomness(new JAXBElement<String>( //
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Randomness"), //
+                    String.class, ticket.getRandomness()));
+            return t;
+        }
+    }
+
+    static class SoapTenantBuilder {
+        private Tenant tenant;
+
+        public SoapTenantBuilder(Tenant tenant) {
+            this.tenant = tenant;
+        }
+
+        public com.latticeengines.pls.globalauth.generated.usermgr.Tenant build() {
+            com.latticeengines.pls.globalauth.generated.usermgr.Tenant t = new ObjectFactory().createTenant();
+            t.setIdentifier(new JAXBElement<String>( //
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Identifier"), //
+                    String.class, tenant.getId()));
+            t.setDisplayName(new JAXBElement<String>( //
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "DisplayName"), //
+                    String.class, tenant.getName()));
+            return t;
         }
     }
 

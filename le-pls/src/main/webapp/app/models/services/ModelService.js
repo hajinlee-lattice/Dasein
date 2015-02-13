@@ -74,7 +74,7 @@ angular.module('mainApp.models.services.ModelService', [
 
             $http({
                 method: 'GET',
-                url: '/pls/modelsummaries/'+ String(modelId),
+                url: '/pls/modelsummaries/'+ modelId,
                 headers: {
                     "Content-Type": "application/json"
                 }
@@ -90,7 +90,7 @@ angular.module('mainApp.models.services.ModelService', [
                     } else {
                         result = {
                             success: true,
-                            resultObj: null,
+                            resultObj: {},
                             resultErrors: null
                         };
 

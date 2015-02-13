@@ -137,29 +137,46 @@ angular.module('mainApp.login.services.LoginService', [
         }
         
         var loginDoc = BrowserStorageUtility.getLoginDocument();
-        var result = {
-            userName: loginDoc.UserName,
-            logSubID: CryptoJS.SHA256(oldPassword).toString(),
-            logMasterID: CryptoJS.SHA256(newPassword).toString(),
-            logDeploymentID: CryptoJS.SHA256(confirmNewPassword).toString()
-            
-        };
+        var credPair = [
+            {
+                Username: loginDoc.UserName,
+                Password: CryptoJS.SHA256(oldPassword).toString()
+            },
+            {
+                Username: loginDoc.UserName,
+                Password: CryptoJS.SHA256(newPassword).toString()
+            }
+        ];
         
         $http({
             method: 'POST',
-            url: "./LoginService.svc/ChangePassword",
-            data: JSON.stringify(result)
+            url: "/pls/changepassword/",
+            data: angular.toJson(credPair),
+            headers: {
+                "Content-Type": "application/json"
+            }
         })
         .success(function(data, status, headers, config) {
-            if (data == null || data.Success !== true) {
+            var result = {
+                success:    true,
+                status:     status
+            };
+
+            if (data !== true && data !== 'true') {
+                result.success = false;
                 ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
             }
-            deferred.resolve(data);
+
+            deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
-            deferred.resolve(data);
+            var result = {
+                    success:    false,
+                    status:     status
+                };
+            deferred.resolve(result);
         });
-        
+
         return deferred.promise;
     };
 });
