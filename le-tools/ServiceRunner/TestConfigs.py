@@ -131,10 +131,10 @@ ConfigDLC["New Data Provider"] = {"command": "-NDP",
 ConfigDLC["Edit Data Provider"] = {"command": "-EDP",
                                    "definition": """dlc -EDP -s [DataLoader URL] -u [User Name] -p [Password] 
                                                     -t [Tenant Name] -dpn [DataProviderName] 
-                                                    -nn [New Data Provider Name: if not specified, will not change] 
+                                                    -nn [New Data Provider Name: ] 
                                                     -dpt [Data Provider Type: sftp|sqlserver|sfdc|marketo|eloqua|
-                                                        clarizen|oraclecrm, if not specified, will not change] 
-                                                    -cs [ConnectionString: if not specified, will not change] 
+                                                        clarizen|oraclecrm, ] 
+                                                    -cs [ConnectionString: ] 
                                                     -dpf [Connection String Used For: upload|validation extract|
                                                         leaf extract|itc|fstable, split with '|', if not specified, 
                                                         will not change] 
@@ -291,4 +291,49 @@ ConfigDLC["New Refresh Data Source"] = {"command": "-NRDS",
                                       "-guid": ("optional", "GUID: the guid for log")
                                      }
 
+ConfigDLC["Edit Refresh Data Source"] = {"command": "-ERDS",
+                                         "definition": """dlc -ERDS -s [DataLoader URL] -u [User Name] 
+                                         -p [Password] -t [Tenant Name] -g [Group Name]
+                                         -rn [Refresh Data Source Name] -sn [Table Schema Name: ]
+                                         -cn [Data Provider Name: ] -usqls [Use SQL Statement: ]
+                                         -sqls [SQL Statement: ] -tab [Table Name: ] -f [Filters: ]
+                                         -ade [Delete Expired Extracts Automatically: true|false] 
+                                         -em [Exact Match: true|false, ]
+                                         -rcs [Required Columns: the names of columns are separated by '|']
+                                         -td [Throttling Data: ] -idc [Id Column: ]
+                                         -diff [Date Diff: ] -limit [Limitation: ]
+                                         -stw [Split into Time Windows: ] -csr [Confidence Succeed Rows: ]
+                                         -htw [Hours of Time Window: ]
+                                         -mmtw [Minutes of Min Time Window: ]
+                                         -mdrc [Max Days of Record Count: ]
+                                         -ewmt [extract Data With Multiple Threads: ]
+                                         -acd [Always Commit Data: ] -guid [GUID: the guid for log]""",
+                                         "-s":    ("required", "DataLoader URL"),
+                                         "-u":    ("required", "User Name"),
+                                         "-p":    ("required", "Password"),
+                                         "-t":    ("required", "Tenant Name"),
+                                         "-g":    ("required", "Group Name"),
+                                         "-rn":   ("required", "Refresh Data Source Name"),
+                                         "-sn":   ("optional", "Table Schema Name"),
+                                         "-cn":   ("optional", "Data Provider Name"),
+                                         "-usqls":("optional", "Use SQL Statement"),
+                                         "-sqls": ("optional", "SQL Statement"),
+                                         "-tab":  ("optional", "Table Name"),
+                                         "-f":    ("optional", "Filters"),
+                                         "-ade":  ("optional", "Delete Expired Extracts Automatically"),
+                                         "-em":   ("optional", "Exact Match"),
+                                         "-rcs":  ("optional", "Required Columns"),
+                                         "-td":   ("optional", "Throttling Data"),
+                                         "-idc":  ("optional", "Id Column"),
+                                         "-diff": ("optional", "Date Diff"),
+                                         "-limit":("optional", "Limitation"),
+                                         "-stw":  ("optional", "Split into Time Windows"),
+                                         "-csr":  ("optional", "Confidence Succeed Rows"),
+                                         "-htw":  ("optional", "Hours of Time Window"),
+                                         "-mmtw": ("optional", "Minutes of Min Time Window"),
+                                         "-mdrc": ("optional", "Max Days of Record Count"),
+                                         "-ewmt": ("optional", "extract Data With Multiple Threads"),
+                                         "-acd ": ("optional", "Always Commit Data"),
+                                         "-guid": ("optional", "GUID: the guid for log")
+                                         }
 

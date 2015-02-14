@@ -1,6 +1,7 @@
 #!/usr/local/bin/python
 # coding: utf-8
 from __builtin__ import str
+from scipy.optimize.zeros import results_c
 
 # Base test framework
 
@@ -41,6 +42,26 @@ class SessionRunner(object):
         self.stdout = ""
         self.stderr = ""
         logging.basicConfig(filename=self.logfile, level=logging.DEBUG)
+
+    def getQuery(self, connection_string, query):
+        try:
+            import pypyodbc
+        except Exception:
+            e = traceback.format_exc()
+            print("\nERROR:Could not import pypyodbc. This MUST be installed", e, "\n")
+            return None
+        try:
+            conn = pypyodbc.connect(connection_string)
+            cur = conn.cursor()
+            cur.execute(query)
+            results = cur.fetchall()
+            cur.close()
+            conn.close()
+            return results
+        except Exception:
+            e = traceback.format_exc()
+            print("\nFAILED:Could not fetch query results", e, "\n")
+            return None
 
     def getSTDoutputs(self, text):
         stdo = ""
