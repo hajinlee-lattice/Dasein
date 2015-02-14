@@ -16,7 +16,7 @@ __status__ = "Alpha"
 # import modules
 from subprocess import PIPE
 from subprocess import Popen
-from suds.client import Client
+#from suds.client import Client
 import datetime
 import json
 import logging
@@ -41,6 +41,27 @@ class SessionRunner(object):
         self.stdout = ""
         self.stderr = ""
         logging.basicConfig(filename=self.logfile, level=logging.DEBUG)
+
+    def getSTDoutputs(self, text):
+        stdo = ""
+        stde = ""
+        if text.find("STDOUT:") != -1:
+            stdo = text[text.find("STDOUT:")+7:text.find("STDERR:")]
+            stde = text[text.find("STDERR:")+7:]
+        self.stdout = stdo
+        self.stderr = stde
+        return stdo, stde
+
+    def getStatus(self):
+        sep = "~"*25
+        if self.stderr.strip("\n") != "":
+            print "%s\nFAILED:%s\n%s" % (sep, self.stderr, sep)
+            return False
+        if self.stdout.lower().find("success") != -1:
+            print "%s\nSUCCESS:%s\n%s" % (sep, self.stdout, sep)
+            return True
+        print "%s\nUNKNOWN: STDERR is empty and STDOUT is %s\n%s" % (sep, self.stdout, sep)
+        return None
 
     def stamp(self):
         return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
@@ -122,7 +143,9 @@ class SessionRunner(object):
         result = client.service.ConfigureDataLoaderAndVisiDB(config_string, specs_string)
         print result
         """
-        client = Client(wsdl, headers={"MagicAuthentication": "Security through obscurity!"})
+        # This is for the future use. Uncomment line below and suds import @ header
+        #client = Client(wsdl, headers={"MagicAuthentication": "Security through obscurity!"})
+        client = ""
         print client
         return client
 
@@ -135,6 +158,7 @@ class SessionRunner(object):
         logging.info("%s\n%s" % (request.status_code, request.text))
         self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
         self.request_text.append(request.text)
+        self.getSTDoutputs(request.text.replace("<br/>", "\n"))
         if request.status_code == 200:
             return True
         else:
@@ -150,6 +174,7 @@ class SessionRunner(object):
         logging.info("%s\n%s" % (request.status_code, request.text))
         self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
         self.request_text.append(request.text)
+        self.getSTDoutputs(request.text.replace("<br/>", "\n"))
         if request.status_code == 200:
             return status and True
         else:
@@ -187,6 +212,7 @@ class SessionRunner(object):
             return self.runCommandOnServer(cmd)
 
     def runCommandLocally(self, cmd, from_dir=None):
+        print cmd
         if from_dir is None:
             from_dir = os.getcwd()
         if from_dir.startswith("~"):
@@ -200,11 +226,13 @@ class SessionRunner(object):
             return False
         else:
             logging.info(self.stdout)
+            print self.stdout
             return True
 
     def runCommandOnServer(self, cmd):
         request_url = self.host + "/cmd"
         print request_url
+        print cmd
         logging.info(request_url)
         if type(cmd) == str or type(cmd) == list or type(cmd) == dict or type(cmd) == unicode:
             command_dict = {"commands": cmd}
@@ -214,6 +242,7 @@ class SessionRunner(object):
             logging.info("%s\n%s" % (request.status_code, request.text))
             self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
             self.request_text.append(request.text)
+            self.getSTDoutputs(request.text.replace("<br/>", "\n"))
             if request.status_code == 200:
                 return True
             else:
@@ -234,6 +263,7 @@ class SessionRunner(object):
             logging.info("%s\n%s" % (request.status_code, request.text))
             self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
             self.request_text.append(request.text)
+            self.getSTDoutputs(request.text.replace("<br/>", "\n"))
             if request.status_code == 200:
                 return True
             else:
@@ -254,6 +284,7 @@ class SessionRunner(object):
             logging.info("%s\n%s" % (request.status_code, request.text))
             self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
             self.request_text.append(request.text)
+            self.getSTDoutputs(request.text.replace("<br/>", "\n"))
             if request.status_code == 200:
                 return True
             else:
@@ -280,6 +311,7 @@ class SessionRunner(object):
             logging.info("%s\n%s" % (request.status_code, request.text))
             self.activity_log[self.stamp()] = "%s:%s" % (request.status_code, request.text)
             self.request_text.append(request.text)
+            self.getSTDoutputs(request.text.replace("<br/>", "\n"))
             if request.status_code == 200:
                 return request.text
             else:

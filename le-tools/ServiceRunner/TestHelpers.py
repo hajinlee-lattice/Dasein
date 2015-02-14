@@ -249,7 +249,9 @@ class PretzelRunner(SessionRunner):
         else:
             status = status and self.getSpecs(topology)
             status = status and self.addTopology(topology)
+            self.getStatus()
             status = status and self.setTopologyRevison(topology)
+            self.getStatus()
             return status
 
 class BardAdminRunner(SessionRunner):
