@@ -1,7 +1,6 @@
 package com.latticeengines.db.exposed.schemagen;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -14,8 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
-
-import com.latticeengines.common.exposed.util.CipherUtils;
 
 public class SchemaGenerator {
 
@@ -128,72 +125,6 @@ public class SchemaGenerator {
         gen.generateToScript();
         gen = new SchemaGenerator(dbName, DBDialect.SQLSERVER, packages);
         gen.generateToScript();
-    }
-
-    /**
-     * Convert from dataplatform.properties to hibernate.properties
-     *
-     * from: dataplatform.dao.datasource.driver=com.microsoft.sqlserver.jdbc.
-     * SQLServerDriver dataplatform.dao.datasource.user=root
-     * dataplatform.dao.datasource.password.encrypted=welcome
-     * dataplatform.dao.datasource.url
-     * =jdbc:sqlserver://10.41.1.250:1433;databaseName=ledp_buildmachine;
-     *
-     * to: hibernate.connection.driver_class - JDBC driver class
-     * hibernate.connection.url - JDBC URL hibernate.connection.username -
-     * database user hibernate.connection.password - database user password
-     * hibernate.connection.pool_size - maximum number of pooled connections
-     *
-     * @param dbPropFilepath
-     * @return [0] ledp db properies [1] dlOrchestration db properties
-     * @throws Exception
-     */
-    private static Properties[] convertDataplatformDbProperties(String dbPropFilepath) throws Exception {
-        File dbPropfile = new File(dbPropFilepath + File.separator + "dataplatform.properties");
-        FileInputStream fis = new FileInputStream(dbPropfile);
-        Properties prop = new Properties();
-        prop.load(fis);
-
-        Properties hibernatePropertiesLEDP = new Properties();
-        hibernatePropertiesLEDP
-                .put("hibernate.connection.driver_class", prop.get("dataplatform.dao.datasource.driver"));
-        hibernatePropertiesLEDP.put("hibernate.connection.url", prop.get("dataplatform.dao.datasource.url"));
-        hibernatePropertiesLEDP.put("hibernate.connection.username", prop.get("dataplatform.dao.datasource.user"));
-        hibernatePropertiesLEDP.put("hibernate.connection.password",
-                CipherUtils.decrypt((String) prop.get("dataplatform.dao.datasource.password.encrypted")));
-        DBDialect dbDialect = convertDbDialect(prop.getProperty("dataplatform.dao.datasource.dialect"));
-        hibernatePropertiesLEDP.put("local.dbdialect", dbDialect);
-
-        Properties hibernatePropertiesDlOrchestration = new Properties();
-        hibernatePropertiesDlOrchestration.put("hibernate.connection.driver_class",
-                prop.get("dataplatform.dlorchestration.datasource.driver"));
-        hibernatePropertiesDlOrchestration.put("hibernate.connection.url",
-                prop.get("dataplatform.dlorchestration.datasource.url"));
-        hibernatePropertiesDlOrchestration.put("hibernate.connection.username",
-                prop.get("dataplatform.dlorchestration.datasource.user"));
-        hibernatePropertiesDlOrchestration.put("hibernate.connection.password",
-                CipherUtils.decrypt((String) prop.get("dataplatform.dlorchestration.datasource.password.encrypted")));
-        dbDialect = convertDbDialect(prop.getProperty("dataplatform.dlorchestration.datasource.dialect"));
-        hibernatePropertiesDlOrchestration.put("local.dbdialect", dbDialect);
-
-        return new Properties[] { hibernatePropertiesLEDP, hibernatePropertiesDlOrchestration };
-    }
-
-    private static DBDialect convertDbDialect(String dialect) {
-        DBDialect dbDialect = null;
-
-        if (dialect.startsWith("org.hibernate.dialect.SQLServer")) {
-            dbDialect = DBDialect.SQLSERVER;
-        } else if (dialect.startsWith("org.hibernate.dialect.MYSQL")) {
-            dbDialect = DBDialect.MYSQL;
-        } else if (dialect.startsWith("org.hibernate.dialect.HSQL")) {
-            dbDialect = DBDialect.HSQL;
-        } else {
-            // default to sqlserver
-            dbDialect = DBDialect.SQLSERVER;
-        }
-
-        return dbDialect;
     }
 
     private List<Class<?>> getClasses(String packageName) throws Exception {
