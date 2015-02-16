@@ -17,13 +17,12 @@ angular.module('mainApp.login.services.LoginService', [
             method: 'POST', 
             url: '/pls/login',
             data: JSON.stringify({ Username: username, Password: passwordHash.toString() })
- //           headers: httpHeaders
-        })
+         })
         .success(function(data, status, headers, config) {
             var result = null;    
             if (data != null && data !== "") {
                 result = data;
-                if (data.Success === true) {                    
+                if (data.Success === true) {
                     BrowserStorageUtility.setTokenDocument(data.Uniqueness + "." + data.Randomness);
                     data.Result.UserName = username;
                     BrowserStorageUtility.setLoginDocument(data.Result);
@@ -79,7 +78,7 @@ angular.module('mainApp.login.services.LoginService', [
         return deferred.promise;
     };
     
-    //If a user forgets their password, this will reset it and notify them
+    // If a user forgets their password, this will reset it and notify them
     this.ResetPassword = function (username) {
         if (username == null) {
             return null;

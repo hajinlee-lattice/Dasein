@@ -3,7 +3,6 @@ angular.module('mainApp.appCommon.modals.SimpleModal', [
 ])
 .service('SimpleModal', function (ResourceUtility) {
     
-    
     this.show = function (overrides, okCallback) {
         
         var options = {

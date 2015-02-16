@@ -211,7 +211,7 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
             isOddActive = (activeWidgetStates.indexOf(WidgetConfigUtility.ACTIVE_WIDGET_ODD) !== -1),
             isChildActive = false;
 
-        // Note: All takes precendence over None,
+        // Note: All takes precedence over None,
         // so ["All", "None"] and ["None", "All"] both evaluate to "All" 
         if (isAllActive) {
             isChildActive = true;

@@ -2,7 +2,7 @@ angular.module('mainApp.core.utilities.ServiceErrorUtility', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.FaultUtility',
     'mainApp.appCommon.modals.SimpleModal'
-])                                                                                                                                                                        
+])
 .service('ServiceErrorUtility', function (FaultUtility, ResourceUtility, SimpleModal) {
     
     this.InvalidCredentials = "LOGIN_INVALID_AUTHENTICATION_CREDENTIALS";
@@ -15,7 +15,7 @@ angular.module('mainApp.core.utilities.ServiceErrorUtility', [
         if (response == null) {
             return;
         }
-        //Session Timeout?
+        // Session Timeout?
         if (this.HandleSessionTimeout(response)) {
             return;
         }
@@ -27,7 +27,7 @@ angular.module('mainApp.core.utilities.ServiceErrorUtility', [
         failSilently = typeof failSilently !== 'undefined' ? failSilently : false;
         
         if (!failSilently) {
-            //Generic Error
+            // Generic Error
             var message = this.HandleFriendlyServiceResponseErrors(response);
             FaultUtility.ShowFaultAlert(message, faultTitle);
         }
@@ -69,7 +69,7 @@ angular.module('mainApp.core.utilities.ServiceErrorUtility', [
         var result = "";
         
         if (response != null && response.Errors != null && response.Errors.length > 0) {
-            for (var x = 0; x<response.Errors.length;x++) {
+            for (var x = 0; x < response.Errors.length; x++) {
                 var errorValue = response.Errors[x].Key;
                 var errorMessage = response.Errors[x].Value;
                 var fullErrorMessage = errorMessage.replace(errorValue, ResourceUtility.getString(errorValue));
@@ -84,7 +84,7 @@ angular.module('mainApp.core.utilities.ServiceErrorUtility', [
     this.ServiceResponseContainsError = function (response, errorCode) {
         var result = false;
         if (response != null && response.Errors != null && response.Errors.length > 0) {
-            for (var x = 0; x<response.Errors.length;x++) {
+            for (var x = 0; x < response.Errors.length; x++) {
                 if (response.Errors[x].Key == errorCode) {
                     result = true;
                 }
