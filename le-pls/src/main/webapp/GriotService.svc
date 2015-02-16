@@ -1,3 +1,0 @@
-﻿<%@ServiceHost language="C#" Debug="true" 
-    Factory="System.ServiceModel.Activation.ServiceHostFactory"
-    Service="LatticeEngines.Griot.WebInterface.ServiceContracts.GriotService"%>
