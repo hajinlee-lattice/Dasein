@@ -15098,21 +15098,5 @@ input.error, input.error:focus {
 
   .bucket-percent, .bucket-section {
     margin: 0 3px; } }
-.login-body {
-  background: url("../images/tweed.png") center top; }
-
-.login-error-container {
-  max-width: 500px;
-  margin: 15px auto -80px;
-  border: 2px solid #B30000;
-  border-radius: 4px;
-  color: #fff;
-  padding: 10px 10px 0 10px;
-  font-weight: 600;
-  background: rgba(140, 0, 0, 0.5);
-  font-size: 14px; }
-
-.login-button {
-  min-width: 90px; }
 
 /*# sourceMappingURL=production.css.map */

@@ -1,21 +1,17 @@
-<div id="loginMainView" data-ng-controller="LoginController">
-    <div id="loginHeaderMessage" class="login-error-container" data-ng-show="showLoginError">
-        <p>
-            {{loginErrorMessage}}
-        </p>
-    </div>
-    <div class="notification-forgot-password" data-ng-show="showSuccessMessage">
-        <p>
-            {{successMessage}}
-        </p>
-    </div>
-    <div id="loginFormPanel" class="form-signin">
-        <div id="loginForm" class="login-form-container">
-            <h2 class="form-signin-heading">
-                <img src="assets/images/logo_lattice.png" alt="Lattice">
-            </h2>
+<div id="loginMainView" class="login-body" data-ng-controller="LoginController">
+    <div class="container">
+        <div class="notification-forgot-password" data-ng-show="showSuccessMessage">
+            <p>
+                {{successMessage}}
+            </p>
+        </div>
+        
+        <form class="form-signin">
+            <h2 class="form-signin-heading"><img src="assets/images/logo_login.png" alt="Lattice"></h2>
+            <p class="error-message" data-ng-show="showLoginError">{{loginErrorMessage}}</p>
             <div class="login-wrap">
                 <div class="user-login-info">
+                    <label>{{ResourceUtility.getString('LOGIN_USERNAME')}}</label>
                     <input  type="text" 
                             id="username" 
                             autocomplete="off" 
@@ -25,6 +21,7 @@
                             placeholder="{{ResourceUtility.getString('LOGIN_USERNAME')}}" 
                             class="form-control" 
                             autofocus>
+                    <label>{{ResourceUtility.getString('LOGIN_PASSWORD')}}</label>
                     <input  type="password"  
                             id="password"
                             autocomplete="off" 
@@ -35,16 +32,17 @@
                             class="form-control">
                 </div>
                 <div class="user-login-info-buttonforgot">
-                    <div class="btn btn-primary login-button" data-ng-show="loginInProgess">
-                        <span class="form-processing-spinner"></span>
-                    </div>
-                    <button id="loginButton" type="submit" data-ng-click="loginClick()" class="btn btn-primary login-button" data-ng-show="!loginInProgess">
+                    <button id="loginButton" type="submit" data-ng-click="loginClick()" class="btn btn-primary">
                         {{ResourceUtility.getString('LOGIN_LABEL')}}
                     </button>
-                    <span class="pull-right forgot-pass"> <a data-toggle="modal" href="#myModal" data-ng-click="forgotPasswordClick($event)">{{ResourceUtility.getString('LOGIN_FORGOT_PASSWORD_LABEL')}}</a> </span> 
+                    <div class="forgot-pass">
+                        <a data-toggle="modal" href="#myModal" data-ng-click="forgotPasswordClick($event)">
+                            {{ResourceUtility.getString('LOGIN_FORGOT_PASSWORD_LABEL')}}
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-        <p class="signin-footer">© {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}</a> </p>
+        </form>
+        <p class="footer">© {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}</a></p>
     </div>
 </div>
