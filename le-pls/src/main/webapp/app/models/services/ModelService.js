@@ -1,9 +1,10 @@
 angular.module('mainApp.models.services.ModelService', [
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.UnderscoreUtility'
+    'mainApp.appCommon.utilities.UnderscoreUtility',
+    'mainApp.appCommon.utilities.StringUtility'
 ])
-.service('ModelService', function ($http, $q, _, ServiceErrorUtility, ResourceUtility) {
+.service('ModelService', function ($http, $q, _, ServiceErrorUtility, ResourceUtility, StringUtility) {
 
     this.GetAllModels = function () {
             var deferred = $q.defer();
@@ -93,24 +94,13 @@ angular.module('mainApp.models.services.ModelService', [
                     resultErrors: null
                 };
 
+                var modelSummary = "";
+                if (!StringUtility.IsEmptyString(data.Details.Payload)) {
+                    modelSummary = JSON.parse(data.Details.Payload);
+                }
+                modelSummary.ModelDetails.Active = data.Active;
                 // sync with front-end json structure
-                result.resultObj = {
-                    Id                  : data.Id,
-                    DisplayName         : data.Name,
-                    CreatedDate         : new Date(data.ConstructionTime).toLocaleDateString(),
-                    RocScore            : data.RocScore,
-                    TestSet             : data.TestRowCount,
-                    TotalLeads          : data.TotalRowCount,
-                    TotalSuccessEvents  : data.TotalConversionCount,
-                    TrainingSet         : data.TrainingRowCount,
-                    ConversionRate      : data.TotalConversionCount/data.TotalRowCount,
-                    Status              : data.Active ? 'Active' : 'Inactive',
-
-                    Details             : data.Details,
-                    Tenant              : data.Tenant
-
-                    //TODO:[2015Feb11] missing fields: ExternalAttributes, InternalAttributes, Opportunity, LeadSource
-                };
+                result.resultObj = modelSummary;
             }
 
             deferred.resolve(result);

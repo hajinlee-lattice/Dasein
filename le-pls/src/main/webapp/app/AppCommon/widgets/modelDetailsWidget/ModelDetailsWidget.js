@@ -8,26 +8,38 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     
     var widgetConfig = $scope.widgetConfig;
     var metadata = $scope.metadata;
-    var data = $scope.data;
+    var data = $scope.data.ModelDetails;
 
-    //TODO:pierce Field names subject to change
     $scope.displayName = data[widgetConfig.NameProperty];
-    $scope.status = data[widgetConfig.StatusProperty];
+    var isActive = data[widgetConfig.StatusProperty];
+    
+    if (isActive) {
+        $scope.status = ResourceUtility.getString("MODEL_DETAILS_ACTIVE_LABEL");
+    } else {
+        $scope.status = ResourceUtility.getString("MODEL_DETAILS_INACTIVE_LABEL");
+    }
+    
     $scope.score = data[widgetConfig.ScoreProperty];
     if ($scope.score != null && $scope.score < 1) {
         $scope.score = Math.round($scope.score * 100);
     }
+    
+    //Need to calculate this
     $scope.externalAttributes = data[widgetConfig.ExternalAttributesProperty];
+    //Need to calculate this
     $scope.internalAttributes = data[widgetConfig.InternalAttributesProperty];
+    
     $scope.createdDate = data[widgetConfig.CreatedDateProperty];
+    $scope.createdDate = new Date($scope.createdDate).toLocaleDateString();
     
     $scope.totalLeads = data[widgetConfig.TotalLeadsProperty];
     $scope.testSet = data[widgetConfig.TestSetProperty];
     $scope.trainingSet = data[widgetConfig.TrainingSetProperty];
     $scope.totalSuccessEvents = data[widgetConfig.TotalSuccessEventsProperty];
-    $scope.conversionRate = data[widgetConfig.ConversionRateProperty];
+    $scope.conversionRate = $scope.totalSuccessEvents / ($scope.testSet + $scope.trainingSet);
     if ($scope.conversionRate != null && $scope.conversionRate < 1) {
         $scope.conversionRate = $scope.conversionRate * 100;
+        $scope.conversionRate = $scope.conversionRate.toFixed(2);
     }
     $scope.leadSource = data[widgetConfig.LeadSourceProperty];
     $scope.opportunity = data[widgetConfig.OpportunityProperty];
