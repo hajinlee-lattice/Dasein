@@ -21,7 +21,8 @@ public class JythonEvaluator {
         String[] scripts = new String[paths.length];
         for (int index = 0; index < paths.length; index++) {
             try {
-                scripts[index] = StreamUtils.copyToString(ClassLoader.getSystemResourceAsStream(paths[index]),
+                scripts[index] = StreamUtils.copyToString(
+                        JythonEvaluator.class.getClassLoader().getResourceAsStream(paths[index]),
                         Charset.defaultCharset());
             } catch (IOException e) {
                 throw new RuntimeException("Unable to load file: " + paths[index], e);
