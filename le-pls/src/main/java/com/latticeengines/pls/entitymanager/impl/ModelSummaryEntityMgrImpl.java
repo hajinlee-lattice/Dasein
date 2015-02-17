@@ -185,8 +185,9 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         if (summary == null) {
             return null;
         }
-
-        if (summary.getTenantId() != getTenantId()) {
+        Long stid = summary.getTenantId();
+        Long tid = getTenantId();
+        if (stid.longValue() != tid.longValue()) {
             return null;
         }
         if (returnRelational) {
