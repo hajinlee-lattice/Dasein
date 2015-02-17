@@ -3,6 +3,11 @@ rm -rf /opt/jetty/webapps/le-pls-*.war
 rm -rf /etc/ledp/*
 rm -rf /opt/jetty/bin/jetty.sh
 rm -rf /home/yarn/.bashrc
+adduser yarn
+groupadd yarn
 mkdir -p /var/log/ledp
+mkdir -p /home/yarn/logs
 chmod -R 755 /var/log/ledp
+chmod -R 755 /home/yarn/logs
 chown yarn:yarn /var/log/ledp
+chown yarn:yarn /home/yarn/logs
