@@ -19,7 +19,7 @@
                             data-ng-enter="loginClick()" 
                             title="{{ResourceUtility.getString('LOGIN_USERNAME')}}" 
                             placeholder="{{ResourceUtility.getString('LOGIN_USERNAME')}}" 
-                            class="form-control" 
+                            class="form-control {{usernameInvalid ? 'error' : ''}}" 
                             autofocus>
                     <label>{{ResourceUtility.getString('LOGIN_PASSWORD')}}</label>
                     <input  type="password"  
@@ -29,7 +29,7 @@
                             data-ng-enter="loginClick()" 
                             title="{{ResourceUtility.getString('LOGIN_PASSWORD')}}" 
                             placeholder="{{ResourceUtility.getString('LOGIN_PASSWORD')}}" 
-                            class="form-control">
+                            class="form-control {{passwordInvalid ? 'error' : ''}}">
                 </div>
                 <div class="user-login-info-buttonforgot">
                     <button id="loginButton" type="submit" data-ng-click="loginClick()" class="btn btn-primary">

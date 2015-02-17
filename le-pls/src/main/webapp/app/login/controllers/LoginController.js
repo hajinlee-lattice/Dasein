@@ -23,8 +23,8 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.copyrightString = ResourceUtility.getString('LOGIN_COPYRIGHT', [(new Date()).getFullYear()]);
     $scope.ResourceUtility = ResourceUtility;
     
-    $scope.username = null;
-    $scope.password = null;
+    $scope.username = "";
+    $scope.password = "";
     $scope.loginMessage = null;
     $scope.loginErrorMessage = null;
     $scope.showLoginError = false;
@@ -37,6 +37,12 @@ angular.module('mainApp.login.controllers.LoginController', [
         $scope.showLoginError = false;
         $scope.loginMessage = ResourceUtility.getString("LOGIN_LOGGING_IN_MESSAGE");
         if ($scope.loginInProgess) {
+            return;
+        }
+        
+        $scope.usernameInvalid = $scope.username === "" ? true : false;
+        $scope.passwordInvalid = $scope.password === "" ? true : false;
+        if ($scope.usernameInvalid || $scope.passwordInvalid) {
             return;
         }
         
