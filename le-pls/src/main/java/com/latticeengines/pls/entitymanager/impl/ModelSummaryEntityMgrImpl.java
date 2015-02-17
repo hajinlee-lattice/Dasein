@@ -181,13 +181,16 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument) {
         ModelSummary summary = modelSummaryDao.findByModelId(modelId);
-        
+
         if (summary == null) {
             return null;
         }
-        Long stid = summary.getTenantId();
-        Long tid = getTenantId();
-        if (stid.longValue() != tid.longValue()) {
+        Long summaryTenantId = summary.getTenantId();
+        Long secCtxTenantId = getTenantId();
+        if (summaryTenantId == null // 
+                || secCtxTenantId == null //
+                || summaryTenantId.longValue() != secCtxTenantId.longValue()) {
+            log.warn(String.format("Summary tenant id = %d, Security context tenant id = %d", summaryTenantId, secCtxTenantId));
             return null;
         }
         if (returnRelational) {
@@ -196,8 +199,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         if (returnDocument) {
             inflateDetails(summary);
         }
-        
-        return summary; 
+
+        return summary;
     }
 
     @Override
@@ -205,4 +208,5 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     public ModelSummary findByModelId(String modelId) {
         return findByModelId(modelId, false, true);
     }
+    
 }
