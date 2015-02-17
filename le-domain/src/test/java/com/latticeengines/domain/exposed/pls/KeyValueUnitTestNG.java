@@ -19,8 +19,8 @@ public class KeyValueUnitTestNG {
         byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
         data = CompressionUtils.compressByteArray(data);
         KeyValue details = new KeyValue();
-        details.setData(data);
         
+        details.setData(data);
         String serializedStr = details.toString();
         
         KeyValue deserializedKeyValue = JsonUtils.deserialize(serializedStr, KeyValue.class);

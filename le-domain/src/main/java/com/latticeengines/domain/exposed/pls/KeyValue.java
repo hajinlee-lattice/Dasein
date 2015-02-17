@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.io.IOException;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,12 +12,16 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.apache.commons.net.util.Base64;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -24,6 +30,8 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 @Table(name = "KEY_VALUE")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class KeyValue implements HasTenantId, HasPid {
+    
+    private static final Log log = LogFactory.getLog(KeyValue.class);
 
     private Long pid;
     private Long tenantId;
@@ -74,13 +82,28 @@ public class KeyValue implements HasTenantId, HasPid {
     @JsonProperty("Payload")
     @Transient
     public String getPayload() {
-        return Base64.encodeBase64URLSafeString(getData());
+        byte[] uncompressedData = CompressionUtils.decompressByteArray(getData());
+        JsonElement root = new JsonParser().parse(new String(uncompressedData));
+        return root.toString();
     }
     
     @JsonProperty("Payload")
     @Transient
     public void setPayload(String payload) {
-        setData(Base64.decodeBase64(payload));
+        byte[] payloadData = null;
+        if (payload == null) {
+            log.warn("Payload is null.");
+            return;
+        } else {
+            payloadData = payload.getBytes();
+        }
+        
+        try {
+            byte[] compressedData = CompressionUtils.compressByteArray(payloadData);
+            setData(compressedData);
+        } catch (IOException e) {
+            log.error(e);
+        }
     }
 
     @JsonIgnore
