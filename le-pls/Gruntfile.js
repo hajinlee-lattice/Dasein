@@ -358,7 +358,7 @@ module.exports = function (grunt) {
     'concat:generated',
     'ngAnnotate:app',
     'uglify:app',
-    //'sass:dist',
+    'sass:dist',
     'copy:main',
     'usemin',
     'clean:post'
