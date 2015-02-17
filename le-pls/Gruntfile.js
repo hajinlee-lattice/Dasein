@@ -111,11 +111,13 @@ module.exports = function (grunt) {
                 
         },
         unit: {
-            options: {
-                browsers: ['PhantomJS'],
-                singleRun: true
+            singleRun: true,
+            browsers: ['PhantomJS'],
+            reporters: ['dots', 'junit'],
+            junitReporter: {
+              outputFile: 'target/karma-test-results.xml'
             }
-        },
+        },      
         watch: {
             options: {
                 browsers: ['PhantomJS'],
