@@ -15,6 +15,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     
     $scope.userDisplayName = clientSession.DisplayName;
     $scope.pageTitle = ResourceUtility.getString('MODEL_LIST_TITLE');
+    $scope.showTitle = !$scope.directToPassword;
     
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {
@@ -27,6 +28,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $event.preventDefault();
         }
         
+        $scope.showTitle = true;
         $rootScope.$broadcast(GriotNavUtility.MODEL_LIST_NAV_EVENT);
     };
     
@@ -42,7 +44,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         if ($event != null) {
             $event.preventDefault();
         }
-        
+        $scope.showTitle = false;
         $rootScope.$broadcast(GriotNavUtility.UPDATE_PASSWORD_NAV_EVENT);
     };
     

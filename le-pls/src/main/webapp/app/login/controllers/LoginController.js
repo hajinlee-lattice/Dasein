@@ -10,11 +10,10 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.login.modals.TenantSelectionModal',
     'mainApp.core.services.ResourceStringsService',
     'mainApp.config.services.GriotConfigService',
-    'mainApp.login.modals.ForgotPasswordModal',
     'mainApp.core.controllers.MainViewController'
 ])
 .controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, ServiceErrorUtility, EvergageUtility, 
-    BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, GriotConfigService, TenantSelectionModal, ForgotPasswordModal) {
+    BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, GriotConfigService, TenantSelectionModal) {
     
     $("body").addClass("login-body");
     $('[autofocus]').focus();
@@ -31,6 +30,8 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.showSuccessMessage = false;
     $scope.successMessage = "";
     $scope.loginInProgess = false;
+    $scope.showLoginForm = true;
+    $scope.forgotPasswordUsername = "";
     
     // Controller methods
     $scope.loginClick = function () {
@@ -136,15 +137,34 @@ angular.module('mainApp.login.controllers.LoginController', [
             $event.preventDefault();
         }
         
-        var successCallback = function () {
-            $scope.successMessage = ResourceUtility.getString('FORGOT_PASSWORD_MESSAGE');
-            $scope.showSuccessMessage = true;
-        };
-        var failCallback = function () {
-            $scope.loginErrorMessage = ResourceUtility.getString('FORGOT_PASSWORD_FAILURE_MESSAGE');
-            $scope.showLoginError = true;
-        };
-        ForgotPasswordModal.show(successCallback, failCallback);
+        $scope.showLoginForm = false;
+    };
+    
+    $scope.cancelForgotPasswordClick = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        $scope.showLoginForm = true;
+    };
+    
+    $scope.forgotPasswordOkClick = function () {
+        $scope.forgotPasswordUsernameInvalid = $scope.forgotPasswordUsername === "" ? true : false;
+        if ($scope.forgotPasswordUsernameInvalid) {
+            return;
+        }
+        LoginService.ResetPassword($scope.forgotPasswordUsername).then(function(result) {
+            if (result == null) {
+                return;
+            }
+            
+            if (result.Success === true) {
+                $scope.showLoginForm = true;
+            } else {
+                if ($scope.failCallback != null) {
+                    $scope.failCallback();
+                }
+            }
+        });
     };
     
     $scope.privacyPolicyClick = function ($event) {

@@ -6,7 +6,8 @@
             </p>
         </div>
         
-        <form class="form-signin">
+        <!-- Login form -->
+        <form class="form-signin" data-ng-show="showLoginForm">
             <h2 class="form-signin-heading"><img src="assets/images/logo_login.png" alt="Lattice"></h2>
             <p class="error-message" data-ng-show="showLoginError">{{loginErrorMessage}}</p>
             <div class="login-wrap">
@@ -43,6 +44,31 @@
                 </div>
             </div>
         </form>
+        
+        <!-- Forgot Password form -->
+        <form class="form-signin" data-ng-show="!showLoginForm">
+            <h2 class="form-signin-heading">
+                {{ResourceUtility.getString('FORGOT_PASSWORD_TITLE')}}
+            </h2>
+            <p>{{ResourceUtility.getString('FORGOT_PASSWORD_MESSAGE')}}</p>
+            <div class="login-wrap">
+                <div class="user-login-info">
+                    <label>{{ResourceUtility.getString('LOGIN_USERNAME')}}</label>
+                    <input type="text" 
+                           class="form-control {{forgotPasswordUsernameInvalid ? 'error' : ''}}" 
+                           placeholder="{{ResourceUtility.getString('LOGIN_USERNAME')}}"
+                           autocomplete="off"
+                           data-ng-model="forgotPasswordUsername"
+                           data-ng-enter="forgotPasswordOkClick()"
+                           autofocus>
+                </div>
+                <div class="user-login-info-buttonforgot">
+                    <a href="#" class="btn btn-secondary" data-ng-click="cancelForgotPasswordClick($event)">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</a>
+                    <button class="btn btn-primary" type="submit" data-ng-click="forgotPasswordOkClick()">{{ResourceUtility.getString('FORGOT_PASSWORD_SEND_EMAIL_BUTTON')}}</button>
+                </div>
+            </div>
+        </form>
+        
         <p class="footer">© {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}</a></p>
     </div>
 </div>

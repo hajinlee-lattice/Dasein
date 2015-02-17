@@ -212,7 +212,6 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/userManagement/controllers/UserManagementController.js',
                     '<%= pls.app %>/app/models/controllers/ModelListController.js',
                     '<%= pls.app %>/app/models/controllers/ModelDetailController.js',
-                    '<%= pls.app %>/app/login/modals/ForgotPasswordModal.js',
                     '<%= pls.app %>/app/login/modals/TenantSelectionModal.js',
                     '<%= pls.app %>/app/userManagement/modals/AddUserModal.js',
                     '<%= pls.app %>/app/config/modals/EnterCredentialsModal.js'
@@ -358,6 +357,7 @@ module.exports = function (grunt) {
     'concat:generated',
     'ngAnnotate:app',
     'uglify:app',
+    'sass:dev',
     'sass:dist',
     'copy:main',
     'usemin',

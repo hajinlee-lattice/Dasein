@@ -16,18 +16,19 @@ angular.module('mainApp.core.controllers.MainViewController', [
 .controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, GriotNavUtility, HelpService, GriotConfigService) {
     $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
     $scope.ResourceUtility = ResourceUtility;
-
-    // Handle Initial View
-    $http.get('./app/core/views/MainHeaderView.html').success(function (html) {
-        var scope = $rootScope.$new();
-        $compile($("#mainHeaderView").html(html))(scope);
-    });
-    
-    if ($scope.directToPassword) {
+    var directToPassword = $scope.directToPassword;
+    if (directToPassword) {
         createUpdatePasswordView();
     } else {
         createModelListView();
     }
+    
+    // Handle Initial View
+    $http.get('./app/core/views/MainHeaderView.html').success(function (html) {
+        var scope = $rootScope.$new();
+        scope.directToPassword = directToPassword;
+        $compile($("#mainHeaderView").html(html))(scope);
+    });
     
     $scope.privacyPolicyClick = function ($event) {
         if ($event != null) {
