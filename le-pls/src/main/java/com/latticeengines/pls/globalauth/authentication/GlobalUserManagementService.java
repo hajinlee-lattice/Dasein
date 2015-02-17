@@ -12,5 +12,7 @@ public interface GlobalUserManagementService {
 
     Boolean revokeRight(String right, String tenant, String username);
 
+    Boolean forgotLatticeCredentials(String username, String tanantId);
+
     Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds);
 }

@@ -5,12 +5,10 @@ import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -40,6 +38,9 @@ public class LoginResource {
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
+
+    @Autowired
+    private GlobalUserManagementService globalUserManagementService;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -102,4 +103,15 @@ public class LoginResource {
         return doc;
     }
 
+    @RequestMapping(value = "/forgotpassword/{userName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Reset password and send an email")
+    public Boolean forgotPassword(@PathVariable String userName) {
+
+        //TODO:[13Feb2015] GlobalAuth requires a deployment Id. UI does not require such an input. Using a fake one.
+        Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
+        String tenantId = ticket.getTenants().get(0).getId();
+
+        return globalUserManagementService.forgotLatticeCredentials(userName, tenantId);
+    }
 }

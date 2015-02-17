@@ -73,6 +73,8 @@ public enum LedpCode {
     LEDP_18007("Model with id {0} not found."), //
     LEDP_18008("Attribute {0} cannot be null."), //
     LEDP_18009("Could not log out user ticket {0}."), //
+    LEDP_18010("Could not change the password for user {0}."), //
+    LEDP_18011("Could not reset the password for user {0} with the tanant {1}."), //
     LEDP_18020("Cannot parse file {0}.");
 
     private String message;

@@ -69,25 +69,33 @@ angular.module('mainApp.login.services.LoginService', [
         
         return deferred.promise;
     };
-    
+
     // If a user forgets their password, this will reset it and notify them
     this.ResetPassword = function (username) {
         if (username == null) {
             return null;
         }
         var deferred = $q.defer();
-        
+
         $http({
-            method: 'GET', 
-            url: "./LoginService.svc/ForgotPassword?username=" + username
+            method: 'GET',
+            url: "/pls/forgotpassword/" + username
         })
-        .success(function(data, status, headers, config) {
-            deferred.resolve(data);
-        })
-        .error(function(data, status, headers, config) {
-            deferred.resolve(data);
-        });
-        
+            .success(function(data, status, headers, config) {
+                var result = { Success: false };
+
+                if (data === true || data === 'true') {
+                    result.Success = true;
+                } else {
+                    ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
+                }
+                deferred.resolve(result);
+            })
+            .error(function(data, status, headers, config) {
+                var result = { Success: false, Error: data };
+                deferred.resolve(result);
+            });
+
         return deferred.promise;
     };
     
@@ -130,11 +138,9 @@ angular.module('mainApp.login.services.LoginService', [
         var loginDoc = BrowserStorageUtility.getLoginDocument();
         var username = loginDoc.UserName;
         var creds = {
-            oldPassword : CryptoJS.SHA256(oldPassword).toString(),
-            newPassword : CryptoJS.SHA256(newPassword).toString()
+            OldPassword : CryptoJS.SHA256(oldPassword).toString(),
+            NewPassword : CryptoJS.SHA256(newPassword).toString()
         };
-
-        console.log(BrowserStorageUtility.getLoginDocument());
 
         $http({
             method: 'PUT',
@@ -146,12 +152,12 @@ angular.module('mainApp.login.services.LoginService', [
         })
         .success(function(data, status, headers, config) {
             var result = {
-                success:    true,
-                status:     status
+                Success:    true,
+                Status:     status
             };
 
             if (data !== true && data !== 'true') {
-                result.success = false;
+                result.Success = false;
                 ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
             }
 
@@ -159,8 +165,8 @@ angular.module('mainApp.login.services.LoginService', [
         })
         .error(function(data, status, headers, config) {
             var result = {
-                    success:    false,
-                    status:     status
+                    Success:    false,
+                    Status:     status
                 };
             deferred.resolve(result);
         });

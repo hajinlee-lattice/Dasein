@@ -5,6 +5,7 @@ import java.net.URL;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -76,6 +77,19 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    public Boolean forgotLatticeCredentials(String username, String tanantId) {
+        IUserManagementService service = getService();
+        addMagicHeaderAndSystemProperty(service);
+        try {
+            log.info("User " + username + " resets his/her credentials for tanant " + tanantId);
+            String deploymentId = tanantId;
+            return service.forgotLatticeCredentials(username, deploymentId);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18011, e, new String[] {username, tanantId});
+        }
+    }
+
+    @Override
     public Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -87,10 +101,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
                 new SoapCredentialsBuilder(newCreds).build()
             );
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18006, e, new String[] {oldCreds.getUsername()});
+            throw new LedpException(LedpCode.LEDP_18010, e, new String[] {oldCreds.getUsername()});
         }
     }
-
 
     static class SoapUserBuilder {
         private User user;

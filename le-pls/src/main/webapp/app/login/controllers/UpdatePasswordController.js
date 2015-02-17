@@ -79,11 +79,11 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
             $scope.saveInProgess = true;
             LoginService.ChangePassword($scope.oldPassword, $scope.newPassword, $scope.confirmPassword).then(function(result) {
                 $scope.saveInProgess = false;
-                if (result.success) {
+                if (result.Success) {
                     $("#changePasswordSuccessAlert").fadeIn();
                     setTimeout(LoginService.Logout(), 1000);
                 } else {
-                    if (result.status == 401) {
+                    if (result.Status == 401) {
                         $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_BAD_CREDS");
                     } else {
                         $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_ERROR");
