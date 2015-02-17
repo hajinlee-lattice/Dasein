@@ -141,8 +141,12 @@
                                     <skip>false</skip>
                                     <includes>
                                         <include>${functional.classes.include}</include>
-                                        <exclude>${functional.classes.exclude}</exclude>
                                     </includes>
+                                    <excludes>
+                                        <exclude>${functional.classes.exclude}</exclude>
+                                        <exclude>${deployment.classes.include}</exclude>
+                                        <exclude>${infrastructure.classes.include}</exclude>
+                                    </excludes>
                                     <groups>${functional.groups}</groups>
                                     <forkMode>always</forkMode>
                                     <additionalClasspathElements>
