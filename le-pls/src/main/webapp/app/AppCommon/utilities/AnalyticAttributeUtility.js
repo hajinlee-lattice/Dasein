@@ -10,7 +10,8 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
         None: "None",
         Model: "Model",
         ModelAndModelInsights: "ModelAndModelInsights",
-        ModelAndAllInsights: "ModelAndAllInsights"
+        ModelAndAllInsights: "ModelAndAllInsights",
+        IndividualDisplay: "IndividualDisplay"
     };
     
     // Enum used to determine attribute type information
@@ -19,14 +20,16 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
         LongString: "LONGSTRING",
         Date: "DATE",
         DateTime: "DATETIME",
+        Time: "TIME",
         Double: "DOUBLE",
         Float: "FLOAT",
         Int: "INT",
         Integer: "INTEGER",
         Short: "SHORT",
         Long: "LONG",
-        Boolean: "BIT",
-        Epoch: "EpochTime"
+        Boolean: "BOOLEAN",
+        Bit: "BIT",
+        Epoch: "EPOCHTIME"
     };
     
     // Enum used to determine attribute type semantics
@@ -37,7 +40,8 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
         Percent: "PERCENT",
         Phone: "PHONE",
         Enum: "ENUM",
-        URI: "URI"
+        URI: "URI",
+        Year: "YEAR"
     };
     
     this.FindAttributeMetadataData = function (modelSummary, attributeData) {
@@ -170,66 +174,77 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
             return value;
         }
         
-        //Abbreviate numbers and currencies
+        var toReturn;
         var dataType = attributeMetadata.DataType != null ? attributeMetadata.DataType.toUpperCase() : null;
-        if (dataType == this.DataType.Double ||
-            dataType == this.DataType.Int ||
-            dataType == this.DataType.Integer ||
-            dataType == this.DataType.Short ||
-            dataType == this.DataType.Long ||
-            dataType == this.DataType.Float) {
-            var parsedValue = parseFloat(value);
-            // If the parsedValue is NaN then we have a mismatch of types so just return the value
-            if (isNaN(parsedValue)) {
-                return value;
-            }
-            
-            
-            // If the value is less than 1 it should get 2 decimal places
-            // If the value is less than 1,000 it should get 1 decimal place, but only if it had a decimal place to begin with
-            // Anything greater than 1,000 will be handled by NumberUtility.AbbreviateLargeNumber
-            var abbreviatedNumber;
-            if (parsedValue === 0) {
-                abbreviatedNumber = parsedValue;
-            } else if (parsedValue < 1) {
-                abbreviatedNumber = parsedValue.toFixed(2);
-            } else if (parsedValue < 1000 && parsedValue % 1 !== 0) {
-                abbreviatedNumber = parsedValue.toFixed(1);
-            } else {
-                abbreviatedNumber = NumberUtility.AbbreviateLargeNumber(parsedValue, 1);
-            }
-            // Handle currency and percent
-            var fundamentalType = attributeMetadata.FundamentalType != null ? attributeMetadata.FundamentalType.toUpperCase() : null;
-            if (fundamentalType == this.FundamentalType.Currency) {
-                return ResourceUtility.getString("CURRENCY_SYMBOL") + abbreviatedNumber;
-            } else if (fundamentalType == this.FundamentalType.Percent) {
-                return abbreviatedNumber + "%";
-            } else {
-                return abbreviatedNumber;
-            }
+        switch (dataType) {
+            // Format Numbers
+            case this.DataType.Double:
+            case this.DataType.Int:
+            case this.DataType.Integer:
+            case this.DataType.Short:
+            case this.DataType.Long:
+            case this.DataType.Float:
+                var parsedValue = parseFloat(value);
+                // If the parsedValue is NaN then we have a mismatch of types so just return the value
+                if (isNaN(parsedValue)) {
+                    toReturn = value;
+                    break;
+                }
+                
+                // Need to handle year differently so it is not rounded
+                var fundamentalType = attributeMetadata.FundamentalType != null ? attributeMetadata.FundamentalType.toUpperCase() : null;
+                if (fundamentalType == this.FundamentalType.Year) {
+                    toReturn = parsedValue;
+                    break;
+                }
+                
+                // If the value is less than 1 it should get 2 decimal places
+                // If the value is less than 1,000 it should get 1 decimal place, but only if it had a decimal place to begin with
+                // Anything greater than 1,000 will be handled by NumberUtility.AbbreviateLargeNumber
+                var abbreviatedNumber;
+                if (parsedValue === 0) {
+                    abbreviatedNumber = parsedValue;
+                } else if (parsedValue < 1) {
+                    abbreviatedNumber = parsedValue.toFixed(2);
+                } else if (parsedValue < 1000 && parsedValue % 1 !== 0) {
+                    abbreviatedNumber = parsedValue.toFixed(1);
+                } else {
+                    abbreviatedNumber = NumberUtility.AbbreviateLargeNumber(parsedValue, 1);
+                }
+                // Handle currency and percent
+                if (fundamentalType == this.FundamentalType.Currency) {
+                    toReturn = ResourceUtility.getString("CURRENCY_SYMBOL") + abbreviatedNumber;
+                } else if (fundamentalType == this.FundamentalType.Percent) {
+                    toReturn = abbreviatedNumber + "%";
+                } else {
+                    toReturn = abbreviatedNumber;
+                }
+                break;
+            // Format Date
+            case this.DataType.Date:
+                toReturn = DateTimeFormatUtility.FormatStringDate(value, false);
+                break;
+            // Format DateTime and Time
+            case this.DataType.DateTime:
+            case this.DataType.Time:
+                toReturn = DateTimeFormatUtility.FormatStringDate(value, true);
+                break;
+            // Format Boolean and Bit
+            case this.DataType.Boolean:
+            case this.DataType.Bit:
+                toReturn = this.FormatBooleanValueForDisplay(value);
+                break;
+            // Format EpochTime
+            case this.DataType.Epoch:
+                toReturn = DateTimeFormatUtility.FormatEpochDate(value);
+                break;
+            default:
+                //No formatting required for String or LongString
+                toReturn = value;
+                break;
         }
         
-        // Format Date
-        if (dataType == this.DataType.Date) {
-            return DateTimeFormatUtility.FormatStringDate(value, false);
-        }
-        
-        // Format DateTime
-        if (dataType == this.DataType.DateTime) {
-            return DateTimeFormatUtility.FormatStringDate(value, true);
-        }
-        
-        // Format Boolean
-        if (dataType == this.DataType.Boolean) {
-            return this.FormatBooleanValueForDisplay(value);
-        }
-        
-        // Format EpochTime
-        if (dataType == this.DataType.Epoch) {
-            return DateTimeFormatUtility.FormatEpochDate(value);
-        }
-        
-        return value;
+        return toReturn;
     };
     
     this.SortAttributeList = function (groomedAttributeList, descending) {
