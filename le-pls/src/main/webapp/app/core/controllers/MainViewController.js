@@ -26,7 +26,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
     // Handle Initial View
     $http.get('./app/core/views/MainHeaderView.html').success(function (html) {
         var scope = $rootScope.$new();
-        scope.directToPassword = directToPassword;
         $compile($("#mainHeaderView").html(html))(scope);
     });
     

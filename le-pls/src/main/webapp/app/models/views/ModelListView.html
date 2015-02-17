@@ -1,7 +1,20 @@
-<section class="panel panel-clear" data-ng-controller="ModelListController">
-    <div class="panel-body main-panel-body">
-        <div class="row" id="modelListContainer">
-            
+<div data-ng-controller="ModelListController">
+    <header class="header">
+        <div class="page-title">
+            <div class="wrapper text-center">
+                <h1>{{ResourceUtility.getString('MODEL_LIST_TITLE')}}</h1>
+            </div>
         </div>
-    </div>
-</section>
+    </header>
+    <section id="main-content" class="wrapper">
+        <div class="row">
+            <section class="panel panel-clear">
+                <div class="panel-body main-panel-body">
+                    <div class="row" id="modelListContainer">
+                        
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>
