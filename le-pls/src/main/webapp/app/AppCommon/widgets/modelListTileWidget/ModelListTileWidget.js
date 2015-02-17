@@ -28,11 +28,26 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     
     //TODO:pierce Field names subject to change
     $scope.displayName = data[widgetConfig.NameProperty];
-    $scope.status = data[widgetConfig.StatusProperty];
+    $scope.isActive = data[widgetConfig.StatusProperty] === "Active" ? true : false;
     $scope.createdDate = data[widgetConfig.CreatedDateProperty];
 
-    $scope.tileClick = function () {
-        $rootScope.$broadcast(GriotNavUtility.MODEL_DETAIL_NAV_EVENT, data);
+    $scope.tileClick = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        
+        var targetElement = $($event.target);
+        if (targetElement.hasClass("editable-click")) {
+            //Changing the name of the model
+            
+        } else if (targetElement.hasClass("fa-trash-o")) {
+            // deleting the model
+            
+        } else {
+            $rootScope.$broadcast(GriotNavUtility.MODEL_DETAIL_NAV_EVENT, data);
+        }
+        
+        
     };
    
 })

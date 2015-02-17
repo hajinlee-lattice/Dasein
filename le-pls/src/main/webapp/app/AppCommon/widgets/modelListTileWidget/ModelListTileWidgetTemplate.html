@@ -1,21 +1,14 @@
-<div class="col-md-4 model-list-tile-widget" data-ng-controller="ModelListTileWidgetController"  data-ng-click="tileClick()">
-    <section class="panel panel-model-fancy" id="panel-model-1">
-        <div class="fancy-header model-bg-1">
-            <div class="model-header-txt"><span class="fa fa-check-circle"></span> {{displayName}}</div>
-                <ul class="tile-datapoints-primary">
-                    <li> 
-                        <span class="tile-label">{{ResourceUtility.getString('MODEL_TILE_STATUS_LABEL')}}</span> 
-                        <span class="tile-value">{{status}}</span> 
-                    </li>
-                </ul>
+<div class="col-md-4" data-ng-controller="ModelListTileWidgetController" data-ng-click="tileClick($event)">
+    <a href="#" class="model {{isActive ? '' : 'inactive'}}">
+        <div class="model-title">
+            <h2 class="editable editable-click" data-type="text" data-placement="right" data-title="Enter Model Name">{{displayName}}</h2>
         </div>
-        <div class="tile-datapoints">
-            <ul>
-                <li>
-                    <span class="tile-label">{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</span> 
-                    <span class="tile-value">{{createdDate}}</span> 
-                </li>
-            </ul>
+        <div class="status">
+            <dl>
+                <dt>{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>
+                <dd>{{createdDate}}</dd>
+            </dl>
+            <button type="button" class="btn btn-link"><i class="fa fa-trash-o"></i></button>
         </div>
-    </section>
+    </a>
 </div>

@@ -160,9 +160,7 @@ angular.module('mainApp.login.controllers.LoginController', [
             if (result.Success === true) {
                 $scope.showLoginForm = true;
             } else {
-                if ($scope.failCallback != null) {
-                    $scope.failCallback();
-                }
+                //TODO:pierce need to handle errors from forgot password
             }
         });
     };
