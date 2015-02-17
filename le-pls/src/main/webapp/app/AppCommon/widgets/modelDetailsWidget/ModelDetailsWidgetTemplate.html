@@ -1,71 +1,69 @@
-<div class="col-md-12" data-ng-controller="ModelDetailsWidgetController">
-    <section class="panel">
-        <div class="panel-body">
-            <div class="model-details-header">
-                <div class="mdh-lt">
-                    <div class="panel-model-scorerating">
-                        <div class="model-score-circ"> <span>{{score}}</span> </div>
-                        <div class="model-rating"><span class="fa fa-star active"></span><span class="fa fa-star active"></span><span class="fa fa-star active"></span><span class="fa fa-star"></span> </div>
-                    </div>
+<div data-ng-controller="ModelDetailsWidgetController">
+    <header class="header">
+        <div class="page-title">
+            <div class="wrapper">
+                <a href="#" class="back-button">Back</a>
+                <dl>
+                    <dt>Model</dt>
+                    <dd><h1>{{displayName}}</h1></dd>
+                </dl>
+            </div>
+            <div class="meta secondary">
+                <div class="wrapper">
+                    <div class="meta-group">
+                        <dl>
+                            <dt>{{ResourceUtility.getString('MODEL_TILE_STATUS_LABEL')}}</dt>
+                            <dd>{{status}}</dd>
+                        </dl>
+                        <dl>
+                            <dt>{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>
+                            <dd>{{createdDate}}</dd>
+                        </dl>
+                  </div>
+                  <a href="#" class="toggleDetails">{{ResourceUtility.getString('MODEL_DETAILS_SHOW_MORE_BUTTON')}}</a>
                 </div>
-                <div class="mdh-mid">
-                    <h1 class="h1-h2"><a href="#" id="editable-model-name" data-type="text" data-placement="right" data-title="Enter Model Name" class="editable editable-click" style="display: inline;">{{displayName}}</a></h1>
-                    <div class="mdh-datapoints" id="base-datapoints">
-                        <div class="value-pair"> <span class="title-label">{{ResourceUtility.getString('MODEL_TILE_STATUS_LABEL')}}</span> 
-                            <span class="title-value"><span class="fa fa-check-circle active"></span> Active</span> 
-                        </div>
-                        <div class="value-pair"> 
-                            <span class="title-label">{{ResourceUtility.getString('MODEL_TILE_EXTERNAL_LABEL')}}</span> 
-                            <span class="title-value">{{externalAttributes}}</span> 
-                        </div>
-                        <div class="value-pair"> 
-                            <span class="title-label">{{ResourceUtility.getString('MODEL_TILE_INTERNAL_LABEL')}}</span> 
-                            <span class="title-value">{{internalAttributes}}</span> 
-                        </div>
-                        <div class="value-pair"> 
-                            <span class="title-label">{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</span> 
-                            <span class="title-value">{{createdDate}}</span> 
-                        </div>
+            </div>
+            <div class="meta tertiary">
+                <div class="wrapper">
+                    <div class="meta-group">
+                        <h3>Leads</h3>
+                        <dl>
+                            <dt>{{ResourceUtility.getString('MODEL_DETAILS_TOTAL_LEADS_LABEL')}}</dt>
+                            <dd>{{totalLeads}}</dd>
+                        </dl>
+                        <dl>
+                            <dt>{{ResourceUtility.getString('MODEL_DETAILS_TEST_SET_LABEL')}}</dt>
+                            <dd>{{testSet}}</dd>
+                        </dl>
+                        <dl>
+                            <dt>{{ResourceUtility.getString('MODEL_DETAILS_TRAINING_SET_LABEL')}}</dt>
+                            <dd>{{trainingSet}}</dd>
+                        </dl>
                     </div>
-                    <div id="link-showmore"><a href="" class="btn"><i class="fa fa-angle-down"></i> {{ResourceUtility.getString('MODEL_DETAILS_SHOW_MORE_BUTTON')}} <i class="fa fa-angle-down"></i></a></div>
-                    <div class="mdh-datapoints sub" id="more-datapoints" style="display: block;">
-                        <div class="value-pair"> 
-                            <span class="title-label">{{ResourceUtility.getString('MODEL_DETAILS_TOTAL_LEADS_LABEL')}}</span> 
-                            <span class="title-value">{{totalLeads}}</span> 
-                        </div>
-                        <div class="value-pair"> 
-                            <span class="title-label">{{ResourceUtility.getString('MODEL_DETAILS_TEST_SET_LABEL')}}</span> 
-                            <span class="title-value">{{testSet}}</span>
-                        </div>
-                        <div class="value-pair"> 
-                            <span class="title-label">{{ResourceUtility.getString('MODEL_DETAILS_TRAINING_SET_LABEL')}}</span>
-                            <span class="title-value">{{trainingSet}}</span>
-                        </div>
-                        <div class="value-pair"> 
-                            <span class="title-label">{{ResourceUtility.getString('MODEL_DETAILS_SUCCESS_EVENTS_LABEL')}}</span> 
-                            <span class="title-value">{{totalSuccessEvents}}</span> 
-                        </div>
-                        <div class="value-pair"> 
-                            <span class="title-label">{{ResourceUtility.getString('MODEL_DETAILS_CONVERSION_RATE_LABEL')}}</span> 
-                            <span class="title-value">{{conversionRate}}%</span> 
-                        </div>
-                        <div class="mdh-datapoints sub" id="more-datapoints-2">
-                            <div class="value-pair"> 
-                                <span class="title-label">{{ResourceUtility.getString('MODEL_DETAILS_LEAD_SOURCE_LABEL')}}</span> 
-                                <span class="title-value">{{leadSource}}</span> 
-                            </div>
-                            <div class="value-pair"> 
-                                <span class="title-label">{{ResourceUtility.getString('MODEL_DETAILS_OPPORTUNITY_LABEL')}}</span> 
-                                <span class="title-value">{{opportunity}}</span> 
-                            </div>
-                        </div>
+                    <div class="meta-group">
+                        <h3>Conversions</h3>
+                        <dl>
+                            <dt>{{ResourceUtility.getString('MODEL_DETAILS_SUCCESS_EVENTS_LABEL')}}</dt>
+                            <dd>{{totalSuccessEvents}}</dd>
+                        </dl>
+                        <dl>
+                            <dt>{{ResourceUtility.getString('MODEL_DETAILS_CONVERSION_RATE_LABEL')}}</dt>
+                            <dd>{{conversionRate}}%</dd>
+                        </dl>
                     </div>
-                </div>
-                <div class="mdh-rt">
-                    <div class="btn-group"> <a class="btn btn-primary" data-toggle="modal" href="#score-modal">{{ResourceUtility.getString('BUTTON_ACTIVATE_LABEL')}}</a> </div>
-                    <div class="btn-group"> <a class="btn btn-secondary" data-toggle="modal" href="#delete-modal"><i class="fa fa-trash-o"></i></a> </div>
+                    <div class="meta-group">
+                        <h3>Predictive Attributes From</h3>
+                        <dl>
+                            <dt>{{ResourceUtility.getString('MODEL_TILE_INTERNAL_LABEL')}}</dt>
+                            <dd>{{internalAttributes}}</dd>
+                        </dl>
+                        <dl>
+                            <dt>{{ResourceUtility.getString('MODEL_TILE_EXTERNAL_LABEL')}}</dt>
+                            <dd>{{externalAttributes}}</dd>
+                        </dl>
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+    </header>
 </div>
