@@ -14,7 +14,12 @@ class EnhancedSummaryGenerator(State):
     def execute(self):
         self.result = OrderedDict()
 
-        self.result["Status"] = "Todo"
+        self.result["Segmentations"] = self.mediator.segmentations
+        self.result["Predictors"] = self.mediator.predictors
+        self.result["ModelDetails"] = self.mediator.modeldetails
+        self.result["TopSample"] = self.mediator.topsample
+        self.result["BottomSample"] = self.mediator.bottomsample
+        self.result["EventTableProvenance"] = self.mediator.eventtableprovenance
 
         # Add Result to Mediator
         self.mediator.enhancedsummary = self.result

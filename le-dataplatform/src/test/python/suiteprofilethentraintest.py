@@ -205,7 +205,7 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
         self.assertTrue(hasOther)
         
         self.assertEqual(len(binarySet), 3)
-        self.assertTrue(binarySet == set(['["Yes"]', '["No"]', 'Not Available']))
+        self.assertTrue(binarySet == set(['["Yes"]', '["No"]', '["Not Available"]']))
 
     @classmethod
     def getSubDir(cls):

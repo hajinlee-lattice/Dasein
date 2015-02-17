@@ -15,8 +15,12 @@ from leframework.model.states.modelgenerator import ModelGenerator
 from leframework.model.states.namegenerator import NameGenerator
 from leframework.model.states.percentilebucketgenerator import PercentileBucketGenerator
 from leframework.model.states.pmmlmodelgenerator import PMMLModelGenerator
-from leframework.model.states.readoutsamplegenerator import ReadoutSampleGenerator
+from leframework.model.states.samplegenerator import SampleGenerator
 from leframework.model.states.rocgenerator import ROCGenerator
+from leframework.model.states.provenancegenerator import ProvenanceGenerator
+from leframework.model.states.predictorgenerator import PredictorGenerator
+from leframework.model.states.modeldetailgenerator import ModelDetailGenerator
+from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
 from leframework.model.states.datacompositiongenerator import DataCompositionGenerator
 from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
@@ -54,14 +58,18 @@ class LearningExecutor(Executor):
         stateMachine.addState(ModelGenerator(), 6)
         stateMachine.addState(PMMLModelGenerator(), 7)
         stateMachine.addState(ROCGenerator(), 8)
-        stateMachine.addState(SummaryGenerator(), 9)
-        stateMachine.addState(NameGenerator(), 10)
-        stateMachine.addState(PercentileBucketGenerator(), 11)
-        stateMachine.addState(ReadoutSampleGenerator(), 12)
-        stateMachine.addState(DataCompositionGenerator(), 13)
-        stateMachine.addState(ScoreDerivationGenerator(), 14)
-        stateMachine.addState(EnhancedSummaryGenerator(), 15)
-        stateMachine.addState(Finalize(), 16)
+        stateMachine.addState(ProvenanceGenerator(), 9)
+        stateMachine.addState(PredictorGenerator(), 10)
+        stateMachine.addState(ModelDetailGenerator(), 11)
+        stateMachine.addState(SegmentationGenerator(), 12)
+        stateMachine.addState(SummaryGenerator(), 13)
+        stateMachine.addState(NameGenerator(), 14)
+        stateMachine.addState(PercentileBucketGenerator(), 15)
+        stateMachine.addState(SampleGenerator(), 16)
+        stateMachine.addState(DataCompositionGenerator(), 17)
+        stateMachine.addState(ScoreDerivationGenerator(), 18)
+        stateMachine.addState(EnhancedSummaryGenerator(), 19)
+        stateMachine.addState(Finalize(), 20)
         return stateMachine
 
     def retrieveMetadata(self, schema, depivoted):

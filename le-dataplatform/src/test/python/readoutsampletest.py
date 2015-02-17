@@ -46,9 +46,9 @@ class ReadoutSampleTest(TrainingTestBase):
         convertedColumName = "Converted"
         convertedColumIndex = 2
         leadIDColumnName = "LeadID"
-        leadIDColumnIndex = 4
+        leadIDColumnIndex = 5
         emailColumName = "Email"
-        emailColumIndex = 6
+        emailColumIndex = 7
 
         # Output File Exists?
         outputFile = glob.glob("./results/*readoutsample.csv")[0]

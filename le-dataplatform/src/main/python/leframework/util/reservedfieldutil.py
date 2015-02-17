@@ -6,6 +6,7 @@ class ReservedFieldUtil():
         configFields.append(("PercentileScore", int(-1)))
         configFields.append(("Score", float(-1)))
         configFields.append(("Converted", None))
+        configFields.append(("Training", None))
 
         # Decorate Names To Avoid Clashes
         lookup = dict()

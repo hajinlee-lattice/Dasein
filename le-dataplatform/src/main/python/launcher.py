@@ -4,6 +4,7 @@ import pwd
 import sys
 from urlparse import urlparse
 from pandas.core.frame import DataFrame
+from pandas import Series
 
 from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
@@ -119,6 +120,8 @@ class Launcher(object):
         schema["python_pipeline_lib"] = self.stripPath(schema["python_pipeline_lib"])
 
         if postProcessClf:
+            self.training[schema["reserved"]["training"]].update(Series([True] * self.training.shape[0]))
+            self.test[schema["reserved"]["training"]].update(Series([False] * self.test.shape[0]))
             params["allDataPreTransform"] = DataFrame.append(self.training, self.test)
             (self.training, self.test, metadata) = executor.transformData(params)
             params["allDataPostTransform"] = DataFrame.append(self.training, self.test)

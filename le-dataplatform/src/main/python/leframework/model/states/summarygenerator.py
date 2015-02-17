@@ -2,7 +2,6 @@ from collections import OrderedDict
 from datetime import datetime
 import logging
 import time
-import uuid
 
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
@@ -18,17 +17,8 @@ class SummaryGenerator(State, JsonGenBase):
     def execute(self):
         mediator = self.mediator
         self.summary = OrderedDict()
-        predictors = []
-        for key, value in mediator.metadata[0].iteritems():
-            if key + "_1" == mediator.schema["target"]:
-                continue
-            self.logger.info("Generating predictors for " + key)
-            predictors.append(self.generatePredictors(key, value))
-
-        # Sort predictor by UncertaintyCoefficient
-        predictors = sorted(predictors, key = lambda x: x["UncertaintyCoefficient"], reverse = True)
         self.summary["SchemaVersion"] = 1
-        self.summary["Predictors"] = predictors
+        self.summary["Predictors"] = mediator.predictors
 
         rocScore = mediator.rocscore
 
@@ -45,78 +35,6 @@ class SummaryGenerator(State, JsonGenBase):
     @overrides(JsonGenBase)
     def getJsonProperty(self):
         return self.summary
-
-    def generatePredictors(self, colname, metadata):
-        elements = []
-
-        attrLevelUncertaintyCoeff = 0
-        hasNotNoneUC = False
-        for record in metadata:
-            self.logger.info(record)
-            element = OrderedDict()
-            element["CorrelationSign"] = 1 if record["lift"] > 1 else -1
-            element["Count"] = record["count"]
-
-            # Lift value
-            if record["lift"] is not None:
-                element["Lift"] = record["lift"]
-
-            # Band values
-            if record["Dtype"] == "BND":
-                element["LowerInclusive"] = record["minV"]
-            if record["Dtype"] == "BND":
-                element["UpperExclusive"] = record["maxV"]
-
-            # Name
-            element["Name"] = str(uuid.uuid4())
-
-            # Uncertainty coefficient
-            if record["uncertaintyCoefficient"] is not None:
-                element["UncertaintyCoefficient"] = record["uncertaintyCoefficient"] 
-                attrLevelUncertaintyCoeff += element["UncertaintyCoefficient"]
-                hasNotNoneUC = True
-
-            # Discrete value
-            if record["Dtype"] == "BND":
-                element["Values"] = []
-            else:
-                element["Values"] = [record["columnvalue"]]
-
-            # Handle null buckets for both continuous and discrete
-            if "continuousNullBucket" in record and record["continuousNullBucket"] == True:
-                element["Values"] = [None]
-            if "discreteNullBucket" in record and record["discreteNullBucket"] == True:
-                element["Values"] = [None]
-
-            element["IsVisible"] = True
-            elements.append(element)
-
-        predictor = OrderedDict()
-        predictor["Elements"] = elements
-        predictor["Name"] = colname
-
-        if "displayname" in record:
-            predictor["DisplayName"] = record["displayname"]
-        else:
-            predictor["DisplayName"] = colname
-        if "approvedusage" in record:
-            predictor["ApprovedUsage"] = record["approvedusage"]
-        else:
-            predictor["ApprovedUsage"] = ""
-        if "category" in record:
-            predictor["Category"] = record["category"]
-        else:
-            predictor["Category"] = ""
-        if "fundamentaltype" in record:
-            predictor["FundamentalType"] = record["fundamentaltype"]
-        else:
-            predictor["FundamentalType"] = ""
-
-        if hasNotNoneUC:
-            predictor["UncertaintyCoefficient"] = attrLevelUncertaintyCoeff
-        else:
-            predictor["UncertaintyCoefficient"] = -1
-        return predictor
 
     def __getSegmentChart(self, probRange, widthRange, buckets, averageProbability):
         # Generate inclusive (min,max) with highest max = null and lowest min = 0
