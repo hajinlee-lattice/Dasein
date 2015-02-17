@@ -2,16 +2,17 @@
     <div id="mainHeaderView">
         
     </div>
-    <section id="main-content">
-        <section class="wrapper">
-            <div class="row">
-                <div class="col-md-12">
-                    <div id="mainContentView">
-                        
-                    </div>
-                    <div class="footer">© {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}</div>
-                </div>
+    <section id="main-content" class="wrapper">
+        <div class="row">
+            <div id="mainContentView">
+                    
             </div>
-        </section>
+        </div>
     </section>
+    
+    <div class="footer">
+        <div class="wrapper">
+            © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}
+        </div>
+    </div>
 </div>

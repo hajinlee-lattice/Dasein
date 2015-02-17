@@ -14,6 +14,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     }
     
     $scope.userDisplayName = clientSession.DisplayName;
+    $scope.pageTitle = ResourceUtility.getString('MODEL_LIST_TITLE');
     
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {

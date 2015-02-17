@@ -52,17 +52,7 @@ angular.module('mainApp.login.controllers.LoginController', [
                 if (result == null) {
                     $scope.showLoginHeaderMessage(ResourceUtility.getString("LOGIN_UNKNOWN_ERROR"));
                 } else {
-                    switch (result.FailureReason) {
-                        case ServiceErrorUtility.InvalidCredentials:
-                            $scope.showLoginHeaderMessage(ResourceUtility.getString(ServiceErrorUtility.InvalidCredentials));
-                            break;
-                        case ServiceErrorUtility.LoginServiceNotRunning:
-                            $scope.showLoginHeaderMessage(ResourceUtility.getString(ServiceErrorUtility.LoginServiceNotRunning));
-                            break;
-                        default:
-                            $scope.showLoginHeaderMessage(ResourceUtility.getString("LOGIN_UNKNOWN_ERROR"));
-                            break;
-                    }
+                    $scope.showLoginHeaderMessage(result.errorMessage);
                 }
             }
         });

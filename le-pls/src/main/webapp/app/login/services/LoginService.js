@@ -22,26 +22,18 @@ angular.module('mainApp.login.services.LoginService', [
             var result = null;    
             if (data != null && data !== "") {
                 result = data;
-                if (data.Success === true) {
-                    BrowserStorageUtility.setTokenDocument(data.Uniqueness + "." + data.Randomness);
-                    data.Result.UserName = username;
-                    BrowserStorageUtility.setLoginDocument(data.Result);
-                } else {
-                    if (ServiceErrorUtility.ServiceResponseContainsError(data, ServiceErrorUtility.InvalidCredentials)) {
-                        result.FailureReason = ServiceErrorUtility.InvalidCredentials;
-                    } else if (ServiceErrorUtility.ServiceResponseContainsError(data, ServiceErrorUtility.ExpiredPassword)) {
-                        result.FailureReason = ServiceErrorUtility.ExpiredPassword;
-                    } else if (ServiceErrorUtility.ServiceResponseContainsError(data, ServiceErrorUtility.LoginServiceNotRunning)) {
-                        result.FailureReason = ServiceErrorUtility.LoginServiceNotRunning;
-                    } else {
-                        result.FailureReason = "LOGIN_UNKNOWN_ERROR";
-                    }
-                }
+                BrowserStorageUtility.setTokenDocument(data.Uniqueness + "." + data.Randomness);
+                data.Result.UserName = username;
+                BrowserStorageUtility.setLoginDocument(data.Result);
             }
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
-            deferred.resolve(false);
+            var result = {
+                Success: false,
+                errorMessage: data ? data.errorMsg : ResourceUtility.getString('LOGIN_UNKNOWN_ERROR')
+            };
+            deferred.resolve(result);
         });
         
         return deferred.promise;
