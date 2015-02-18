@@ -6925,7 +6925,8 @@ Footer
 /*
 Content
 ================================================================== */
-#main-content {
+#main-content,
+.model-details .tab-widget {
   margin-top: 3em; }
 
 /*

@@ -1,12 +1,14 @@
-<div data-ng-controller="SimpleTabWidgetController" class="tab-container">
-    <ul class="nav nav-tabs">
-        <li class="{{tab.IsActive ? 'active' : ''}}" data-ng-repeat="tab in tabs">
-            <a href="#{{tab.ID}}" data-ng-click="tabClicked($event, tab)">{{tab.Title}}</a>
-        </li>
-    </ul>
-  
-    <div class="tab-content">
-        <div class="tab-pane {{tab.IsActive ? 'active' : ''}}" id="{{tab.ID}}" data-ng-repeat="tab in tabs">
+<section data-ng-controller="SimpleTabWidgetController" class="tab-widget">
+    <div class="tab-panel" role="tabpanel">
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="{{tab.IsActive ? 'active' : ''}}" data-ng-repeat="tab in tabs">
+                <a href="#{{tab.ID}}" aria-controls="home" role="tab" data-toggle="tab">{{tab.Title}}</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane {{tab.IsActive ? 'active' : ''}}" id="{{tab.ID}}" data-ng-repeat="tab in tabs">
+                
+            </div>
         </div>
     </div>
-</div>
+</section>
