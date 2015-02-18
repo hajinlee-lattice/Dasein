@@ -668,22 +668,6 @@ def testSetup(marketting_app, run_setup=False, run_test=True, use_second_bard=Fa
         # Step 7 - Upload to Dante and Deal with that - WIP
 
 
-def addLeadsToMarketo(marketo_url, marketo_token, marketo_id, leads_list):
-    # leads_list must be a List of Dict
-    marketo_dict = {"action":"createOrUpdate",
-                    "lookupField":"email",
-                    "input": leads_list}
-    endpoint = "/rest/v1/leads.json"
-    auth_token =  "?access_token=%s" % marketo_token
-    request_url = "%s%s%s" % (marketo_url, endpoint, auth_token)
-    #print request_url, marketo_dict
-    auth_url ="%s/identity/oauth/token?grant_type=client_credentials" % marketo_url
-    request_url = auth_url + "&client_id=" + marketo_id + "&client_secret=" + marketo_token
-    #request = requests.post(request_url, data=json.dumps(marketo_dict))
-    print request_url
-    request = requests.get(request_url)
-    print request.text
-
 def main():
     print "Welcome to PLS End to End Automation!"
     testSetup("Eloqua", run_setup=False, use_second_bard=False, run_test=True)
