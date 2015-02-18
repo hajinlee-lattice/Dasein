@@ -70,7 +70,8 @@ class SuiteProfilingThenTrainTest(TrainingTestBase):
     def tearDown(self):
         super(TrainingTestBase, self).tearDown()
         # Remove launcher module to restore its globals()
-        del sys.modules['launcher']
+        if 'launcher' in sys.modules:
+            del sys.modules['launcher']
         
 class SuiteMuleSoftProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
@@ -210,3 +211,15 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     @classmethod
     def getSubDir(cls):
         return "PLS132_test_Docusign"
+    
+class SuiteTenant1ProfilingThenTrainTest(SuiteProfilingThenTrainTest):
+    def testExecuteProfilingThenTrain(self):
+        super(SuiteTenant1ProfilingThenTrainTest, self).executeProfilingThenTrain()
+        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
+        rocScore = jsonDict["Summary"]["RocScore"]
+        self.assertTrue(rocScore > 0.5)
+
+    @classmethod
+    def getSubDir(cls):
+        return "Tenant1"
+    
