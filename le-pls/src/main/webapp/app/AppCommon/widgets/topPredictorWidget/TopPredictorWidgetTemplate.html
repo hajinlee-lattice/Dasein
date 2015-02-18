@@ -1,17 +1,4 @@
 <style>
-    .top-predictor-panel {
-        display: inline-block;
-        vertical-align: text-top;
-    }
-    
-    .top-predictor-panel.middle {
-        margin-left: 150px;
-    }
-    
-    .top-predictor-panel.right {
-        margin-left: 150px;
-    }
-    
     .top-predictor-donut-text
     {
         text-anchor:        middle;
@@ -45,32 +32,33 @@
         cursor: pointer;
     }
 </style>
-<div data-ng-controller="TopPredictorWidgetController" class="wrapper">
+<div data-ng-controller="TopPredictorWidgetController" id="attributes">
     <div class="tab-header">
         <div class="wrapper" data-ng-show="!backToSummaryView">
-            <span>{{topPredictorTitle}} </span>&nbsp;|&nbsp;<a href="#" class="secondary">Export All</a>
+            <span>{{topPredictorTitle}} </span>&nbsp;|&nbsp;<a href="#" class="secondary">{{ResourceUtility.getString('TOP_PREDICTORS_EXPORT_LABEL')}}</a>
             
         </div>
         <div class="wrapper" data-ng-show="backToSummaryView">
-            <span class="top-predictor-back" data-ng-click="backToSummaryClicked()">&lt; Back to Top Attributes </span>
+            <span class="top-predictor-back" data-ng-click="backToSummaryClicked()">&lt; {{ResourceUtility.getString('TOP_PREDICTORS_BACK_TO_SUMMARY_LABEL')}}</span>
         </div>
     </div>
-    <div>
-        <span class="top-predictor-panel" data-ng-show="showExternalCategories">
-            <h3>{{externalPredictorTotal}}</h3>
-            <h3>{{ResourceUtility.getString('TOP_PREDICTORS_CATEGORY_LABEL')}}</h3>
-            <div class="top-predictor-category" data-ng-repeat="category in externalCategories" data-ng-click="categoryClicked(category)">
-                <p class="top-predictor-category-count" style="background-color:{{category.color}}">{{category.count}}</p> {{category.name}}
+    <div class="wrapper">
+        <div class="data">
+            <div data-ng-show="showExternalCategories">
+                <h4>{{externalPredictorTotal}}</h4>
+                <div class="top-predictor-category" data-ng-repeat="category in externalCategories" data-ng-click="categoryClicked(category)">
+                    <p class="top-predictor-category-count" style="background-color:{{category.color}}">{{category.count}}</p> {{category.name}}
+                </div>
             </div>
-        </span>
-        <span class="js-top-predictor-donut top-predictor-panel middle">
-        </span>
-        <span class="top-predictor-panel right" data-ng-show="showInternalCategories">
-            <h3>{{internalPredictorTotal}}</h3>
-            <h3>{{ResourceUtility.getString('TOP_PREDICTORS_CATEGORY_LABEL')}}</h3>
-            <div class="top-predictor-category" data-ng-repeat="category in internalCategories">
-                <p class="top-predictor-category-count">{{category.count}}</p> {{category.name}}
+            <div id="chart" class="js-top-predictor-donut">
+                
             </div>
-        </span>
+            <div data-ng-show="showInternalCategories">
+                <h4>{{internalPredictorTotal}}</h4>
+                <div class="top-predictor-category" data-ng-repeat="category in internalCategories">
+                    <p class="top-predictor-category-count">{{category.count}}</p> {{category.name}}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
