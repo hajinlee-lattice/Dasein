@@ -148,7 +148,7 @@ public class ModelingServiceExecutor {
     
     private void waitForAppId(String appId) throws Exception {
         JobStatus status = null;
-        int maxTries = 20;
+        int maxTries = 60;
         int i = 0;
         do {
             String url = String.format(modelingServiceHostPort + "/rest/getJobStatus/%s", appId);
