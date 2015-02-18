@@ -29,8 +29,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.common.exposed.util.CompressionUtils;
-import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -50,6 +48,7 @@ import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagemen
 import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.security.TicketAuthenticationToken;
+import com.latticeengines.pls.service.impl.ModelSummaryParser;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
@@ -77,6 +76,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private SessionFactory sessionFactory;
+    
+    @Autowired
+    private ModelSummaryParser modelSummaryParser;
 
     @Value("${pls.api.hostport}")
     private String hostPort;
@@ -201,14 +203,14 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                 UserDocument.class, new Object[] {});
     }
 
-    private KeyValue getDetails() throws Exception {
-        InputStream modelSummaryFileAsStream = ClassLoader
-                .getSystemResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary.json");
-        byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
-        data = CompressionUtils.compressByteArray(data);
-        KeyValue details = new KeyValue();
-        details.setData(data);
-        return details;
+    private ModelSummary getDetails(Tenant tenant, String suffix) throws Exception {
+        String file = String.format("com/latticeengines/pls/functionalframework/modelsummary-%s.json", suffix);
+        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(file);
+        String contents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
+        String fakePath = String.format("/user/s-analytics/customers/%s-%s", tenant.getId(), suffix);
+        ModelSummary summary = modelSummaryParser.parse(fakePath, contents);
+        summary.setTenant(tenant);
+        return summary;
     }
     
     protected void setupDb(String tenant1Name, String tenant2Name) throws Exception {
@@ -226,21 +228,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             tenantEntityMgr.create(tenant1);
 
             if (createSummaries) {
-                ModelSummary summary1 = new ModelSummary();
-                summary1.setId("123");
-                summary1.setName("Model1");
-                summary1.setTenant(tenant1);
-                summary1.setRocScore(0.75);
-                summary1.setLookupId(tenant1Name + "|Q_EventTable_" + tenant1Name + "|abcde");
-                summary1.setTrainingRowCount(8000L);
-                summary1.setTestRowCount(2000L);
-                summary1.setTotalRowCount(10000L);
-                summary1.setTrainingConversionCount(80L);
-                summary1.setTestConversionCount(20L);
-                summary1.setTotalConversionCount(100L);
-                summary1.setDetails(getDetails());
-                summary1.setConstructionTime(System.currentTimeMillis());
-
+                ModelSummary summary1 = getDetails(tenant1, "eloqua");
                 modelSummaryEntityMgr.create(summary1);
             }
         }
@@ -252,20 +240,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             tenantEntityMgr.create(tenant2);
 
             if (createSummaries) {
-                ModelSummary summary2 = new ModelSummary();
-                summary2.setId("456");
-                summary2.setName("Model2");
-                summary2.setTenant(tenant2);
-                summary2.setRocScore(0.80);
-                summary2.setLookupId(tenant2Name + "|Q_EventTable_" + tenant2Name + "|fghij");
-                summary2.setTrainingRowCount(80000L);
-                summary2.setTestRowCount(20000L);
-                summary2.setTotalRowCount(100000L);
-                summary2.setTrainingConversionCount(800L);
-                summary2.setTestConversionCount(200L);
-                summary2.setTotalConversionCount(1000L);
-                summary2.setDetails(getDetails());
-                summary2.setConstructionTime(System.currentTimeMillis());
+                ModelSummary summary2 = getDetails(tenant2, "marketo");
                 Predictor s2p1 = new Predictor();
                 s2p1.setApprovedUsage("Model");
                 s2p1.setCategory("Construction");
@@ -274,7 +249,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                 s2p1.setFundamentalType("");
                 s2p1.setUncertaintyCoefficient(0.151911);
                 summary2.addPredictor(s2p1);
-
                 PredictorElement s2el1 = new PredictorElement();
                 s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
                 s2el1.setCorrelationSign(-1);

@@ -134,7 +134,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(response.size(), 1);
         Map<String, String> map = (Map) response.get(0);
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
-        assertEquals(summary.getName(), "Model2");
+        assertEquals(summary.getName(), "PLSModel");
         assertNotNull(summary.getDetails());
     }
 
@@ -165,8 +165,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
-        restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/456");
-        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort()  + "/pls/modelsummaries/456", ModelSummary.class);
+        restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/ms-8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a");
+        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort()  + "/pls/modelsummaries/ms-8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a", ModelSummary.class);
         assertNull(summary);
     }
 

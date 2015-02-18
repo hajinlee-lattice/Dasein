@@ -20,19 +20,19 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void parse() throws Exception {
         InputStream is = ClassLoader.getSystemResourceAsStream(
-                "com/latticeengines/pls/functionalframework/modelsummary.json");
+                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
         String data = new String(IOUtils.toByteArray(is));
         ModelSummary summary = modelSummaryParser.parse("/tmp/abc/modelsummary.json", data);
         
-        assertEquals(summary.getName(), "Model_Submission1");
-        assertEquals(summary.getLookupId(), "TENANT1|Q_EventTable_TENANT1|58e6de15-5448-4009-a512-bd27d59ca75d");
-        assertEquals(summary.getTrainingRowCount().longValue(), 17040L);
-        assertEquals(summary.getTestRowCount().longValue(), 4294L);
-        assertEquals(summary.getTotalRowCount().longValue(), 21334L);
-        assertEquals(summary.getTrainingConversionCount().longValue(), 397L);
-        assertEquals(summary.getTestConversionCount().longValue(), 105L);
-        assertEquals(summary.getTotalConversionCount().longValue(), 502L);
-        assertEquals(summary.getRocScore(), 0.8199950607305632);
+        assertEquals(summary.getName(), "PLSModel");
+        assertEquals(summary.getLookupId(), "TENANT1|Q_PLS_Modeling_TENANT1|8195dcf1-0898-4ad3-b94d-0d0f806e979e");
+        assertEquals(summary.getTrainingRowCount().longValue(), 15376L);
+        assertEquals(summary.getTestRowCount().longValue(), 3738L);
+        assertEquals(summary.getTotalRowCount().longValue(), 19114L);
+        assertEquals(summary.getTrainingConversionCount().longValue(), 719L);
+        assertEquals(summary.getTestConversionCount().longValue(), 154L);
+        assertEquals(summary.getTotalConversionCount().longValue(), 873L);
+        assertEquals(summary.getRocScore(), 0.9341374179555253);
         
         String decompressedDetails = new String(CompressionUtils.decompressByteArray(summary.getDetails().getData()));
         assertEquals(decompressedDetails, data);

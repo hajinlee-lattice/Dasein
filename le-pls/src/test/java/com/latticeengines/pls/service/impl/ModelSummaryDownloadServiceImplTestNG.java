@@ -75,7 +75,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         String dir = modelingServiceHdfsBaseDir
                 + "/TENANT1/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0001/enhancements";
         URL modelSummaryUrl = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/functionalframework/modelsummary.json");
+                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
 
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
@@ -99,7 +99,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         String dir = modelingServiceHdfsBaseDir
                 + "/TENANT1/models/Q_EventTable_TENANT1/58e6de15-5448-4009-a512-bd27d59ca75d/1423547416066_0002/enhancements";
         URL modelSummaryUrl = ClassLoader.getSystemResource(
-                "com/latticeengines/pls/functionalframework/modelsummary.json");
+                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
 

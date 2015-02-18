@@ -52,7 +52,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     
     private void setDetails(ModelSummary summary) throws Exception {
         InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
-                "com/latticeengines/pls/functionalframework/modelsummary.json");
+                "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
         byte[] data = IOUtils.toByteArray(modelSummaryFileAsStream);
         data = CompressionUtils.compressByteArray(data);
         KeyValue details = new KeyValue();
@@ -68,7 +68,6 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         summary1 = new ModelSummary();
         summary1.setId("123");
         summary1.setName("Model1");
-        summary1.setTenant(tenant1);
         summary1.setRocScore(0.75);
         summary1.setLookupId("TENANT1|Q_EventTable_TENANT1|abcde");
         summary1.setTrainingRowCount(8000L);
@@ -78,6 +77,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         summary1.setTestConversionCount(20L);
         summary1.setTotalConversionCount(100L);
         summary1.setConstructionTime(System.currentTimeMillis());
+        summary1.setTenant(tenant1);
         setDetails(summary1);
         Predictor s1p1 = new Predictor();
         s1p1.setApprovedUsage("Model");
@@ -122,7 +122,6 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         ModelSummary summary2 = new ModelSummary();
         summary2.setId("456");
         summary2.setName("Model2");
-        summary2.setTenant(tenant2);
         summary2.setRocScore(0.80);
         summary2.setLookupId("TENANT2|Q_EventTable_TENANT2|fghij");
         summary2.setTrainingRowCount(80000L);
@@ -132,6 +131,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         summary2.setTestConversionCount(200L);
         summary2.setTotalConversionCount(1000L);
         summary2.setConstructionTime(System.currentTimeMillis());
+        summary2.setTenant(tenant2);
         setDetails(summary2);
         Predictor s2p1 = new Predictor();
         s2p1.setApprovedUsage("Model");
