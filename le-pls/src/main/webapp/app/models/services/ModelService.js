@@ -2,9 +2,10 @@ angular.module('mainApp.models.services.ModelService', [
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
-    'mainApp.appCommon.utilities.StringUtility'
+    'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.core.services.SessionService'
 ])
-.service('ModelService', function ($http, $q, _, ServiceErrorUtility, ResourceUtility, StringUtility) {
+.service('ModelService', function ($http, $q, _, ServiceErrorUtility, ResourceUtility, StringUtility, SessionService) {
 
     this.GetAllModels = function () {
             var deferred = $q.defer();
@@ -47,6 +48,7 @@ angular.module('mainApp.models.services.ModelService', [
                 deferred.resolve(result);
             })
             .error(function(data, status, headers, config) {
+                SessionService.HandleResponseErrors(data, status);
                 if (status == 403) {
                     // Users without the privilege of reading models see empty list instead of an error
                     result = {
@@ -106,6 +108,7 @@ angular.module('mainApp.models.services.ModelService', [
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
             result = {
                 success: false,
                 resultObj: null,

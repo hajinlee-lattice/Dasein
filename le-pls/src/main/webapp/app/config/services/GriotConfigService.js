@@ -2,9 +2,10 @@ angular.module('mainApp.config.services.GriotConfigService', [
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.URLUtility'
+    'mainApp.appCommon.utilities.URLUtility',
+    'mainApp.core.services.SessionService'
 ])
-.service('GriotConfigService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, URLUtility) {
+.service('GriotConfigService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, URLUtility, SessionService) {
     
     this.GetConfigDocument = function () {
         var deferred = $q.defer();
@@ -44,12 +45,14 @@ angular.module('mainApp.config.services.GriotConfigService', [
                     result.resultObj = data.Result;
                     BrowserStorageUtility.setConfigDocument(data.Result);
                 } else {
+                    SessionService.HandleResponseErrors(data, status);
                     result.resultErrors = ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
                 }
             }
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
             var result = {
                 success: false,
                 resultObj: null,
@@ -77,7 +80,8 @@ angular.module('mainApp.config.services.GriotConfigService', [
             return deferred.promise;
         }
         
-        var webServer = URLUtility.GetWebServerAddress("index.html") + "/assets/resources/WidgetConfigurationDocument.json";
+        var test = URLUtility.GetBaseUrl();
+        var webServer = URLUtility.GetWebServerAddress("/") + "/assets/resources/WidgetConfigurationDocument.json";
         
         $http({
             method: 'GET', 
@@ -131,6 +135,7 @@ angular.module('mainApp.config.services.GriotConfigService', [
             if (data != null && data !== "") {
                 result = data;
                 if (data.Success !== true) {
+                    SessionService.HandleResponseErrors(data, status);
                     if (ServiceErrorUtility.ServiceResponseContainsError(data, "VALIDATE_CREDENTIALS_FAILURE")) {
                         result.FailureReason = "VALIDATE_CREDENTIALS_FAILURE";
                     } else {
@@ -141,6 +146,7 @@ angular.module('mainApp.config.services.GriotConfigService', [
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
             deferred.resolve(data);
         });
         

@@ -34,7 +34,7 @@ var mainApp = angular.module('mainApp', [
         //Refresh session and go somewhere
         LoginService.GetSessionDocument(tenant).then(
             // Success
-            function (data) {
+            function (data, status) {
                 if (data && data.Success === true) {
                     //Initialize Evergage
                     EvergageUtility.Initialize({
@@ -44,14 +44,12 @@ var mainApp = angular.module('mainApp', [
                     });
                     
                     $scope.getLocaleSpecificResourceStrings(data.Result.User.Locale);
-                } else {
-                   SessionService.ClearSession();
                 }
             },
             
             // Fail
-            function (data) {
-                SessionService.ClearSession();
+            function (data, status) {
+                
             }
         );
     };

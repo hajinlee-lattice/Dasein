@@ -28,10 +28,11 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         $scope.score = Math.round($scope.score * 100);
     }
     
-    //Need to calculate this
     $scope.externalAttributes = TopPredictorService.GetNumberOfAttributesByType(data.Predictors, "External");
-    //Need to calculate this
+    $scope.externalAttributes = StringUtility.AddCommas($scope.externalAttributes);
+    
     $scope.internalAttributes = TopPredictorService.GetNumberOfAttributesByType(data.Predictors, "Internal");
+    $scope.internalAttributes = StringUtility.AddCommas($scope.internalAttributes);
     
     $scope.createdDate = modelDetails[widgetConfig.CreatedDateProperty];
     $scope.createdDate = $scope.createdDate * 1000;

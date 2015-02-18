@@ -2,9 +2,10 @@ angular.module('mainApp.login.services.LoginService', [
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.StringUtility'
+    'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.core.services.SessionService'
 ])
-.service('LoginService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, StringUtility) {
+.service('LoginService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, StringUtility, SessionService) {
     
     this.Login = function (username, password) {
         var deferred = $q.defer();
@@ -58,12 +59,13 @@ angular.module('mainApp.login.services.LoginService', [
                 BrowserStorageUtility.setClientSession(data.Result.User);
                 result = data;
             } else {
-                ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
+                SessionService.HandleResponseErrors(data, status);
             }
             
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
             deferred.resolve(data);
         });
         
@@ -87,11 +89,12 @@ angular.module('mainApp.login.services.LoginService', [
                 if (data === true || data === 'true') {
                     result.Success = true;
                 } else {
-                    ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
+                    SessionService.HandleResponseErrors(data, status);
                 }
                 deferred.resolve(result);
             })
             .error(function(data, status, headers, config) {
+                SessionService.HandleResponseErrors(data, status);
                 var result = { Success: false, Error: data };
                 deferred.resolve(result);
             });
@@ -116,7 +119,7 @@ angular.module('mainApp.login.services.LoginService', [
                 ResourceUtility.clearResourceStrings();
                 window.location.reload();
             } else {
-                ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
+                SessionService.HandleResponseErrors(data, status);
             }
             deferred.resolve(data);
         })
@@ -158,12 +161,13 @@ angular.module('mainApp.login.services.LoginService', [
 
             if (data !== true && data !== 'true') {
                 result.Success = false;
-                ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
+                SessionService.HandleResponseErrors(data, status);
             }
 
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
             var result = {
                     Success:    false,
                     Status:     status
