@@ -60,7 +60,7 @@ class Scenario(object):
             print("FAILURE!  (No output written to {0})".format(self.__outputFile), file=sys.stderr)
             return
         
-        if not os.path.exists(self.__expectedOutputFile)
+        if not os.path.exists(self.__expectedOutputFile):
             self.successful = True
             print("SUCCESS:  This test does not have any expected output")
             return
