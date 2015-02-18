@@ -239,10 +239,197 @@ Footer
 /*
 Content
 ================================================================== */
-#main-content,
-.model-details .tab-widget {
+#main-content {
     margin-top: 3em;
 }
+
+
+
+
+/*
+Sign In, Forgot Password, and Update Password Forms
+================================================================== */
+.global-error {
+    background: #f03213;
+    text-align: center;
+    color: #fff;
+    padding: 10px;
+    border-radius: 0 0 4px 4px;
+    border: #fff solid 1px;
+    margin-top: -1px;
+    font-size: 1.25em;
+    font-style: italic;
+}
+    .global-error i, .global-error a i {
+        color: #fff;
+    }
+        .global-error .close {
+            opacity: .8;
+            filter: alpha(opacity=80);
+        } 
+            .global-error .close:hover {
+                opacity: 1;
+                filter: alpha(opacity=100);
+            } 
+.login-body {
+    background: url(../images/bg_login.jpg) no-repeat top left fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    width:100%;
+    height:100%;
+}
+.form-signin {
+    max-width:480px;
+    margin:100px auto;
+    padding: 0 40px;
+    background-color: #b2c2d4;
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#b2c2d4), to(#fff));
+    background: -webkit-linear-gradient(top, #fff, #b2c2d4);
+    background: -moz-linear-gradient(top, #fff, #b2c2d4);
+    background: -ms-linear-gradient(top, #fff, #b2c2d4);
+    background: -o-linear-gradient(top, #fff, #b2c2d4);
+    border-radius: 8px;
+    -webkit-border-radius: 8px;
+    box-shadow:1px 0 3px rgba(0,0,0,.25);
+    border: #fff solid 4px;
+}
+    .form-signin h2.form-signin-heading {
+        margin:0;
+        padding:40px 0 0 40px;
+    }
+        .form-signin-heading img {
+            width: 240px;
+        }
+
+.form-signin .checkbox {
+    font-weight:normal;
+    color:#b6b6b6;
+    font-weight:300;
+    font-family:'Open Sans',sans-serif;
+}
+.form-signin .form-control {
+    position:relative;
+    font-size:16px;
+    height:auto;
+    padding:10px;
+    -webkit-box-sizing:border-box;
+    -moz-box-sizing:border-box;
+    box-sizing:border-box;
+}
+.form-signin .form-control:focus {
+    z-index:2;
+    border-color: #1e73d5;
+    border-width: 2px;
+}
+.form-signin label {
+    color: #444;
+}
+.form-signin input[type="text"],.form-signin input[type="password"] {
+    margin-bottom:8px;
+    border-radius:5px;
+    -webkit-border-radius:5px;
+    border: #ccc solid 1px;
+    box-shadow:none;
+    font-size:1.1em;
+    -moz-box-shadow:    inset 0 1px 3px #bbb;
+    -webkit-box-shadow: inset 0 1px 3px #bbb;
+    box-shadow:         inset 0 1px 3px #bbb;
+}
+.form-signin p {
+    padding: 20px 40px 0;
+    margin-bottom: 0;
+}
+.error-message {
+    color: #f03213;
+}
+.form-signin .form-control.error {
+    border: #f03213 solid 2px;
+}
+.form-signin .btn-login {
+    background:#008C8C;
+    color:#fff;
+    font-weight:500;
+   
+   padding:8px 34px;
+    
+}
+
+.forgot-pass {
+    margin:14px 0 0 0;
+}
+
+.form-signin p {
+    text-align:left;
+   /*  color:#888;
+    font-size:16px;
+    font-weight:300; */
+}
+.login-wrap {
+    padding:15px 20px 34px 20px;
+    position:relative;
+}
+.user-login-info {
+    margin:-20px -20px 0 -20px;
+    padding:20px 40px 8px 40px;
+}
+
+.user-login-info-buttonforgot {
+     padding:10px 20px 8px 20px;
+}
+
+.user-login-info .form-control:last-child {
+    margin-bottom:0 !important;
+}
+.registration {
+    position:absolute;
+    right:0;
+    bottom:-35px;
+    color: #b8bab9;
+}
+
+
+.form-update-password {
+    width: 600px;
+    margin: 6em auto 6em; 
+}
+    .form-update-password .form, .form-update-password .form-title {
+        float: left;
+    }
+        .form-update-password .form-title h2 {
+            font-size: 2em;
+            text-align: right;
+            margin-right: 1em;
+            padding-right: 1em;
+            padding-bottom: 7em;
+            border-right: #ccc solid 1px;
+            font-weight: normal;
+        }
+        .form-update-password:after {
+            display: table;
+            content: "";
+            clear: both;
+        }
+        .form-update-password .form {
+            width: 60%;
+        }
+            .form-update-password .form > div {
+                margin-bottom: 0.5em;
+            }
+                .form-update-password .form > div:last-of-type {
+                    margin: 2em 0 0;
+                }
+                .form-update-password .form > div:last-of-type a, .form-update-password .form > div:last-of-type button {
+                    width: 47%;
+                }
+                .form-update-password .form > div:last-of-type a {
+                    margin-right: 5%;
+                }
+         .form-update-password .form-title {
+            width: 40%;
+         }
+
 
 
 /*
@@ -382,21 +569,42 @@ Model Details
     color: #333;
     border-color: #a5bbd4;
     border-style: solid;
-    border-width: 1px 0 0 1px;
+    border-width: 1px 1px 0 1px;
 }
+    .model-details .nav li:last-of-type.active a {
+        border-width: 1px 1px 0 0;
+    }
+    .model-details .nav li:first-of-type.active a {
+        border-width: 1px 0 0 1px;
+    }
 .model-details .nav-tabs > li {
     margin-bottom: -3px;
 }
+
+
     .model-details .nav-tabs > li.active > a {
         border-bottom: none;
-        border-top-right-radius: 0;
-        border-top-left-radius: 4px;
     }
     .model-details .nav-tabs > li > a {
         background: #a5bbd4;
         color: #fff;
-        border-top-left-radius: 0;
     }
+        .model-details .nav-tabs > li > a:hover {
+            background: #93adca;
+        }
+        .model-details .nav-tabs > li.active > a:hover {
+            background: #fff;
+        }
+
+    .model-details .nav-tabs > li:last-of-type.active > a {
+        border-top-left-radius: 0;
+        border-top-right-radius: 4px;
+    }
+    .model-details .nav-tabs > li:first-of-type.active > a {
+        border-top-right-radius: 0;
+        border-top-left-radius: 4px;
+    }
+
 .model-details .tab-content {
     padding: 2em 0;
     background: #fff;
@@ -424,6 +632,34 @@ Model Details
         padding: 0.25em 1em;
     }
 
+
+.model-details .page-title {
+    position: relative;
+    box-sizing: border-box;
+    border-bottom: #a5bbd4 solid 1px;
+}
+.model-details .page-title .primary {
+    padding: 1em 0 2em;   
+    margin-bottom: 1.25em;
+    border-bottom: #c6ccd2 solid 1px;
+}
+    .model-details .page-title .back-button, .model-details .page-title dl {
+        float: left;
+    }
+        .model-details .page-title .primary:after {
+            display: table;
+            content: "";
+            clear: both;
+        }
+        .model-details .page-title .back-button {
+            padding: 1em 6em 1em 3em;
+            background: url(../images/bg_back_button.jpg) no-repeat left center;
+            color: #999;
+        }
+        .model-details .page-title h1 {
+            margin: 0;
+        }
+
 .secondary .wrapper:after, .tertiary .wrapper:after {
     display: table;
     content: "";
@@ -431,7 +667,13 @@ Model Details
 }
 .toggleDetails {
     float: right;
+    padding: 1em 3em 1em 6em;
+    background: url(../images/bg_more_button.jpg) no-repeat right center;
+    color: #477cba;
 }
+    .toggleDetails.less {
+        background: url(../images/bg_less_button.jpg) no-repeat right center;
+    }
 .meta-group {
     float: left;
     width: 30%;
@@ -449,7 +691,27 @@ Model Details
         .meta-group dl:last-of-type {
             margin-right: 0;
         }
+.tertiary {
+    display: none;
+}
 
+
+#attributes h3 {
+    text-align: center;
+}
+    #attributes .data:after {
+        display: table;
+        content: "";
+        clear: both;
+    }
+    #attributes .data > div {
+        float: left;
+        width: 20%;
+    }   
+        #attributes .data > div#chart {
+            width: 60%;
+            text-align: center;
+        }
 
 
 /*
@@ -2136,146 +2398,6 @@ a.accordion-toggle .badge {
 
 
 
-/*login page*/
-.global-error {
-    background: #f03213;
-    text-align: center;
-    color: #fff;
-    padding: 10px;
-    border-radius: 0 0 4px 4px;
-    border: #fff solid 1px;
-    margin-top: -1px;
-    font-size: 1.25em;
-    font-style: italic;
-}
-    .global-error i, .global-error a i {
-        color: #fff;
-    }
-        .global-error .close {
-            opacity: .8;
-            filter: alpha(opacity=80);
-        } 
-            .global-error .close:hover {
-                opacity: 1;
-                filter: alpha(opacity=100);
-            } 
-.login-body {
-    background: url(../images/bg_login.jpg) no-repeat top left fixed; 
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
-    width:100%;
-    height:100%;
-}
-.form-signin {
-    max-width:480px;
-    margin:100px auto;
-    padding: 0 40px;
-    background-color: #b2c2d4;
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#b2c2d4), to(#fff));
-    background: -webkit-linear-gradient(top, #fff, #b2c2d4);
-    background: -moz-linear-gradient(top, #fff, #b2c2d4);
-    background: -ms-linear-gradient(top, #fff, #b2c2d4);
-    background: -o-linear-gradient(top, #fff, #b2c2d4);
-    border-radius: 8px;
-    -webkit-border-radius: 8px;
-    box-shadow:1px 0 3px rgba(0,0,0,.25);
-    border: #fff solid 4px;
-}
-    .form-signin h2.form-signin-heading {
-        margin:0;
-        padding:40px 0 0 40px;
-    }
-        .form-signin-heading img {
-            width: 240px;
-        }
-
-.form-signin .checkbox {
-    font-weight:normal;
-    color:#b6b6b6;
-    font-weight:300;
-    font-family:'Open Sans',sans-serif;
-}
-.form-signin .form-control {
-    position:relative;
-    font-size:16px;
-    height:auto;
-    padding:10px;
-    -webkit-box-sizing:border-box;
-    -moz-box-sizing:border-box;
-    box-sizing:border-box;
-}
-.form-signin .form-control:focus {
-    z-index:2;
-    border-color: #1e73d5;
-    border-width: 2px;
-}
-.form-signin label {
-    color: #444;
-}
-.form-signin input[type="text"],.form-signin input[type="password"] {
-    margin-bottom:8px;
-    border-radius:5px;
-    -webkit-border-radius:5px;
-    border: #ccc solid 1px;
-    box-shadow:none;
-    font-size:1.1em;
-    -moz-box-shadow:    inset 0 1px 3px #bbb;
-    -webkit-box-shadow: inset 0 1px 3px #bbb;
-    box-shadow:         inset 0 1px 3px #bbb;
-}
-.form-signin p {
-    padding: 20px 40px 0;
-    margin-bottom: 0;
-}
-.error-message {
-    color: #f03213;
-}
-.form-signin .form-control.error {
-    border: #f03213 solid 2px;
-}
-.form-signin .btn-login {
-    background:#008C8C;
-    color:#fff;
-    font-weight:500;
-   
-   padding:8px 34px;
-    
-}
-
-.forgot-pass {
-    margin:14px 0 0 0;
-}
-
-.form-signin p {
-    text-align:left;
-   /*  color:#888;
-    font-size:16px;
-    font-weight:300; */
-}
-.login-wrap {
-    padding:15px 20px 34px 20px;
-    position:relative;
-}
-.user-login-info {
-    margin:-20px -20px 0 -20px;
-    padding:20px 40px 8px 40px;
-}
-
-.user-login-info-buttonforgot {
-     padding:10px 20px 8px 20px;
-}
-
-.user-login-info .form-control:last-child {
-    margin-bottom:0 !important;
-}
-.registration {
-    position:absolute;
-    right:0;
-    bottom:-35px;
-    color: #b8bab9;
-}
 
 
 
@@ -2494,10 +2616,6 @@ a.logo span {
 }
 
 
-.page-title {
-    position: relative;
-    box-sizing: border-box;
-}
 
 
 /*notification*/

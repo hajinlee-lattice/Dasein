@@ -6,3 +6,10 @@
 @import "style";
 @import "style-responsive";
 // END: Base styles from UX
+
+//START: Style overrides (NOTE: This should only be done in extreme cases because it will make maintaining the css more difficult going forward)
+.model-details .tab-widget {
+    margin-top: 3em;
+}
+
+//END: Style overrides 

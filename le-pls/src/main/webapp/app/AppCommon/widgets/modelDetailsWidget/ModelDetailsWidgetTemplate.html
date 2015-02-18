@@ -1,12 +1,15 @@
+
 <div data-ng-controller="ModelDetailsWidgetController">
     <header class="header">
         <div class="page-title">
-            <div class="wrapper">
-                <a href="#" class="back-button" data-ng-click="backButtonClick($event)">{{ResourceUtility.getString('MODEL_DETAIL_BACK_BUTTON')}}</a>
-                <dl>
-                    <dt>{{ResourceUtility.getString('MODEL_DETAIL_BACK_LABEL')}}</dt>
-                    <dd><h1>{{displayName}}</h1></dd>
-                </dl>
+            <div class="meta primary">
+                <div class="wrapper">
+                    <a href="#" class="back-button" data-ng-click="backButtonClick($event)">{{ResourceUtility.getString('MODEL_DETAIL_BACK_BUTTON')}}</a>
+                    <dl>
+                        <dt>{{ResourceUtility.getString('MODEL_DETAIL_BACK_LABEL')}}</dt>
+                        <dd><h1>{{displayName}}</h1></dd>
+                    </dl>
+                </div>
             </div>
             <div class="meta secondary">
                 <div class="wrapper">
@@ -20,7 +23,7 @@
                             <dd>{{createdDate}}</dd>
                         </dl>
                   </div>
-                  <a href="#" class="toggleDetails" data-ng-click="showMoreClicked($event)">{{showMoreLabel}}</a>
+                  <a href="#" class="toggleDetails {{dataExpanded ? 'less' : ''}}" data-ng-click="showMoreClicked($event)">{{showMoreLabel}}</a>
                 </div>
             </div>
             <div id="moreDataPoints" class="meta tertiary">
