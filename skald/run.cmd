@@ -1,0 +1,1 @@
+mvn jetty:run -Djetty.port=8050 -Dskald.pod=test -Dskald.zookeeper.address=localhost:2181 -Dskald.hdfs.address=bodcprodvhdp195.prod.lattice.local:50070 -Dskald.matcher.address=10.40.1.44/DeployedRTSSite

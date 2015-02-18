@@ -1,29 +1,31 @@
 package com.latticeengines.skald;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 
 @Configuration
-@PropertySource("file:skald.properties")
 public class SkaldProperties {
     public String getPod() {
-        return env.getProperty("skald.zookeeper.pod");
+        return getProperty("skald.pod");
     }
 
     public String getZooKeeperAddress() {
-        return env.getProperty("skald.zookeeper.address");
+        return getProperty("skald.zookeeper.address");
     }
 
     public String getHdfsAddress() {
-        return env.getProperty("skald.hdfs.address");
+        return getProperty("skald.hdfs.address");
     }
 
     public String getMatcherAddress() {
-        return env.getProperty("skald.matcher.address");
+        return getProperty("skald.matcher.address");
     }
 
-    @Autowired
-    private Environment env;
+    private String getProperty(String name) {
+        String result = System.getProperty(name);
+        if (result == null) {
+            throw new RuntimeException("No value specified for property " + name);
+        }
+
+        return result;
+    }
 }
