@@ -1,9 +1,11 @@
 angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.DateTimeFormatUtility'
+    'mainApp.appCommon.utilities.DateTimeFormatUtility',
+    'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.appCommon.utilities.StringUtility'
 ])
 
-.controller('ModelDetailsWidgetController', function ($scope, ResourceUtility, DateTimeFormatUtility) {
+.controller('ModelDetailsWidgetController', function ($scope, $rootScope, ResourceUtility, DateTimeFormatUtility, GriotNavUtility, StringUtility) {
     $scope.ResourceUtility = ResourceUtility;
     
     var widgetConfig = $scope.widgetConfig;
@@ -33,10 +35,18 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.createdDate = new Date($scope.createdDate).toLocaleDateString();
     
     $scope.totalLeads = data[widgetConfig.TotalLeadsProperty];
+    $scope.totalLeads = StringUtility.AddCommas($scope.totalLeads);
+    
     $scope.testSet = data[widgetConfig.TestSetProperty];
+    $scope.testSet = StringUtility.AddCommas($scope.testSet);
+    
     $scope.trainingSet = data[widgetConfig.TrainingSetProperty];
+    $scope.trainingSet = StringUtility.AddCommas($scope.trainingSet);
+
     $scope.totalSuccessEvents = data[widgetConfig.TotalSuccessEventsProperty];
-    $scope.conversionRate = $scope.totalSuccessEvents / ($scope.testSet + $scope.trainingSet);
+    $scope.totalSuccessEvents = StringUtility.AddCommas($scope.totalSuccessEvents);
+    
+    $scope.conversionRate = data[widgetConfig.TotalSuccessEventsProperty] / (data[widgetConfig.TestSetProperty] + data[widgetConfig.TrainingSetProperty]);
     if ($scope.conversionRate != null && $scope.conversionRate < 1) {
         $scope.conversionRate = $scope.conversionRate * 100;
         $scope.conversionRate = $scope.conversionRate.toFixed(2);
@@ -44,13 +54,31 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.leadSource = data[widgetConfig.LeadSourceProperty];
     $scope.opportunity = data[widgetConfig.OpportunityProperty];
     
-    $("#more-datapoints").hide();
-
-    $("#link-showmore a").click(function(){
-        $("#more-datapoints").slideToggle('400');
-        return false;
-    });
+    $scope.dataExpanded = false;
+    $scope.showMoreLabel = ResourceUtility.getString('MODEL_DETAILS_SHOW_MORE_BUTTON');
+    $("#moreDataPoints").hide();
     
+    $scope.backButtonClick = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        
+        $rootScope.$broadcast(GriotNavUtility.MODEL_LIST_NAV_EVENT);
+    };
+    
+    $scope.showMoreClicked = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        $scope.dataExpanded = !$scope.dataExpanded;
+        if ($scope.dataExpanded) {
+            $scope.showMoreLabel = ResourceUtility.getString('MODEL_DETAILS_SHOW_LESS_BUTTON');
+        } else {
+            $scope.showMoreLabel = ResourceUtility.getString('MODEL_DETAILS_SHOW_MORE_BUTTON');
+        }
+        
+        $("#moreDataPoints").slideToggle('400');
+    };
 })
 .directive('modelDetailsWidget', function ($compile) {
     var directiveDefinitionObject = {

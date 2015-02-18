@@ -9,4 +9,13 @@ angular.module('mainApp.appCommon.utilities.StringUtility', [])
         return isEmpty;
     };
     
+    this.AddCommas = function (stringToChange) {
+        if (stringToChange == null) {
+            return null;
+        }
+        var parts = stringToChange.toString().split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return parts.join(".");
+    };
+    
 });

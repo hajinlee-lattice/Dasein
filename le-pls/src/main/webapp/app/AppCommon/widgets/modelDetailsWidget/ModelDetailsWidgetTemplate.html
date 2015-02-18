@@ -2,9 +2,9 @@
     <header class="header">
         <div class="page-title">
             <div class="wrapper">
-                <a href="#" class="back-button">Back</a>
+                <a href="#" class="back-button" data-ng-click="backButtonClick($event)">{{ResourceUtility.getString('MODEL_DETAIL_BACK_BUTTON')}}</a>
                 <dl>
-                    <dt>Model</dt>
+                    <dt>{{ResourceUtility.getString('MODEL_DETAIL_BACK_LABEL')}}</dt>
                     <dd><h1>{{displayName}}</h1></dd>
                 </dl>
             </div>
@@ -20,13 +20,13 @@
                             <dd>{{createdDate}}</dd>
                         </dl>
                   </div>
-                  <a href="#" class="toggleDetails">{{ResourceUtility.getString('MODEL_DETAILS_SHOW_MORE_BUTTON')}}</a>
+                  <a href="#" class="toggleDetails" data-ng-click="showMoreClicked($event)">{{showMoreLabel}}</a>
                 </div>
             </div>
-            <div class="meta tertiary">
+            <div id="moreDataPoints" class="meta tertiary">
                 <div class="wrapper">
                     <div class="meta-group">
-                        <h3>Leads</h3>
+                        <h3>{{ResourceUtility.getString('MODEL_DETAILS_LEADS_TITLE')}}</h3>
                         <dl>
                             <dt>{{ResourceUtility.getString('MODEL_DETAILS_TOTAL_LEADS_LABEL')}}</dt>
                             <dd>{{totalLeads}}</dd>
@@ -41,7 +41,7 @@
                         </dl>
                     </div>
                     <div class="meta-group">
-                        <h3>Conversions</h3>
+                        <h3>{{ResourceUtility.getString('MODEL_DETAILS_CONVERSIONS_TITLE')}}</h3>
                         <dl>
                             <dt>{{ResourceUtility.getString('MODEL_DETAILS_SUCCESS_EVENTS_LABEL')}}</dt>
                             <dd>{{totalSuccessEvents}}</dd>
@@ -52,7 +52,7 @@
                         </dl>
                     </div>
                     <div class="meta-group">
-                        <h3>Predictive Attributes From</h3>
+                        <h3>{{ResourceUtility.getString('MODEL_DETAILS_ATTRIBUTES_TITLE')}}</h3>
                         <dl>
                             <dt>{{ResourceUtility.getString('MODEL_TILE_INTERNAL_LABEL')}}</dt>
                             <dd>{{internalAttributes}}</dd>
