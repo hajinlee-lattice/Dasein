@@ -36,7 +36,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         IAuthenticationService ias = service.getBasicHttpBindingIAuthenticationService();
         addMagicHeaderAndSystemProperty(ias);
         try {
-            log.info("Authenticating user " + user + " against Global Auth.");
+            log.info(String.format("Authenticating user %s against Global Auth.", user));
             return new TicketBuilder(ias.authenticateLattice(user, password)).build();
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18001, e, new String[] { user });

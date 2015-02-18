@@ -48,7 +48,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         ISessionManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info("Retrieving session from ticket " + ticket.toString() + " against Global Auth.");
+            log.info(String.format("Retrieving session from ticket %s against Global Auth.", ticket.toString()));
             Session s = new SessionBuilder(service.retrieve(new SoapTicketBuilder(ticket).build())).build();
             s.setTicket(ticket);
             return s;
@@ -74,7 +74,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         ISessionManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info("Attaching ticket " + ticket.toString() + " against Global Auth.");
+            log.info(String.format("Attaching ticket %s against Global Auth.", ticket.toString()));
 
             Session s = new SessionBuilder(service.attach( //
                             new SoapTicketBuilder(ticket).build(), //

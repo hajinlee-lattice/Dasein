@@ -188,6 +188,29 @@
                                     </arguments>
                                 </configuration>
                             </execution>
+                            <execution>
+                                <id>globalauthtenantmgrgen</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${env.JAVA_HOME}/bin/java</executable>
+                                    <workingDirectory>.</workingDirectory>
+                                    <arguments>
+                                        <argument>-classpath</argument>
+                                        <argument>${env.JAVA_HOME}/lib/tools.jar</argument>
+                                        <argument>-Djavax.net.ssl.trustStore=./certificates/${certificate.name}</argument>
+                                        <argument>com.sun.tools.internal.ws.WsImport</argument>
+                                        <argument>-d</argument>
+                                        <argument>${project.build.directory}/generated-sources</argument>
+                                        <argument>-p</argument>
+                                        <argument>com.latticeengines.pls.globalauth.generated.tenantmgr</argument>
+                                        <argument>-keep</argument>
+                                        <argument>${globalauth.base.url}/GlobalAuthTenantManager?wsdl</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                     <plugin>

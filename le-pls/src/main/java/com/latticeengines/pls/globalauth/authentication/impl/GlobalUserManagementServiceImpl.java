@@ -42,7 +42,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info("Registering user " + creds.getUsername() + " against Global Auth.");
+            log.info(String.format("Registering user %s against Global Auth.", creds.getUsername()));
             return service.registerUser(
                     new SoapUserBuilder(user).build(),
                     new SoapCredentialsBuilder(creds).build());
@@ -56,7 +56,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info("Granting right " + right + " to user " + username + " for tenant " + tenant + ".");
+            log.info(String.format("Granting right %s to user %s for tenant %s.", right, username, tenant));
             return service.grantRight(right, tenant, username);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18005, e, new String[] { right, username, tenant });
@@ -68,7 +68,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info("Revoking right " + right + " to user " + username + " for tenant " + tenant + ".");
+            log.info(String.format("Revoking right %s from user %s for tenant %s.", right, username, tenant));
             return service.revokeRight(right, tenant, username);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18006, e, new String[] { right, username, tenant });
@@ -80,7 +80,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info("User " + username + " resets his/her credentials for tenant " + tenantId);
+            log.info(String.format("Resetting credentials for user %s and tenant %s.", username, tenantId));
             String deploymentId = tenantId;
             return service.forgotLatticeCredentials(username, deploymentId);
         } catch (Exception e) {
@@ -93,7 +93,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info("Modify credentials for " + oldCreds.getUsername());
+            log.info(String.format("Modifying credentials for %s.", oldCreds.getUsername()));
             return service.modifyLatticeCredentials(
                 new SoapTicketBuilder(ticket).build(),
                 new SoapCredentialsBuilder(oldCreds).build(),

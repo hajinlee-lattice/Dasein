@@ -18,15 +18,15 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 
 public class ModelDownloaderCallable implements Callable<Boolean> {
-    
+
     private static final Log log = LogFactory.getLog(ModelDownloaderCallable.class);
-    
+
     private Tenant tenant;
     private String modelServiceHdfsBaseDir;
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
     private Configuration yarnConfiguration;
     private ModelSummaryParser parser;
-    
+
     public ModelDownloaderCallable(Builder builder) {
         this.tenant = builder.getTenant();
         this.modelServiceHdfsBaseDir = builder.getModelServiceHdfsBaseDir();
@@ -46,26 +46,26 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 if (file == null) {
                     return false;
                 }
-                
+
                 if (file.getModificationTime() < tenantRegistrationTime) {
                     return false;
                 }
-                
+
                 String name = file.getPath().getName().toString();
                 return name.equals("modelsummary.json");
             }
-            
+
         };
-        
+
         List<String> files = new ArrayList<>();
         try {
             files = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, startingHdfsPoint, filter);
         } catch (FileNotFoundException e) {
-            log.warn("No models seem to have been created yet for this tenant.", e);
+            log.warn(String.format("No models seem to have been created yet for tenant with id %s. Error message: %s",
+                    tenant.getId(), e.getMessage()));
             return false;
         }
-        
-        
+
         Set<String> set = new HashSet<>();
         List<ModelSummary> summaries = modelSummaryEntityMgr.noAspectsFindAll();
         for (ModelSummary summary : summaries) {
@@ -77,7 +77,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 String contents = HdfsUtils.getHdfsFileContents(yarnConfiguration, file);
                 ModelSummary summary = parser.parse(file, contents);
                 summary.setTenant(tenant);
-                
+
                 if (!set.contains(summary.getId())) {
                     modelSummaryEntityMgr.create(summary);
                     foundFilesToDownload = true;
@@ -86,36 +86,36 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         } catch (Exception e) {
             log.error(e);
         }
-        
+
         return foundFilesToDownload;
     }
-    
+
     public static class Builder {
         private Tenant tenant;
         private String modelServiceHdfsBaseDir;
         private ModelSummaryEntityMgr modelSummaryEntityMgr;
         private Configuration yarnConfiguration;
         private ModelSummaryParser modelSummaryParser;
-        
+
         public Builder() {
-            
+
         }
-        
+
         public Builder tenant(Tenant tenant) {
             this.tenant = tenant;
             return this;
         }
-        
+
         public Builder modelServiceHdfsBaseDir(String modelServiceHdfsBaseDir) {
             this.modelServiceHdfsBaseDir = modelServiceHdfsBaseDir;
             return this;
         }
-        
+
         public Builder modelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
             this.modelSummaryEntityMgr = modelSummaryEntityMgr;
             return this;
         }
-        
+
         public Builder yarnConfiguration(Configuration yarnConfiguration) {
             this.yarnConfiguration = yarnConfiguration;
             return this;
@@ -137,11 +137,11 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         public ModelSummaryEntityMgr getModelSummaryEntityMgr() {
             return modelSummaryEntityMgr;
         }
-        
+
         public Configuration getYarnConfiguration() {
             return yarnConfiguration;
         }
-        
+
         public ModelSummaryParser getModelSummaryParser() {
             return modelSummaryParser;
         }
