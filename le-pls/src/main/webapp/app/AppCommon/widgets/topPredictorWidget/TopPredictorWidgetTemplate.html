@@ -1,6 +1,5 @@
 <style>
     .top-predictor-panel {
-        margin-left: 11px;
         display: inline-block;
         vertical-align: text-top;
     }
@@ -40,11 +39,21 @@
     {
         background-color: #EDEFF3;
     }
+    
+    .top-predictor-back
+    {
+        cursor: pointer;
+    }
 </style>
 <div data-ng-controller="TopPredictorWidgetController" class="wrapper">
-    <div>
-        <h1>{{topPredictorTitle}} </h1>
-        <hr/>
+    <div class="tab-header">
+        <div class="wrapper" data-ng-show="!backToSummaryView">
+            <span>{{topPredictorTitle}} </span>&nbsp;|&nbsp;<a href="#" class="secondary">Export All</a>
+            
+        </div>
+        <div class="wrapper" data-ng-show="backToSummaryView">
+            <span class="top-predictor-back" data-ng-click="backToSummaryClicked()">&lt; Back to Top Attributes </span>
+        </div>
     </div>
     <div>
         <span class="top-predictor-panel" data-ng-show="showExternalCategories">

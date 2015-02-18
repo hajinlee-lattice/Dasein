@@ -69,39 +69,27 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         return toReturn;
     };
     
-    this.GetColorByCategory = function (categoryName) {
-        var toReturn;
-        switch (categoryName) {
-            case "Firmographics":
-                toReturn = "#27D2AE";
-                break;
-            case "Growth Trends":
-                toReturn = "#3279DF";
-                break;
-            case "Online Presence":
-                toReturn = "#FF9403";
-                break;
-            case "Technologies":
-                toReturn = "#BD8DF6";
-                break;
-            case "Behind Firewall Tech":
-                toReturn = "#96E01E";
-                break;
-            case "Financial":
-                toReturn = "#A8A8A8";
-                break;
-            case "Marketing Activity":
-                toReturn = "#3279DF";
-                break;
-            case "Lead Information":
-                toReturn = "#FF7A44";
-                break;
-            default:
-                toReturn = "#000000";
-                break;
+    this.SortByCategoryName = function (a, b) {
+        if (a.name.toUpperCase() < b.name.toUpperCase()) {
+            return -1;
         }
-        
-        return toReturn;
+        if (a.name.toUpperCase() > b.name.toUpperCase()) {
+            return 1;
+        }
+        // a must be equal to b
+        return 0;
+    };
+    
+    this.AssignColorsToCategories = function (categoryList) {
+        if (categoryList == null || categoryList.length === 0) {
+            return;
+        }
+        var possibleNumberofCategories = categoryList.length <=8 ? categoryList.length : 8;
+        var colorChoices = ["#27D2AE", "#3279DF", "#FF9403", "#BD8DF6", "#96E01E", "#A8A8A8", "#3279DF", "#FF7A44"];
+        categoryList = categoryList.sort(this.SortByCategoryName);
+        for (var i = 0; i < possibleNumberofCategories; i++) {
+            categoryList[i].color = colorChoices[i];
+        }
     };
     
     this.SortByPredictivePower = function (a, b) {
@@ -134,6 +122,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             if (maxNumber == null || toReturn.length < maxNumber) {
                 var displayPredictor = {
                   name: predictor.Name,
+                  categoryName: categoryName,
                   power: predictor.UncertaintyCoefficient,
                   size: 1,
                   color: categoryColor
@@ -186,14 +175,21 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 topCategoryNames.push(predictor.Category);
                 category = {
                     name: predictor.Category,
-                    power: predictor.UncertaintyCoefficient,
-                    size: 1, // This doesn't matter because the inner ring takes on the saze of the outer
-                    color: this.GetColorByCategory(predictor.Category),
+                    categoryName: predictor.Category,
+                    UncertaintyCoefficient: predictor.UncertaintyCoefficient,
+                    size: 1, // This doesn't matter because the inner ring takes on the size of the outer
+                    color: null,
                     children: []
                 };
                 topCategories.push(category);
             }
         }
+        
+        // Need to assign colors based on alphabetical name, which will change the sort
+        this.AssignColorsToCategories(topCategories);
+        
+        // So we need to re-sort it by UncertaintyCoefficient after the color assignment
+        topCategories = topCategories.sort(this.SortByPredictivePower);
         
         //And finally calculate the size based on predictive power
         var attributesPerCategory = topCategories.length >= 7 ? 3 : 5;
