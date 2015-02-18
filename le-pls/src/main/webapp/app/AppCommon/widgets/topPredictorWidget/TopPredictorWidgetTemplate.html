@@ -52,7 +52,7 @@
         <hr/>
     </div>
     <div>
-        <span class="top-predictor-panel">
+        <span class="top-predictor-panel" data-ng-show="showExternalCategories">
             <h3>{{externalPredictorTotal}}</h3>
             <h3>{{ResourceUtility.getString('TOP_PREDICTORS_CATEGORY_LABEL')}}</h3>
             <div class="top-predictor-category" data-ng-repeat="category in externalCategories" data-ng-click="categoryClicked(category)">
@@ -61,7 +61,7 @@
         </span>
         <span class="js-top-predictor-donut top-predictor-panel middle">
         </span>
-        <span class="top-predictor-panel right">
+        <span class="top-predictor-panel right" data-ng-show="showInternalCategories">
             <h3>{{internalPredictorTotal}}</h3>
             <h3>{{ResourceUtility.getString('TOP_PREDICTORS_CATEGORY_LABEL')}}</h3>
             <div class="top-predictor-category" data-ng-repeat="category in internalCategories">
