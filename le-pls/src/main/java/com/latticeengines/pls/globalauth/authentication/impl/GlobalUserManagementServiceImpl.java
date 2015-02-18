@@ -5,7 +5,6 @@ import java.net.URL;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -77,15 +76,15 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
-    public Boolean forgotLatticeCredentials(String username, String tanantId) {
+    public Boolean forgotLatticeCredentials(String username, String tenantId) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info("User " + username + " resets his/her credentials for tanant " + tanantId);
-            String deploymentId = tanantId;
+            log.info("User " + username + " resets his/her credentials for tenant " + tenantId);
+            String deploymentId = tenantId;
             return service.forgotLatticeCredentials(username, deploymentId);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18011, e, new String[] {username, tanantId});
+            throw new LedpException(LedpCode.LEDP_18011, e, new String[] { username, tenantId });
         }
     }
 
@@ -94,7 +93,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info("Modify credential for " + oldCreds.getUsername());
+            log.info("Modify credentials for " + oldCreds.getUsername());
             return service.modifyLatticeCredentials(
                 new SoapTicketBuilder(ticket).build(),
                 new SoapCredentialsBuilder(oldCreds).build(),
