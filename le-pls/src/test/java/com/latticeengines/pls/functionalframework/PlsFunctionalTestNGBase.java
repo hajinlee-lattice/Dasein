@@ -210,8 +210,12 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         details.setData(data);
         return details;
     }
-
+    
     protected void setupDb(String tenant1Name, String tenant2Name) throws Exception {
+        setupDb(tenant1Name, tenant2Name, true);
+    }
+
+    protected void setupDb(String tenant1Name, String tenant2Name, boolean createSummaries) throws Exception {
         keyValueEntityMgr.deleteAll();
         tenantEntityMgr.deleteAll();
 
@@ -221,22 +225,24 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             tenant1.setName(tenant1Name);
             tenantEntityMgr.create(tenant1);
 
-            ModelSummary summary1 = new ModelSummary();
-            summary1.setId("123");
-            summary1.setName("Model1");
-            summary1.setTenant(tenant1);
-            summary1.setRocScore(0.75);
-            summary1.setLookupId(tenant1Name + "|Q_EventTable_" + tenant1Name + "|abcde");
-            summary1.setTrainingRowCount(8000L);
-            summary1.setTestRowCount(2000L);
-            summary1.setTotalRowCount(10000L);
-            summary1.setTrainingConversionCount(80L);
-            summary1.setTestConversionCount(20L);
-            summary1.setTotalConversionCount(100L);
-            summary1.setDetails(getDetails());
-            summary1.setConstructionTime(System.currentTimeMillis());
+            if (createSummaries) {
+                ModelSummary summary1 = new ModelSummary();
+                summary1.setId("123");
+                summary1.setName("Model1");
+                summary1.setTenant(tenant1);
+                summary1.setRocScore(0.75);
+                summary1.setLookupId(tenant1Name + "|Q_EventTable_" + tenant1Name + "|abcde");
+                summary1.setTrainingRowCount(8000L);
+                summary1.setTestRowCount(2000L);
+                summary1.setTotalRowCount(10000L);
+                summary1.setTrainingConversionCount(80L);
+                summary1.setTestConversionCount(20L);
+                summary1.setTotalConversionCount(100L);
+                summary1.setDetails(getDetails());
+                summary1.setConstructionTime(System.currentTimeMillis());
 
-            modelSummaryEntityMgr.create(summary1);
+                modelSummaryEntityMgr.create(summary1);
+            }
         }
 
         if (tenant2Name != null) {
@@ -245,53 +251,54 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             tenant2.setName(tenant2Name);
             tenantEntityMgr.create(tenant2);
 
-            ModelSummary summary2 = new ModelSummary();
-            summary2.setId("456");
-            summary2.setName("Model2");
-            summary2.setTenant(tenant2);
-            summary2.setRocScore(0.80);
-            summary2.setLookupId(tenant2Name + "|Q_EventTable_" + tenant2Name + "|fghij");
-            summary2.setTrainingRowCount(80000L);
-            summary2.setTestRowCount(20000L);
-            summary2.setTotalRowCount(100000L);
-            summary2.setTrainingConversionCount(800L);
-            summary2.setTestConversionCount(200L);
-            summary2.setTotalConversionCount(1000L);
-            summary2.setDetails(getDetails());
-            summary2.setConstructionTime(System.currentTimeMillis());
-            Predictor s2p1 = new Predictor();
-            s2p1.setApprovedUsage("Model");
-            s2p1.setCategory("Construction");
-            s2p1.setName("LeadSource");
-            s2p1.setDisplayName("LeadSource");
-            s2p1.setFundamentalType("");
-            s2p1.setUncertaintyCoefficient(0.151911);
-            summary2.addPredictor(s2p1);
+            if (createSummaries) {
+                ModelSummary summary2 = new ModelSummary();
+                summary2.setId("456");
+                summary2.setName("Model2");
+                summary2.setTenant(tenant2);
+                summary2.setRocScore(0.80);
+                summary2.setLookupId(tenant2Name + "|Q_EventTable_" + tenant2Name + "|fghij");
+                summary2.setTrainingRowCount(80000L);
+                summary2.setTestRowCount(20000L);
+                summary2.setTotalRowCount(100000L);
+                summary2.setTrainingConversionCount(800L);
+                summary2.setTestConversionCount(200L);
+                summary2.setTotalConversionCount(1000L);
+                summary2.setDetails(getDetails());
+                summary2.setConstructionTime(System.currentTimeMillis());
+                Predictor s2p1 = new Predictor();
+                s2p1.setApprovedUsage("Model");
+                s2p1.setCategory("Construction");
+                s2p1.setName("LeadSource");
+                s2p1.setDisplayName("LeadSource");
+                s2p1.setFundamentalType("");
+                s2p1.setUncertaintyCoefficient(0.151911);
+                summary2.addPredictor(s2p1);
 
-            PredictorElement s2el1 = new PredictorElement();
-            s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
-            s2el1.setCorrelationSign(-1);
-            s2el1.setCount(311L);
-            s2el1.setLift(0.0);
-            s2el1.setLowerInclusive(0.0);
-            s2el1.setUpperExclusive(10.0);
-            s2el1.setUncertaintyCoefficient(0.00313);
-            s2el1.setVisible(true);
-            s2p1.addPredictorElement(s2el1);
+                PredictorElement s2el1 = new PredictorElement();
+                s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
+                s2el1.setCorrelationSign(-1);
+                s2el1.setCount(311L);
+                s2el1.setLift(0.0);
+                s2el1.setLowerInclusive(0.0);
+                s2el1.setUpperExclusive(10.0);
+                s2el1.setUncertaintyCoefficient(0.00313);
+                s2el1.setVisible(true);
+                s2p1.addPredictorElement(s2el1);
 
-            PredictorElement s2el2 = new PredictorElement();
-            s2el2.setName("7ade3995-f3da-4b83-87e6-c358ba3bdc00");
-            s2el2.setCorrelationSign(1);
-            s2el2.setCount(704L);
-            s2el2.setLift(1.3884292375950742);
-            s2el2.setLowerInclusive(10.0);
-            s2el2.setUpperExclusive(1000.0);
-            s2el2.setUncertaintyCoefficient(0.000499);
-            s2el2.setVisible(true);
-            s2p1.addPredictorElement(s2el2);
+                PredictorElement s2el2 = new PredictorElement();
+                s2el2.setName("7ade3995-f3da-4b83-87e6-c358ba3bdc00");
+                s2el2.setCorrelationSign(1);
+                s2el2.setCount(704L);
+                s2el2.setLift(1.3884292375950742);
+                s2el2.setLowerInclusive(10.0);
+                s2el2.setUpperExclusive(1000.0);
+                s2el2.setUncertaintyCoefficient(0.000499);
+                s2el2.setVisible(true);
+                s2p1.addPredictorElement(s2el2);
 
-            modelSummaryEntityMgr.create(summary2);
-
+                modelSummaryEntityMgr.create(summary2);
+            }
         }
     }
 
