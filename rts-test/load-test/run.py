@@ -8,23 +8,20 @@ import sys
 import string
 
 def main(argv):
+    scenarios_folder = "scenarios"
+
     parser = argparse.ArgumentParser()
     parser.add_argument("scoring_harness_jar", help="Location of scoring harness jar file")
-    parser.add_argument("scenarios_folder", help="Location of folder for scenarios to run")
-    
+   
     args = parser.parse_args()
     
     if not os.path.exists(args.scoring_harness_jar):
         print("Must provide a scoring harness jar that exists. {0} does not exist".format(args.scoring_harness_jar), file=sys.stderr)
         exit(1)
     
-    if not os.path.isdir(args.scenarios_folder):
-        print("Must provide a scenarios folder that exists. {0} does not exist".format(args.scenarios_folder), file=sys.stder)
-        exit(1)
-    
     scenarios = []
-    for entry in os.listdir(args.scenarios_folder):
-        completePath = os.path.join(args.scenarios_folder, entry)
+    for entry in os.listdir(scenarios_folder):
+        completePath = os.path.join(scenarios_folder, entry)
         if os.path.isdir(completePath):
             scenarios.append(Scenario(args.scoring_harness_jar, completePath))
     
@@ -61,6 +58,11 @@ class Scenario(object):
         # Check for output        
         if not os.path.exists(self.__outputFile):
             print("FAILURE!  (No output written to {0})".format(self.__outputFile), file=sys.stderr)
+            return
+        
+        if not os.path.exists(self.__expectedOutputFile)
+            self.successful = True
+            print("SUCCESS:  This test does not have any expected output")
             return
         
         # Compare output
