@@ -32,6 +32,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.internalAttributes = data[widgetConfig.InternalAttributesProperty];
     
     $scope.createdDate = data[widgetConfig.CreatedDateProperty];
+    $scope.createdDate = $scope.createdDate * 1000;
     $scope.createdDate = new Date($scope.createdDate).toLocaleDateString();
     
     $scope.totalLeads = data[widgetConfig.TotalLeadsProperty];
