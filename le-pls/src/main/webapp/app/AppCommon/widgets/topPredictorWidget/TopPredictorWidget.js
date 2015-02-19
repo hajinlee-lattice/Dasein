@@ -163,10 +163,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         $scope.drawSummaryChart();
     };
     
-    $scope.categoryClicked = function ($event, category) {
-        if ($event != null) {
-            $event.preventDefault();
-        }
+    $scope.categoryClicked = function (category) {
         var categoryList = TopPredictorService.GetAttributesByCategory(data.Predictors, category.name, category.color, 50);
         TopPredictorService.CalculateAttributeSize(categoryList);
         $scope.backToSummaryView = true;
