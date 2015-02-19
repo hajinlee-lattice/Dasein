@@ -45,11 +45,11 @@ public class WriteLeadToMarketoOperation extends Operation<WriteLeadOperationSpe
         try {
             BaseCloudResult result = harness.updateObjects(update);
             outputResult.isSuccess = result.isSuccess;
-            addToCache(result);
             if (!result.isSuccess) {
                 throw new RuntimeException(String.format("Failed to write the lead %s to Marketo: %s", spec.object,
                         result.errorMessage));
             }
+            addToCache(result);
         } catch (Exception e) {
             log.error(String.format("Failed to write lead %s to Marketo", spec.externalId), e);
             outputResult.additionalFields.add(e.getMessage());

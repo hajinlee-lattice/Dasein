@@ -1,24 +1,24 @@
 [
 	{
 		"@type":"write",
-		"offsetMilliseconds":100,
+		"offsetMilliseconds":0,
 		"externalId":"ksoze@lattice-engines.com",
 		"object":{}
 	},
 	{
-		"@type":"readscore",
-		"offsetMilliseconds":500,
-		"externalId":"ksoze@lattice-engines.com"
-	},
-	{
 		"@type":"write",
-		"offsetMilliseconds":600,
+		"offsetMilliseconds":1000,
 		"externalId":"scoring-harness-sample1@lattice-engines.com",
 		"object":{}
 	},
 	{
 		"@type":"readscore",
-		"offsetMilliseconds":900,
+		"offsetMilliseconds":60000,
+		"externalId":"ksoze@lattice-engines.com"
+	},
+	{
+		"@type":"readscore",
+		"offsetMilliseconds":61000,
 		"externalId":"scoring-harness-sample1@lattice-engines.com"
 	}
 ]

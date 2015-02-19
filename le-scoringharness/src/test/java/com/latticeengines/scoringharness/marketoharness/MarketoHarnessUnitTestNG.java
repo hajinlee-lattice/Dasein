@@ -6,6 +6,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudQuery;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudResult;
 import com.latticeengines.scoringharness.cloudmodel.BaseCloudUpdate;
@@ -22,7 +23,9 @@ public class MarketoHarnessUnitTestNG extends AbstractTestNGSpringContextTests {
     public void testInsertMarketoLeads() throws Exception {
         BaseCloudUpdate update = new BaseCloudUpdate(MarketoHarness.OBJECT_TYPE_LEAD,
                 MarketoHarness.OBJECT_ACTION_CREATE_OR_UPDATE);
-        update.addRow(JsonUtil.parseObject("{\"email\":\"testharness2@lattice-engines.com\"}"));
+        ObjectNode json = JsonUtil.createObject();
+        json.put("email", "testharness2@lattice-engines.com");
+        update.addRow(json);
 
         BaseCloudResult result = marketoHarness.updateObjects(update);
         Assert.assertTrue(result != null, "Result was null");
