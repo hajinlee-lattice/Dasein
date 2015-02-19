@@ -39,13 +39,12 @@ EtlConfig["Eloqua"] = {"CrmPassword": "Happy2010",
                         "CrmUserName": "apeters-widgettech@lattice-engines.com",
                         "DeploymentExternalID": "", # Tenant
                         "DataLoaderTenantName": "", # Tenant
-                        "ReportsDBDataSource": "localhost",
-                        "ReportsDBInitialCatalog": "BardDB",
-                        "ScoringDBDataSource": "localhost",
-                        "ScoringDBInitialCatalog": "BardScoringDB",
-                        # TODO: Confirm
-                        "DanteDBDataSource": "localhost",
-                        "DanteDBInitialCatalog": "DanteDB",
+                        "ReportsDBDataSource": "",
+                        "ReportsDBInitialCatalog": "",
+                        "ScoringDBDataSource": "",
+                        "ScoringDBInitialCatalog": "",
+                        "DanteDBDataSource": "",
+                        "DanteDBInitialCatalog": "",
                         # Make sure you have protocol in your URL (you'll get an error otherwise)
                         "DataLoaderURL": "https://bodcdevvint187.dev.lattice.local:8080",
                         # Marketting App specific
@@ -67,13 +66,12 @@ EtlConfig["Marketo"] = {"CrmPassword": "Happy2010",
                         "CrmUserName": "apeters-widgettech@lattice-engines.com",
                         "DeploymentExternalID": "", # Tenant
                         "DataLoaderTenantName": "", # Tenant
-                        "ReportsDBDataSource": "localhost",
-                        "ReportsDBInitialCatalog": "BardDB",
-                        "ScoringDBDataSource": "localhost",
-                        "ScoringDBInitialCatalog": "BardScoringDB",
-                        # TODO: Confirm
-                        "DanteDBDataSource": "localhost",
-                        "DanteDBInitialCatalog": "DanteDB",
+                        "ReportsDBDataSource": "",
+                        "ReportsDBInitialCatalog": "",
+                        "ScoringDBDataSource": "",
+                        "ScoringDBInitialCatalog": "",
+                        "DanteDBDataSource": "",
+                        "DanteDBInitialCatalog": "",
                         # Make sure you have protocol in your URL (you'll get an error otherwise)
                         "DataLoaderURL": "https://bodcdevvint187.dev.lattice.local:8080",
                         # Marketting App specific

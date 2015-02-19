@@ -1,7 +1,6 @@
 #!/usr/local/bin/python
 # coding: utf-8
 from __builtin__ import str
-from scipy.optimize.zeros import results_c
 
 # Base test framework
 
@@ -17,7 +16,6 @@ __status__ = "Alpha"
 # import modules
 from subprocess import PIPE
 from subprocess import Popen
-#from suds.client import Client
 import datetime
 import json
 import logging
@@ -48,7 +46,9 @@ class SessionRunner(object):
             import pypyodbc
         except Exception:
             e = traceback.format_exc()
-            print("\nERROR:Could not import pypyodbc. This MUST be installed", e, "\n")
+            print "\nERROR:Could not import pypyodbc. it MUST be installed", e, "\n"
+            print "Linux:https://code.google.com/p/pypyodbc/wiki/Linux_ODBC_in_3_steps"
+            print "Windows:https://code.google.com/p/pyodbc/wiki/ConnectionStrings"
             return None
         try:
             conn = pypyodbc.connect(connection_string)
@@ -60,7 +60,7 @@ class SessionRunner(object):
             return results
         except Exception:
             e = traceback.format_exc()
-            print("\nFAILED:Could not fetch query results", e, "\n")
+            print "\nFAILED:Could not fetch query results", e, "\n"
             return None
 
     def getSTDoutputs(self, text):
@@ -155,6 +155,7 @@ class SessionRunner(object):
     def getWsdlClient(self, wsdl):
         # SOAP https://qatest2.dev.lattice.local/BD2_ADEDTBDd70064254nD26163627r12/DataLoaderShim?wsdl
         """
+        Example for DataLoader_Shim:
         wsdl = "https://%s/%s/DataLoaderShim?wsdl" % (soap_host, tenant)
         print wsdl
         client = Client(wsdl, headers={"MagicAuthentication": "Security through obscurity!"})
@@ -164,11 +165,22 @@ class SessionRunner(object):
         result = client.service.ConfigureDataLoaderAndVisiDB(config_string, specs_string)
         print result
         """
+        try:
+            from suds.client import Client
+        except Exception:
+            e = traceback.format_exc()
+            print "!!!ERROR: suds library must be installed for this to work: %s !!!" % e
+            print "You need to run: sudo easy_install suds"
+            return None
+        try:
         # This is for the future use. Uncomment line below and suds import @ header
-        #client = Client(wsdl, headers={"MagicAuthentication": "Security through obscurity!"})
-        client = ""
-        print client
-        return client
+            client = Client(wsdl, headers={"MagicAuthentication": "Security through obscurity!"})
+            print client
+            return client
+        except Exception:
+            e = traceback.format_exc()
+            print "FAILED: can not get SOAP  client: %s !!!" % e
+            return None
 
     def processFile(self, filename, process):
         request_url = self.host + "/%s" % process

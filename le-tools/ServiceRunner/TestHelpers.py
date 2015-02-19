@@ -427,7 +427,7 @@ class EtlRunner(PretzelRunner):
         self.python_code = ""
         self.etl_py_filename = "emulatePretzelETL.py"
 
-    def generatePretzelEtlScript(self, tenant, marketting_app):
+    def generatePretzelEtlScript(self, tenant, marketting_app, sql_server, scoring_db, dante_db):
         print "Yeahh!!! Let's write some Python!!!"
         indent = " " * 4
         config_filename = "Template.config"
@@ -436,6 +436,13 @@ class EtlRunner(PretzelRunner):
         etl_settings = EtlConfig[marketting_app]
         etl_settings["DeploymentExternalID"] = tenant
         etl_settings["DataLoaderTenantName"] = tenant
+        
+        etl_settings["ReportsDBDataSource"] = sql_server
+        etl_settings["ReportsDBInitialCatalog"] = tenant
+        etl_settings["ScoringDBDataSource"] = sql_server
+        etl_settings["ScoringDBInitialCatalog"] = scoring_db
+        etl_settings["DanteDBDataSource"] = sql_server
+        etl_settings["DanteDBInitialCatalog"] = dante_db
     
         if marketting_app == "Marketo":
             config_filename = "Template_MKTO.config"
