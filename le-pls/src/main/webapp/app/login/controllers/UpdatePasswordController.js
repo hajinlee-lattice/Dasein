@@ -2,10 +2,11 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.core.utilities.GriotNavUtility',
     'mainApp.login.services.LoginService'
 ])
 
-.controller('UpdatePasswordController', function ($scope, ResourceUtility, BrowserStorageUtility, StringUtility, LoginService) {
+.controller('UpdatePasswordController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, StringUtility, GriotNavUtility, LoginService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.oldPassword = null;
     $scope.newPassword = null;
@@ -14,7 +15,7 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
     $scope.oldPasswordInputError = "";
     $scope.newPasswordInputError = "";
     $scope.confirmPasswordInputError = "";
-    
+    $scope.showPasswordError = false;
     $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_HELP");
     
     $scope.saveInProgess = false;
@@ -69,11 +70,27 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
         return true;
     }
     
+    $scope.cancelClick = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        
+        $rootScope.$broadcast(GriotNavUtility.MODEL_LIST_NAV_EVENT);
+    };
+    
+    $scope.closeErrorClick = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        
+        $scope.showPasswordError = false;
+    };
+    
     $scope.updatePasswordClick = function () {
         if ($scope.saveInProgess) {
             return;
         }
-        
+        $scope.showPasswordError = false;
         var isValid = validatePassword();
         if (isValid) {
             $scope.saveInProgess = true;
@@ -88,11 +105,11 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
                     } else {
                         $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_ERROR");
                     }
-                    $("#validateAlertError").fadeIn();
+                    $scope.showPasswordError = true;
                 }
             });
         } else {
-            $("#validateAlertError").fadeIn();
+            $scope.showPasswordError = true;
         }
     };
 });

@@ -11,7 +11,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     var data = $scope.data;
     var parentData = $scope.parentData;
     $scope.ResourceUtility = ResourceUtility;
-    $scope.backToSummaryView = false;
+    
     
     var container = $('<div></div>');
     $($element).append(container);
@@ -28,6 +28,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     var chartData = TopPredictorService.FormatDataForChart(data);
     var chartTitle1 = ResourceUtility.getString("TOP_PREDICTORS_CHART_TITLE_1", [chartData.attributesPerCategory]);
     var chartTitle2 = ResourceUtility.getString("TOP_PREDICTORS_CHART_TITLE_2");
+    $scope.backToSummaryView = false;
+    $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER");
     
     // Get Internal category list
     var internalCategoryObj = TopPredictorService.GetNumberOfAttributesByCategory(chartData.children, "Internal", data.Predictors);
@@ -104,7 +106,9 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
               .style("fill", function(d) {
                   return d.color;
               })
-              .on("click", attributeClicked);
+              .on("click", attributeClicked)
+              .on("mouseover", attributeMouseover)
+              .on("mouseout", attributeMouseout);
               
           function attributeClicked(d) {
               var category = null;
@@ -119,6 +123,23 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                   // This is required to update bindings (although not sure why)
                   $scope.$apply($scope.categoryClicked(category));
               }
+          }
+          
+          function attributeMouseover (d) {
+              svg.selectAll("path")
+                  .filter(function(node) {
+                            return node.depth == 2 && node.name == d.name;
+                          })
+                  .style("opacity", 1);
+              //TODO:pierce Here is where the hover chart will go
+          }
+          
+          function attributeMouseout (d) {
+              svg.selectAll("path")
+                  .filter(function(node) {
+                            return node.depth == 2;
+                          })
+                  .style("opacity", 0.6);
           }
         
         // Add value to the middle of the arc
@@ -138,13 +159,18 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     
     $scope.backToSummaryClicked = function () {
         $scope.backToSummaryView = false;
+        $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER");
         $scope.drawSummaryChart();
     };
     
-    $scope.categoryClicked = function (category) {
+    $scope.categoryClicked = function ($event, category) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
         var categoryList = TopPredictorService.GetAttributesByCategory(data.Predictors, category.name, category.color, 50);
         TopPredictorService.CalculateAttributeSize(categoryList);
         $scope.backToSummaryView = true;
+        $scope.chartHeader = category.name;
         var root = {
             name: "root",
             size : 1,

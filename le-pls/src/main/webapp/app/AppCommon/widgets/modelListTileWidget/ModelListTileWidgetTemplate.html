@@ -2,11 +2,17 @@
     <a href="#" class="model {{isActive ? '' : 'inactive'}}">
         <div class="model-title">
             <h2 class="editable editable-click" data-type="text" data-placement="right" data-title="Enter Model Name">{{displayName}}</h2>
-        </div>
+            <button type="button" class="edit" data-ng-click="modelNameEditClick($event)"><i class="fa fa-pencil"></i></button>
+        </div>  
         <div class="status">
             <dl>
                 <dt>{{ResourceUtility.getString('MODEL_TILE_CREATED_DATE_LABEL')}}</dt>
                 <dd>{{createdDate}}</dd>
+            </dl>
+            
+            <dl data-ng-show="!isActive">
+                <dt>{{ResourceUtility.getString('MODEL_TILE_STATUS_LABEL')}}</dt>
+                <dd>{{ResourceUtility.getString('MODEL_DETAILS_INACTIVE_LABEL')}}</dd>
             </dl>
             <button type="button" class="btn btn-link"><i class="fa fa-trash-o"></i></button>
         </div>

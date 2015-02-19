@@ -30,6 +30,12 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     $scope.displayName = data[widgetConfig.NameProperty];
     $scope.isActive = data[widgetConfig.StatusProperty] === "Active" ? true : false;
     $scope.createdDate = data[widgetConfig.CreatedDateProperty];
+    
+    $scope.modelNameEditClick = function ($event) {
+        if ($event != null) {
+            $event.stopPropagation();
+        }
+    };
 
     $scope.tileClick = function ($event) {
         if ($event != null) {
@@ -37,10 +43,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         }
         
         var targetElement = $($event.target);
-        if (targetElement.hasClass("editable-click")) {
-            //Changing the name of the model
-            
-        } else if (targetElement.hasClass("fa-trash-o")) {
+        if (targetElement.hasClass("fa-trash-o")) {
             // deleting the model
             
         } else {

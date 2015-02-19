@@ -6830,42 +6830,6 @@ h2 {
   border-radius: 0;
   text-align: center; }
 
-/* modal redesign */
-.modal-content {
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px; }
-
-.modal-header {
-  background: #444;
-  color: #fff;
-  font-weight: 700;
-  -webkit-border-radius: 2px 2px 0 0;
-  -moz-border-radius: 2px 2px 0 0;
-  border-radius: 2px 2px 0 0; }
-
-.modal-header .close {
-  color: #fff;
-  opacity: .5; }
-
-.modal-header .close:hover {
-  opacity: 1; }
-
-.modal-header .close:active {
-  color: #ccc; }
-
-.modal-footer {
-  text-align: center;
-  padding: 8px 14px;
-  background: #eee;
-  border-top: 1px solid #ddd; }
-
-.modal-sm {
-  width: 500px; }
-
-.processing {
-  opacity: .4; }
-
 /*
 Helpers
 ======================================================================== */
@@ -7178,8 +7142,6 @@ Model List
   cursor: pointer; }
 
 .model-title h2:after {
-  content: "\f040";
-  font-family: FontAwesome;
   color: #bfbfbf;
   font-style: normal;
   font-weight: normal;
@@ -7189,6 +7151,11 @@ Model List
 
 .model-title:hover h2:after {
   color: #477cba; }
+
+.model-title .edit {
+  top: 0;
+  right: 0;
+  position: absolute; }
 
 .status {
   background: rgba(255, 255, 255, 0.85);
@@ -7366,6 +7333,61 @@ Model Details
   width: 60%;
   text-align: center; }
 
+.data .attributes h4 {
+  margin-bottom: 0.5em;
+  padding-bottom: 0.5em;
+  border-bottom: #ddd solid 1px;
+  text-align: left; }
+
+.attributes.lattice-attributes h4 {
+  text-align: right; }
+
+.lattice-attributes a, .marketo-attributes a {
+  text-align: right;
+  color: #747474;
+  padding: 0.35em;
+  display: block;
+  border-bottom: transparent solid 1px; }
+
+.marketo-attributes a {
+  text-align: left; }
+
+.attributes a:hover {
+  color: #747474;
+  background: #e1eefd;
+  border-bottom: #ddd solid 1px; }
+
+.attributes span {
+  display: inline-block;
+  color: #fff;
+  width: 33px;
+  height: 26px;
+  vertical-align: middle;
+  text-align: center;
+  line-height: 2.25em;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  font-weight: bold; }
+
+.lattice-attributes span {
+  margin-left: 1em; }
+
+.firmographics span {
+  background: #85e7d7; }
+
+.growth-trends span {
+  background: #0fb6e0; }
+
+.marketo-attributes span {
+  margin-right: 1em; }
+
+.marketing-response span {
+  background: #4095e1; }
+
+.other span {
+  background: #fe864b; }
+
 /*
 Data Tables
 ================================================================== */
@@ -7390,6 +7412,50 @@ Data Tables
 
 .data-table table td {
   color: #333; }
+
+/*
+Modals
+================================================================== */
+.modal-backdrop {
+  background-color: #4b6689; }
+
+.modal-content {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px; }
+
+.modal-header {
+  background: #477cba;
+  color: #fff;
+  font-weight: 700;
+  -webkit-border-radius: 2px 2px 0 0;
+  -moz-border-radius: 2px 2px 0 0;
+  border-radius: 2px 2px 0 0; }
+
+.modal-header .close {
+  color: #fff;
+  opacity: .5; }
+
+.modal-header .close:hover {
+  opacity: 1; }
+
+.modal-header .close:active {
+  color: #ccc; }
+
+.modal-body {
+  padding: 40px; }
+
+.modal-footer {
+  text-align: center;
+  padding: 0 14px 35px;
+  margin-top: 0;
+  border-top: none; }
+
+.modal-sm {
+  width: 500px; }
+
+.processing {
+  opacity: .4; }
 
 /* end */
 #saleforce-credentials-readonly {
