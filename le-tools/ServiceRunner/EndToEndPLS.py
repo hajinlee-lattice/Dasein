@@ -494,24 +494,9 @@ def activateModelTest(bard_host, bard_path, second_bard_path,
     bard.getStatus()
 
 # Step 6
-def doScoring(dlc_host, dlc_path, tenant, sql_server, db_name,
-              dl_server="https://10.41.1.187:8080/",
-              user="Richard.liu@lattice-engines.com",
-              password="1"):
-
-    pre_scoring_list = ["LoadCRMData", "LoadMapData", "PropDataMatch", "PushToScoringDB"]
-    #post_scoring_list = ["PushToLeadDestination", "PushToReportsDB", "ConsolidateExtracts"]
-    post_scoring_list = ["PushToReportsDB", "ConsolidateExtracts"]
-    dlc = DLCRunner(host=dlc_host, dlc_path=dlc_path)
-    params = {"-s": dl_server,
-              "-u": user,
-              "-p": password,
-              "-t": tenant
-             }
-    # Run PreScoring loadgroups:
-    #runLoadGroups(dlc, params, pre_scoring_list, sleep_time=60)
-
+def waitForLeadInputQueue(sql_server, db_name):
     # Wait for the leads to be scored
+    dlc = SessionRunner()
     connection_string = "DRIVER={SQL Server};SERVER=%s;DATABASE=%s;uid=dataloader_user;pwd=password" % (sql_server, db_name)
     if platform.system() == "Linux":
         connection_string = "DRIVER=FreeTDS;SERVER=%s;DATABASE=%s;uid=dataloader_user;pwd=password" % (sql_server, db_name)
@@ -536,6 +521,25 @@ def doScoring(dlc_host, dlc_path, tenant, sql_server, db_name,
         print "Sleeping for 180 seconds, hoping Status turns 2"
         wait_cycle += 1
         time.sleep(180)
+
+def doScoring(dlc_host, dlc_path, tenant, sql_server, db_name,
+              dl_server="https://10.41.1.187:8080/",
+              user="Richard.liu@lattice-engines.com",
+              password="1"):
+
+    pre_scoring_list = ["LoadCRMData", "LoadMapData", "PropDataMatch", "PushToScoringDB"]
+    post_scoring_list = ["PushToLeadDestination", "PushToReportsDB", "ConsolidateExtracts"]
+    dlc = DLCRunner(host=dlc_host, dlc_path=dlc_path)
+    params = {"-s": dl_server,
+              "-u": user,
+              "-p": password,
+              "-t": tenant
+             }
+    # Run PreScoring loadgroups:
+    runLoadGroups(dlc, params, pre_scoring_list, sleep_time=60)
+
+    # Wait for the leads to be scored
+    waitForLeadInputQueue(sql_server, db_name)
 
     # Run PostScoring loadgroups:
     runLoadGroups(dlc, params, post_scoring_list)
@@ -650,7 +654,7 @@ def testSetup(marketting_app, run_setup=False, run_test=True, use_second_bard=Fa
 
     if run_test:
         # Step 3 - Run LoadGroups and Download Model
-        """
+        
         runModelingLoadGroups(dlc_test_server, dlc_path, tenant_to_use)
         getModelFromModelingServiceTest(pls_test_server, bard_path, bard_path_2,
                                         second_bard_tenant=use_second_bard)
@@ -661,6 +665,7 @@ def testSetup(marketting_app, run_setup=False, run_test=True, use_second_bard=Fa
         activateModelTest(pls_test_server, bard_path, bard_path_2,
                           use_second_bard_tenant=use_second_bard)
     
+        """
         """
         # Steps 6 - Not really a step, let's keep the slot for verification
         doScoring(dlc_test_server, dlc_path, tenant, sql_server, scoring_db_name)
