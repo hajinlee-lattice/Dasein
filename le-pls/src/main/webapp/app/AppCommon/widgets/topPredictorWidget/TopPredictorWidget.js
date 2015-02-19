@@ -26,10 +26,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     WidgetFrameworkService.CreateChildWidgets(options, $scope.data);
     
     var chartData = TopPredictorService.FormatDataForChart(data);
-    var chartTitle1 = ResourceUtility.getString("TOP_PREDICTORS_CHART_TITLE_1", [chartData.attributesPerCategory]);
-    var chartTitle2 = ResourceUtility.getString("TOP_PREDICTORS_CHART_TITLE_2");
     $scope.backToSummaryView = false;
-    $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER");
+    $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
     
     // Get Internal category list
     var internalCategoryObj = TopPredictorService.GetNumberOfAttributesByCategory(chartData.children, "Internal", data.Predictors);
@@ -141,25 +139,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                           })
                   .style("opacity", 0.6);
           }
-        
-        // Add value to the middle of the arc
-        svg.append("text")
-            .attr("class", "top-predictor-donut-text")
-            .style("fill", "#555555")
-            .attr("dy", ".10em")
-            .text(chartTitle1);
-            
-        svg.append("text")
-            .attr("class", "top-predictor-donut-text")
-            .style("fill", "#555555")
-            .attr("dy", "1.250em")
-            .text(chartTitle2);
     };
     $scope.drawSummaryChart();
     
     $scope.backToSummaryClicked = function () {
         $scope.backToSummaryView = false;
-        $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER");
+        $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
         $scope.drawSummaryChart();
     };
     
@@ -167,7 +152,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         var categoryList = TopPredictorService.GetAttributesByCategory(data.Predictors, category.name, category.color, 50);
         TopPredictorService.CalculateAttributeSize(categoryList);
         $scope.backToSummaryView = true;
-        $scope.chartHeader = category.name;
+        $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_CATEGORY_HEADER", [category.name, categoryList.length]);
         var root = {
             name: "root",
             size : 1,
@@ -240,22 +225,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 };
             });
         }
-        
-        var categoryTitle1 = ResourceUtility.getString("TOP_PREDICTORS_CATEGORY_CHART_TITLE_1");
-        var categoryTitle2 = ResourceUtility.getString("TOP_PREDICTORS_CATEGORY_CHART_TITLE_2");
-        
-        // Add value to the middle of the arc
-        svg.append("text")
-            .attr("class", "top-predictor-donut-text")
-            .style("fill", "#555555")
-            .attr("dy", ".10em")
-            .text(categoryTitle1);
-            
-        svg.append("text")
-            .attr("class", "top-predictor-donut-text")
-            .style("fill", "#555555")
-            .attr("dy", "1.250em")
-            .text(categoryTitle2);
     };
   
 })
