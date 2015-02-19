@@ -65,7 +65,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
 
     private Ticket ticket = null;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         assertEquals(ticket.getTenants().size(), 2);
@@ -106,7 +106,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void runPipeline() throws Exception {
         executor.runPipeline();
         Thread.sleep(30000L);
