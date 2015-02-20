@@ -8,10 +8,12 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.appCommon.widgets.ThresholdExplorerWidget',
     'mainApp.models.controllers.ModelDetailController',
-    'mainApp.models.services.ModelService'
+    'mainApp.models.services.ModelService',
+    'mainApp.appCommon.services.TopPredictorService'
 ])
 
-.controller('ModelDetailController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, WidgetConfigUtility, GriotNavUtility, WidgetFrameworkService, GriotWidgetService, ModelService) {
+.controller('ModelDetailController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, WidgetConfigUtility, 
+    GriotNavUtility, WidgetFrameworkService, GriotWidgetService, ModelService, TopPredictorService) {
     $scope.ResourceUtility = ResourceUtility;
     
     var modelId = $scope.data.Id;
@@ -34,6 +36,9 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     ModelService.GetModelById(modelId).then(function(result) {
         if (result != null && result.success === true) {
             var model = result.resultObj;
+            model.ChartData = TopPredictorService.FormatDataForChart(model);
+            model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, "Internal", model.Predictors);
+            model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, "External", model.Predictors);
 
             var contentContainer = $('#modelDetailContainer');
             WidgetFrameworkService.CreateWidget({

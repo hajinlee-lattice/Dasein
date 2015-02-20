@@ -2,11 +2,10 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.utilities.GriotNavUtility',
-    'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.appCommon.services.TopPredictorService'
+    'mainApp.appCommon.utilities.StringUtility'
 ])
 
-.controller('ModelDetailsWidgetController', function ($scope, $rootScope, ResourceUtility, DateTimeFormatUtility, GriotNavUtility, StringUtility, TopPredictorService) {
+.controller('ModelDetailsWidgetController', function ($scope, $rootScope, ResourceUtility, DateTimeFormatUtility, GriotNavUtility, StringUtility) {
     $scope.ResourceUtility = ResourceUtility;
     
     var widgetConfig = $scope.widgetConfig;
@@ -27,11 +26,11 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     if ($scope.score != null && $scope.score < 1) {
         $scope.score = Math.round($scope.score * 100);
     }
-    
-    $scope.externalAttributes = TopPredictorService.GetNumberOfAttributesByType(data.Predictors, "External");
+     
+    $scope.externalAttributes = data.ExternalAttributes.total;
     $scope.externalAttributes = StringUtility.AddCommas($scope.externalAttributes);
     
-    $scope.internalAttributes = TopPredictorService.GetNumberOfAttributesByType(data.Predictors, "Internal");
+    $scope.internalAttributes = data.InternalAttributes.total;
     $scope.internalAttributes = StringUtility.AddCommas($scope.internalAttributes);
     
     $scope.createdDate = modelDetails[widgetConfig.CreatedDateProperty];

@@ -25,18 +25,18 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     };
     WidgetFrameworkService.CreateChildWidgets(options, $scope.data);
     
-    var chartData = TopPredictorService.FormatDataForChart(data);
+    var chartData = data.ChartData;
     $scope.backToSummaryView = false;
     $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
     
     // Get Internal category list
-    var internalCategoryObj = TopPredictorService.GetNumberOfAttributesByCategory(chartData.children, "Internal", data.Predictors);
+    var internalCategoryObj = data.InternalAttributes;
     $scope.internalPredictorTotal = internalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_INTERNAL_TITLE");
     $scope.internalCategories = internalCategoryObj.categories;
     $scope.showInternalCategories = internalCategoryObj.total > 0;
     
     // Get External category list
-    var externalCategoryObj = TopPredictorService.GetNumberOfAttributesByCategory(chartData.children, "External", data.Predictors);
+    var externalCategoryObj = data.ExternalAttributes;
     $scope.externalPredictorTotal = externalCategoryObj.total + " " + ResourceUtility.getString("TOP_PREDICTORS_EXTERNAL_TITLE");
     $scope.externalCategories = externalCategoryObj.categories;
     $scope.showExternalCategories = externalCategoryObj.total > 0;
@@ -68,18 +68,18 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             .endAngle(function(d) { return d.x + d.dx; })
             .innerRadius(function(d) {
                 if (d.depth === 1) {
-                    return 70;
+                    return 50;
                 } else if (d.depth === 2) {
-                    return 81;
+                    return 61;
                 }  else {
                     return 0;
                 }
             })
             .outerRadius(function(d) { 
                 if (d.depth === 1) {
-                    return 80;
+                    return 60;
                 } else if (d.depth === 2) {
-                    return 120;
+                    return 125;
                 } else {
                     return 0;
                 }
@@ -180,14 +180,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             .endAngle(function(d) { return d.x + d.dx; })
             .innerRadius(function(d) {
                 if (d.depth === 1) {
-                    return 70;
+                    return 50;
                 }  else {
                     return 0;
                 }
             })
             .outerRadius(function(d) { 
                 if (d.depth === 1) {
-                    return 120; 
+                    return 125; 
                 } else {
                     return 0;
                 }

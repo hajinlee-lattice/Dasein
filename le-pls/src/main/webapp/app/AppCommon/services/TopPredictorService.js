@@ -192,7 +192,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         topCategories = topCategories.sort(this.SortByPredictivePower);
         
         //And finally calculate the size based on predictive power
-        var attributesPerCategory = topCategories.length >= 7 ? 3 : 5;
+        var attributesPerCategory = 3;
         var numLargeCategories = Math.round((topCategories.length * attributesPerCategory) * 0.16);
         var numMediumCategories = Math.round((topCategories.length * attributesPerCategory) * 0.32);
         var totalAttributes = [];
