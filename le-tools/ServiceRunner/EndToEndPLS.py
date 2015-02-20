@@ -554,11 +554,7 @@ def doScoring(dlc_host, dlc_path, tenant, sql_server, db_name,
 
 def runPlsEndToEndTest(marketting_app, run_setup=False, run_test=True, use_second_bard=False):
     print "End to End Starts now!"
-
-##################### PLS End-to-End test ########################
-
-def testSetup(marketting_app, run_setup=False, run_test=True, use_second_bard=False):
-    # These parameters should be taken from Jenkins build info page
+    #These parameters should be taken from Jenkins build info page
 
     ############ Generic Parameters ######################
     # this parameter should be in format "http://ip:5000" IP, NOT the name!!!
@@ -675,8 +671,8 @@ def testSetup(marketting_app, run_setup=False, run_test=True, use_second_bard=Fa
 
 def main():
     print "Welcome to PLS End to End Automation!"
-    testSetup("Eloqua", run_setup=False, use_second_bard=False, run_test=True)
-    #testSetup("Marketo", run_setup=False, use_second_bard=True, run_test=True)
+    runPlsEndToEndTest("Eloqua", run_setup=True, use_second_bard=False, run_test=True)
+    runPlsEndToEndTest("Marketo", run_setup=True, use_second_bard=True, run_test=True)
 
 
 if __name__ == '__main__':
