@@ -18,10 +18,10 @@
       http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
     <bean id="readOnlyDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="${pls.readonly.datasource.driver}" />
-        <property name="url"      value="${pls.readonly.datasource.url}" />
-        <property name="username" value="${pls.readonly.datasource.user}" />
-        <property name="password" value="${pls.readonly.datasource.password.encrypted}" />
+        <property name="driverClassName" value="${pls.datasource.driver}" />
+        <property name="url"      value="${pls.datasource.url}" />
+        <property name="username" value="${pls.datasource.user}" />
+        <property name="password" value="${pls.datasource.password.encrypted}" />
     </bean>
 
     <!-- Hibernate session factory -->
