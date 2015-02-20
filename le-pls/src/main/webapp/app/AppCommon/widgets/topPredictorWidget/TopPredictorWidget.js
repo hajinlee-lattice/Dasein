@@ -45,23 +45,37 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     var totalAttributes = internalCategoryObj.total + externalCategoryObj.total;
     $scope.topPredictorTitle = totalAttributes + " " + ResourceUtility.getString("TOP_PREDICTORS_TITLE");
     
-    //Draw Donut chart
-    $scope.drawSummaryChart = function () {
-        var width = 300,
-            height = 300,
-            radius = Math.min(width, height) / 2;
-            
+    // Methods used for the Sunburst chart
+    
+    // Stash the old values for transition.
+    function stash(d) {
+        d.x0 = d.x;
+        d.dx0 = d.dx;
+    }
+    
+    var width = 300,
+        height = 300,
+        radius = Math.min(width, height) / 2;
+
+    // This is used to get an initial size so it can animate 
+    var fakePartition = d3.layout.partition()
+        .sort(null)
+        .size([0.01, 0.01])
+        .value(function(d) { return 1; });
+        
+    var partition = d3.layout.partition()
+        .sort(null)
+        .size([2 * Math.PI, radius * radius])
+        .value(function(d) { return d.size; });
+    
+    //Draw Sunburst chart
+    $scope.drawSummaryChart = function () {  
         $(".js-top-predictor-donut").empty();
         var svg = d3.select(".js-top-predictor-donut").append("svg")
             .attr("width", width)
             .attr("height", height)
           .append("g")
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-            
-        var partition = d3.layout.partition()
-            .sort(null)
-            .size([2 * Math.PI, radius * radius])
-            .value(function(d) { return d.size; });
             
         var arc = d3.svg.arc()
             .startAngle(function(d) { return d.x; })
@@ -86,7 +100,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             });
         
         var path = svg.datum(chartData).selectAll("path")
-              .data(partition.nodes)
+              .data(fakePartition.nodes)
             .enter().append("path")
               .attr("display", function(d) { 
                   return d.depth ? null : "none"; 
@@ -106,39 +120,53 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
               })
               .on("click", attributeClicked)
               .on("mouseover", attributeMouseover)
-              .on("mouseout", attributeMouseout);
+              .on("mouseout", attributeMouseout)
+              .each(stash);
+        
+        function attributeClicked(d) {
+            var category = null;
+            for (var i = 0; i < chartData.children.length; i++) {
+                if (chartData.children[i].categoryName == d.categoryName) {
+                    category = chartData.children[i];
+                    break;
+                }
+            }
               
-          function attributeClicked(d) {
-              var category = null;
-              for (var i = 0; i < chartData.children.length; i++) {
-                  if (chartData.children[i].categoryName == d.categoryName) {
-                      category = chartData.children[i];
-                      break;
-                  }
-              }
-              
-              if (category != null) {
-                  // This is required to update bindings (although not sure why)
-                  $scope.$apply($scope.categoryClicked(category));
-              }
-          }
+            if (category != null) {
+                // This is required to update bindings (although not sure why)
+                $scope.$apply($scope.categoryClicked(category));
+            }
+        }
           
-          function attributeMouseover (d) {
-              svg.selectAll("path")
-                  .filter(function(node) {
-                            return node.depth == 2 && node.name == d.name;
-                          })
-                  .style("opacity", 1);
+        function attributeMouseover (d) {
+            svg.selectAll("path")
+                .filter(function(node) {
+                          return node.depth == 2 && node.name == d.name;
+                })
+                .style("opacity", 1);
               //TODO:pierce Here is where the hover chart will go
-          }
+        }
           
-          function attributeMouseout (d) {
-              svg.selectAll("path")
-                  .filter(function(node) {
-                            return node.depth == 2;
-                          })
-                  .style("opacity", 0.6);
-          }
+        function attributeMouseout (d) {
+            svg.selectAll("path")
+                .filter(function(node) {
+                    return node.depth == 2;
+                })
+                .style("opacity", 0.6);
+        }
+        
+        // Interpolate the arcs in data space.
+        function arcTween(a) {
+            var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
+            return function(t) {
+                var b = i(t);
+                a.x0 = b.x;
+                a.dx0 = b.dx;
+                return arc(b);
+            };
+        }
+        path.data(partition.nodes).transition().duration(1000).attrTween("d", arcTween);
+        
     };
     $scope.drawSummaryChart();
     
@@ -160,20 +188,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             children: categoryList
         };
         $(".js-top-predictor-donut").empty();
-        var width = 300,
-            height = 300,
-            radius = Math.min(width, height) / 2;
             
         var svg = d3.select(".js-top-predictor-donut").append("svg")
             .attr("width", width)
             .attr("height", height)
           .append("g")
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-            
-        var partition = d3.layout.partition()
-            .sort(null)
-            .size([2 * Math.PI, radius * radius])
-            .value(function(d) { return d.size; });
         
         var arc2 = d3.svg.arc()
             .startAngle(function(d) { return d.x; })
@@ -194,7 +214,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             });
         
         var path = svg.datum(root).selectAll("path")
-          .data(partition.nodes)
+          .data(fakePartition.nodes)
         .enter().append("path")
           .attr("display", function(d) { 
               return d.depth ? null : "none"; 
@@ -211,20 +231,19 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
           .style("fill", function(d) {
               return d.color;
           })
-          .transition()
-            .duration(1000)
-            .call(arcTween);
+          .each(stash);
         
         // Interpolate the arcs in data space.
-        function arcTween(transition, newAngle) {
-            transition.attrTween("d", function(d) {
-                var interpolate = d3.interpolate(d.endAngle, newAngle);
-                return function(t) {
-                    d.endAngle = interpolate(t);
-                    return arc2(d);
-                };
-            });
+        function arcTween(a) {
+            var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
+            return function(t) {
+                var b = i(t);
+                a.x0 = b.x;
+                a.dx0 = b.dx;
+                return arc2(b);
+            };
         }
+        path.data(partition.nodes).transition().duration(1000).attrTween("d", arcTween);
     };
   
 })
