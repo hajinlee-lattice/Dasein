@@ -65,7 +65,7 @@
             <activation>
                 <property>
                     <name>environment.type</name>
-                    <value>prod</value>
+                    <value>prodcluster</value>
                 </property>
             </activation>
             <properties>
