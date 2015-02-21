@@ -88,25 +88,79 @@ class SampleGenerator(State):
         dataFrame.columns = columns
 
     def generateTopAndBottomSamples(self, readoutSample):
-        '''
-        Good Enough (For Now)
-        '''
-        topSample = []
-        for i in xrange(10):
-            lead = OrderedDict()
-            lead["Company"] = "Company " + str(i)
-            lead["Contact"] = "Contact " + str(i)
-            lead["Converted"] = False if i in [2, 6, 7] else True
-            lead["Score"] = 100
-            topSample.append(lead)
+        mediator = self.mediator
+        schema = mediator.schema
+        samples = schema["samples"]
 
-        bottomSample = []
-        for i in xrange(10):
+        def getSample(row):
             lead = OrderedDict()
-            lead["Company"] = "Company " + str(10 + i)
-            lead["Contact"] = "Contact " + str(10 + i)
-            lead["Converted"] = False
-            lead["Score"] = 1
-            bottomSample.append(lead)
+            lead["Company"] = row[samples["company"]].strip()
+            lead["FirstName"] = row[samples["firstname"]].strip()
+            lead["LastName"] = row[samples["lastname"]].strip()
+            lead["Converted"] = True if row[schema["target"]] == 1 else False
+            lead["Score"] = row[schema["reserved"]["percentilescore"]]
+            return lead
 
-        return (topSample, bottomSample)
+        def isValid(row):
+            company = row[samples["company"]] if "company" in samples else None
+            firstName = row[samples["firstname"]] if "firstname" in samples else None
+            lastName = row[samples["lastname"]] if "lastname" in samples else None
+            validCompany = company is not None and len(company.strip()) > 0
+            validFirstName = firstName is not None and len(firstName.strip()) > 0
+            validLastName = lastName is not None and len(lastName.strip()) > 0
+            return validCompany and validFirstName and validLastName
+
+        def isSpam(row):
+            spamIndicator = row[samples["spamindicator"]] if "spamindicator" in samples else None
+            return True if spamIndicator is not None and spamIndicator == 1 else False
+
+        def isTest(row):
+            return not row[schema["reserved"]["training"]]
+
+        def generateTopSample():
+            result = []
+            converted = 7; notConverted = 3
+            sampleSize = converted + notConverted
+            numConverted = 0
+            numNotConverted = 0
+            companies = set()
+            rows = readoutSample.shape[0]
+            for i in xrange(rows):
+                row = readoutSample.iloc[i]
+                if isTest(row) and isValid(row) and not isSpam(row):
+                    sample = getSample(row)
+                    company = sample["Company"]
+                    if company not in companies:
+                        leadConverted = sample["Converted"]
+                        if leadConverted and numConverted < converted:
+                            result.append(sample)
+                            companies.add(company)
+                            numConverted += 1
+                        elif not leadConverted and numNotConverted < notConverted:
+                            result.append(sample)
+                            companies.add(company)
+                            numNotConverted += 1
+                if len(result) == sampleSize: break
+            return result
+
+        def generateBottomSample():
+            result = []
+            sampleSize = 10
+            numSample = 0
+            companies = set()
+            rows = readoutSample.shape[0]
+            for i in xrange(rows):
+                row = readoutSample.iloc[rows - 1 - i]
+                if isTest(row) and isValid(row):
+                    sample = getSample(row)
+                    company = sample["Company"]
+                    if company not in companies:
+                        leadConverted = sample["Converted"]
+                        if not leadConverted:
+                            result.append(sample)
+                            numSample += 1
+                if len(result) == sampleSize: break
+            result.reverse()
+            return result
+
+        return generateTopSample(), generateBottomSample()

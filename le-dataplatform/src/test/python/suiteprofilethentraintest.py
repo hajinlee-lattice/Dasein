@@ -79,7 +79,7 @@ class SuiteMuleSoftProfilingThenTrainTest(SuiteProfilingThenTrainTest):
         jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
         self.assertTrue(rocScore > 0.83)
-        
+
     @classmethod
     def getSubDir(cls):
         return "Mulesoft_Relaunch"
@@ -112,13 +112,13 @@ class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
         with open("./results/scoringengine.py", "w") as scoringScript:
             scoringScript.write(jsonDict["Model"]["Script"])
 
-        
+
         with open("./results/scorefileforonerow.txt", "w") as fw:
             with open("./results/scorefilefortrainingdata.txt", "r") as fr:
                 for line in fr:
                     fw.write(line)
                     break
-        
+
         predictors = jsonDict["Summary"]["Predictors"]
         oneRowData = json.loads(open("./results/scorefileforonerow.txt", "r").read())
         for data in oneRowData["value"]:
@@ -141,10 +141,10 @@ class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
         subprocess.call([sys.executable, './results/scoringengine.py', "./results/scorefileforonerowchanged.txt", "./results/scorefileforonerowchanged.output.txt"])
         score1 = float(csv.reader(open("./results/scorefileforonerow.output.txt", "r")).next()[1])
         score2 = float(csv.reader(open("./results/scorefileforonerowchanged.output.txt", "r")).next()[1])
-        
+
         self.assertTrue(math.fabs(score1 - score2) > 0.001)
- 
- 
+
+
         subprocess.call([sys.executable, './results/scoringengine.py', "./results/scorefilefortrainingdata.txt", "./results/scoreoutputfilefortrainingdata.txt"])
         self.__writePercentileBucketsFile("./results/scoreoutputfilefortrainingdata.txt", "./results/pctilescoreoutputfilefortrainingdata.csv", jsonDict)
         self.__writePercentileBucketsFile(glob.glob("./results/*scored.txt")[0], "./results/pctilescoreoutputfilefortestdata.csv", jsonDict)
@@ -156,13 +156,13 @@ class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
                 for row in csv.reader(csvreader):
                     rawScore = float(row[1])
                     csvwriter.writerow((row[0], rawScore, self.__getPercentileScore(jsonDict["PercentileBuckets"], rawScore)))
-    
+
     def __getPercentileScore(self, percentileBuckets, rawScore):
         for percentileBucket in percentileBuckets:
             minScore = percentileBucket["MinimumScore"]
             maxScore = percentileBucket["MaximumScore"]
             percentile = percentileBucket["Percentile"]
-            
+
             if percentile == 100 and rawScore >= maxScore:
                 return 100
             if percentile == 1 and rawScore <= minScore:
@@ -173,7 +173,6 @@ class SuiteLatticeRelaunchProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     @classmethod
     def getSubDir(cls):
         return "Lattice_Relaunch"
-
 
 class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def testExecuteProfilingThenTrain(self):
@@ -201,10 +200,10 @@ class SuiteDocsignProfilingThenTrainTest(SuiteProfilingThenTrainTest):
                 count += 1
             if row['Attribute Name'] == 'Open Source Adoption':
                 binarySet.add(row['Attribute Value'])
-                    
+
         self.assertTrue(count == 9)
         self.assertTrue(hasOther)
-        
+
         self.assertEqual(len(binarySet), 3)
         self.assertTrue(binarySet == set(['["Yes"]', '["No"]', '["Not Available"]']))
 
@@ -218,6 +217,38 @@ class SuiteTenant1ProfilingThenTrainTest(SuiteProfilingThenTrainTest):
         jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
         rocScore = jsonDict["Summary"]["RocScore"]
         self.assertTrue(rocScore > 0.5)
+
+        # Summary File Exists?
+        summaryFile = "./results/enhancements/modelsummary.json"
+        self.assertTrue(os.path.isfile(summaryFile))
+
+        # Load Summary
+        summary = json.loads(open(summaryFile).read())
+
+        # Check Top Sample
+        topSample = summary["TopSample"]
+        self.assertEqual(len(topSample), 10)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if e["Converted"] else 0), topSample, 0), 7)
+        self.assertEqual(reduce(lambda acc, e: acc + (0 if e["Converted"] else 1), topSample, 0), 3)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if e["FirstName"] is None else 0), topSample, 0), 0)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if len(e["FirstName"]) == 0 else 0), topSample, 0), 0)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if e["LastName"] is None else 0), topSample, 0), 0)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if len(e["LastName"]) == 0 else 0), topSample, 0), 0)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if e["Company"] is None else 0), topSample, 0), 0)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if len(e["Company"]) == 0 else 0), topSample, 0), 0)
+        self.assertEqual(len(set([e["Company"] for e in topSample])), 10)
+
+        # Check Bottom Sample
+        bottomSample = summary["BottomSample"]
+        self.assertEqual(len(bottomSample), 10)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if e["Converted"] else 0), bottomSample, 0), 0)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if e["FirstName"] is None else 0), bottomSample, 0), 0)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if len(e["FirstName"]) == 0 else 0), bottomSample, 0), 0)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if e["LastName"] is None else 0), bottomSample, 0), 0)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if len(e["LastName"]) == 0 else 0), bottomSample, 0), 0)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if e["Company"] is None else 0), bottomSample, 0), 0)
+        self.assertEqual(reduce(lambda acc, e: acc + (1 if len(e["Company"]) == 0 else 0), bottomSample, 0), 0)
+        self.assertEqual(len(set([e["Company"] for e in bottomSample])), 10)
 
     @classmethod
     def getSubDir(cls):

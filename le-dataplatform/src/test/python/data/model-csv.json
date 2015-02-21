@@ -103,7 +103,11 @@
   ],
   "targets": [
 	"Event: P1_Event",
-	"Readouts: LeadID | Email"
+	"Readouts: LeadID | Email",
+	"Company: Company",
+	"LastName: LastName",
+	"FirstName: FirstName",
+	"SpamIndicator: SpamIndicator"
   ],
   "data_profile": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/EventMetadata_Nutanix/profile.avro",
   "config_metadata": "/user/s-analytics/customers/Nutanix/data/Q_EventTable_Nutanix/EventMetadata_Nutanix/metadata.avsc",

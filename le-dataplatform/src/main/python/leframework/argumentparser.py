@@ -38,7 +38,7 @@ class ArgumentParser(object):
 
         self.fields = dataSchema["fields"]
         self.features = self.metadataSchema["features"]
-        (self.target, self.readouts) = self.extractTargets()
+        (self.target, self.readouts, self.samples) = self.extractTargets()
         self.keys = self.metadataSchema["key_columns"]
         self.depivoted = False
         if "depivoted" in self.metadataSchema:
@@ -65,8 +65,12 @@ class ArgumentParser(object):
 
         eventKey = "Event".lower()
         readoutKey = "Readouts".lower()
+        companyKey = "Company".lower()
+        lastNameKey = "LastName".lower()
+        firstNameKey = "FirstName".lower()
+        spamIndicatorKey = "SpamIndicator".lower()
 
-        target = None; readouts = []
+        target = None; readouts = []; samples = dict()
         for sTarget in specifiedTargets:
             pair = sTarget.split(":")
             if len(pair) == 2:
@@ -79,6 +83,18 @@ class ArgumentParser(object):
                     for value in [e.strip() for e in value.split("|")]:
                         if columnExists(value): readouts.append(value)
                         else: logWarning(value, "readout")
+                elif key == companyKey:
+                    if columnExists(value): samples[companyKey] = value
+                    else: logWarning(value, "company")
+                elif key == lastNameKey:
+                    if columnExists(value): samples[lastNameKey] = value
+                    else: logWarning(value, "lastname")
+                elif key == firstNameKey:
+                    if columnExists(value): samples[firstNameKey] = value
+                    else: logWarning(value, "firstname")
+                elif key == spamIndicatorKey:
+                    if columnExists(value): samples[spamIndicatorKey] = value
+                    else: logWarning(value, "spamindicator")
                 else: logWarning(value, "unspecified")
             # Legacy
             elif len(pair) == 1:
@@ -86,7 +102,7 @@ class ArgumentParser(object):
                 if columnExists(value): target = value
                 else: logWarning(value, "target")
 
-        return target, readouts
+        return target, readouts, samples
 
     def __parseProperties(self, name):
         element = {}
@@ -134,7 +150,7 @@ class ArgumentParser(object):
         self.stringColNames = set()
 
         scoringColumns = set(self.features) | set([self.target]) | set(self.keys)
-        nonScoringColumns = set(self.readouts)
+        nonScoringColumns = set(self.readouts) | set(self.samples.values())
 
         if postProcessClf:
             specifiedColumns = scoringColumns | nonScoringColumns
@@ -204,6 +220,7 @@ class ArgumentParser(object):
         schema["target"] = self.target
         schema["reserved"] = self.reserved
         schema["readouts"] = self.readouts
+        schema["samples"] = self.samples
         schema["stringColumns"] = self.stringColNames
         schema["fields"] = { k['name']:k['type'][0] for k in self.fields }
 

@@ -59,6 +59,14 @@ class EnhancedFilesTest(TrainingTestBase):
         for i in xrange(len(segments) - 1):
             self.assertGreaterEqual(segments[i]["FitConversion"], segments[i+1]["FitConversion"])
 
+        # Check Top Sample
+        topSample = summary["TopSample"]
+        self.assertEqual(len(topSample), 0)
+
+        # Check Bottom Sample
+        bottomSample = summary["BottomSample"]
+        self.assertEqual(len(bottomSample), 0)
+
         # Check Provenance
         provenance = summary["EventTableProvenance"]
         self.assertEqual(provenance["SourceURL"], "http://10.41.1.238/")

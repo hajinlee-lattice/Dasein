@@ -17,10 +17,10 @@ class Initialize(State):
 
         #Score and Update Data
         dataScores = ScoringUtil.score(mediator, mediator.data, self.logger)
-        mediator.data[mediator.schema["reserved"]["score"]].update(pd.Series(dataScores))
+        dataScoreSeries = pd.Series(dataScores, index=mediator.data.index)
+        mediator.data[mediator.schema["reserved"]["score"]].update(dataScoreSeries)
 
         # Score PostTransform And Update PreTransform
-        allScores = ScoringUtil.score(self.mediator, mediator.allDataPostTransform, self.logger)
-        mediator.allDataPreTransform[mediator.schema["reserved"]["score"]].update(pd.Series(allScores))
-
-        
+        allScores = ScoringUtil.score(mediator, mediator.allDataPostTransform, self.logger)
+        allScoreSeries = pd.Series(allScores, index=mediator.allDataPreTransform.index)
+        mediator.allDataPreTransform[mediator.schema["reserved"]["score"]].update(allScoreSeries)
