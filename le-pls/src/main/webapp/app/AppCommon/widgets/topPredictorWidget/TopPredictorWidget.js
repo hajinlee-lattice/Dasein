@@ -169,7 +169,18 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         
     };
     $scope.drawSummaryChart();
-    
+
+    $scope.exportClicked = function () {
+    /*
+    	var columns = ["Category", "Name", "Description", "%Leads", "Lift", "PredictivePower"];
+    	rows = []; rows.push(columns);
+    	for (i = 0; i < 20000; i++)
+    		rows.push(["Firmographics", "SomeName " + i, "SomeDescription " + i, 22, 0.753367662619544, 0.0012298305466095939]);
+        alasql("SELECT * INTO CSV('predictors.csv') FROM ?", [rows]);
+    */
+    	window.alert("Export All: Coming Soon.");
+    };
+
     $scope.backToSummaryClicked = function () {
         $scope.backToSummaryView = false;
         $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_HEADER", [chartData.attributesPerCategory]);
