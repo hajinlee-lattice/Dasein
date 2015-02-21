@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
@@ -33,7 +34,8 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "MODEL_SUMMARY")
+@Table(name = "MODEL_SUMMARY", 
+       uniqueConstraints = { @UniqueConstraint(columnNames = { "Id" }), @UniqueConstraint(columnNames = { "Name" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId {
     
@@ -74,7 +76,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     @Override
     @JsonProperty("name")
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", unique = true, nullable = false)
     public String getName() {
         return name;
     }
@@ -87,7 +89,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     @Override
     @JsonProperty("Id")
-    @Column(name = "ID", nullable = false)
+    @Column(name = "ID", unique = true, nullable = false)
     @Index(name = "MODEL_SUMMARY_ID_IDX")
     public String getId() {
         return id;
