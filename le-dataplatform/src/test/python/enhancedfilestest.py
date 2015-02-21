@@ -56,8 +56,6 @@ class EnhancedFilesTest(TrainingTestBase):
         converted = reduce(lambda acc, e: acc + e["Converted"], segments, 0)
         self.assertEqual(count, details["TestingLeads"])
         self.assertEqual(converted, details["TestingConversions"])
-        for i in xrange(len(segments) - 1):
-            self.assertGreaterEqual(segments[i]["FitConversion"], segments[i+1]["FitConversion"])
 
         # Check Top Sample
         topSample = summary["TopSample"]

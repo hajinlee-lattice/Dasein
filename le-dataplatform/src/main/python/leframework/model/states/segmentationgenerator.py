@@ -1,7 +1,5 @@
 from collections import OrderedDict
 import logging
-import numpy as np
-from scipy.optimize import curve_fit
 
 from leframework.codestyle import overrides
 from leframework.model.state import State
@@ -48,9 +46,6 @@ class SegmentationGenerator(State):
         for i in xrange(remainder, numBlocks):
             addSegment(i)
 
-        # Apply Curve Fit
-        self.applyCurveFit(segments)
-
         # Construct Result
         self.result = []
         allSegments = OrderedDict()
@@ -60,21 +55,3 @@ class SegmentationGenerator(State):
 
         # Add Result to Mediator
         self.mediator.segmentations = self.result
-
-    def applyCurveFit(self, segments):
-        '''
-        Good Enough (For Now)
-        '''
-        def model(x, a, b, c):
-            return a * np.exp(-b * x) + c
-
-        xdata = range(len(segments))
-        ydata = [float(s["Converted"]) / float(s["Count"]) if s["Count"] > 0 else 0 for s in segments]
-
-        try:
-            popt, _ = curve_fit(model, xdata, ydata)
-            yFitdata = [model(i, popt[0], popt[1], popt[2]) for i in xdata]
-            for i in xdata: segments[i]["FitConversion"] = yFitdata[i]
-        except:
-            self.logger.warn("Could Not Apply Curve Fit", exc_info=True)
-            for i in xdata: segments[i]["FitConversion"] = -1
