@@ -5,6 +5,7 @@ import java.util.Arrays;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -108,10 +109,12 @@ public class LoginResource {
         return doc;
     }
 
-    @RequestMapping(value = "/forgotpassword/{userName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/forgotpassword", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset password and send an email")
-    public Boolean forgotPassword(@PathVariable String userName) {
+    public Boolean forgotPassword(@RequestBody AttributeMap attrMap) {
+
+        String userName = attrMap.get("Username");
 
         //TODO:[13Feb2015] GlobalAuth requires a deployment Id. UI does not require such an input. Using a fake one.
         Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));

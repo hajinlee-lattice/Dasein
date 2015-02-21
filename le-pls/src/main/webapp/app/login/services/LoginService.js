@@ -80,24 +80,25 @@ angular.module('mainApp.login.services.LoginService', [
         var deferred = $q.defer();
 
         $http({
-            method: 'GET',
-            url: "/pls/forgotpassword/" + username
+            method: 'PUT',
+            url: "/pls/forgotpassword/",
+            data: {Username: username}
         })
-            .success(function(data, status, headers, config) {
-                var result = { Success: false };
+        .success(function(data, status, headers, config) {
+            var result = { Success: false };
 
-                if (data === true || data === 'true') {
-                    result.Success = true;
-                } else {
-                    SessionService.HandleResponseErrors(data, status);
-                }
-                deferred.resolve(result);
-            })
-            .error(function(data, status, headers, config) {
+            if (data === true || data === 'true') {
+                result.Success = true;
+            } else {
                 SessionService.HandleResponseErrors(data, status);
-                var result = { Success: false, Error: data };
-                deferred.resolve(result);
-            });
+            }
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            var result = { Success: false, Error: data };
+            deferred.resolve(result);
+        });
 
         return deferred.promise;
     };
