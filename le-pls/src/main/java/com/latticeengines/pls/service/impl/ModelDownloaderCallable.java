@@ -80,7 +80,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
                 summary.setTenant(tenant);
 
                 if (!set.contains(summary.getId())) {
-                    log.info(String.format("Creating model summary with id %s.", summary.getId()));
+                    log.info(String.format("Creating model summary with id %s from file %s.", summary.getId(), file));
                     modelSummaryEntityMgr.create(summary);
                     foundFilesToDownload = true;
                 }
