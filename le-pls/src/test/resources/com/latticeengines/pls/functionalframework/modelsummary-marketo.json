@@ -9978,7 +9978,7 @@
         }
     ], 
     "ModelDetails": {
-        "Name": "PLSModel", 
+        "Name": "PLSModel-Marketo", 
         "LookupID": "BD2_ADEDTBDd69264296nJ26263627n12|Q_PLS_Modeling_BD2_ADEDTBDd69264296nJ26263627n12|8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a", 
         "TotalLeads": 10498, 
         "TestingLeads": 2112, 
