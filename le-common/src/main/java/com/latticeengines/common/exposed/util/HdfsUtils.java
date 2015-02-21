@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.hadoop.conf.Configuration;
@@ -131,14 +133,14 @@ public class HdfsUtils {
             HdfsFileFilter filter) throws Exception {
         FileSystem fs = FileSystem.get(configuration);
         FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
-        List<String> filePaths = new ArrayList<String>();
+        Set<String> filePaths = new HashSet<String>();
         for (FileStatus status : statuses) {
             if (status.isDirectory()) {
                 filePaths.addAll(getFilesForDir(configuration, status.getPath().toString(), filter));
                 filePaths.addAll(getFilesForDirRecursive(configuration, status.getPath().toString(), filter));
             }
         }
-        return filePaths;
+        return new ArrayList<>(filePaths);
     }
 
     public static final String getApplicationLog(Configuration configuration, String user, String applicationId)
