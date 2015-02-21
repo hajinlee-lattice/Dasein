@@ -134,7 +134,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(response.size(), 1);
         Map<String, String> map = (Map) response.get(0);
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
-        assertEquals(summary.getName(), "PLSModel");
+        assertEquals(summary.getName(), "PLSModel-Eloqua");
         assertNotNull(summary.getDetails());
     }
 
