@@ -16,7 +16,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.api.StringList;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.dataplatform.visidb.GetQueryMetaDataColumnsResponse;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
@@ -62,8 +61,7 @@ public class ModelingServiceExecutor {
     private void writeMetadataFile() throws Exception {
         String hdfsPath = String.format("%s/%s/data/%s/metadata.avsc", modelingServiceHdfsBaseDir,
                 builder.getCustomer(), builder.getMetadataTable());
-        GetQueryMetaDataColumnsResponse response = new GetQueryMetaDataColumnsResponse();
-        HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, response.toString());
+        HdfsUtils.writeToFile(yarnConfiguration, hdfsPath, builder.getMetadataContents());
     }
 
     private void loadData() throws Exception {
@@ -194,6 +192,7 @@ public class ModelingServiceExecutor {
         private String modelingServiceHostPort;
         private String modelingServiceHdfsBaseDir;
         private Configuration yarnConfiguration;
+        private String metadataContents;
 
         public Builder() {
         }
@@ -270,6 +269,11 @@ public class ModelingServiceExecutor {
         
         public Builder yarnConfiguration(Configuration yarnConfiguration) {
             this.setYarnConfiguration(yarnConfiguration);
+            return this;
+        }
+        
+        public Builder metadataContents(String metadataContents) {
+            this.setMetadataContents(metadataContents);
             return this;
         }
 
@@ -392,7 +396,14 @@ public class ModelingServiceExecutor {
         public void setYarnConfiguration(Configuration yarnConfiguration) {
             this.yarnConfiguration = yarnConfiguration;
         }
-        
+
+        public String getMetadataContents() {
+            return metadataContents;
+        }
+
+        public void setMetadataContents(String metadataContents) {
+            this.metadataContents = metadataContents;
+        }
 
     }
 }

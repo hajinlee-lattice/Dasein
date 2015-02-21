@@ -4,11 +4,13 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -65,7 +67,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
 
     private Ticket ticket = null;
 
-    @BeforeClass(groups = "deployment", enabled = false)
+    @BeforeClass(groups = "deployment", enabled = true)
     public void setup() throws Exception {
         ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         assertEquals(ticket.getTenants().size(), 2);
@@ -84,6 +86,10 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         
         setupDb(tenant1, tenant2, false);
 
+        InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
+                "com/latticeengines/pls/controller/metadata.avsc");
+        String metadataContents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
+
         ModelingServiceExecutor.Builder bldr = new ModelingServiceExecutor.Builder();
         bldr.modelingServiceHostPort(modelingServiceHostPort) //
         .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
@@ -95,18 +101,31 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         .dataSourcePassword(dataSourcePassword) //
         .dataSourcePort(dataSourcePort) //
         .dataSourceDbType("SQLServer") //
-        .table("Q_EventTable_Nutanix") //
+        .table("Q_PLS_Modeling_Tenant1") //
         .metadataTable("EventMetadata") //
-        .keyColumn("Nutanix_EventTable_Clean") //
-        .profileExcludeList("LeadID", "CustomerID", "PeriodID") //
-        .targets("P1_Event");
+        .keyColumn("ModelingID") //
+        .profileExcludeList("LeadID", //
+                "Email", //
+                "ModelingID", //
+                "P1_Event", //
+                "CreationDate", //
+                "Company", //
+                "LastName", //
+                "FirstName") //
+        .targets("Event: P1_Event", //
+                 "Readouts: LeadID | Email | CreationDate", //
+                 "Company: Company", //
+                 "LastName: LastName", //
+                 "FirstName: FirstName", //
+                 "SpamIndicator: SpamIndicator") //
+        .metadataContents(metadataContents);
     
         executor = new ModelingServiceExecutor(bldr);
         executor.init();
     }
     
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void runPipeline() throws Exception {
         executor.runPipeline();
         Thread.sleep(30000L);

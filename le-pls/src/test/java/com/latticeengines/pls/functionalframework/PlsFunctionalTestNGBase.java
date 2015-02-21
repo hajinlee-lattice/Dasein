@@ -228,7 +228,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             tenantEntityMgr.create(tenant1);
 
             if (createSummaries) {
-                ModelSummary summary1 = getDetails(tenant1, "eloqua");
+                ModelSummary summary1 = getDetails(tenant1, "marketo");
                 modelSummaryEntityMgr.create(summary1);
             }
         }
@@ -240,7 +240,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             tenantEntityMgr.create(tenant2);
 
             if (createSummaries) {
-                ModelSummary summary2 = getDetails(tenant2, "marketo");
+                ModelSummary summary2 = getDetails(tenant2, "eloqua");
                 Predictor s2p1 = new Predictor();
                 s2p1.setApprovedUsage("Model");
                 s2p1.setCategory("Construction");

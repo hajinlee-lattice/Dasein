@@ -158,6 +158,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(summary.getDetails());
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateModelSummaryHasEditPlsModelsRight" })
     public void deleteModelSummaryHasEditPlsModelsRight() {
         UserDocument doc = loginAndAttach("bnguyen");
@@ -165,7 +166,11 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
-        restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/ms-8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a");
+        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+        assertNotNull(response);
+        assertEquals(response.size(), 1);
+        Map<String, String> map = (Map) response.get(0);
+        restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"));
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort()  + "/pls/modelsummaries/ms-8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a", ModelSummary.class);
         assertNull(summary);
     }
