@@ -77,6 +77,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @Override
     @JsonProperty("name")
     @Column(name = "NAME", unique = true, nullable = false)
+    @Index(name = "MODEL_SUMMARY_NAME_IDX")
     public String getName() {
         return name;
     }

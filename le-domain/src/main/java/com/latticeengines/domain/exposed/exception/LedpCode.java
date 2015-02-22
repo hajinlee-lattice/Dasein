@@ -77,6 +77,7 @@ public enum LedpCode {
     LEDP_18011("Could not reset the password for user {0} with tenant {1}."), //
     LEDP_18012("Could not register tenant with id {0} and display name {1}."), //
     LEDP_18013("Could not discard tenant with id {0}."), //
+    LEDP_18014("The requested new name '{0}' already exists."), //
     LEDP_18020("Cannot parse file {0}.");
 
     private String message;

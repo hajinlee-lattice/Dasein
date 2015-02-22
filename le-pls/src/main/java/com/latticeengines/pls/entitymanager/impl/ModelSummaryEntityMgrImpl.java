@@ -169,12 +169,25 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         
         // Support renaming only
         String name = modelSummary.getName();
+        if (modelNameIsValid(summary, name)) {
+            summary.setName(name);
+        }
+
+        super.update(summary);
+    }
+
+    private boolean modelNameIsValid(ModelSummary model, String name) {
         if (name == null) {
             throw new LedpException(LedpCode.LEDP_18008, new String[] { "Name" });
         }
-        
-        summary.setName(name);
-        super.update(summary);
+        String oldName = model.getName();
+        if (name.equals(oldName)) { return true; }
+
+
+        if (modelSummaryDao.findByModelName(name) != null) {
+            throw new LedpException(LedpCode.LEDP_18014, new String[] { name });
+        }
+        return true;
     }
 
     @Override
@@ -208,5 +221,5 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     public ModelSummary findByModelId(String modelId) {
         return findByModelId(modelId, false, true);
     }
-    
+
 }

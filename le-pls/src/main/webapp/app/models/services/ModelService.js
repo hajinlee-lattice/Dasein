@@ -121,4 +121,46 @@ angular.module('mainApp.models.services.ModelService', [
         return deferred.promise;
     };
 
+    this.ChangeModelName = function (modelId, name) {
+        var deferred = $q.defer();
+        var result;
+
+        $http({
+            method: 'PUT',
+            url: '/pls/modelsummaries/'+ modelId,
+            data: { Name: name },
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+            .success(function(data, status, headers, config) {
+                if (data == null) {
+                    result = {
+                        Success: false,
+                        ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                    };
+                    deferred.resolve(result);
+                } else {
+                    result = {
+                        Success: true,
+                        ResultErrors: null
+                    };
+                }
+
+                deferred.resolve(result);
+            })
+            .error(function(data, status, headers, config) {
+                SessionService.HandleResponseErrors(data, status);
+                result = {
+                    Success: false,
+                    ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                };
+                if (data.errorCode == 'LEDP_18003') result.ResultErrors = ResourceUtility.getString('CHANGE_MODEL_NAME_ACCESS_DENIED');
+                if (data.errorCode == 'LEDP_18014') result.ResultErrors = ResourceUtility.getString('CHANGE_MODEL_NAME_CONFLICT');
+                deferred.resolve(result);
+            });
+
+        return deferred.promise;
+    };
+
 });

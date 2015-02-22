@@ -30,4 +30,17 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         return (ModelSummary) list.get(0);
     }
 
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public ModelSummary findByModelName(String modelName) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummary> entityClz = getEntityClass();
+        Query query = session.createQuery("from " + entityClz.getSimpleName() + " where name = '" + modelName + "'");
+        List list = query.list();
+        if (list.size() == 0) {
+            return null;
+        }
+        return (ModelSummary) list.get(0);
+    }
 }
