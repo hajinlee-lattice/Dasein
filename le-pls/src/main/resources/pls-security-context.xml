@@ -12,7 +12,7 @@
         <context:exclude-filter type="assignable" expression="com.latticeengines.pls.swagger.SwaggerConfig" />
     </context:component-scan>
 
-    <import resource="classpath:pls-context.xml"/>
+    <import resource="classpath:pls-persistence-context.xml"/>
     <import resource="classpath:pls-properties-context.xml"/>
     
     <security:http use-expressions="true" 

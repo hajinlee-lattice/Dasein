@@ -30,7 +30,7 @@
         </property>
     </bean>
 
-        <bean id="modelSummaryDownloadExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+    <bean id="modelSummaryDownloadExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
         <property name="corePoolSize" value="${pls.downloader.core.pool.size}" />
         <property name="maxPoolSize" value="${pls.downloader.max.pool.size}" />
         <property name="queueCapacity" value="${pls.downloader.queue.capacity}" />
