@@ -11,7 +11,7 @@
 							"Type" : "ModelDetailsWidget",
 							"ScoreProperty" : "RocScore",
 							"NameProperty" : "Name",
-							"StatusProperty" : "Active",
+							"StatusProperty" : "Status",
 							"ExternalAttributesProperty" : "ExternalAttributes",
 							"InternalAttributesProperty" : "InternalAttributes",
 							"CreatedDateProperty" : "ConstructionTime",

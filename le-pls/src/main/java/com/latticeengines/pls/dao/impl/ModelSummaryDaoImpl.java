@@ -7,6 +7,7 @@ import org.hibernate.Session;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.pls.dao.ModelSummaryDao;
 
 
@@ -43,4 +44,14 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         }
         return (ModelSummary) list.get(0);
     }
+    
+    @Override
+    public List<ModelSummary> findAllValid() {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<ModelSummary> entityClz = getEntityClass();
+        Query query = session.createQuery("from " + entityClz.getSimpleName() + " where STATUS != " + ModelSummaryStatus.DELETED.getStatusId());
+        List<ModelSummary> list = query.list();
+        return list;
+    }
+
 }

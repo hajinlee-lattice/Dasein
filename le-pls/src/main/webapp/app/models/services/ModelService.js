@@ -40,7 +40,7 @@ angular.module('mainApp.models.services.ModelService', [
                                 Id          : rawObj.Id,
                                 DisplayName : rawObj.Name,
                                 CreatedDate : new Date(rawObj.ConstructionTime).toLocaleDateString(),
-                                Status      : rawObj.Active ? 'Active' : 'Inactive'
+                                Status      : rawObj.Status
                             };}
                     );
 
@@ -65,6 +65,49 @@ angular.module('mainApp.models.services.ModelService', [
                 }
                 deferred.resolve(result);
             });
+
+        return deferred.promise;
+    };
+
+
+    this.updateAsDeletedModel = function (modelId) {
+        var deferred = $q.defer();
+        var result;
+        $http({
+            method: 'PUT',
+            url: '/pls/modelsummaries/'+ modelId,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            data: angular.toJson ({ Status: "UpdateAsDeleted" }),
+        })
+        .success(function(data, status, headers, config) {
+            if (data === true || data === 'true') {
+                result = {
+                    success: true,
+                    resultObj: {},
+                    resultErrors: null
+                };
+                deferred.resolve(result);
+            } else {
+                result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                };
+            }
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+            };
+            if (data.errorCode == 'LEDP_18003') result.ResultErrors = ResourceUtility.getString('MODEL_DELETE_ACCESS_DENIED');
+            if (data.errorCode == 'LEDP_18021') result.ResultErrors = ResourceUtility.getString('MODEL_DELETE_ACTIVE_MODEL_ERROR');
+            deferred.resolve(result);
+        });
 
         return deferred.promise;
     };
@@ -100,7 +143,7 @@ angular.module('mainApp.models.services.ModelService', [
                 if (!StringUtility.IsEmptyString(data.Details.Payload)) {
                     modelSummary = JSON.parse(data.Details.Payload);
                 }
-                modelSummary.ModelDetails.Active = data.Active;
+                modelSummary.ModelDetails.Status = data.Status;
                 // sync with front-end json structure
                 result.resultObj = modelSummary;
             }

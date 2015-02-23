@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -28,19 +30,19 @@ import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
-    
+
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
     private KeyValueEntityMgr keyValueEntityMgr;
-    
+
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
-    
+
     private ModelSummary summary1;
     private ModelSummary summary2;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         keyValueEntityMgr.deleteAll();
@@ -49,7 +51,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         summary1 = createModelSummaryForTenant1();
         summary2 = createModelSummaryForTenant2();
     }
-    
+
     private void setDetails(ModelSummary summary) throws Exception {
         InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
                 "com/latticeengines/pls/functionalframework/modelsummary-marketo.json");
@@ -59,7 +61,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         details.setData(data);
         summary.setDetails(details);
     }
-        
+
     private ModelSummary createModelSummaryForTenant1() throws Exception {
         Tenant tenant1 = new Tenant();
         tenant1.setId("TENANT1");
@@ -87,7 +89,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s1p1.setFundamentalType("");
         s1p1.setUncertaintyCoefficient(0.151911);
         summary1.addPredictor(s1p1);
-        
+
         PredictorElement s1el1 = new PredictorElement();
         s1el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
         s1el1.setCorrelationSign(-1);
@@ -109,11 +111,11 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s1el2.setUncertaintyCoefficient(0.000499);
         s1el2.setVisible(true);
         s1p1.addPredictorElement(s1el2);
-        
+
         modelSummaryEntityMgr.create(summary1);
         return summary1;
     }
-    
+
     private ModelSummary createModelSummaryForTenant2() throws Exception {
         Tenant tenant2 = new Tenant();
         tenant2.setId("TENANT2");
@@ -141,7 +143,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s2p1.setFundamentalType("");
         s2p1.setUncertaintyCoefficient(0.151911);
         summary2.addPredictor(s2p1);
-        
+
         PredictorElement s2el1 = new PredictorElement();
         s2el1.setName("863d38df-d0f6-42af-ac0d-06e2b8a681f8");
         s2el1.setCorrelationSign(-1);
@@ -163,64 +165,60 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         s2el2.setUncertaintyCoefficient(0.000499);
         s2el2.setVisible(true);
         s2p1.addPredictorElement(s2el2);
-        
+
         modelSummaryEntityMgr.create(summary2);
         return summary2;
     }
-    
+
     @Test(groups = "functional")
     public void findByModelId() {
         setupSecurityContext(summary1);
         ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true);
         assertEquals(retrievedSummary.getId(), summary1.getId());
         assertEquals(retrievedSummary.getName(), summary1.getName());
-        
+
         List<Predictor> predictors = retrievedSummary.getPredictors();
         assertEquals(predictors.size(), 1);
-        
+
         KeyValue details = retrievedSummary.getDetails();
         String uncompressedStr = new String(CompressionUtils.decompressByteArray(details.getData()));
         assertEquals(details.getTenantId(), summary1.getTenantId());
         assertTrue(uncompressedStr.contains("\"Segmentations\":"));
-        
-        String[] predictorFields = new String[] {
-                "name", //
+
+        String[] predictorFields = new String[] { "name", //
                 "displayName", //
                 "approvedUsage", //
                 "category", //
                 "fundamentalType", //
-                "uncertaintyCoefficient"
-        };
-        
-        String[] predictorElementFields = new String[] {
-                "name", //
+                "uncertaintyCoefficient" };
+
+        String[] predictorElementFields = new String[] { "name", //
                 "correlationSign", //
                 "count", //
                 "lift", //
                 "lowerInclusive", //
                 "upperExclusive", //
                 "uncertaintyCoefficient", //
-                "visible"
-        };
+                "visible" };
 
         for (int i = 0; i < predictors.size(); i++) {
             for (String field : predictorFields) {
                 assertEquals(ReflectionTestUtils.getField(predictors.get(i), field),
                         ReflectionTestUtils.getField(summary1.getPredictors().get(i), field));
-                
+
             }
-            List<PredictorElement> retrievedElements = predictors.get(i).getPredictorElements(); 
+            List<PredictorElement> retrievedElements = predictors.get(i).getPredictorElements();
             List<PredictorElement> summaryElements = summary1.getPredictors().get(i).getPredictorElements();
             for (int j = 0; j < retrievedElements.size(); j++) {
                 for (String field : predictorElementFields) {
                     assertEquals(ReflectionTestUtils.getField(retrievedElements.get(j), field),
                             ReflectionTestUtils.getField(summaryElements.get(j), field));
-                    
+
                 }
             }
         }
     }
-    
+
     @Test(groups = "functional")
     public void findAll() {
         setupSecurityContext(summary2);
@@ -228,7 +226,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(summaries.size(), 1);
         assertEquals(summaries.get(0).getName(), summary2.getName());
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = { "findByModelId", "findAll" })
     public void updateModelSummaryForModelInTenant() {
         setupSecurityContext(summary1);
@@ -248,7 +246,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         ModelSummary summaryToUpdate = new ModelSummary();
         summaryToUpdate.setId(summary2.getId());
         summaryToUpdate.setName("ABC");
-        
+
         setupSecurityContext(summary1);
         boolean exception = false;
         try {
@@ -259,11 +257,41 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         }
         assertTrue(exception);
     }
-    
+
     @Test(groups = "functional", dependsOnMethods = { "updateModelSummaryForModelNotInTenant" })
+    public void updateAsDeletedForActiveModel() {
+        setupSecurityContext(summary1);
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId());
+        assertNotNull(retrievedSummary);
+        try {
+            modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.DELETED);
+            Assert.fail("Should not come here!");
+        } catch (LedpException ex) {
+            Assert.assertEquals(ex.getCode(), LedpCode.LEDP_18021);
+        }
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "updateAsDeletedForActiveModel" })
+    public void updateAsDeletedForInactiveModel() {
+        setupSecurityContext(summary1);
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId());
+        assertNotNull(retrievedSummary);
+        retrievedSummary.setStatus(ModelSummaryStatus.INACTIVE);
+        modelSummaryEntityMgr.update(retrievedSummary);
+        modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.DELETED);
+        assertNotNull(modelSummaryEntityMgr.findByModelId(summary1.getId()));
+        assertEquals(modelSummaryEntityMgr.findByModelId(summary1.getId()).getStatus(), ModelSummaryStatus.DELETED);
+        List<ModelSummary> modelSummaryList = modelSummaryEntityMgr.findAllValid();
+        Assert.assertEquals(modelSummaryList.size(), 0);
+        
+        modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.INACTIVE);
+        modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.ACTIVE);;
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "updateAsDeletedForInactiveModel" })
     public void deleteForModelInTenant() {
         setupSecurityContext(summary1);
-        ModelSummary retrievedSummary  = modelSummaryEntityMgr.findByModelId(summary1.getId());
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId());
         assertNotNull(retrievedSummary);
         modelSummaryEntityMgr.deleteByModelId(summary1.getId());
         assertNull(modelSummaryEntityMgr.findByModelId(summary1.getId()));
@@ -284,6 +312,5 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         }
         assertTrue(exception);
     }
-    
-}
 
+}

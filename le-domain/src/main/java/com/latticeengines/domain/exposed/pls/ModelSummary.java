@@ -7,6 +7,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -56,7 +58,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private Long totalConversionCount;
     private KeyValue details;
     private Long constructionTime;
-    private Boolean active = false;
+    private ModelSummaryStatus status = ModelSummaryStatus.ACTIVE;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -279,14 +281,15 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         this.constructionTime = constructionTime;
     }
 
-    @JsonProperty("Active")
-    @Column(name = "ACTIVE", nullable = false)
-    public Boolean getActive() {
-        return active;
+    @JsonProperty("Status")
+    @Column(name = "STATUS", nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    public ModelSummaryStatus getStatus() {
+        return status;
     }
 
-    public void setActive(Boolean active) {
-        this.active = active;
+    public void setStatus(ModelSummaryStatus status) {
+        this.status = status;
     }
 
 }

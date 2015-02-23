@@ -5,10 +5,11 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.utilities.GriotNavUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.models.services.ModelService'
+    'mainApp.models.services.ModelService',
+    'mainApp.models.modals.DeleteModelModal'
 ])
 .controller('ModelListTileWidgetController', function ($scope, $rootScope, $element, ResourceUtility, DateTimeFormatUtility, 
-    EvergageUtility, TrackingConstantsUtility, GriotNavUtility, WidgetFrameworkService) {
+    EvergageUtility, TrackingConstantsUtility, GriotNavUtility, WidgetFrameworkService, DeleteModelModal) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.nameStatus = {
         editing: false
@@ -33,7 +34,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     
     //TODO:pierce Field names subject to change
     $scope.displayName = data[widgetConfig.NameProperty];
-    $scope.isActive = data[widgetConfig.StatusProperty] === "Active" ? true : false;
+    $scope.isActive = data[widgetConfig.StatusProperty] === "Active";
     $scope.createdDate = data[widgetConfig.CreatedDateProperty];
     
     $scope.modelNameEditClick = function ($event) {
@@ -51,12 +52,12 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
 
         var targetElement = $($event.target);
         if (targetElement.hasClass("fa-trash-o")) {
-            // deleting the model
+            DeleteModelModal.show($scope.data.Id);
         } else if (!$scope.nameStatus.editing) {
             $rootScope.$broadcast(GriotNavUtility.MODEL_DETAIL_NAV_EVENT, data);
         }
     };
-   
+    
 })
 .controller('ChangeModelNameController', function ($scope, $rootScope, GriotNavUtility, ModelService) {
     $scope.data = {name: $scope.$parent.displayName};

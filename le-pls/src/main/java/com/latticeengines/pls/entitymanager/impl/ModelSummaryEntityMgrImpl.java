@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -94,6 +95,12 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     public List<ModelSummary> findAll() {
         return super.findAll();
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<ModelSummary> findAllValid() {
+        return modelSummaryDao.findAllValid();
+    }
     
     private void inflateDetails(ModelSummary summary) {
         KeyValue kv = summary.getDetails();
@@ -153,6 +160,24 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         keyValueDao.delete(kv);
     }
 
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateStatusByModelId(String modelId, ModelSummaryStatus status) {
+        ModelSummary summary = findByModelId(modelId);
+        
+        if (summary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+        
+        if (status == ModelSummaryStatus.DELETED && summary.getStatus() == ModelSummaryStatus.ACTIVE) {
+            throw new LedpException(LedpCode.LEDP_18021);
+        }
+        summary.setStatus(status);
+        super.update(summary);
+
+    }
+    
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateModelSummary(ModelSummary modelSummary) {

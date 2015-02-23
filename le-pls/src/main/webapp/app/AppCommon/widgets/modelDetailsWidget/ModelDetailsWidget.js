@@ -14,7 +14,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     var modelDetails = $scope.data.ModelDetails;
 
     $scope.displayName = modelDetails[widgetConfig.NameProperty];
-    var isActive = modelDetails[widgetConfig.StatusProperty];
+    var isActive = modelDetails[widgetConfig.StatusProperty] == 'Active';
     
     if (isActive) {
         $scope.status = ResourceUtility.getString("MODEL_DETAILS_ACTIVE_LABEL");

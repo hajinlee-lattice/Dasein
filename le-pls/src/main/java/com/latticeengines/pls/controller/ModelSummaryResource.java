@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.wordnik.swagger.annotations.Api;
@@ -24,10 +25,10 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping("/modelsummaries")
 @PreAuthorize("hasRole('View_PLS_Models')")
 public class ModelSummaryResource {
-    
+
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
-    
+
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get summary for specific model")
@@ -43,8 +44,8 @@ public class ModelSummaryResource {
     @ResponseBody
     @ApiOperation(value = "Get list of model summary ids available to the user")
     public List<ModelSummary> getModelSummaries() {
-        List<ModelSummary> summaries = modelSummaryEntityMgr.findAll();
-        
+        List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
+
         for (ModelSummary summary : summaries) {
             summary.setPredictors(new ArrayList<Predictor>());
             summary.setDetails(null);
@@ -66,10 +67,33 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Update a model summary")
     @PreAuthorize("hasRole('Edit_PLS_Models')")
     public Boolean update(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
-        ModelSummary modelSummary = new ModelSummary();
-        modelSummary.setId(modelId);
-        modelSummary.setName(attrMap.get("Name"));
-        modelSummaryEntityMgr.updateModelSummary(modelSummary);
+
+        if (attrMap.containsKey("Status")) {
+            updateModelStatus(modelId, attrMap);
+
+        } else {
+            ModelSummary modelSummary = new ModelSummary();
+            modelSummary.setId(modelId);
+            modelSummary.setName(attrMap.get("Name"));
+            modelSummaryEntityMgr.updateModelSummary(modelSummary);
+        }
         return true;
+    }
+
+    private void updateModelStatus(String modelId, AttributeMap attrMap) {
+        String status = attrMap.get("Status");
+        switch (status) {
+        case "UpdateAsDeleted":
+            modelSummaryEntityMgr.updateStatusByModelId(modelId, ModelSummaryStatus.DELETED);
+            break;
+        case "UpdateAsInactive":
+            modelSummaryEntityMgr.updateStatusByModelId(modelId, ModelSummaryStatus.INACTIVE);
+            break;
+        case "UpdateAsActive":
+            modelSummaryEntityMgr.updateStatusByModelId(modelId, ModelSummaryStatus.ACTIVE);
+            break;
+        default:
+            break;
+        }
     }
 }

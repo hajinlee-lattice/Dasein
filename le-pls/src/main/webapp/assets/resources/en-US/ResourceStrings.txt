@@ -98,6 +98,12 @@ MODEL_DETAILS_INACTIVE_LABEL=Inactive
 MODEL_DETAILS_LEADS_TITLE=Leads
 MODEL_DETAILS_CONVERSIONS_TITLE=Conversions
 MODEL_DETAILS_ATTRIBUTES_TITLE=Predictive Attributes From
+MODEL_DELETE_TITLE=Delete Model
+MODEL_DELETE_LABEL1=Please be sure you want to delete this model.
+MODEL_DELETE_LABEL2=To add a new model, please contact customer support.
+MODEL_DELETE_ACTIVE_MODEL_ERROR=Cannot delete active model.
+MODEL_DELETE_ACCESS_DENIED=Access denied to delete model.
+
 THRESHOLD_EXPLORER_TAB_TITLE=Threshold Explorer
 TOP_PREDICTORS_TAB_TITLE=Attributes
 TOP_PREDICTORS_TITLE=Total Predictive Attributes

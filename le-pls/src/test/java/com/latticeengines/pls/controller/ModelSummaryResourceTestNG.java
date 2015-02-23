@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -164,6 +165,33 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateModelSummaryHasEditPlsModelsRight" })
+    public void updateAsDeletedModelSummaryHasEditPlsModelsRight() {
+        UserDocument doc = loginAndAttach("bnguyen");
+        addAuthHeader.setAuthValue(doc.getTicket().getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+        assertNotNull(response);
+        assertEquals(response.size(), 1);
+        
+        Map<String, String> map = (Map) response.get(0);
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put("Status", "UpdateAsInactive");
+        restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
+        
+        attrMap = new AttributeMap();
+        attrMap.put("Status", "UpdateAsDeleted");
+        restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
+        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
+        assertEquals(summary.getStatus(), ModelSummaryStatus.DELETED);
+        
+        attrMap = new AttributeMap();
+        attrMap.put("Status", "UpdateAsActive");
+        restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
+
+    }    
+    
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateAsDeletedModelSummaryHasEditPlsModelsRight" })
     public void deleteModelSummaryHasEditPlsModelsRight() {
         UserDocument doc = loginAndAttach("bnguyen");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
