@@ -5,12 +5,6 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 .service('TopPredictorService', function (StringUtility, AnalyticAttributeUtility) {
     
     this.ShowBasedOnTags = function (predictor, tag) {
-        
-        //TODO:pierce This is a hack because DataLoader is not providing internal metadata
-        if (predictor.Tags == null) {
-            predictor.Tags = ["External"];
-        }
-        
         var toReturn = false;
         for (var x=0; x<predictor.Tags.length; x++) {
             if (tag == predictor.Tags[x]) {

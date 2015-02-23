@@ -117,7 +117,14 @@ module.exports = function (grunt) {
             junitReporter: {
               outputFile: 'target/karma-test-results.xml'
             }
-        },      
+        },
+        devunit: {
+            options: {
+                browsers: ['Chrome'],
+                singleRun: false
+            }
+        },
+        
         watch: {
             options: {
                 browsers: ['PhantomJS'],
@@ -385,6 +392,11 @@ module.exports = function (grunt) {
   var unitText = 'Runs standard (karma) unit tests';
   grunt.registerTask('unit', unitText, [
     'karma:unit'
+  ]);
+  
+  var devUnitText = 'Runs standard (karma) unit tests in Chrome for debugging purposes';
+  grunt.registerTask('devunit', devUnitText, [
+    'karma:devunit'
   ]);
   
   var sentryText = 'Watches for changes in any javascript file, and automatically re-runs linting and karma unit tests. If your computer can handle the strain, this should be running during active develpment';
