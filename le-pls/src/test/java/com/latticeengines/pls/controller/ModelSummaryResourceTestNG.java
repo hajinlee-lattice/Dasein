@@ -81,6 +81,10 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "bnguyen");
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "bnguyen");
+        grantRight(GrantedRight.EDIT_PLS_USERS, tenant1, "admin");
+        grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "admin");
+        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "admin");
+        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "admin");
 
         createUser("ysong", "ysong@lattice-engines.com", "Yintao", "Song");
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "ysong");

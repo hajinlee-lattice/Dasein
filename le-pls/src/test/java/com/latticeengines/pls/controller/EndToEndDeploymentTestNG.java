@@ -83,6 +83,10 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "bnguyen");
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "bnguyen");
+        grantRight(GrantedRight.EDIT_PLS_USERS, tenant1, "admin");
+        grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "admin");
+        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "admin");
+        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "admin");
         
         setupDb(tenant1, tenant2, false);
 
