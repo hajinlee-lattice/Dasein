@@ -11,3 +11,4 @@ chmod -R 755 /var/log/ledp
 chmod -R 755 /home/yarn/logs
 chown yarn:yarn /var/log/ledp
 chown yarn:yarn /home/yarn/logs
+chown yarn:yarn /opt/jetty/logs
