@@ -254,3 +254,14 @@ class SuiteTenant1ProfilingThenTrainTest(SuiteProfilingThenTrainTest):
     def getSubDir(cls):
         return "Tenant1"
     
+class SuiteTenant2ProfilingThenTrainTest(SuiteProfilingThenTrainTest):
+    def testExecuteProfilingThenTrain(self):
+        super(SuiteTenant2ProfilingThenTrainTest, self).executeProfilingThenTrain()
+        jsonDict = json.loads(open(glob.glob("./results/*PLSModel*.json")[0]).read())
+        rocScore = jsonDict["Summary"]["RocScore"]
+        self.assertTrue(rocScore > 0.5)
+
+
+    @classmethod
+    def getSubDir(cls):
+        return "Tenant2"
