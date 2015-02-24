@@ -2,17 +2,21 @@
     <a href="#" class="model {{isActive ? '' : 'inactive'}}">
         <div class="model-title" data-ng-hide="nameStatus.editing">
             <h2 class="editable editable-click" data-type="text" data-placement="right" data-title="Enter Model Name">{{displayName}}</h2>
-            <button type="button" class="edit" data-ng-click="modelNameEditClick($event)"><i class="fa fa-pencil"></i></button>
-        </div>  
+            <div class="edit">
+                <button type="button" class="btn btn-link" data-ng-click="modelNameEditClick($event)"><i class="fa fa-pencil"></i></button>
+            </div>
+        </div>
         <div class="model-title" data-ng-if="nameStatus.editing" data-ng-controller="ChangeModelNameController">
-            <form novalidate class="form-inline editable-container" name="form">
-                <label class="global-error" data-ng-show="showNameEditError">
-                    <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{nameEditErrorMessage}}</span>
-                </label>
-                <input type="text" class="form-control" data-ng-model="data.name" placeholder="{{data.name}}"/>
-                <div class="pull-right">
-                    <button class="btn btn-primary" data-ng-click="submit($event)">submit</button>
-                    <button class="btn btn-secondary" data-ng-click="cancel($event)">cancel</button>
+            <form novalidate class="form-inline editable-container editableform" name="form">
+                <div class="control-group">
+                    <input type="text" class="form-control" data-ng-model="data.name" placeholder="{{data.name}}"/>
+                    <div class="editable-buttons">
+                        <button class="btn btn-secondary editable-cancel" data-ng-click="cancel($event)">Cancel</button>
+                        <button class="btn btn-primary editable-submit" data-ng-click="submit($event)">Save</button>
+                    </div>
+                    <label class="global-error" data-ng-show="showNameEditError">
+                        <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{nameEditErrorMessage}}</span>
+                    </label>
                 </div>
             </form>
         </div>
@@ -20,7 +24,7 @@
             <dl>
                 <dd>{{createdDate}}</dd>
             </dl>
-            
+
             <dl data-ng-show="!isActive">
                 <dt>{{ResourceUtility.getString('MODEL_TILE_STATUS_LABEL')}}</dt>
                 <dd>{{ResourceUtility.getString('MODEL_DETAILS_INACTIVE_LABEL')}}</dd>
@@ -28,4 +32,4 @@
             <button type="button" class="btn btn-link"><i class="fa fa-trash-o"></i></button>
         </div>
     </a>
-</div>
+</div
