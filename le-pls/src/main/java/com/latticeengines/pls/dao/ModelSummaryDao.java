@@ -13,4 +13,6 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
     List<ModelSummary> findAllValid();
 
+    ModelSummary findValidByModelId(String modelId);
+
 }

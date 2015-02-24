@@ -33,7 +33,7 @@ public class ModelSummaryResource {
     @ResponseBody
     @ApiOperation(value = "Get summary for specific model")
     public ModelSummary getModelSummary(@PathVariable String modelId) {
-        ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId);
+        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
         if (summary != null) {
             summary.setPredictors(new ArrayList<Predictor>());
         }

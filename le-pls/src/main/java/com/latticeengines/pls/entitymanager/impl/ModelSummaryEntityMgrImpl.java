@@ -135,7 +135,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteByModelId(String modelId) {
-        ModelSummary summary = findByModelId(modelId);
+        ModelSummary summary = findValidByModelId(modelId);
         
         if (summary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
@@ -164,7 +164,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateStatusByModelId(String modelId, ModelSummaryStatus status) {
-        ModelSummary summary = findByModelId(modelId);
+        ModelSummary summary = findByModelId(modelId, false, true, false);
         
         if (summary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
@@ -186,7 +186,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         if (modelId == null) {
             throw new LedpException(LedpCode.LEDP_18008, new String[] { "Id" });
         }
-        ModelSummary summary = findByModelId(modelSummary.getId());
+        ModelSummary summary = findValidByModelId(modelSummary.getId());
         
         if (summary == null) {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
@@ -215,11 +215,16 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         }
         return true;
     }
-
+    
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument) {
-        ModelSummary summary = modelSummaryDao.findByModelId(modelId);
+    public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly) {
+        ModelSummary summary = null;
+        if (validOnly) {
+            summary = modelSummaryDao.findValidByModelId(modelId);
+        } else {
+            summary = modelSummaryDao.findByModelId(modelId);
+        }
 
         if (summary == null) {
             return null;
@@ -244,8 +249,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public ModelSummary findByModelId(String modelId) {
-        return findByModelId(modelId, false, true);
+    public ModelSummary findValidByModelId(String modelId) {
+        return findByModelId(modelId, false, true, true);
     }
 
     @Override

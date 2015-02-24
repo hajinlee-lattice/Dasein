@@ -173,7 +173,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void findByModelId() {
         setupSecurityContext(summary1);
-        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true);
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false);
         assertEquals(retrievedSummary.getId(), summary1.getId());
         assertEquals(retrievedSummary.getName(), summary1.getName());
 
@@ -230,10 +230,10 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "findByModelId", "findAll" })
     public void updateModelSummaryForModelInTenant() {
         setupSecurityContext(summary1);
-        ModelSummary s = modelSummaryEntityMgr.findByModelId(summary1.getId());
+        ModelSummary s = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
         s.setName("XYZ");
         modelSummaryEntityMgr.updateModelSummary(s);
-        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId());
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
         assertEquals(retrievedSummary.getName(), "XYZ");
     }
 
@@ -261,7 +261,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "updateModelSummaryForModelNotInTenant" })
     public void updateAsDeletedForActiveModel() {
         setupSecurityContext(summary1);
-        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId());
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
         assertNotNull(retrievedSummary);
         try {
             modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.ACTIVE);
@@ -275,13 +275,13 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "updateAsDeletedForActiveModel" })
     public void updateAsDeletedForInactiveModel() {
         setupSecurityContext(summary1);
-        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId());
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
         assertNotNull(retrievedSummary);
         retrievedSummary.setStatus(ModelSummaryStatus.INACTIVE);
         modelSummaryEntityMgr.update(retrievedSummary);
         modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.DELETED);
-        assertNotNull(modelSummaryEntityMgr.findByModelId(summary1.getId()));
-        assertEquals(modelSummaryEntityMgr.findByModelId(summary1.getId()).getStatus(), ModelSummaryStatus.DELETED);
+        assertNotNull(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false));
+        assertEquals(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false).getStatus(), ModelSummaryStatus.DELETED);
         List<ModelSummary> modelSummaryList = modelSummaryEntityMgr.findAllValid();
         Assert.assertEquals(modelSummaryList.size(), 0);
         
@@ -292,10 +292,10 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "updateAsDeletedForInactiveModel" })
     public void deleteForModelInTenant() {
         setupSecurityContext(summary1);
-        ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId());
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
         assertNotNull(retrievedSummary);
         modelSummaryEntityMgr.deleteByModelId(summary1.getId());
-        assertNull(modelSummaryEntityMgr.findByModelId(summary1.getId()));
+        assertNull(modelSummaryEntityMgr.findValidByModelId(summary1.getId()));
         KeyValue kv = new KeyValue();
         kv.setPid(retrievedSummary.getDetails().getPid());
         assertNull(keyValueEntityMgr.findByKey(kv));

@@ -10,10 +10,10 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     ModelSummary getByModelId(String modelId);
     
-    ModelSummary findByModelId(String modelId);
+    ModelSummary findValidByModelId(String modelId);
     
-    ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument);
-    
+    ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly);
+
     void deleteByModelId(String modelId);
     
     void updateModelSummary(ModelSummary modelSummary);
@@ -23,5 +23,6 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
     List<ModelSummary> findAllValid();
 
     void updateStatusByModelId(String modelId, ModelSummaryStatus status);
+
 
 }
