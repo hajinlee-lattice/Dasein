@@ -67,10 +67,8 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Update a model summary")
     @PreAuthorize("hasRole('Edit_PLS_Models')")
     public Boolean update(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
-
         if (attrMap.containsKey("Status")) {
             updateModelStatus(modelId, attrMap);
-
         } else {
             ModelSummary modelSummary = new ModelSummary();
             modelSummary.setId(modelId);
@@ -79,7 +77,7 @@ public class ModelSummaryResource {
         }
         return true;
     }
-
+    
     private void updateModelStatus(String modelId, AttributeMap attrMap) {
         String status = attrMap.get("Status");
         switch (status) {
@@ -96,4 +94,9 @@ public class ModelSummaryResource {
             break;
         }
     }
+
+    public void setModelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
+        this.modelSummaryEntityMgr = modelSummaryEntityMgr;
+    }
+    
 }

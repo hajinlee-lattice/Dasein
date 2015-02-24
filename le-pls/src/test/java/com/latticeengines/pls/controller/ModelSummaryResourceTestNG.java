@@ -191,6 +191,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     }    
     
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateAsDeletedModelSummaryHasEditPlsModelsRight" })
     public void deleteModelSummaryHasEditPlsModelsRight() {
         UserDocument doc = loginAndAttach("bnguyen");

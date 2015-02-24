@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.KeyValueDao;
 import com.latticeengines.pls.dao.ModelSummaryDao;
@@ -86,7 +87,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ModelSummary> noAspectsFindAll() {
+    public List<ModelSummary> getAll() {
         return super.findAll();
     }
     
@@ -160,7 +161,6 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         keyValueDao.delete(kv);
     }
 
-
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateStatusByModelId(String modelId, ModelSummaryStatus status) {
@@ -177,7 +177,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         super.update(summary);
 
     }
-    
+
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void updateModelSummary(ModelSummary modelSummary) {
@@ -194,20 +194,21 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         
         // Support renaming only
         String name = modelSummary.getName();
-        if (modelNameIsValid(summary, name)) {
+        if (newModelNameIsValid(summary, name)) {
             summary.setName(name);
         }
 
         super.update(summary);
     }
 
-    private boolean modelNameIsValid(ModelSummary model, String name) {
+    private boolean newModelNameIsValid(ModelSummary model, String name) {
         if (name == null) {
             throw new LedpException(LedpCode.LEDP_18008, new String[] { "Name" });
         }
         String oldName = model.getName();
-        if (name.equals(oldName)) { return true; }
-
+        if (name.equals(oldName)) { 
+            return true; 
+        }
 
         if (modelSummaryDao.findByModelName(name) != null) {
             throw new LedpException(LedpCode.LEDP_18014, new String[] { name });
@@ -245,6 +246,20 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findByModelId(String modelId) {
         return findByModelId(modelId, false, true);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public ModelSummary getByModelId(String modelId) {
+        return modelSummaryDao.findByModelId(modelId);
+    }
+    
+    public void manufactureSecurityContextForInternalAccess(Tenant tenant) {
+        TicketAuthenticationToken auth = new TicketAuthenticationToken(null, "x.y");
+        Session session = new Session();
+        session.setTenant(tenant);
+        auth.setSession(session);
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
 }

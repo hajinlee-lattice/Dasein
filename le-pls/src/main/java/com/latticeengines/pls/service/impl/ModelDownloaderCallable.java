@@ -68,7 +68,7 @@ public class ModelDownloaderCallable implements Callable<Boolean> {
         }
 
         Set<String> set = new HashSet<>();
-        List<ModelSummary> summaries = modelSummaryEntityMgr.noAspectsFindAll();
+        List<ModelSummary> summaries = modelSummaryEntityMgr.getAll();
         for (ModelSummary summary : summaries) {
             set.add(summary.getId());
         }

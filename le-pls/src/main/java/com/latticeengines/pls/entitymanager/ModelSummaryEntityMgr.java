@@ -8,6 +8,8 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 
 public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
+    ModelSummary getByModelId(String modelId);
+    
     ModelSummary findByModelId(String modelId);
     
     ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument);
@@ -16,7 +18,7 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
     
     void updateModelSummary(ModelSummary modelSummary);
 
-    List<ModelSummary> noAspectsFindAll();
+    List<ModelSummary> getAll();
 
     List<ModelSummary> findAllValid();
 

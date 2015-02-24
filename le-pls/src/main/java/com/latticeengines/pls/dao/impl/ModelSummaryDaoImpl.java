@@ -47,6 +47,7 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         return (ModelSummary) list.get(0);
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public List<ModelSummary> findAllValid() {
         Session session = getSessionFactory().getCurrentSession();
