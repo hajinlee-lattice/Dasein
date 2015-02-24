@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "MODEL_SUMMARY", 
-       uniqueConstraints = { @UniqueConstraint(columnNames = { "Id" }), @UniqueConstraint(columnNames = { "Name" }) })
+       uniqueConstraints = { @UniqueConstraint(columnNames = { "ID" }), @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId {
     
