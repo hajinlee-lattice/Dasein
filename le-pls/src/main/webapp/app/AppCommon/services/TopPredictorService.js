@@ -85,6 +85,17 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         }
     };
     
+    this.SortBySize = function (a, b) {
+        if (a.size > b.size) {
+            return -1;
+        }
+        if (a.size < b.size) {
+            return 1;
+        }
+        // a must be equal to b
+        return 0;
+    };
+    
     this.SortByPredictivePower = function (a, b) {
         if (a.UncertaintyCoefficient > b.UncertaintyCoefficient) {
             return -1;
@@ -129,12 +140,18 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         
     };
     
-    this.CalculateAttributeSize = function (attributeList) {
+    this.CalculateAttributeSize = function (attributeList, numLargeCategories, numMediumCategories) {
         if (attributeList == null || attributeList.length === 0) {
             return null;
         }
-        var numLargeCategories = Math.round(attributeList.length * 0.16);
-        var numMediumCategories = Math.round(attributeList.length * 0.32);
+        
+        if (numLargeCategories == null) {
+            numLargeCategories = Math.round(attributeList.length * 0.16);
+        }
+        
+        if (numMediumCategories == null) {
+            numMediumCategories = Math.round(attributeList.length * 0.32);
+        }
         
         for (var i = 0; i < attributeList.length; i++) {
             var attribute = attributeList[i];
@@ -261,19 +278,12 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         }
         
         totalAttributes.Predictors = totalAttributes.sort(this.SortByPredictivePower);
+        this.CalculateAttributeSize(totalAttributes, numLargeCategories, numMediumCategories);
         
-        for (var z = 0; z < totalAttributes.length; z++) {
-            var attribute = totalAttributes[z];
-            if (numLargeCategories > 0) {
-                attribute.size = 6.55;
-                numLargeCategories--;
-            } else if (numMediumCategories > 0) {
-                attribute.size = 2.56;
-                numMediumCategories--;
-            } else {
-                attribute.size = 1;
-            }
-            
+        // Within each category, sort by size
+        for (var i = 0; i < topCategories.length; i++) {
+            category = topCategories[i];
+            category.children = category.children.sort(this.SortBySize);
         }
         
         var toReturn = {
