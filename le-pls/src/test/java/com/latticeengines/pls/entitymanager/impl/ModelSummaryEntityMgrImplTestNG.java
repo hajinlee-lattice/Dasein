@@ -264,6 +264,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         ModelSummary retrievedSummary = modelSummaryEntityMgr.findByModelId(summary1.getId());
         assertNotNull(retrievedSummary);
         try {
+            modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.ACTIVE);
             modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.DELETED);
             Assert.fail("Should not come here!");
         } catch (LedpException ex) {

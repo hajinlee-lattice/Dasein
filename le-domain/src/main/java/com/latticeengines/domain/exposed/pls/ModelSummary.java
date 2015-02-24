@@ -58,7 +58,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private Long totalConversionCount;
     private KeyValue details;
     private Long constructionTime;
-    private ModelSummaryStatus status = ModelSummaryStatus.ACTIVE;
+    private ModelSummaryStatus status = ModelSummaryStatus.INACTIVE;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
