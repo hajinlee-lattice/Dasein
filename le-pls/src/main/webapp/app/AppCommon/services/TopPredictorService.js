@@ -151,7 +151,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         }
     };
     
-    this.FormatDataForChart = function (modelSummary) {
+    this.GetTopCategories = function (modelSummary) {
         if (modelSummary == null || modelSummary.Predictors == null || modelSummary.Predictors.length === 0) {
             return null;
         }
@@ -179,6 +179,69 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
         }
         
+        return topCategories;
+    };
+    
+    this.IsPredictorElementCategorical = function (predictorElement) {
+        if (predictorElement == null) {
+            return false;
+        }
+        
+        return predictorElement.LowerInclusive == null && predictorElement.UpperExclusive == null && 
+            predictorElement.Values != null && predictorElement.Values.length > 0;
+    };
+    
+    this.GetTopPredictorExport = function (modelSummary) {
+        if (modelSummary == null || modelSummary.Predictors == null || modelSummary.Predictors.length === 0) {
+            return null;
+        }
+        
+        var columns = ["Category", "Name", "Description", "%Leads", "Lift", "PredictivePower"];
+        var toReturn = []; 
+        toReturn.push(columns);
+        // Get all unique categories
+        var topCategories = this.GetTopCategories(modelSummary);
+        
+        var totalPredictors = modelSummary.Predictors.sort(this.SortByPredictivePower);
+        for (var i = 0; i < topCategories.length; i++) {
+            category = topCategories[i];
+            var numOfAttributesPerCategory = 0;
+            for (var x = 0; x < totalPredictors.length; x++) {
+                var predictor = totalPredictors[x];
+                if (numOfAttributesPerCategory == 50) {
+                    break;
+                }
+                
+                if (category.name == predictor.Category) {
+                    numOfAttributesPerCategory++;
+                    for (var y = 0; y < predictor.Elements.length; y++) {
+                        var element = predictor.Elements[y];
+                        var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
+                        var isCategorical = this.IsPredictorElementCategorical(element);
+                        if (isCategorical && percentTotal < 1) {
+                            continue;
+                        }
+                        percentTotal = Math.round(percentTotal);
+                        var lift = element.Lift.toPrecision(2);
+                        var description = predictor.Description ? predictor.Description : "";
+                        var attributeRow = [predictor.Category, predictor.DisplayName, description, percentTotal, lift, element.UncertaintyCoefficient];
+                        toReturn.push(attributeRow);
+                    }
+                }
+            }
+        }
+        
+        return toReturn;
+    };
+    
+    this.FormatDataForChart = function (modelSummary) {
+        if (modelSummary == null || modelSummary.Predictors == null || modelSummary.Predictors.length === 0) {
+            return null;
+        }
+        
+        // Get all unique categories
+        var topCategories = this.GetTopCategories(modelSummary);
+        
         // Need to assign colors based on alphabetical name, which will change the sort
         this.AssignColorsToCategories(topCategories);
         
@@ -190,6 +253,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         var numLargeCategories = Math.round((topCategories.length * attributesPerCategory) * 0.16);
         var numMediumCategories = Math.round((topCategories.length * attributesPerCategory) * 0.32);
         var totalAttributes = [];
+        var category;
         for (var x = 0; x < topCategories.length; x++) {
             category = topCategories[x];
             category.children = this.GetAttributesByCategory(modelSummary.Predictors, category.name, category.color, attributesPerCategory);
