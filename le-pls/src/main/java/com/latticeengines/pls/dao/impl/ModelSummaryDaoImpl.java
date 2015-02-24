@@ -23,7 +23,8 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     public ModelSummary findByModelId(String modelId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        Query query = session.createQuery("from " + entityClz.getSimpleName() + " where id = '" + modelId + "'");
+        Query query = session.createQuery("from " + entityClz.getSimpleName() + " where id = :modelId");
+        query.setString("modelId", modelId);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -37,7 +38,8 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     public ModelSummary findByModelName(String modelName) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        Query query = session.createQuery("from " + entityClz.getSimpleName() + " where name = '" + modelName + "'");
+        Query query = session.createQuery("from " + entityClz.getSimpleName() + " where name = :modelName");
+        query.setString("modelName", modelName);
         List list = query.list();
         if (list.size() == 0) {
             return null;
@@ -49,7 +51,8 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
     public List<ModelSummary> findAllValid() {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        Query query = session.createQuery("from " + entityClz.getSimpleName() + " where STATUS != " + ModelSummaryStatus.DELETED.getStatusId());
+        Query query = session.createQuery("from " + entityClz.getSimpleName() + " where STATUS != :statusId");
+        query.setInteger("statusId", ModelSummaryStatus.DELETED.getStatusId());
         List<ModelSummary> list = query.list();
         return list;
     }
