@@ -37,8 +37,8 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         if (result != null && result.success === true) {
             var model = result.resultObj;
             model.ChartData = TopPredictorService.FormatDataForChart(model);
-            model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, "Internal", model.Predictors);
-            model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, "External", model.Predictors);
+            model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
+            model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
 
             var contentContainer = $('#modelDetailContainer');
             WidgetFrameworkService.CreateWidget({

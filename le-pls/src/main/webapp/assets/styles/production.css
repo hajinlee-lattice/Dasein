@@ -7123,20 +7123,17 @@ Model List
   width: 100%; }
 
 .model-title .edit button {
-    background: white;
-    border: 0;
-    color: #999;
-    font-size: x-large;
-}
+  background: white;
+  border: 0;
+  color: #999;
+  font-size: x-large; }
 
 .model-title .edit button:hover {
-    color: #486d99;
-}
+  color: #486d99; }
 
 .model-title .editable-buttons {
-    margin-top: 0.5em;
-    padding-bottom: 2.5em;
-}
+  margin-top: 0.5em;
+  padding-bottom: 2.5em; }
 
 .model-title .editable-cancel {
   float: left;

@@ -4,8 +4,9 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 ])
 .service('TopPredictorService', function (StringUtility, AnalyticAttributeUtility) {
     
-    this.ShowBasedOnTags = function (predictor, tag) {
+    this.ShowBasedOnTags = function (predictor, isExternal) {
         var toReturn = false;
+        var tag = isExternal ? "External" : "Internal";
         for (var x=0; x<predictor.Tags.length; x++) {
             if (tag == predictor.Tags[x]) {
                 toReturn = true;
@@ -16,25 +17,12 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         return toReturn;
     };
     
-    this.GetNumberOfAttributesByType = function (fullPredictorList, type) {
-        var toReturn = 0;
-        for (var i = 0; i < fullPredictorList.length; i++) {
-            var predictor = fullPredictorList[i];
-            if (this.ShowBasedOnTags(predictor, type) && AnalyticAttributeUtility.IsAllowedForInsights(predictor)) {
-                //TODO:pierce Might need to check frequency on categoricals before adding the number
-                toReturn += predictor.Elements.length;
-            }
-        }
-        
-        return toReturn;
-    };
-    
-    this.GetNumberOfAttributesByCategory = function (categoryList, type, fullPredictorList) {
+    this.GetNumberOfAttributesByCategory = function (categoryList, isExternal, modelSummary) {
         var toReturn = {
             total: 0,
             categories: []
         };
-        if (categoryList == null || type == null || fullPredictorList == null) {
+        if (categoryList == null || isExternal == null || modelSummary.Predictors == null) {
             return toReturn;
         }
         for (var x = 0; x < categoryList.length; x++) {
@@ -44,14 +32,25 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 count: 0,
                 color: category.color
             };
-            for (var i = 0; i < fullPredictorList.length; i++) {
-                var predictor = fullPredictorList[i];
+
+            for (var i = 0; i < modelSummary.Predictors.length; i++) {
+                var predictor = modelSummary.Predictors[i];
+                
                 if (predictor.Category == category.name && 
-                    this.ShowBasedOnTags(predictor, type) &&
+                    this.ShowBasedOnTags(predictor, isExternal) &&
                     AnalyticAttributeUtility.IsAllowedForInsights(predictor)) {
-                        //TODO:pierce Might need to check frequency on categoricals before adding the number
-                        toReturn.total += predictor.Elements.length;
-                        displayCategory.count = displayCategory.count + predictor.Elements.length;
+
+                        for (var y = 0; y < predictor.Elements.length; y++) {
+                            var element = predictor.Elements[y];
+                            var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
+                            var isCategorical = this.IsPredictorElementCategorical(element);
+                            if (isCategorical && percentTotal < 1) {
+                                continue;
+                            }
+                            toReturn.total++;
+                            displayCategory.count++;
+                            
+                        }
                     }
             }
             
@@ -196,7 +195,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             return null;
         }
         
-        var columns = ["Category", "Name", "Description", "%Leads", "Lift", "PredictivePower"];
+        var columns = ["Category", "Attribute Name", "Attribute  Value", "Attribute Description", "%Leads", "Lift", "PredictivePower"];
         var toReturn = []; 
         toReturn.push(columns);
         // Get all unique categories
@@ -205,15 +204,13 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         var totalPredictors = modelSummary.Predictors.sort(this.SortByPredictivePower);
         for (var i = 0; i < topCategories.length; i++) {
             category = topCategories[i];
-            var numOfAttributesPerCategory = 0;
+            
             for (var x = 0; x < totalPredictors.length; x++) {
                 var predictor = totalPredictors[x];
-                if (numOfAttributesPerCategory == 50) {
-                    break;
-                }
                 
-                if (category.name == predictor.Category) {
-                    numOfAttributesPerCategory++;
+                if (predictor.Category == category.name && 
+                    (this.ShowBasedOnTags(predictor, true) || this.ShowBasedOnTags(predictor, false)) &&
+                    AnalyticAttributeUtility.IsAllowedForInsights(predictor)) {
                     for (var y = 0; y < predictor.Elements.length; y++) {
                         var element = predictor.Elements[y];
                         var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
@@ -224,7 +221,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                         percentTotal = Math.round(percentTotal);
                         var lift = element.Lift.toPrecision(2);
                         var description = predictor.Description ? predictor.Description : "";
-                        var attributeRow = [predictor.Category, predictor.DisplayName, description, percentTotal, lift, element.UncertaintyCoefficient];
+                        var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
+                        var attributeRow = [predictor.Category, predictor.DisplayName, attributeValue, description, percentTotal, lift, element.UncertaintyCoefficient];
                         toReturn.push(attributeRow);
                     }
                 }
