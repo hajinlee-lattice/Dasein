@@ -87,7 +87,9 @@ class PredictorGenerator(State):
         if colname in configMetadata:
             metadata = configMetadata[colname]
             predictor["Tags"] = metadata["Tags"]
+            predictor["DataType"] = metadata["DataType"]
             predictor["DisplayName"] = metadata["DisplayName"]
+            predictor["Description"] = metadata["Description"]
             predictor["ApprovedUsage"] = metadata["ApprovedUsage"]
             predictor["FundamentalType"] = metadata["FundamentalType"]
 
@@ -99,7 +101,9 @@ class PredictorGenerator(State):
                         break
         else:
             predictor["Tags"] = None
+            predictor["DataType"] = None
             predictor["DisplayName"] = None
+            predictor["Description"] = None
             predictor["ApprovedUsage"] = None
             predictor["FundamentalType"] = None
             predictor["Category"] = None
