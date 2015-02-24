@@ -48,7 +48,7 @@
             <div class="attributes lattice-attributes" data-ng-show="showExternalCategories">
                 <h4>{{externalPredictorTotal}}</h4>
                 <ul>    
-                    <li data-ng-repeat="category in externalCategories" data-ng-click="categoryClicked(category)">
+                    <li data-ng-repeat="category in externalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
                         <a href="#">{{category.name}}<span style="background-color:{{category.color}}">{{category.count}}</span></a>
                     </li>
                 </ul>
@@ -59,7 +59,7 @@
             <div class="attributes lattice-attributes" data-ng-show="showInternalCategories">
                 <h4>{{internalPredictorTotal}}</h4>
                 <ul>
-                    <li data-ng-repeat="category in internalCategories" data-ng-click="categoryClicked(category)">
+                    <li data-ng-repeat="category in internalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
                         <a href="#">{{category.name}}<span style="background-color:{{category.color}}">{{category.count}}</span></a>
                     </li>
                 </ul>

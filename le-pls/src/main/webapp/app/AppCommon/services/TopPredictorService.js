@@ -1,8 +1,9 @@
 angular.module('mainApp.appCommon.services.TopPredictorService', [
     'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.appCommon.utilities.AnalyticAttributeUtility'
+    'mainApp.appCommon.utilities.AnalyticAttributeUtility',
+    'mainApp.appCommon.utilities.ResourceUtility'
 ])
-.service('TopPredictorService', function (StringUtility, AnalyticAttributeUtility) {
+.service('TopPredictorService', function (StringUtility, AnalyticAttributeUtility, ResourceUtility) {
     
     this.ShowBasedOnTags = function (predictor, isExternal) {
         var toReturn = false;
@@ -212,7 +213,15 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             return null;
         }
         
-        var columns = ["Category", "Attribute Name", "Attribute  Value", "Attribute Description", "%Leads", "Lift", "PredictivePower"];
+        var columns = [
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_CATEGORY_LABEL'), 
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_ATTRIBUTE_NAME_LABEL'), 
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_ATTRIBUTE_VALUE_LABEL'), 
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_ATTRIBUTE_DESCRIPTION_LABEL'), 
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_PERCENT_LEADS_LABEL'), 
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_LIFT_LABEL'), 
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_PREDICTIVE_POWER_LABEL')
+        ];
         var toReturn = []; 
         toReturn.push(columns);
         // Get all unique categories
@@ -284,7 +293,13 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         for (var i = 0; i < topCategories.length; i++) {
             category = topCategories[i];
             category.children = category.children.sort(this.SortBySize);
+            for (var z = 0; z < category.children.length; z++) {
+                category.size += category.children[z].size;
+            }
         }
+        
+        // Then sort the categories by the total size of their top attributes
+        topCategories = topCategories.sort(this.SortBySize);
         
         var toReturn = {
             name: "root",
