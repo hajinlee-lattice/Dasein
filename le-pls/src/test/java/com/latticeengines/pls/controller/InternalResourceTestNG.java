@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.api.Status;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -58,5 +60,13 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
             assertEquals(modelSummary.getStatus(), ModelSummaryStatus.ACTIVE);
         }
 
+    }
+
+    @Test(groups = "functional")
+    public void calculate() {
+        String restAPIHostPort = getRestAPIHostPort();
+        String url = String.format("%s/pls/internal/add/1/2", restAPIHostPort);
+        Status status = restTemplate.getForObject(url, Status.class);
+        assertNotNull(status);
     }
 }
