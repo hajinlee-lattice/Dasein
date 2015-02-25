@@ -5,7 +5,11 @@
                 {{successMessage}}
             </p>
         </div>
-        
+        <div class="global-error" data-ng-show="showForgotPasswordError">
+            <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{ResourceUtility.getString('RESET_PASSWORD_FAIL')}}</span>
+            <button class="close btn btn-link" data-ng-click="showForgotPasswordError = false;"><i class="fa fa-times fa-inverse"></i></button>
+        </div>
+
         <!-- Login form -->
         <form class="form-signin" data-ng-show="showLoginForm">
             <h2 class="form-signin-heading"><img src="assets/images/logo_login.png" alt="Lattice"></h2>
@@ -65,10 +69,6 @@
                 <div class="user-login-info-buttonforgot">
                     <a href="#" class="btn btn-secondary" data-ng-click="cancelForgotPasswordClick($event)">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</a>
                     <button class="btn btn-primary" type="submit" data-ng-click="forgotPasswordOkClick()">{{ResourceUtility.getString('FORGOT_PASSWORD_SEND_EMAIL_BUTTON')}}</button>
-                </div>
-                <div class="global-error" data-ng-show="showForgotPasswordError">
-                    <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{ResourceUtility.getString('RESET_PASSWORD_FAIL')}}</span>
-                    <button class="close btn btn-link" data-ng-click="showForgotPasswordError = false;"><i class="fa fa-times fa-inverse"></i></button>
                 </div>
             </div>
         </form>
