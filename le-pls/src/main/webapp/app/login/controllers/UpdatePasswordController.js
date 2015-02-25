@@ -115,10 +115,9 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
 })
 .controller('UpdatePasswordSuccessController', function ($scope, ResourceUtility, LoginService) {
 
-    $scope.message = ResourceUtility.getString("CHANGE_PASSWORD_SUCCESS");
-    $scope.buttonLabel = ResourceUtility.getString("CHANGE_PASSWORD_RE_LOGIN");
+    $scope.ResourceUtility = ResourceUtility;
     $scope.clickRelogin = function(){
         LoginService.Logout();
-    }
+    };
 
 });

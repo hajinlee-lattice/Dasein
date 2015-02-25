@@ -81,7 +81,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
             $compile($("#mainContentView").html(html))(scope);
         });
     }
-    
+
     // Handle when the User Management link is clicked
     $scope.$on(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT, function (event, data) {
         createUserManagementView();

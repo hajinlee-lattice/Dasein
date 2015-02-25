@@ -46,7 +46,7 @@
         </form>
         
         <!-- Forgot Password form -->
-        <form class="form-signin" data-ng-show="!showLoginForm">
+        <form class="form-signin" data-ng-show="!showLoginForm && showForgotPassword">
             <h2 class="form-signin-heading">
                 {{ResourceUtility.getString('FORGOT_PASSWORD_TITLE')}}
             </h2>
@@ -66,8 +66,24 @@
                     <a href="#" class="btn btn-secondary" data-ng-click="cancelForgotPasswordClick($event)">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</a>
                     <button class="btn btn-primary" type="submit" data-ng-click="forgotPasswordOkClick()">{{ResourceUtility.getString('FORGOT_PASSWORD_SEND_EMAIL_BUTTON')}}</button>
                 </div>
+                <div class="global-error" data-ng-show="showForgotPasswordError">
+                    <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{ResourceUtility.getString('RESET_PASSWORD_FAIL')}}</span>
+                    <button class="close btn btn-link" data-ng-click="showForgotPasswordError = false;"><i class="fa fa-times fa-inverse"></i></button>
+                </div>
             </div>
         </form>
+
+        <!-- Forgot Password success -->
+        <div class="form-signin" data-ng-show="!showLoginForm && resetPasswordSuccess">
+            <h2 class="form-signin-heading">{{ ResourceUtility.getString('FORGOT_PASSWORD_EMAIL_SENT_TITLE') }}</h2>
+            <p><strong>{{ email }}</strong></p>
+            <p>{{ ResourceUtility.getString('FORGOT_PASSWORD_EMAIL_SENT_BODY') }}</p>
+            <div class="login-wrap">
+                <div class="user-login-info-buttonforgot">
+                    <button class="btn btn-primary" data-ng-click="showLoginForm = true;">{{ ResourceUtility.getString('RETURN_TO_LOGIN') }}</button>
+                </div>
+            </div>
+        </div>
         
         <p class="footer">© {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}</a></p>
     </div>

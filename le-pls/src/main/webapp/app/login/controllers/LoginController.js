@@ -5,6 +5,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.core.utilities.GriotNavUtility',
     'mainApp.login.services.LoginService',
     'mainApp.core.services.HelpService',
     'mainApp.login.modals.TenantSelectionModal',
@@ -12,7 +13,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.config.services.GriotConfigService',
     'mainApp.core.controllers.MainViewController'
 ])
-.controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, ServiceErrorUtility, EvergageUtility, 
+.controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, GriotNavUtility, ServiceErrorUtility, EvergageUtility,
     BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, GriotConfigService, TenantSelectionModal) {
     
     $("body").addClass("login-body");
@@ -31,6 +32,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.successMessage = "";
     $scope.loginInProgess = false;
     $scope.showLoginForm = true;
+    $scope.showForgotPassword = false;
     $scope.forgotPasswordUsername = "";
     
     // Controller methods
@@ -138,6 +140,7 @@ angular.module('mainApp.login.controllers.LoginController', [
         }
         
         $scope.showLoginForm = false;
+        $scope.showForgotPassword = true;
     };
     
     $scope.cancelForgotPasswordClick = function ($event) {
@@ -148,6 +151,8 @@ angular.module('mainApp.login.controllers.LoginController', [
     };
     
     $scope.forgotPasswordOkClick = function () {
+        $scope.resetPasswordSuccess = false;
+        $scope.showForgotPasswordError = false;
         $scope.forgotPasswordUsernameInvalid = $scope.forgotPasswordUsername === "" ? true : false;
         if ($scope.forgotPasswordUsernameInvalid) {
             return;
@@ -158,13 +163,16 @@ angular.module('mainApp.login.controllers.LoginController', [
             }
             
             if (result.Success === true) {
-                $scope.showLoginForm = true;
+                $scope.showForgotPassword = false;
+                $scope.resetPasswordSuccess = true;
             } else {
                 //TODO:pierce need to handle errors from forgot password
+                $scope.showForgotPasswordError = true;
+                $scope.forgotPasswordUsernameInvalid = false;
             }
         });
     };
-    
+
     $scope.privacyPolicyClick = function ($event) {
         if ($event != null) {
             $event.preventDefault();
