@@ -16,6 +16,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.container.TimeStampContainer;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryDownloadService;
@@ -33,10 +34,12 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
     
     private TenantEntityMgr tenantEntityMgr;
-    
+
     private Configuration yarnConfiguration;
-    
+
     private ModelSummaryParser modelSummaryParser;
+
+    private TimeStampContainer timeStampContainer;
 
     public Future<Boolean> downloadModel(Tenant tenant) {
         log.info("Downloading model for tenant " + tenant.getId());
@@ -52,6 +55,8 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        timeStampContainer.setTimeStamp();
+        log.info(timeStampContainer.getTimeStamp().getSeconds());
         List<Tenant> tenants = tenantEntityMgr.findAll();
         
         List<Future<Boolean>> futures = new ArrayList<>();
@@ -116,4 +121,11 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
         this.modelSummaryParser = modelSummaryParser;
     }
 
+    public TimeStampContainer getTimeStampContainer(){
+        return this.timeStampContainer;
+    }
+
+    public void setTimeStampContainer(TimeStampContainer timeStampContainer){
+        this.timeStampContainer = timeStampContainer;
+    }
 }

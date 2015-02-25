@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.container.TimeStampContainer;
 import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
@@ -44,6 +45,9 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
     @Autowired
     private ModelSummaryParser modelSummaryParser;
 
+    @Autowired
+    private TimeStampContainer timeStampContainer;
+
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
@@ -55,6 +59,7 @@ public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBa
         modelSummaryDownloadService.setModelSummaryEntityMgr(modelSummaryEntityMgr);
         modelSummaryDownloadService.setModelSummaryDownloadExecutor(modelSummaryDownloadExecutor);
         modelSummaryDownloadService.setModelSummaryParser(modelSummaryParser);
+        modelSummaryDownloadService.setTimeStampContainer(timeStampContainer);
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
     }
     
