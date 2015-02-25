@@ -18,7 +18,7 @@ public class CustomerSpace {
     public CustomerSpace(String deploymentExternalId) {
         this.contractId = deploymentExternalId;
         this.tenantId = deploymentExternalId;
-        this.spaceId = "Prod";
+        this.spaceId = "Production";
     }
 
     @Override
