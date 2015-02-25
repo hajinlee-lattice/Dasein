@@ -10261,128 +10261,149 @@
     }, 
     "TopSample": [
         {
-            "Company": "Company 0", 
-            "Contact": "Contact 0", 
-            "Converted": true, 
-            "Score": 100
-        }, 
-        {
             "Company": "Company 1", 
-            "Contact": "Contact 1", 
-            "Converted": true, 
-            "Score": 100
-        }, 
-        {
-            "Company": "Company 2", 
-            "Contact": "Contact 2", 
+            "FirstName": "FirstName1",
+            "LastName": "LastName1", 
             "Converted": false, 
             "Score": 100
         }, 
         {
+            "Company": "Company 2", 
+            "FirstName": "FirstName2",
+            "LastName": "LastName2", 
+            "Converted": true, 
+            "Score": 100
+        }, 
+        {
             "Company": "Company 3", 
-            "Contact": "Contact 3", 
+            "FirstName": "FirstName3",
+            "LastName": "LastName3", 
             "Converted": true, 
             "Score": 100
         }, 
         {
             "Company": "Company 4", 
-            "Contact": "Contact 4", 
-            "Converted": true, 
+            "FirstName": "FirstName4",
+            "LastName": "LastName4", 
+            "Converted": false, 
             "Score": 100
         }, 
         {
             "Company": "Company 5", 
-            "Contact": "Contact 5", 
+            "FirstName": "FirstName5",
+            "LastName": "LastName5", 
             "Converted": true, 
             "Score": 100
         }, 
         {
             "Company": "Company 6", 
-            "Contact": "Contact 6", 
+            "FirstName": "FirstName6",
+            "LastName": "LastName6", 
             "Converted": false, 
             "Score": 100
         }, 
         {
             "Company": "Company 7", 
-            "Contact": "Contact 7", 
-            "Converted": false, 
+            "FirstName": "FirstName7",
+            "LastName": "LastName7", 
+            "Converted": true, 
             "Score": 100
         }, 
         {
             "Company": "Company 8", 
-            "Contact": "Contact 8", 
+            "FirstName": "FirstName8",
+            "LastName": "LastName8", 
             "Converted": true, 
             "Score": 100
         }, 
         {
             "Company": "Company 9", 
-            "Contact": "Contact 9", 
+            "FirstName": "FirstName9",
+            "LastName": "LastName9",
+            "Converted": true, 
+            "Score": 100
+        }, 
+        {
+            "Company": "Company 10",
+            "FirstName": "FirstName10",
+            "LastName": "LastName10", 
             "Converted": true, 
             "Score": 100
         }
     ], 
     "BottomSample": [
         {
-            "Company": "Company 10", 
-            "Contact": "Contact 10", 
+            "Company": "Company 1001", 
+            "FirstName": "FirstName1001",
+            "LastName": "LastName1001", 
             "Converted": false, 
             "Score": 1
         }, 
         {
-            "Company": "Company 11", 
-            "Contact": "Contact 11", 
+            "Company": "Company 1002", 
+            "FirstName": "FirstName1002",
+            "LastName": "LastName1002", 
             "Converted": false, 
             "Score": 1
         }, 
         {
-            "Company": "Company 12", 
-            "Contact": "Contact 12", 
+            "Company": "Company 1003", 
+            "FirstName": "FirstName1003",
+            "LastName": "LastName1003", 
             "Converted": false, 
             "Score": 1
         }, 
         {
-            "Company": "Company 13", 
-            "Contact": "Contact 13", 
+            "Company": "Company 1004", 
+            "FirstName": "FirstName1004",
+            "LastName": "LastName1004", 
             "Converted": false, 
             "Score": 1
         }, 
         {
-            "Company": "Company 14", 
-            "Contact": "Contact 14", 
+            "Company": "Company 1005", 
+            "FirstName": "FirstName1005",
+            "LastName": "LastName1005", 
             "Converted": false, 
             "Score": 1
         }, 
         {
-            "Company": "Company 15", 
-            "Contact": "Contact 15", 
+            "Company": "Company 1006", 
+            "FirstName": "FirstName1006",
+            "LastName": "LastName1006", 
             "Converted": false, 
             "Score": 1
         }, 
         {
-            "Company": "Company 16", 
-            "Contact": "Contact 16", 
+            "Company": "Company 1007", 
+            "FirstName": "FirstName1007",
+            "LastName": "LastName1007", 
             "Converted": false, 
             "Score": 1
         }, 
         {
-            "Company": "Company 17", 
-            "Contact": "Contact 17", 
+            "Company": "Company 1008", 
+            "FirstName": "FirstName1008",
+            "LastName": "LastName1008", 
             "Converted": false, 
             "Score": 1
         }, 
         {
-            "Company": "Company 18", 
-            "Contact": "Contact 18", 
+            "Company": "Company 1009", 
+            "FirstName": "FirstName1009",
+            "LastName": "LastName1009", 
             "Converted": false, 
             "Score": 1
         }, 
         {
-            "Company": "Company 19", 
-            "Contact": "Contact 19", 
+            "Company": "Company 1010", 
+            "FirstName": "FirstName1010",
+            "LastName": "LastName1010", 
             "Converted": false, 
             "Score": 1
         }
     ], 
+
     "EventTableProvenance": {
         "SourceURL": "https://bodcdevvint187.dev.lattice.local:8080//DLRestService", 
         "TenantName": "BD2_ADEDTBDd69264296nJ26263627n12", 
