@@ -33,6 +33,14 @@
                                     "Widgets": [{
                                             "ID" : "modelDetailsAttributesWidget",
                                             "Type" : "TopPredictorWidget"
+                                        }, {
+                                            "ID" : "modelDetailsTopSampleGridWidget",
+                                            "Type" : "SimpleGridWidget",
+                                            "TitleString": "TOP_SAMPLE_GRID_TITLE"
+                                        }, {
+                                            "ID" : "modelDetailsBottomSampleGridWidget",
+                                            "Type" : "SimpleGridWidget",
+                                            "TitleString": "BOTTOM_SAMPLE_GRID_TITLE"
                                         }
                                     ]
                                 }, {

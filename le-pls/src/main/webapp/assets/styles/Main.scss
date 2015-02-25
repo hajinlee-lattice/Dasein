@@ -12,4 +12,11 @@
     margin-top: 3em;
 }
 
+.tab-contents > .tab-pane {
+  display: none;
+}
+.tab-contents > .active {
+  display: block;
+}
+
 //END: Style overrides 

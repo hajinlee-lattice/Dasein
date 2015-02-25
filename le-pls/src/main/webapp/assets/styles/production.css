@@ -15284,4 +15284,10 @@ input.error, input.error:focus {
 .model-details .tab-widget {
   margin-top: 3em; }
 
+.tab-contents > .tab-pane {
+  display: none; }
+
+.tab-contents > .active {
+  display: block; }
+
 /*# sourceMappingURL=production.css.map */

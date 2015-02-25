@@ -6,6 +6,7 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
     'mainApp.appCommon.widgets.ArcChartWidget',
     'mainApp.appCommon.widgets.CollapsiblePanelWidget',
     'mainApp.appCommon.widgets.ScreenHeaderWidget',
+    'mainApp.appCommon.widgets.SimpleGridWidget',
     'mainApp.appCommon.widgets.SimpleTabWidget',
     'mainApp.appCommon.widgets.TabWidget',
     'mainApp.appCommon.widgets.TopPredictorWidget'
@@ -67,6 +68,9 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
                 break;
             case WidgetConfigUtility.SCREEN_HEADER_WIDGET:
                 $compile(options.element.html('<div data-screen-header-widget></div>'))(scope);
+                break;
+            case WidgetConfigUtility.SIMPLE_GRID_WIDGET:
+                $compile(options.element.html('<div data-simple-grid-widget></div>'))(scope);
                 break;
             case WidgetConfigUtility.SIMPLE_TAB_WIDGET:
                 $compile(options.element.html('<div data-simple-tab-widget></div>'))(scope);

@@ -12299,5 +12299,3 @@ alasql.worker = function(path, paths, cb) {
 
 };
 
-
-//# sourceMappingURL=alasql.js.map
