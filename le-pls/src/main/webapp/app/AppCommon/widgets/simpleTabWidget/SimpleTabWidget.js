@@ -17,13 +17,10 @@ angular.module('mainApp.appCommon.widgets.SimpleTabWidget', [
     
     $scope.tabs = [];
     var createTabs = function () {
-        for (var i = 0; i < widgetConfig.Widgets.length; i++) {
-            var widget = widgetConfig.Widgets[i];
-            var tab = {
-                ID: widget.ID,
-                IsActive: false,
-                Title: ResourceUtility.getString(widget.TitleString)
-            };
+        for (var i = 0; i < widgetConfig.Tabs.length; i++) {
+            var tab = widgetConfig.Tabs[i];
+            tab.IsActive = false;
+            tab.Title = ResourceUtility.getString(tab.TitleString);
             $scope.tabs.push(tab);
         }
         
@@ -47,21 +44,23 @@ angular.module('mainApp.appCommon.widgets.SimpleTabWidget', [
     
     //TODO:pierce There has to be a better to handle this
     setTimeout(function () {
-        for (var i = 0; i < widgetConfig.Widgets.length; i++) {
+        for (var i = 0; i < widgetConfig.Tabs.length; i++) {
+            var tab = widgetConfig.Tabs[i];
             
-            var tabWidgetConfig = widgetConfig.Widgets[i];
-            
-            var childElement = $('#' + tabWidgetConfig.ID, $element);
-            var container = $('<div></div>');
-            childElement.append(container);
-            
-            if (childElement) {
-                WidgetFrameworkService.CreateWidget({
-                    element: container,
-                    widgetConfig: tabWidgetConfig,
-                    data: data,
-                    parentData: parentData
-                });
+            for (var x = 0; x < tab.Widgets.length; x++) {
+                var tabWidgetConfig = tab.Widgets[x];
+                var childElement = $('#' + tab.ID, $element);
+                var container = $('<div></div>');
+                childElement.append(container);
+                
+                if (childElement) {
+                    WidgetFrameworkService.CreateWidget({
+                        element: container,
+                        widgetConfig: tabWidgetConfig,
+                        data: data,
+                        parentData: parentData
+                    });
+                }
             }
         }
     }, 0);
