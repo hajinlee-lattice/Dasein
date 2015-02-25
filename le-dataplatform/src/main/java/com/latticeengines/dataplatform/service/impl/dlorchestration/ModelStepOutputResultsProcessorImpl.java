@@ -40,9 +40,9 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
     private static final String CREATE_OUTPUT_TABLE_SQL = "(Id int NOT NULL,\n" + "    CommandId int NOT NULL,\n"
             + "    SampleSize int NOT NULL,\n" + "    Algorithm varchar(50) NOT NULL,\n"
             + "    JsonPath varchar(512) NULL,\n" + "    Timestamp datetime NULL\n" + ")\n" + "";
-
     private static final String HTTPFS_SUFFIX = "?op=OPEN&user.name=yarn";
 
+    
     private static final String INSERT_OUTPUT_TABLE_SQL = "(Id, CommandId, SampleSize, Algorithm, JsonPath, Timestamp) values (?, ?, ?, ?, ?, ?)";
 
     @Value("${dataplatform.fs.web.defaultFS}")
@@ -73,7 +73,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         String modelFilePath = getModelFilePath(modelCommand, jobStatus, appId);
 
         publishModel(modelCommand, jobStatus, modelCommandParameters, modelFilePath, appId);
-        publishModelSummary(modelCommand, jobStatus, appId);
+        publishModelArtifacts(modelCommand, jobStatus, modelCommandParameters, appId);
         publishLinks(modelCommand, jobStatus, modelFilePath);
         updateEventTable(modelCommand, modelCommandParameters, modelFilePath);
     }
@@ -114,6 +114,28 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         }
     }
 
+    private String getUniqueModelName(
+            JobStatus jobStatus,
+            ModelCommandParameters modelCommandParameters) {
+        //This is apparently a BARD restriction.
+        int modelIdLengthLimit = 45;
+
+        String modelName = modelCommandParameters.getModelName();
+        
+        String modelId = jobStatus.getResultDirectory().split("/")[7] + "-" + modelName;
+        if (modelId.length() > modelIdLengthLimit) {
+            modelId = modelId.substring(0, modelIdLengthLimit);
+        }
+        
+        return modelId;
+    }
+    
+    private int getModelVersion()
+    {
+        // TODO This should be set to the actual model version once that's supported.
+    	return 1;
+    }
+    
     private void publishModel(
             ModelCommand modelCommand,
             JobStatus jobStatus,
@@ -127,25 +149,18 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
             String[] tokens = hdfsResultDirectory.split("/");
 
             if (tokens.length > 7) { //Chances are, this is good.
-
-                //This is apparently a BARD restriction.
-                int modelIdLengthLimit = 45;
-
                 String consumer = "BARD";
-                String modelName = modelCommandParameters.getModelName();
+
+                StringBuilder hdfsCustomersDirectory = new StringBuilder();
+                for (int i = 0; i < 4; i++) {
+                	hdfsCustomersDirectory.append(tokens[i]).append("/");
+                }
+                
+                String modelId = getUniqueModelName(jobStatus, modelCommandParameters);
 
                 StringBuilder hdfsConsumerDirectory = new StringBuilder();
-                for (int i = 0; i < 5; i++) {
-                    hdfsConsumerDirectory.append(tokens[i]).append("/");
-                }
-
-                String modelId = tokens[7] + "-" + modelName;
-                if (modelId.length() > modelIdLengthLimit) {
-                    modelId = modelId.substring(0, modelIdLengthLimit);
-                }
-
-                hdfsConsumerDirectory.append(consumer).append("/").append(modelId);
-                String hdfsConsumerFile = hdfsConsumerDirectory + "/1.json";
+                hdfsConsumerDirectory.append(hdfsCustomersDirectory).append(tokens[4]).append("/").append(consumer).append("/").append(modelId);
+                String hdfsConsumerFile = hdfsConsumerDirectory + "/" + getModelVersion() + ".json";
 
                 if (HdfsUtils.fileExists(yarnConfiguration, hdfsConsumerFile)) {
                     HdfsUtils.rmdir(yarnConfiguration, hdfsConsumerFile);
@@ -153,8 +168,23 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
 
                 String modelContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFilePath);
                 HdfsUtils.writeToFile(yarnConfiguration, hdfsConsumerFile, modelContent);
-
-            } else {
+                
+                // Publish the PMML model and associated artifacts.
+                String deploymentExternalId = modelCommand.getDeploymentExternalId();
+                CustomerSpace space = new CustomerSpace(deploymentExternalId);
+                
+                StringBuilder artifactPath = new StringBuilder();
+                artifactPath.append(hdfsCustomersDirectory).append(space).append("/models/").append(modelId).append("/").append(getModelVersion()).append("/");
+                
+                String pmmlContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsResultDirectory + "/rfpmml.xml");
+                HdfsUtils.writeToFile(yarnConfiguration, artifactPath + "ModelPmml.xml", pmmlContent);
+                
+                String dataContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsResultDirectory + "/enhancements/DataComposition.json");
+                HdfsUtils.writeToFile(yarnConfiguration, artifactPath + "DataComposition.json", dataContent);
+                
+                String scoreContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsResultDirectory + "/enhancements/ScoreDerivation.json");
+                HdfsUtils.writeToFile(yarnConfiguration, artifactPath + "ScoreDerivation.json", scoreContent);
+            } else {               
                 throw new Exception("Unexpected result directory: " + hdfsResultDirectory);
             }
         }
@@ -164,30 +194,38 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         }
     }
 
-    private void publishModelSummary(
+    private void publishModelArtifacts(
             ModelCommand modelCommand,
             JobStatus jobStatus,
+            ModelCommandParameters modelCommandParameters,
             String appId) throws LedpException {
         try {
 
             String hdfsPath = jobStatus.getResultDirectory() + "/enhancements/modelsummary.json";
 
-            if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+            String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath);
 
-                String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath);
+            String interfaceName = "ModelSummary";
+            String deploymentExternalId = modelCommand.getDeploymentExternalId();
+            CustomerSpace space = new CustomerSpace(deploymentExternalId);
+            DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName, space);
 
-                String interfaceName = "ModelSummary";
-                String deploymentExternalId = modelCommand.getDeploymentExternalId();
-                CustomerSpace space = new CustomerSpace(deploymentExternalId);
-                DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName, space);
+            Path relativePath = new Path("/ModelSummary");
+            Document pubDoc = new Document(content);
+            pub.publish(relativePath, pubDoc);
 
-                Path relativePath = new Path("/ModelSummary");
-                Document pubDoc = new Document(content);
-                pub.publish(relativePath, pubDoc);
+            // Publish model artifacts into ZooKeeper.            
+            DataInterfacePublisher modelPublisher = new DataInterfacePublisher("ModelArtifact", space);
+            String modelName = getUniqueModelName(jobStatus, modelCommandParameters);
+            String basePath = "/Models/" + modelName + "/" + getModelVersion() + "/";
 
-            } else {
-                throw new Exception("Model-summary does not exist: " + hdfsPath);
-            }
+            String dataComposition = HdfsUtils.getHdfsFileContents(yarnConfiguration,
+            		jobStatus.getResultDirectory() + "/enhancements/DataComposition.json");
+            modelPublisher.publish(new Path(basePath + "DataComposition.json"), new Document(dataComposition));
+
+            String scoreDerivation = HdfsUtils.getHdfsFileContents(yarnConfiguration,
+            		jobStatus.getResultDirectory() + "/enhancements/ScoreDerivation.json");
+            modelPublisher.publish(new Path(basePath + "ScoreDerivation.json"), new Document(scoreDerivation));
         }
         catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_16011, e,
@@ -217,6 +255,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         modelCommandLogService.log(modelCommand, "ReadOutSample file download link: " + httpFsPrefix + readOutSampleFileHdfsPath
                 + HTTPFS_SUFFIX);
     }
+    
 
     private void updateEventTable(
             ModelCommand modelCommand,

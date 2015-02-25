@@ -58,11 +58,16 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     private RestTemplate restTemplate = new RestTemplate();
 
     private List<String> linkContents = Arrays.<String> asList(new String[] { "a", "b", "c", "d" });
+    private String pmmlContents = "XML!";
     private String modelSummaryContents = "MSC";
+    private String scoreDerivationContents = "Deciles!";
+    private String dataCompositionContents = "Transforms!";
 
     private String resultDirectory = "/user/s-analytics/customers/Nutanix/models/Q_EventTable_Nutanix/58e6de15-5448-4009-a512-bd27d59abcde/";
     private String consumerDirectory = "/user/s-analytics/customers/Nutanix/BARD/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/";
-
+    private String hdfsArtifactsDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
+    private String zkArtifactsPath = "/Models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
+    
     @BeforeClass(groups = "functional")
     public void beforeClass() throws Exception {
         initMocks(this);
@@ -73,7 +78,10 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "scored.txt", linkContents.get(2));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "readoutsample.csv", linkContents.get(3));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "diagnostics.json", "diagnostics");
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "rfpmml.xml", pmmlContents);
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/modelsummary.json", modelSummaryContents);
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/ScoreDerivation.json", scoreDerivationContents);
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/DataComposition.json", dataCompositionContents);
         when(modelingService.getJobStatus(YARN_APPLICATION_ID)).thenReturn(jobStatus);
 
         ReflectionTestUtils.setField(modelStepOutputResultsProcessor, "modelingService", modelingService);
@@ -123,6 +131,8 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
         checkModel(command);
         checkModelSummary(command);
+        checkHdfsArtifacts(command);
+        checkZkArtifacts(command);
     }
 
     private void checkModel(ModelCommand command) throws Exception {
@@ -146,5 +156,25 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
         pub.remove(relativePath);
         Assert.assertNull(sub.get(relativePath));
+    }
+    
+    private void checkHdfsArtifacts(ModelCommand command) throws Exception {
+        String pmmlFile = hdfsArtifactsDirectory + "ModelPmml.xml";
+        String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, pmmlFile);
+        Assert.assertEquals(content, pmmlContents);
+    }
+
+    private void checkZkArtifacts(ModelCommand command) throws Exception {
+        String interfaceName = "ModelArtifact";
+        CustomerSpace space = new CustomerSpace(command.getDeploymentExternalId());
+        DataInterfaceSubscriber subscriber = new DataInterfaceSubscriber(interfaceName, space);
+
+        Path relativePath = new Path(zkArtifactsPath + "ScoreDerivation.json");
+        Document document = subscriber.get(relativePath);
+        Assert.assertEquals(document.getData(), scoreDerivationContents);
+
+        relativePath = new Path(zkArtifactsPath + "DataComposition.json");
+        document = subscriber.get(relativePath);
+        Assert.assertEquals(document.getData(), dataCompositionContents);
     }
 }
