@@ -61,11 +61,13 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         return list;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public ModelSummary findValidByModelId(String modelId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ModelSummary> entityClz = getEntityClass();
-        Query query = session.createQuery("from " + entityClz.getSimpleName() + " where id = :modelId AND STATUS != :statusId");
+        String queryStr = String.format("from %s where id = :modelId AND status != :statusId", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
         query.setString("modelId", modelId);
         query.setInteger("statusId", ModelSummaryStatus.DELETED.getStatusId());
         List list = query.list();
