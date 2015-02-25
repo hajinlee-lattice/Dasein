@@ -54,7 +54,12 @@ angular.module('mainApp.core.controllers.MainViewController', [
     
     // Handle when the Update Password link is clicked
     $scope.$on(GriotNavUtility.UPDATE_PASSWORD_NAV_EVENT, function (event, data) {
-        createUpdatePasswordView();
+        if (data != null && data.Success) {
+            createUpdatePasswordSuccessView();
+        } else {
+            createUpdatePasswordView();
+        }
+
     });
     
     function createUpdatePasswordView() {
@@ -63,6 +68,15 @@ angular.module('mainApp.core.controllers.MainViewController', [
         
         // Fetch the view and make it Angular aware
         $http.get('./app/login/views/UpdatePasswordView.html').success(function (html) {
+            var scope = $rootScope.$new();
+            $compile($("#mainContentView").html(html))(scope);
+        });
+    }
+
+    function createUpdatePasswordSuccessView() {
+        // Set the hash
+        window.location.hash = GriotNavUtility.UPDATE_PASSWORD_HASH;
+        $http.get('./app/login/views/UpdatePasswordSuccessView.html').success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });

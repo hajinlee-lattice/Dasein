@@ -98,7 +98,7 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
                 $scope.saveInProgess = false;
                 if (result.Success) {
                     $("#changePasswordSuccessAlert").fadeIn();
-                    setTimeout(LoginService.Logout(), 1000);
+                    $rootScope.$broadcast(GriotNavUtility.UPDATE_PASSWORD_NAV_EVENT, {Success: true});
                 } else {
                     if (result.Status == 401) {
                         $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_BAD_CREDS");
@@ -112,4 +112,13 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
             $scope.showPasswordError = true;
         }
     };
+})
+.controller('UpdatePasswordSuccessController', function ($scope, ResourceUtility, LoginService) {
+
+    $scope.message = ResourceUtility.getString("CHANGE_PASSWORD_SUCCESS");
+    $scope.buttonLabel = ResourceUtility.getString("CHANGE_PASSWORD_RE_LOGIN");
+    $scope.clickRelogin = function(){
+        LoginService.Logout();
+    }
+
 });
