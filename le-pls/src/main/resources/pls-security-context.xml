@@ -13,6 +13,7 @@
     </context:component-scan>
 
     <import resource="classpath:pls-persistence-context.xml"/>
+    <import resource="classpath:pls-yarn-config-context.xml"/>
     <import resource="classpath:pls-properties-context.xml"/>
     
     <security:http use-expressions="true" 
