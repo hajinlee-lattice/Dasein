@@ -31,7 +31,13 @@
                    create-session="stateless">
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
     </security:http>
-    
+    <security:http use-expressions="true" 
+                   pattern="/pls/datafiles/**" 
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint" 
+                   create-session="stateless">
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
+    </security:http>
     <bean id="restServicesFilter" class="com.latticeengines.pls.security.RestGlobalAuthenticationFilter">
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="authenticationSuccessHandler" ref="restAuthenticationSuccessHandler" />

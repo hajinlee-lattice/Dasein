@@ -1,6 +1,9 @@
 package com.latticeengines.pls.controller;
 
-import javax.ws.rs.core.Response;
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,42 +22,53 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/datafiles")
 @PreAuthorize("View_PLS_Configuration")
 public class DataFileResource {
-    
+
     @Autowired
     private DataFileProviderService dataFileProviderService;
 
-    @RequestMapping(value = "/modeljson/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json", produces = { "text/plain" })
+    @RequestMapping(value = "/modeljson/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get model json file for specific model summary")
-    public Response getModelJsonFile(@PathVariable String modelId) {
-        return null;
+    public void getModelJsonFile(@PathVariable String modelId, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        dataFileProviderService.downloadFile(request, response, modelId, "application/json", "modelsummary.json");
     }
 
-    @RequestMapping(value = "/predictorcsv/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json", produces = { "text/plain" })
+    @RequestMapping(value = "/predictorcsv/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get top predictors csv file for specific model summary")
-    public Response getTopPredictorsCsvFile(@PathVariable String modelId) {
-        return null;
+    public void getTopPredictorsCsvFile(@PathVariable String modelId, HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+
+        dataFileProviderService.downloadFile(request, response, modelId, "application/csv", ".*_model.csv");
     }
 
-    @RequestMapping(value = "/readoutcsv/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json", produces = { "text/plain" })
+    @RequestMapping(value = "/readoutcsv/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get readout sample csv file for specific model summary")
-    public Response getReadoutSampleCsvFile(@PathVariable String modelId) {
-        return null;
+    public void getReadoutSampleCsvFile(@PathVariable String modelId, HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+
+        dataFileProviderService.downloadFile(request, response, modelId, "application/csv", ".*_readoutsample.csv");
     }
 
-    @RequestMapping(value = "/scorecsv/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json", produces = { "text/plain" })
+    @RequestMapping(value = "/scorecsv/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get score csv file for specific model summary")
-    public Response getScoreCsvFile(@PathVariable String modelId) {
-        return null;
+    public void getScoreCsvFile(@PathVariable String modelId, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        dataFileProviderService.downloadFile(request, response, modelId, "text/plain", ".*_scored.txt");
     }
 
-    @RequestMapping(value = "/explorercsv/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json", produces = { "text/plain" })
+    @RequestMapping(value = "/explorercsv/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get threshold explorer csv file for specific model summary")
-    public Response getThresholdExplorerCsvFile(@PathVariable String modelId) {
-        return null;
+    public void getThresholdExplorerCsvFile(@PathVariable String modelId, HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+
+        dataFileProviderService.downloadFile(request, response, modelId, "application/csv", ".*_explorer.csv");
     }
+
 }
