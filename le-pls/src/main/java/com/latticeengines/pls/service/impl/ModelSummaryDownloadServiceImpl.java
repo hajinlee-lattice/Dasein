@@ -16,9 +16,9 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.container.TimeStampContainer;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
+import com.latticeengines.pls.mbean.TimeStampContainer;
 import com.latticeengines.pls.service.ModelSummaryDownloadService;
 
 @DisallowConcurrentExecution
@@ -56,7 +56,9 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         timeStampContainer.setTimeStamp();
-        log.info(timeStampContainer.getTimeStamp().getSeconds());
+        if (log.isDebugEnabled()) {
+           log.debug(timeStampContainer.getTimeStamp().getSeconds());
+        }
         List<Tenant> tenants = tenantEntityMgr.findAll();
         
         List<Future<Boolean>> futures = new ArrayList<>();

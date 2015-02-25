@@ -16,11 +16,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.container.TimeStampContainer;
 import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.mbean.TimeStampContainer;
 
 public class ModelSummaryDownloadServiceImplTestNG extends PlsFunctionalTestNGBase {
     

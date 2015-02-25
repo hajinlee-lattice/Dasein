@@ -9,8 +9,6 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.pls.container.TimeStampContainer;
-
 @Component("modelDownloaderMBean")
 @ManagedResource(objectName = "Diagnostics:name=ModelDownloaderCheck")
 public class ModelDownloaderMBean{
@@ -18,27 +16,26 @@ public class ModelDownloaderMBean{
 	@Autowired
     private ApplicationContext applicationContext;
 
-	@Value("${pls.downloader.checkTime}")
-	private long downloaderInvokeInterval;
-	
-	@Autowired
-	private TimeStampContainer timeStampContainer;
-	
+    @Value("${pls.jmx.downloader.check.frequency}")
+    private long downloaderInvokeInterval;
+
+    @Autowired
+    private TimeStampContainer timeStampContainer;
+
 	@ManagedOperation(description = "Check if ModelDownloader is Running")
     public String checkModelDownloader() {
         try {
             if (applicationContext.containsBean("modelSummaryDownloadJob")){
-            	TimeStamp timeStamp = TimeStamp.getCurrentTime();
-            	if (timeStamp.getSeconds() - timeStampContainer.getTimeStamp().getSeconds() <= downloaderInvokeInterval){
-            		long diff = timeStamp.getSeconds() - timeStampContainer.getTimeStamp().getSeconds();
-            		return "[SUCCESS] ModelDownloaderJob has been running for " + diff + " seconds.";
-            	}
-            	return "[FAILURE] ModelDownloaderJob has been running for more than " + downloaderInvokeInterval + " seconds.";
+                TimeStamp timeStamp = TimeStamp.getCurrentTime();
+                if (timeStamp.getSeconds() - timeStampContainer.getTimeStamp().getSeconds() <= downloaderInvokeInterval){
+                    long diff = timeStamp.getSeconds() - timeStampContainer.getTimeStamp().getSeconds();
+                    return String.format("[SUCCESS] ModelDownloader job has been running for %d seconds.", diff);
+                }
+                return String.format("[FAILURE] ModelDownloaderJob has been running for more than %d seconds.", downloaderInvokeInterval);
             }
             return "[FAILURE] ModelDownloaderJob is not loaded into application context.";
         } catch (Exception e) {
-            return "[FAILURE] Unexpected Exception happened: \n"
-            		+ ExceptionUtils.getStackTrace(e);
+            return "[FAILURE] Unexpected exception happened: \n"  + ExceptionUtils.getStackTrace(e);
         }
     }
 }
