@@ -205,5 +205,27 @@ angular.module('mainApp.models.services.ModelService', [
 
         return deferred.promise;
     };
+    
+    // This will take sample lead data from the server and transform it for display purposes
+    this.FormatLeadSampleData = function (sampleLeads) {
+        if (sampleLeads == null) {
+            return null;
+        }
+        
+        var toReturn = [];
+        for (var i = 0; i < sampleLeads.length; i++) {
+            var lead = sampleLeads[i];
+            
+            var leadToDisplay = {
+                Company: lead.Company,
+                Contact: lead.FirstName + " " + lead.LastName,
+                Converted: lead.Converted,
+                Score: lead.Score
+            };
+            toReturn.push(leadToDisplay);
+        }
+        
+        return toReturn;
+    };
 
 });

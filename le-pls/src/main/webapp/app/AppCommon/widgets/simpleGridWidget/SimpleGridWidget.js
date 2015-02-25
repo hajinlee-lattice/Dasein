@@ -13,6 +13,23 @@ angular.module('mainApp.appCommon.widgets.SimpleGridWidget', [
         return;
     }
     
+    $scope.gridTitle = ResourceUtility.getString(widgetConfig.TitleString);
+    
+    if (widgetConfig.Columns == null || widgetConfig.Columns.length === 0) {
+        return;
+    }
+    
+    
+    $scope.columnTitles = [];
+    $scope.columns = [];
+    for (var i = 0; i < widgetConfig.Columns.length; i++) {
+        var column = widgetConfig.Columns[i];
+        $scope.columnTitles.push(ResourceUtility.getString(column.TitleString));
+        $scope.columns.push(column.PropertyName);
+    }
+    
+    $scope.columnData = data[widgetConfig.DataProvider];
+    
 })
 
 .directive('simpleGridWidget', function () {

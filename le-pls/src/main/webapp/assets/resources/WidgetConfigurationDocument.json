@@ -36,11 +36,41 @@
                                         }, {
                                             "ID" : "modelDetailsTopSampleGridWidget",
                                             "Type" : "SimpleGridWidget",
-                                            "TitleString": "TOP_SAMPLE_GRID_TITLE"
+                                            "TitleString": "SAMPLE_LEAD_GRID_TOP_TITLE",
+                                            "DataProvider": "TopSample",
+                                            "Columns": [{
+                                                    "TitleString": "SAMPLE_LEAD_GRID_COMPANY_LABEL",
+                                                    "PropertyName": "Company"
+                                                }, {
+                                                    "TitleString": "SAMPLE_LEAD_GRID_CONTACT_LABEL",
+                                                    "PropertyName": "Contact"
+                                                }, {
+                                                    "TitleString": "SAMPLE_LEAD_GRID_CONVERTED_LABEL",
+                                                    "PropertyName": "Converted"
+                                                }, {
+                                                    "TitleString": "SAMPLE_LEAD_GRID_SCORE_LABEL",
+                                                    "PropertyName": "Score"
+                                                }
+                                            ]
                                         }, {
                                             "ID" : "modelDetailsBottomSampleGridWidget",
                                             "Type" : "SimpleGridWidget",
-                                            "TitleString": "BOTTOM_SAMPLE_GRID_TITLE"
+                                            "TitleString": "SAMPLE_LEAD_GRID_BOTTOM_TITLE",
+                                            "DataProvider": "BottomSample",
+                                            "Columns": [{
+                                                    "TitleString": "SAMPLE_LEAD_GRID_COMPANY_LABEL",
+                                                    "PropertyName": "Company"
+                                                }, {
+                                                    "TitleString": "SAMPLE_LEAD_GRID_CONTACT_LABEL",
+                                                    "PropertyName": "Contact"
+                                                }, {
+                                                    "TitleString": "SAMPLE_LEAD_GRID_CONVERTED_LABEL",
+                                                    "PropertyName": "Converted"
+                                                }, {
+                                                    "TitleString": "SAMPLE_LEAD_GRID_SCORE_LABEL",
+                                                    "PropertyName": "Score"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }, {

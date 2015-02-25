@@ -1,11 +1,17 @@
-<div class="data-table wrapper attributes-data">
-    <h2>Sample High-Scoring Leads</h2>
+<div data-ng-controller="SimpleGridWidgetController" class="data-table wrapper">
+    <h2>{{gridTitle}}</h2>
     <table>
         <thead>
-            
+            <th data-ng-repeat="title in columnTitles">
+                {{title}}
+            </th>
         </thead>
         <tbody>
-            
+            <tr data-ng-repeat="data in columnData">
+                <td data-ng-repeat="column in columns">
+                    {{data[column]}}
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>

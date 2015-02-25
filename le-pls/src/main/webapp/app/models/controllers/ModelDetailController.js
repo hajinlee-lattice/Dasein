@@ -39,6 +39,8 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
             model.ChartData = TopPredictorService.FormatDataForChart(model);
             model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
             model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
+            model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
+            model.BottomSample = ModelService.FormatLeadSampleData(model.BottomSample);
 
             var contentContainer = $('#modelDetailContainer');
             WidgetFrameworkService.CreateWidget({
