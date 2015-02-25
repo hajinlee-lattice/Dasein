@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 import org.springframework.stereotype.Component;
 
@@ -31,7 +32,7 @@ public class ModelSummaryParser {
             long constructionTime = modelDetailsJsonObject.get("ConstructionTime").getAsLong() * 1000;
             String lookupId = modelDetailsJsonObject.get("LookupID").getAsString();
             summary.setName(String.format("%s-%s", modelDetailsJsonObject.get("Name").getAsString(), //
-                    getDate(constructionTime, "MM/dd/yyyy hh:mm:ss")));
+                    getDate(constructionTime, "MM/dd/yyyy hh:mm:ss z")));
             summary.setLookupId(lookupId);
             summary.setTrainingRowCount(modelDetailsJsonObject.get("TrainingLeads").getAsLong());
             summary.setTestRowCount(modelDetailsJsonObject.get("TestingLeads").getAsLong());
@@ -57,6 +58,7 @@ public class ModelSummaryParser {
 
     private static String getDate(long milliSeconds, String dateFormat) {
         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(milliSeconds);
         return formatter.format(calendar.getTime());
