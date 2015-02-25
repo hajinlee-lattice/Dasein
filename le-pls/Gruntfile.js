@@ -107,16 +107,32 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/AppCommon/test/unit/**/*.js',
                     '<%= pls.app %>/app/**/*.js'
                 ],
-                frameworks: ['jasmine']
+                frameworks: ['jasmine']               
                 
         },
         unit: {
             singleRun: true,
             browsers: ['PhantomJS'],
-            reporters: ['dots', 'junit'],
+            reporters: ['dots', 'junit', 'coverage'],
             junitReporter: {
-              outputFile: 'target/karma-test-results.xml'
-            }
+                outputFile: 'target/karma-test-results.xml'
+            },
+
+            preprocessors: {
+                'src/main/webapp/**/!(angular|vendor|test)/!(*Spec).js': 'coverage'
+            },
+            coverageReporter: {                
+                dir : 'target/jscoverage',
+                reporters: [
+                    // reporters not supporting the `file` property
+                    { type: 'html', subdir: 'report-html' },
+                    { type: 'lcov', subdir: 'report-lcov' },
+                    // reporters supporting the `file` property, use `subdir` to directly
+                    // output them in the `dir` directory
+                    { type: 'cobertura', subdir: '.', file: 'cobertura.xml' }
+                ]                
+            }             
+
         },
         devunit: {
             options: {
