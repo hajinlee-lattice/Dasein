@@ -14,7 +14,6 @@ angular.module('mainApp.core.utilities.GriotNavUtility', [])
     this.USER_MANAGEMENT_NAV_EVENT = "UserManagementNavEvent";
     this.MODEL_LIST_NAV_EVENT = "ModelListNavEvent";
     this.MODEL_DETAIL_NAV_EVENT = "ModelDetailNavEvent";
-    this.RESET_PASSWORD_FINISED_NAV_EVENT = "RestPassowrdFinishedNavEvent";
     
     // General Event Constants
     this.SYSTEM_CONFIGURED_COMPLETE_EVENT = "SystemConfiguredCompleteEvent";
