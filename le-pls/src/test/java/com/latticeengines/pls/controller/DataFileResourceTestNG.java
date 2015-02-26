@@ -3,7 +3,9 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,6 +15,7 @@ import java.util.Map;
 import junit.framework.Assert;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -78,7 +81,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant2, "admin");
 
         setupDb(tenant1, tenant2);
-        
+
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
 
         String dir = modelingServiceHdfsBaseDir
@@ -88,7 +91,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
+        HdfsUtils
+                .copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_readoutsample.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_scored.txt");
@@ -120,6 +124,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
                         Assert.assertTrue(headers.containsKey("Content-Disposition"));
                         Assert.assertTrue(headers.containsKey("Content-Type"));
                         Assert.assertEquals(headers.getFirst("Content-Type"), mimeType);
+                        Assert.assertTrue(IOUtils.readLines(response.getBody()).size() > 0);
+                        response.close();
                         return Collections.emptyMap();
                     }
                 });
@@ -127,13 +133,9 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
     @DataProvider(name = "dataFileProvier")
     public static Object[][] getValidateNameData() {
-        return new Object[][] {
-                { "modeljson", "application/json"},
-                { "predictorcsv", "application/csv" },
-                { "readoutcsv", "application/csv"},
-                { "scorecsv", "text/plain"},
-                { "explorercsv", "application/csv"}
-                
+        return new Object[][] { { "modeljson", "application/json" }, { "predictorcsv", "application/csv" },
+                { "readoutcsv", "application/csv" }, { "scorecsv", "text/plain" }, { "explorercsv", "application/csv" }
+
         };
     }
 }
