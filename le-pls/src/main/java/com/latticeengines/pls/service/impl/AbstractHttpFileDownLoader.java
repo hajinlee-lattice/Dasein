@@ -28,7 +28,6 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
 
     @Override
     public void downloadFile(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
         response.setContentType(mimeType);
         response.setHeader("Content-Disposition", "attachment; filename=\"" + getFileName() + "\"");
         FileCopyUtils.copy(getFileInputStream(), response.getOutputStream());
