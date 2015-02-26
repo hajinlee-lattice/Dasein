@@ -36,7 +36,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     ModelService.GetModelById(modelId).then(function(result) {
         if (result != null && result.success === true) {
             var model = result.resultObj;
-            model.ChartData = TopPredictorService.FormatDataForChart(model);
+            model.ChartData = TopPredictorService.FormatDataForTopPredictorChart(model);
             model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
             model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
             model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);

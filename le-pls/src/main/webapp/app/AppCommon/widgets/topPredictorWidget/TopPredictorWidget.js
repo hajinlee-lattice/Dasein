@@ -1,10 +1,12 @@
 angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.appCommon.services.TopPredictorService'
+    'mainApp.appCommon.services.TopPredictorService',
+    'mainApp.appCommon.widgets.TopPredictorAttributeWidget'
 ])
 
-.controller('TopPredictorWidgetController', function ($scope, $element, ResourceUtility, WidgetFrameworkService, TopPredictorService) {
+.controller('TopPredictorWidgetController', function ($scope, $element, $compile, $rootScope, 
+    ResourceUtility, WidgetFrameworkService, TopPredictorService) {
     
     var widgetConfig = $scope.widgetConfig;
     var metadata = $scope.metadata;
@@ -46,9 +48,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     $scope.topPredictorTitle = totalAttributes + " " + ResourceUtility.getString("TOP_PREDICTORS_TITLE");
     
     // Methods used for the Sunburst chart
-    
     // Stash the old values for transition.
-    function stash(d) {
+    function stash (d) {
         d.x0 = d.x;
         d.dx0 = d.dx;
     }
@@ -69,7 +70,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         .value(function(d) { return d.size; });
     
     //Draw Sunburst chart
-    $scope.drawSummaryChart = function () {  
+    $scope.drawSummaryChart = function () {
         $(".js-top-predictor-donut").empty();
         var svg = d3.select(".js-top-predictor-donut").append("svg")
             .attr("width", width)
@@ -123,7 +124,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
               .on("mouseout", attributeMouseout)
               .each(stash);
         
-        function attributeClicked(d) {
+        function attributeClicked (d) {
             var category = null;
             for (var i = 0; i < chartData.children.length; i++) {
                 if (chartData.children[i].categoryName == d.categoryName) {
@@ -144,7 +145,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                           return node.depth == 2 && node.name == d.name;
                 })
                 .style("opacity", 1);
-              //TODO:pierce Here is where the hover chart will go
+          showAttributeHover(d.name);
         }
           
         function attributeMouseout (d) {
@@ -153,10 +154,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                     return node.depth == 2;
                 })
                 .style("opacity", 0.6);
+            hideAttributeHover();
         }
         
         // Interpolate the arcs in data space.
-        function arcTween(a) {
+        function arcTween (a) {
             var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
             return function(t) {
                 var b = i(t);
@@ -166,6 +168,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             };
         }
         path.data(partition.nodes).transition().duration(1000).attrTween("d", arcTween);
+        
         
     };
     $scope.drawSummaryChart();
@@ -239,7 +242,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
           .each(stash);
         
         // Interpolate the arcs in data space.
-        function arcTween(a) {
+        function arcTween (a) {
             var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
             return function(t) {
                 var b = i(t);
@@ -250,6 +253,17 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         }
         path.data(partition.nodes).transition().duration(1000).attrTween("d", arcTween);
     };
+    
+    function showAttributeHover (attributeName) {
+        var avData = TopPredictorService.FormatDataForAttributeValueChart(attributeName, data);
+        var scope = $rootScope.$new();
+        scope.data = avData;
+        //$compile($("#topPredictorAttributeHover").html('<div data-top-predictor-attribute-widget></div>'))(scope);
+    }
+    
+    function hideAttributeHover () {
+        $("#topPredictorAttributeHover").empty();
+    }
   
 })
 

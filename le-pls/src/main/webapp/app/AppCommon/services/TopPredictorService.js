@@ -74,18 +74,6 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         return 0;
     };
     
-    this.AssignColorsToCategories = function (categoryList) {
-        if (categoryList == null || categoryList.length === 0) {
-            return;
-        }
-        var possibleNumberofCategories = categoryList.length <=8 ? categoryList.length : 8;
-        var colorChoices = ["#27D2AE", "#3279DF", "#FF9403", "#BD8DF6", "#96E01E", "#A8A8A8", "#3279DF", "#FF7A44"];
-        categoryList = categoryList.sort(this.SortByCategoryName);
-        for (var i = 0; i < possibleNumberofCategories; i++) {
-            categoryList[i].color = colorChoices[i];
-        }
-    };
-    
     this.SortBySize = function (a, b) {
         if (a.size > b.size) {
             return -1;
@@ -106,6 +94,29 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         }
         // a must be equal to b
         return 0;
+    };
+    
+    this.SortByLift = function (a, b) {
+        if (a.Lift > b.Lift) {
+            return -1;
+        }
+        if (a.Lift < b.Lift) {
+            return 1;
+        }
+        // a must be equal to b
+        return 0;
+    };
+    
+    this.AssignColorsToCategories = function (categoryList) {
+        if (categoryList == null || categoryList.length === 0) {
+            return;
+        }
+        var possibleNumberofCategories = categoryList.length <=8 ? categoryList.length : 8;
+        var colorChoices = ["#27D2AE", "#3279DF", "#FF9403", "#BD8DF6", "#96E01E", "#A8A8A8", "#3279DF", "#FF7A44"];
+        categoryList = categoryList.sort(this.SortByCategoryName);
+        for (var i = 0; i < possibleNumberofCategories; i++) {
+            categoryList[i].color = colorChoices[i];
+        }
     };
     
     this.GetAttributesByCategory = function (predictorList, categoryName, categoryColor, maxNumber) {
@@ -205,7 +216,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         }
         
         return predictorElement.LowerInclusive == null && predictorElement.UpperExclusive == null && 
-            predictorElement.Values != null && predictorElement.Values.length > 0;
+            predictorElement.Values != null && predictorElement.Values.length > 0 &&
+            predictorElement.Values[0] != null;
     };
     
     this.GetTopPredictorExport = function (modelSummary) {
@@ -248,6 +260,9 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                         var lift = element.Lift.toPrecision(2);
                         var description = predictor.Description ? predictor.Description : "";
                         var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
+                        if (attributeValue.toUpperCase() == "NULL") {
+                            attributeValue = "N/A";
+                        }
                         var attributeRow = [predictor.Category, predictor.DisplayName, attributeValue, description, percentTotal, lift, element.UncertaintyCoefficient];
                         toReturn.push(attributeRow);
                     }
@@ -258,7 +273,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         return toReturn;
     };
     
-    this.FormatDataForChart = function (modelSummary) {
+    this.FormatDataForTopPredictorChart = function (modelSummary) {
         if (modelSummary == null || modelSummary.Predictors == null || modelSummary.Predictors.length === 0) {
             return null;
         }
@@ -308,6 +323,52 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             attributesPerCategory: attributesPerCategory,
             children: topCategories
         };
+        
+        return toReturn;
+    };
+    
+    this.GetAttributeByName = function (attributeName, predictorList) {
+        if (attributeName == null || predictorList == null) {
+            return null;
+        }
+        
+        for (var i = 0; i < predictorList.length; i++) {
+            if (attributeName == predictorList[i].Name) {
+                return predictorList[i];
+            }
+        }
+        
+        return null;
+    };
+    
+    this.FormatDataForAttributeValueChart = function (attributeName, modelSummary) {
+        if (attributeName == null || modelSummary == null) {
+            return null;
+        }
+        
+        var predictor = this.GetAttributeByName(attributeName, modelSummary.Predictors);
+        if (predictor == null) {
+            return null;
+        }
+        
+        var isCategorical =  this.IsPredictorElementCategorical(predictor.Elements[0]);
+        
+        var toReturn = [];
+        for (var i = 0; i < predictor.Elements.length; i++) {
+            var element = predictor.Elements[i];
+            var percentTotal = Math.round((element.Count / modelSummary.ModelDetails.TotalLeads) * 100);
+            var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
+            if (attributeValue.toUpperCase() == "NULL") {
+                attributeValue = "N/A";
+            }
+            console.log(attributeValue);
+            var dataToDisplay = {
+                name: attributeValue,
+                lift: element.Lift.toPrecision(2),
+                percentTotal: percentTotal
+            };
+            toReturn.push(dataToDisplay);
+        }
         
         return toReturn;
     };

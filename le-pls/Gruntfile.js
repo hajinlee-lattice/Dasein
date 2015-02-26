@@ -217,6 +217,7 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/AppCommon/widgets/thresholdExplorerWidget/ThresholdExplorerWidget.js',
                     '<%= pls.app %>/app/AppCommon/widgets/simpleTabWidget/SimpleTabWidget.js',
                     '<%= pls.app %>/app/AppCommon/widgets/topPredictorWidget/TopPredictorWidget.js',
+                    '<%= pls.app %>/app/AppCommon/widgets/topPredictorWidget/TopPredictorAttributeWidget.js',
                     '<%= pls.app %>/app/AppCommon/widgets/simpleGridWidget/SimpleGridWidget.js',
                     '<%= pls.app %>/app/app.js',
                     '<%= pls.app %>/app/core/utilities/BrowserStorageUtility.js',

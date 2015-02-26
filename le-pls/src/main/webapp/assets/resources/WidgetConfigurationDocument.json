@@ -10,7 +10,7 @@
 							"ID" : "modelDetailsWidget",
 							"Type" : "ModelDetailsWidget",
 							"ScoreProperty" : "RocScore",
-							"NameProperty" : "Name",
+							"NameProperty" : "DisplayName",
 							"StatusProperty" : "Status",
 							"ExternalAttributesProperty" : "ExternalAttributes",
 							"InternalAttributesProperty" : "InternalAttributes",

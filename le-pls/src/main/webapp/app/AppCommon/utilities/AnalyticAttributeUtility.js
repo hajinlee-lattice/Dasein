@@ -160,8 +160,8 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
     //  1) If the bucket spans one integer (e.g. lower is 0 and upper is 1), return lower
     //  2) Otherwise, decrement upper exclusive so that it is "inclusive"
     this.FormatIntegerBucket = function(lower, upper, attributeMetadata) {
-        if(upper - lower <= 1) {
-            return lower;
+        if(upper - lower <= 2) {
+            return ResourceUtility.getString("ANALYTIC_ATTRIBUTE_GREATER_THAN_LABEL", [this.FormatBucketValue(lower, attributeMetadata)]);
         }
 
         var lowerValue = this.FormatBucketValue(lower, attributeMetadata);
