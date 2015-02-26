@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,6 +65,9 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     private GlobalUserManagementServiceImpl globalUserManagementService;
 
     @Autowired
+    private GlobalTenantManagementService globalTenantManagementService;
+
+    @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @BeforeClass(groups = { "functional", "deployment" })
@@ -87,11 +92,12 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "admin");
 
         createUser("ysong", "ysong@lattice-engines.com", "Yintao", "Song");
-        revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "ysong");
-        revokeRight(GrantedRight.VIEW_PLS_MODELS, tenant1, "ysong");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "ysong");
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant1, "ysong");
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "ysong");
+        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "ysong");
+        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "ysong");
+        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "ysong");
 
         setupDb(tenant1, tenant2);
     }

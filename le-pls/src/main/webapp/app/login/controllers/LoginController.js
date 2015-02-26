@@ -77,7 +77,6 @@ angular.module('mainApp.login.controllers.LoginController', [
             $scope.getSessionDocument(tenantList[0]);
         } else {
             var tenantSelectionCallback = function (selectedTenant) {
-                
                 $scope.getSessionDocument(selectedTenant);
             };
             TenantSelectionModal.show(tenantList, tenantSelectionCallback);

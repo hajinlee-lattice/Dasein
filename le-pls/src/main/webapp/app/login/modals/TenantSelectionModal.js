@@ -9,7 +9,6 @@ angular.module('mainApp.login.modals.TenantSelectionModal', [
             var scope = $rootScope.$new();
             scope.tenantList = tenantList;
             scope.successCallback = successCallback;
-            
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
             
@@ -30,9 +29,9 @@ angular.module('mainApp.login.modals.TenantSelectionModal', [
     $scope.ResourceUtility = ResourceUtility;
     $scope.handleTenantSelected = function () {
         if (this.select_value != null) {
-            for (var i = 0; i<$scope.tenantList.length;i++) {
+            for (var i = 0; i<$scope.tenantList.length; i++) {
                 var tenant = $scope.tenantList[i];
-                if (tenant.DisplayName == this.select_value) {
+                if (tenant.Identifier == this.select_value) {
                     $scope.successCallback(tenant);
                     $("#modalContainer").modal('hide');
                 }
