@@ -97,6 +97,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_explorer.csv");
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional" }, dataProvider = "dataFileProvier")
     public void dataFileResource(String fileType, final String mimeType) {
         UserDocument doc = loginAndAttach("admin");
@@ -131,9 +132,12 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
     @DataProvider(name = "dataFileProvier")
     public static Object[][] getValidateNameData() {
-        return new Object[][] { { "modeljson", "application/json" }, { "predictorcsv", "application/csv" },
-                { "readoutcsv", "application/csv" }, { "scorecsv", "text/plain" }, { "explorercsv", "application/csv" }
-
+        return new Object[][] { //
+                { "modeljson", "application/json" }, //
+                { "predictorcsv", "application/csv" }, //
+                { "readoutcsv", "application/csv" }, //
+                { "scorecsv", "text/plain" }, //
+                { "explorercsv", "application/csv" }
         };
     }
 }
