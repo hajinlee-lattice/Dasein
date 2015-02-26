@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.service.DataFileProviderService;
+import com.latticeengines.pls.service.impl.HdfsFileHttpDownloader.DownloadRequestBuilder;
 
 @Component("dataFileProviderService")
 public class DataFileProviderServiceImpl implements DataFileProviderService {
@@ -33,10 +34,12 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
 
     private HdfsFileHttpDownloader getDownloader(String modelId, String mimeType, String filter) {
         
-        HdfsFileHttpDownloader downloader = new HdfsFileHttpDownloader(mimeType, filter);
-        downloader.setModelId(modelId).setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir)
-                .setModelSummaryEntityMgr(modelSummaryEntityMgr).setYarnConfiguration(yarnConfiguration);
-        return downloader;
+        DownloadRequestBuilder requestBuilder = new DownloadRequestBuilder();
+        requestBuilder.setMimeType(mimeType).setFilter(filter).setModelId(modelId)
+                .setYarnConfiguration(yarnConfiguration);
+        requestBuilder.setModelSummaryEntityMgr(modelSummaryEntityMgr).setModelingServiceHdfsBaseDir(
+                modelingServiceHdfsBaseDir);
+        return new HdfsFileHttpDownloader(requestBuilder);
     }
 
 }

@@ -66,21 +66,17 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private Configuration yarnConfiguration;
 
-    @BeforeClass(groups = { "functional" })
+    @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         assertEquals(ticket.getTenants().size(), 2);
         assertNotNull(ticket);
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "admin");
         grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant1, "admin");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "admin");
         grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant2, "admin");
 
         setupDb(tenant1, tenant2);
-
-        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
 
         String dir = modelingServiceHdfsBaseDir
                 + "/BD2_ADEDTBDd69264296nJ26263627n12/models/Q_PLS_Modeling_BD2_ADEDTBDd69264296nJ26263627n12/8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a/1423547416066_0001/";
@@ -98,7 +94,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = { "functional" }, dataProvider = "dataFileProvier")
+    @Test(groups = { "functional", "deployment" }, dataProvider = "dataFileProvier")
     public void dataFileResource(String fileType, final String mimeType) {
         UserDocument doc = loginAndAttach("admin");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
@@ -131,13 +127,13 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @DataProvider(name = "dataFileProvier")
-    public static Object[][] getValidateNameData() {
-        return new Object[][] { //
-                { "modeljson", "application/json" }, //
+    public static Object[][] getDataFileProvier() {
+        return new Object[][] { { "modeljson", "application/json" }, //
                 { "predictorcsv", "application/csv" }, //
                 { "readoutcsv", "application/csv" }, //
                 { "scorecsv", "text/plain" }, //
                 { "explorercsv", "application/csv" }
+
         };
     }
 }
