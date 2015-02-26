@@ -20,7 +20,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @Api(value = "datafiles", description = "REST resource for retrieving data files")
 @RestController
 @RequestMapping(value = "/datafiles")
-@PreAuthorize("View_PLS_Configuration")
+@PreAuthorize("hasRole('View_PLS_Configuration')")
 public class DataFileResource {
 
     @Autowired

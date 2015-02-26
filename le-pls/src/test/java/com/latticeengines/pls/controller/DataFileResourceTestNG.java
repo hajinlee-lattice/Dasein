@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequest;
@@ -27,6 +28,7 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -80,20 +82,21 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
 
         String dir = modelingServiceHdfsBaseDir
-                + "/TENANT1/models/Q_PLS_Modeling_TENANT1/8195dcf1-0898-4ad3-b94d-0d0f806e979e/1423547416066_0001/";
+                + "/BD2_ADEDTBDd69264296nJ26263627n12/models/Q_PLS_Modeling_BD2_ADEDTBDd69264296nJ26263627n12/8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a/1423547416066_0001/";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
 
         HdfsUtils.mkdir(yarnConfiguration, dir);
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/modelsummary.json");
+        HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_readoutsample.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_scored.txt");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_explorer.csv");
     }
 
-//    @Test(groups = { "functional" }, dataProvider = "dataFileProvier")
-    public void dataFileResource(String fileType) {
+    @Test(groups = { "functional" }, dataProvider = "dataFileProvier")
+    public void dataFileResource(String fileType, final String mimeType) {
         UserDocument doc = loginAndAttach("admin");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
@@ -113,6 +116,10 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
                     @Override
                     public Map<String, String> extractData(ClientHttpResponse response) throws IOException {
                         Assert.assertEquals(response.getStatusCode(), HttpStatus.OK);
+                        HttpHeaders headers = response.getHeaders();
+                        Assert.assertTrue(headers.containsKey("Content-Disposition"));
+                        Assert.assertTrue(headers.containsKey("Content-Type"));
+                        Assert.assertEquals(headers.getFirst("Content-Type"), mimeType);
                         return Collections.emptyMap();
                     }
                 });
@@ -121,11 +128,11 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     @DataProvider(name = "dataFileProvier")
     public static Object[][] getValidateNameData() {
         return new Object[][] {
-                { "modeljson" },
-                { "predictorcsv" },
-                { "readoutcsv" },
-                { "scorecsv" },
-                { "explorercsv" }
+                { "modeljson", "application/json"},
+                { "predictorcsv", "application/csv" },
+                { "readoutcsv", "application/csv"},
+                { "scorecsv", "text/plain"},
+                { "explorercsv", "application/csv"}
                 
         };
     }
