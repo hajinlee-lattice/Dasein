@@ -341,7 +341,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         return null;
     };
     
-    this.FormatDataForAttributeValueChart = function (attributeName, modelSummary) {
+    this.FormatDataForAttributeValueChart = function (attributeName, attributeColor, modelSummary) {
         if (attributeName == null || modelSummary == null) {
             return null;
         }
@@ -351,9 +351,14 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             return null;
         }
         
-        var isCategorical =  this.IsPredictorElementCategorical(predictor.Elements[0]);
+        var toReturn = {
+            name: predictor.Name,
+            color: attributeColor,
+            description: predictor.Description,
+            elementList: []
+        };
         
-        var toReturn = [];
+        
         for (var i = 0; i < predictor.Elements.length; i++) {
             var element = predictor.Elements[i];
             var percentTotal = Math.round((element.Count / modelSummary.ModelDetails.TotalLeads) * 100);
@@ -361,13 +366,12 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             if (attributeValue.toUpperCase() == "NULL") {
                 attributeValue = "N/A";
             }
-            console.log(attributeValue);
             var dataToDisplay = {
                 name: attributeValue,
                 lift: element.Lift.toPrecision(2),
                 percentTotal: percentTotal
             };
-            toReturn.push(dataToDisplay);
+            toReturn.elementList.push(dataToDisplay);
         }
         
         return toReturn;

@@ -145,7 +145,9 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                           return node.depth == 2 && node.name == d.name;
                 })
                 .style("opacity", 1);
-          showAttributeHover(d.name);
+          if (d.depth == 2) {
+              showAttributeHover(d.name, d.color);
+          }
         }
           
         function attributeMouseout (d) {
@@ -254,15 +256,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         path.data(partition.nodes).transition().duration(1000).attrTween("d", arcTween);
     };
     
-    function showAttributeHover (attributeName) {
-        var avData = TopPredictorService.FormatDataForAttributeValueChart(attributeName, data);
+    function showAttributeHover (attributeName, attributeColor) {
         var scope = $rootScope.$new();
-        scope.data = avData;
-        //$compile($("#topPredictorAttributeHover").html('<div data-top-predictor-attribute-widget></div>'))(scope);
+        scope.data = TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data);
+        $compile($("#topPredictorAttributeHover").html('<div data-top-predictor-attribute-widget></div>'))(scope);
     }
     
     function hideAttributeHover () {
-        $("#topPredictorAttributeHover").empty();
+        //$("#topPredictorAttributeHover").empty();
     }
   
 })

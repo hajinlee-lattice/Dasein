@@ -2,18 +2,54 @@
     .top-predictor-hover
     {
         position: absolute;
-        top: 500px;
+        top: 400px;
         left: 1200px;
-        width:  500px;
-        height: 500px;
+        width:  600px;
+        height: 600px;
         background: #FFFFFF;
         border: 1px solid #000;
         z-index: 5000;
     }
+    
+    .attribute-color
+    {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .display-inline
+    {
+        display: inline-block;
+    }
+    
+    .attribute-chart
+    {
+        margin: 10px;
+    }
+    
+    .chart {
+      background: #ffffff;
+      margin: 5px;
+    }
+    
+    .chart rect {
+      stroke: white;
+    }
+    
+    .chart text {
+      fill: white;
+    }
+    
+    .chart text.name {
+      fill: #000;
+    }
 </style>
 <div data-ng-controller="TopPredictorAttributeWidgetController" class="top-predictor-hover">
-    <h2>Attribute Name</h2>
-    <div class="js-attribute-chart">
+    <span>
+        <div class="attribute-color display-inline" style="background:{{attributeColor}}"></div><h4 class="display-inline">{{attributeName}}</h4>
+    </span>
+    <p>{{attributeDescription}}</p>
+    <div id="attributeChart" class="attribute-chart">
         
     </div>
 </div>
