@@ -84,6 +84,9 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
             grantRight(GrantedRight.EDIT_PLS_MODELS, "NEW_TENANT", "admin");
             grantRight(GrantedRight.VIEW_PLS_MODELS, "NEW_TENANT", "admin");
             grantRight(GrantedRight.EDIT_PLS_USERS, "NEW_TENANT", "admin");
+
+            globalAuthenticationService.discard(ticket);
+            ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         }
 
         assertEquals(ticket.getTenants().size(), 2);
