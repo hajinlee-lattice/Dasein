@@ -4,7 +4,7 @@ angular.module('mainApp.core.utilities.RightsUtility', [])
     this.canViewUsers = function(rightsDict) {
         if (rightsDict.hasOwnProperty("PLS_Users")) {
             var userRights = rightsDict.PLS_Users;
-            return (userRights.MayView || userRights.MayEdit);
+            return (userRights.MayView);
         }
         return false;
     };

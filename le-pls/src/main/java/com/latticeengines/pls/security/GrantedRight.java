@@ -33,9 +33,11 @@ public enum GrantedRight implements GrantedAuthority {
     }, //
     EDIT_PLS_MODELS {
         @Override
-        public String getAuthority() {
-            return "Edit_PLS_Models";
-        }
+        public String getAuthority() { return "Edit_PLS_Models"; }
+    }, //
+    VIEW_PLS_USERS {
+        @Override
+        public String getAuthority() { return "VIEW_PLS_Users"; }
     }, //
     EDIT_PLS_USERS {
         @Override

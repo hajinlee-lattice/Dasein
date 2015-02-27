@@ -4,9 +4,9 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
 ])
 .service('UserManagementService', function ($http, $q, BrowserStorageUtility, ResourceUtility, ServiceErrorUtility) {
     
-    this.GetUsers = function () {
+    this.GetUsers = function (tenantId) {
         var deferred = $q.defer();
-        
+
         $http({
             method: 'GET', 
             url: './LoginService.svc/GetUsers'

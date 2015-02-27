@@ -11,6 +11,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     var metadata = $scope.metadata;
     var data = $scope.data;
 
+    $scope.showAddUserButton = metadata.CanAddUser;
+
 })
 .directive('userManagementWidget', function ($compile) {
     var directiveDefinitionObject = {

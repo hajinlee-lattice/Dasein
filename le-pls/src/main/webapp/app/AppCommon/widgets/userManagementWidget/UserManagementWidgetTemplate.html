@@ -16,5 +16,7 @@
         </tr>
         </tbody>
     </table>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-ng-click="addUserClicked($event)">{{ResourceUtility.getString('USER_MANAGEMENT_ADD_USER_BUTTON')}}</button>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-ng-if="showAddUserButton" data-ng-click="addUserClicked($event)">
+        {{ResourceUtility.getString('USER_MANAGEMENT_ADD_USER_BUTTON')}}
+    </button>
 </div>

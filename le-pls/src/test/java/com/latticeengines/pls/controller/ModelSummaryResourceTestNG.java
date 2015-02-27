@@ -101,6 +101,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "admin");
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant1, "admin");
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "admin");
+        grantRight(GrantedRight.VIEW_PLS_USERS, tenant1, "admin");
         grantRight(GrantedRight.EDIT_PLS_USERS, tenant1, "admin");
 
         grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant2, "admin");
@@ -108,6 +109,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "admin");
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "admin");
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "admin");
+        grantRight(GrantedRight.VIEW_PLS_USERS, tenant2, "admin");
         grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "admin");
 
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
@@ -125,6 +127,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "ysong");
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "ysong");
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "ysong");
+        grantRight(GrantedRight.VIEW_PLS_USERS, tenant2, "ysong");
 
         setupDb(tenant1, tenant2);
     }
