@@ -9,7 +9,8 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
     'mainApp.appCommon.widgets.SimpleGridWidget',
     'mainApp.appCommon.widgets.SimpleTabWidget',
     'mainApp.appCommon.widgets.TabWidget',
-    'mainApp.appCommon.widgets.TopPredictorWidget'
+    'mainApp.appCommon.widgets.TopPredictorWidget',
+    'mainApp.appCommon.widgets.ThresholdExplorerWidget'
 ])
 .service('WidgetFrameworkService', function ($compile, $rootScope, WidgetConfigUtility, MetadataUtility) {
 
