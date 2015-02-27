@@ -188,7 +188,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
     svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + (height + 3) + ")")
-        .style("font-size", "9pt")
+        .style("font-size", "9px")
         .style("font-weight", "700")
         .style("fill", "#999")
         .call(xAxis)
@@ -196,7 +196,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .attr("transform", "translate(" + (width / 2) + " , 110)")
         .style("text-anchor", "middle")
         .style("font-family", "Helvetica")
-        .style("font-size", "14pt")
+        .style("font-size", "14px")
         .style("font-weight", "700")
         .style("fill", "#333")
         .text("TOP % LEADS");
@@ -204,7 +204,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
     svg.append("g")
         .attr("class", "y axis")
         .attr("transform", "translate(-3, 0)")
-        .style("font-size", "9pt")
+        .style("font-size", "9px")
         .style("font-weight", "700")
         .style("fill", "#999")
         .call(yAxis)
@@ -212,7 +212,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .attr("transform", "translate(" + (-120) + ", " + (height / 2) + ") rotate(-90)")
         .style("text-anchor", "middle")
         .style("font-family", "Helvetica")
-        .style("font-size", "14pt")
+        .style("font-size", "14px")
         .style("font-weight", "700")
         .style("fill", "#333")
         .text("% TOTAL CONVERSIONS");
@@ -304,7 +304,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .attr("class", "rltext")
         .style("text-anchor", "start")
         .style("fill", "#666")
-        .style("font-size", "11pt")
+        .style("font-size", "11px")
         .style("font-weight", "700")
         .text("LIFT");
 
@@ -312,7 +312,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .attr("class", "rtext")
         .style("text-anchor", "start")
         .style("fill", "#666")
-        .style("font-size", "22pt")
+        .style("font-size", "22px")
         .style("font-weight", "700");
 
     infoElements.append("text")
@@ -320,7 +320,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("text-anchor", "end")
         .style("startOffset", "100%")
         .style("fill", "#666")
-        .style("font-size", "11pt")
+        .style("font-size", "11px")
         .style("font-weight", "700")
         .text("LIFT");
 
@@ -329,7 +329,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("text-anchor", "end")
         .style("startOffset", "100%")
         .style("fill", "#666")
-        .style("font-size", "22pt")
+        .style("font-size", "22px")
         .style("font-weight", "700");
 
     infoElements.append("text")
@@ -337,7 +337,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("text-anchor", "end")
         .style("startOffset", "100%")
         .style("fill", "#666")
-        .style("font-size", "11pt")
+        .style("font-size", "11px")
         .style("font-weight", "700")
         .text("% CONV");
 
@@ -346,7 +346,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("text-anchor", "end")
         .style("startOffset", "100%")
         .style("fill", "#477cba")
-        .style("font-size", "18pt")
+        .style("font-size", "18px")
         .style("font-weight", "700");
 
     infoElements.append("text")
@@ -354,7 +354,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("text-anchor", "end")
         .style("startOffset", "100%")
         .style("fill", "#666")
-        .style("font-size", "11pt")
+        .style("font-size", "11px")
         .style("font-weight", "700")
         .text("TOP");
 
@@ -363,14 +363,14 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("text-anchor", "end")
         .style("startOffset", "100%")
         .style("fill", "#477cba")
-        .style("font-size", "18pt")
+        .style("font-size", "18px")
         .style("font-weight", "700");
 
     infoElements.append("text")
         .attr("class", "ryltext")
         .style("text-anchor", "start")
         .style("fill", "#666")
-        .style("font-size", "11pt")
+        .style("font-size", "11px")
         .style("font-weight", "700")
         .text("SCORE");
 
@@ -378,7 +378,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .attr("class", "rytext")
         .style("text-anchor", "start")
         .style("fill", "#477cba")
-        .style("font-size", "18pt")
+        .style("font-size", "18px")
         .style("font-weight", "700");
 
     infoElements.append("polygon")
