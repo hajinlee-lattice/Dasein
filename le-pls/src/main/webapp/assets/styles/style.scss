@@ -9,23 +9,23 @@
 
 @font-face {
   font-family: 'ProximaNova-Regular';
-  src: url('ProximaNova-Regular.otf');
+  src: url('../fonts/ProximaNova-Regular.otf');
 }
 @font-face {
   font-family: 'ProximaNova-RegularItalic';
-  src: url('ProximaNova-RegularItalic.otf');
+  src: url('../fonts/ProximaNova-RegularItalic.otf');
 }
 @font-face {
   font-family: 'ProximaNova-Semibold';
-  src: url('ProximaNova-Semibold.otf');
+  src: url('../fonts/ProximaNova-Semibold.otf');
 }
 @font-face {
   font-family: 'ProximaNova-SemiboldItalic';
-  src: url('ProximaNova-SemiboldItalic.otf');
+  src: url('../fonts/ProximaNova-SemiboldItalic.otf');
 }
 @font-face {
   font-family: 'ProximaNova-Bold';
-  src: url('ProximaNova-Bold.otf');
+  src: url('../fonts/ProximaNova-Bold.otf');
 }
 
 
@@ -769,7 +769,6 @@ Model Details
                 position: relative;
             }
             .attribute-hover > div {
-                display: none;
                 position: absolute;
                 background: #f6f9fc;
                 border: 4px solid rgba(229, 229, 229, 1);
@@ -777,8 +776,8 @@ Model Details
                 width: 400px;
                 min-height: 300px;
                 text-align: left;
-                top: -142px;
-                left: -195px;
+                top: -350px;
+                left: 1100px;
             }
             .attribute-hover > div:after, .attribute-hover > div:before {
                 left: 100%;
@@ -806,7 +805,6 @@ Model Details
                 .attribute-hover > div h4 {
                     padding-left: 10px;
                     margin: 0;
-                    border-left: #87e7d7 solid 6px;
                     display: inline-block;
                     font-family: 'ProximaNova-Bold';
                 }

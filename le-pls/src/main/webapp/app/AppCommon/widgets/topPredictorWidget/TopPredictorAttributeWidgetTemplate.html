@@ -51,12 +51,16 @@
       fill: #000;
     }
 </style>
-<div data-ng-controller="TopPredictorAttributeWidgetController" class="top-predictor-hover">
-    <span>
-        <div class="attribute-color display-inline" style="background:{{attributeColor}}"></div><h4 class="display-inline">{{attributeName}}</h4>
-    </span>
-    <p>{{attributeDescription}}</p>
-    <div id="attributeChart" class="attribute-chart">
-        
+
+<div>
+    
+</div>
+<div data-ng-controller="TopPredictorAttributeWidgetController" class="attribute-hover">
+    <div>
+        <h4 style="border-left: {{attributeColor}} solid 6px;">{{attributeName}}</h4>
+        <p>{{attributeDescription}}</p>
+        <div id="attributeChart" class="attribute-chart">
+            
+        </div>
     </div>
 </div>

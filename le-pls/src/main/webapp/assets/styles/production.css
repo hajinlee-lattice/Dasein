@@ -7408,7 +7408,6 @@ Model Details
   position: relative; }
 
 .attribute-hover > div {
-  display: none;
   position: absolute;
   background: #f6f9fc;
   border: 4px solid #e5e5e5;
@@ -7416,8 +7415,8 @@ Model Details
   width: 400px;
   min-height: 300px;
   text-align: left;
-  top: -142px;
-  left: -195px; }
+  top: -350px;
+  left: 1100px; }
 
 .attribute-hover > div:after, .attribute-hover > div:before {
   left: 100%;
@@ -7444,7 +7443,6 @@ Model Details
 .attribute-hover > div h4 {
   padding-left: 10px;
   margin: 0;
-  border-left: #87e7d7 solid 6px;
   display: inline-block;
   font-family: 'ProximaNova-Bold'; }
 
@@ -15443,5 +15441,47 @@ input.error, input.error:focus {
 
 .tab-contents > .active {
   display: block; }
+
+.attribute-hover {
+  position: relative; }
+
+.attribute-hover > div {
+  position: absolute;
+  background: #f6f9fc;
+  border: 4px solid #e5e5e5;
+  padding: 1.5em;
+  width: 465px;
+  min-height: 380px;
+  text-align: left;
+  top: -350px;
+  left: 1100px; }
+
+.attribute-hover > div:after, .attribute-hover > div:before {
+  left: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none; }
+
+.attribute-hover > div:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-left-color: #f6f9fc;
+  border-width: 12px;
+  margin-top: -12px; }
+
+.attribute-hover > div:before {
+  border-color: rgba(255, 225, 255, 0);
+  border-left-color: #e5e5e5;
+  border-width: 18px;
+  margin-top: -18px; }
+
+.attribute-hover > div h4 {
+  padding-left: 10px;
+  margin: 0;
+  display: inline-block;
+  font-family: 'ProximaNova-Bold'; }
 
 /*# sourceMappingURL=production.css.map */
