@@ -75,7 +75,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("width", x)
         .attr("height", bar_height)
         .style("fill", data.color)
-        .attr('opacity', 0.7);
+        .attr('opacity', function(d) {
+            if (d > 1) {
+                return 0.7;
+            } else {
+                return 0.4;
+            }
+            
+        });
    
     chart.selectAll("text.lift")
         .data(liftValues)

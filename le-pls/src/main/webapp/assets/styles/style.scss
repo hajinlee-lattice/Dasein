@@ -7,6 +7,29 @@
 */
 @import url(bucket-ico-fonts.css);
 
+@font-face {
+  font-family: 'ProximaNova-Regular';
+  src: url('ProximaNova-Regular.otf');
+}
+@font-face {
+  font-family: 'ProximaNova-RegularItalic';
+  src: url('ProximaNova-RegularItalic.otf');
+}
+@font-face {
+  font-family: 'ProximaNova-Semibold';
+  src: url('ProximaNova-Semibold.otf');
+}
+@font-face {
+  font-family: 'ProximaNova-SemiboldItalic';
+  src: url('ProximaNova-SemiboldItalic.otf');
+}
+@font-face {
+  font-family: 'ProximaNova-Bold';
+  src: url('ProximaNova-Bold.otf');
+}
+
+
+
 html {
     text-rendering: optimizeLegibility !important;
     -webkit-font-smoothing: antialiased !important;
@@ -18,7 +41,7 @@ body {
     -moz-background-size: cover;
     -o-background-size: cover;
     background-size: cover;
-    font-family:'Open Sans',sans-serif;
+    font-family:'ProximaNova-Regular','Open Sans',sans-serif;
     padding:0px !important;
     margin:0px !important;
     font-size:13px;
@@ -27,7 +50,7 @@ body {
 }
 
 div, span, form, li, header, footer, p, h1, h2, h3, h4, h5, h6 {
-    font-family:'Open Sans',sans-serif !important;
+    font-family:'ProximaNova-Regular','Open Sans',sans-serif;
 }
 
 ul li {
@@ -154,7 +177,7 @@ dl {
     }
     dd {
         color: #333;
-        font-weight: bold;
+        font-family: 'ProximaNova-Semibold';
         font-size: 1.25em;
     }
 
@@ -167,9 +190,7 @@ Grid
     max-width: 1100px;
     margin: 0 auto;
 }
-.wrapper .centered {
-  text-align: center;
-}
+
 
 /*
 Header
@@ -404,6 +425,9 @@ Model List
     margin-bottom: 10em;
     background: url(../images/bg_no_models.png) no-repeat center center;
 }
+
+
+
 .model {
     background: #fff url(../images/bg_model_active.png) no-repeat center bottom;
     border: #fff solid 2px;
@@ -421,12 +445,20 @@ Model List
     .model.inactive {
         background: #f3f7fb url(../images/bg_model_inactive.png) no-repeat center bottom;       
     }
+        
+        .model-title {
+            position: absolute;
+            top: 0px;
+            z-index: 2;
+            width: 92%;
+        }
         .model-title, .status {
             padding: 1em;
         }
         .model-title h2 {
             margin: 0;
             padding-right: 40px;
+            background: url(../images/ico-pencil.png) no-repeat top right;
         }
             .model-title .editable-container {
                 position: absolute;
@@ -434,7 +466,7 @@ Model List
                 left: 0;
                 z-index: 2;
                 width: 100%;
-                height: 100%;
+                height: 280px;
                 background: rgba(48, 102, 165, 0.6);
             }
                 .model-title .editable-container > div {
@@ -442,8 +474,8 @@ Model List
                     padding: 10px 16px;
                 }
                 .model-title .editable-container .form-control {
-                    border: none;
-                    padding: 0;
+                    padding: 8px;
+                    height: 50px;
                     font-family: 'Open Sans',sans-serif !important;
                     font-size: 1.6em;
                     color: #333;
@@ -453,40 +485,23 @@ Model List
                 .editableform > div {
                     width: 100%;
                 }
-
-                .model-title .edit button {
-                  background: transparent;
-                  border: 0;
-                  color: #999;
-                  font-size: x-large;
-                }
-
-                .model-title .edit button:hover {
-                  color: #486d99;
-                }
-
                 .model-title .editable-buttons {
-                  margin-top: 0.5em;
-                  padding-bottom: 2.5em;
+                    margin-top: 2.5em;
                 }
-
                 .model-title .editable-cancel {
-                  float: left;
-                  width: 48%;
-                  margin-right: 2%;
-                  font-size: 1.25em;
-                  height: 2.5em;
+                    float: left;
+                    width: 47.5%;
+                    margin-right: 5%;
+                    font-size: 1.25em;
                 }
-
                 .model-title .editable-submit {
-                  float: right;
-                  width: 48%;
-                  font-size: 1.25em;
-                  height: 2.5em; }
+                    float: right;
+                    width: 47.5%;
+                    font-size: 1.25em;
+                }
 
             .model-title h2.editable-click:hover {
                 padding-right: 40px;
-                background: none;
                 cursor: pointer;
             }
             .model-title h2:after {
@@ -526,15 +541,20 @@ Model List
                 .status dl:nth-child(2) dd {
                     padding-top: 14px;
                 }
-            .status button {
-                float: right;
+
+
+            .delete-model {
+                position: absolute;
+                bottom: 33px;
+                right: 27px;
+                z-index: 2;
                 padding: 2px 6px;
                 background: transparent;
                 border: none;
                 color: #bfbfbf;
                 font-size: 2em;
             }
-                .status button:hover {
+                .delete-model:hover {
                     color: #ff0000;
                 }
 
@@ -545,7 +565,8 @@ Model List
 Model Details
 ================================================================== */
 .model-details .nav-tabs {
-    margin-left: 40%;
+    margin: 0 auto;
+    width: 408px;
 }
 .model-details .nav li.active a {
     background: #fff;
@@ -571,22 +592,20 @@ Model Details
     .model-details .nav-tabs > li > a {
         background: #a5bbd4;
         color: #fff;
+        border-radius: 0;
     }
         .model-details .nav-tabs > li > a:hover {
             background: #93adca;
+            color: #fff;
+            border: transparent solid 1px;
         }
         .model-details .nav-tabs > li.active > a:hover {
             background: #fff;
+            color: #333;
+            border-color: #a5bbd4;
         }
 
-    .model-details .nav-tabs > li:last-of-type.active > a {
-        border-top-left-radius: 0;
-        border-top-right-radius: 4px;
-    }
-    .model-details .nav-tabs > li:first-of-type.active > a {
-        border-top-right-radius: 0;
-        border-top-left-radius: 4px;
-    }
+
 
 .model-details .tab-content {
     padding: 2em 0;
@@ -603,6 +622,13 @@ Model Details
     font-weight: bold;
 }
 
+.tab-content h3 {
+    text-transform: none;
+}
+.nav-tabs li {
+    text-transform: uppercase;
+}
+
 .model-details .data-table {
     background: #fff;
     border: #c9d4e2 solid 1px;
@@ -612,9 +638,13 @@ Model Details
     border-radius: 4px; 
 }
     .model-details .data-table h2 {
-        padding: 0.25em 1em;
+        padding: 10px;
+        margin: 0;
+        font-size: 1.25em;
     }
-
+    #scoring-leads .data-table {
+        border: none;
+    }
 
 .model-details .page-title {
     position: relative;
@@ -641,6 +671,7 @@ Model Details
         }
         .model-details .page-title h1 {
             margin: 0;
+            font-family: 'ProximaNova-Bold';
         }
 
 .secondary .wrapper:after, .tertiary .wrapper:after {
@@ -650,6 +681,7 @@ Model Details
 }
 .toggleDetails {
     float: right;
+    text-transform: uppercase;
     padding: 1em 3em 1em 6em;
     background: url(../images/bg_more_button.jpg) no-repeat right center;
     color: #477cba;
@@ -660,24 +692,56 @@ Model Details
 .meta-group {
     float: left;
     width: 30%;
-    margin-right: 2em;
+    margin-right: 1em;
+    padding-right: 1.5em;
+    border-right: #ddd solid 1px;   
 }
+    .meta-group:nth-child(2), .meta-group:last-of-type {
+        padding-left: 6em;
+    }
+    .meta-group:last-of-type {
+        margin-right: 0;
+        padding-right: 0;
+        border-right: 0;
+    }
+    .secondary .meta-group:last-of-type {
+        padding-left: 0;
+    }
     .meta-group:after {
         display: table;
         content: "";
         clear: both;
     }
+    .meta-group h3 {
+        margin-top: 0;
+    }
     .meta-group dl {
         float: left;
-        margin-right: 2em;
+        margin-right: 1.25em;
+        padding-right: 1.25em;
+        border-right: #ddd solid 1px;
     }
         .meta-group dl:last-of-type {
             margin-right: 0;
+            padding-right: 0;
+            border-right: none;
         }
 .tertiary {
     display: none;
 }
+    .tertiary .wrapper {
+        border-top: #ddd solid 1px;
+        margin-top: 1em;
+        padding-top: 1em;
+    }
 
+.tab-header {
+    font-family: 'ProximaNova-Bold';
+}
+.tab-header a.secondary {
+    text-transform: uppercase;
+    font-size: 0.85em;
+}
 
 #attributes h3 {
     text-align: center;
@@ -695,6 +759,57 @@ Model Details
             width: 60%;
             text-align: center;
         }
+
+            #chart span {
+                color: #477cba;
+                cursor: pointer;                
+            }
+
+            .attribute-hover {
+                position: relative;
+            }
+            .attribute-hover > div {
+                display: none;
+                position: absolute;
+                background: #f6f9fc;
+                border: 4px solid rgba(229, 229, 229, 1);
+                padding: 1.5em;
+                width: 400px;
+                min-height: 300px;
+                text-align: left;
+                top: -142px;
+                left: -195px;
+            }
+            .attribute-hover > div:after, .attribute-hover > div:before {
+                left: 100%;
+                top: 50%;
+                border: solid transparent;
+                content: " ";
+                height: 0;
+                width: 0;
+                position: absolute;
+                pointer-events: none;
+            }
+
+            .attribute-hover > div:after {
+                border-color: rgba(255, 255, 255, 0);
+                border-left-color: #f6f9fc;
+                border-width: 12px;
+                margin-top: -12px;
+            }
+            .attribute-hover > div:before {
+                border-color: rgba(255, 225, 255, 0);
+                border-left-color: rgba(229, 229, 229, 1);
+                border-width: 18px;
+                margin-top: -18px;
+            }
+                .attribute-hover > div h4 {
+                    padding-left: 10px;
+                    margin: 0;
+                    border-left: #87e7d7 solid 6px;
+                    display: inline-block;
+                    font-family: 'ProximaNova-Bold';
+                }
 
 .data .attributes h4 {
     margin-bottom: 0.5em;
@@ -753,6 +868,68 @@ Model Details
             }
 
 
+
+
+/*
+Manage Users
+================================================================== */
+
+.user-list {
+    width: 600px;
+    margin: 8em auto;
+}
+    .user-list:after {
+        display: table;
+        content: "";
+        clear: both;
+    }
+.user-list h2, .user-list table {
+    float: left;
+}
+
+.user-list h2 {
+    font-family: 'ProximaNova-Regular';
+    font-size: 2em;
+    text-align: right;
+    width: 160px;
+    margin: 0 1em 0 0;
+}
+
+.user-list table {
+    width: 414px;
+}
+
+    .user-list td, .user-list th {
+        padding: 10px;
+    }
+
+.user-list button {
+    margin-left: 196px;
+    margin-top: 1em;
+}
+
+
+#add-user-modal ul {
+    padding: 0 6em;
+}
+#add-user-modal li {
+    margin-bottom: 1.5em;
+}
+#add-user-modal label, #add-user-modal input, #add-user-modal select {
+    display: block;
+    width: 100%;
+    text-align: left;
+}
+#add-user-modal label {
+    font-family: 'ProximaNova-Semibold';
+    text-transform: uppercase;
+}
+#add-user-modal input {
+    padding: 6px;
+}
+
+
+
 /*
 Data Tables
 ================================================================== */
@@ -769,6 +946,9 @@ Data Tables
         color: #999;
         font-weight: normal;
     }   
+    .data-table table tr {
+        background: #fff;
+    }
     .data-table table tr:nth-child(odd) {
         background: #f3f7fb;
     }
@@ -1586,7 +1766,6 @@ border-radius: 2px !important;
 }
 
 .editable-click:hover {
-    background:#FFEFBF;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
@@ -1625,8 +1804,6 @@ h3 {
     color:#444;
     text-transform: uppercase;
     font-weight:700;
-    letter-spacing: -.05em;
-    
 }
 
 .horizontal-menu {
