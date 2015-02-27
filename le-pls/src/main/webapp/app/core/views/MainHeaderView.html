@@ -10,6 +10,7 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-2">
                     <li><a href="#" data-ng-click="updatePasswordClicked($event)">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
+                    <li data-ng-if="showUserManagement"><a href="#" data-ng-click="userManagementClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_USERS')}}</a></li>
                     <li><a href="#" data-ng-click="logoutClicked($event)">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
                 </ul>
             </li>

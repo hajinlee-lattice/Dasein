@@ -1,20 +1,23 @@
 angular.module('mainApp.core.controllers.MainHeaderController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.core.utilities.RightsUtility',
     'mainApp.core.utilities.GriotNavUtility',
     'mainApp.login.services.LoginService'
 ])
 
-.controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, GriotNavUtility, LoginService) {
+.controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, RightsUtility, GriotNavUtility, LoginService) {
     $scope.ResourceUtility = ResourceUtility;
-    
+    $scope.showUserManagement = false;
+
     var clientSession = BrowserStorageUtility.getClientSession();
     if (clientSession == null) {
         return;
     }
-    
+
     $scope.userDisplayName = clientSession.DisplayName;
-    
+    $scope.showUserManagement = RightsUtility.canSeeUserManagement(clientSession.availableRights);
+
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {
             $event.preventDefault();

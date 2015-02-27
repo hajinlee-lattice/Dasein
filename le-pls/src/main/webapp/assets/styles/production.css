@@ -7501,55 +7501,64 @@ Model Details
 .other span {
   background: #fe864b; }
 
+
 /*
 Manage Users
 ================================================================== */
+
 .user-list {
   width: 600px;
-  margin: 8em auto; }
-
+  margin: 8em auto;
+}
 .user-list:after {
   display: table;
   content: "";
-  clear: both; }
-
+  clear: both;
+}
 .user-list h2, .user-list table {
-  float: left; }
+  float: left;
+}
 
 .user-list h2 {
   font-family: 'ProximaNova-Regular';
   font-size: 2em;
   text-align: right;
-  width: 160px;
-  margin: 0 1em 0 0; }
+  width: 100px;
+  margin: 0 1em 0 0;
+}
 
 .user-list table {
-  width: 414px; }
+  width: 414px;
+}
 
 .user-list td, .user-list th {
-  padding: 10px; }
+  padding: 10px;
+}
 
 .user-list button {
-  margin-left: 196px;
-  margin-top: 1em; }
+  margin-left: 136px;
+  margin-top: 1em;
+}
+
 
 #add-user-modal ul {
-  padding: 0 6em; }
-
+  padding: 0 6em;
+}
 #add-user-modal li {
-  margin-bottom: 1.5em; }
-
+  margin-bottom: 1.5em;
+}
 #add-user-modal label, #add-user-modal input, #add-user-modal select {
   display: block;
   width: 100%;
-  text-align: left; }
-
+  text-align: left;
+}
 #add-user-modal label {
   font-family: 'ProximaNova-Semibold';
-  text-transform: uppercase; }
-
+  text-transform: uppercase;
+}
 #add-user-modal input {
-  padding: 6px; }
+  padding: 6px;
+}
 
 /*
 Data Tables

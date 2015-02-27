@@ -1,4 +1,5 @@
-echo off
+@echo off
+
 set cmd=%1
 
 IF /i [%cd:~-6%] NEQ [le-pls] (

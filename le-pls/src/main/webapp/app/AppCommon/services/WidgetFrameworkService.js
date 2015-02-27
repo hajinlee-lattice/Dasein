@@ -90,6 +90,9 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
             case WidgetConfigUtility.TOP_PREDICTOR_WIDGET:
                 $compile(options.element.html('<div data-top-predictor-widget></div>'))(scope);
                 break;
+            case WidgetConfigUtility.USER_MANAGEMENT_WIDGET:
+                $compile(options.element.html('<div data-user-management-widget></div>'))(scope);
+                break;
             default:
                 return;
         }
