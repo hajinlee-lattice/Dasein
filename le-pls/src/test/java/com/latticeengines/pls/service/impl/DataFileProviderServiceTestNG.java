@@ -92,7 +92,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
 
     }
 
-    @Test(groups = { "functional" }, dataProvider = "dataFileProvier")
+    @Test(groups = { "functional" }, dataProvider = "dataFileProvider", enabled = false)
     public void downloadFile(final String mimeType, final String filter) {
 
         Tenant tenant;
@@ -127,7 +127,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @Test(groups = { "functional" }, dataProvider = "dataFileProvierNotFound")
+    @Test(groups = { "functional" }, dataProvider = "dataFileProviderNotFound", enabled = false)
     public void downloadFileNotFound(final String mimeType, final String filter) {
 
         Tenant tenant;
@@ -163,7 +163,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         Assert.fail("Should not come here.");
     }
 
-    @DataProvider(name = "dataFileProvier")
+    @DataProvider(name = "dataFileProvider")
     public static Object[][] getDataFileProvier() {
         return new Object[][] { { "application/json", "modelsummary.json" }, //
                 { "application/csv", ".*_model.csv" }, //
@@ -174,7 +174,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         };
     }
 
-    @DataProvider(name = "dataFileProvierNotFound")
+    @DataProvider(name = "dataFileProviderNotFound")
     public static Object[][] getDataFileProvierNotFound() {
         return new Object[][] { { "application/json", "modelsummaryNotFound.json" }, //
 

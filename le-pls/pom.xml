@@ -15,8 +15,8 @@
         <le.camille.version>1.0.24-SNAPSHOT</le.camille.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
-        <globalauth.base.url>https://bodcdevvint57.dev.lattice.local/GA_ADEDTBDd70064499nF26263627n1</globalauth.base.url>
-        <certificate.name>bodcdevvint57.dev.lattice.local.jks</certificate.name>
+        <globalauth.base.url>https://bodcdevvcus209.dev.lattice.local/test</globalauth.base.url>
+        <certificate.name>bodcdevvcus209.dev.lattice.local.jks</certificate.name>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
 
