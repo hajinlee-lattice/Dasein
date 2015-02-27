@@ -31,8 +31,8 @@ public class ModelSummaryParser {
             JsonObject modelDetailsJsonObject = modelDetails.getAsJsonObject();
             long constructionTime = modelDetailsJsonObject.get("ConstructionTime").getAsLong() * 1000;
             String lookupId = modelDetailsJsonObject.get("LookupID").getAsString();
-            summary.setName(String.format("%s-%s", modelDetailsJsonObject.get("Name").getAsString(), //
-                    getDate(constructionTime, "MM/dd/yyyy hh:mm:ss z")));
+            String name = modelDetailsJsonObject.get("Name").getAsString();
+            summary.setName(String.format("%s-%s", name, getDate(constructionTime, "MM/dd/yyyy hh:mm:ss z")));
             summary.setLookupId(lookupId);
             summary.setTrainingRowCount(modelDetailsJsonObject.get("TrainingLeads").getAsLong());
             summary.setTestRowCount(modelDetailsJsonObject.get("TestingLeads").getAsLong());
@@ -42,7 +42,7 @@ public class ModelSummaryParser {
             summary.setTotalConversionCount(modelDetailsJsonObject.get("TotalConversions").getAsLong());
             summary.setRocScore(modelDetailsJsonObject.get("RocScore").getAsDouble());
             summary.setConstructionTime(constructionTime);
-            summary.setId("ms-" + lookupId.split("\\|")[2]);
+            summary.setId(String.format("ms__%s-%s", lookupId.split("\\|")[2], name));
         }
 
         KeyValue kv = new KeyValue();
