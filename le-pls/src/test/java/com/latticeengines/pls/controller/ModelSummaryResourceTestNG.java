@@ -81,8 +81,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
             grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, "NEW_TENANT", "admin");
             grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, "NEW_TENANT", "admin");
             grantRight(GrantedRight.VIEW_PLS_REPORTING, "NEW_TENANT", "admin");
-            grantRight(GrantedRight.EDIT_PLS_MODELS, "NEW_TENANT", "admin");
             grantRight(GrantedRight.VIEW_PLS_MODELS, "NEW_TENANT", "admin");
+            grantRight(GrantedRight.EDIT_PLS_MODELS, "NEW_TENANT", "admin");
             grantRight(GrantedRight.EDIT_PLS_USERS, "NEW_TENANT", "admin");
 
             globalAuthenticationService.discard(ticket);
@@ -95,6 +95,21 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         createUser("bnguyen", "bnguyen@lattice-engines.com", "Bernie", "Nguyen");
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
+
+        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant1, "admin");
+        grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, tenant1, "admin");
+        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "admin");
+        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant1, "admin");
+        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "admin");
+        grantRight(GrantedRight.EDIT_PLS_USERS, tenant1, "admin");
+
+        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant2, "admin");
+        grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, tenant2, "admin");
+        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "admin");
+        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "admin");
+        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "admin");
+        grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "admin");
+
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "bnguyen");
         revokeRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
@@ -102,10 +117,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "bnguyen");
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "bnguyen");
-        grantRight(GrantedRight.EDIT_PLS_USERS, tenant1, "admin");
-        grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "admin");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "admin");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "admin");
 
         createUser("ysong", "ysong@lattice-engines.com", "Yintao", "Song");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "ysong");
