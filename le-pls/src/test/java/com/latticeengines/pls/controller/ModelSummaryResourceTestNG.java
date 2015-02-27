@@ -96,6 +96,9 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
 
+        revokeRight(GrantedRight.VIEW_PLS_USERS, tenant1, "admin");
+        revokeRight(GrantedRight.VIEW_PLS_USERS, tenant2, "admin");
+
         grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant1, "admin");
         grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, tenant1, "admin");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "admin");
