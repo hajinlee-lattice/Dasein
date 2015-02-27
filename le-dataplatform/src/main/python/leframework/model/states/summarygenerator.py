@@ -81,15 +81,15 @@ class SummaryGenerator(State, JsonGenBase):
         return segmentChart
 
     def __getDLEventTableData(self, provenanceProperties, rowCount):
+        element = OrderedDict()
+        element["SourceRowCount"] = rowCount
         if len(provenanceProperties) == 0:
             self.logger.error("Provenance property is null.")
-            return OrderedDict()
+            return element
 
-        element = OrderedDict()
         element["DataLoaderURL"] = provenanceProperties["DataLoader_Instance"] 
         element["TenantName"] = provenanceProperties["DataLoader_TenantName"]
         element["QueryName"] = provenanceProperties["DataLoader_Query"]
-        element["SourceRowCount"] = rowCount
         return element
 
     def __getConstructionInfo(self):
