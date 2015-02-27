@@ -45,6 +45,11 @@ public class InternalResource {
             throw new LoginException(new LedpException(LedpCode.LEDP_18001, new String[] {}));
         }
         ModelSummary summary = modelSummaryEntityMgr.getByModelId(modelId);
+        
+        if (summary == null) {
+            return false;
+        }
+    
         ((ModelSummaryEntityMgrImpl) modelSummaryEntityMgr).manufactureSecurityContextForInternalAccess(summary.getTenant());
         
         // Reuse the logic in the ModelSummaryResource to do the updates
