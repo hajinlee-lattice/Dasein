@@ -12,6 +12,33 @@ public class GetQueryMetaDataColumnsResponse {
     private List<Metadata> metadata = new ArrayList<>();
     private int status;
     
+    public static class KV {
+        private String key;
+        private String value;
+        
+        @JsonProperty("Key")
+        public String getKey() {
+            return key;
+        }
+        
+        @JsonProperty("Key")
+        public void setKey(String key) {
+            this.key = key;
+        }
+
+        @JsonProperty("Value")
+        public String getValue() {
+            return value;
+        }
+
+        @JsonProperty("Value")
+        public void setValue(String value) {
+            this.value = value;
+        }
+        
+        
+    }
+    
     public static class Metadata {
         private String approvedUsage;
         private String columnName;
@@ -20,11 +47,11 @@ public class GetQueryMetaDataColumnsResponse {
         private String description;
         private String displayDiscretizationStrategy;
         private String displayName;
-        private String extensions;
+        private List<KV> extensions;
         private String fundamentalType;
         private String lastTimeSourceUpdated;
         private String statisticalType;
-        private String tags;
+        private List<String> tags;
         
         @JsonProperty("ApprovedUsage")
         public String getApprovedUsage() {
@@ -97,12 +124,12 @@ public class GetQueryMetaDataColumnsResponse {
         }
 
         @JsonProperty("Extensions")
-        public String getExtensions() {
+        public List<KV> getExtensions() {
             return extensions;
         }
 
         @JsonProperty("Extensions")
-        public void setExtensions(String extensions) {
+        public void setExtensions(List<KV> extensions) {
             this.extensions = extensions;
         }
 
@@ -137,12 +164,12 @@ public class GetQueryMetaDataColumnsResponse {
         }
 
         @JsonProperty("Tags")
-        public String getTags() {
+        public List<String> getTags() {
             return tags;
         }
 
         @JsonProperty("Tags")
-        public void setTags(String tags) {
+        public void setTags(List<String> tags) {
             this.tags = tags;
         }
         
