@@ -22,11 +22,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     }
     
     var chart,
-        width = 350,
-        left_width = 140,
+        width = 200,
+        left_width = 130,
         bar_height = 24,
         height = bar_height * bucketNames.length,
-        gap = 5;
+        gap = 10;
     
     var x = d3.scale.linear()
         .domain([0, d3.max(liftValues)])
@@ -46,7 +46,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
       .attr('width', left_width + width + 40)
       .attr('height', (bar_height + gap * 2) * bucketNames.length + 30)
       .append("g")
-      .attr("transform", "translate(10, 20)");
+      .attr("transform", "translate(0, 20)");
       
     chart.selectAll("line")
         .data(x.ticks(d3.max(liftValues)))
@@ -87,7 +87,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     chart.selectAll("text.lift")
         .data(liftValues)
         .enter().append("text")
-        .attr("x", function(d) { return x(d) + left_width; })
+        .attr("x", function(d) { return 400; })
         .attr("y", function(d){ return y(d) + y.rangeBand()/2; } )
         .attr("dx", -5)
         .attr("dy", ".36em")
@@ -102,7 +102,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("x", 0)
         .attr("y", function(d) {return nameY(d) + nameY.rangeBand()/2; })
         .attr("dy", ".36em")
-        .attr('class', 'name')
+        .style("fill", "black")
         .text(String);
         
 })
