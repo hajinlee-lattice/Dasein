@@ -1,9 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +25,8 @@ import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticatio
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
 import com.latticeengines.pls.security.GrantedRight;
+
+import static org.testng.Assert.*;
 
 /**
  * This test has two users with particular privileges:
@@ -73,6 +71,21 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
+
+        if (ticket.getTenants().size() == 1) {
+            Tenant newTenant = new Tenant();
+            newTenant.setId("NEW_TENANT");
+            newTenant.setName("NEW_TENANT");
+
+            assertTrue(globalTenantManagementService.registerTenant(newTenant));
+            grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, "NEW_TENANT", "admin");
+            grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, "NEW_TENANT", "admin");
+            grantRight(GrantedRight.VIEW_PLS_REPORTING, "NEW_TENANT", "admin");
+            grantRight(GrantedRight.EDIT_PLS_MODELS, "NEW_TENANT", "admin");
+            grantRight(GrantedRight.VIEW_PLS_MODELS, "NEW_TENANT", "admin");
+            grantRight(GrantedRight.EDIT_PLS_USERS, "NEW_TENANT", "admin");
+        }
+
         assertEquals(ticket.getTenants().size(), 2);
         assertNotNull(ticket);
         createUser("rgonzalez", "rgonzalez@lattice-engines.com", "Ron", "Gonzalez");
