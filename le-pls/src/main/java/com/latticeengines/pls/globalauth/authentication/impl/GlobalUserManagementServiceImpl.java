@@ -103,6 +103,18 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             throw new LedpException(LedpCode.LEDP_18010, e, new String[] {oldCreds.getUsername()});
         }
     }
+    
+    @Override
+    public Boolean deleteUser(String username) {
+        IUserManagementService service = getService();
+        addMagicHeaderAndSystemProperty(service);
+        try {
+            log.info(String.format("Deleting user %s.", username));
+            return service.deleteUser(username);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18015, e, new String[] { username });
+        }
+    }
 
     static class SoapUserBuilder {
         private User user;

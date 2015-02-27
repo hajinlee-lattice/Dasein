@@ -15,4 +15,6 @@ public interface GlobalUserManagementService {
     Boolean forgotLatticeCredentials(String username, String tenantId);
 
     Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds);
+    
+    Boolean deleteUser(String username);
 }
