@@ -4,6 +4,9 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 
+import java.util.AbstractMap;
+import java.util.List;
+
 public interface GlobalUserManagementService {
 
     Boolean registerUser(User user, Credentials creds);
@@ -17,4 +20,6 @@ public interface GlobalUserManagementService {
     Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds);
     
     Boolean deleteUser(String username);
+
+    List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId);
 }

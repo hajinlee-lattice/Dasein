@@ -12,7 +12,6 @@ angular.module('mainApp.userManagement.controllers.UserManagementController', [
     $scope.ResourceUtility = ResourceUtility;
 
     var clientSession = BrowserStorageUtility.getClientSession();
-    console.log(clientSession);
     if (clientSession == null) { return; }
 
     var metadata = {CanAddUser: RightsUtility.canAddUser(clientSession.availableRights)};
@@ -37,12 +36,14 @@ angular.module('mainApp.userManagement.controllers.UserManagementController', [
     var contentContainer = $('#userManagementContainer');
     var tenantId = clientSession.Tenant.Identifier;
     UserManagementService.GetUsers(tenantId).then(function(result) {
-        WidgetFrameworkService.CreateWidget({
-            element:      contentContainer,
-            widgetConfig: screenWidgetConfig,
-            metadata:     metadata,
-            data:         null,
-            parentData:   null
-        });
+        if (result.Success) {
+            WidgetFrameworkService.CreateWidget({
+                element:      contentContainer,
+                widgetConfig: screenWidgetConfig,
+                metadata:     metadata,
+                data:         result.ResultObj,
+                parentData:   null
+            });
+        }
     });
 });

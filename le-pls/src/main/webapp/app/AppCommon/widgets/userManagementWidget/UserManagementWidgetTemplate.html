@@ -4,15 +4,15 @@
         <thead>
         <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_FIRST_NAME')}}</th>
         <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_LAST_NAME')}}</th>
-        <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_ROLE')}}</th>
+        <!--<th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_ROLE')}}</th>-->
         <th>{{ResourceUtility.getString('USER_MANAGEMENT_GRID_USERNAME')}}</th>
         </thead>
         <tbody>
-        <tr>
-            <td>Michael</td>
-            <td>Jordan</td>
-            <td>Shooting Guard</td>
-            <td>hisairness</td>
+        <tr data-ng-repeat="user in data">
+            <td>{{user.FirstName}}</td>
+            <td>{{user.LastName}}</td>
+            <!--<td>Shooting Guard</td>-->
+            <td>{{user.Username}}</td>
         </tr>
         </tbody>
     </table>

@@ -25,4 +25,19 @@ angular.module('mainApp.core.utilities.RightsUtility', [])
         return this.canEditUsers(rightsDict);
     };
 
+    this.isAdmin = function(rightsDict) {
+        if (
+            rightsDict.hasOwnProperty("PLS_Models") &&
+            rightsDict.hasOwnProperty("PLS_Users") &&
+            rightsDict.hasOwnProperty("PLS_Configuration")
+        ) {
+            return (
+                rightsDict.PLS_Users.MayEdit &&
+                rightsDict.PLS_Models.MayEdit &&
+                rightsDict.PLS_Configuration.MayEdit
+            );
+        }
+        return false;
+    };
+
 });

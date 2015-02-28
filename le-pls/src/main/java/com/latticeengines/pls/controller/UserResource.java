@@ -2,6 +2,9 @@ package com.latticeengines.pls.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.pls.security.RightsUtilities;
+import org.apache.avro.generic.GenericData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +28,9 @@ import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @Api(value = "user", description = "REST resource for user management")
 @RestController
@@ -100,5 +106,28 @@ public class UserResource {
         //TODO:[13Feb2015] update other User attributes
 
         return success;
+    }
+
+    @RequestMapping(value = "/all/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Register new users")
+    @PreAuthorize("hasRole('View_PLS_Users')")
+    public List<Map<String, Object>> getAllUsersOfTenant(@PathVariable String tenantId) {
+        try {
+            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId);
+            List<Map<String, Object>> results = new ArrayList<>();
+            for (AbstractMap.SimpleEntry<User, List<String>> userRights : userRightsList) {
+                Map<String, Object> resultEntry = new HashMap<>();
+                resultEntry.put("User", userRights.getKey());
+                resultEntry.put("AvailableRights", RightsUtilities.translateRights(userRights.getValue()));
+                results.add(resultEntry);
+            }
+            return results;
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
+        }
     }
 }

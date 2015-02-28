@@ -35,13 +35,13 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() {
         Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
-        grantRight(GrantedRight.EDIT_PLS_USERS, ticket.getTenants().get(0).getId(), "admin");
+        //grantRight(GrantedRight.EDIT_PLS_USERS, ticket.getTenants().get(0).getId(), "admin");
     }
 
     @AfterClass(groups = { "functional", "deployment" })
     public void tearDown() {
         Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
-        revokeRight(GrantedRight.EDIT_PLS_USERS, ticket.getTenants().get(0).getId(), "admin");
+        //revokeRight(GrantedRight.EDIT_PLS_USERS, ticket.getTenants().get(0).getId(), "admin");
     }
 
 

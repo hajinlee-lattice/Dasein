@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class User {
-    
+
+    private String username;
     private String email;
     private String firstName;
     private String lastName;
@@ -42,6 +43,16 @@ public class User {
         this.lastName = lastName;
     }
 
+    @JsonProperty("Username")
+    public String getUsername() {
+        return username;
+    }
+
+    @JsonProperty("Username")
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     @JsonProperty("PhoneNumber")
     public String getPhoneNumber() {
         return phoneNumber;
@@ -61,6 +72,7 @@ public class User {
     public void setActive(boolean active) {
         this.active = active;
     }
+
     @JsonProperty("Title")
     public String getTitle() {
         return title;

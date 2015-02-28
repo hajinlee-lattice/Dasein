@@ -1,38 +1,41 @@
 angular.module('mainApp.userManagement.services.UserManagementService', [
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.appCommon.utilities.ResourceUtility'
+    'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.appCommon.utilities.UnderscoreUtility',
+    'mainApp.core.utilities.RightsUtility'
 ])
-.service('UserManagementService', function ($http, $q, BrowserStorageUtility, ResourceUtility, ServiceErrorUtility) {
+.service('UserManagementService', function ($http, $q, _, BrowserStorageUtility, ResourceUtility, RightsUtility, ServiceErrorUtility) {
     
     this.GetUsers = function (tenantId) {
         var deferred = $q.defer();
 
         $http({
             method: 'GET', 
-            url: './LoginService.svc/GetUsers'
+            url: '/pls/users/all/' + tenantId
         })
         .success(function(data, status, headers, config) {
             var result = {
-                success: false,
-                resultObj: null,
-                resultErrors: null
+                Success: false,
+                ResultObj: null,
+                ResultErrors: null
             };
             if (data != null && data !== "") {
-                result.success = data.Success;
-                if (data.Success === true) {
-                    result.resultObj = data.Result;
-                } else {
-                    result.resultErrors = ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
-                }
+                result.Success = true;
+                result.ResultObj = _.map(
+                    _.filter(data, function(userRights){
+                        return !RightsUtility.isAdmin(userRights.AvailableRights);
+                    }),
+                    function(userRights) { return userRights.User; }
+                );
             } else {
-                result.resultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+                result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
             }
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
             var result = {
-                success: false,
-                reportErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                Success: false,
+                ReportErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
             };
             deferred.resolve(result);
         });
