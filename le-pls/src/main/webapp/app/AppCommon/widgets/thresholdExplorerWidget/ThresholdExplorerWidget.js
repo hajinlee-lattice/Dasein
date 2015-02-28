@@ -444,7 +444,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
                     "-50" + ")");
 
         infoElements.select("text.rtext")
-            .text((Math.round(100 * d.rightLift) / 100) + "x")
+            .text(d.rightLift.toFixed(2) + "x")
             .attr("transform", "translate(" +
                     (x(d.leads) + 15) + "," +
                     "-26" + ")");
@@ -455,7 +455,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
                     "-50" + ")");
 
         infoElements.select("text.ltext")
-            .text((Math.round(100 * d.leftLift) / 100) + "x")
+            .text(d.leftLift.toFixed(2) + "x")
             .attr("transform", "translate(" +
                     (x(d.leads) - 15) + "," +
                     "-26" + ")");
@@ -508,7 +508,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
                     (height + 60) + ")");
 
         infoElements.select("text.rytext")
-            .text(Math.round(d.score))
+            .text("> " + (d.score - 1))
             .attr("transform", "translate(" +
                     (x(d.leads) + 10) + "," +
                     (height + 82) + ")");
@@ -549,7 +549,11 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
             d0 = data[i - 1],
             d1 = data[i],
             d = x0 - d0.leads > d1.leads - x0 ? d1 : d0;
-        updateInfoElements(d);
+
+        if (d.leads === 0)
+            captureMouseOut();
+        else
+            updateInfoElements(d);
     }
 
     //==================================================
