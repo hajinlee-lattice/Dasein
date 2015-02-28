@@ -33,25 +33,31 @@ public enum GrantedRight implements GrantedAuthority {
     }, //
     EDIT_PLS_MODELS {
         @Override
-        public String getAuthority() { return "Edit_PLS_Models"; }
+        public String getAuthority() {
+            return "Edit_PLS_Models";
+        }
     }, //
     VIEW_PLS_USERS {
         @Override
-        public String getAuthority() { return "View_PLS_Users"; }
+        public String getAuthority() {
+            return "View_PLS_Users";
+        }
     }, //
     EDIT_PLS_USERS {
         @Override
-        public String getAuthority() { return "Edit_PLS_Users"; }
+        public String getAuthority() {
+            return "Edit_PLS_Users";
+        }
     };
 
     private static Map<String, GrantedRight> grantedRightsMap = new HashMap<>();
-    
+
     static {
         for (GrantedRight grantedRight : GrantedRight.values()) {
             grantedRightsMap.put(grantedRight.getAuthority(), grantedRight);
         }
     }
-    
+
     public static GrantedRight getGrantedRight(String value) {
         return grantedRightsMap.get(value);
     }
