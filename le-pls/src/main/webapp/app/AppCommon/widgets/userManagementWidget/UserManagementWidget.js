@@ -75,7 +75,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     var widgetConfig = $scope.widgetConfig;
     var metadata = $scope.metadata;
     var data = $scope.data;
-    $scope.showAddUserButton = metadata.mayAddUser;
+    $scope.mayEditUsers = metadata.mayAddUser;
 
     $scope.toBeDeleted = _.range(data.length).map(function () { return false; });
 
