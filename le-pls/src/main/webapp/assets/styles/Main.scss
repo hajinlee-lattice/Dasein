@@ -103,8 +103,21 @@ Model list title
   color: #428bca;
 }
 
-.model-title .editableform .form-control {
-  border: none;
+.model-title .editableform {
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;
+}
+
+.model-title .editableform .control-group {
+  -webkit-border-radius: 4px 4px 0 0;
+  -moz-border-radius: 4px 4px 0 0;
+  border-radius: 4px 4px 0 0;
+  border: #486d99 solid 2px;
+}
+
+.model-title .popover-title {
+  margin: -10px -16px 8px -16px;
 }
 
 .model-title .editable-buttons {
