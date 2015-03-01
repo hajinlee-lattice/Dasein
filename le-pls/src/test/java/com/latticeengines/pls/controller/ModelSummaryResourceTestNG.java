@@ -91,6 +91,10 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
         assertEquals(ticket.getTenants().size(), 2);
         assertNotNull(ticket);
+        assertTrue(globalUserManagementService.deleteUser("rgonzalez"));
+        assertTrue(globalUserManagementService.deleteUser("rgonzalez@lattice-engines.com"));
+        assertTrue(globalUserManagementService.deleteUser("bnguyen"));
+        assertTrue(globalUserManagementService.deleteUser("bnguyen@lattice-engines.com"));
         createUser("rgonzalez", "rgonzalez@lattice-engines.com", "Ron", "Gonzalez");
         createUser("bnguyen", "bnguyen@lattice-engines.com", "Bernie", "Nguyen");
         String tenant1 = ticket.getTenants().get(0).getId();
@@ -123,6 +127,8 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "bnguyen");
 
+        assertTrue(globalUserManagementService.deleteUser("ysong"));
+        assertTrue(globalUserManagementService.deleteUser("ysong@lattice-engines.com"));
         createUser("ysong", "ysong@lattice-engines.com", "Yintao", "Song");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "ysong");
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant1, "ysong");
