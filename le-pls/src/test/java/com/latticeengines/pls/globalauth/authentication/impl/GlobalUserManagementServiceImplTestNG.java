@@ -4,7 +4,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -23,32 +25,52 @@ public class GlobalUserManagementServiceImplTestNG extends PlsFunctionalTestNGBa
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
 
+    @Autowired
+    private GlobalAuthenticationServiceImpl globalAuthenticationService;
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         UserDocument userDoc = loginAndAttach("admin");
         String tenant = userDoc.getTicket().getTenants().get(0).getId();
-        createUser("abc", "abc@xyz.com", "Abc", "Def");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant, "abc");
-    }
-
-    @AfterClass(groups = "functional")
-    public void tearDown() throws Exception {
-        globalUserManagementService.deleteUser("abc");
+        createUser("abc@xyz.com", "abc@xyz.com", "Abc", "Def");
+        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant, "abc@xyz.com");
     }
 
     @Test(groups = "functional")
     public void deleteUser() {
-        UserDocument userDoc = loginAndAttach("abc");
+        UserDocument userDoc = loginAndAttach("abc@xyz.com");
         assertNotNull(userDoc);
-        globalUserManagementService.deleteUser("abc");
-        
+        globalUserManagementService.deleteUser("abc@xyz.com");
+
         boolean exception = false;
         try {
-            loginAndAttach("abc");
+            loginAndAttach("abc@xyz.com");
         } catch (Exception e) {
             exception = true;
         }
         assertTrue(exception);
+    }
+
+    @Test(groups = "functional")
+    public void resetLatticeCredentials() {
+        UserDocument userDoc = loginAndAttach("admin");
+        String tenant = userDoc.getTicket().getTenants().get(0).getId();
+        createUser("test@xyz.com", "test@xyz.com", "Abc", "Def");
+        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant, "test@xyz.com");
+        userDoc = loginAndAttach("test@xyz.com");
+        assertNotNull(userDoc);
+
+        String newPassword = globalUserManagementService.resetLatticeCredentials("test@xyz.com");
+        assertNotNull(newPassword);
+
+        Ticket ticket = globalAuthenticationService.authenticateUser("test@xyz.com", DigestUtils.sha256Hex(newPassword));
+        assertNotNull(ticket);
+        assertEquals(ticket.getTenants().size(), 1);
+
+        boolean result = globalAuthenticationService.discard(ticket);
+        assertTrue(result);
+
+        globalUserManagementService.deleteUser("test@xyz.com");
     }
 
     @Test(groups = "functional")

@@ -219,10 +219,13 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/AppCommon/widgets/topPredictorWidget/TopPredictorWidget.js',
                     '<%= pls.app %>/app/AppCommon/widgets/topPredictorWidget/TopPredictorAttributeWidget.js',
                     '<%= pls.app %>/app/AppCommon/widgets/simpleGridWidget/SimpleGridWidget.js',
+                    '<%= pls.app %>/app/AppCommon/widgets/userManagementWidget/UserManagementWidget.js',
                     '<%= pls.app %>/app/app.js',
                     '<%= pls.app %>/app/core/utilities/BrowserStorageUtility.js',
                     '<%= pls.app %>/app/core/utilities/ServiceErrorUtility.js',
                     '<%= pls.app %>/app/core/utilities/GriotNavUtility.js',
+                    '<%= pls.app %>/app/core/utilities/RightsUtility.js',
+                    '<%= pls.app %>/app/core/utilities/PasswordUtility.js',
                     '<%= pls.app %>/app/core/services/HelpService.js',
                     '<%= pls.app %>/app/core/services/ResourceStringsService.js',
                     '<%= pls.app %>/app/core/services/SessionService.js',
@@ -257,7 +260,7 @@ module.exports = function (grunt) {
         app: {
             files: {
                 '<%= pls.dist %>/app/production_<%= versionString %>.js': ['<%= pls.dist %>/app/production_<%= versionString %>.js']
-            },
+            }
         }
     },
     

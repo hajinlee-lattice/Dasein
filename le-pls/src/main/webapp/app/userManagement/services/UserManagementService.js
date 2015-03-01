@@ -21,12 +21,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
             };
             if (data != null && data !== "") {
                 result.Success = true;
-                result.ResultObj = _.map(
-                    _.filter(data, function(userRights){
-                        return !RightsUtility.isAdmin(userRights.AvailableRights);
-                    }),
-                    function(userRights) { return userRights.User; }
-                );
+                result.ResultObj = data;
             } else {
                 result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
             }
@@ -43,45 +38,105 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
         return deferred.promise;
     };
     
-    this.AddUser = function (emailAddress, firstName, lastName) {
+    this.AddUser = function (newUser) {
         var deferred = $q.defer();
-        
-        var params = {
-            userName: emailAddress,
-            firstName: firstName,
-            lastName: lastName
+
+        var clientSession = BrowserStorageUtility.getClientSession();
+        var tenant = {
+            DisplayName: clientSession.Tenant.DisplayName,
+            Identifier:  clientSession.Tenant.Identifier
         };
+
+        var user = {
+            Username:  newUser.Email,
+            FirstName: newUser.FirstName,
+            LastName:  newUser.LastName,
+            Email:     newUser.Email
+        };
+
+        var creds = {
+            Username: user.Username,
+            Password: "WillBeResetImmediately"
+        };
+
+        var registration = {
+            User:        user,
+            Credentials: creds,
+            Tenant:      tenant
+        };
+
         $http({
             method: 'POST', 
-            url: './LoginService.svc/AddUser',
-            data: JSON.stringify(params)
+            url: '/pls/users/add',
+            data: JSON.stringify(registration)
         })
         .success(function(data, status, headers, config) {
             var result = {
-                success: false,
-                resultObj: null,
-                resultErrors: null
+                Success: false,
+                ResultObj: {},
+                ResultErrors: null
             };
-            if (data != null && data !== "") {
-                result.success = data.Success;
-                if (data.Success === true) {
-                    result.resultObj = data.Result;
-                } else {
-                    result.resultErrors = ServiceErrorUtility.HandleFriendlyServiceResponseErrors(data);
-                }
+            if (data != null) {
+                $http({
+                    method: 'PUT',
+                    url: '/pls/users/resetpassword/' + JSON.stringify(user.Username)
+                }).success(function(pwd){
+                    result.Success = true;
+                    result.ResultObj = { Username: user.Username, Password: pwd };
+                    deferred.resolve(result);
+                }).error(function(error){
+                    console.log(error);
+                    result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+                    $http({
+                        method: 'DELETE',
+                        url: '/pls/users/' + JSON.stringify(user.Username)
+                    }).success(function(){deferred.resolve(result);}).error(function(){deferred.resolve(result);});
+                });
             } else {
-                result.resultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+                result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+                $http({
+                    method: 'DELETE',
+                    url: '/pls/users/' + JSON.stringify(user.Username)
+                }).success(function(){deferred.resolve(result);}).error(function(){deferred.resolve(result);});
+            }
+        })
+        .error(function(data, status, headers, config) {
+            var result = {
+                Success: false,
+                ReportErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+            };
+            $http({
+                method: 'DELETE',
+                url: '/pls/users/' + JSON.stringify(user.Username)
+            })
+            .success(function(){ deferred.resolve(result); })
+            .error(function(){ deferred.resolve(result); });
+        });
+
+        return deferred.promise;
+    };
+
+    this.DeleteUser = function(user) {
+        var deferred = $q.defer();
+        var result = {
+            Success: false,
+            User: user
+        };
+        $http({
+            method: 'DELETE',
+            url: '/pls/users/' + JSON.stringify(user.Username)
+        })
+        .success(function(data, status, headers, config) {
+            if(data != null && (data === "true" || data === true)) {
+                result.Success = true;
             }
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
-            var result = {
-                success: false,
-                reportErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
-            };
             deferred.resolve(result);
         });
-        
+
         return deferred.promise;
     };
+
 });

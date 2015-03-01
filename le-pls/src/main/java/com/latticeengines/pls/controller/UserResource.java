@@ -2,7 +2,7 @@ package com.latticeengines.pls.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.*;
 import com.latticeengines.pls.security.RightsUtilities;
 import org.apache.avro.generic.GenericData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +18,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.UserDocument;
-import com.latticeengines.domain.exposed.security.Credentials;
-import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.exception.LoginException;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
@@ -49,6 +46,8 @@ public class UserResource {
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public Boolean registerUser(@RequestBody UserRegistration userRegistration) {
         Credentials creds = userRegistration.getCredentials();
+        System.out.println(userRegistration.getUser().toString());
+        System.out.println(creds.toString());
         boolean registered = globalUserManagementService.registerUser(userRegistration.getUser(), creds);
 
         if (!registered) {
@@ -72,12 +71,14 @@ public class UserResource {
         return doc;
     }
 
-    @RequestMapping(value = "/{userName}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/{userName:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a user")
     public Boolean update(@PathVariable String userName, @RequestBody AttributeMap attrMap) {
         boolean success = false;
-
+        if (userName.charAt(0) == '"' && userName.charAt(userName.length() - 1) == '"') {
+            userName = userName.substring(1, userName.length() - 1);
+        }
         // change password
         if (attrMap.containsKey("OldPassword") && attrMap.containsKey("NewPassword")) {
             String oldPassword  = attrMap.get("OldPassword");
@@ -108,21 +109,55 @@ public class UserResource {
         return success;
     }
 
+    @RequestMapping(value = "/resetpassword/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Reset the password for a user")
+    @PreAuthorize("hasRole('Edit_PLS_Users')")
+    public String delete(@PathVariable String username) {
+        try {
+            if (username.charAt(0) == '"' && username.charAt(username.length() - 1) == '"') {
+                username = username.substring(1, username.length() - 1);
+            }
+            return globalUserManagementService.resetLatticeCredentials(username);
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
+        }
+    }
+
+    @RequestMapping(value = "/{username:.+}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete a user")
+    @PreAuthorize("hasRole('Edit_PLS_Users')")
+    public Boolean resetPassword(@PathVariable String username) {
+        try {
+            if (username.charAt(0) == '"' && username.charAt(username.length() - 1) == '"') {
+                username = username.substring(1, username.length() - 1);
+            }
+            return globalUserManagementService.deleteUser(username);
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
+        }
+    }
+
     @RequestMapping(value = "/all/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register new users")
     @PreAuthorize("hasRole('View_PLS_Users')")
-    public List<Map<String, Object>> getAllUsersOfTenant(@PathVariable String tenantId) {
+    public List<User> getAllUsersOfTenant(@PathVariable String tenantId) {
         try {
             List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId);
-            List<Map<String, Object>> results = new ArrayList<>();
+            List<User> users = new ArrayList<>();
             for (AbstractMap.SimpleEntry<User, List<String>> userRights : userRightsList) {
-                Map<String, Object> resultEntry = new HashMap<>();
-                resultEntry.put("User", userRights.getKey());
-                resultEntry.put("AvailableRights", RightsUtilities.translateRights(userRights.getValue()));
-                results.add(resultEntry);
+                if (RightsUtilities.isAdmin(RightsUtilities.translateRights(userRights.getValue()))) { continue; }
+                users.add(userRights.getKey());
             }
-            return results;
+            return users;
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
                 throw new LoginException(e);

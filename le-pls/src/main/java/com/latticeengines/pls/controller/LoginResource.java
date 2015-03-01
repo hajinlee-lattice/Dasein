@@ -50,7 +50,7 @@ public class LoginResource {
     @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Login to the PLS application")
-    public LoginDocument login(@RequestBody Credentials creds, HttpServletResponse response) {
+    public LoginDocument login(@RequestBody Credentials creds) {
         LoginDocument doc = new LoginDocument();
 
         try {

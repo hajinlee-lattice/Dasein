@@ -10,11 +10,12 @@ angular.module('mainApp.userManagement.controllers.UserManagementController', [
 
 .controller('UserManagementController', function ($scope, BrowserStorageUtility, ResourceUtility, RightsUtility, GriotWidgetService, WidgetConfigUtility, WidgetFrameworkService, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
+    $scope.loading = true;
 
     var clientSession = BrowserStorageUtility.getClientSession();
     if (clientSession == null) { return; }
 
-    var metadata = {CanAddUser: RightsUtility.canAddUser(clientSession.availableRights)};
+    var metadata = {mayAddUser: RightsUtility.mayAddUser(clientSession.availableRights)};
 
     $("#userManagementError").hide();
     $scope.errorMessage = ResourceUtility.getString("USER_MANAGEMENT_GET_USERS_ERROR");
@@ -36,6 +37,7 @@ angular.module('mainApp.userManagement.controllers.UserManagementController', [
     var contentContainer = $('#userManagementContainer');
     var tenantId = clientSession.Tenant.Identifier;
     UserManagementService.GetUsers(tenantId).then(function(result) {
+        $scope.loading = false;
         if (result.Success) {
             WidgetFrameworkService.CreateWidget({
                 element:      contentContainer,

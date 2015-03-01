@@ -36,13 +36,13 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
         return service.getBasicHttpBindingIUserManagementService();
     }
-
-
     
     @Override
     public Boolean registerUser(User user, Credentials creds) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
+        System.out.println(user.toString());
+        System.out.println(creds.toString());
         try {
             log.info(String.format("Registering user %s against Global Auth.", creds.getUsername()));
             return service.registerUser(
@@ -86,7 +86,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             String deploymentId = tenantId;
             return service.forgotLatticeCredentials(username, deploymentId);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18011, e, new String[] { username, tenantId });
+            throw new LedpException(LedpCode.LEDP_18011, e, new String[] { username });
         }
     }
 
@@ -103,6 +103,18 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             );
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18010, e, new String[] {oldCreds.getUsername()});
+        }
+    }
+
+    @Override
+    public String resetLatticeCredentials(String username) {
+        IUserManagementService service = getService();
+        addMagicHeaderAndSystemProperty(service);
+        try {
+            log.info(String.format("Resetting credentials for %s.", username));
+            return service.resetLatticeCredentials(username);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18011, e, new String[] {username});
         }
     }
     

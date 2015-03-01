@@ -1,10 +1,11 @@
 angular.module('mainApp.userManagement.modals.AddUserModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.core.utilities.PasswordUtility',
+    'mainApp.core.utilities.GriotNavUtility',
     'mainApp.userManagement.services.UserManagementService'
 ])
-.service('AddUserModal', function ($compile, $rootScope, $http, ResourceUtility) {
-    var self = this;
+.service('AddUserModal', function ($compile, $rootScope, $http) {
     this.show = function (successCallback, failCallback) {
         $http.get('./app/userManagement/views/AddUserView.html').success(function (html) {
             
@@ -28,63 +29,66 @@ angular.module('mainApp.userManagement.modals.AddUserModal', [
         });
     };
 })
-.controller('AddUserController', function ($scope, ResourceUtility, StringUtility, UserManagementService) {
+.controller('AddUserController', function ($scope, $rootScope, ResourceUtility, StringUtility, PasswordUtility, GriotNavUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
     
-    $scope.emailAddress = null;
-    $scope.firstName = null;
-    $scope.lastName = null;
-    
-    $scope.emailAddressInputError = "";
-    $scope.firstNameInputError = "";
-    $scope.lastNameInputError = "";
-    
-    $scope.saveInProgess = false;
-    
+    $scope.saveInProgress = false;
     $scope.addUserErrorMessage = "";
-    $("#addUserError").hide();
-    
-    function updateDisplayValidation () {
-        $scope.emailAddressInputError = StringUtility.IsEmptyString($scope.emailAddress) ? "error" : "";
-        $scope.firstNameInputError = StringUtility.IsEmptyString($scope.firstName) ? "error" : "";
-        $scope.lastNameInputError = StringUtility.IsEmptyString($scope.lastName) ? "error" : "";
+    $scope.showAddUserError = false;
 
+    $scope.user = {};
+
+    function validateNewUser() {
+        if ($scope.form.$error.required) {
+            $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_REQUIERD");
+            return false;
+        }
+
+        if ($scope.form.$error.email) {
+            $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_INVALID_EMAIL");
+            return false;
+        }
+
+        return true;
     }
-    
-    function areInputsValid () {
-        return !StringUtility.IsEmptyString($scope.emailAddress) && !StringUtility.IsEmptyString($scope.firstName) && !StringUtility.IsEmptyString($scope.lastName);
-    }
-    
     
     $scope.addUserClick = function ($event) {
         if ($event != null) {
             $event.preventDefault();
         }
-        $("#addUserError").hide();
-        updateDisplayValidation();
-        if (areInputsValid() && !$scope.saveInProgess) {
-            $scope.saveInProgess = true;
-            UserManagementService.AddUser($scope.emailAddress, $scope.firstName, $scope.lastName).then(function(result) {
-                $scope.saveInProgess = false;
-                if (result && result.success === true) {
-                    if ($scope.successCallback != null && typeof $scope.successCallback === "function") {
-                        var user = result.resultObj;
-                        $scope.successCallback(user);
-                    }
-                    $("#modalContainer").modal('hide');
-                } else {
-                    // TODO:pierce Need more useful error messages
-                    $scope.addUserErrorMessage = result.resultErrors;
-                    $("#addUserError").fadeIn();
-                }
-            });
+
+        if ($scope.saveInProgress) { return; }
+        $scope.saveInProgress = true;
+        $scope.showAddUserError = false;
+        $scope.showAddUserSuccess = false;
+
+        if (!validateNewUser()) {
+            $scope.saveInProgress = false;
+            $scope.showAddUserError = true;
+            $event.target.blur();
+            return;
         }
-        
+
+        UserManagementService.AddUser($scope.user).then(function(result){
+            if (result.Success) {
+                $scope.showAddUserSuccess = true;
+                $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_USER_SUCCESS", [result.ResultObj.Username, result.ResultObj.Password]);
+                $scope.saveInProgress = false;
+                $event.target.blur();
+            } else {
+                $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_GENERAL_ERROR");
+                $scope.showAddUserError = true;
+                $scope.showAddUserSuccess = false;
+                $scope.saveInProgress = false;
+                $event.target.blur();
+            }
+        });
     };
-    
+
     $scope.cancelClick = function () {
-        if (!$scope.saveInProgess) {
+        if (!$scope.saveInProgress) {
             $("#modalContainer").modal('hide');
+            $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
         }
     };
 });

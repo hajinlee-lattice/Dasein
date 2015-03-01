@@ -19,7 +19,6 @@ angular.module('mainApp.appCommon.utilities.ResourceUtility', [])
 
     // get a config resource string value given its key
     this.getString = function (key, replacements) {
-
         if (this.configStrings == null) {
             this.populateConfigStrings();
         }

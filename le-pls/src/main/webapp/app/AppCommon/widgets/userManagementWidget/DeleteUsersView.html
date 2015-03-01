@@ -1,0 +1,48 @@
+<div id="delete-users-modal">
+    <div class="modal-dialog modal-sm" data-ng-controller="DeleteUsersController">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">{{ResourceUtility.getString('DELETE_USERS_TITLE')}}</h4>
+            </div>
+            <div class="modal-body">
+                <div data-ng-show="deleteInProgess">
+                    <div class="loader">
+                        Loading...
+                    </div>
+                    <h2 class="text-center">{{ResourceUtility.getString('DELETE_USERS_WAIT')}}</h2>
+                </div>
+                <div class="row" data-ng-show="!deleteInProgess">
+
+                    <div data-ng-show="successUsers.length > 0">
+                    <p>{{ResourceUtility.getString('DELETE_USERS_PARA1')}}</p>
+                        <table class="table delete-user-table delete-user-table-success">
+                            <tr data-ng-repeat="user in successUsers">
+                                <td>{{user.FirstName}}</td>
+                                <td>{{user.LastName}}</td>
+                                <td>{{user.Username}}</td>
+                            </tr>
+                        </table>
+                        <h4><span class="label label-info" >{{name.value}}</span></h4>
+                    </div>
+
+                    <div data-ng-show="failUsers.length > 0">
+                    <p>Unable to be delete the following users:</p>
+                        <table class="table delete-user-table delete-user-table-fail">
+                            <tr data-ng-repeat="user in failUsers">
+                                <td>{{user.FirstName}}</td>
+                                <td>{{user.LastName}}</td>
+                                <td>{{user.Username}}</td>
+                            </tr>
+                        </table>
+                    <p>Please contact your system administrator.</p>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer" data-ng-show="!deleteInProgess">
+                <button class="btn btn-primary" data-ng-click="okClick($event)">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
+            </div>
+        </div>
+    </div>
+</div>

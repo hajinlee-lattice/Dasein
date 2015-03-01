@@ -872,6 +872,7 @@ Manage Users
   width: 600px;
   margin: 8em auto;
 }
+
 .user-list:after {
   display: table;
   content: "";
@@ -885,7 +886,7 @@ Manage Users
   font-family: 'ProximaNova-Regular';
   font-size: 2em;
   text-align: right;
-  width: 100px;
+  width: 160px;
   margin: 0 1em 0 0;
 }
 
@@ -898,7 +899,7 @@ Manage Users
 }
 
 .user-list button {
-  margin-left: 136px;
+  margin-left: 196px;
   margin-top: 1em;
 }
 
@@ -920,6 +921,16 @@ Manage Users
 }
 #add-user-modal input {
   padding: 6px;
+}
+
+#delete-users-modal p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em
+}
+
+#delete-users-modal .label {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em
 }
 
 /*

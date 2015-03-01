@@ -37,4 +37,17 @@ public class RightsUtilities {
 
         return availableRights;
     }
+
+    public static boolean isAdmin(Map<String, EntityAccessRightsData> availableRights) {
+        if (!availableRights.containsKey("PLS_Users")) { return false; }
+        if (!availableRights.containsKey("PLS_Configuration")) { return false; }
+        if (!availableRights.containsKey("PLS_Models")) { return false; }
+        if (!availableRights.containsKey("PLS_Reporting")) { return false; }
+
+        if (!availableRights.get("PLS_Users").isMayEdit()) { return false; }
+        if (!availableRights.get("PLS_Models").isMayEdit()) { return false; }
+        if (!availableRights.get("PLS_Configuration").isMayEdit()) { return false; }
+
+        return true;
+    }
 }
