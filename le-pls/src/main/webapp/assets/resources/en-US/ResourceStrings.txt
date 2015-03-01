@@ -93,6 +93,7 @@ USER_MANAGEMENT_GET_USERS_ERROR=Unable to get users at this time. Please contact
 UNEXPECTED_SERVICE_ERROR=Unknown error occurred.
 GENERAL_LOADING=Loading data ...
 MODEL_LIST_TITLE=All Models
+MODEL_LIST_NO_MODELs=There are currently no models.
 MODEL_TILE_STATUS_LABEL=Status
 MODEL_TILE_EXTERNAL_LABEL=Lattice Data Cloud
 MODEL_TILE_INTERNAL_LABEL=Company

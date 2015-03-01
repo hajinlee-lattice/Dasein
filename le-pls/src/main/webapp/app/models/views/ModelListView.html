@@ -11,7 +11,10 @@
             <div class="loader"> </div>
             <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
         </div>
-        <div class="row">
+        <div class="no-models text-center"  data-ng-show="showNoModels">
+            <h2>{{ResourceUtility.getString('MODEL_LIST_NO_MODELs')}}</h2>
+        </div>
+        <div class="row" data-ng-hide="showNoModels || loading">
             <section class="panel panel-clear">
                 <div class="panel-body main-panel-body">
                     <div class="row" id="modelListContainer">

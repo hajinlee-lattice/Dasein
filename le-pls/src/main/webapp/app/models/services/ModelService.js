@@ -56,6 +56,12 @@ angular.module('mainApp.models.services.ModelService', [
                         resultObj: null,
                         resultErrors: null
                     };
+                } else if (data.errorMsg.indexOf("No tenant found")) {
+                    result = {
+                        success: false,
+                        resultObj: null,
+                        resultErrors: "NO TENANT FOUND"
+                    };
                 } else {
                     result = {
                         success: false,

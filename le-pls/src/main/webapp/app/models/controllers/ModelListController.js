@@ -28,16 +28,21 @@ angular.module('mainApp.models.controllers.ModelListController', [
         $scope.loading = false;
         if (result != null && result.success === true) {
             var modelList = result.resultObj;
-            var contentContainer = $('#modelListContainer');
-            WidgetFrameworkService.CreateWidget({
-                element: contentContainer,
-                widgetConfig: screenWidgetConfig,
-                metadata: null,
-                data: modelList,
-                parentData: modelList
-            });
+            if (modelList == null || modelList.length == 0) {
+                $scope.showNoModels = true;
+            } else {
+                var contentContainer = $('#modelListContainer');
+                WidgetFrameworkService.CreateWidget({
+                    element: contentContainer,
+                    widgetConfig: screenWidgetConfig,
+                    metadata: null,
+                    data: modelList,
+                    parentData: modelList
+                });
+            }
+        } else if (result.resultErrors === "NO TENANT FOUND") {
+            $scope.showNoModels = true;
         }
-
     });
 
 });
