@@ -87,17 +87,11 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
                 }).error(function(error){
                     console.log(error);
                     result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
-                    $http({
-                        method: 'DELETE',
-                        url: '/pls/users/' + JSON.stringify(user.Username)
-                    }).success(function(){deferred.resolve(result);}).error(function(){deferred.resolve(result);});
+                    deferred.resolve(result);
                 });
             } else {
                 result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
-                $http({
-                    method: 'DELETE',
-                    url: '/pls/users/' + JSON.stringify(user.Username)
-                }).success(function(){deferred.resolve(result);}).error(function(){deferred.resolve(result);});
+                deferred.resolve(result);
             }
         })
         .error(function(data, status, headers, config) {
@@ -105,12 +99,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
                 Success: false,
                 ReportErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
             };
-            $http({
-                method: 'DELETE',
-                url: '/pls/users/' + JSON.stringify(user.Username)
-            })
-            .success(function(){ deferred.resolve(result); })
-            .error(function(){ deferred.resolve(result); });
+            deferred.resolve(result);
         });
 
         return deferred.promise;

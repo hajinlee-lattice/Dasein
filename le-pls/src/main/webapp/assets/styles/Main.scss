@@ -72,6 +72,47 @@
 }
 
 /*
+Model list title
+*/
+
+.model-title h2 {
+  background: transparent;
+}
+
+.model-title h2.edit {
+  margin-top: 3px;
+  padding-right: 0;
+  text-align: right;
+  background: transparent;
+}
+
+.model-title .edit button {
+  background: transparent;
+  border: 0;
+  color: #999;
+  margin-right: 0.3px;
+  font-size: larger;
+}
+
+.model-title .edit button:hover {
+  color: #428bca;
+}
+
+.model-title .editableform .form-control {
+  border: none;
+}
+
+.model-title .editable-buttons {
+  margin-top: 0.5em;
+  margin-bottom: 2.7em;
+}
+
+.model-error {
+  border-radius: 4px 4px 4px 4px;
+  margin-top: 0.5em;
+}
+
+/*
 User-list
 */
 .user-list h2 {

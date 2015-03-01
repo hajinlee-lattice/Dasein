@@ -4,21 +4,23 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.models.services.ModelService',
     'mainApp.models.modals.DeleteModelModal'
 ])
-.controller('ModelListTileWidgetController', function ($scope, $rootScope, $element, ResourceUtility, DateTimeFormatUtility, 
+.controller('ModelListTileWidgetController', function ($scope, $rootScope, $element, ResourceUtility, BrowserStorageUtility, RightsUtility, DateTimeFormatUtility,
     EvergageUtility, TrackingConstantsUtility, GriotNavUtility, WidgetFrameworkService, DeleteModelModal) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.nameStatus = {
         editing: false
     };
-    $scope.mayEditModels = true;
-
+    var clientSession = BrowserStorageUtility.getClientSession();
     var widgetConfig = $scope.widgetConfig;
     var metadata = $scope.metadata;
     var data = $scope.data;
+    $scope.mayEditModels = RightsUtility.mayEditModels(clientSession.availableRights);
 
     if (widgetConfig == null || data == null) {
         return;

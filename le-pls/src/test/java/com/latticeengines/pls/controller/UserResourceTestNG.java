@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,9 +33,13 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private GlobalAuthenticationServiceImpl globalAuthenticationService;
 
+    @Autowired
+    private GlobalUserManagementService globalUserManagementService;
+
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() {
         Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
+        revokeRight(GrantedRight.EDIT_PLS_USERS, ticket.getTenants().get(0).getId(), "admin");
         grantRight(GrantedRight.EDIT_PLS_USERS, ticket.getTenants().get(0).getId(), "admin");
     }
 
@@ -42,6 +47,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
     public void tearDown() {
         Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         // admin must have EDIT_PLS_USERS right
+        revokeRight(GrantedRight.EDIT_PLS_USERS, ticket.getTenants().get(0).getId(), "admin");
         grantRight(GrantedRight.EDIT_PLS_USERS, ticket.getTenants().get(0).getId(), "admin");
     }
 
@@ -57,6 +63,8 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
 
         try {
+            globalUserManagementService.deleteUser("hford");
+            globalUserManagementService.deleteUser("hford@ford.com");
             Boolean response = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users/add", userReg, Boolean.class, new HashMap<>());
             assertTrue(response);
         } catch (Exception e) {
