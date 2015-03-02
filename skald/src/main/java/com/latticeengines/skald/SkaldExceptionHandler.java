@@ -33,6 +33,11 @@ public class SkaldExceptionHandler extends ResponseEntityExceptionHandler {
         List<String> messages = new ArrayList<String>();
         Throwable cause = ex;
         while (cause != null) {
+            String message = cause.getMessage();
+            if (message == null) {
+                message = cause.getClass().getSimpleName();
+            }
+
             messages.add(cause.getMessage());
             cause = cause.getCause();
         }

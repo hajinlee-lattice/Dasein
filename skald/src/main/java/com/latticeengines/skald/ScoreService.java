@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.skald.model.FieldSchema;
@@ -27,6 +29,18 @@ public class ScoreService {
     public Map<ScoreType, Object> scoreRecord(@RequestBody ScoreRequest request) {
         try (LogContext context = new LogContext("Space", request.space)) {
             log.info("Received a score request");
+
+            // ScoreHistory entries are written by the ScoreHistorian
+            // interceptor to capture malformed requests and deserialization
+            // errors and so that the duration field includes serialization
+            // and deserialization time.
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
+                    .getRequestAttributes();
+            ScoreHistoryEntry history = (ScoreHistoryEntry) attributes.getRequest().getAttribute(
+                    ScoreHistorian.ENTRY_KEY);
+
+            // TODO Populate other history fields.
+            history.space = request.space;
 
             List<CombinationElement> combination = combinationRetriever.getCombination(request.space,
                     request.combination, request.tag);
@@ -105,9 +119,6 @@ public class ScoreService {
             Map<ScoreType, Object> result = evaluator.evaluate(transformed, selected.derivation);
             result.put(ScoreType.MODEL_NAME, selected.model.name);
             return result;
-
-            // TODO Write record and results to a score history database.
-            // TODO Also do this for failures and capture error information.
         }
     }
 

@@ -33,6 +33,7 @@ public class SkaldConfiguration extends WebMvcConfigurerAdapter {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(interceptor);
+        registry.addInterceptor(historian);
     }
 
     @Override
@@ -52,6 +53,9 @@ public class SkaldConfiguration extends WebMvcConfigurerAdapter {
 
     @Autowired
     private SkaldInterceptor interceptor;
+
+    @Autowired
+    private ScoreHistorian historian;
 
     @Autowired
     private SkaldProperties properties;
