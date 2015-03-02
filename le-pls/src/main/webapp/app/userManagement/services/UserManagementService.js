@@ -67,7 +67,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
 
         $http({
             method: 'GET', 
-            url: '/pls/users/all'
+            url: '/pls/users/all/'
         })
         .success(function(data, status, headers, config) {
             var result = {
@@ -135,7 +135,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
             if (data != null) {
                 $http({
                     method: 'PUT',
-                    url: '/pls/users/resetpassword/' + JSON.stringify(user.Username)
+                    url: '/pls/users/resetpassword/' + user.Username
                 }).success(function(pwd){
                     result.Success = true;
                     result.ResultObj = { Username: user.Username, Password: pwd };
