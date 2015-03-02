@@ -70,5 +70,14 @@ public class DataFileResource {
 
         dataFileProviderService.downloadFile(request, response, modelId, "application/csv", ".*_explorer.csv");
     }
+    
+    @RequestMapping(value = "/rfmodelcsv/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get RF model csv file for specific model summary")
+    public void getRfModelCsvFile(@PathVariable String modelId, HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        dataFileProviderService.downloadFile(request, response, modelId, "text/plain", ".*rf_model.txt");
+    }
 
 }

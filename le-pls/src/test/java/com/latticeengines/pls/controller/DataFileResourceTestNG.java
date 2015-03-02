@@ -91,6 +91,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_readoutsample.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_scored.txt");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_explorer.csv");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/rf_model.txt");
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -132,7 +133,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
                 { "predictorcsv", "application/csv" }, //
                 { "readoutcsv", "application/csv" }, //
                 { "scorecsv", "text/plain" }, //
-                { "explorercsv", "application/csv" }
+                { "explorercsv", "application/csv" }, //
+                { "rfmodelcsv", "text/plain" }
 
         };
     }
