@@ -47,12 +47,12 @@ public class ServiceBootstrapManager {
         private boolean bootstrapped;
         private Installer installer;
         private final String logPrefix;
-        private final Path serviceDirectoryPath;
+        private final String serviceName;
 
         public Bootstrapper(String serviceName, Installer installer) {
             this.installer = installer;
             this.logPrefix = String.format("[Service=%s] ", serviceName);
-            this.serviceDirectoryPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), serviceName);
+            this.serviceName = serviceName;
         }
 
         public void setInstaller(Installer installer) {
@@ -72,6 +72,7 @@ public class ServiceBootstrapManager {
         }
 
         private void install(int executableVersion) throws Exception {
+            Path serviceDirectoryPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), this.serviceName);
             BootstrapUtil.install(installer, executableVersion, serviceDirectoryPath, true, logPrefix);
         }
     }

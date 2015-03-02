@@ -1,6 +1,14 @@
 package com.latticeengines.domain.exposed.camille;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CustomerSpace {
+    private static final Logger log = LoggerFactory.getLogger(new Object() {
+    }.getClass().getEnclosingClass());
+
+    public static final String BACKWARDS_COMPATIBLE_SPACE_ID = "Production";
+
     private String contractId;
     private String tenantId;
     private String spaceId;
@@ -15,10 +23,48 @@ public class CustomerSpace {
         this.spaceId = spaceId;
     }
 
+    /**
+     * Return a CustomerSpace constructed from a Deployment ExternalID
+     * 
+     * @param deploymentExternalId
+     */
     public CustomerSpace(String deploymentExternalId) {
+        log.debug(String
+                .format("Using backwards-compatible conversion to extract Contract, Tenant, and Space IDs from Deployment External ID %s.  Assuming %s is %s.",
+                        deploymentExternalId, deploymentExternalId, String.format("%s.%s.%s", deploymentExternalId,
+                                deploymentExternalId, BACKWARDS_COMPATIBLE_SPACE_ID)));
+
         this.contractId = deploymentExternalId;
         this.tenantId = deploymentExternalId;
-        this.spaceId = "Production";
+        this.spaceId = BACKWARDS_COMPATIBLE_SPACE_ID;
+    }
+
+    /**
+     * Parse the specified 3-part or 1-part identifier into a CustomerSpace. The
+     * identifier may be a Deployment ExternalID, such as DellAPJ, or a 3-part
+     * identifier, such as Dell.APJ.Production.
+     * 
+     * @param identifier
+     * @return CustomerSpace
+     */
+    public static CustomerSpace parse(String identifier) {
+        if (identifier == null) {
+            throw new NullPointerException("Identifier parameter to CustomerSpace.parse may not be null");
+        }
+
+        String[] parts = identifier.split(".");
+        if (parts.length != 3 && parts.length != 1) {
+            throw new RuntimeException(
+                    String.format(
+                            "Identifiers must either contain no dots (e.g., 'DellAPJ') or are in a 3-part format (e.g., 'Dell.APJ.Production').  Identifier %s is invalid",
+                            identifier));
+        }
+
+        if (parts.length == 1) {
+            return new CustomerSpace(identifier);
+        }
+
+        return new CustomerSpace(parts[0], parts[1], parts[2]);
     }
 
     @Override
