@@ -37,24 +37,10 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     $scope.successUsers = [];
     $scope.failUsers = [];
 
-    function deleteUserWithTimeout (user, timeout) {
-        setTimeout(
-            UserManagementService.DeleteUser(user).then(function(result){
-                if (result.Success) {
-                    $scope.successUsers.push(result.User);
-                } else {
-                    $scope.failUsers.push(result.User);
-                }
-                if ($scope.successUsers.length + $scope.failUsers.length == $scope.users.length) {
-                    $scope.deleteInProgess = false;
-                }
-            }),
-            timeout * 1000
-        );
-    }
-
-    _.zip($scope.users, _.range($scope.users.length)).map(function(params){
-        deleteUserWithTimeout(params[0], params[1]);
+    UserManagementService.DeleteUsers($scope.users).then(function(result){
+        $scope.successUsers = result.SuccessUsers;
+        $scope.failUsers = result.FailUsers;
+        $scope.deleteInProgess = false;
     });
 
     $scope.okClick = function ($event) {
@@ -98,7 +84,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         if ($event != null) {
             $event.preventDefault();
         }
-        AddUserModal.show();
+        AddUserModal.show(data.map(function(u){ return u.Email; }));
     };
 })
 .directive('userManagementWidget', function ($compile) {

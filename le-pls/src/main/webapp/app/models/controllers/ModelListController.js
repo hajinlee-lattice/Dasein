@@ -28,7 +28,7 @@ angular.module('mainApp.models.controllers.ModelListController', [
         $scope.loading = false;
         if (result != null && result.success === true) {
             var modelList = result.resultObj;
-            if (modelList == null || modelList.length == 0) {
+            if (modelList == null || modelList.length === 0) {
                 $scope.showNoModels = true;
             } else {
                 var contentContainer = $('#modelListContainer');

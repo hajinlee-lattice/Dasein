@@ -23,5 +23,7 @@ public interface GlobalUserManagementService {
 
     Boolean deleteUser(String username);
 
+    User getUserByEmail(String email);
+
     List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId);
 }

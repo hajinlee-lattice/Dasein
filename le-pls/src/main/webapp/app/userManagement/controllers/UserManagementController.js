@@ -35,8 +35,7 @@ angular.module('mainApp.userManagement.controllers.UserManagementController', [
     }
 
     var contentContainer = $('#userManagementContainer');
-    var tenantId = clientSession.Tenant.Identifier;
-    UserManagementService.GetUsers(tenantId).then(function(result) {
+    UserManagementService.GetUsers().then(function(result) {
         $scope.loading = false;
         if (result.Success) {
             WidgetFrameworkService.CreateWidget({

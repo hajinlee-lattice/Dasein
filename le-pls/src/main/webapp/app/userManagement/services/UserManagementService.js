@@ -5,9 +5,66 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
     'mainApp.core.utilities.RightsUtility'
 ])
 .service('UserManagementService', function ($http, $q, _, BrowserStorageUtility, ResourceUtility, RightsUtility, ServiceErrorUtility) {
-    
-    this.GetUsers = function (tenantId) {
+
+    this.GetUserByEmail = function(email) {
         var deferred = $q.defer();
+        var result = {
+            Success: false,
+            ResultObj: null,
+            ResultErrors: null
+        };
+
+        $http({
+            method: 'GET',
+            url: '/pls/users/byemail/' + email
+        }).success(function(data){
+            if (data != null) {
+                result.Success = true;
+                result.ResultObj = data;
+            }
+            deferred.resolve(result);
+        }).error(function(){
+            result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
+    this.GrantDefaultRights = function(username){
+        var deferred = $q.defer();
+        var result = {
+            Success: false,
+            ResultObj: null,
+            ResultErrors: null
+        };
+        var clientSession = BrowserStorageUtility.getClientSession();
+        var data = {
+            Username: username,
+            TenantId: clientSession.Tenant.Identifier
+        };
+
+        $http({
+            method: 'PUT',
+            url: '/pls/users/grant',
+            data: JSON.stringify(data)
+        }).success(function(data){
+            if (data != null) {
+                result.Success = true;
+                result.ResultObj = data;
+            }
+            deferred.resolve(result);
+        }).error(function(){
+            result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+
+    this.GetUsers = function () {
+        var deferred = $q.defer();
+        var tenantId = BrowserStorageUtility.getClientSession().Tenant.Identifier;
 
         $http({
             method: 'GET', 
@@ -105,26 +162,76 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
         return deferred.promise;
     };
 
-    this.DeleteUser = function(user) {
+    this.DeleteSingleUser = function(user) {
         var deferred = $q.defer();
         var result = {
             Success: false,
             User: user
         };
+        var tenantId = BrowserStorageUtility.getClientSession().Tenant.Identifier;
+
+        var postData = {
+            Bulk: false,
+            Username: user.Username,
+            TenantId: tenantId
+        };
+
         $http({
-            method: 'DELETE',
-            url: '/pls/users/' + JSON.stringify(user.Username)
+            method: 'POST',
+            url: '/pls/users/deleteintenant',
+            data: postData,
+            headers: {
+                'Content-Type': "application/json"
+            }
         })
-        .success(function(data, status, headers, config) {
-            if(data != null && (data === "true" || data === true)) {
+        .success(function(data) {
+            if(data != null && (data.Success === "true" || data.Success === true)) {
                 result.Success = true;
             }
             deferred.resolve(result);
         })
-        .error(function(data, status, headers, config) {
+        .error(function() {
             deferred.resolve(result);
         });
 
+        return deferred.promise;
+    };
+
+
+    this.DeleteUsers = function(users) {
+        var deferred = $q.defer();
+        var result = {
+            Success: false,
+            SuccessUsers: [],
+            FailUsers: []
+        };
+        var tenantId = BrowserStorageUtility.getClientSession().Tenant.Identifier;
+
+        var postData = {
+            Bulk: true,
+            Users: users,
+            TenantId: tenantId
+        };
+
+        $http({
+            method: 'POST',
+            url: '/pls/users/deleteintenant',
+            data: postData,
+            headers: {
+                'Content-Type': "application/json"
+            }
+        })
+        .success(function(data) {
+            if(data != null) {
+                result.Success = true;
+                result.SuccessUsers = data.SuccessUsers;
+                result.FailUsers = data.FailUsers;
+            }
+            deferred.resolve(result);
+        })
+        .error(function() {
+            deferred.resolve(result);
+        });
         return deferred.promise;
     };
 

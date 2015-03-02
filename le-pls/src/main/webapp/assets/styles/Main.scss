@@ -199,6 +199,24 @@ User-list
   color: red;
 }
 
+
+/*
+Add user
+*/
+table.existing-user-info {
+  margin-left: auto;
+  margin-right: auto;
+  width:  80%;
+}
+
+table.existing-user-info tr th {
+  color: #e96339;
+}
+
+table.existing-user-info tr td {
+  color: #4070a8;
+}
+
 /*
 Spinner
 */

@@ -41,8 +41,6 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     public Boolean registerUser(User user, Credentials creds) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
-        System.out.println(user.toString());
-        System.out.println(creds.toString());
         try {
             log.info(String.format("Registering user %s against Global Auth.", creds.getUsername()));
             return service.registerUser(
@@ -73,7 +71,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Revoking right %s from user %s for tenant %s.", right, username, tenant));
             return service.revokeRight(right, tenant, username);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18006, e, new String[] { right, username, tenant });
+            throw new LedpException(LedpCode.LEDP_18006, e, new String[]{right, username, tenant});
         }
     }
 
@@ -117,7 +115,19 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             throw new LedpException(LedpCode.LEDP_18011, e, new String[] {username});
         }
     }
-    
+
+    @Override
+    public User getUserByEmail(String email) {
+        IUserManagementService service = getService();
+        addMagicHeaderAndSystemProperty(service);
+        try {
+            log.info(String.format("Getting user having the email %s.", email));
+            return new UserBuilder(service.findUserByEmail(email)).build();
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18017, e, new String[] { email });
+        }
+    }
+
     @Override
     public Boolean deleteUser(String username) {
         IUserManagementService service = getService();

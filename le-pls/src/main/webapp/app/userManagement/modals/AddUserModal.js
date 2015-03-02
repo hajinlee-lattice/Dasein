@@ -1,18 +1,18 @@
 angular.module('mainApp.userManagement.modals.AddUserModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
+    'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.core.utilities.PasswordUtility',
     'mainApp.core.utilities.GriotNavUtility',
     'mainApp.userManagement.services.UserManagementService'
 ])
 .service('AddUserModal', function ($compile, $rootScope, $http) {
-    this.show = function (successCallback, failCallback) {
+    this.show = function (emails) {
         $http.get('./app/userManagement/views/AddUserView.html').success(function (html) {
             
             var scope = $rootScope.$new();
-            scope.successCallback = successCallback;
-            scope.failCallback = failCallback;
-            
+            scope.emails = emails;
+
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
             
@@ -29,7 +29,7 @@ angular.module('mainApp.userManagement.modals.AddUserModal', [
         });
     };
 })
-.controller('AddUserController', function ($scope, $rootScope, ResourceUtility, StringUtility, PasswordUtility, GriotNavUtility, UserManagementService) {
+.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility, StringUtility, PasswordUtility, GriotNavUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
     
     $scope.saveInProgress = false;
@@ -46,6 +46,11 @@ angular.module('mainApp.userManagement.modals.AddUserModal', [
 
         if ($scope.form.$error.email) {
             $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_INVALID_EMAIL");
+            return false;
+        }
+
+        if (_.contains($scope.emails, $scope.user.Email)) {
+            $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_CONFLICT_EMAIL");
             return false;
         }
 
@@ -69,19 +74,51 @@ angular.module('mainApp.userManagement.modals.AddUserModal', [
             return;
         }
 
-        UserManagementService.AddUser($scope.user).then(function(result){
+        UserManagementService.GetUserByEmail($scope.user.Email).then(function(result){
+            if (result.Success) {
+                $scope.existingUser = result.ResultObj;
+                $scope.showExistingUser = true;
+            } else {
+                UserManagementService.AddUser($scope.user).then(function(result){
+                    if (result.Success) {
+                        $scope.showAddUserSuccess = true;
+                        $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_USER_SUCCESS", [result.ResultObj.Username, result.ResultObj.Password]);
+                    } else {
+                        $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_GENERAL_ERROR");
+                        $scope.showAddUserSuccess = false;
+                        $scope.showAddUserError = true;
+                    }
+                    $scope.saveInProgress = false;
+                    $scope.showExistingUser = false;
+                    $event.target.blur();
+                });
+            }
+        });
+
+    };
+
+    $scope.yesClick = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+
+        $scope.showExistingUser = false;
+        $scope.user.FirstName = $scope.existingUser.FirstName;
+        $scope.user.LastName = $scope.existingUser.LastName;
+        $scope.user.Email = $scope.existingUser.Email;
+        $scope.user.Username = $scope.existingUser.Username;
+
+        UserManagementService.GrantDefaultRights($scope.user.Username).then(function(result){
             if (result.Success) {
                 $scope.showAddUserSuccess = true;
-                $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_USER_SUCCESS", [result.ResultObj.Username, result.ResultObj.Password]);
-                $scope.saveInProgress = false;
-                $event.target.blur();
+                $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_EXSITING_USER_SUCCESS", [$scope.user.Username]);
             } else {
                 $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_GENERAL_ERROR");
-                $scope.showAddUserError = true;
                 $scope.showAddUserSuccess = false;
-                $scope.saveInProgress = false;
-                $event.target.blur();
+                $scope.showAddUserError = true;
             }
+            $scope.saveInProgress = false;
+            $event.target.blur();
         });
     };
 
@@ -90,5 +127,10 @@ angular.module('mainApp.userManagement.modals.AddUserModal', [
             $("#modalContainer").modal('hide');
             $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
         }
+    };
+
+    $scope.noClick = function () {
+        $scope.saveInProgress = false;
+        $scope.showExistingUser = false;
     };
 });

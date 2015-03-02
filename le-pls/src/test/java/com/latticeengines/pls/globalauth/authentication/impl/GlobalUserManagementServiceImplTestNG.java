@@ -52,6 +52,23 @@ public class GlobalUserManagementServiceImplTestNG extends PlsFunctionalTestNGBa
     }
 
     @Test(groups = "functional")
+    public void getUserByEmail() {
+        UserDocument userDoc = loginAndAttach("admin");
+        String tenant = userDoc.getTicket().getTenants().get(0).getId();
+        createUser("abc@xyz.com", "abc@xyz.com", "Abc", "Def");
+        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant, "abc@xyz.com");
+
+        User user = globalUserManagementService.getUserByEmail("abc@xyz.com");
+        assertNotNull(user);
+
+        assertEquals(user.getEmail(), "abc@xyz.com");
+        assertEquals(user.getUsername(), "abc@xyz.com");
+        assertEquals(user.getFirstName(), "Abc");
+        assertEquals(user.getLastName(), "Def");
+        assertTrue(globalUserManagementService.deleteUser("abc@xyz.com"));
+    }
+
+    @Test(groups = "functional")
     public void resetLatticeCredentials() {
         UserDocument userDoc = loginAndAttach("admin");
         String tenant = userDoc.getTicket().getTenants().get(0).getId();
