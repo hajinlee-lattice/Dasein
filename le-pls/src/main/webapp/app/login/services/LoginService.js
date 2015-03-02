@@ -148,7 +148,7 @@ angular.module('mainApp.login.services.LoginService', [
 
         $http({
             method: 'PUT',
-            url: '/pls/users/' + JSON.stringify(username),
+            url: '/pls/users/' + username,
             data: JSON.stringify(creds),
             headers: {
                 "Content-Type": "application/json"
