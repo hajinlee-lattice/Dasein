@@ -166,20 +166,12 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
         var deferred = $q.defer();
         var result = {
             Success: false,
-            User: user
-        };
-        var tenantId = BrowserStorageUtility.getClientSession().Tenant.Identifier;
-
-        var postData = {
-            Bulk: false,
-            Username: user.Username,
-            TenantId: tenantId
+            ReportErrors: null
         };
 
         $http({
-            method: 'POST',
-            url: '/pls/users/deleteintenant',
-            data: postData,
+            method: 'DELETE',
+            url: '/pls/users/' + user.Username,
             headers: {
                 'Content-Type': "application/json"
             }
@@ -187,10 +179,13 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
         .success(function(data) {
             if(data != null && (data.Success === "true" || data.Success === true)) {
                 result.Success = true;
+            } else {
+                result.ReportErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
             }
             deferred.resolve(result);
         })
         .error(function() {
+            result.ReportErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
             deferred.resolve(result);
         });
 
@@ -207,16 +202,10 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
         };
         var tenantId = BrowserStorageUtility.getClientSession().Tenant.Identifier;
 
-        var postData = {
-            Bulk: true,
-            Users: users,
-            TenantId: tenantId
-        };
-
         $http({
             method: 'POST',
-            url: '/pls/users/deleteintenant',
-            data: postData,
+            url: '/pls/users/bulkdelete',
+            data: users,
             headers: {
                 'Content-Type': "application/json"
             }

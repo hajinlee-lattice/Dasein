@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.security.*;
+import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 import com.latticeengines.pls.security.RightsUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,6 +40,9 @@ public class UserResource {
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
+
+    @Autowired
+    private GlobalSessionManagementService globalSessionManagementService;
 
     @RequestMapping(value = "/add", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
@@ -120,14 +124,13 @@ public class UserResource {
 
     @RequestMapping(value = "/{username:.+}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Delete a user")
+    @ApiOperation(value = "Soft delete a user by revoking all rights to current tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public Boolean delete(@PathVariable String username) {
+    public Boolean delete(@PathVariable String username, HttpServletRequest request) {
         try {
-            if (username.charAt(0) == '"' && username.charAt(username.length() - 1) == '"') {
-                username = username.substring(1, username.length() - 1);
-            }
-            return globalUserManagementService.deleteUser(username);
+            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
+            return softDelete(tenant.getId(), username);
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
                 throw new LoginException(e);
@@ -136,43 +139,35 @@ public class UserResource {
         }
     }
 
-    @RequestMapping(value = "/deleteintenant", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/bulkdelete", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Soft delete a user in a tenant")
+    @ApiOperation(value = "Soft delete a group of users in a tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public Map<String, Object> deleteInTenant(@RequestBody JsonNode node) {
+    public Map<String, Object> bulkDelete(@RequestBody List<User> users, HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
-        if (node.get("Bulk").asBoolean()) {
-            String tenantId = node.get("TenantId").asText();
+        try {
+            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
+            String tenantId = tenant.getId();
             List<User> successUsers = new ArrayList<>();
-            List<JsonNode> failUsers = new ArrayList<>();
-            ObjectMapper mapper = new ObjectMapper();
-            for (JsonNode userNode : node.get("Users")) {
+            List<User> failUsers = new ArrayList<>();
+            for (User user : users) {
                 try {
-                    User user = mapper.treeToValue(userNode, User.class);
                     if (softDelete(tenantId, user.getUsername())) {
                         successUsers.add(user);
                     }
                 } catch (Exception e) {
-                    failUsers.add(userNode);
+                    failUsers.add(user);
                 }
             }
             result.put("SuccessUsers", successUsers);
             result.put("FailUsers", failUsers);
             return result;
-        } else {
-            String username = node.get("Username").asText();
-            String tenantId = node.get("TenantId").asText();
-            try {
-                result.put("Success", softDelete(tenantId, username));
-                //TODO:song if this user has no rights in any other tenant, hard delete?
-                return result;
-            } catch (LedpException e) {
-                if (e.getCode() == LedpCode.LEDP_18001) {
-                    throw new LoginException(e);
-                }
-                throw e;
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
             }
+            throw e;
         }
     }
 
@@ -181,9 +176,6 @@ public class UserResource {
     @ApiOperation(value = "Get a user by email address")
     public User getByEmail(@PathVariable String email) {
         try {
-            if (email.charAt(0) == '"' && email.charAt(email.length() - 1) == '"') {
-                email = email.substring(1, email.length() - 1);
-            }
             return globalUserManagementService.getUserByEmail(email);
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
@@ -199,9 +191,6 @@ public class UserResource {
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public String resetPassword(@PathVariable String username) {
         try {
-            if (username.charAt(0) == '"' && username.charAt(username.length() - 1) == '"') {
-                username = username.substring(1, username.length() - 1);
-            }
             return globalUserManagementService.resetLatticeCredentials(username);
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
