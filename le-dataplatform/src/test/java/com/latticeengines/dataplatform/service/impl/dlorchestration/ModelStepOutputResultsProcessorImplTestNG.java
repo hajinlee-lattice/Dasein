@@ -146,7 +146,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
         String interfaceName = "ModelSummary";
         String deploymentExternalId = command.getDeploymentExternalId();
-        CustomerSpace space = new CustomerSpace(deploymentExternalId);
+        CustomerSpace space = CustomerSpace.parse(deploymentExternalId);
         DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName, space);
         DataInterfaceSubscriber sub = new DataInterfaceSubscriber(interfaceName, space);
 

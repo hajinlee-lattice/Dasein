@@ -171,7 +171,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                 
                 // Publish the PMML model and associated artifacts.
                 String deploymentExternalId = modelCommand.getDeploymentExternalId();
-                CustomerSpace space = new CustomerSpace(deploymentExternalId);
+                CustomerSpace space = CustomerSpace.parse(deploymentExternalId);
                 
                 StringBuilder artifactPath = new StringBuilder();
                 artifactPath.append(hdfsCustomersDirectory).append(space).append("/models/").append(modelId).append("/").append(getModelVersion()).append("/");
