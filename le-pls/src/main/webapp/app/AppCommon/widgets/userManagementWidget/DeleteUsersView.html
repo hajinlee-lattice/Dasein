@@ -6,6 +6,19 @@
                 <h4 class="modal-title">{{ResourceUtility.getString('DELETE_USERS_TITLE')}}</h4>
             </div>
             <div class="modal-body">
+                <div class="row" data-ng-hide="deleteConfirmed">
+                    <div class="col-sm-3"><span class="fa fa-exclamation-circle active fa-very-lg"></span></div>
+                    <div class="col-sm-8">
+                        <p><h4>{{ResourceUtility.getString('DELETE_USER_ALERT')}}</h4></p>
+                        <table class="table delete-user-table">
+                            <tr data-ng-repeat="user in users">
+                                <td>{{user.FirstName}}</td>
+                                <td>{{user.LastName}}</td>
+                                <td>{{user.Username}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
                 <div data-ng-show="deleteInProgess">
                     <div class="loader">
                         Loading...

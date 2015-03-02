@@ -32,23 +32,27 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
 })
 .controller('DeleteUsersController', function ($scope, $rootScope, ResourceUtility, StringUtility, PasswordUtility, GriotNavUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
-    $scope.deleteInProgess = true;
-
-    $scope.successUsers = [];
-    $scope.failUsers = [];
-
-    UserManagementService.DeleteUsers($scope.users).then(function(result){
-        $scope.successUsers = result.SuccessUsers;
-        $scope.failUsers = result.FailUsers;
-        $scope.deleteInProgess = false;
-    });
+    $scope.deleteInProgess = false;
+    $scope.deleteConfirmed = false;
 
     $scope.okClick = function ($event) {
         if ($event != null) {
             $event.preventDefault();
         }
 
-        if (!$scope.deleteInProgess) {
+        if (!$scope.deleteConfirmed) {
+            $scope.deleteConfirmed = true;
+            $scope.deleteInProgess = true;
+            $scope.successUsers = [];
+            $scope.failUsers = [];
+
+            UserManagementService.DeleteUsers($scope.users).then(function(result){
+                $scope.successUsers = result.SuccessUsers;
+                $scope.failUsers = result.FailUsers;
+                $scope.deleteInProgess = false;
+            });
+
+        } else if (!$scope.deleteInProgess) {
             $("#modalContainer").modal('hide');
             $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
         }

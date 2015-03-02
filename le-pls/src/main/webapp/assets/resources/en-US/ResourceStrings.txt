@@ -85,6 +85,7 @@ ADD_USER_EXISTING_P1=The specific user cannot be created at this time, because t
 ADD_USER_EXISTING_P2=However, you can grant access rights to this existing user. Do you want to proceeds?
 ADD_EXSITING_USER_SUCCESS=Successfully grant general access rights to user {0}.
 DELETE_USERS_TITLE=Delete Users
+DELETE_USER_ALERT=Please be sure you want to delete these users.
 DELETE_USERS_WAIT=Deleting users ...
 DELETE_USERS_PARA1=The following users have been successfully deleted:
 DELETE_USERS_PARA2=But the deletion of the following users is unsuccessful:

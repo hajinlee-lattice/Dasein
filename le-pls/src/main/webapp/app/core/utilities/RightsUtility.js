@@ -69,6 +69,6 @@ angular.module('mainApp.core.utilities.RightsUtility', [])
             this.mayViewConfiguration(rightsDict) &&
             this.mayViewReporting(rightsDict)
         );
-    }
+    };
 
 });
