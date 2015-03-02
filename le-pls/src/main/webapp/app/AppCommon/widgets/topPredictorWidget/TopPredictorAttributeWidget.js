@@ -22,8 +22,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     }
     
     var chart,
-        width = 200,
-        left_width = 130,
+        width = 220,
+        left_width = 145,
         bar_height = 24,
         height = bar_height * bucketNames.length,
         gap = 10;
@@ -37,35 +37,35 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .rangeBands([0, (bar_height + 2 * gap) * liftValues.length]);
     
     var nameY = d3.scale.ordinal()
-            .domain(bucketNames)
-            .rangeBands([0, (bar_height + 2 * gap) * bucketNames.length]);
-    
+        .domain(bucketNames)
+        .rangeBands([0, (bar_height + 2 * gap) * bucketNames.length]);
+        
+    var xTicks = x.ticks(5);
     chart = d3.select("#attributeChart") 
       .append('svg')
       .attr('class', 'chart')
       .attr('width', left_width + width + 40)
-      .attr('height', (bar_height + gap * 2) * bucketNames.length + 30)
+      .attr('height', (bar_height + gap * 2) * bucketNames.length + 50)
       .append("g")
       .attr("transform", "translate(0, 20)");
       
     chart.selectAll("line")
-        .data(x.ticks(d3.max(liftValues)))
+        .data(xTicks)
         .enter().append("line")
         .attr("x1", function(d) { return x(d) + left_width; })
         .attr("x2", function(d) { return x(d) + left_width; })
         .attr("y1", 0)
         .attr("y2", (bar_height + gap * 2) * bucketNames.length);
-
+        
     chart.selectAll(".rule")
-        .data(x.ticks(d3.max(liftValues)))
+        .data(xTicks)
         .enter().append("text")
         .attr("class", "rule")
         .attr("x", function(d) { return x(d) + left_width; })
-        .attr("y", 0)
+        .attr("y", (bar_height + gap * 2) * bucketNames.length + 20)
         .attr("dy", -6)
         .attr("text-anchor", "middle")
-        .attr("font-size", 10)
-        .text(String);
+        .text(function(d) { return d + "x"; } );
     
     chart.selectAll("rect")
         .data(liftValues)
@@ -99,9 +99,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     chart.selectAll("text.name")
         .data(bucketNames)
         .enter().append("text")
-        .attr("x", 0)
+        .attr("x", left_width - 5)
         .attr("y", function(d) {return nameY(d) + nameY.rangeBand()/2; })
         .attr("dy", ".36em")
+        .attr("text-anchor", "end")
         .style("fill", "black")
         .text(String);
         
