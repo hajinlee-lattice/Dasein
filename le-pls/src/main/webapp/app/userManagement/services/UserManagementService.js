@@ -16,7 +16,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
 
         $http({
             method: 'GET',
-            url: '/pls/users/byemail/' + email
+            url: '/pls/users?email=' + email
         }).success(function(data){
             if (data != null) {
                 result.Success = true;
@@ -64,11 +64,10 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
 
     this.GetUsers = function () {
         var deferred = $q.defer();
-        var tenantId = BrowserStorageUtility.getClientSession().Tenant.Identifier;
 
         $http({
             method: 'GET', 
-            url: '/pls/users/all/' + tenantId
+            url: '/pls/users/all'
         })
         .success(function(data, status, headers, config) {
             var result = {

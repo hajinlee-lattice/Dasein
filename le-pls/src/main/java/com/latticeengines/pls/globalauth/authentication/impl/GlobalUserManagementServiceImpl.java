@@ -44,8 +44,8 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         try {
             log.info(String.format("Registering user %s against Global Auth.", creds.getUsername()));
             return service.registerUser(
-                    new SoapUserBuilder(user).build(),
-                    new SoapCredentialsBuilder(creds).build());
+                new SoapUserBuilder(user).build(),
+                new SoapCredentialsBuilder(creds).build());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18004, e, new String[] { creds.getUsername() });
         }
@@ -125,6 +125,18 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             return new UserBuilder(service.findUserByEmail(email)).build();
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18017, e, new String[] { email });
+        }
+    }
+
+    @Override
+    public User getUser(String username) {
+        IUserManagementService service = getService();
+        addMagicHeaderAndSystemProperty(service);
+        try {
+            log.info(String.format("Getting user %s.", username));
+            return new UserBuilder(service.findUserByUsername(username)).build();
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18018, e, new String[] { username });
         }
     }
 
