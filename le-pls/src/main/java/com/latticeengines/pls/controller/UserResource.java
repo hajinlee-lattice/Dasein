@@ -84,7 +84,7 @@ public class UserResource {
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get a user by username (?username=) or email address (?email=)")
+    @ApiOperation(value = "Get a user by username (?username=) or email address (?email=) [CROSS TENANT]")
     public User getUser(@RequestParam(value = "username", required=false) String username, @RequestParam(value = "email", required=false) String email) {
         if (username == null && email == null) {
             return null;

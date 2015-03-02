@@ -11,7 +11,8 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
     'mainApp.appCommon.widgets.TabWidget',
     'mainApp.appCommon.widgets.TopPredictorWidget',
     'mainApp.appCommon.widgets.ThresholdExplorerWidget',
-    'mainApp.appCommon.widgets.UserManagementWidget'
+    'mainApp.appCommon.widgets.UserManagementWidget',
+    'mainApp.appCommon.widgets.AdminInfoWidget'
 ])
 .service('WidgetFrameworkService', function ($compile, $rootScope, WidgetConfigUtility, MetadataUtility) {
 
@@ -91,6 +92,9 @@ angular.module('mainApp.appCommon.services.WidgetFrameworkService', [
                 break;
             case WidgetConfigUtility.TOP_PREDICTOR_WIDGET:
                 $compile(options.element.html('<div data-top-predictor-widget></div>'))(scope);
+                break;
+            case WidgetConfigUtility.ADMIN_INFO_WIDGET:
+                $compile(options.element.html('<div data-admin-info-widget></div>'))(scope);
                 break;
             case WidgetConfigUtility.USER_MANAGEMENT_WIDGET:
                 $compile(options.element.html('<div data-user-management-widget></div>'))(scope);

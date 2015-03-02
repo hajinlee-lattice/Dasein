@@ -31,6 +31,30 @@ angular.module('mainApp.core.utilities.RightsUtility', [])
         return false;
     };
 
+    this.mayViewConfiguration = function(rightsDict) {
+        try{
+            return rightsDict.PLS_Configuration.MayView;
+        } catch(err) {
+            return false;
+        }
+    };
+
+    this.mayEditConfiguration = function(rightsDict) {
+        try{
+            return rightsDict.PLS_Configuration.MayEdit;
+        } catch(err) {
+            return false;
+        }
+    };
+
+    this.mayViewReporting = function(rightsDict) {
+        try{
+            return rightsDict.PLS_Reporting.MayView;
+        } catch(err) {
+            return false;
+        }
+    };
+
     this.canSeeUserManagement = function(rightsDict) {
         return this.mayViewUsers(rightsDict);
     };
@@ -38,5 +62,13 @@ angular.module('mainApp.core.utilities.RightsUtility', [])
     this.mayAddUser = function(rightsDict) {
         return this.mayEditUsers(rightsDict);
     };
+
+    this.maySeeHiddenAdminTab = function(rightsDict) {
+        return (
+            this.mayViewModels(rightsDict) &&
+            this.mayViewConfiguration(rightsDict) &&
+            this.mayViewReporting(rightsDict)
+        );
+    }
 
 });

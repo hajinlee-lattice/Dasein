@@ -1,8 +1,10 @@
 angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.GriotWidgetService',
     'mainApp.appCommon.widgets.ModelDetailsWidget',
@@ -12,7 +14,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.services.TopPredictorService'
 ])
 
-.controller('ModelDetailController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, WidgetConfigUtility, 
+.controller('ModelDetailController', function ($scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
     GriotNavUtility, WidgetFrameworkService, GriotWidgetService, ModelService, TopPredictorService) {
     $scope.ResourceUtility = ResourceUtility;
     
@@ -23,7 +25,17 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     if (widgetConfig == null) {
         return;
     }
-    
+
+    var clientSession = BrowserStorageUtility.getClientSession();
+    if (!RightsUtility.maySeeHiddenAdminTab(clientSession.availableRights)) {
+        try {
+            var widget = _.where(widgetConfig.Widgets, {ID: "modelDetailsScreenWidget"})[0];
+            widget = _.where(widget.Widgets, {ID: "modelDetailsTabWidget"})[0];
+            var adminTabId = _.findIndex(widget.Tabs, {ID: "modelAdminInfoTab"});
+            widget.Tabs.splice(adminTabId, 1);
+        } catch (err) { }
+    }
+
     var screenWidgetConfig = WidgetConfigUtility.GetWidgetConfig(
         widgetConfig,
         "modelDetailsScreenWidget"
