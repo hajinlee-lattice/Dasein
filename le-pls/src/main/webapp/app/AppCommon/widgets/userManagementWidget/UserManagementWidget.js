@@ -1,4 +1,4 @@
-angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
+angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.utilities.GriotNavUtility',
