@@ -57,7 +57,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
     public void registerUser() throws Exception {
         UserDocument doc = loginAndAttach("admin");
         Tenant tenant = doc.getTicket().getTenants().get(0);
-        UserRegistration userReg = createUserRegistration(tenant);
+        UserRegistration userReg = createUserRegistration();
 
         addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
@@ -79,7 +79,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(summaries.size(), 1);
     }
 
-    private UserRegistration createUserRegistration(Tenant tenant) {
+    private UserRegistration createUserRegistration() {
         UserRegistration userReg = new UserRegistration();
 
         User user = new User();
@@ -95,7 +95,6 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
 
         userReg.setUser(user);
         userReg.setCredentials(creds);
-        userReg.setTenant(tenant);
 
         return userReg;
     }

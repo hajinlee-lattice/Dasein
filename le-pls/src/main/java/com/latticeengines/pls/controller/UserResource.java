@@ -41,9 +41,9 @@ public class UserResource {
 
     @RequestMapping(value = "/add", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Register new users")
+    @ApiOperation(value = "Register a new user to the current tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public Boolean registerUser(@RequestBody UserRegistration userRegistration) {
+    public Boolean registerUser(@RequestBody UserRegistration userRegistration, HttpServletRequest request) {
         Credentials creds = userRegistration.getCredentials();
         boolean registered = globalUserManagementService.registerUser(userRegistration.getUser(), creds);
 
@@ -51,9 +51,11 @@ public class UserResource {
             throw new LedpException(LedpCode.LEDP_18004, new String[] { creds.getUsername() });
         }
 
+        Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+        Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
         AttributeMap aMap = new AttributeMap();
         aMap.put("Username", creds.getUsername());
-        aMap.put("TenantId", userRegistration.getTenant().getId());
+        aMap.put("TenantId", tenant.getId());
         return grantDefaultRights(aMap);
     }
 
@@ -110,7 +112,7 @@ public class UserResource {
 
     @RequestMapping(value = "/{username:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get a user by username")
+    @ApiOperation(value = "Get a user by username [CROSS TENANT]")
     public User getUserByPath(@PathVariable String username) {
         try {
             return globalUserManagementService.getUser(username);
@@ -124,7 +126,7 @@ public class UserResource {
 
     @RequestMapping(value = "/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Update a user")
+    @ApiOperation(value = "Update a user [CROSS TENANT]")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public Boolean update(@PathVariable String username, @RequestBody AttributeMap attrMap) {
         boolean success = false;
@@ -207,7 +209,7 @@ public class UserResource {
 
     @RequestMapping(value = "/resetpassword/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Reset the password for a user")
+    @ApiOperation(value = "Reset the password for a user [CROSS TENANT]")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public String resetPassword(@PathVariable String username) {
         try {
