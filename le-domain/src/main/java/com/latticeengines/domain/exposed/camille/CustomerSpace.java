@@ -52,7 +52,7 @@ public class CustomerSpace {
             throw new NullPointerException("Identifier parameter to CustomerSpace.parse may not be null");
         }
 
-        String[] parts = identifier.split(".");
+        String[] parts = identifier.split("\\.");
         if (parts.length != 3 && parts.length != 1) {
             throw new RuntimeException(
                     String.format(
