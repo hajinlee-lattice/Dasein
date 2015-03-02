@@ -74,6 +74,7 @@ public class UserResource {
     @RequestMapping(value = "/{userName:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a user")
+    @PreAuthorize("hasRole('Edit_PLS_Users')")
     public Boolean update(@PathVariable String userName, @RequestBody AttributeMap attrMap) {
         boolean success = false;
         if (userName.charAt(0) == '"' && userName.charAt(userName.length() - 1) == '"') {
@@ -113,7 +114,7 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Reset the password for a user")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public String delete(@PathVariable String username) {
+    public String resetPassword(@PathVariable String username) {
         try {
             if (username.charAt(0) == '"' && username.charAt(username.length() - 1) == '"') {
                 username = username.substring(1, username.length() - 1);
@@ -131,7 +132,7 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Delete a user")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public Boolean resetPassword(@PathVariable String username) {
+    public Boolean delete(@PathVariable String username) {
         try {
             if (username.charAt(0) == '"' && username.charAt(username.length() - 1) == '"') {
                 username = username.substring(1, username.length() - 1);
