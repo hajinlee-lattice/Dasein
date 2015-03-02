@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
@@ -390,6 +391,7 @@ public class ModelingServiceImpl implements ModelingService {
     public ApplicationId profileData(DataProfileConfiguration dataProfileConfig) {
         Set<String> excludeList = new HashSet<String>(dataProfileConfig.getExcludeColumnList());
         Set<String> includeList = new HashSet<String>(dataProfileConfig.getIncludeColumnList());
+        Set<String> eventList = getEventList(dataProfileConfig.getTargets());
         if (dataProfileConfig.getCustomer() == null) {
             throw new LedpException(LedpCode.LEDP_15002);
         }
@@ -432,7 +434,7 @@ public class ModelingServiceImpl implements ModelingService {
                         featureList.add(name);
                     }
                 } else {
-                    if (!excludeList.contains(name)) {
+                    if (!excludeList.contains(name) && !eventList.contains(name)) {
                         featureList.add(name);
                     }
                 }
@@ -463,6 +465,25 @@ public class ModelingServiceImpl implements ModelingService {
         ModelingJob modelingJob = createJob(m, dataProfileAlgorithm, assignedQueue, "profiling");
         m.addModelingJob(modelingJob);
         return modelingJobService.submitJob(modelingJob);
+    }
+
+    @VisibleForTesting
+    Set<String> getEventList(List<String> targets) {
+        Set<String> eventList = new HashSet<String>();
+        String eventKey = "Event:"; // assumes key:value form
+        for (String token : targets) {
+            int index = token.indexOf(eventKey);
+            if (index >= 0) {
+                // List of key-value pairs
+                eventList.add(token.substring(index + eventKey.length() + 1));
+                return eventList;
+            }
+        }
+
+        // List of columns
+        eventList.addAll(targets);
+
+        return eventList;
     }
 
     @Override
