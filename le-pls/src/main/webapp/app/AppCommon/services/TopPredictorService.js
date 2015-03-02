@@ -112,7 +112,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             return;
         }
         var possibleNumberofCategories = categoryList.length <=8 ? categoryList.length : 8;
-        var colorChoices = ["#27D2AE", "#3279DF", "#FF9403", "#BD8DF6", "#96E01E", "#A8A8A8", "#3279DF", "#FF7A44"];
+        var colorChoices = ["#4bd1bb", "#00a2d0", "#f6b300", "#a981e1", "#95cb2c", "#9a9a9a", "#3488d3", "#e55e1b"];
         categoryList = categoryList.sort(this.SortByCategoryName);
         for (var i = 0; i < possibleNumberofCategories; i++) {
             categoryList[i].color = colorChoices[i];

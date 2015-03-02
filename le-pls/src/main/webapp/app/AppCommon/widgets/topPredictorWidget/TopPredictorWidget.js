@@ -56,7 +56,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     
     var width = 300,
         height = 300,
-        radius = Math.min(width, height) / 2;
+        radius = Math.min(width, height) / 2,
+        hoverOpacity = 0.7;
 
     // This is used to get an initial size so it can animate 
     var fakePartition = d3.layout.partition()
@@ -113,15 +114,15 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                   if (d.depth === 1) {
                     return 1;
                 } else if (d.depth === 2) {
-                    return 0.6;
+                    return hoverOpacity;
                 }
               })
               .style("fill", function(d) {
                   return d.color;
               })
               .on("click", attributeClicked)
-              .on("mouseover", attributeMouseover)
-              .on("mouseout", attributeMouseout)
+              .on("mouseover", categoryMouseover)
+              .on("mouseout", categoryMouseout)
               .each(stash);
         
         function attributeClicked (d) {
@@ -139,7 +140,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             }
         }
           
-        function attributeMouseover (d) {
+        function categoryMouseover (d) {
             svg.selectAll("path")
                 .filter(function(node) {
                           return node.depth == 2 && node.name == d.name;
@@ -150,12 +151,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
           }
         }
           
-        function attributeMouseout (d) {
+        function categoryMouseout (d) {
             svg.selectAll("path")
                 .filter(function(node) {
                     return node.depth == 2;
                 })
-                .style("opacity", 0.6);
+                .style("opacity", hoverOpacity);
             hideAttributeHover();
         }
         
@@ -235,13 +236,35 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
               if (d.depth === 1) {
                 return 1;
             } else if (d.depth === 2) {
-                return 0.6;
+                return hoverOpacity;
             }
           })
           .style("fill", function(d) {
               return d.color;
           })
+          .on("mouseover", attributeMouseover)
+          .on("mouseout", attributeMouseout)
           .each(stash);
+          
+          function attributeMouseover (d) {
+            svg.selectAll("path")
+                .filter(function(node) {
+                          return node.depth == 1 && node.name == d.name;
+                })
+                .style("opacity", hoverOpacity);
+          if (d.depth == 1) {
+              showAttributeHover(d.name, d.color);
+          }
+        }
+          
+        function attributeMouseout (d) {
+            svg.selectAll("path")
+                .filter(function(node) {
+                    return node.depth == 1;
+                })
+                .style("opacity", 1);
+            hideAttributeHover();
+        }
         
         // Interpolate the arcs in data space.
         function arcTween (a) {
