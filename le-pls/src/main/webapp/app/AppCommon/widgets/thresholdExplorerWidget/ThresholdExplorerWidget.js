@@ -11,59 +11,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         return;
     }
 
-    //==================================================
-    // Prepare Data
-    //==================================================
-    totalLeads = modelSummary.ModelDetails.TestingLeads;
-    totalConversions = modelSummary.ModelDetails.TestingConversions;
-    avgConversion = totalConversions / totalLeads;
-    
-    segments = modelSummary.Segmentations[0].Segments;
-
-    percentLeads = []; for (i = 0; i < 101; i++) percentLeads.push(i);
-
-    cumConversions = []; cumConversions.push(0);
-    cumCount = []; cumCount.push(0);
-    for (i = 1; i < 101; i++) {
-        cumConversions.push(cumConversions[i - 1] + segments[i - 1].Converted);
-        cumCount.push(cumCount[i - 1] + segments[i - 1].Count);
-    }
-
-    cumPctConversions = []; cumPctConversions.push(0);
-    for (i = 1; i < 101; i++) {
-        cumPctConversions.push(100 * (cumConversions[i] / totalConversions));
-    }
-
-    leftLift = []; leftLift.push(0);
-    for (i = 1; i < 101; i++) {
-        conversion = cumConversions[i] / cumCount[i];
-        leftLift.push(conversion / avgConversion);
-    }
-
-    rightLift = [];
-    for (i = 0; i < 100; i++) {
-        conversion = (totalConversions - cumConversions[i]) / (totalLeads - cumCount[i]);
-        rightLift.push(conversion / avgConversion);
-    }
-    rightLift.push(0);
-
-    score = []; score.push(0);
-    for (i = 100; i > 0; i--) {
-        score.push(i);
-    }
-
-    //==================================================
-    // Load Data
-    //==================================================
-    data = [];
-    for (i = 0; i < 101; i++) {
-        data.push({
-            "leads": percentLeads[i],
-            "score": score[i],
-            "conversions": cumPctConversions[i],
-            "leftLift": leftLift[i],
-            "rightLift": rightLift[i]});
-    }
+    data = modelSummary.ThresholdChartData;
 
     //==================================================
     // Specify Dimensions

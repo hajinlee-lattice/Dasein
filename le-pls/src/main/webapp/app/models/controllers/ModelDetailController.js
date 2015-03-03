@@ -8,14 +8,14 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.GriotWidgetService',
     'mainApp.appCommon.widgets.ModelDetailsWidget',
-    'mainApp.appCommon.widgets.ThresholdExplorerWidget',
     'mainApp.models.controllers.ModelDetailController',
     'mainApp.models.services.ModelService',
-    'mainApp.appCommon.services.TopPredictorService'
+    'mainApp.appCommon.services.TopPredictorService',
+    'mainApp.appCommon.services.ThresholdExplorerService'
 ])
 
 .controller('ModelDetailController', function ($scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
-    GriotNavUtility, WidgetFrameworkService, GriotWidgetService, ModelService, TopPredictorService) {
+    GriotNavUtility, WidgetFrameworkService, GriotWidgetService, ModelService, TopPredictorService, ThresholdExplorerService) {
     $scope.ResourceUtility = ResourceUtility;
     
     var modelId = $scope.data.Id;
@@ -62,6 +62,10 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
             model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
             model.BottomSample = ModelService.FormatLeadSampleData(model.BottomSample);
 
+            thresholdData = ThresholdExplorerService.PrepareData(model);
+            model.ThresholdChartData = thresholdData.ChartData;
+            model.ThresholdDecileData = thresholdData.DecileData;
+
             var contentContainer = $('#modelDetailContainer');
             WidgetFrameworkService.CreateWidget({
                 element: contentContainer,
@@ -71,9 +75,5 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
                 parentData: model
             });
         }
-
     });
-
-
-
 });

@@ -87,6 +87,57 @@
                                     "Widgets": [{
                                             "ID" : "modelDetailsExplorerWidget",
                                             "Type" : "ThresholdExplorerWidget"
+                                        }, {
+                                            "ID" : "modelDetailsDecileGridWidget",
+                                            "Type" : "SimpleGridWidget",
+                                            "TitleString": "DECILE_GRID_TITLE",
+                                            "DataProvider": "ThresholdDecileData",
+                                            "Columns": [{
+                                                    "TitleString": "DECILE_GRID_LEADS_LABEL",
+                                                    "PropertyName": "Leads",
+                                                    "DisplayType": "String"
+                                                }, {
+                                                    "TitleString": "DECILE_GRID_D1_LABEL",
+                                                    "PropertyName": "D1",
+                                                    "DisplayType": "String"
+                                                }, {
+                                                    "TitleString": "DECILE_GRID_D2_LABEL",
+                                                    "PropertyName": "D2",
+                                                    "DisplayType": "String"
+                                                }, {
+                                                    "TitleString": "DECILE_GRID_D3_LABEL",
+                                                    "PropertyName": "D3",
+                                                    "DisplayType": "String"
+                                                }, {
+                                                    "TitleString": "DECILE_GRID_D4_LABEL",
+                                                    "PropertyName": "D4",
+                                                    "DisplayType": "String"
+                                                }, {
+                                                    "TitleString": "DECILE_GRID_D5_LABEL",
+                                                    "PropertyName": "D5",
+                                                    "DisplayType": "String"
+                                                }, {
+                                                    "TitleString": "DECILE_GRID_D6_LABEL",
+                                                    "PropertyName": "D6",
+                                                    "DisplayType": "String"
+                                                }, {
+                                                    "TitleString": "DECILE_GRID_D7_LABEL",
+                                                    "PropertyName": "D7",
+                                                    "DisplayType": "String"
+                                                }, {
+                                                    "TitleString": "DECILE_GRID_D8_LABEL",
+                                                    "PropertyName": "D8",
+                                                    "DisplayType": "String"
+                                                }, {
+                                                    "TitleString": "DECILE_GRID_D9_LABEL",
+                                                    "PropertyName": "D9",
+                                                    "DisplayType": "String"
+                                                }, {
+                                                    "TitleString": "DECILE_GRID_D10_LABEL",
+                                                    "PropertyName": "D10",
+                                                    "DisplayType": "String"
+                                                }
+                                            ]
                                         }
                                     ]
                                 }
