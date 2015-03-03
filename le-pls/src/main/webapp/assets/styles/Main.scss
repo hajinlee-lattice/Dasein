@@ -178,12 +178,17 @@ Model-detail
 */
 
 .model-details .nav-tabs {
-  min-width: 480px;
-  margin: 0 45%;
+  width: 100%;
+  list-style-type: none;
+  text-align: center;
 }
 
 .model-details .nav-tabs>li {
   margin-bottom: -1px;
+  float: none;
+  margin-right: 1px;
+  margin-left: 1px;
+  display: inline-block;
 }
 
 .model-details .nav-tabs li {
