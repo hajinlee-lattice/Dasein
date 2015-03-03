@@ -166,7 +166,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
     private void checkZkArtifacts(ModelCommand command) throws Exception {
         String interfaceName = "ModelArtifact";
-        CustomerSpace space = new CustomerSpace(command.getDeploymentExternalId());
+        CustomerSpace space = CustomerSpace.parse(command.getDeploymentExternalId());
         DataInterfaceSubscriber subscriber = new DataInterfaceSubscriber(interfaceName, space);
 
         Path relativePath = new Path(zkArtifactsPath + "ScoreDerivation.json");
