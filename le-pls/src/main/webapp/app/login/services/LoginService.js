@@ -148,7 +148,7 @@ angular.module('mainApp.login.services.LoginService', [
 
         $http({
             method: 'PUT',
-            url: '/pls/users/changepassword',
+            url: '/pls/users/self',
             data: creds,
             headers: {
                 "Content-Type": "application/json"

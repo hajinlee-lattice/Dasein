@@ -168,10 +168,10 @@ public class UserResource {
         }
     }
 
-    @RequestMapping(value = "/changepassword", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/self", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Change password for the login user")
-    public Boolean changePassword(@RequestBody AttributeMap attrMap, HttpServletRequest request) {
+    @ApiOperation(value = "Update the login user [CROSS TENANT]")
+    public Boolean updateSelf(@RequestBody AttributeMap attrMap, HttpServletRequest request) {
         boolean success = false;
         User user;
         try {
