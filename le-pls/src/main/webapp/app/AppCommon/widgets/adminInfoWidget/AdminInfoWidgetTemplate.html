@@ -15,8 +15,6 @@
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <data-file-downloader url="/pls/datafiles/modeljson/{{ModelId}}" filename="modelsummary.json" filetype="application/json"></data-file-downloader>
-                        &nbsp;&nbsp;&nbsp;&nbsp;
-                        <a download="modelsummary.json" href="/pls/datafiles/modeljson/{{ModelId}}">direct download (testing)</a>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <data-file-downloader url="/pls/datafiles/predictorcsv/{{ModelId}}" filename="predictors.csv" filetype="text/plain"></data-file-downloader>
