@@ -1,9 +1,12 @@
 package com.latticeengines.pls.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +65,9 @@ public class LoginResource {
 
             LoginResult result = doc.new LoginResult();
             result.setMustChangePassword(ticket.isMustChangePassword());
-            result.setTenants(ticket.getTenants());
+            List<Tenant> sortedTenants = new ArrayList<>(ticket.getTenants());
+            Collections.sort(sortedTenants, new TenantNameSorter());
+            result.setTenants(sortedTenants);
             doc.setResult(result);
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
@@ -120,5 +125,13 @@ public class LoginResource {
         String tenantId = ticket.getTenants().get(0).getId();
 
         return globalUserManagementService.forgotLatticeCredentials(userName, tenantId);
+    }
+
+    class TenantNameSorter implements Comparator<Tenant>{
+
+        public int compare(Tenant aTenant, Tenant anotherTenant) {
+            return aTenant.getName().compareTo(anotherTenant.getName());
+        }
+
     }
 }
