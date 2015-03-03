@@ -442,7 +442,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
                     "-41" + ")");
 
         infoElements.select("text.rtext")
-            .text((d.rightLift != 0 ? d.rightLift.toFixed(2) : 0) + "x")
+            .text((d.rightLift !== 0 ? d.rightLift.toFixed(2) : 0) + "x")
             .attr("transform", "translate(" +
                     (x(d.leads) + 14) + "," +
                     "-23" + ")");
