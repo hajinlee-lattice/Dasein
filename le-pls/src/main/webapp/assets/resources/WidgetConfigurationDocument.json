@@ -89,14 +89,6 @@
                                             "Type" : "ThresholdExplorerWidget"
                                         }
                                     ]
-                                }, {
-                                    "ID" : "modelAdminInfoTab",
-                                    "TitleString": "ADMIN_INFO_TAB_TITLE",
-                                    "Widgets": [{
-                                          "ID" : "modelAdminInfoWidget",
-                                          "Type" : "AdminInfoWidget"
-                                        }
-                                    ]
                                 }
                             ]
                         }

@@ -27,12 +27,19 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     }
 
     var clientSession = BrowserStorageUtility.getClientSession();
-    if (!RightsUtility.maySeeHiddenAdminTab(clientSession.availableRights)) {
+    if (RightsUtility.maySeeHiddenAdminTab(clientSession.availableRights)) {
         try {
             var widget = _.where(widgetConfig.Widgets, {ID: "modelDetailsScreenWidget"})[0];
             widget = _.where(widget.Widgets, {ID: "modelDetailsTabWidget"})[0];
-            var adminTabId = _.findIndex(widget.Tabs, {ID: "modelAdminInfoTab"});
-            widget.Tabs.splice(adminTabId, 1);
+            var adminTab = {
+                "ID" : "modelAdminInfoTab",
+                "TitleString": "ADMIN_INFO_TAB_TITLE",
+                "Widgets": [{
+                    "ID" : "modelAdminInfoWidget",
+                    "Type" : "AdminInfoWidget"
+                }]
+            };
+            widget.Tabs.push(adminTab);
         } catch (err) { }
     }
 
