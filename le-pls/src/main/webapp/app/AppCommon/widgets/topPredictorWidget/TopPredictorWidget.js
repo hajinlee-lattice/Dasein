@@ -299,11 +299,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         if (showAttributeTimeout != null) {
             clearTimeout(showAttributeTimeout);
         }
-        var topPredictorAttributeHover = $("#topPredictorAttributeHover");
+        /*var topPredictorAttributeHover = $("#topPredictorAttributeHover");
         topPredictorAttributeHover.hide();
         topPredictorAttributeHover.css("top", -1000);
         topPredictorAttributeHover.css("left", 0);
-        topPredictorAttributeHover.empty();
+        topPredictorAttributeHover.empty();*/
         
     }
   

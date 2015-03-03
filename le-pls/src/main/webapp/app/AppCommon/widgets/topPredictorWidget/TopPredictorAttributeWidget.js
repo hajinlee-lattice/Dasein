@@ -136,6 +136,16 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("class", "lift")
         .style("fill", "black")
         .text(function(d) { return d + "x"; } );
+        
+    // This is the lift label to the right of the chart
+    var liftText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LIFT_LABEL").toUpperCase();
+    chart.append("text")
+        .attr("x", function(d) { return 375; })
+        .attr("y", 5)
+        .attr("dy", ".36em")
+        .attr("font-size", "10px")
+        .style("fill", "#999999")
+        .text(liftText);
     
     // These are the percent numbers to the right of the chart
     chart.selectAll("text.percentLeads")
@@ -151,6 +161,16 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("class", "lift")
         .style("fill", "black")
         .text(function(d) { return d + "%"; } );
+    
+    // This is the %Leads label to the right of the chart
+    var leadsText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LEADS_LABEL").toUpperCase();
+    chart.append("text")
+        .attr("x", function(d) { return 410; })
+        .attr("y", 5)
+        .attr("dy", ".36em")
+        .attr("font-size", "10px")
+        .style("fill", "#999999")
+        .text(leadsText);
         
     // These are the bucket names to the left of the chart
     chart.selectAll("text.name")
