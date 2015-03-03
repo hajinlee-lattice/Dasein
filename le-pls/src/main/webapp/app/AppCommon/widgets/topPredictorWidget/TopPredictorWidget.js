@@ -292,12 +292,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             scope.data = TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data);
             $compile(topPredictorAttributeHover.html('<div data-top-predictor-attribute-widget></div>'))(scope);
             topPredictorAttributeHover.show();
-        }, 750);
+        }, 500);
     }
     
     function hideAttributeHover () {
         var topPredictorAttributeHover = $("#topPredictorAttributeHover");
         topPredictorAttributeHover.hide();
+        topPredictorAttributeHover.css("top", -1000);
+        topPredictorAttributeHover.css("left", 0);
         topPredictorAttributeHover.empty();
         
     }
