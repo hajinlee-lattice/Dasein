@@ -123,10 +123,8 @@ angular.module('mainApp.userManagement.modals.AddUserModal', [
     };
 
     $scope.cancelClick = function () {
-        if (!$scope.saveInProgress) {
-            $("#modalContainer").modal('hide');
-            $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
-        }
+        $("#modalContainer").modal('hide');
+        $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
     };
 
     $scope.noClick = function () {

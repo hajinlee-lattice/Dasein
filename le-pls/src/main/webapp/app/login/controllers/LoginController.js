@@ -54,7 +54,8 @@ angular.module('mainApp.login.controllers.LoginController', [
             $scope.loginInProgess = false;
             $scope.loginMessage = null;
             if (result != null && result.Success === true) {
-                $scope.directToPassword = result.Result.MustChangePassword;
+                //$scope.directToPassword = result.Result.MustChangePassword; -- turned off for PLS 1.4
+                $scope.directToPassword = false;
                 $scope.handleTenantSelection(result.Result.Tenants); 
             } else {
                 // Need to fail gracefully if we get no service response at all

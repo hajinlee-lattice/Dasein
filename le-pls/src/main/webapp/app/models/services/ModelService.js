@@ -85,7 +85,7 @@ angular.module('mainApp.models.services.ModelService', [
             headers: {
                 "Content-Type": "application/json"
             },
-            data: angular.toJson ({ Status: "UpdateAsDeleted" }),
+            data: angular.toJson ({ Status: "UpdateAsDeleted" })
         })
         .success(function(data, status, headers, config) {
             if (data === true || data === 'true') {
