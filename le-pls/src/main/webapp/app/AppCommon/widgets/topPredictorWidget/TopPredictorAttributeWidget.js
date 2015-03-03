@@ -8,6 +8,31 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     $scope.attributeDescription = data.description;
     $scope.attributeColor = data.color;
     
+    function setHoverPosition(xPos, yPos) {
+        var modalHeight = $(".attribute-hover > div").height();
+        var topOffset = modalHeight > 333 ? (modalHeight - 333)/2 : 0;
+        $("#topPredictorAttributeHover").css("top", yPos + (400 - topOffset));
+        
+        var leftOffset;
+        var attributeHover = $(".attribute-hover");
+        if (xPos < 0) {
+            leftOffset = 980;
+            attributeHover.removeClass("attribute-hover-left-arrow");
+            attributeHover.addClass("attribute-hover-right-arrow");
+        } else {
+            leftOffset = 440;
+            attributeHover.removeClass("attribute-hover-right-arrow");
+            attributeHover.addClass("attribute-hover-left-arrow");
+        }
+        $("#topPredictorAttributeHover").css("left", xPos + leftOffset);
+    }
+    
+    setHoverPosition($scope.mouseX, $scope.mouseY);
+    
+    $scope.$on('MouseMoveEvent', function (event, data) {
+        setHoverPosition(data[0], data[1]);
+    });
+    
     var chartData = data.elementList;
     var i;
     

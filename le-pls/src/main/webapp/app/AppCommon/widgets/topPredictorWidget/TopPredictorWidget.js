@@ -57,7 +57,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     var width = 300,
         height = 300,
         radius = Math.min(width, height) / 2,
-        hoverOpacity = 0.7;
+        hoverOpacity = 0.7,
+        showAttributeTimeout;
 
     // This is used to get an initial size so it can animate 
     var fakePartition = d3.layout.partition()
@@ -122,7 +123,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             })
             .on("click", attributeClicked)
             .on('mousemove', function () {
-                setHoverPosition(d3.mouse(this)[0], d3.mouse(this)[1]);
+                $rootScope.$broadcast('MouseMoveEvent', [d3.mouse(this)[0], d3.mouse(this)[1]]);
             })
             .on("mouseover", function (d) {
                 svg.selectAll("path")
@@ -131,7 +132,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                     })
                     .style("opacity", 1);
                 if (d.depth == 2) {
-                    showAttributeHover(d.name, d.color);
+                    showAttributeHover(d.name, d.color, d3.mouse(this)[0], d3.mouse(this)[1]);
                 }
             })
             .on("mouseout", function (d) {
@@ -187,6 +188,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     };
     
     $scope.categoryClicked = function (category) {
+        clearTimeout(showAttributeTimeout);
         var categoryList = TopPredictorService.GetAttributesByCategory(data.Predictors, category.name, category.color, 50);
         TopPredictorService.CalculateAttributeSize(categoryList);
         $scope.backToSummaryView = true;
@@ -243,7 +245,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 return d.color;
             })
             .on('mousemove', function () {
-                setHoverPosition(d3.mouse(this)[0], d3.mouse(this)[1]);
+                $rootScope.$broadcast('MouseMoveEvent', [d3.mouse(this)[0], d3.mouse(this)[1]]);
             })
             .on("mouseover", function (d) {
                 svg.selectAll("path")
@@ -252,7 +254,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                     })
                     .style("opacity", hoverOpacity);
                 if (d.depth == 1) {
-                    showAttributeHover(d.name, d.color);
+                    showAttributeHover(d.name, d.color, d3.mouse(this)[0], d3.mouse(this)[1]);
                 }
             })
             .on("mouseout", function (d) {
@@ -278,20 +280,15 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         path.data(partition.nodes).transition().duration(1000).attrTween("d", arcTween);
     };
     
-    function setHoverPosition(xPos, yPos) {
-        var modalHeight = $(".attribute-hover > div").height();
-        var topOffset = modalHeight > 333 ? (modalHeight - 333)/2 : 0;
-        $("#topPredictorAttributeHover").css("top", yPos + (400 - topOffset));
-        
-        console.log(xPos);
-        var topOffset = xPos < 0 ? 980: 440;
-        $("#topPredictorAttributeHover").css("left", xPos + topOffset);
-    }
-    
-    function showAttributeHover (attributeName, attributeColor) {
-        setTimeout(function () {
+    function showAttributeHover (attributeName, attributeColor, mouseX, mouseY) {
+        if (showAttributeTimeout != null) {
+            clearTimeout(showAttributeTimeout);
+        }
+        showAttributeTimeout = setTimeout(function () {
             var topPredictorAttributeHover = $("#topPredictorAttributeHover");
             var scope = $rootScope.$new();
+            scope.mouseX = mouseX;
+            scope.mouseY = mouseY;
             scope.data = TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data);
             $compile(topPredictorAttributeHover.html('<div data-top-predictor-attribute-widget></div>'))(scope);
             topPredictorAttributeHover.show();

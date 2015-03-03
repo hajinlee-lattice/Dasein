@@ -7404,46 +7404,6 @@ Model Details
   color: #477cba;
   cursor: pointer; }
 
-.attribute-hover {
-  position: relative; }
-
-.attribute-hover > div {
-  position: absolute;
-  background: #f6f9fc;
-  border: 4px solid #e5e5e5;
-  padding: 1.5em;
-  width: 400px;
-  min-height: 300px;
-  text-align: left; }
-
-.attribute-hover > div:after, .attribute-hover > div:before {
-  left: 100%;
-  top: 50%;
-  border: solid transparent;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none; }
-
-.attribute-hover > div:after {
-  border-color: rgba(255, 255, 255, 0);
-  border-left-color: #f6f9fc;
-  border-width: 12px;
-  margin-top: -12px; }
-
-.attribute-hover > div:before {
-  border-color: rgba(255, 225, 255, 0);
-  border-left-color: #e5e5e5;
-  border-width: 18px;
-  margin-top: -18px; }
-
-.attribute-hover > div h4 {
-  padding-left: 10px;
-  margin: 0;
-  display: inline-block;
-  font-family: 'ProximaNova-Bold'; }
-
 .data .attributes h4 {
   margin-bottom: 0.5em;
   padding-bottom: 0.5em;
@@ -15463,7 +15423,8 @@ input.error, input.error:focus {
   min-height: 380px;
   text-align: left; }
 
-.attribute-hover > div:after, .attribute-hover > div:before {
+.attribute-hover-left-arrow > div:after,
+.attribute-hover-left-arrow > div:before {
   left: 100%;
   top: 50%;
   border: solid transparent;
@@ -15473,20 +15434,49 @@ input.error, input.error:focus {
   position: absolute;
   pointer-events: none; }
 
-.attribute-hover > div:after {
+.attribute-hover-left-arrow > div:after {
   border-color: rgba(255, 255, 255, 0);
   border-left-color: #f6f9fc;
   border-width: 12px;
   margin-top: -12px; }
 
-.attribute-hover > div:before {
+.attribute-hover-left-arrow > div:before {
   border-color: rgba(255, 225, 255, 0);
   border-left-color: #e5e5e5;
   border-width: 18px;
   margin-top: -18px; }
 
-.attribute-hover > div h4 {
+.attribute-hover-left-arrow > div h4 {
   padding-left: 10px;
+  margin: 0;
+  display: inline-block;
+  font-family: 'ProximaNova-Bold'; }
+
+.attribute-hover-right-arrow > div:after,
+.attribute-hover-right-arrow > div:before {
+  right: 100%;
+  top: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none; }
+
+.attribute-hover-right-arrow > div:after {
+  border-color: rgba(255, 255, 255, 0);
+  border-right-color: #f6f9fc;
+  border-width: 12px;
+  margin-top: -12px; }
+
+.attribute-hover-right-arrow > div:before {
+  border-color: rgba(255, 225, 255, 0);
+  border-right-color: #e5e5e5;
+  border-width: 18px;
+  margin-top: -18px; }
+
+.attribute-hover-right-arrow > div h4 {
+  padding-right: 10px;
   margin: 0;
   display: inline-block;
   font-family: 'ProximaNova-Bold'; }
