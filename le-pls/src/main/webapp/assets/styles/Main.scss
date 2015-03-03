@@ -135,7 +135,27 @@ Model-detail
 */
 
 .model-details .nav-tabs {
-  min-width: 600px;
+  min-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.model-admin-info table {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.model-admin-info table th {
+  min-width: 150px;
+}
+
+.model-admin-info-error {
+  border-radius: 4px 4px 4px 4px;
+  margin-top: 0.5em;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /*

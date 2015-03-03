@@ -1,22 +1,41 @@
 <div data-ng-controller="AdminInfoWidgetController" class="tab-content">
     <div class="wrapper model-admin-info">
         <table class="table table-striped">
-            <tr>
-                <th>Model Health Score</th>
-                <td>0.8635 Excellent</td>
-            </tr>
-            <tr>
-                <th>Model Health Score</th>
-                <td>0.8635 Excellent</td>
-            </tr>
-            <tr>
-                <th>Model Health Score</th>
-                <td>0.8635 Excellent</td>
-            </tr>
-            <tr>
-                <th>Model Health Score</th>
-                <td>0.8635 Excellent</td>
-            </tr>
+            <tbody>
+                <tr>
+                    <th>{{ResourceUtility.getString('MODEL_ADMIN_HEALTH_SCORE_LABEL')}}</th>
+                    <td>{{ModelHealthScore}}</td>
+                </tr>
+                <tr>
+                    <th>{{ResourceUtility.getString('MODEL_ADMIN_INTERNAL_ID_LABEL')}}</th>
+                    <td>{{ModelId}}</td>
+                </tr>
+                <tr>
+                    <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_DETAILS_LABEL')}}</th>
+                    <td>
+                        <a href="#" data-ng-click="modelSummaryJSONClick()">{{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}</a></br>
+                        <a href="#" data-ng-click="topPredictorCSVClick()">{{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ResourceUtility.getString('MODEL_ADMIN_SCORED_LEADS_LABEL')}}</th>
+                    <td>
+                        <a href="#" data-ng-click="readoutCSVClick()">{{ResourceUtility.getString('MODEL_ADMIN_READOUT_SAMPLE_LINK')}}</a></br>
+                        <a href="#" data-ng-click="scoresCSVClick()">{{ResourceUtility.getString('MODEL_ADMIN_SCORES_LINK')}}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_PERFORMANCE_LABEL')}}</th>
+                    <td>
+                        <a href="#" data-ng-click="thresholdExplorerCSVClick()">{{ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPLORER_LINK')}}</a></br>
+                        <a href="#" data-ng-click="RFModelCSVClick()">{{ResourceUtility.getString('MODEL_ADMIN_RF_MODEL_LINK')}}</a>
+                    </td>
+                </tr>
+            </tbody>
         </table>
+        <div class="global-error model-admin-info-error" data-ng-show="showDownloadError">
+            <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD_ERROR')}}</span>
+            <button class="close btn btn-link" data-ng-click="showDownloadError = false;"><i class="fa fa-times fa-inverse"></i></button>
+        </div>
     </div>
 </div>
