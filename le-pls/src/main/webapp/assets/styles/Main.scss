@@ -19,6 +19,10 @@
   display: block;
 }
 
+#topPredictorAttributeHover {
+  position: absolute;
+}
+
 .attribute-hover {
     position: relative;
 }
@@ -30,8 +34,6 @@
     width: 485px;
     min-height: 380px;
     text-align: left;
-    top: -350px;
-    left: 1100px;
 }
 .attribute-hover > div:after, .attribute-hover > div:before {
     left: 100%;

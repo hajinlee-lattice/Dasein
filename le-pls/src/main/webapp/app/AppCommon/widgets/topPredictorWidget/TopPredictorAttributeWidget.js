@@ -21,6 +21,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         bucketNames.push(data.elementList[i].name);
     }
     
+    var percentLeads = [];
+    for (i = 0; i < data.elementList.length; i++) {
+        percentLeads.push(data.elementList[i].percentTotal);
+    }
+    
     var chart,
         width = 220,
         left_width = 145,
@@ -39,6 +44,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     var nameY = d3.scale.ordinal()
         .domain(bucketNames)
         .rangeBands([0, (bar_height + 2 * gap) * bucketNames.length]);
+    
+    var percentY = d3.scale.ordinal()
+        .domain(percentLeads)
+        .rangeBands([0, (bar_height + 2 * gap) * percentLeads.length]);
         
     var xTicks = x.ticks(5);
     chart = d3.select("#attributeChart") 
@@ -77,7 +86,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .style("fill", data.color)
         .attr('opacity', function(d) {
             if (d > 1) {
-                return 0.7;
+                return 0.9;
             } else {
                 return 0.4;
             }
@@ -95,6 +104,22 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("class", "lift")
         .style("fill", "black")
         .text(String);
+    
+    chart.selectAll("text.percentLeads")
+        .data(percentLeads)
+        .enter().append("text")
+        .attr("x", function(d) { return 430; })
+        .attr("y", function(d) { 
+            var test1 = percentY(d);
+            var test2 = percentY.rangeBand()/2;
+            return percentY(d) + percentY.rangeBand()/2; 
+        })
+        .attr("dx", -5)
+        .attr("dy", ".36em")
+        .attr("text-anchor", "end")
+        .attr("class", "lift")
+        .style("fill", "black")
+        .text(function(d) { return d + "%"; } );
   
     chart.selectAll("text.name")
         .data(bucketNames)

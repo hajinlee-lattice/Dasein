@@ -102,28 +102,47 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             });
         
         var path = svg.datum(chartData).selectAll("path")
-              .data(fakePartition.nodes)
-            .enter().append("path")
-              .attr("display", function(d) { 
-                  return d.depth ? null : "none"; 
-              }) // hide inner ring
-              .attr("d", arc)   
-              .style("stroke", "#fff")
-              .style("cursor", "pointer")
-              .attr('opacity', function(d) {
-                  if (d.depth === 1) {
+            .data(fakePartition.nodes)
+        .enter().append("path")
+            .attr("display", function(d) { 
+                return d.depth ? null : "none"; 
+            }) // hide inner ring
+            .attr("d", arc)   
+            .style("stroke", "#fff")
+            .style("cursor", "pointer")
+            .attr('opacity', function(d) {
+                if (d.depth === 1) {
                     return 1;
                 } else if (d.depth === 2) {
                     return hoverOpacity;
                 }
-              })
-              .style("fill", function(d) {
-                  return d.color;
-              })
-              .on("click", attributeClicked)
-              .on("mouseover", categoryMouseover)
-              .on("mouseout", categoryMouseout)
-              .each(stash);
+            })
+            .style("fill", function(d) {
+                return d.color;
+            })
+            .on("click", attributeClicked)
+            .on('mousemove', function () {
+                setHoverPosition(d3.mouse(this)[0], d3.mouse(this)[1]);
+            })
+            .on("mouseover", function (d) {
+                svg.selectAll("path")
+                    .filter(function(node) {
+                        return node.depth == 2 && node.name == d.name;
+                    })
+                    .style("opacity", 1);
+                if (d.depth == 2) {
+                    showAttributeHover(d.name, d.color);
+                }
+            })
+            .on("mouseout", function (d) {
+                svg.selectAll("path")
+                    .filter(function(node) {
+                        return node.depth == 2;
+                    })
+                    .style("opacity", hoverOpacity);
+                hideAttributeHover();
+            })
+            .each(stash);
         
         function attributeClicked (d) {
             var category = null;
@@ -138,26 +157,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 // This is required to update bindings (although not sure why)
                 $scope.$apply($scope.categoryClicked(category));
             }
-        }
-          
-        function categoryMouseover (d) {
-            svg.selectAll("path")
-                .filter(function(node) {
-                          return node.depth == 2 && node.name == d.name;
-                })
-                .style("opacity", 1);
-          if (d.depth == 2) {
-              showAttributeHover(d.name, d.color);
-          }
-        }
-          
-        function categoryMouseout (d) {
-            svg.selectAll("path")
-                .filter(function(node) {
-                    return node.depth == 2;
-                })
-                .style("opacity", hoverOpacity);
-            hideAttributeHover();
         }
         
         // Interpolate the arcs in data space.
@@ -226,46 +225,45 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             });
         
         var path = svg.datum(root).selectAll("path")
-          .data(fakePartition.nodes)
+            .data(fakePartition.nodes)
         .enter().append("path")
-          .attr("display", function(d) { 
-              return d.depth ? null : "none"; 
-          }) // hide inner ring
-          .attr("d", arc2)   
-          .style("stroke", "#fff")
-          .attr('opacity', function(d) {
-              if (d.depth === 1) {
-                return 1;
-            } else if (d.depth === 2) {
-                return hoverOpacity;
-            }
-          })
-          .style("fill", function(d) {
-              return d.color;
-          })
-          .on("mouseover", attributeMouseover)
-          .on("mouseout", attributeMouseout)
-          .each(stash);
-          
-          function attributeMouseover (d) {
-            svg.selectAll("path")
-                .filter(function(node) {
-                          return node.depth == 1 && node.name == d.name;
-                })
-                .style("opacity", hoverOpacity);
-          if (d.depth == 1) {
-              showAttributeHover(d.name, d.color);
-          }
-        }
-          
-        function attributeMouseout (d) {
-            svg.selectAll("path")
-                .filter(function(node) {
-                    return node.depth == 1;
-                })
-                .style("opacity", 1);
-            hideAttributeHover();
-        }
+            .attr("display", function(d) { 
+                return d.depth ? null : "none"; 
+            }) // hide inner ring
+            .attr("d", arc2)   
+            .style("stroke", "#fff")
+            .attr('opacity', function(d) {
+                if (d.depth === 1) {
+                    return 1;
+                } else if (d.depth === 2) {
+                    return hoverOpacity;
+                }
+            })
+            .style("fill", function(d) {
+                return d.color;
+            })
+            .on('mousemove', function () {
+                setHoverPosition(d3.mouse(this)[0], d3.mouse(this)[1]);
+            })
+            .on("mouseover", function (d) {
+                svg.selectAll("path")
+                    .filter(function(node) {
+                        return node.depth == 1 && node.name == d.name;
+                    })
+                    .style("opacity", hoverOpacity);
+                if (d.depth == 1) {
+                    showAttributeHover(d.name, d.color);
+                }
+            })
+            .on("mouseout", function (d) {
+                svg.selectAll("path")
+                    .filter(function(node) {
+                        return node.depth == 1;
+                    })
+                    .style("opacity", 1);
+                hideAttributeHover();
+            })
+            .each(stash);
         
         // Interpolate the arcs in data space.
         function arcTween (a) {
@@ -280,14 +278,31 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         path.data(partition.nodes).transition().duration(1000).attrTween("d", arcTween);
     };
     
+    function setHoverPosition(xPos, yPos) {
+        var modalHeight = $(".attribute-hover > div").height();
+        var topOffset = modalHeight > 333 ? (modalHeight - 333)/2 : 0;
+        $("#topPredictorAttributeHover").css("top", yPos + (400 - topOffset));
+        
+        console.log(xPos);
+        var topOffset = xPos < 0 ? 980: 440;
+        $("#topPredictorAttributeHover").css("left", xPos + topOffset);
+    }
+    
     function showAttributeHover (attributeName, attributeColor) {
-        var scope = $rootScope.$new();
-        scope.data = TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data);
-        $compile($("#topPredictorAttributeHover").html('<div data-top-predictor-attribute-widget></div>'))(scope);
+        setTimeout(function () {
+            var topPredictorAttributeHover = $("#topPredictorAttributeHover");
+            var scope = $rootScope.$new();
+            scope.data = TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data);
+            $compile(topPredictorAttributeHover.html('<div data-top-predictor-attribute-widget></div>'))(scope);
+            topPredictorAttributeHover.show();
+        }, 750);
     }
     
     function hideAttributeHover () {
-        //$("#topPredictorAttributeHover").empty();
+        var topPredictorAttributeHover = $("#topPredictorAttributeHover");
+        topPredictorAttributeHover.hide();
+        topPredictorAttributeHover.empty();
+        
     }
   
 })
