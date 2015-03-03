@@ -339,7 +339,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("fill", "#666")
         .style("font-size", "11px")
         .style("font-weight", "700")
-        .text("% CONV");
+        .text("% Total Conversions");
 
     infoElements.append("text")
         .attr("class", "xtext")
@@ -356,7 +356,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("fill", "#666")
         .style("font-size", "11px")
         .style("font-weight", "700")
-        .text("TOP");
+        .text("LEAD");
 
     infoElements.append("text")
         .attr("class", "lytext")

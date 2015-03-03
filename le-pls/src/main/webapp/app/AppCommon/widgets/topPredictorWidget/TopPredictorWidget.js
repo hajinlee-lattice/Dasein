@@ -191,7 +191,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         var categoryList = TopPredictorService.GetAttributesByCategory(data.Predictors, category.name, category.color, 50);
         TopPredictorService.CalculateAttributeSize(categoryList);
         $scope.backToSummaryView = true;
-        $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_CATEGORY_HEADER", [category.name, categoryList.length]);
+        var prefix = categoryList.length >= 50 ? ResourceUtility.getString("TOP_PREDICTORS_CHART_CATEGORY_HEADER_PREFIX") : ""
+        $scope.chartHeader = ResourceUtility.getString("TOP_PREDICTORS_CHART_CATEGORY_HEADER", [category.name, prefix, categoryList.length]);
         var root = {
             name: "root",
             size : 1,

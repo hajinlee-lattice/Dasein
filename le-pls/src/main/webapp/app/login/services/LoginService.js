@@ -34,6 +34,8 @@ angular.module('mainApp.login.services.LoginService', [
                 Success: false,
                 errorMessage: data ? data.errorMsg : ResourceUtility.getString('LOGIN_UNKNOWN_ERROR')
             };
+            
+            if (data.errorCode == 'LEDP_18001') result.errorMessage = ResourceUtility.getString('DEFAULT_LOGIN_ERROR_TEXT');
             deferred.resolve(result);
         });
         
