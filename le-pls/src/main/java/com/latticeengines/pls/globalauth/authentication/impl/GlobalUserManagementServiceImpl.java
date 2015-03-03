@@ -23,8 +23,9 @@ import com.latticeengines.pls.globalauth.generated.usermgr.ObjectFactory;
 import com.latticeengines.pls.globalauth.generated.usermgr.UserManagementService;
 
 @Component("globalUserManagementService")
-public class GlobalUserManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl implements GlobalUserManagementService {
-    
+public class GlobalUserManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl implements
+        GlobalUserManagementService {
+
     private static final Log log = LogFactory.getLog(GlobalUserManagementServiceImpl.class);
 
     private IUserManagementService getService() {
@@ -36,16 +37,14 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
         return service.getBasicHttpBindingIUserManagementService();
     }
-    
+
     @Override
     public Boolean registerUser(User user, Credentials creds) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
             log.info(String.format("Registering user %s against Global Auth.", creds.getUsername()));
-            return service.registerUser(
-                new SoapUserBuilder(user).build(),
-                new SoapCredentialsBuilder(creds).build());
+            return service.registerUser(new SoapUserBuilder(user).build(), new SoapCredentialsBuilder(creds).build());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18004, e, new String[] { creds.getUsername() });
         }
@@ -71,7 +70,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Revoking right %s from user %s for tenant %s.", right, username, tenant));
             return service.revokeRight(right, tenant, username);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18006, e, new String[]{right, username, tenant});
+            throw new LedpException(LedpCode.LEDP_18006, e, new String[] { right, username, tenant });
         }
     }
 
@@ -94,13 +93,10 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         addMagicHeaderAndSystemProperty(service);
         try {
             log.info(String.format("Modifying credentials for %s.", oldCreds.getUsername()));
-            return service.modifyLatticeCredentials(
-                new SoapTicketBuilder(ticket).build(),
-                new SoapCredentialsBuilder(oldCreds).build(),
-                new SoapCredentialsBuilder(newCreds).build()
-            );
+            return service.modifyLatticeCredentials(new SoapTicketBuilder(ticket).build(), new SoapCredentialsBuilder(
+                    oldCreds).build(), new SoapCredentialsBuilder(newCreds).build());
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18010, e, new String[] {oldCreds.getUsername()});
+            throw new LedpException(LedpCode.LEDP_18010, e, new String[] { oldCreds.getUsername() });
         }
     }
 
@@ -112,7 +108,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Resetting credentials for %s.", username));
             return service.resetLatticeCredentials(username);
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18011, e, new String[] {username});
+            throw new LedpException(LedpCode.LEDP_18011, e, new String[] { username });
         }
     }
 
@@ -159,7 +155,8 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         try {
             log.info(String.format("Getting all users and their rights for tenant %s.", tenantId));
             List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = new ArrayList<>();
-            for (com.latticeengines.pls.globalauth.generated.usermgr.UserRights userRights : service.findAllUserRightsByTenant(tenantId).getUserRights()) {
+            for (com.latticeengines.pls.globalauth.generated.usermgr.UserRights userRights : service
+                    .findAllUserRightsByTenant(tenantId).getUserRights()) {
                 userRightsList.add(new UserRightsBuilder(userRights).build());
             }
             return userRightsList;
@@ -170,32 +167,32 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     static class SoapUserBuilder {
         private User user;
-        
+
         public SoapUserBuilder(User user) {
             this.user = user;
         }
-        
+
         public com.latticeengines.pls.globalauth.generated.usermgr.User build() {
             com.latticeengines.pls.globalauth.generated.usermgr.User u = new ObjectFactory().createUser();
             u.setEmail(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Email"), // 
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Email"), //
                     String.class, user.getEmail()));
             u.setFirstName(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "FirstName"), // 
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "FirstName"), //
                     String.class, user.getFirstName()));
             u.setLastName(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "LastName"), // 
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "LastName"), //
                     String.class, user.getLastName()));
             u.setPhoneNumber(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "PhoneNumber"), // 
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "PhoneNumber"), //
                     String.class, user.getPhoneNumber()));
             u.setTitle(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Title"), // 
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Title"), //
                     String.class, user.getTitle()));
             return u;
         }
     }
-    
+
     static class SoapCredentialsBuilder {
         private Credentials creds;
 
@@ -206,11 +203,11 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         public com.latticeengines.pls.globalauth.generated.usermgr.Credentials build() {
             com.latticeengines.pls.globalauth.generated.usermgr.Credentials c = new ObjectFactory().createCredentials();
             c.setUsername(new JAXBElement<String>( //
-                new QName("http://schemas.lattice-engines.com/2008/Poet", "Username"), //
-                String.class, creds.getUsername()));
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Username"), //
+                    String.class, creds.getUsername()));
             c.setPassword(new JAXBElement<String>( //
-                new QName("http://schemas.lattice-engines.com/2008/Poet", "Password"), //
-                String.class, creds.getPassword()));
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Password"), //
+                    String.class, creds.getPassword()));
 
             return c;
 
@@ -228,15 +225,14 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             com.latticeengines.pls.globalauth.generated.usermgr.Ticket t = new ObjectFactory().createTicket();
             t.setUniquness(ticket.getUniqueness());
             t.setRandomness(new JAXBElement<String>( //
-                new QName("http://schemas.lattice-engines.com/2008/Poet", "Randomness"), //
-                String.class, ticket.getRandomness()));
+                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Randomness"), //
+                    String.class, ticket.getRandomness()));
             return t;
         }
     }
 
     static class UserBuilder {
         private com.latticeengines.pls.globalauth.generated.usermgr.User user;
-
 
         public UserBuilder(com.latticeengines.pls.globalauth.generated.usermgr.User user) {
             this.user = user;
@@ -265,10 +261,8 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
 
         public AbstractMap.SimpleEntry<User, List<String>> build() {
-            return new AbstractMap.SimpleEntry<>(
-                new UserBuilder(userRights.getUser()).build(),
-                userRights.getRights().getValue().getString()
-            );
+            return new AbstractMap.SimpleEntry<>(new UserBuilder(userRights.getUser()).build(), userRights.getRights()
+                    .getValue().getString());
         }
     }
 

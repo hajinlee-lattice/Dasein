@@ -1,29 +1,41 @@
 package com.latticeengines.pls.controller;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.domain.exposed.security.*;
-import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
-import com.latticeengines.pls.security.RightsUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.exception.LoginException;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
+import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
+import com.latticeengines.pls.security.RightsUtilities;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
-
-import java.util.*;
 
 @Api(value = "user", description = "REST resource for user management")
 @RestController
@@ -66,7 +78,11 @@ public class UserResource {
     public Boolean grantDefaultRights(@RequestBody AttributeMap attrMap) {
         String username = attrMap.get("Username");
         String tenantId = attrMap.get("TenantId");
-        return globalUserManagementService.grantRight(GrantedRight.VIEW_PLS_MODELS.getAuthority(), tenantId, username);
+        boolean viewModelRightsGranted = globalUserManagementService.grantRight(GrantedRight.VIEW_PLS_MODELS.getAuthority(), tenantId, username);
+        boolean viewReportRightsGranted = globalUserManagementService.grantRight(GrantedRight.VIEW_PLS_REPORTING.getAuthority(), tenantId, username);
+        boolean viewConfigRightsGranted = globalUserManagementService.grantRight(GrantedRight.VIEW_PLS_CONFIGURATION.getAuthority(), tenantId, username);
+        
+        return viewModelRightsGranted && viewReportRightsGranted && viewConfigRightsGranted;
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET, headers = "Accept=application/json")
