@@ -207,7 +207,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
 
             String interfaceName = "ModelSummary";
             String deploymentExternalId = modelCommand.getDeploymentExternalId();
-            CustomerSpace space = new CustomerSpace(deploymentExternalId);
+            CustomerSpace space = CustomerSpace.parse(deploymentExternalId);
             DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName, space);
 
             Path relativePath = new Path("/ModelSummary");
