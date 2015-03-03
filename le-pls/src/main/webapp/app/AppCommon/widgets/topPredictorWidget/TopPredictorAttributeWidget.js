@@ -20,7 +20,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             attributeHover.removeClass("attribute-hover-left-arrow");
             attributeHover.addClass("attribute-hover-right-arrow");
         } else {
-            leftOffset = 440;
+            leftOffset = 415;
             attributeHover.removeClass("attribute-hover-right-arrow");
             attributeHover.addClass("attribute-hover-left-arrow");
         }
@@ -128,12 +128,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("text-anchor", "end")
         .attr("class", "lift")
         .style("fill", "black")
-        .text(String);
+        .text(function(d) { return d + "x"; } );
     
     chart.selectAll("text.percentLeads")
         .data(percentLeads)
         .enter().append("text")
-        .attr("x", function(d) { return 430; })
+        .attr("x", function(d) { return 450; })
         .attr("y", function(d) { 
             var test1 = percentY(d);
             var test2 = percentY.rangeBand()/2;

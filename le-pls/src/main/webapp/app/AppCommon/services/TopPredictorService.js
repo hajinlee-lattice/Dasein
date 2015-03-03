@@ -362,6 +362,10 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         for (var i = 0; i < predictor.Elements.length; i++) {
             var element = predictor.Elements[i];
             var percentTotal = Math.round((element.Count / modelSummary.ModelDetails.TotalLeads) * 100);
+            var isCategorical = this.IsPredictorElementCategorical(element);
+            if (isCategorical && percentTotal < 1) {
+                continue;
+            }
             var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
             if (attributeValue.toUpperCase() == "NULL") {
                 attributeValue = "N/A";
