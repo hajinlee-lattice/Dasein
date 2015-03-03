@@ -140,36 +140,13 @@ public class UserResource {
         }
     }
 
+
     @RequestMapping(value = "/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a user [CROSS TENANT]")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public Boolean update(@PathVariable String username, @RequestBody AttributeMap attrMap) {
         boolean success = false;
-        // change password
-        if (attrMap.containsKey("OldPassword") && attrMap.containsKey("NewPassword")) {
-            String oldPassword  = attrMap.get("OldPassword");
-            String newPassword  = attrMap.get("NewPassword");
-
-            Credentials oldCreds = new Credentials();
-            oldCreds.setUsername(username);
-            oldCreds.setPassword(oldPassword);
-
-            Credentials newCreds = new Credentials();
-            newCreds.setUsername(username);
-            newCreds.setPassword(newPassword);
-
-            try {
-                Ticket ticket = globalAuthenticationService.authenticateUser(username, oldPassword);
-                success = globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
-            } catch (LedpException e) {
-                if (e.getCode() == LedpCode.LEDP_18001) {
-                    throw new LoginException(e);
-                }
-                throw e;
-            }
-        }
-
         //TODO:song update other User attributes
         return success;
     }
@@ -189,6 +166,50 @@ public class UserResource {
             }
             throw e;
         }
+    }
+
+    @RequestMapping(value = "/changepassword", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Change password for the login user")
+    public Boolean changePassword(@RequestBody AttributeMap attrMap, HttpServletRequest request) {
+        boolean success = false;
+        User user;
+        try {
+            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            user = globalUserManagementService.getUserByEmail(globalSessionManagementService.retrieve(ticket).getEmailAddress());
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
+        }
+
+        // change password
+        if (attrMap.containsKey("OldPassword") && attrMap.containsKey("NewPassword")) {
+            String oldPassword  = attrMap.get("OldPassword");
+            String newPassword  = attrMap.get("NewPassword");
+
+            Credentials oldCreds = new Credentials();
+            oldCreds.setUsername(user.getUsername());
+            oldCreds.setPassword(oldPassword);
+
+            Credentials newCreds = new Credentials();
+            newCreds.setUsername(user.getUsername());
+            newCreds.setPassword(newPassword);
+
+            try {
+                Ticket ticket = globalAuthenticationService.authenticateUser(user.getUsername(), oldPassword);
+                success = globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
+            } catch (LedpException e) {
+                if (e.getCode() == LedpCode.LEDP_18001) {
+                    throw new LoginException(e);
+                }
+                throw e;
+            }
+        }
+
+        //TODO:song update other User attributes
+        return success;
     }
 
     @RequestMapping(value = "/bulkdelete", method = RequestMethod.POST, headers = "Accept=application/json")

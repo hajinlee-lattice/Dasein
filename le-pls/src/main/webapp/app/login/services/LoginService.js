@@ -138,9 +138,7 @@ angular.module('mainApp.login.services.LoginService', [
             deferred.resolve(null);
             return deferred.promise;
         }
-        
-        var loginDoc = BrowserStorageUtility.getLoginDocument();
-        var username = loginDoc.UserName;
+
         var creds = {
             OldPassword : CryptoJS.SHA256(oldPassword).toString(),
             NewPassword : CryptoJS.SHA256(newPassword).toString()
@@ -148,8 +146,8 @@ angular.module('mainApp.login.services.LoginService', [
 
         $http({
             method: 'PUT',
-            url: '/pls/users/' + username,
-            data: JSON.stringify(creds),
+            url: '/pls/users/changepassword',
+            data: creds,
             headers: {
                 "Content-Type": "application/json"
             }
