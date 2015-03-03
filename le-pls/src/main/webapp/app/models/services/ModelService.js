@@ -108,7 +108,7 @@ angular.module('mainApp.models.services.ModelService', [
             SessionService.HandleResponseErrors(data, status);
             result = {
                 Success: false,
-                ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                ResultErrors: ResourceUtility.getString('MODEL_DELETE_SERVICE_ERROR')
             };
             if (data.errorCode == 'LEDP_18003') result.ResultErrors = ResourceUtility.getString('MODEL_DELETE_ACCESS_DENIED');
             if (data.errorCode == 'LEDP_18021') result.ResultErrors = ResourceUtility.getString('MODEL_DELETE_ACTIVE_MODEL_ERROR');
@@ -203,7 +203,7 @@ angular.module('mainApp.models.services.ModelService', [
                 SessionService.HandleResponseErrors(data, status);
                 result = {
                     Success: false,
-                    ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                    ResultErrors: ResourceUtility.getString('MODEL_TILE_EDIT_SERVICE_ERROR')
                 };
                 if (data.errorCode == 'LEDP_18003') result.ResultErrors = ResourceUtility.getString('CHANGE_MODEL_NAME_ACCESS_DENIED');
                 if (data.errorCode == 'LEDP_18014') result.ResultErrors = ResourceUtility.getString('CHANGE_MODEL_NAME_CONFLICT');
