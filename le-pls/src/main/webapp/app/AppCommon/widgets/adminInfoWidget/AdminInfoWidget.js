@@ -60,7 +60,11 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
                 $scope.$parent.Error.ShowError = false;
                 $scope.$emit('download-start');
                 $http.get($attrs.url).then(function (response) {
-                    $scope.$emit('downloaded', btoa(unescape(encodeURIComponent(JSON.stringify(response.data)))));
+                    if ($attrs.filetype === "application/json") {
+                        $scope.$emit('downloaded', btoa(unescape(encodeURIComponent(JSON.stringify(response.data)))));
+                    } else {
+                        $scope.$emit('downloaded', btoa(unescape(encodeURIComponent(response.data))));
+                    }
                     $scope.fetching = false;
                     $scope.linkText = ResourceUtility.getString("MODEL_ADMIN_DOWNLOAD");
                 }, function () {
