@@ -4,24 +4,23 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.domain.exposed.security.User;
+import java.util.AbstractMap;
+import java.util.List;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.GrantedRight;
 
-import java.util.AbstractMap;
-import java.util.List;
-
 public class GlobalUserManagementServiceImplTestNG extends PlsFunctionalTestNGBase {
-    
+
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
 

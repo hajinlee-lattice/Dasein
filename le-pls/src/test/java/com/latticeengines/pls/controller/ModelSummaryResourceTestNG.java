@@ -115,7 +115,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
         if (globalUserManagementService.getUser("bnguyen") == null) {
             assertTrue(globalUserManagementService.deleteUser("bnguyen@lattice-engines.com"));
-            createUser("bnguyen", "bnguyen@lattice-engines.com", "Bernie", "Nguyen");
+            createUser("bnguyen", "bnguyen@lattice-engines.com", "Everything", "IsAwesome", "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=");
         }
         grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant1, "bnguyen");
         grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, tenant1, "bnguyen");
@@ -210,7 +210,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = { "functional", "deployment" })
     public void getModelSummariesHasViewPlsModelsRight() {
-        UserDocument doc = loginAndAttach("bnguyen");
+        UserDocument doc = loginAndAttach("bnguyen", "tahoe");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
@@ -226,7 +226,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "getModelSummariesHasViewPlsModelsRight" })
     public void updateModelSummaryHasEditPlsModelsRight() {
-        UserDocument doc = loginAndAttach("bnguyen");
+        UserDocument doc = loginAndAttach("bnguyen", "tahoe");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
@@ -246,35 +246,35 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateModelSummaryHasEditPlsModelsRight" })
     public void updateAsDeletedModelSummaryHasEditPlsModelsRight() {
-        UserDocument doc = loginAndAttach("bnguyen");
+        UserDocument doc = loginAndAttach("bnguyen", "tahoe");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), 1);
-        
+
         Map<String, String> map = (Map) response.get(0);
         AttributeMap attrMap = new AttributeMap();
         attrMap.put("Status", "UpdateAsInactive");
         restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
-        
+
         attrMap = new AttributeMap();
         attrMap.put("Status", "UpdateAsDeleted");
         restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
         assertNull(summary);
-        
+
         attrMap = new AttributeMap();
         attrMap.put("Status", "UpdateAsActive");
         restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
 
-    }    
-    
+    }
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateAsDeletedModelSummaryHasEditPlsModelsRight" })
     public void deleteModelSummaryHasEditPlsModelsRight() {
-        UserDocument doc = loginAndAttach("bnguyen");
+        UserDocument doc = loginAndAttach("bnguyen", "tahoe");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());

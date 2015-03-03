@@ -76,7 +76,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private SessionFactory sessionFactory;
-    
+
     @Autowired
     private ModelSummaryParser modelSummaryParser;
 
@@ -90,6 +90,10 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             "");
 
     protected void createUser(String username, String email, String firstName, String lastName) {
+        createUser(username, email, firstName, lastName, "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
+    }
+
+    protected void createUser(String username, String email, String firstName, String lastName, String password) {
         try {
             User user1 = new User();
             user1.setFirstName(firstName);
@@ -98,7 +102,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
             Credentials user1Creds = new Credentials();
             user1Creds.setUsername(username);
-            user1Creds.setPassword("EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
+            user1Creds.setPassword(password);
             assertTrue(globalUserManagementService.registerUser(user1, user1Creds));
         } catch (Exception e) {
             log.info("User " + username + " already created.");
@@ -189,9 +193,13 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected UserDocument loginAndAttach(String username) {
+        return loginAndAttach(username, "admin");
+    }
+
+    protected UserDocument loginAndAttach(String username, String password) {
         Credentials creds = new Credentials();
         creds.setUsername(username);
-        creds.setPassword(DigestUtils.sha256Hex("admin"));
+        creds.setPassword(DigestUtils.sha256Hex(password));
 
         LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds,
                 LoginDocument.class, new Object[] {});
@@ -212,7 +220,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         summary.setTenant(tenant);
         return summary;
     }
-    
+
     protected void setupDb(String tenant1Name, String tenant2Name) throws Exception {
         setupDb(tenant1Name, tenant2Name, true);
     }

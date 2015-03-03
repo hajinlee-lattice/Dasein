@@ -35,25 +35,25 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
-    
+
     @Value("${pls.modelingservice.testdsdb}")
     private String dataSourceDb;
 
     @Value("${pls.modelingservice.testdsdbhost}")
     private String dataSourceHost;
-    
+
     @Value("${pls.modelingservice.testdsdbuser}")
     private String dataSourceUser;
-    
+
     @Value("${pls.modelingservice.testdsdbpasswd.encrypted}")
     private String dataSourcePassword;
-    
+
     @Value("${pls.modelingservice.testdsdbport}")
     private int dataSourcePort;
-    
+
     @Autowired
     private Configuration yarnConfiguration;
-    
+
     @Autowired
     private GlobalAuthenticationServiceImpl globalAuthenticationService;
 
@@ -73,7 +73,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         assertEquals(ticket.getTenants().size(), 2);
         assertNotNull(ticket);
         createUser("rgonzalez", "rgonzalez@lattice-engines.com", "Ron", "Gonzalez");
-        createUser("bnguyen", "bnguyen@lattice-engines.com", "Bernie", "Nguyen");
+        createUser("bnguyen", "bnguyen@lattice-engines.com", "Everything", "IsAwesome", "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=");
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
@@ -87,7 +87,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "admin");
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "admin");
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "admin");
-        
+
         setupDb(tenant1, tenant2, false);
 
         InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
@@ -123,17 +123,17 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
                  "FirstName: FirstName", //
                  "SpamIndicator: SpamIndicator") //
         .metadataContents(metadataContents);
-    
+
         executor = new ModelingServiceExecutor(bldr);
         executor.init();
     }
-    
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = "deployment", enabled = true)
     public void runPipeline() throws Exception {
         executor.runPipeline();
         Thread.sleep(30000L);
-        UserDocument doc = loginAndAttach("bnguyen");
+        UserDocument doc = loginAndAttach("bnguyen", "tahoe");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
@@ -145,5 +145,5 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         assertTrue(summary.getName().startsWith("Model-"));
         assertNotNull(summary.getDetails());
     }
-    
+
 }
