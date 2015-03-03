@@ -59,53 +59,56 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         gap = 10;
     
     var x = d3.scale.linear()
-        .domain([0, d3.max(liftValues)])
+        .domain([0, d3.max(liftValues) + 1])
         .range([0, width]);
     
     var y = d3.scale.ordinal()
         .domain(liftValues)
         .rangeBands([0, (bar_height + 2 * gap) * liftValues.length]);
-    
-    var nameY = d3.scale.ordinal()
-        .domain(bucketNames)
-        .rangeBands([0, (bar_height + 2 * gap) * bucketNames.length]);
-    
-    var percentY = d3.scale.ordinal()
-        .domain(percentLeads)
-        .rangeBands([0, (bar_height + 2 * gap) * percentLeads.length]);
         
-    var xTicks = x.ticks(5);
+    var xTicks = x.ticks(d3.max(liftValues) + 1);
     chart = d3.select("#attributeChart") 
       .append('svg')
       .attr('class', 'chart')
       .attr('width', left_width + width + 40)
-      .attr('height', (bar_height + gap * 2) * bucketNames.length + 50)
+      .attr('height', (bar_height + gap * 2) * bucketNames.length + 60)
       .append("g")
       .attr("transform", "translate(0, 20)");
       
+    // These are the background ticks
     chart.selectAll("line")
         .data(xTicks)
         .enter().append("line")
         .attr("x1", function(d) { return x(d) + left_width; })
         .attr("x2", function(d) { return x(d) + left_width; })
-        .attr("y1", 0)
-        .attr("y2", (bar_height + gap * 2) * bucketNames.length);
+        .attr("y1", function(d, i) {
+            if (i === 0 || i === xTicks.length-1) {
+                return 0;
+            } else {
+                return 20;
+            }
+        })
+        .attr("y2", (bar_height + gap * 2) * bucketNames.length + 20);
         
+    // These are the background tick labels
     chart.selectAll(".rule")
         .data(xTicks)
         .enter().append("text")
         .attr("class", "rule")
         .attr("x", function(d) { return x(d) + left_width; })
-        .attr("y", (bar_height + gap * 2) * bucketNames.length + 20)
+        .attr("y", (bar_height + gap * 2) * bucketNames.length + 40)
         .attr("dy", -6)
         .attr("text-anchor", "middle")
         .text(function(d) { return d + "x"; } );
     
+    // These are the bars
     chart.selectAll("rect")
         .data(liftValues)
         .enter().append("rect")
         .attr("x", left_width)
-        .attr("y", function(d) { return y(d) + gap; })
+        .attr("y", function(d) { 
+            return y(d) + gap + 20; 
+        })
         .attr("width", x)
         .attr("height", bar_height)
         .style("fill", data.color)
@@ -117,12 +120,15 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             }
             
         });
-   
+        
+    // These are the lift numbers to the right of the chart
     chart.selectAll("text.lift")
         .data(liftValues)
         .enter().append("text")
         .attr("x", function(d) { return 400; })
-        .attr("y", function(d){ return y(d) + y.rangeBand()/2; } )
+        .attr("y", function(d, i) {
+            return (i * (bar_height + 2 * gap)) + 42; 
+        })
         .attr("dx", -5)
         .attr("dy", ".36em")
         .attr("text-anchor", "end")
@@ -130,14 +136,13 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .style("fill", "black")
         .text(function(d) { return d + "x"; } );
     
+    // These are the percent numbers to the right of the chart
     chart.selectAll("text.percentLeads")
         .data(percentLeads)
         .enter().append("text")
         .attr("x", function(d) { return 450; })
-        .attr("y", function(d) { 
-            var test1 = percentY(d);
-            var test2 = percentY.rangeBand()/2;
-            return percentY(d) + percentY.rangeBand()/2; 
+        .attr("y", function(d, i) { 
+            return (i * (bar_height + 2 * gap)) + 42; 
         })
         .attr("dx", -5)
         .attr("dy", ".36em")
@@ -145,12 +150,15 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("class", "lift")
         .style("fill", "black")
         .text(function(d) { return d + "%"; } );
-  
+        
+    // These are the bucket names to the left of the chart
     chart.selectAll("text.name")
         .data(bucketNames)
         .enter().append("text")
         .attr("x", left_width - 5)
-        .attr("y", function(d) {return nameY(d) + nameY.rangeBand()/2; })
+        .attr("y", function(d, i) {
+            return (i * (bar_height + 2 * gap)) + 42; 
+        })
         .attr("dy", ".36em")
         .attr("text-anchor", "end")
         .style("fill", "black")

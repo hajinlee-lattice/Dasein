@@ -120,7 +120,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
     };
     
     this.GetAttributesByCategory = function (predictorList, categoryName, categoryColor, maxNumber) {
-        if (StringUtility.IsEmptyString(categoryName) || predictorList == null) {
+        if (StringUtility.IsEmptyString(categoryName) || predictorList == null  || maxNumber == null) {
             return [];
         }
         
@@ -134,8 +134,11 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         
         var toReturn = [];
         for (var y = 0; y < totalPredictors.length; y++) {
+            if (toReturn.length == maxNumber) {
+                break;
+            }
             var predictor = totalPredictors[y];
-            if (maxNumber == null || toReturn.length < maxNumber) {
+            if (AnalyticAttributeUtility.IsAllowedForInsights(predictor)) {
                 var displayPredictor = {
                   name: predictor.Name,
                   categoryName: categoryName,
@@ -144,9 +147,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                   color: categoryColor
                 };
                 toReturn.push(displayPredictor);
-            } else {
-                break;
-            }
+            } 
         }
         return toReturn;
         
@@ -193,7 +194,9 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         var category;
         for (var i = 0; i < modelSummary.Predictors.length; i++) {
             var predictor = modelSummary.Predictors[i];
-            if (!StringUtility.IsEmptyString(predictor.Category) &&  topCategoryNames.indexOf(predictor.Category) === -1 && topCategoryNames.length < 8) {
+            if (AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
+                !StringUtility.IsEmptyString(predictor.Category) && 
+                topCategoryNames.indexOf(predictor.Category) === -1 && topCategoryNames.length < 8) {
                 topCategoryNames.push(predictor.Category);
                 category = {
                     name: predictor.Category,
@@ -352,7 +355,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         }
         
         var toReturn = {
-            name: predictor.Name,
+            name: predictor.DisplayName,
             color: attributeColor,
             description: predictor.Description,
             elementList: []
