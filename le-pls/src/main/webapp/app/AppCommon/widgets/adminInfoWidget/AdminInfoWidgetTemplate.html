@@ -13,28 +13,37 @@
                 <tr>
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_DETAILS_LABEL')}}</th>
                     <td>
-                        <a href="#" data-ng-click="modelSummaryJSONClick()">{{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}</a></br>
-                        <a href="#" data-ng-click="topPredictorCSVClick()">{{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}</a>
+                        {{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <data-file-downloader url="/pls/datafiles/modeljson/{{ModelId}}" filename="modelsummary.json" filetype="application/json"></data-file-downloader>
+                        <br/>
+                        {{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <data-file-downloader url="/pls/datafiles/predictorcsv/{{ModelId}}" filename="predictors.csv" filetype="text/plain"></data-file-downloader>
                     </td>
                 </tr>
                 <tr>
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_SCORED_LEADS_LABEL')}}</th>
                     <td>
-                        <a href="#" data-ng-click="readoutCSVClick()">{{ResourceUtility.getString('MODEL_ADMIN_READOUT_SAMPLE_LINK')}}</a></br>
-                        <a href="#" data-ng-click="scoresCSVClick()">{{ResourceUtility.getString('MODEL_ADMIN_SCORES_LINK')}}</a>
+                        {{ResourceUtility.getString('MODEL_ADMIN_READOUT_SAMPLE_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <data-file-downloader url="/pls/datafiles/readoutcsv/{{ModelId}}" filename="readout.csv" filetype="text/plain"></data-file-downloader>
+                        <br/>
+                        {{ResourceUtility.getString('MODEL_ADMIN_SCORES_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <data-file-downloader url="/pls/datafiles/scorescsv/{{ModelId}}" filename="scores.csv" filetype="text/plain"></data-file-downloader>
                     </td>
                 </tr>
                 <tr>
                     <th>{{ResourceUtility.getString('MODEL_ADMIN_MODEL_PERFORMANCE_LABEL')}}</th>
                     <td>
-                        <a href="#" data-ng-click="thresholdExplorerCSVClick()">{{ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPLORER_LINK')}}</a></br>
-                        <a href="#" data-ng-click="RFModelCSVClick()">{{ResourceUtility.getString('MODEL_ADMIN_RF_MODEL_LINK')}}</a>
+                        {{ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPLORER_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <data-file-downloader url="/pls/datafiles/thresholdExplorercsv/{{ModelId}}" filename="threshold.csv" filetype="text/plain"></data-file-downloader>
+                        <br/>
+                        {{ResourceUtility.getString('MODEL_ADMIN_RF_MODEL_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <data-file-downloader url="/pls/datafiles/rfmodelcsv/{{ModelId}}" filename="rfmodel.csv" filetype="text/plain"></data-file-downloader>
                     </td>
                 </tr>
             </tbody>
         </table>
-        <div class="global-error model-admin-info-error" data-ng-show="showDownloadError">
-            <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{ResourceUtility.getString('MODEL_ADMIN_DOWNLOAD_ERROR')}}</span>
+        <div class="global-error model-admin-info-error" data-ng-show="Error.ShowError">
+            <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{Error.ErrorMsg}}</span>
             <button class="close btn btn-link" data-ng-click="showDownloadError = false;"><i class="fa fa-times fa-inverse"></i></button>
         </div>
     </div>

@@ -140,6 +140,15 @@ Model-detail
   margin-right: auto;
 }
 
+.model-details .nav-tabs>li {
+  margin-bottom: -1px;
+}
+
+.model-details .nav-tabs li {
+  margin-right: 1px;
+  margin-left: 1px;
+}
+
 .model-admin-info table {
   width: 50%;
   margin-left: auto;
