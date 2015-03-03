@@ -3,10 +3,11 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.PasswordUtility',
     'mainApp.login.services.LoginService'
 ])
 
-.controller('UpdatePasswordController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, StringUtility, GriotNavUtility, LoginService) {
+.controller('UpdatePasswordController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, PasswordUtility, StringUtility, GriotNavUtility, LoginService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.oldPassword = null;
     $scope.newPassword = null;
@@ -33,35 +34,16 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
             return false;
         }
 
+
+
         if ($scope.newPassword !== $scope.confirmPassword) {
             $scope.validateErrorMessage = ResourceUtility.getString("LOGIN_PASSWORD_MATCH_ERROR");
             $scope.newPasswordInputError = "error";
             $scope.confirmPasswordInputError = "error";
             return false;
         }
-        
-        if ($scope.newPassword.length < 8) {
-            $scope.newPasswordInputError = "error";
-            $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_HELP");
-            return false;
-        }
-        
-        var uppercase = /[A-Z]/;
-        if (!uppercase.test($scope.newPassword)) {
-            $scope.newPasswordInputError = "error";
-            $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_HELP");
-            return false;
-        }
-        
-        var lowercase = /[a-z]/;
-        if (!lowercase.test($scope.newPassword)) {
-            $scope.newPasswordInputError = "error";
-            $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_HELP");
-            return false;
-        }
-        
-        var number = /[0-9]/;
-        if (!number.test($scope.newPassword)) {
+
+        if (!PasswordUtility.validPassword($scope.newPassword)) {
             $scope.newPasswordInputError = "error";
             $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_HELP");
             return false;
