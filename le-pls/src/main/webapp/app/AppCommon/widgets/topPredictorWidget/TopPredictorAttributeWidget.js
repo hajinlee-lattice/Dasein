@@ -65,8 +65,9 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     var y = d3.scale.ordinal()
         .domain(liftValues)
         .rangeBands([0, (bar_height + 2 * gap) * liftValues.length]);
-        
-    var xTicks = x.ticks(d3.max(liftValues) + 1);
+    
+    var maxTicks = d3.max(liftValues) > 5 ? 5 : d3.max(liftValues);
+    var xTicks = x.ticks(maxTicks + 1);
     chart = d3.select("#attributeChart") 
       .append('svg')
       .attr('class', 'chart')
