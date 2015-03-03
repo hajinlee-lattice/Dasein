@@ -8,7 +8,6 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
 
     var data = $scope.data;
     $scope.ModelId = $scope.data.ModelId;
-    console.log(data);
 
     function parseROC(score) {
         return score.toFixed(4).toString() + " Excellent";
