@@ -40,7 +40,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
             // When the download finishes, attach the data to the link. Enable the link and change its appearance.
             scope.$on('downloaded', function (event, data) {
                 $(anchor).attr({
-                    href:     'data:' + attr.filetype + ';base64,' + btoa(JSON.stringify(data)),
+                    href:     'data:' + attr.filetype + ';base64,' + data,
                     download: attr.filename
                 })
                 .removeAttr('disabled');
@@ -61,7 +61,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
                 $scope.$parent.Error.ShowError = false;
                 $scope.$emit('download-start');
                 $http.get($attrs.url).then(function (response) {
-                    $scope.$emit('downloaded', response.data);
+                    $scope.$emit('downloaded', btoa(unescape(encodeURIComponent(JSON.stringify(response.data)))));
                     $scope.fetching = false;
                     $scope.linkText = ResourceUtility.getString("MODEL_ADMIN_DOWNLOAD");
                 }, function () {

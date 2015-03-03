@@ -15,6 +15,8 @@
                     <td>
                         {{ResourceUtility.getString('MODEL_ADMIN_MODEL_SUMMARY_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <data-file-downloader url="/pls/datafiles/modeljson/{{ModelId}}" filename="modelsummary.json" filetype="application/json"></data-file-downloader>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <a download="modelsummary.json" href="/pls/datafiles/modeljson/{{ModelId}}">direct download (testing)</a>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <data-file-downloader url="/pls/datafiles/predictorcsv/{{ModelId}}" filename="predictors.csv" filetype="text/plain"></data-file-downloader>
@@ -27,7 +29,7 @@
                         <data-file-downloader url="/pls/datafiles/readoutcsv/{{ModelId}}" filename="readout.csv" filetype="text/plain"></data-file-downloader>
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_SCORES_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
-                        <data-file-downloader url="/pls/datafiles/scorescsv/{{ModelId}}" filename="scores.csv" filetype="text/plain"></data-file-downloader>
+                        <data-file-downloader url="/pls/datafiles/scorecsv/{{ModelId}}" filename="scores.csv" filetype="text/plain"></data-file-downloader>
                     </td>
                 </tr>
                 <tr>
