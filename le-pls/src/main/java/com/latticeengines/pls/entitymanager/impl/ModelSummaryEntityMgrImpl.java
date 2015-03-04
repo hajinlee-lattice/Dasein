@@ -199,6 +199,9 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         if (status == ModelSummaryStatus.DELETED && summary.getStatus() == ModelSummaryStatus.ACTIVE) {
             throw new LedpException(LedpCode.LEDP_18021);
         }
+        if (status == ModelSummaryStatus.ACTIVE && summary.getStatus() == ModelSummaryStatus.DELETED) {
+            throw new LedpException(LedpCode.LEDP_18024);
+        }
         summary.setStatus(status);
         super.update(summary);
     }

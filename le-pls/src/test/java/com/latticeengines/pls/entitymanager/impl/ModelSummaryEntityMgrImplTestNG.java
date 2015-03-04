@@ -274,6 +274,7 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
+    
     @Test(groups = "functional", dependsOnMethods = { "updateAsDeletedForActiveModel" })
     public void updateAsDeletedForInactiveModel() {
         setupSecurityContext(summary1);
@@ -286,12 +287,27 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(modelSummaryEntityMgr.findByModelId(summary1.getId(), true, true, false).getStatus(), ModelSummaryStatus.DELETED);
         List<ModelSummary> modelSummaryList = modelSummaryEntityMgr.findAllValid();
         Assert.assertEquals(modelSummaryList.size(), 0);
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = { "updateAsDeletedForInactiveModel" })
+    public void updateAsActiveForDeletedModel() {
+        setupSecurityContext(summary1);
+        ModelSummary retrievedSummary = modelSummaryEntityMgr.getByModelId(summary1.getId());
+        assertNotNull(retrievedSummary);
+        try {
+            modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.ACTIVE);
+            Assert.fail("Should not come here!");
+        } catch (LedpException ex) {
+            Assert.assertEquals(ex.getCode(), LedpCode.LEDP_18024);
+        }
         
         modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.INACTIVE);
         modelSummaryEntityMgr.updateStatusByModelId(summary1.getId(), ModelSummaryStatus.ACTIVE);;
+        
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "updateAsDeletedForInactiveModel" })
+
+    @Test(groups = "functional", dependsOnMethods = { "updateAsActiveForDeletedModel" })
     public void deleteForModelInTenant() {
         setupSecurityContext(summary1);
         ModelSummary retrievedSummary = modelSummaryEntityMgr.findValidByModelId(summary1.getId());

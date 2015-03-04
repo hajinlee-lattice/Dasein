@@ -20,7 +20,7 @@ public class RestApiMetricsAspect {
 
         long endTime = System.currentTimeMillis();
 
-        log.info("Metrics for API=" + joinPoint.getSignature().getName() + " ElapsedTime=" + (endTime - startTime)
+        log.info("Metrics for API=" + joinPoint.getSignature().toShortString() + " ElapsedTime=" + (endTime - startTime)
                 + " in milliseconds");
 
         return retVal;

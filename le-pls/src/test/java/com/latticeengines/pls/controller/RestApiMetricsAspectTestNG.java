@@ -53,7 +53,7 @@ public class RestApiMetricsAspectTestNG extends PlsFunctionalTestNGBase {
         try {
             modelSummaryResource.delete("1");
             verify(newLog, times(1)).info(anyString());
-            Assert.assertTrue(logs.get(0).contains("Metrics for API=delete ElapsedTime="));
+            Assert.assertTrue(logs.get(0).contains("Metrics for API=ModelSummaryResource.delete(..) ElapsedTime="));
 
             modelSummaryResource.getModelSummaries();
             verify(newLog, times(2)).info(anyString());
