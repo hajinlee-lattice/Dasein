@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import com.latticeengines.domain.exposed.security.User;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -14,8 +15,14 @@ public class RegistrationResultUnitTestNG {
     public void testSerDe() throws IOException {
         ResponseDocument<RegistrationResult> regDoc = new ResponseDocument<>();
         regDoc.setSuccess(true);
+
         RegistrationResult obj = new RegistrationResult();
         obj.setPassword("password");
+        obj.setValid(true);
+        User user = new User();
+        user.setFirstName("Henry");
+        user.setLastName("Ford");
+        obj.setUser(user);
         regDoc.setResult(obj);
         
         String serializedStr = regDoc.toString();
@@ -25,5 +32,8 @@ public class RegistrationResultUnitTestNG {
         assertNull(deserializedDoc.getErrors());
 
         assertEquals(deserializedDoc.getResult().getPassword(), "password");
+        assertTrue(deserializedDoc.getResult().isValid());
+        assertEquals(deserializedDoc.getResult().getUser().getFirstName(), "Henry");
+        assertEquals(deserializedDoc.getResult().getUser().getLastName(), "Ford");
     }
 }
