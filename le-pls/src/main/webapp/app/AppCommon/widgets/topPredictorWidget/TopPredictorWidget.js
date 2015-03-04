@@ -122,9 +122,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 return d.color;
             })
             .on("click", attributeClicked)
-            .on('mousemove', function () {
-                $rootScope.$broadcast('MouseMoveEvent', [d3.mouse(this)[0], d3.mouse(this)[1]]);
-            })
             .on("mouseover", function (d) {
                 svg.selectAll("path")
                     .filter(function(node) {
@@ -244,9 +241,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             .style("fill", function(d) {
                 return d.color;
             })
-            .on('mousemove', function () {
-                $rootScope.$broadcast('MouseMoveEvent', [d3.mouse(this)[0], d3.mouse(this)[1]]);
-            })
             .on("mouseover", function (d) {
                 svg.selectAll("path")
                     .filter(function(node) {
@@ -299,11 +293,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         if (showAttributeTimeout != null) {
             clearTimeout(showAttributeTimeout);
         }
-        /*var topPredictorAttributeHover = $("#topPredictorAttributeHover");
+        var topPredictorAttributeHover = $("#topPredictorAttributeHover");
         topPredictorAttributeHover.hide();
         topPredictorAttributeHover.css("top", -1000);
         topPredictorAttributeHover.css("left", 0);
-        topPredictorAttributeHover.empty();*/
+        topPredictorAttributeHover.empty();
         
     }
   

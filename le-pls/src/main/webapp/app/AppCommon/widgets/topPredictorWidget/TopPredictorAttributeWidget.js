@@ -8,30 +8,23 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     $scope.attributeDescription = data.description;
     $scope.attributeColor = data.color;
     
-    function setHoverPosition(xPos, yPos) {
-        var modalHeight = $(".attribute-hover > div").height();
-        var topOffset = modalHeight > 333 ? (modalHeight - 333)/2 : 0;
-        $("#topPredictorAttributeHover").css("top", yPos + (400 - topOffset));
-        
-        var leftOffset;
+    function setHoverPosition(xPos) {
+        var donutChartSvg = $(".js-top-predictor-donut > svg");
+        var donutChartLocation = donutChartSvg.offset();
         var attributeHover = $(".attribute-hover");
-        if (xPos < 0) {
-            leftOffset = 980;
+        $("#topPredictorAttributeHover").css("top", donutChartLocation.top - 50);
+        
+        if (xPos > 0) {
+            $("#topPredictorAttributeHover").css("left", donutChartLocation.left + donutChartSvg.width());
             attributeHover.removeClass("attribute-hover-left-arrow");
             attributeHover.addClass("attribute-hover-right-arrow");
         } else {
-            leftOffset = 415;
+            $("#topPredictorAttributeHover").css("left", donutChartLocation.left - 510);
             attributeHover.removeClass("attribute-hover-right-arrow");
             attributeHover.addClass("attribute-hover-left-arrow");
         }
-        $("#topPredictorAttributeHover").css("left", xPos + leftOffset);
     }
-    
-    setHoverPosition($scope.mouseX, $scope.mouseY);
-    
-    $scope.$on('MouseMoveEvent', function (event, data) {
-        setHoverPosition(data[0], data[1]);
-    });
+    setHoverPosition($scope.mouseX);
     
     var chartData = data.elementList;
     var i;
@@ -72,7 +65,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
       .append('svg')
       .attr('class', 'chart')
       .attr('width', left_width + width + 40)
-      .attr('height', (bar_height + gap * 2) * bucketNames.length + 60)
+      .attr('height', (bar_height + gap * 2) * bucketNames.length + 80)
       .append("g")
       .attr("transform", "translate(0, 20)");
       
@@ -102,6 +95,18 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("text-anchor", "middle")
         .text(function(d) { return d + "x"; } );
     
+    // This is the lift label at the bottom of the chart
+    var liftText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LIFT_LABEL").toUpperCase();
+    chart.append("text")
+        .attr("x", function () {
+            return left_width + (width/2) - 20;
+        })
+        .attr("y", (bar_height + gap * 2) * bucketNames.length + 55)
+        .attr("dy", ".36em")
+        .attr("font-size", "10px")
+        .style("fill", "#999999")
+        .text(liftText);
+    
     // These are the bars
     chart.selectAll("rect")
         .data(liftValues)
@@ -126,7 +131,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     chart.selectAll("text.lift")
         .data(liftValues)
         .enter().append("text")
-        .attr("x", function(d) { return 400; })
+        .attr("x", 400)
         .attr("y", function(d, i) {
             return (i * (bar_height + 2 * gap)) + 42; 
         })
@@ -138,9 +143,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .text(function(d) { return d + "x"; } );
         
     // This is the lift label to the right of the chart
-    var liftText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LIFT_LABEL").toUpperCase();
     chart.append("text")
-        .attr("x", function(d) { return 375; })
+        .attr("x", 375)
         .attr("y", 5)
         .attr("dy", ".36em")
         .attr("font-size", "10px")
@@ -151,7 +155,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     chart.selectAll("text.percentLeads")
         .data(percentLeads)
         .enter().append("text")
-        .attr("x", function(d) { return 450; })
+        .attr("x", 450)
         .attr("y", function(d, i) { 
             return (i * (bar_height + 2 * gap)) + 42; 
         })
@@ -165,7 +169,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     // This is the %Leads label to the right of the chart
     var leadsText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LEADS_LABEL").toUpperCase();
     chart.append("text")
-        .attr("x", function(d) { return 410; })
+        .attr("x", 410)
         .attr("y", 5)
         .attr("dy", ".36em")
         .attr("font-size", "10px")
