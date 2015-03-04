@@ -1,8 +1,9 @@
 angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
+    'mainApp.appCommon.services.ThresholdExplorerService',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility'
 ])
-.controller('AdminInfoWidgetController', function ($scope, $rootScope, $http, ResourceUtility) {
+.controller('AdminInfoWidgetController', function ($scope, $rootScope, $http, ResourceUtility, ThresholdExplorerService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.Error = { ShowError: false };
 
@@ -15,6 +16,11 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
 
     $scope.ModelHealthScore = parseROC(data.ModelDetails.RocScore);
     $scope.LookupId = data.ModelDetails.LookupID;
+
+    $scope.exportThresholdClicked = function () {
+        var csvRows = ThresholdExplorerService.PrepareExportData(data);
+        alasql("SELECT * INTO CSV('performance.csv') FROM ?", [csvRows]);
+    };
 })
 .directive('adminInfoWidget', function ($compile) {
     var directiveDefinitionObject = {

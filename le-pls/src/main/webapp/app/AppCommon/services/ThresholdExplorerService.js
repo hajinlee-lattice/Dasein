@@ -98,4 +98,39 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
 
         return result;
     };
+
+    this.PrepareExportData = function (modelSummary) {
+        result = [];
+
+        chartData = modelSummary.hasOwnProperty("ThresholdChartData") ?
+                    modelSummary.ThresholdChartData :
+                    this.GetChartData(modelSummary);
+
+        segments = modelSummary.Segmentations[0].Segments;
+
+        columns = [
+            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_SCORE_LABEL'),
+            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_LEADS_LABEL'),
+            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_CONVERSIONS_LABEL'),
+            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_LEFT_LIFT_LABEL'),
+            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_RIGHT_LIFT_LABEL'),
+            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_COUNT_LABEL'),
+            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_CONVERTED_LABEL')
+        ];
+        result.push(columns);
+
+        for (i = 1; i < 101; i++) {
+            row = [];
+            row.push(chartData[i].score);
+            row.push(chartData[i].leads + "%");
+            row.push(chartData[i].conversions.toFixed(0) + "%");
+            row.push(chartData[i].leftLift.toFixed(2));
+            row.push(chartData[i].rightLift.toFixed(2));
+            row.push(segments[i - 1].Count);
+            row.push(segments[i - 1].Converted);
+            result.push(row);
+        }
+
+        return result;
+    };
 });
