@@ -7,7 +7,7 @@ public class UserRegistration {
 
     private User user;
     private Credentials credentials;
-    private Tenant tenant;
+    private boolean validation = false;
     
     @JsonProperty("User")
     public User getUser() {
@@ -29,14 +29,14 @@ public class UserRegistration {
         this.credentials = credentials;
     }
 
-    @JsonProperty("Tenant")
-    public Tenant getTenant() {
-        return tenant;
+    @JsonProperty("Validation")
+    public boolean getValidation() {
+        return validation;
     }
 
-    @JsonProperty("Tenant")
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
+    @JsonProperty("Validation")
+    public void setValidation(boolean validation) {
+        this.validation = validation;
     }
     
     @Override

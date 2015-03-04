@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.security;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 import org.testng.annotations.Test;
 
@@ -23,19 +24,14 @@ public class UserRegistrationUnitTestNG {
         creds.setUsername("hford");
         creds.setPassword("changeme");
         
-        Tenant tenant = new Tenant();
-        tenant.setId("Ford");
-        tenant.setName("Ford");
-        
         userReg.setUser(user);
         userReg.setCredentials(creds);
-        userReg.setTenant(tenant);
         
         String serializedStr = userReg.toString();
         UserRegistration deserializedUserReg = JsonUtils.deserialize(serializedStr, UserRegistration.class);
         
         assertEquals(deserializedUserReg.getUser().toString(), userReg.getUser().toString());
         assertEquals(deserializedUserReg.getCredentials().toString(), userReg.getCredentials().toString());
-        assertEquals(deserializedUserReg.getTenant().toString(), userReg.getTenant().toString());
+        assertFalse(deserializedUserReg.getValidation());
     }
 }
