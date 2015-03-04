@@ -98,5 +98,8 @@ public class ModelSummaryResource {
     public void setModelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
         this.modelSummaryEntityMgr = modelSummaryEntityMgr;
     }
-    
+
+    public ModelSummaryEntityMgr getModelSummaryEntityMgr() {
+        return modelSummaryEntityMgr;
+    }
 }

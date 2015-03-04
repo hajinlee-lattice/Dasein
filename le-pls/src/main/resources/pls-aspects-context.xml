@@ -15,6 +15,8 @@
     <aop:aspectj-autoproxy/>           
 
     <bean id="multiTenancyAspect" class="com.latticeengines.pls.entitymanager.impl.MultiTenantEntityMgrAspect" />
+    
+    <bean id="restApiMetricsAspect" class="com.latticeengines.pls.controller.RestApiMetricsAspect" />
 
 	
 </beans>
