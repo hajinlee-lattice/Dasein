@@ -2,21 +2,54 @@
 
 module.exports = function (grunt) {
 
-  // Configurable paths for the application
-  var appConfig = {
-    app: 'src/main/webapp',
-    dist: 'dist'
-  };
+    var sourceDir = 'src/main/webapp';
+    // Configurable paths for the application
+    var appConfig = {
+        app: sourceDir,
+        dist: 'dist',
+        env: {
+            dev: {
+                url: 'http://localhost:8080',
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.dev.js'
+            },
+            integration: {
+                url: 'http://bodcdevhdpweb52.dev.lattice.local:8080',
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js'
+            },
+            qa: {
+                url: 'http://bodcdevhdpweb53.dev.lattice.local:8080',
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js'
+            },
+            prod: {
+                url: 'TBD',
+                protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js'
+            }
+        }
+    };
+
+    var env = grunt.option('env') || 'dev';
+    var chosenEnv;
+    if (env === 'dev') {
+        chosenEnv = appConfig.env.dev;
+        process.env.plstest = chosenEnv;
+    } else if (env === 'int') {
+        chosenEnv = appConfig.env.integration;
+    } else if (env === 'qa') {
+        chosenEnv = appConfig.env.qa;
+    } else if (env === 'prod') {
+        chosenEnv = appConfig.env.prod;
+    }
   
-  // version of our software. This should really be in the package.json
-  // but it gets passed in through 
-  var versionStringConfig = grunt.option('versionString') || '';
+    // version of our software. This should really be in the package.json
+    // but it gets passed in through 
+    var versionStringConfig = grunt.option('versionString') || '';
 
   // Define the configuration for all the tasks
   grunt.initConfig({
-
+    
     // Project settings
     pls: appConfig,
+    testenv: chosenEnv,
     versionString: versionStringConfig,
     
     // Removes unessasary folders and files that are created during the build process
@@ -48,6 +81,11 @@ module.exports = function (grunt) {
                 force: true
             }
         }
+    },
+
+    concurrent: {
+        mac: ['e2eChrome', 'e2eFirefox', 'e2eSafari'],
+        windows: ['e2eChrome', 'e2eFirefox']
     },
     
     // Copies files around the directory structure. Main copies the pls website over to the 
@@ -276,11 +314,52 @@ module.exports = function (grunt) {
     
     // End to End (e2e) tests (aka UI automation)
     protractor: {
-        options: {
-            configFile: '<%= pls.app %>/test/protractor-conf.js',
-            keepAlive: false // don't keep browser process alive after failures
+        options: {        
+            configFile: '<%= testenv.protractorConf %>',
+            noColor: false,
+            keepAlive: false, // don't keep browser process alive after failures                       
+            args: {
+                allScriptsTimeout: 110000,
+                jasmineNodeOpts: {
+                    showColors: true,
+                    defaultTimeoutInterval: 30000
+                }
+            }                     
         },
-        run: {}
+        chrome: {           
+            options: { 
+                args: {
+                    browser: 'chrome',
+                    baseUrl: '<%= testenv.url %>',
+                    directConnect: true                 
+                }
+            }
+        }, 
+        firefox: {
+            options: {
+                args: {
+                    browser: 'firefox',
+                    baseUrl: '<%= testenv.url %>',
+                    //directConnect: true
+                }
+            }
+        }, 
+        internetexplorer: {
+            options: {
+                args: {
+                    browser: 'internet explorer',
+                    baseUrl: '<%= testenv.url %>'
+                }
+            }
+        },         
+        safari: {
+            options: {
+                args: {
+                    browser: 'safari',
+                    baseUrl: '<%= testenv.url %>'
+                }
+            }
+        }
     },
     
     // Find all instances of @@versionString in our index.html page and replace
@@ -366,6 +445,7 @@ module.exports = function (grunt) {
     }
     
   });
+  grunt.loadNpmTasks('grunt-concurrent');
   grunt.loadNpmTasks('grunt-contrib-clean');  
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-copy');  
@@ -374,7 +454,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-karma');
-  grunt.loadNpmTasks('grunt-ng-annotate');
+  grunt.loadNpmTasks('grunt-ng-annotate');  
   grunt.loadNpmTasks('grunt-protractor-runner');
   grunt.loadNpmTasks('grunt-usemin');
   grunt.loadNpmTasks('grunt-replace');
@@ -404,11 +484,36 @@ module.exports = function (grunt) {
     'sass:dev'
   ]);
   
-  var e2eText = 'Runs selenium end to end (protractor) unit tests';
-  grunt.registerTask('e2e', e2eText, [
-    'protractor:run'
+  var e2eChromeText = 'Runs selenium end to end (protractor) unit tests on Chrome';
+  grunt.registerTask('e2eChrome', e2eChromeText, [
+    'protractor:chrome'
   ]);
-  
+
+  var e2eFirefoxText = 'Runs selenium end to end (protractor) unit tests on Firefox';
+  grunt.registerTask('e2eFirefox', e2eFirefoxText, [
+    'protractor:firefox'
+  ]);
+
+  var e2eInternetExplorerText = 'Runs selenium end to end (protractor) unit tests on Internet Explorer';
+  grunt.registerTask('e2eInternetExplorer', e2eInternetExplorerText, [
+    'protractor:internetexplorer'
+  ]);
+
+  var e2eSafariText = 'Runs selenium end to end (protractor) unit tests on Safari';
+  grunt.registerTask('e2eSafari', e2eSafariText, [
+    'protractor:safari'
+  ]);
+
+  var e2eMacText = 'Runs selenium end to end (protractor) Mac tests';
+  grunt.registerTask('e2eMac', e2eMacText, [
+    'concurrent:mac'
+  ]);
+
+  var e2eWinText = 'Runs selenium end to end (protractor) Windows tests';
+  grunt.registerTask('e2eWin', e2eWinText, [
+    'concurrent:win'
+  ]);
+
   var lintText = 'Checks all JavaScript code for possible errors. This should be run before a checkin if you aren\'t using grunt sentry';
   grunt.registerTask('lint', lintText, [
     'jshint:dist'
