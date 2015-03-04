@@ -85,7 +85,8 @@ public enum LedpCode {
     LEDP_18020("Cannot parse file {0}."), //
     LEDP_18021("Cannot delete active model."), //
     LEDP_18022("Failed to download file."), //
-    LEDP_18023("File not found."); //
+    LEDP_18023("File not found."), //
+    LEDP_18024("Cannot change deleted model to active directly; change it to inactive first, then delete it.");
 
     private String message;
 
