@@ -511,7 +511,7 @@ module.exports = function (grunt) {
 
   var e2eWinText = 'Runs selenium end to end (protractor) Windows tests';
   grunt.registerTask('e2eWin', e2eWinText, [
-    'concurrent:win'
+    'concurrent:windows'
   ]);
 
   var lintText = 'Checks all JavaScript code for possible errors. This should be run before a checkin if you aren\'t using grunt sentry';
