@@ -120,7 +120,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Getting user having the email %s.", email));
             return new UserBuilder(service.findUserByEmail(email)).build();
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18017, e, new String[] { email });
+            //throw new LedpException(LedpCode.LEDP_18017, e, new String[] { email });
+            //TODO: handle different exceptions returned from GlobalAuth
+            return null;
         }
     }
 
@@ -132,7 +134,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             log.info(String.format("Getting user %s.", username));
             return new UserBuilder(service.findUserByUsername(username)).build();
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18018, e, new String[] { username });
+            // throw new LedpException(LedpCode.LEDP_18018, e, new String[] { username });
+            //TODO: handle different exceptions returned from GlobalAuth
+            return null;
         }
     }
 

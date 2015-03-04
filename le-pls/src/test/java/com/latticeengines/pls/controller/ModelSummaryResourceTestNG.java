@@ -133,6 +133,19 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_USERS, tenant2, "bnguyen");
         grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "bnguyen");
 
+        if (globalUserManagementService.getUser("lming") == null) {
+            assertTrue(globalUserManagementService.deleteUser("lming@lattice-engines.com"));
+            createUser("lming", "lming@lattice-engines.com", "General", "User", "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
+        }
+        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant1, "lming");
+        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "lming");
+        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant1, "lming");
+
+        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant2, "lming");
+        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "lming");
+        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "lming");
+
+
         if (globalUserManagementService.getUser("tsanghavi@lattice-engines.com") == null) {
             assertTrue(globalUserManagementService.deleteUser("tsanghavi@lattice-engines.com"));
             createUser("tsanghavi@lattice-engines.com", "tsanghavi@lattice-engines.com", "Tejas", "Sanghavi");
