@@ -16,9 +16,9 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
     //==================================================
     // Specify Dimensions
     //==================================================
-    var margin = {top: 60, right: 150, bottom: 70, left: 150},
-        width = 1100 - margin.left - margin.right,
-        height = 330 - margin.top - margin.bottom;
+    var margin = {top: 47, right: 150, bottom: 89, left: 204},
+        width = 1154 - margin.left - margin.right,
+        height = 336 - margin.top - margin.bottom;
 
     //==================================================
     // Define Axes
@@ -141,11 +141,11 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("fill", "#999")
         .call(xAxis)
       .append("text")
-        .attr("transform", "translate(" + (width / 2) + " , 25)")
+        .attr("transform", "translate(" + (width / 2) + " , 77)")
         .style("text-anchor", "middle")
         .style("font-size", "14px")
-        .style("font-weight", "700")
-        .style("fill", "#333")
+        .style("font-family", "ProximaNova-Semibold")
+        .style("fill", "#aaa")
         .text("TOP % LEADS");
 
     svg.append("g")
@@ -159,8 +159,8 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .attr("transform", "translate(" + (-100) + ", " + (height / 2) + ") rotate(-90)")
         .style("text-anchor", "middle")
         .style("font-size", "14px")
-        .style("font-weight", "700")
-        .style("fill", "#333")
+        .style("font-family", "ProximaNova-Semibold")
+        .style("fill", "#aaa")
         .text("% TOTAL CONVERSIONS");
 
     //==================================================
@@ -235,7 +235,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .attr("x1", "0")
         .attr("y1", "0")
         .attr("x2", "0")
-        .attr("y2", height + 85)
+        .attr("y2", height + 62)
         .attr("stroke-dasharray", "2 2")
         .style("stroke", "#666");
 
@@ -251,15 +251,15 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("text-anchor", "start")
         .style("fill", "#333")
         .style("font-size", "11px")
-        .style("font-weight", "700")
+        .style("font-family", "ProximaNova-Bold")
         .text("LIFT");
 
     infoElements.append("text")
         .attr("class", "rtext")
         .style("text-anchor", "start")
         .style("fill", "#333")
-        .style("font-size", "22px")
-        .style("font-weight", "700");
+        .style("font-size", "18px")
+        .style("font-family", "ProximaNova-Bold");
 
     infoElements.append("text")
         .attr("class", "lltext")
@@ -267,7 +267,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("startOffset", "100%")
         .style("fill", "#333")
         .style("font-size", "11px")
-        .style("font-weight", "700")
+        .style("font-family", "ProximaNova-Bold")
         .text("LIFT");
 
     infoElements.append("text")
@@ -275,8 +275,8 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("text-anchor", "end")
         .style("startOffset", "100%")
         .style("fill", "#333")
-        .style("font-size", "22px")
-        .style("font-weight", "700");
+        .style("font-size", "18px")
+        .style("font-family", "ProximaNova-Bold");
 
     infoElements.append("text")
         .attr("class", "xltext")
@@ -284,7 +284,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("startOffset", "100%")
         .style("fill", "#333")
         .style("font-size", "11px")
-        .style("font-weight", "700")
+        .style("font-family", "ProximaNova-Bold")
         .text("% CONV");
 
     infoElements.append("text")
@@ -293,7 +293,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("startOffset", "100%")
         .style("fill", "#477cba")
         .style("font-size", "18px")
-        .style("font-weight", "700");
+        .style("font-family", "ProximaNova-Bold");
 
     infoElements.append("text")
         .attr("class", "lyltext")
@@ -301,7 +301,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("startOffset", "100%")
         .style("fill", "#333")
         .style("font-size", "11px")
-        .style("font-weight", "700")
+        .style("font-family", "ProximaNova-Bold")
         .text("TOP");
 
     infoElements.append("text")
@@ -310,14 +310,14 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("startOffset", "100%")
         .style("fill", "#477cba")
         .style("font-size", "18px")
-        .style("font-weight", "700");
+        .style("font-family", "ProximaNova-Bold");
 
     infoElements.append("text")
         .attr("class", "ryltext")
         .style("text-anchor", "start")
         .style("fill", "#333")
         .style("font-size", "11px")
-        .style("font-weight", "700")
+        .style("font-family", "ProximaNova-Bold")
         .text("SCORE");
 
     infoElements.append("text")
@@ -325,7 +325,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("text-anchor", "start")
         .style("fill", "#477cba")
         .style("font-size", "18px")
-        .style("font-weight", "700");
+        .style("font-family", "ProximaNova-Bold");
 
     infoElements.append("polygon")
         .attr("class", "rarrow")
@@ -356,7 +356,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .attr("x1", "0")
         .attr("y1", "0")
         .attr("x2", "0")
-        .attr("y2", "24")
+        .attr("y2", "25")
         .style("stroke", "#c6cbd1");
 
     //==================================================
@@ -377,44 +377,44 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         infoElements.select("line.y")
             .attr("transform", "translate(" +
                     x(d.leads) + "," +
-                    "-50" + ")");
+                    "-40" + ")");
 
         infoElements.select("line.d")
             .attr("transform", "translate(" +
                     x(d.leads) + "," +
-                    (height + 43) + ")");
+                    (height + 30) + ")");
 
         infoElements.select("text.rltext")
             .attr("transform", "translate(" +
                     (x(d.leads) + 15) + "," +
-                    "-41" + ")");
+                    "-30" + ")");
 
         infoElements.select("text.rtext")
             .text((d.rightLift !== 0 ? d.rightLift.toFixed(2) : 0) + "x")
             .attr("transform", "translate(" +
                     (x(d.leads) + 14) + "," +
-                    "-23" + ")");
+                    "-13" + ")");
 
         infoElements.select("text.lltext")
             .attr("transform", "translate(" +
                     (x(d.leads) - 16) + "," +
-                    "-41" + ")");
+                    "-30" + ")");
 
         infoElements.select("text.ltext")
             .text(d.leftLift.toFixed(2) + "x")
             .attr("transform", "translate(" +
                     (x(d.leads) - 16) + "," +
-                    "-23" + ")");
+                    "-13" + ")");
 
         infoElements.select("polygon.larrow")
         	.attr("transform", "translate(" +
                 	(x(d.leads) - 10) + "," +
-	                "-40" + ")");
+					"-30" + ")");
 
         infoElements.select("polygon.rarrow")
         	.attr("transform", "translate(" +
                 	(x(d.leads) + 5) + "," +
-	                "-40" + ")");
+					"-30" + ")");
 
         infoElements.select("circle.xball")
         	.attr("transform", "translate(" +
@@ -424,40 +424,40 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         infoElements.select("circle.yball")
 	        .attr("transform", "translate(" +
                 	x(d.leads) + "," +
-                	(height + 36) + ")");
+                	(height + 25) + ")");
 
         infoElements.select("text.xltext")
             .attr("transform", "translate(" +
                     (-40) + "," +
-                    (y(d.conversions) - 5) + ")");
+                    (y(d.conversions) - 3) + ")");
 
         infoElements.select("text.xtext")
             .text(Math.round(d.conversions) + "%")
             .attr("transform", "translate(" +
                     (-40) + "," +
-                    (y(d.conversions) + 18) + ")");
+                    (y(d.conversions) + 14) + ")");
 
         infoElements.select("text.lyltext")
             .attr("transform", "translate(" +
                     (x(d.leads) - 10) + "," +
-                    (height + 51) + ")");
+                    (height + 38) + ")");
 
         infoElements.select("text.lytext")
             .text(Math.round(d.leads) + "%")
             .attr("transform", "translate(" +
                     (x(d.leads) - 10) + "," +
-                    (height + 67) + ")");
+                    (height + 55) + ")");
 
         infoElements.select("text.ryltext")
             .attr("transform", "translate(" +
                     (x(d.leads) + 9) + "," +
-                    (height + 51) + ")");
+                    (height + 38) + ")");
 
         infoElements.select("text.rytext")
             .text("> " + (d.score - 1))
             .attr("transform", "translate(" +
                     (x(d.leads) + 9) + "," +
-                    (height + 67) + ")");
+                    (height + 55) + ")");
     }
 
     //==================================================
