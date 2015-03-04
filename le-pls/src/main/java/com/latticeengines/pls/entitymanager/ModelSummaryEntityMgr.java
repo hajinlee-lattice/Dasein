@@ -3,6 +3,7 @@ package com.latticeengines.pls.entitymanager;
 import java.util.List;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 
@@ -16,13 +17,13 @@ public interface ModelSummaryEntityMgr extends BaseEntityMgr<ModelSummary> {
 
     void deleteByModelId(String modelId);
     
-    void updateModelSummary(ModelSummary modelSummary);
-
     List<ModelSummary> getAll();
 
     List<ModelSummary> findAllValid();
 
     void updateStatusByModelId(String modelId, ModelSummaryStatus status);
+
+    void updateModelSummary(ModelSummary modelSummary, AttributeMap attrMap);
 
 
 }

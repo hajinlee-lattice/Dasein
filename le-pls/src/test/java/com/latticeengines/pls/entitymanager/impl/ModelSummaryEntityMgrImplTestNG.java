@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -231,8 +232,9 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     public void updateModelSummaryForModelInTenant() {
         setupSecurityContext(summary1);
         ModelSummary s = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
-        s.setName("XYZ");
-        modelSummaryEntityMgr.updateModelSummary(s);
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put("Name", "XYZ");
+        modelSummaryEntityMgr.updateModelSummary(s, attrMap);
         ModelSummary retrievedSummary = modelSummaryEntityMgr.findValidByModelId(summary1.getId());
         assertEquals(retrievedSummary.getName(), "XYZ");
     }
@@ -242,15 +244,15 @@ public class ModelSummaryEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
      */
     @Test(groups = "functional", dependsOnMethods = { "updateModelSummaryForModelInTenant" })
     public void updateModelSummaryForModelNotInTenant() {
-
         ModelSummary summaryToUpdate = new ModelSummary();
         summaryToUpdate.setId(summary2.getId());
-        summaryToUpdate.setName("ABC");
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put("Name", "ABC");
 
         setupSecurityContext(summary1);
         boolean exception = false;
         try {
-            modelSummaryEntityMgr.updateModelSummary(summaryToUpdate);
+            modelSummaryEntityMgr.updateModelSummary(summaryToUpdate, attrMap);
         } catch (LedpException e) {
             exception = true;
             assertEquals(e.getCode(), LedpCode.LEDP_18007);

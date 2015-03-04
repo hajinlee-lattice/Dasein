@@ -2,7 +2,6 @@ package com.latticeengines.pls.controller;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,9 +31,6 @@ public class InternalResource {
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
     
-    @Autowired
-    private SessionFactory sessionFactory;
-
     @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a model summary")
@@ -60,6 +56,7 @@ public class InternalResource {
     
     @RequestMapping(value = "/{op}/{left}/{right}", method = RequestMethod.GET)
     @ResponseBody
+    @ApiOperation(value = "Status check for this endpoint")
     public Status calculate(@PathVariable("op") String op, @PathVariable("left") Integer left,
             @PathVariable("right") Integer right) {
         Assert.notNull(op);

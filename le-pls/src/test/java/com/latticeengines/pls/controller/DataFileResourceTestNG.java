@@ -78,15 +78,15 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
         setupDb(tenant1, tenant2);
 
+        HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
         String dir = modelingServiceHdfsBaseDir
-                + "/BD2_ADEDTBDd69264296nJ26263627n12/models/Q_PLS_Modeling_BD2_ADEDTBDd69264296nJ26263627n12/8e3a9d8c-3bc1-4d21-9c91-0af28afc5c9a/1423547416066_0001/";
+                + "/TENANT1/models/Q_PLS_Modeling_TENANT1/8195dcf1-0898-4ad3-b94d-0d0f806e979e/1423547416066_0001/";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
 
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
-        HdfsUtils
-                .copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_readoutsample.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_scored.txt");
@@ -95,7 +95,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = { "functional", "deployment" }, dataProvider = "dataFileProvier")
+    @Test(groups = { "functional", "deployment" }, dataProvider = "dataFileProvider")
     public void dataFileResource(String fileType, final String mimeType) {
         UserDocument doc = loginAndAttach("admin");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
@@ -127,8 +127,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
                 });
     }
 
-    @DataProvider(name = "dataFileProvier")
-    public static Object[][] getDataFileProvier() {
+    @DataProvider(name = "dataFileProvider")
+    public static Object[][] getDataFileProvider() {
         return new Object[][] { { "modeljson", "application/json" }, //
                 { "predictorcsv", "application/csv" }, //
                 { "readoutcsv", "application/csv" }, //

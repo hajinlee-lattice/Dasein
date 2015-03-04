@@ -17,6 +17,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.KeyValue;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
@@ -163,6 +164,31 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
+    public void updateModelSummary(ModelSummary modelSummary, AttributeMap attrMap) {
+        String modelId = modelSummary.getId();
+        
+        if (modelId == null) {
+            throw new LedpException(LedpCode.LEDP_18008, new String[] { "Id" });
+        }
+        
+        // If it's a status update, then allow for getting deleted models
+        boolean statusUpdate = attrMap.containsKey("Status");
+        
+        ModelSummary summary = findByModelId(modelId, false, true, !statusUpdate);
+        
+        if (summary == null) {
+            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
+        }
+        
+        // Update status
+        updateStatus(summary, attrMap);
+        
+        // Update name
+        updateName(summary, attrMap);
+    }
+    
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public void updateStatusByModelId(String modelId, ModelSummaryStatus status) {
         ModelSummary summary = findByModelId(modelId, false, true, false);
         
@@ -175,37 +201,32 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         }
         summary.setStatus(status);
         super.update(summary);
-
     }
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void updateModelSummary(ModelSummary modelSummary) {
-        String modelId = modelSummary.getId();
-        
-        if (modelId == null) {
-            throw new LedpException(LedpCode.LEDP_18008, new String[] { "Id" });
+    private void updateStatus(ModelSummary summary, AttributeMap attrMap) {
+        String status = attrMap.get("Status");
+        if (status == null) {
+            return;
         }
-        ModelSummary summary = findValidByModelId(modelSummary.getId());
-        
-        if (summary == null) {
-            throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
-        }
-        
-        // Support renaming only
-        String name = modelSummary.getName();
-        if (newModelNameIsValid(summary, name)) {
-            summary.setName(name);
-        }
+        updateStatusByModelId(summary.getId(), ModelSummaryStatus.getByStatusCode(status));
+    }
+    
+    private void updateName(ModelSummary summary, AttributeMap attrMap) {
+        String name = attrMap.get("Name");
+        if (name != null) {
+            if (newModelNameIsValid(summary, name)) {
+                summary.setName(name);
+            }
 
-        super.update(summary);
+            super.update(summary);
+        }
     }
 
-    private boolean newModelNameIsValid(ModelSummary model, String name) {
+    private boolean newModelNameIsValid(ModelSummary summary, String name) {
         if (name == null) {
             throw new LedpException(LedpCode.LEDP_18008, new String[] { "Name" });
         }
-        String oldName = model.getName();
+        String oldName = summary.getName();
         if (name.equals(oldName)) { 
             return true; 
         }

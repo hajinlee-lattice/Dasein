@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.wordnik.swagger.annotations.Api;
@@ -67,34 +66,12 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Update a model summary")
     @PreAuthorize("hasRole('Edit_PLS_Models')")
     public Boolean update(@PathVariable String modelId, @RequestBody AttributeMap attrMap) {
-        if (attrMap.containsKey("Status")) {
-            updateModelStatus(modelId, attrMap);
-        } else {
-            ModelSummary modelSummary = new ModelSummary();
-            modelSummary.setId(modelId);
-            modelSummary.setName(attrMap.get("Name"));
-            modelSummaryEntityMgr.updateModelSummary(modelSummary);
-        }
+        ModelSummary modelSummary = new ModelSummary();
+        modelSummary.setId(modelId);
+        modelSummaryEntityMgr.updateModelSummary(modelSummary, attrMap);
         return true;
     }
     
-    private void updateModelStatus(String modelId, AttributeMap attrMap) {
-        String status = attrMap.get("Status");
-        switch (status) {
-        case "UpdateAsDeleted":
-            modelSummaryEntityMgr.updateStatusByModelId(modelId, ModelSummaryStatus.DELETED);
-            break;
-        case "UpdateAsInactive":
-            modelSummaryEntityMgr.updateStatusByModelId(modelId, ModelSummaryStatus.INACTIVE);
-            break;
-        case "UpdateAsActive":
-            modelSummaryEntityMgr.updateStatusByModelId(modelId, ModelSummaryStatus.ACTIVE);
-            break;
-        default:
-            break;
-        }
-    }
-
     public void setModelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
         this.modelSummaryEntityMgr = modelSummaryEntityMgr;
     }
