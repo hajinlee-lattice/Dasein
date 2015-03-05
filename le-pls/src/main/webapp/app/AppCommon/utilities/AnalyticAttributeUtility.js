@@ -153,7 +153,7 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
             upperValue = this.FormatBucketValue(bucket.UpperExclusive, attributeMetadata);
             toReturn = ResourceUtility.getString("ANALYTIC_ATTRIBUTE_LESS_THAN_LABEL", [upperValue]);
         }
-        return toReturn;
+        return String(toReturn);
     };
 
     // ENG-6735:
