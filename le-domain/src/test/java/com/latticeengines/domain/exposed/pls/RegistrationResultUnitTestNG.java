@@ -22,7 +22,7 @@ public class RegistrationResultUnitTestNG {
         User user = new User();
         user.setFirstName("Henry");
         user.setLastName("Ford");
-        obj.setUser(user);
+        obj.setConflictingUser(user);
         regDoc.setResult(obj);
         
         String serializedStr = regDoc.toString();
@@ -33,7 +33,7 @@ public class RegistrationResultUnitTestNG {
 
         assertEquals(deserializedDoc.getResult().getPassword(), "password");
         assertTrue(deserializedDoc.getResult().isValid());
-        assertEquals(deserializedDoc.getResult().getUser().getFirstName(), "Henry");
-        assertEquals(deserializedDoc.getResult().getUser().getLastName(), "Ford");
+        assertEquals(deserializedDoc.getResult().getConflictingUser().getFirstName(), "Henry");
+        assertEquals(deserializedDoc.getResult().getConflictingUser().getLastName(), "Ford");
     }
 }

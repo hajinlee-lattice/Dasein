@@ -11,7 +11,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class ResponseDocument<ResultType> {
 
-    private boolean success;
+    private boolean success = false;
     private List<String> errors;
     private ResultType result;
 
@@ -44,10 +44,15 @@ public class ResponseDocument<ResultType> {
     @Override
     public String toString() { return JsonUtils.serialize(this); }
 
-    public static ResponseDocument generateFromJSON(String json, Class resultType) throws IOException {
+    public static ResponseDocument generateFromJSON(String json, Class resultType) {
         ResponseDocument deserializedDoc = new ResponseDocument<>();
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode node = mapper.readTree(json);
+        JsonNode node;
+        try {
+            node = mapper.readTree(json);
+        } catch (IOException e) {
+            return null;
+        }
 
         deserializedDoc.setSuccess(node.get("Success").asBoolean());
 
@@ -59,7 +64,11 @@ public class ResponseDocument<ResultType> {
             deserializedDoc.setErrors(errors);
         }
 
-        deserializedDoc.setResult(mapper.treeToValue(node.get("Result"), resultType));
+        try {
+            deserializedDoc.setResult(mapper.treeToValue(node.get("Result"), resultType));
+        } catch (IOException e) {
+            return null;
+        }
 
         return deserializedDoc;
     }
