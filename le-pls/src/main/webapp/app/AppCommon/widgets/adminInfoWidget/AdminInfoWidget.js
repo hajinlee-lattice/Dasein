@@ -8,14 +8,9 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
     $scope.Error = { ShowError: false };
 
     var data = $scope.data;
-    $scope.ModelId = $scope.data.ModelId;
-
-    function parseROC(score) {
-        return score.toFixed(4).toString() + " Excellent";
-    }
-
-    $scope.ModelHealthScore = parseROC(data.ModelDetails.RocScore);
-    $scope.LookupId = data.ModelDetails.LookupID;
+    $scope.ModelId = data.ModelId;
+    $scope.TenantId = data.TenantId;
+    $scope.ModelHealthScore = data.ModelDetails.RocScore;
 
     $scope.exportThresholdClicked = function () {
         var csvRows = ThresholdExplorerService.PrepareExportData(data);
@@ -28,6 +23,30 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
     };
 
     return directiveDefinitionObject;
+})
+.directive('healthScore', function() {
+    return {
+        restrict: 'E',
+        template: '{{score | number: 4}}&nbsp;&nbsp;&nbsp;&nbsp;<strong class="{{healthClass}}">{{healthLevel}}</strong>',
+        scope:    {score: '='},
+        controller: ['$scope', 'ResourceUtility', function ($scope, ResourceUtility) {
+
+            if ($scope.score >= 0.75) {
+                $scope.healthLevel = ResourceUtility.getString("MODEL_ADMIN_HEALTH_EXCELLENT");
+                $scope.healthClass = "health-excellent";
+            } else if ($scope.score >= 0.6) {
+                $scope.healthLevel = ResourceUtility.getString("MODEL_ADMIN_HEALTH_GOOD");
+                $scope.healthClass = "health-good";
+            } else if ($scope.score >= 0.5) {
+                $scope.healthLevel = ResourceUtility.getString("MODEL_ADMIN_HEALTH_MEDIUM");
+                $scope.healthClass = "health-medium";
+            } else {
+                $scope.healthLevel = ResourceUtility.getString("MODEL_ADMIN_HEALTH_POOR");
+                $scope.healthClass = "health-poor";
+            }
+
+        }]
+    }
 })
 .directive('fileDownloader', function() {
     return {

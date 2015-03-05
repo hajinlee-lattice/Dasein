@@ -36,26 +36,6 @@
     text-align: left;
 }
 
-.attribute-hover-header {
-    padding: 1.5em;
-}
-
-.attribute-hover p {
-    font-size: 12px;
-}
-
-.attribute-hover h4 {
-    padding-left: 6px;
-    margin: 0;
-    display: inline-block;
-    font-family: 'ProximaNova-Bold';
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    width: 100%;
-    font-size: 16px;
-}
-
 .attribute-hover-left-arrow > div:after, 
 .attribute-hover-left-arrow > div:before {
     left: 100%;
@@ -82,6 +62,13 @@
     margin-top: -18px;
 }
 
+.attribute-hover-left-arrow > div h4 {
+    padding-left: 10px;
+    margin: 0;
+    display: inline-block;
+    font-family: 'ProximaNova-Bold';
+}
+
 .attribute-hover-right-arrow > div:after, 
 .attribute-hover-right-arrow > div:before {
     right: 100%;
@@ -106,6 +93,13 @@
     border-right-color: rgba(229, 229, 229, 1);
     border-width: 18px;
     margin-top: -18px;
+}
+
+.attribute-hover-right-arrow > div h4 {
+    padding-left: 10px;
+    margin: 0;
+    display: inline-block;
+    font-family: 'ProximaNova-Bold';
 }
 
 .label-primary {
@@ -207,8 +201,17 @@ Model-detail
   border-width: 1px;
 }
 
+.model-admin-link {
+  padding-left: 5px;
+  margin-top: 40px;
+}
+
+.model-admin-link .hidden-link {
+  color: #999;
+}
+
 .model-admin-info table {
-  width: 50%;
+  width: 40%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -217,12 +220,38 @@ Model-detail
   min-width: 150px;
 }
 
+.model-admin-info .health-excellent {
+  color: #189008;
+}
+
+.model-admin-info .health-good {
+  color: #85B200;
+}
+
+.model-admin-info .health-medium {
+  color: #D8A300;
+}
+
+.model-admin-info .health-poor {
+  color: #D96D00;
+}
+
+.model-admin-info table tbody tr:last-of-type {
+  border-bottom: #ccc solid 1px;
+}
+
 .model-admin-info-error {
   border-radius: 4px 4px 4px 4px;
   margin-top: 0.5em;
   width: 50%;
   margin-left: auto;
   margin-right: auto;
+}
+
+.panel-body.model-admin-info {
+  margin-top: 8em;
+  padding-top: 4em;
+  padding-bottom: 3em;
 }
 
 .leads-table .data-table {
@@ -244,6 +273,10 @@ Model-detail
 .leads-table .lead-score {
   width: 20%;
   text-align: center;
+}
+
+.model-details tbody tr:last-of-type {
+  border-bottom: #ccc solid 1px;
 }
 
 /*

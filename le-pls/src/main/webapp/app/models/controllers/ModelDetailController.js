@@ -26,37 +26,6 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         return;
     }
 
-    var widget = _.where(widgetConfig.Widgets, {ID: "modelDetailsScreenWidget"})[0];
-    widget = _.where(widget.Widgets, {ID: "modelDetailsTabWidget"})[0];
-
-    var adminTabId = _.findIndex(widget.Tabs, {"ID" : "modelAdminInfoTab"});
-    while (adminTabId > -1) {
-        widget.Tabs.splice(adminTabId, 1);
-        adminTabId = _.findIndex(widget.Tabs, {"ID" : "modelAdminInfoTab"});
-    }
-
-    //for (var x = 0; x < widget.Tabs.length; x++) {
-    //    if (widget.Tabs[x].ID == "modelAdminInfoTab") {
-    //        widget.Tabs.splice(x, 1);
-    //        break;
-    //    }
-    //}
-
-    var clientSession = BrowserStorageUtility.getClientSession();
-    if (RightsUtility.maySeeHiddenAdminTab(clientSession.availableRights)) {
-        try {
-            var adminTab = {
-                "ID" : "modelAdminInfoTab",
-                "TitleString": "ADMIN_INFO_TAB_TITLE",
-                "Widgets": [{
-                    "ID" : "modelAdminInfoWidget",
-                    "Type" : "AdminInfoWidget"
-                }]
-            };
-            widget.Tabs.push(adminTab);
-        } catch (err) { }
-    }
-
     var screenWidgetConfig = WidgetConfigUtility.GetWidgetConfig(
         widgetConfig,
         "modelDetailsScreenWidget"
