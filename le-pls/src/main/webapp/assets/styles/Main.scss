@@ -70,9 +70,6 @@
     font-family: 'ProximaNova-Bold';
 }
 
-
-
-
 .attribute-hover-right-arrow > div:after, 
 .attribute-hover-right-arrow > div:before {
     right: 100%;
@@ -183,17 +180,18 @@ Model-detail
   text-align: center;
 }
 
-.model-details .nav-tabs>li {
-  margin-bottom: -1px;
+.model-details .nav-tabs li {
   float: none;
   margin-right: 1px;
   margin-left: 1px;
+  margin-bottom: -2px;
   display: inline-block;
 }
 
-.model-details .nav-tabs li {
-  margin-right: 1px;
-  margin-left: 1px;
+.model-details .nav li.active a {
+  border-width: 1px;
+  border-bottom-color: white;
+  height: 41px;
 }
 
 .model-admin-info table {
