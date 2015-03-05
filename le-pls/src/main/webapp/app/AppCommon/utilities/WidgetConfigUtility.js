@@ -27,6 +27,7 @@ angular.module('mainApp.appCommon.utilities.WidgetConfigUtility', [
     this.THRESHOLD_EXPLORER_WIDGET = 'ThresholdExplorerWidget';
     this.TOP_PREDICTOR_WIDGET = 'TopPredictorWidget';
     this.ADMIN_INFO_WIDGET = 'AdminInfoWidget';
+    this.LEADS_TAB_WIDGET = 'LeadsTabWidget';
     this.USER_MANAGEMENT_WIDGET = 'UserManagementWidget';
 
     // Values for "ActiveWidgets" WidgetConfig property

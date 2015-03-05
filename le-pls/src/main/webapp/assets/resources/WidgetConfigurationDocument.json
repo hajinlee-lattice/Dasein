@@ -140,6 +140,13 @@
                                             ]
                                         }
                                     ]
+                                }, {
+                                    "ID" : "modelDetailsLeadsTab",
+                                    "TitleString": "LEADS_TAB_TITLE",
+                                    "Widgets": [{
+                                        "ID" : "leadsTabWidget",
+                                        "Type" : "LeadsTabWidget"
+                                    }]
                                 }
                             ]
                         }
@@ -169,13 +176,11 @@
 				}, {
                     "ID" : "userManagementScreenWidget",
                     "Type" : "ScreenWidget",
-                    "Widgets" : [
-                                  {
-                                    "ID" : "userManagementWidget",
-                                    "Type" : "UserManagementWidget",
-                                    "Widgets" : []
-                                  }
-                                ]
+                    "Widgets" : [{
+                        "ID" : "userManagementWidget",
+                        "Type" : "UserManagementWidget",
+                        "Widgets" : []
+                    }]
                 }
 			]
 		}

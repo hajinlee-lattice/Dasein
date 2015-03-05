@@ -260,6 +260,7 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/AppCommon/widgets/adminInfoWidget/AdminInfoWidget.js',
                     '<%= pls.app %>/app/AppCommon/widgets/simpleGridWidget/SimpleGridWidget.js',
                     '<%= pls.app %>/app/AppCommon/widgets/userManagementWidget/UserManagementWidget.js',
+                    '<%= pls.app %>/app/AppCommon/widgets/leadsTabWidget/LeadsTabWidget.js',
                     '<%= pls.app %>/app/app.js',
                     '<%= pls.app %>/app/core/utilities/BrowserStorageUtility.js',
                     '<%= pls.app %>/app/core/utilities/ServiceErrorUtility.js',
