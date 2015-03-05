@@ -51,7 +51,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     }
     
     var chart,
-        width = 208,
+        width = 200,
         left_width = 101,
         bar_height = 24,
         height = bar_height * bucketNames.length,
@@ -101,8 +101,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("x", function(d) { return x(d) + left_width; })
         .attr("y", (bar_height + gap * 2) * bucketNames.length + 40)
         .attr("dy", -6)
+        .attr("font-weight", "semi-bold")
         .attr("font-size", fontSize)
         .attr("text-anchor", "middle")
+        .style("fill", "#666666")
         .text(function(d) { return d + "x"; } );
     
     // This is the lift label at the bottom of the chart
