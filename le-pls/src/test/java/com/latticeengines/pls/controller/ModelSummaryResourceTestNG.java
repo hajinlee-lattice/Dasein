@@ -94,9 +94,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
 
-        revokeRight(GrantedRight.VIEW_PLS_USERS, tenant1, "admin");
-        revokeRight(GrantedRight.VIEW_PLS_USERS, tenant2, "admin");
-
         grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant1, "admin");
         grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, tenant1, "admin");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "admin");
@@ -114,6 +111,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "admin");
 
         if (globalUserManagementService.getUser("bnguyen") == null) {
+            assertTrue(globalUserManagementService.deleteUser("bnguyen"));
             assertTrue(globalUserManagementService.deleteUser("bnguyen@lattice-engines.com"));
             createUser("bnguyen", "bnguyen@lattice-engines.com", "Everything", "IsAwesome", "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=");
         }
@@ -134,6 +132,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "bnguyen");
 
         if (globalUserManagementService.getUser("lming") == null) {
+            assertTrue(globalUserManagementService.deleteUser("lming"));
             assertTrue(globalUserManagementService.deleteUser("lming@lattice-engines.com"));
             createUser("lming", "lming@lattice-engines.com", "General", "User", "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
         }
