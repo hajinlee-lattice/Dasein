@@ -68,8 +68,8 @@ angular.module('mainApp.core.utilities.RightsUtility', [])
             this.mayViewModels(rightsDict) &&
             this.mayViewConfiguration(rightsDict) &&
             this.mayViewReporting(rightsDict) &&
-            this.mayEditModels &&
-            this.mayEditConfiguration
+            this.mayEditModels(rightsDict) &&
+            this.mayEditConfiguration(rightsDict)
         );
     };
 
