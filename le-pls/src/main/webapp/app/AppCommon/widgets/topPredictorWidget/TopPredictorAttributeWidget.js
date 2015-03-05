@@ -5,7 +5,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
 .controller('TopPredictorAttributeWidgetController', function ($scope, ResourceUtility) {
     var data = $scope.data;
     $scope.attributeName = data.name;
+    $scope.attributeFullDescription = data.description;
     $scope.attributeDescription = data.description;
+    if ($scope.attributeDescription.length > 150) {
+       $scope.attributeDescription = $scope.attributeDescription.substring(0, 150) + "...";
+    }
     $scope.attributeColor = data.color;
     
     function setHoverPosition(xPos) {
@@ -19,10 +23,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             attributeHover.removeClass("attribute-hover-left-arrow");
             attributeHover.addClass("attribute-hover-right-arrow");
         } else {
-            $("#topPredictorAttributeHover").css("left", donutChartLocation.left - 510);
+            $("#topPredictorAttributeHover").css("left", donutChartLocation.left - 470);
             attributeHover.removeClass("attribute-hover-right-arrow");
             attributeHover.addClass("attribute-hover-left-arrow");
         }
+        
+        $("#topPredictorAttributeHover").fadeIn();
     }
     setHoverPosition($scope.mouseX);
     
@@ -46,10 +52,13 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     
     var chart,
         width = 220,
-        left_width = 145,
+        left_width = 101,
         bar_height = 24,
         height = bar_height * bucketNames.length,
-        gap = 10;
+        gap = 8,
+        labelSize = "10px",
+        fontSize = "12px",
+        commonDy = ".36em";
     
     var x = d3.scale.linear()
         .domain([0, d3.max(liftValues) + 1])
@@ -67,7 +76,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
       .attr('width', left_width + width + 40)
       .attr('height', (bar_height + gap * 2) * bucketNames.length + 80)
       .append("g")
-      .attr("transform", "translate(0, 20)");
+      .attr("transform", "translate(0, 0)");
       
     // These are the background ticks
     chart.selectAll("line")
@@ -92,6 +101,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("x", function(d) { return x(d) + left_width; })
         .attr("y", (bar_height + gap * 2) * bucketNames.length + 40)
         .attr("dy", -6)
+        .attr("font-size", fontSize)
         .attr("text-anchor", "middle")
         .text(function(d) { return d + "x"; } );
     
@@ -102,8 +112,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             return left_width + (width/2) - 20;
         })
         .attr("y", (bar_height + gap * 2) * bucketNames.length + 55)
-        .attr("dy", ".36em")
-        .attr("font-size", "10px")
+        .attr("dy", commonDy)
+        .attr("font-size", labelSize)
         .style("fill", "#999999")
         .text(liftText);
     
@@ -131,12 +141,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     chart.selectAll("text.lift")
         .data(liftValues)
         .enter().append("text")
-        .attr("x", 400)
+        .attr("x", 360)
         .attr("y", function(d, i) {
             return (i * (bar_height + 2 * gap)) + 42; 
         })
         .attr("dx", -5)
-        .attr("dy", ".36em")
+        .attr("dy", commonDy)
+        .attr("font-weight", "semi-bold")
+        .attr("font-size", fontSize)
         .attr("text-anchor", "end")
         .attr("class", "lift")
         .style("fill", "black")
@@ -144,10 +156,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         
     // This is the lift label to the right of the chart
     chart.append("text")
-        .attr("x", 375)
+        .attr("x", 335)
         .attr("y", 5)
-        .attr("dy", ".36em")
-        .attr("font-size", "10px")
+        .attr("dy", commonDy)
+        .attr("font-size", labelSize)
         .style("fill", "#999999")
         .text(liftText);
     
@@ -155,12 +167,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     chart.selectAll("text.percentLeads")
         .data(percentLeads)
         .enter().append("text")
-        .attr("x", 450)
+        .attr("x", 410)
         .attr("y", function(d, i) { 
             return (i * (bar_height + 2 * gap)) + 42; 
         })
         .attr("dx", -5)
-        .attr("dy", ".36em")
+        .attr("dy", commonDy)
+        .attr("font-weight", "semi-bold")
+        .attr("font-size", fontSize)
         .attr("text-anchor", "end")
         .attr("class", "lift")
         .style("fill", "black")
@@ -169,10 +183,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     // This is the %Leads label to the right of the chart
     var leadsText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LEADS_LABEL").toUpperCase();
     chart.append("text")
-        .attr("x", 410)
+        .attr("x", 370)
         .attr("y", 5)
-        .attr("dy", ".36em")
-        .attr("font-size", "10px")
+        .attr("dy", commonDy)
+        .attr("font-size", labelSize)
         .style("fill", "#999999")
         .text(leadsText);
         
@@ -184,10 +198,39 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("y", function(d, i) {
             return (i * (bar_height + 2 * gap)) + 42; 
         })
-        .attr("dy", ".36em")
+        .attr("dy", commonDy)
+        .attr("font-weight", "bold")
+        .attr("font-size", fontSize)
         .attr("text-anchor", "end")
         .style("fill", "black")
-        .text(String);
+        .text(String)
+        .call(wrap, left_width - 20);
+    
+    function wrap(text, width) {
+        text.each(function() {
+            var text = d3.select(this),
+                words = text.text().split(/\s+/).reverse(),
+                wordLength = words.length,
+                word,
+                line = [],
+                lineNumber = 0,
+                lineHeight = 1.1, // ems
+                y = text.attr("y"),
+                dy = parseFloat(text.attr("dy")),
+                tspan = text.text(null).append("tspan").attr("x", left_width - 5).attr("y", y).attr("dy", dy + "em");
+            for (var i = 0; i < wordLength; i++) {
+                word = words.pop();
+                line.push(word);
+                tspan.text(line.join(" "));
+                if (tspan.node().getComputedTextLength() > width) {
+                    line.pop();
+                    tspan.text(line.join(" "));
+                    line = [word];
+                    tspan = text.append("tspan").attr("x", left_width - 5).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                }
+            }
+        });
+    }
         
 })
 
