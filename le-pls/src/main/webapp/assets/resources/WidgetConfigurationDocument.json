@@ -134,15 +134,7 @@
                         "Type" : "UserManagementWidget",
                         "Widgets" : []
                     }]
-                }, {
-                    "ID" : "adminInfoScreenWidget",
-                    "Type" : "ScreenWidget",
-                    "Widgets" : [{
-                        "ID" : "adminInfoWidget",
-                        "Type" : "AdminInfoWidget",
-                        "Widgets" : []
-                    }]
-                  }
+                }
 			]
 		}
 	]

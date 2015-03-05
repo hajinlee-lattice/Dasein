@@ -9,7 +9,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.config.controllers.ManageCredentialsController',
     'mainApp.login.controllers.UpdatePasswordController',
     'mainApp.userManagement.controllers.UserManagementController',
-    'mainApp.models.controllers.AdminInfoController',
     'mainApp.models.controllers.ModelListController',
     'mainApp.models.controllers.ModelDetailController'
 ])
@@ -95,23 +94,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
         // Fetch the view and make it Angular aware
         $http.get('./app/userManagement/views/UserManagementView.html').success(function (html) {
             var scope = $rootScope.$new();
-            $compile($("#mainContentView").html(html))(scope);
-        });
-    }
-
-    // Handle when the User Management link is clicked
-    $scope.$on(GriotNavUtility.ADMIN_INFO_NAV_EVENT, function (event, data) {
-        createAdminInfoView(data);
-    });
-
-    function createAdminInfoView(data) {
-        // Set the hash
-        window.location.hash = GriotNavUtility.ADMIN_INFO_HASH;
-
-        // Fetch the view and make it Angular aware
-        $http.get('./app/models/views/AdminInfoView.html').success(function (html) {
-            var scope = $rootScope.$new();
-            scope.data = data;
             $compile($("#mainContentView").html(html))(scope);
         });
     }

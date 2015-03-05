@@ -17,8 +17,10 @@
 </div>
 <div data-ng-controller="TopPredictorAttributeWidgetController" class="attribute-hover">
     <div>
-        <h4 style="border-left: {{attributeColor}} solid 6px;">{{attributeName}}</h4>
-        <p>{{attributeDescription}}</p>
+        <div class="attribute-hover-header">
+            <h4 style="border-left: {{attributeColor}} solid 6px;" title="{{attributeName}}">{{attributeName}}</h4>
+            <p title="{{attributeFullDescription}}">{{attributeDescription}}</p>
+        </div>
         <div id="attributeChart" class="attribute-chart">
             
         </div>
