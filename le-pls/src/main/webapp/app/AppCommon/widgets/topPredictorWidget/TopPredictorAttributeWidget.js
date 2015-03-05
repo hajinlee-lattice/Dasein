@@ -23,7 +23,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             attributeHover.removeClass("attribute-hover-left-arrow");
             attributeHover.addClass("attribute-hover-right-arrow");
         } else {
-            $("#topPredictorAttributeHover").css("left", donutChartLocation.left - 470);
+            $("#topPredictorAttributeHover").css("left", donutChartLocation.left - 410);
             attributeHover.removeClass("attribute-hover-right-arrow");
             attributeHover.addClass("attribute-hover-left-arrow");
         }
@@ -51,7 +51,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     }
     
     var chart,
-        width = 220,
+        width = 208,
         left_width = 101,
         bar_height = 24,
         height = bar_height * bucketNames.length,
@@ -141,7 +141,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     chart.selectAll("text.lift")
         .data(liftValues)
         .enter().append("text")
-        .attr("x", 360)
+        .attr("x", width + 135)
         .attr("y", function(d, i) {
             return (i * (bar_height + 2 * gap)) + 42; 
         })
@@ -156,7 +156,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         
     // This is the lift label to the right of the chart
     chart.append("text")
-        .attr("x", 335)
+        .attr("x", width + 110)
         .attr("y", 5)
         .attr("dy", commonDy)
         .attr("font-size", labelSize)
@@ -167,7 +167,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     chart.selectAll("text.percentLeads")
         .data(percentLeads)
         .enter().append("text")
-        .attr("x", 410)
+        .attr("x", width + 180)
         .attr("y", function(d, i) { 
             return (i * (bar_height + 2 * gap)) + 42; 
         })
@@ -183,7 +183,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     // This is the %Leads label to the right of the chart
     var leadsText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LEADS_LABEL").toUpperCase();
     chart.append("text")
-        .attr("x", 370)
+        .attr("x", width + 142)
         .attr("y", 5)
         .attr("dy", commonDy)
         .attr("font-size", labelSize)

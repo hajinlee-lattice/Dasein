@@ -31,10 +31,13 @@
     position: absolute;
     background: #ffffff;
     border: 4px solid rgba(229, 229, 229, 1);
-    padding: 1.5em;
-    width: 470px;
+    width: 420px;
     min-height: 380px;
     text-align: left;
+}
+
+.attribute-hover-header {
+    padding: 1.5em;
 }
 
 .attribute-hover p {
