@@ -1,5 +1,4 @@
 <div data-ng-controller="LeadsTabWidgetController" class="tab-content">
-    <div class="wrapper">
-        here will be leads
-    </div>
+    <data-leads-table leads="data.TopSample" title="{{ResourceUtility.getString('SAMPLE_LEAD_GRID_TOP_TITLE')}}"></data-leads-table>
+    <data-leads-table leads="data.BottomSample" title="{{ResourceUtility.getString('SAMPLE_LEAD_GRID_BOTTOM_TITLE')}}"></data-leads-table>
 </div>

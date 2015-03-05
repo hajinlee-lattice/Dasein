@@ -194,6 +194,14 @@ Model-detail
   height: 41px;
 }
 
+.model-details .nav li:first-of-type.active a {
+  border-width: 1px;
+}
+
+.model-details .nav li:last-of-type.active a {
+  border-width: 1px;
+}
+
 .model-admin-info table {
   width: 50%;
   margin-left: auto;
@@ -210,6 +218,27 @@ Model-detail
   width: 50%;
   margin-left: auto;
   margin-right: auto;
+}
+
+.leads-table .data-table {
+  border: none;
+}
+
+.leads-table th.lead-company {
+  width: 35%;
+}
+
+.leads-table th.lead-contact {
+  width: 25%;
+}
+
+.leads-table .lead-converted {
+  text-align: center;
+}
+
+.leads-table .lead-score {
+  width: 20%;
+  text-align: center;
 }
 
 /*

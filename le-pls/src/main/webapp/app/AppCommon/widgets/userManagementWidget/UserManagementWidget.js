@@ -8,11 +8,12 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
     'mainApp.userManagement.services.UserManagementService'
 ])
 .service('DeleteUsersModal', function ($compile, $rootScope, $http) {
-    this.show = function (users) {
+    this.show = function (users, cancelCallback) {
         $http.get('./app/AppCommon/widgets/userManagementWidget/DeleteUsersView.html').success(function (html) {
 
             var scope = $rootScope.$new();
             scope.users = users;
+            scope.cancelCallback = cancelCallback;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -57,6 +58,12 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
             $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
         }
     };
+
+    $scope.cancelClick = function(){
+        $("#modalContainer").modal('hide');
+        $scope.cancelCallback();
+    };
+
 })
 .controller('UserManagementWidgetController', function ($scope, $rootScope, _, ResourceUtility, AddUserModal, DeleteUsersModal, UserManagementService, GriotNavUtility, StringUtility) {
     $scope.ResourceUtility = ResourceUtility;
@@ -67,21 +74,30 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
     var data = $scope.data;
     $scope.mayEditUsers = metadata.mayAddUser;
 
-    $scope.toBeDeleted = _.range(data.length).map(function () { return false; });
+    $scope.selected = _.range(data.length).map(function () { return false; });
 
     $scope.deleteUsersClicked = function($event) {
         if ($event != null) {
             $event.preventDefault();
         }
 
-        if ($scope.deleteInProgress) { return; }
+        if (!_.some($scope.selected) || $scope.deleteInProgress) {
+            $event.target.blur();
+            return;
+        }
+
         $scope.deleteInProgress = true;
 
         var usersToBeDeleted = _.range(data.length)
-            .filter(function(i){ return $scope.toBeDeleted[i]; })
+            .filter(function(i){ return $scope.selected[i]; })
             .map(function(i){ return $scope.data[i]; });
 
-        DeleteUsersModal.show(usersToBeDeleted);
+        var cancalCallback = function() {
+            $scope.deleteInProgress = false;
+            $scope.selected = _.range(data.length).map(function () { return false; });
+        };
+
+        DeleteUsersModal.show(usersToBeDeleted, cancalCallback);
     };
 
     $scope.addUserClicked = function($event) {

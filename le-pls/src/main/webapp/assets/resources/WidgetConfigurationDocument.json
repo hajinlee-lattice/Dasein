@@ -33,54 +33,7 @@
                                     "Widgets": [{
                                             "ID" : "modelDetailsAttributesWidget",
                                             "Type" : "TopPredictorWidget"
-                                        }, {
-                                            "ID" : "modelDetailsTopSampleGridWidget",
-                                            "Type" : "SimpleGridWidget",
-                                            "TitleString": "SAMPLE_LEAD_GRID_TOP_TITLE",
-                                            "DataProvider": "TopSample",
-                                            "Columns": [{
-                                                    "TitleString": "SAMPLE_LEAD_GRID_COMPANY_LABEL",
-                                                    "PropertyName": "Company",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "SAMPLE_LEAD_GRID_CONTACT_LABEL",
-                                                    "PropertyName": "Contact",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "SAMPLE_LEAD_GRID_CONVERTED_LABEL",
-                                                    "PropertyName": "Converted",
-                                                    "DisplayType": "Boolean"
-                                                }, {
-                                                    "TitleString": "SAMPLE_LEAD_GRID_SCORE_LABEL",
-                                                    "PropertyName": "Score",
-                                                    "DisplayType": "String"
-                                                }
-                                            ]
-                                        }, {
-                                            "ID" : "modelDetailsBottomSampleGridWidget",
-                                            "Type" : "SimpleGridWidget",
-                                            "TitleString": "SAMPLE_LEAD_GRID_BOTTOM_TITLE",
-                                            "DataProvider": "BottomSample",
-                                            "Columns": [{
-                                                    "TitleString": "SAMPLE_LEAD_GRID_COMPANY_LABEL",
-                                                    "PropertyName": "Company",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "SAMPLE_LEAD_GRID_CONTACT_LABEL",
-                                                    "PropertyName": "Contact",
-                                                    "DisplayType": "String"
-                                                }, {
-                                                    "TitleString": "SAMPLE_LEAD_GRID_CONVERTED_LABEL",
-                                                    "PropertyName": "Converted",
-                                                    "DisplayType": "Boolean"
-                                                }, {
-                                                    "TitleString": "SAMPLE_LEAD_GRID_SCORE_LABEL",
-                                                    "PropertyName": "Score",
-                                                    "DisplayType": "String"
-                                                }
-                                            ]
-                                        }
-                                    ]
+                                    }]
                                 }, {
                                     "ID" : "modelDetailsExplorerTab",
                                     "TitleString": "THRESHOLD_EXPLORER_TAB_TITLE",
