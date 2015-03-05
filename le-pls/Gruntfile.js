@@ -85,7 +85,7 @@ module.exports = function (grunt) {
 
     concurrent: {
         mac: ['e2eChrome', 'e2eFirefox', 'e2eSafari'],
-        windows: ['e2eChrome', 'e2eFirefox']
+        windows: ['e2eFirefox', 'e2eChrome']
     },
     
     // Copies files around the directory structure. Main copies the pls website over to the 
