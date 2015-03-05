@@ -6,6 +6,8 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -27,6 +29,8 @@ import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 
 public class ModelingServiceExecutor {
+    
+    private static final Log log = LogFactory.getLog(ModelingServiceExecutor.class);
 
     private Builder builder;
 
@@ -38,8 +42,6 @@ public class ModelingServiceExecutor {
 
     private Configuration yarnConfiguration;
     
-    private static int modelCount = 1;
-
     public ModelingServiceExecutor(Builder builder) {
         this.builder = builder;
         this.modelingServiceHostPort = builder.getModelingServiceHostPort();
@@ -85,6 +87,7 @@ public class ModelingServiceExecutor {
         AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/load", config,
                 AppSubmission.class, new Object[] {});
         String appId = submission.getApplicationIds().get(0);
+        log.info(String.format("App id for load: %s", appId));
         waitForAppId(appId);
     }
     
@@ -100,6 +103,7 @@ public class ModelingServiceExecutor {
         AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/createSamples",
                 samplingConfig, AppSubmission.class, new Object[] {});
         String appId = submission.getApplicationIds().get(0);
+        log.info(String.format("App id for sampling: %s", appId));
         waitForAppId(appId);
     }
 
@@ -114,6 +118,7 @@ public class ModelingServiceExecutor {
         AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/profile", config,
                 AppSubmission.class, new Object[] {});
         String appId = submission.getApplicationIds().get(0);
+        log.info(String.format("App id for profile: %s", appId));
         waitForAppId(appId);
     }
     
@@ -143,6 +148,7 @@ public class ModelingServiceExecutor {
         AppSubmission submission = restTemplate.postForObject(modelingServiceHostPort + "/rest/submit", model,
                 AppSubmission.class, new Object[] {});
         String appId = submission.getApplicationIds().get(0);
+        log.info(String.format("App id for modeling: %s", appId));
         waitForAppId(appId);
     }
     
