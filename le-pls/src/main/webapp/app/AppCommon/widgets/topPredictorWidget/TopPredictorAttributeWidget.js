@@ -223,6 +223,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
                 line.push(word);
                 tspan.text(line.join(" "));
                 if (tspan.node().getComputedTextLength() > width) {
+                    dy = dy * -1;
+                    tspan.attr("dy", dy + "em");
                     line.pop();
                     tspan.text(line.join(" "));
                     line = [word];
