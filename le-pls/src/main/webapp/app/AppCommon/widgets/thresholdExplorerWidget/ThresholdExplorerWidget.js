@@ -146,7 +146,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("font-size", "14px")
         .style("font-family", "ProximaNova-Semibold")
         .style("fill", "#aaa")
-        .text("TOP % LEADS");
+        .text(ResourceUtility.getString("THRESHOLD_EXPLORER_X_AXIS_LABEL"));
 
     svg.append("g")
         .attr("class", "y axis")
@@ -161,7 +161,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("font-size", "14px")
         .style("font-family", "ProximaNova-Semibold")
         .style("fill", "#aaa")
-        .text("% TOTAL CONVERSIONS");
+        .text(ResourceUtility.getString("THRESHOLD_EXPLORER_Y_AXIS_LABEL"));
 
     //==================================================
     // Apply Tick Coloring
@@ -252,7 +252,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("fill", "#333")
         .style("font-size", "11px")
         .style("font-family", "ProximaNova-Bold")
-        .text("LIFT");
+        .text(ResourceUtility.getString("THRESHOLD_EXPLORER_LIFT_LABEL"));
 
     infoElements.append("text")
         .attr("class", "rtext")
@@ -268,7 +268,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("fill", "#333")
         .style("font-size", "11px")
         .style("font-family", "ProximaNova-Bold")
-        .text("LIFT");
+        .text(ResourceUtility.getString("THRESHOLD_EXPLORER_LIFT_LABEL"));
 
     infoElements.append("text")
         .attr("class", "ltext")
@@ -285,7 +285,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("fill", "#333")
         .style("font-size", "11px")
         .style("font-family", "ProximaNova-Bold")
-        .text("% CONV");
+        .text(ResourceUtility.getString("THRESHOLD_EXPLORER_CONVERSION_LABEL"));
 
     infoElements.append("text")
         .attr("class", "xtext")
@@ -302,7 +302,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("fill", "#333")
         .style("font-size", "11px")
         .style("font-family", "ProximaNova-Bold")
-        .text("TOP");
+        .text(ResourceUtility.getString("THRESHOLD_EXPLORER_LEADS_LABEL"));
 
     infoElements.append("text")
         .attr("class", "lytext")
@@ -318,7 +318,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .style("fill", "#333")
         .style("font-size", "11px")
         .style("font-family", "ProximaNova-Bold")
-        .text("SCORE");
+        .text(ResourceUtility.getString("THRESHOLD_EXPLORER_SCORE_LABEL"));
 
     infoElements.append("text")
         .attr("class", "rytext")

@@ -109,13 +109,13 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
         segments = modelSummary.Segmentations[0].Segments;
 
         columns = [
-            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_SCORE_LABEL'),
-            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_LEADS_LABEL'),
-            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_CONVERSIONS_LABEL'),
-            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_LEFT_LIFT_LABEL'),
-            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_RIGHT_LIFT_LABEL'),
-            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_COUNT_LABEL'),
-            ResourceUtility.getString('MODEL_ADMIN_THRESHOLD_EXPORT_CONVERTED_LABEL')
+            ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_SCORE_LABEL"),
+            ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_LEADS_LABEL"),
+            ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_CONVERSIONS_LABEL"),
+            ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_LEFT_LIFT_LABEL"),
+            ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_RIGHT_LIFT_LABEL"),
+            ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_COUNT_LABEL"),
+            ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_CONVERTED_LABEL")
         ];
         result.push(columns);
 
