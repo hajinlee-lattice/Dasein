@@ -28,11 +28,13 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
 
     var widget = _.where(widgetConfig.Widgets, {ID: "modelDetailsScreenWidget"})[0];
     widget = _.where(widget.Widgets, {ID: "modelDetailsTabWidget"})[0];
-    while (_.find(widget.Tabs, {"ID" : "modelAdminInfoTab"})) {
-        var adminTabId = _.firstIndex(widget.Tabs, {"ID" : "modelAdminInfoTab"});
-        widget.Tabs.splice(adminTab, 1);
+    
+    for (var x = 0; x < widget.Tabs.length; x++) {
+        if (widget.Tabs[x].ID == "modelAdminInfoTab") {
+            widget.Tabs.splice(x, 1);
+            break;
+        }
     }
-
     var clientSession = BrowserStorageUtility.getClientSession();
     if (RightsUtility.maySeeHiddenAdminTab(clientSession.availableRights)) {
         try {
