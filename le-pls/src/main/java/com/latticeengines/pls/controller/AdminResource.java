@@ -27,7 +27,7 @@ public class AdminResource {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @RequestMapping(value = "/tenants/add", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/tenants", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Add a PLS tenant")
     public Boolean addTenant(@RequestBody Tenant tenant, HttpServletRequest request, HttpServletResponse response) {

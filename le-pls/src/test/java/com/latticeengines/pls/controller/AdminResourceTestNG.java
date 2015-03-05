@@ -36,7 +36,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     public void addTenantWithProperMagicAuthenticationHeader() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants/add", tenant, Boolean.class, new HashMap<>());
+        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class, new HashMap<>());
         assertTrue(result);
         
         Tenant t = tenantEntityMgr.findByTenantId("T1");
@@ -51,7 +51,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
 
         boolean exception = false;
         try {
-            restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants/add", tenant, Boolean.class, new HashMap<>());
+            restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class, new HashMap<>());
         } catch (Exception e) {
             exception = true;
             String code = e.getMessage();
