@@ -432,7 +432,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
                     (y(d.conversions) - 3) + ")");
 
         infoElements.select("text.xtext")
-            .text(Math.round(d.conversions) + "%")
+            .text(d.conversions.toFixed(0) + "%")
             .attr("transform", "translate(" +
                     (-40) + "," +
                     (y(d.conversions) + 14) + ")");
@@ -443,7 +443,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
                     (height + 38) + ")");
 
         infoElements.select("text.lytext")
-            .text(Math.round(d.leads) + "%")
+            .text(d.leads + "%")
             .attr("transform", "translate(" +
                     (x(d.leads) - 10) + "," +
                     (height + 55) + ")");
