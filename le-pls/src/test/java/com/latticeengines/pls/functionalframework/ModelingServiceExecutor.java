@@ -37,6 +37,8 @@ public class ModelingServiceExecutor {
     private RestTemplate restTemplate = new RestTemplate();
 
     private Configuration yarnConfiguration;
+    
+    private static int modelCount = 1;
 
     public ModelingServiceExecutor(Builder builder) {
         this.builder = builder;
@@ -127,7 +129,7 @@ public class ModelingServiceExecutor {
 
         Model model = new Model();
         model.setModelDefinition(modelDef);
-        model.setName("Model-" + System.currentTimeMillis());
+        model.setName(builder.getModelName());
         model.setTable(builder.getTable());
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
@@ -193,6 +195,7 @@ public class ModelingServiceExecutor {
         private String modelingServiceHdfsBaseDir;
         private Configuration yarnConfiguration;
         private String metadataContents;
+        private String modelName;
 
         public Builder() {
         }
@@ -274,6 +277,11 @@ public class ModelingServiceExecutor {
         
         public Builder metadataContents(String metadataContents) {
             this.setMetadataContents(metadataContents);
+            return this;
+        }
+        
+        public Builder modelName(String modelName) {
+            this.setModelName(modelName);
             return this;
         }
 
@@ -403,6 +411,14 @@ public class ModelingServiceExecutor {
 
         public void setMetadataContents(String metadataContents) {
             this.metadataContents = metadataContents;
+        }
+
+        public String getModelName() {
+            return modelName;
+        }
+
+        public void setModelName(String modelName) {
+            this.modelName = modelName;
         }
 
     }

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -63,9 +64,9 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private GlobalUserManagementServiceImpl globalUserManagementService;
 
-    private ModelingServiceExecutor executor = null;
-
     private Ticket ticket = null;
+    
+    private static String tenant;
 
     @BeforeClass(groups = "deployment", enabled = true)
     public void setup() throws Exception {
@@ -76,6 +77,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         createUser("bnguyen", "bnguyen@lattice-engines.com", "Everything", "IsAwesome", "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=");
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
+        tenant = tenant2;
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "bnguyen");
         revokeRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
@@ -89,23 +91,26 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "admin");
 
         setupDb(tenant1, tenant2, false);
-
+        
+    }
+    
+    private ModelingServiceExecutor buildModel(String tenant, String modelName, String metadata, String table) throws Exception {
         InputStream modelSummaryFileAsStream = ClassLoader.getSystemResourceAsStream(
-                "com/latticeengines/pls/controller/metadata.avsc");
+                String.format("com/latticeengines/pls/controller/metadata-%s.avsc", metadata));
         String metadataContents = new String(IOUtils.toByteArray(modelSummaryFileAsStream));
 
         ModelingServiceExecutor.Builder bldr = new ModelingServiceExecutor.Builder();
         bldr.modelingServiceHostPort(modelingServiceHostPort) //
         .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
         .yarnConfiguration(yarnConfiguration) //
-        .customer(tenant2) //
+        .customer(tenant) //
         .dataSourceDb(dataSourceDb) //
         .dataSourceHost(dataSourceHost) //
         .dataSourceUser(dataSourceUser) //
         .dataSourcePassword(dataSourcePassword) //
         .dataSourcePort(dataSourcePort) //
         .dataSourceDbType("SQLServer") //
-        .table("Q_PLS_Modeling_Tenant1") //
+        .table(table) //
         .metadataTable("EventMetadata") //
         .keyColumn("ModelingID") //
         .profileExcludeList("LeadID", //
@@ -122,28 +127,44 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
                  "LastName: LastName", //
                  "FirstName: FirstName", //
                  "SpamIndicator: SpamIndicator") //
-        .metadataContents(metadataContents);
+        .metadataContents(metadataContents) //
+        .modelName(modelName);
 
-        executor = new ModelingServiceExecutor(bldr);
-        executor.init();
+        ModelingServiceExecutor executor = new ModelingServiceExecutor(bldr);
+        
+        return executor;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    @Test(groups = "deployment", enabled = true)
-    public void runPipeline() throws Exception {
+    
+    @Test(groups = "deployment", enabled = true, dataProvider = "modelMetadataProvider")
+    public void runPipeline(String tenant, String modelName, String metadataSuffix, String tableName) throws Exception {
+        ModelingServiceExecutor executor = buildModel(tenant, modelName, metadataSuffix, tableName);
+        executor.init();
         executor.runPipeline();
         Thread.sleep(30000L);
+    }
+    
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Test(groups = "deployment", enabled = true, dependsOnMethods = { "runPipeline" })
+    public void checkModels() {
         UserDocument doc = loginAndAttach("bnguyen", "tahoe");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
-        assertEquals(response.size(), 1);
+        assertEquals(response.size(), 2);
         Map<String, String> map = (Map) response.get(0);
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
-        assertTrue(summary.getName().startsWith("Model-"));
+        assertTrue(summary.getName().startsWith("PLSModel-Eloqua"));
         assertNotNull(summary.getDetails());
     }
-
+    
+    @DataProvider(name = "modelMetadataProvider")
+    public static Object[][] getModelMetadataProvider() {
+        return new Object[][] { //
+                { tenant, "PLSModel-Eloqua1", "eloqua1", "Q_PLS_Modeling_Tenant1" }, //
+                { tenant, "PLSModel-Eloqua2", "eloqua2", "Q_PLS_Modeling_Tenant2" }
+        };
+    }
 }
