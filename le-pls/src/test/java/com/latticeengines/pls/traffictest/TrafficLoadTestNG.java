@@ -264,7 +264,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                             modelSummary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/"
                                     + map.get("Id"), ModelSummary.class);
                             finishTime = TimeStamp.getCurrentTime();
-                            assertTrue(modelSummary.getName().startsWith("T"));
+                            assertTrue(modelSummary.getName().startsWith(tenant.getName()));
                             assertNotNull(modelSummary.getDetails());
                             return finishTime.getSeconds() - startTime.getSeconds();
                         }
