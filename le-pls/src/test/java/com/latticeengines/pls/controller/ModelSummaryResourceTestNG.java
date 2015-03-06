@@ -277,6 +277,14 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
         assertNull(summary);
 
+        response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+        assertNotNull(response);
+        int length1 = response.size();
+        response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/?selection=all", List.class);
+        assertNotNull(response);
+        int length2 = response.size();
+        assertEquals(length1 + 1, length2);
+
         attrMap = new AttributeMap();
         attrMap.put("Status", "UpdateAsInactive");
         restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
