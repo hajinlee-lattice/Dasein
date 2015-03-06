@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -59,4 +60,14 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         }
         assertTrue(exception);
     }
+
+    @SuppressWarnings("unchecked")
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "addTenantWithProperMagicAuthenticationHeader" })
+    public void getTenantsWithProperMagicAuthenticationHeader() {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        List<Tenant> tenants = restTemplate.getForObject(getRestAPIHostPort() + "/pls/admin/tenants", List.class);
+        assertEquals(tenants.size(), 1);
+    }
+
 }

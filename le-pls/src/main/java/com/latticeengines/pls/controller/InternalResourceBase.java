@@ -1,0 +1,19 @@
+package com.latticeengines.pls.controller;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.pls.exception.LoginException;
+import com.latticeengines.pls.globalauth.authentication.impl.Constants;
+
+public class InternalResourceBase {
+
+    protected void checkHeader(HttpServletRequest request) {
+        String value = request.getHeader(Constants.INTERNAL_SERVICE_HEADERNAME);
+        
+        if (value == null || !value.equals(Constants.INTERNAL_SERVICE_HEADERVALUE)) {
+            throw new LoginException(new LedpException(LedpCode.LEDP_18001, new String[] {}));
+        }
+    }
+}
