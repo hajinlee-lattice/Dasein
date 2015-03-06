@@ -20,6 +20,7 @@ describe('smoketest main flow of app', function() {
         browser.driver.sleep(1000);     
 
         // choose any model
+        expect(element(by.css('.js-top-predictor-donut')).isPresent()).toBe(false);
         modelList.getAnyModel().click();
         browser.waitForAngular();
 
@@ -28,6 +29,7 @@ describe('smoketest main flow of app', function() {
         browser.driver.sleep(1000);
 
         // check existence of threshold explorer
+        expect(element(by.id('thresholdExplorerChart')).isDisplayed()).toBe(false); 
         modelTabs.getTabByIndex(1).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
@@ -42,12 +44,14 @@ describe('smoketest main flow of app', function() {
         expect(element(by.id('moreDataPoints')).isDisplayed()).toBe(true); 
 
         // check existence of sample leads tab
+        expect(element(by.css('.leads-table')).isDisplayed()).toBe(false); 
         modelTabs.getTabByIndex(2).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
         expect(element(by.css('.leads-table')).isDisplayed()).toBe(true);  
 
         // check existence of hidden admin page
+        expect(element(by.id('adminInfoContainer')).isPresent()).toBe(false);  
         element(by.id('adminLink')).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);    
