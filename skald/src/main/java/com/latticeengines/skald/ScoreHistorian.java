@@ -31,9 +31,8 @@ public class ScoreHistorian extends HandlerInterceptorAdapter {
             long start = (long) request.getAttribute(SkaldInterceptor.START_TIME_KEY);
 
             entry.requestID = identifier;
-
-            // Hopefully the duration fits into 32 bits worth of milliseconds!
-            entry.duration = (int) (System.currentTimeMillis() - start);
+            entry.received = start;
+            entry.duration = System.currentTimeMillis() - start;
 
             // TODO Actually write the history entry to the database.
         }
