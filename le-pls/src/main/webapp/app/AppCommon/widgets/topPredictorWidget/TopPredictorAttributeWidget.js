@@ -58,7 +58,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         gap = 8,
         labelSize = "10px",
         fontSize = "12px",
-        commonDy = ".36em";
+        commonDy = ".18em";
     
     var x = d3.scale.linear()
         .domain([0, d3.max(liftValues) + 1])
@@ -77,7 +77,25 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
       .attr('height', (bar_height + gap * 2) * bucketNames.length + 80)
       .append("g")
       .attr("transform", "translate(0, 0)");
-      
+    
+    // These are the background bars that alternate
+    chart.selectAll("rect.background")
+        .data(liftValues)
+        .enter().append("rect")
+        .attr("display", function(d, i) { 
+            return i % 2 == 1 ? "none" : null; 
+        }) 
+        .attr("x", left_width)
+        .attr("y", function(d) { 
+            return y(d) + gap + 16; 
+        })
+        .attr("width", function (d) {
+            return width + 80;
+        })
+        .attr("height", bar_height + 8)
+        .style("fill", "#EEF3F7")
+        .attr('opacity', 0.7);
+        
     // These are the background ticks
     chart.selectAll("line")
         .data(xTicks)
@@ -118,9 +136,9 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("font-size", labelSize)
         .style("fill", "#999999")
         .text(liftText);
-    
+        
     // These are the bars
-    chart.selectAll("rect")
+    chart.selectAll("rect.bar")
         .data(liftValues)
         .enter().append("rect")
         .attr("x", left_width)
