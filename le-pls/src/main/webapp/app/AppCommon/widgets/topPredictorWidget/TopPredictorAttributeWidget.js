@@ -58,7 +58,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         gap = 8,
         labelSize = "10px",
         fontSize = "12px",
-        commonDy = ".18em";
+        commonDy = ".18em",
+        labelDx = 3;
     
     var x = d3.scale.linear()
         .domain([0, d3.max(liftValues) + 1])
@@ -114,12 +115,27 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("class", "rule")
         .attr("x", function(d) { return x(d) + left_width; })
         .attr("y", (bar_height + gap * 2) * bucketNames.length + 40)
+        .attr("dx", function(d) {
+            if (d === 0) {
+                return 0;
+            } else {
+                return labelDx;
+            }
+        })
         .attr("dy", -6)
         .attr("font-weight", "semi-bold")
         .attr("font-size", fontSize)
         .attr("text-anchor", "middle")
         .style("fill", "#666666")
-        .text(function(d) { return d + "x"; } );
+        .text(function(d) {
+            if (d === 0) {
+                return d;
+            } else if (d === 1) {
+                return ""; 
+            } else {
+                return d + "x"; 
+            }
+        });
     
     // This is the lift label at the bottom of the chart
     var liftText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LIFT_LABEL").toUpperCase();
@@ -152,6 +168,45 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             }
             
         });
+    
+    // This is the 1x line
+    chart.selectAll("line.baselineLift")
+        .data([1])
+        .enter().append("line")
+        .attr("x1", function(d) { return x(d) + left_width; })
+        .attr("x2", function(d) { return x(d) + left_width; })
+        .attr("y1", 20)
+        .attr("y2", (bar_height + gap * 2) * bucketNames.length + 20)
+        .style("fill", "#BBBBBB")
+        .attr('opacity', 1);
+        
+    // This is the 1x line label at the bottom
+    chart.selectAll(".baselineLiftBottom")
+        .data([1])
+        .enter().append("text")
+        .attr("x", function(d) { return x(d) + left_width; })
+        .attr("y", (bar_height + gap * 2) * bucketNames.length + 40)
+        .attr("dy", -6)
+        .attr("dx", labelDx)
+        .attr("font-weight", "semi-bold")
+        .attr("font-size", fontSize)
+        .attr("text-anchor", "middle")
+        .style("fill", "#666666")
+        .text(function(d) { return d + "x"; } );
+    
+    // This is the 1x line label at the top    
+    chart.selectAll(".baselineLiftTop")
+        .data([1])
+        .enter().append("text")
+        .attr("x", function(d) { return x(d) + left_width; })
+        .attr("y", 20)
+        .attr("dy", -6)
+        .attr("dx", labelDx)
+        .attr("font-weight", "semi-bold")
+        .attr("font-size", fontSize)
+        .attr("text-anchor", "middle")
+        .style("fill", "#666666")
+        .text(function(d) { return d + "x"; } );
         
     // These are the lift numbers to the right of the chart
     chart.selectAll("text.lift")
