@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 @Table(name = "PREDICTOR_ELEMENT")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class PredictorElement implements HasPid, HasName, HasTenantId {
-    
+
     private String name;
     private Long pid;
     private Integer correlationSign;
@@ -156,7 +156,7 @@ public class PredictorElement implements HasPid, HasName, HasTenantId {
     public Long getTenantId() {
         return tenantId;
     }
-    
+
     @Override
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;

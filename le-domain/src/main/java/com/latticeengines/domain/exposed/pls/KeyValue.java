@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 @Table(name = "KEY_VALUE")
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class KeyValue implements HasTenantId, HasPid {
-    
+
     private static final Log log = LogFactory.getLog(KeyValue.class);
 
     private Long pid;
@@ -61,7 +61,7 @@ public class KeyValue implements HasTenantId, HasPid {
     public Long getTenantId() {
         return tenantId;
     }
-    
+
     @Override
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;
@@ -78,7 +78,7 @@ public class KeyValue implements HasTenantId, HasPid {
     public void setData(byte[] data) {
         this.data = data;
     }
-    
+
     @JsonProperty("Payload")
     @Transient
     public String getPayload() {
@@ -86,7 +86,7 @@ public class KeyValue implements HasTenantId, HasPid {
         JsonElement root = new JsonParser().parse(new String(uncompressedData));
         return root.toString();
     }
-    
+
     @JsonProperty("Payload")
     @Transient
     public void setPayload(String payload) {
@@ -97,7 +97,7 @@ public class KeyValue implements HasTenantId, HasPid {
         } else {
             payloadData = payload.getBytes();
         }
-        
+
         try {
             byte[] compressedData = CompressionUtils.compressByteArray(payloadData);
             setData(compressedData);

@@ -35,7 +35,6 @@ public class LoginDocument {
         this.errors = errors;
     }
 
-
     @JsonProperty("Uniqueness")
     public String getUniqueness() {
         return uniqueness;

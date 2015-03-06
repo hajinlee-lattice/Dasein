@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.pls;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 
@@ -11,17 +10,27 @@ public class UserUpdateData {
     private String newPassword;
 
     @JsonProperty("OldPassword")
-    public String getOldPassword() { return oldPassword; }
+    public String getOldPassword() {
+        return oldPassword;
+    }
 
     @JsonProperty("OldPassword")
-    public void setOldPassword(String oldPassword) { this.oldPassword = oldPassword; }
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
+    }
 
     @JsonProperty("NewPassword")
-    public String getNewPassword() { return newPassword; }
+    public String getNewPassword() {
+        return newPassword;
+    }
 
     @JsonProperty("NewPassword")
-    public void setNewPassword(String newPassword) { this.newPassword = newPassword; }
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
 
     @Override
-    public String toString() { return JsonUtils.serialize(this); }
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 }

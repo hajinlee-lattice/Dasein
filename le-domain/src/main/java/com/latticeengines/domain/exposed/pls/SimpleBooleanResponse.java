@@ -2,8 +2,10 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.util.List;
 
+@SuppressWarnings("rawtypes")
 public class SimpleBooleanResponse extends ResponseDocument {
 
+    @SuppressWarnings("unchecked")
     private SimpleBooleanResponse(boolean success, List<String> errors) {
         this.setSuccess(success);
         this.setErrors(errors);

@@ -36,11 +36,11 @@ import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "MODEL_SUMMARY", 
-       uniqueConstraints = { @UniqueConstraint(columnNames = { "ID" }), @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
+@Table(name = "MODEL_SUMMARY", uniqueConstraints = { @UniqueConstraint(columnNames = { "ID" }),
+        @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, HasTenantId {
-    
+
     private String id;
     private String name;
     private Long pid;
@@ -119,7 +119,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     public Tenant getTenant() {
         return tenant;
     }
-    
+
     @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "modelSummary")
     @OnDelete(action = OnDeleteAction.CASCADE)
     public List<Predictor> getPredictors() {
@@ -129,7 +129,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     public void setPredictors(List<Predictor> predictors) {
         this.predictors = predictors;
     }
-    
+
     public void addPredictor(Predictor predictor) {
         if (predictor != null) {
             predictors.add(predictor);
@@ -144,7 +144,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     public Long getTenantId() {
         return tenantId;
     }
-    
+
     @Override
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;

@@ -40,7 +40,7 @@ public class Predictor implements HasName, HasPid, HasTenantId {
     private ModelSummary modelSummary;
     private List<PredictorElement> predictorElements = new ArrayList<>();
     private Long tenantId;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -132,7 +132,7 @@ public class Predictor implements HasName, HasPid, HasTenantId {
     public void setPredictorElements(List<PredictorElement> predictorElements) {
         this.predictorElements = predictorElements;
     }
-    
+
     public void addPredictorElement(PredictorElement predictorElement) {
         predictorElements.add(predictorElement);
         predictorElement.setPredictor(this);
@@ -145,7 +145,7 @@ public class Predictor implements HasName, HasPid, HasTenantId {
     public Long getTenantId() {
         return tenantId;
     }
-    
+
     @Override
     public void setTenantId(Long tenantId) {
         this.tenantId = tenantId;

@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.pls;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -13,17 +12,27 @@ public class DeleteUsersResult {
     private List<String> failUsers;
 
     @JsonProperty("SuccessUsers")
-    public List<String> getSuccessUsers() { return successUsers; }
+    public List<String> getSuccessUsers() {
+        return successUsers;
+    }
 
     @JsonProperty("SuccessUsers")
-    public void setSuccessUsers(List<String> successUsers) { this.successUsers = successUsers; }
+    public void setSuccessUsers(List<String> successUsers) {
+        this.successUsers = successUsers;
+    }
 
     @JsonProperty("FailUsers")
-    public List<String> getFailUsers() { return failUsers; }
+    public List<String> getFailUsers() {
+        return failUsers;
+    }
 
     @JsonProperty("FailUsers")
-    public void setFailUsers(List<String> failUsers) { this.failUsers = failUsers; }
+    public void setFailUsers(List<String> failUsers) {
+        this.failUsers = failUsers;
+    }
 
     @Override
-    public String toString() { return JsonUtils.serialize(this); }
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 }

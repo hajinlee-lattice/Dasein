@@ -15,16 +15,23 @@ public class ResponseDocument<ResultType> {
     private List<String> errors;
     private ResultType result;
 
-    public ResponseDocument() { }
+    public ResponseDocument() {
+    }
 
     @JsonProperty("Errors")
-    public List<String> getErrors() { return errors; }
+    public List<String> getErrors() {
+        return errors;
+    }
 
     @JsonProperty("Errors")
-    public void setErrors(List<String> errors) { this.errors = errors; }
+    public void setErrors(List<String> errors) {
+        this.errors = errors;
+    }
 
     @JsonProperty("Result")
-    public ResultType getResult() { return result; }
+    public ResultType getResult() {
+        return result;
+    }
 
     @JsonProperty("Result")
     public void setResult(ResultType result) {
@@ -42,8 +49,11 @@ public class ResponseDocument<ResultType> {
     }
 
     @Override
-    public String toString() { return JsonUtils.serialize(this); }
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static ResponseDocument generateFromJSON(String json, Class resultType) {
         ResponseDocument deserializedDoc = new ResponseDocument<>();
         ObjectMapper mapper = new ObjectMapper();
@@ -58,7 +68,7 @@ public class ResponseDocument<ResultType> {
 
         if (node.get("Errors") != null && node.get("Errors").size() > 0) {
             List<String> errors = new ArrayList<>();
-            for (JsonNode errorNode: node.get("Errors")){
+            for (JsonNode errorNode : node.get("Errors")) {
                 errors.add(errorNode.asText());
             }
             deserializedDoc.setErrors(errors);
