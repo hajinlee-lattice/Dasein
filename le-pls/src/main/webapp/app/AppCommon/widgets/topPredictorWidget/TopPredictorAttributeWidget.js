@@ -28,7 +28,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             attributeHover.addClass("attribute-hover-left-arrow");
         }
         
-        $("#topPredictorAttributeHover").fadeIn();
+        $("#topPredictorAttributeHover").show();
     }
     setHoverPosition($scope.mouseX);
     

@@ -209,6 +209,28 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
           .append("g")
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
         
+        // Append a back button
+        setTimeout(function () {
+            svg.append("svg:image")
+                .attr("class", "donut-chart-back-button")
+                .attr("xlink:href", "assets/images/Donut-Center-Back-Click.png")
+                .attr("x", -14)
+                .attr("y", -13)
+                .attr("width", "29px")
+                .attr("height", "29px")
+                .on("mouseover", function (d) {
+                    d3.select(this).attr("xlink:href", "assets/images/Donut-Center-Back-Hover.png");
+                })
+                .on("mouseout", function (d) {
+                    d3.select(this).attr("xlink:href", "assets/images/Donut-Center-Back-Click.png");
+                })
+                .on("click", function (d) {
+                    $scope.backToSummaryClicked();
+                });;
+                
+        }, 1000);
+        
+            
         var arc2 = d3.svg.arc()
             .startAngle(function(d) { return d.x; })
             .endAngle(function(d) { return d.x + d.dx; })
