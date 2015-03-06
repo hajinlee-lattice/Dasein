@@ -207,8 +207,17 @@ Model-detail
   border-width: 1px;
 }
 
+.model-admin-link {
+  padding-left: 5px;
+  margin-top: 40px;
+}
+
+.model-admin-link .hidden-link {
+  color: #999;
+}
+
 .model-admin-info table {
-  width: 50%;
+  width: 40%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -217,12 +226,38 @@ Model-detail
   min-width: 150px;
 }
 
+.model-admin-info .health-excellent {
+  color: #189008;
+}
+
+.model-admin-info .health-good {
+  color: #85B200;
+}
+
+.model-admin-info .health-medium {
+  color: #D8A300;
+}
+
+.model-admin-info .health-poor {
+  color: #D96D00;
+}
+
+.model-admin-info table tbody tr:last-of-type {
+  border-bottom: #ccc solid 1px;
+}
+
 .model-admin-info-error {
   border-radius: 4px 4px 4px 4px;
   margin-top: 0.5em;
   width: 50%;
   margin-left: auto;
   margin-right: auto;
+}
+
+.panel-body.model-admin-info {
+  margin-top: 8em;
+  padding-top: 4em;
+  padding-bottom: 3em;
 }
 
 .leads-table .data-table {
@@ -244,6 +279,10 @@ Model-detail
 .leads-table .lead-score {
   width: 20%;
   text-align: center;
+}
+
+.model-details tbody tr:last-of-type {
+  border-bottom: #ccc solid 1px;
 }
 
 /*
