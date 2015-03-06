@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,8 +43,14 @@ public class ModelSummaryResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of model summary ids available to the user")
-    public List<ModelSummary> getModelSummaries() {
-        List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
+    public List<ModelSummary> getModelSummaries(@RequestParam(value="selection", required=false) String selection) {
+        
+        List<ModelSummary> summaries = null;
+        if (selection != null && selection.equalsIgnoreCase("all")) {
+            summaries = modelSummaryEntityMgr.findAll();
+        } else {
+            summaries = modelSummaryEntityMgr.findAllValid();
+        }
 
         for (ModelSummary summary : summaries) {
             summary.setPredictors(new ArrayList<Predictor>());

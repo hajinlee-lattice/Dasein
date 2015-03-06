@@ -13,6 +13,7 @@ angular.module('mainApp.appCommon.utilities.WidgetConfigUtility', [
     this.LEAD_DETAILS_TILE_WIDGET = 'LeadDetailsTileWidget';
     this.MODEL_DETAILS_WIDGET = 'ModelDetailsWidget';
     this.MODEL_LIST_TILE_WIDGET = 'ModelListTileWidget';
+    this.MODEL_LIST_CREATION_HISTORY = 'ModelListCreationHistoryWidget';
     this.REPEATER_WIDGET = 'RepeaterWidget';
     this.PLAY_DETAILS_TILE_WIDGET = 'PlayDetailsTileWidget';
     this.PLAY_LIST_TILE_WIDGET = 'PlayListTileWidget';

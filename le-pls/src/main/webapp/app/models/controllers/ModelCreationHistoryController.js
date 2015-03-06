@@ -1,38 +1,43 @@
-angular.module('mainApp.models.controllers.ModelListController', [
+angular.module('mainApp.models.controllers.ModelCreationHistoryController', [
     'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.core.services.GriotWidgetService',
-    'mainApp.appCommon.widgets.ModelListTileWidget',
     'mainApp.models.services.ModelService'
 ])
-.controller('ModelListController', function ($scope, ResourceUtility, WidgetConfigUtility, WidgetFrameworkService, GriotWidgetService, ModelService) {
+
+.controller('ModelCreationHistoryController', function ($scope, BrowserStorageUtility, ResourceUtility, RightsUtility, GriotWidgetService, WidgetConfigUtility, 
+		WidgetFrameworkService, ModelService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.loading = true;
+
+    var clientSession = BrowserStorageUtility.getClientSession();
+    if (clientSession == null) { return; }
 
     var widgetConfig = GriotWidgetService.GetApplicationWidgetConfig();
     if (widgetConfig == null) {
         return;
     }
-    
+
     var screenWidgetConfig = WidgetConfigUtility.GetWidgetConfig(
-        widgetConfig,
-        "modelListScreenWidget"
+            widgetConfig,
+            "modelListCreationHistoryWidget"
     );
-    
     if (screenWidgetConfig == null) {
         return;
     }
-
+                    
     $scope.showNoModels = false;
-    ModelService.GetAllModels(true).then(function(result) {
+    ModelService.GetAllModels(false).then(function(result) {
         $scope.loading = false;
         if (result != null && result.success === true) {
             var modelList = result.resultObj;
             if (modelList == null || modelList.length === 0) {
                 $scope.showNoModels = true;
             } else {
-                var contentContainer = $('#modelListContainer');
+                var contentContainer = $('#modelCreationHistoryContainer');
                 WidgetFrameworkService.CreateWidget({
                     element: contentContainer,
                     widgetConfig: screenWidgetConfig,

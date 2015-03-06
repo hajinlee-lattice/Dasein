@@ -7,17 +7,21 @@ angular.module('mainApp.models.services.ModelService', [
 ])
 .service('ModelService', function ($http, $q, _, ServiceErrorUtility, ResourceUtility, StringUtility, SessionService) {
 
-    this.GetAllModels = function () {
+    this.GetAllModels = function (isValidOnly) {
             var deferred = $q.defer();
             var result;
-
-            $http({
+            var request;
+            request = {
                 method: 'GET',
                 url: '/pls/modelsummaries/',
                 headers: {
                     "Content-Type": "application/json"
                 }
-            })
+            };
+            if (isValidOnly === false) {
+                request.url += '?selection=all';
+            }
+            $http(request)
             .success(function(data, status, headers, config) {
                 if (data == null) {
                     result = {
@@ -118,6 +122,46 @@ angular.module('mainApp.models.services.ModelService', [
         return deferred.promise;
     };
 
+    this.undoDeletedModel = function (modelId) {
+        var deferred = $q.defer();
+        var result;
+        $http({
+            method: 'PUT',
+            url: '/pls/modelsummaries/'+ modelId,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            data: angular.toJson ({ Status: "UpdateAsInactive" })
+        })
+        .success(function(data, status, headers, config) {
+            if (data === true || data === 'true') {
+                result = {
+                    success: true,
+                    resultObj: {},
+                    resultErrors: null
+                };
+                deferred.resolve(result);
+            } else {
+                result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                };
+            }
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('MODEL_LIST_UNDO_DELETE_SERVICE_ERROR')
+            };
+            if (data.errorCode == 'LEDP_18003') result.ResultErrors = ResourceUtility.getString('MODEL_LIST_UNTO_DELETE_ACCESS_DENIED');
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
 
     this.GetModelById = function (modelId) {
         var deferred = $q.defer();

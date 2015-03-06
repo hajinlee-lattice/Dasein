@@ -1,0 +1,27 @@
+<div data-ng-controller="ModelListCreationHistoryWidgetController">
+    <div class="leads-table data-table wrapper">
+        <p><h4>{{ResourceUtility.getString('MODEL_LIST_CREATION_HISTORY')}}</h4></p>
+        <table>
+            <thead>
+              <tr>
+                <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_NAME')}}</th>
+                <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_INTERNAL_ID')}}</th>
+                <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_CREATION_DATE')}}</th>
+                <th>{{ResourceUtility.getString('MODEL_LIST_MODEL_STATUS')}}</th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr data-ng-repeat="model in models">
+                    <td>{{model.DisplayName}}</td>
+                    <td>{{model.Id}}</td>
+                    <td>{{model.CreatedDate}}</td>
+                    <td>{{model.Status}}&nbsp;
+                        <a data-ng-show="model.Status == 'Deleted'"
+                         href="#" data-ng-click="undoDeleteModel(model.Id)">{{ResourceUtility.getString('MODEL_LIST_MODEL_DELETED_UNDO_LABEL')}}</a>
+                     </td>
+                </tr>
+             </tbody>
+        </table>
+    </div>
+
+</div>

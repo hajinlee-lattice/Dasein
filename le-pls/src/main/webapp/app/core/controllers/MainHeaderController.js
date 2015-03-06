@@ -18,6 +18,11 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     $scope.userDisplayName = clientSession.DisplayName;
     $scope.showUserManagement = RightsUtility.canSeeUserManagement(clientSession.availableRights);
 
+    $scope.isShowModelCreationHistory = false;
+    if (RightsUtility.maySeeHiddenAdminTab(clientSession.availableRights))  {
+        $scope.isShowModelCreationHistory = true;
+    }
+    
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {
             $event.preventDefault();
@@ -38,6 +43,13 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         }
         
         $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
+    };
+    
+    $scope.showModelCreationHistory = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        $rootScope.$broadcast(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
     };
     
     $scope.updatePasswordClicked = function ($event) {

@@ -11,7 +11,8 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.userManagement.controllers.UserManagementController',
     'mainApp.models.controllers.AdminInfoController',
     'mainApp.models.controllers.ModelListController',
-    'mainApp.models.controllers.ModelDetailController'
+    'mainApp.models.controllers.ModelDetailController',
+    'mainApp.models.controllers.ModelCreationHistoryController'
 ])
 
 .controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, GriotNavUtility, HelpService, GriotConfigService) {
@@ -112,6 +113,19 @@ angular.module('mainApp.core.controllers.MainViewController', [
         $http.get('./app/models/views/AdminInfoView.html').success(function (html) {
             var scope = $rootScope.$new();
             scope.data = data;
+            $compile($("#mainContentView").html(html))(scope);
+        });
+    }
+    
+    $scope.$on(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT, function (event, data) {
+        modelCreationHistoryView();
+    });
+    
+    function modelCreationHistoryView() {
+        window.location.hash = GriotNavUtility.MODEL_CREATION_HISTORY_HASH;
+        
+        $http.get('./app/models/views/ModelCreationHistoryView.html').success(function (html) {
+            var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
         });
     }

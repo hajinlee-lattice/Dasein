@@ -127,6 +127,11 @@
 						}
 					]
 				}, {
+                    "ID" : "modelListCreationHistoryWidget",
+                    "Type" : "ModelListCreationHistoryWidget",
+                    "Widgets" : [
+                                ]
+                }, {
                     "ID" : "userManagementScreenWidget",
                     "Type" : "ScreenWidget",
                     "Widgets" : [{
