@@ -70,4 +70,21 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(tenants.size(), 1);
     }
 
+    @Test(groups = { "functional", "deployment" })
+    public void getTenantsWithoutProperMagicAuthenticationHeader() {
+        addMagicAuthHeader.setAuthValue("xyz");
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+
+        boolean exception = false;
+        try {
+            restTemplate.getForObject(getRestAPIHostPort() + "/pls/admin/tenants", List.class);
+        } catch (Exception e) {
+            exception = true;
+            String code = e.getMessage();
+            assertEquals(code, "401");
+        }
+        assertTrue(exception);
+    }
+
 }
