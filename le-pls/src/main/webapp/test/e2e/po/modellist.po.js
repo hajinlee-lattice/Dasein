@@ -1,7 +1,7 @@
 'use strict';
 
 var ModelList = function() {
-    this.getModel = function(name) {    	   
+    this.getAnyModel = function() {    	   
      	return element(by.binding('createdDate'));      
     };  	
 
