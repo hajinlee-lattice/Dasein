@@ -44,9 +44,8 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
                 $scope.healthLevel = ResourceUtility.getString("MODEL_ADMIN_HEALTH_POOR");
                 $scope.healthClass = "health-poor";
             }
-
         }]
-    }
+    };
 })
 .directive('fileDownloader', function() {
     return {

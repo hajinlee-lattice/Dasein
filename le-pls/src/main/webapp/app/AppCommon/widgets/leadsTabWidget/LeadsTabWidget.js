@@ -16,7 +16,7 @@ angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
         Segmentaions:   $scope.data.Segmentations,
         ModelId:        $scope.data.ModelId,
         TenantId:       clientSession.Tenant.Identifier
-    }
+    };
 
     $scope.adminLinkClick = function() {
        $rootScope.$broadcast(GriotNavUtility.ADMIN_INFO_NAV_EVENT, adminData);
