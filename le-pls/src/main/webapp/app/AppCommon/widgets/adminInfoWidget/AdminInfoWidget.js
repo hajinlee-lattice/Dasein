@@ -50,7 +50,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
 .directive('fileDownloader', function() {
     return {
         restrict:    'E',
-        template:   '<a href="" data-ng-click="downloadFile()" data-ng-hide="fetching">{{linkText}}</a><span data-ng-show="fetching">{{ResourceUtility.getString("MODEL_ADMIN_FETCHING")}}</span>',
+        template:   '<a href="" data-ng-click="downloadFile($event)" data-ng-hide="fetching">{{ResourceUtility.getString("MODEL_ADMIN_DOWNLOAD")}}</a><span data-ng-show="fetching">{{ResourceUtility.getString("MODEL_ADMIN_FETCHING")}}</span>',
         scope:       true,
         link:        function (scope, element, attr) {
             var anchor = element.children()[0];
@@ -71,15 +71,23 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
                 scope.downloadFile = function () { };
             });
 
-            scope.$on('download-failed', function (event, data) {
+            scope.$on('download-failed', function () {
                 $(anchor).removeAttr('disabled');
             });
+
+            scope.$on('auto-download', function () {
+                $(anchor).triggerHandler('click');
+            });
         },
-        controller:  ['$scope', '$attrs', '$http', 'ResourceUtility', function ($scope, $attrs, $http, ResourceUtility) {
+        controller:  ['$scope', '$attrs', '$http', '$timeout', 'ResourceUtility', function ($scope, $attrs, $http, $timeout, ResourceUtility) {
             $scope.fetching = false;
+            $scope.fetched = false;
             $scope.ResourceUtility = ResourceUtility;
-            $scope.linkText = ResourceUtility.getString("MODEL_ADMIN_FETCH");
-            $scope.downloadFile = function() {
+            $scope.downloadFile = function($event) {
+                if ($event != null) {
+                    $event.preventDefault();
+                }
+
                 $scope.fetching = true;
                 $scope.$parent.Error.ShowError = false;
                 $scope.$emit('download-start');
@@ -90,13 +98,12 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
                         $scope.$emit('downloaded', btoa(unescape(encodeURIComponent(response.data))));
                     }
                     $scope.fetching = false;
-                    $scope.linkText = ResourceUtility.getString("MODEL_ADMIN_DOWNLOAD");
+                    $timeout(function(){ $scope.$emit('auto-download'); });
                 }, function () {
-                    $scope.$emit('download-failed');
                     $scope.$parent.Error.ShowError = true;
                     $scope.$parent.Error.ErrorMsg = ResourceUtility.getString("MODEL_ADMIN_FETCH_ERROR", [$attrs.filename]);
                     $scope.fetching = false;
-                    $scope.linkText = ResourceUtility.getString("MODEL_ADMIN_FETCH");
+                    $scope.$emit('download-failed');
                 });
             };
         }]
