@@ -229,7 +229,19 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (modelSummary == null || modelSummary.Predictors == null || modelSummary.Predictors.length === 0) {
             return null;
         }
-        
+
+        /*
+         * Apparently, excel does not like UTF-8 characters. Handle the current offenders.
+         *
+         * See: http://i18nqa.com/debug/utf8-debug.html
+         */
+        function cleanupForExcel(text) {
+          return text
+              .replace("\u2019", "'")
+              .replace("\u201c", "\"")
+              .replace("\u201d", "\"");
+        }
+
         var columns = [
             ResourceUtility.getString('TOP_PREDICTOR_EXPORT_CATEGORY_LABEL'), 
             ResourceUtility.getString('TOP_PREDICTOR_EXPORT_ATTRIBUTE_NAME_LABEL'), 
@@ -263,7 +275,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                         }
                         percentTotal = Math.round(percentTotal);
                         var lift = element.Lift.toPrecision(2);
-                        var description = predictor.Description ? predictor.Description : "";
+                        var description = cleanupForExcel(predictor.Description ? predictor.Description : "");
                         var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
                         if (attributeValue.toUpperCase() == "NULL") {
                             attributeValue = "N/A";
