@@ -73,6 +73,19 @@
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
+        <profile>
+            <id>load</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>loadtest</value>
+                </property>
+            </activation>
+            <properties>
+                <pls.properties.path>conf/env/loadtestr</pls.properties.path>
+                <bin.env.path>bin/env/loadtest</bin.env.path>
+            </properties>
+        </profile>
     </profiles>
 
 
