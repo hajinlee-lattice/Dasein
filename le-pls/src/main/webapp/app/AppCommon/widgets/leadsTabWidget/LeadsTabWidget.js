@@ -10,16 +10,10 @@ angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
 
     var clientSession = BrowserStorageUtility.getClientSession();
     $scope.showAdminLink = RightsUtility.maySeeHiddenAdminTab(clientSession.availableRights);
-
-    var adminData = {
-        ModelDetails:   $scope.data.ModelDetails,
-        Segmentaions:   $scope.data.Segmentations,
-        ModelId:        $scope.data.ModelId,
-        TenantId:       clientSession.Tenant.Identifier
-    };
+    $scope.data.TenantId = clientSession.Tenant.Identifier;
 
     $scope.adminLinkClick = function() {
-       $rootScope.$broadcast(GriotNavUtility.ADMIN_INFO_NAV_EVENT, adminData);
+       $rootScope.$broadcast(GriotNavUtility.ADMIN_INFO_NAV_EVENT, $scope.data);
     };
 
 })
