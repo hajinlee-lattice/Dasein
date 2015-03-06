@@ -226,7 +226,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 })
                 .on("click", function (d) {
                     $scope.backToSummaryClicked();
-                });;
+                });
                 
         }, 1000);
         
