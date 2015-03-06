@@ -64,10 +64,6 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .domain([0, d3.max(liftValues) + 1])
         .range([0, width]);
     
-    var y = d3.scale.ordinal()
-        .domain(liftValues)
-        .rangeBands([0, (bar_height + 2 * gap) * liftValues.length]);
-    
     var maxTicks = d3.max(liftValues) > 5 ? 5 : d3.max(liftValues);
     var xTicks = x.ticks(maxTicks + 1);
     chart = d3.select("#attributeChart") 
@@ -86,8 +82,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             return i % 2 == 1 ? "none" : null; 
         }) 
         .attr("x", left_width)
-        .attr("y", function(d) { 
-            return y(d) + gap + 16; 
+        .attr("y", function(d, i) { 
+            return (i * (bar_height + 2 * gap)) + 24; 
         })
         .attr("width", function (d) {
             return width + 80;
@@ -142,8 +138,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .data(liftValues)
         .enter().append("rect")
         .attr("x", left_width)
-        .attr("y", function(d) { 
-            return y(d) + gap + 20; 
+        .attr("y", function(d, i) { 
+            return (i * (bar_height + 2 * gap)) + 28; 
         })
         .attr("width", x)
         .attr("height", bar_height)
