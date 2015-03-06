@@ -15,7 +15,9 @@ import com.latticeengines.domain.exposed.api.Status;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
 import com.latticeengines.pls.exception.LoginException;
@@ -34,7 +36,7 @@ public class InternalResource {
     @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a model summary")
-    public Boolean update(@PathVariable String modelId, @RequestBody AttributeMap attrMap, HttpServletRequest request) {
+    public ResponseDocument<ModelActivationResult> update(@PathVariable String modelId, @RequestBody AttributeMap attrMap, HttpServletRequest request) {
         String value = request.getHeader(Constants.INTERNAL_SERVICE_HEADERNAME);
         
         if (value == null || !value.equals(Constants.INTERNAL_SERVICE_HEADERVALUE)) {
@@ -43,7 +45,12 @@ public class InternalResource {
         ModelSummary summary = modelSummaryEntityMgr.getByModelId(modelId);
         
         if (summary == null) {
-            return false;
+            ModelActivationResult result = new ModelActivationResult();
+            result.setExists(false);
+            ResponseDocument<ModelActivationResult> response = new ResponseDocument<>();
+            response.setSuccess(false);
+            response.setResult(result);
+            return response;
         }
     
         ((ModelSummaryEntityMgrImpl) modelSummaryEntityMgr).manufactureSecurityContextForInternalAccess(summary.getTenant());
@@ -51,7 +58,16 @@ public class InternalResource {
         // Reuse the logic in the ModelSummaryResource to do the updates
         ModelSummaryResource msr = new ModelSummaryResource();
         msr.setModelSummaryEntityMgr(modelSummaryEntityMgr);
-        return msr.update(modelId, attrMap);
+        ModelActivationResult result = new ModelActivationResult();
+        result.setExists(true);
+        ResponseDocument<ModelActivationResult> response = new ResponseDocument<>();
+        response.setResult(result);
+        if (msr.update(modelId, attrMap)) {
+            response.setSuccess(true);
+        } else {
+            response.setSuccess(false);
+        }
+        return response;
     }
     
     @RequestMapping(value = "/{op}/{left}/{right}", method = RequestMethod.GET)
