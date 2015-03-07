@@ -172,6 +172,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                 userCreds.setUsername(tenant.getName() + "_testuser_" + i);
                 user.setUsername(userCreds.getUsername());
                 userCreds.setPassword(password);
+                globalUserManagementService.deleteUser(user.getUsername());
                 globalUserManagementService.registerUser(user, userCreds);
                 users.add(user);
                 grantRights(tenant, user);
