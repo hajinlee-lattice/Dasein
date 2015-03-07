@@ -122,6 +122,7 @@
                                         <numOfTenants>${TENANTS_NUM}</numOfTenants>
                                         <numOfUsers>${USERS_NUM}</numOfUsers>
                                         <numOfRuns>${RUNS_NUMBER}</numOfRuns>
+                                        <threadSleep>${SLEEP_TIME}</threadSleep>
                                     </systemPropertyVariables>
                                     <argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
                                     <skip>false</skip>

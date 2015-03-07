@@ -87,6 +87,8 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
 
     private int numOfRuns;
 
+    private int threadSleep;
+
     private static ExecutorService executor;
 
     private List<Tenant> tenantList = new ArrayList<>();
@@ -95,9 +97,9 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
 
     private static final String password = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
 
-    @Parameters({ "numOfThreads", "numOfTenants", "numOfUsers", "numOfRuns" })
+    @Parameters({ "numOfThreads", "numOfTenants", "numOfUsers", "numOfRuns", "threadSleep" })
     @BeforeClass(groups = { "load" })
-    public void setup(String numOfThreads, String numOfTenants, String numOfUsers, String numOfRuns) throws Exception {
+    public void setup(String numOfThreads, String numOfTenants, String numOfUsers, String numOfRuns, String threadSleep) throws Exception {
         tenantEntityMgr.deleteAll();
         keyValueEntityMgr.deleteAll();
         modelSummaryEntityMgr.deleteAll();
@@ -105,10 +107,11 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
         this.numOfTenants = Integer.parseInt(numOfTenants);
         this.numOfUsers = Integer.parseInt(numOfUsers);
         this.numOfRuns = Integer.parseInt(numOfRuns);
+        this.threadSleep = Integer.parseInt(threadSleep);
         executor = Executors.newFixedThreadPool(this.numOfThreads);
         createTenants();
         createUsers();
-        Thread.sleep(2000L);
+        Thread.sleep(this.threadSleep * 1000L);
     }
 
     @AfterClass(groups = { "load" })
