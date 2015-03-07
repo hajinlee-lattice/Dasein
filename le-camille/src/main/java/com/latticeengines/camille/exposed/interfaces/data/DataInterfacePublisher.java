@@ -1,5 +1,6 @@
 package com.latticeengines.camille.exposed.interfaces.data;
 
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,12 @@ public class DataInterfacePublisher extends DataInterfaceBase {
     public void publish(Path localPath, Document doc) throws Exception {
         Camille c = CamilleEnvironment.getCamille();
         Path path = getBasePath().append(localPath);
-        c.upsert(path, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        try {
+            c.create(path, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        } catch (KeeperException.NodeExistsException e) {
+            log.debug("Node already existed @ {}, forcing update", path);
+            c.set(path, doc, true);
+        }
     }
 
     public void remove(Path localPath) throws Exception {
