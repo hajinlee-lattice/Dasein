@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +34,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("modelStepOutputResultsProcessor")
 public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
+    private static final Log log = LogFactory.getLog(ModelStepOutputResultsProcessorImpl.class);
 
     public static final int SAMPLE_SIZE = 100;
     public static final String RANDOM_FOREST = "RandomForest";
@@ -72,10 +75,14 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
 
         String modelFilePath = getModelFilePath(modelCommand, jobStatus, appId);
 
-        publishModel(modelCommand, jobStatus, modelCommandParameters, modelFilePath, appId);
-        publishModelArtifacts(modelCommand, jobStatus, modelCommandParameters, appId);
-        publishLinks(modelCommand, jobStatus, modelFilePath);
-        updateEventTable(modelCommand, modelCommandParameters, modelFilePath);
+        try {
+            publishModel(modelCommand, jobStatus, modelCommandParameters, modelFilePath, appId);
+            publishModelArtifacts(modelCommand, jobStatus, modelCommandParameters, appId);
+        }
+        finally {
+            publishLinks(modelCommand, jobStatus, modelFilePath);
+            updateEventTable(modelCommand, modelCommandParameters, modelFilePath);
+        }
     }
 
     private String getModelFilePath(
@@ -198,21 +205,11 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
             ModelCommand modelCommand,
             JobStatus jobStatus,
             ModelCommandParameters modelCommandParameters,
-            String appId) throws LedpException {
+            String appId) {
         try {
 
-            String hdfsPath = jobStatus.getResultDirectory() + "/enhancements/modelsummary.json";
-
-            String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsPath);
-
-            String interfaceName = "ModelSummary";
             String deploymentExternalId = modelCommand.getDeploymentExternalId();
             CustomerSpace space = CustomerSpace.parse(deploymentExternalId);
-            DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName, space);
-
-            Path relativePath = new Path("/ModelSummary");
-            Document pubDoc = new Document(content);
-            pub.publish(relativePath, pubDoc);
 
             // Publish model artifacts into ZooKeeper.            
             DataInterfacePublisher modelPublisher = new DataInterfacePublisher("ModelArtifact", space);
@@ -228,8 +225,10 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
             modelPublisher.publish(new Path(basePath + "ScoreDerivation.json"), new Document(scoreDerivation));
         }
         catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_16011, e,
-                  new String[] { String.valueOf(modelCommand.getPid()), appId });
+            LedpException exc =
+                    new LedpException(LedpCode.LEDP_16011, e,
+                    new String[] { String.valueOf(modelCommand.getPid()), appId });
+            log.error("", exc);
         }
     }
 

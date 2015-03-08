@@ -130,7 +130,6 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         }
 
         checkModel(command);
-        checkModelSummary(command);
         checkHdfsArtifacts(command);
         checkZkArtifacts(command);
     }
@@ -142,22 +141,6 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         Assert.assertEquals(content, linkContents.get(0));
     }
 
-    private void checkModelSummary(ModelCommand command) throws Exception {
-
-        String interfaceName = "ModelSummary";
-        String deploymentExternalId = command.getDeploymentExternalId();
-        CustomerSpace space = CustomerSpace.parse(deploymentExternalId);
-        DataInterfacePublisher pub = new DataInterfacePublisher(interfaceName, space);
-        DataInterfaceSubscriber sub = new DataInterfaceSubscriber(interfaceName, space);
-
-        Path relativePath = new Path("/ModelSummary");
-        Document document = sub.get(relativePath);
-        Assert.assertEquals(document.getData(), modelSummaryContents);
-
-        pub.remove(relativePath);
-        Assert.assertNull(sub.get(relativePath));
-    }
-    
     private void checkHdfsArtifacts(ModelCommand command) throws Exception {
         String pmmlFile = hdfsArtifactsDirectory + "ModelPmml.xml";
         String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, pmmlFile);
