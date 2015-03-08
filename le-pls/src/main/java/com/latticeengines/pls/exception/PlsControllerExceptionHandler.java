@@ -1,8 +1,13 @@
 package com.latticeengines.pls.exception;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.message.BasicNameValuePair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,12 +17,15 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.pls.exposed.service.AlertService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 @ControllerAdvice
 public class PlsControllerExceptionHandler {
     private static final Log log = LogFactory.getLog(PlsControllerExceptionHandler.class);
+    @Autowired
+    private AlertService alertService;
 
     public PlsControllerExceptionHandler() {
     }
@@ -49,6 +57,11 @@ public class PlsControllerExceptionHandler {
         MappingJacksonJsonView jsonView = new MappingJacksonJsonView();
         String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils.getStackTrace(e);
         log.error(stackTrace);
+        
+        List<BasicNameValuePair> details = new ArrayList<>();
+        details.add(new BasicNameValuePair("stackTrace", stackTrace));    
+        alertService.triggerCriticalEvent(e.getMessage(), details);
+        
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", e.getCode().name(), //
                 "errorMsg", e.getMessage()));
 
@@ -60,6 +73,11 @@ public class PlsControllerExceptionHandler {
         MappingJacksonJsonView jsonView = new MappingJacksonJsonView();
         String stackTrace = ExceptionUtils.getFullStackTrace(e);
         log.error(stackTrace);
+        
+        List<BasicNameValuePair> details = new ArrayList<>();
+        details.add(new BasicNameValuePair("stackTrace", stackTrace));    
+        alertService.triggerCriticalEvent(e.getMessage(), details);
+        
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_00002.name(), //
                 "errorMsg", stackTrace));
     }
