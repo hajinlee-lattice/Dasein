@@ -1,4 +1,4 @@
-package com.latticeengines.pls.exposed.service;
+package com.latticeengines.pls.service;
 
 import org.apache.http.message.BasicNameValuePair;
 

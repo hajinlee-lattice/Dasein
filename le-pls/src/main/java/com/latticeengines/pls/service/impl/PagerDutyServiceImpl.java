@@ -1,4 +1,4 @@
-package com.latticeengines.pls.exposed.service.impl;
+package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
-import com.latticeengines.pls.exposed.service.PagerDutyService;
+import com.latticeengines.pls.service.PagerDutyService;
 
 @Component("pagerDutyService")
 public class PagerDutyServiceImpl implements PagerDutyService {

@@ -1,4 +1,4 @@
-package com.latticeengines.pls.exposed.service.impl;
+package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
 
@@ -10,12 +10,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.impl.AlertServiceImpl;
 
 
-public class AlertServiceTestNG extends PlsFunctionalTestNGBase {
+public class AlertServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
-    AlertServiceImpl alertService;
+    private AlertServiceImpl alertService;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -26,20 +27,20 @@ public class AlertServiceTestNG extends PlsFunctionalTestNGBase {
     public void testTriggerOneDetail() throws ClientProtocolException, IOException, ParseException {
         String result = alertService.triggerCriticalEvent("AlertServiceTestNG", new BasicNameValuePair("testmetric",
                 "testvalue"));
-        PagerDutyTestUtils.confirmPagerDutyIncident(result);
+        PagerDutyImplTestUtils.confirmPagerDutyIncident(result);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerNoDetail() throws ClientProtocolException, IOException, ParseException {
         String result = alertService.triggerCriticalEvent("AlertServiceTestNG");
-        PagerDutyTestUtils.confirmPagerDutyIncident(result);
+        PagerDutyImplTestUtils.confirmPagerDutyIncident(result);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerMultipleDetail() throws ClientProtocolException, IOException, ParseException {
         String result = alertService.triggerCriticalEvent("AlertServiceTestNG", new BasicNameValuePair("testmetric",
                 "testvalue"), new BasicNameValuePair("anothertestmetric", "anothertestvalue"));
-        PagerDutyTestUtils.confirmPagerDutyIncident(result);
+        PagerDutyImplTestUtils.confirmPagerDutyIncident(result);
     }
 
 }

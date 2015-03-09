@@ -1,4 +1,4 @@
-package com.latticeengines.pls.exposed.service.impl;
+package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertTrue;
 
@@ -6,7 +6,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class PagerDutyTestUtils {
+public class PagerDutyImplTestUtils {
 
     public static void confirmPagerDutyIncident(String result) throws ParseException {
         JSONParser parser = new JSONParser();

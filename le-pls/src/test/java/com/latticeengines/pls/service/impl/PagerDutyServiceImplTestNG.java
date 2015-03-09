@@ -1,4 +1,4 @@
-package com.latticeengines.pls.exposed.service.impl;
+package com.latticeengines.pls.service.impl;
 
 import java.io.IOException;
 
@@ -10,12 +10,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.impl.PagerDutyServiceImpl;
 
 
-public class PagerDutyServiceTestNG extends PlsFunctionalTestNGBase {
+public class PagerDutyServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
-    PagerDutyServiceImpl pagerDutyService;
+    private PagerDutyServiceImpl pagerDutyService;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -26,13 +27,13 @@ public class PagerDutyServiceTestNG extends PlsFunctionalTestNGBase {
     public void testTriggerOneDetail() throws ClientProtocolException, IOException, ParseException {
         String result = pagerDutyService.triggerEvent("PagerDutyServiceTestNG",
                 new BasicNameValuePair("testmetric", "testvalue"));
-        PagerDutyTestUtils.confirmPagerDutyIncident(result);
+        PagerDutyImplTestUtils.confirmPagerDutyIncident(result);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerNoDetail() throws ClientProtocolException, IOException, ParseException {
         String result = pagerDutyService.triggerEvent("PagerDutyServiceTestNG");
-        PagerDutyTestUtils.confirmPagerDutyIncident(result);
+        PagerDutyImplTestUtils.confirmPagerDutyIncident(result);
     }
 
     @Test(groups = "functional", enabled = true)
@@ -40,7 +41,7 @@ public class PagerDutyServiceTestNG extends PlsFunctionalTestNGBase {
         String result = pagerDutyService.triggerEvent("PagerDutyServiceTestNG",
                 new BasicNameValuePair("testmetric", "testvalue"), new BasicNameValuePair("anothertestmetric",
                         "anothertestvalue"));
-        PagerDutyTestUtils.confirmPagerDutyIncident(result);
+        PagerDutyImplTestUtils.confirmPagerDutyIncident(result);
     }
 
     @Test(groups = "functional", enabled = true)
@@ -50,7 +51,7 @@ public class PagerDutyServiceTestNG extends PlsFunctionalTestNGBase {
                 new BasicNameValuePair("commandLogId91", "errorCode:LEDP_00002 errorMessage:Generic system error.\n"
                         + "com.latticeengines.domain.exposed.exception.LedpException: Generic system error.\n"),
                 new BasicNameValuePair("anothertestmetric", "anothertestvalue"));
-        PagerDutyTestUtils.confirmPagerDutyIncident(result);
+        PagerDutyImplTestUtils.confirmPagerDutyIncident(result);
     }
 
 }
