@@ -93,8 +93,11 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         addMagicHeaderAndSystemProperty(service);
         try {
             log.info(String.format("Modifying credentials for %s.", oldCreds.getUsername()));
-            return service.modifyLatticeCredentials(new SoapTicketBuilder(ticket).build(), new SoapCredentialsBuilder(
-                    oldCreds).build(), new SoapCredentialsBuilder(newCreds).build());
+            return service.modifyLatticeCredentials(
+                new SoapTicketBuilder(ticket).build(),
+                new SoapCredentialsBuilder(oldCreds).build(),
+                new SoapCredentialsBuilder(newCreds).build()
+            );
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18010, e, new String[] { oldCreds.getUsername() });
         }
@@ -127,20 +130,6 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
-    public User getUser(String username) {
-        IUserManagementService service = getService();
-        addMagicHeaderAndSystemProperty(service);
-        try {
-            log.info(String.format("Getting user %s.", username));
-            return new UserBuilder(service.findUserByUsername(username)).build();
-        } catch (Exception e) {
-            // throw new LedpException(LedpCode.LEDP_18018, e, new String[] { username });
-            //TODO: handle different exceptions returned from GlobalAuth
-            return null;
-        }
-    }
-
-    @Override
     public Boolean deleteUser(String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
@@ -149,6 +138,18 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             return service.deleteUser(username);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18015, e, new String[] { username });
+        }
+    }
+
+    @Override
+    public Boolean isRedundant(String username) {
+        IUserManagementService service = getService();
+        addMagicHeaderAndSystemProperty(service);
+        try {
+            log.info(String.format("Checking if user %s is redundant.", username));
+            return service.isRedundant(username);
+        } catch (Exception e) {
+            return false;
         }
     }
 

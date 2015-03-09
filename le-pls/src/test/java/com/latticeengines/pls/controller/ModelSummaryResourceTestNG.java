@@ -26,7 +26,10 @@ import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManage
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
 import com.latticeengines.pls.security.GrantedRight;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 /**
  * This test has two users with particular privileges:
@@ -110,7 +113,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_USERS, tenant2, "admin");
         grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "admin");
 
-        if (globalUserManagementService.getUser("bnguyen") == null) {
+        if (globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com") == null) {
             assertTrue(globalUserManagementService.deleteUser("bnguyen"));
             assertTrue(globalUserManagementService.deleteUser("bnguyen@lattice-engines.com"));
             createUser("bnguyen", "bnguyen@lattice-engines.com", "Everything", "IsAwesome", "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=");
@@ -131,7 +134,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_USERS, tenant2, "bnguyen");
         grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "bnguyen");
 
-        if (globalUserManagementService.getUser("lming") == null) {
+        if (globalUserManagementService.getUserByEmail("lming@lattice-engines.com") == null) {
             assertTrue(globalUserManagementService.deleteUser("lming"));
             assertTrue(globalUserManagementService.deleteUser("lming@lattice-engines.com"));
             createUser("lming", "lming@lattice-engines.com", "General", "User", "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
@@ -145,7 +148,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "lming");
 
 
-        if (globalUserManagementService.getUser("tsanghavi@lattice-engines.com") == null) {
+        if (globalUserManagementService.getUserByEmail("tsanghavi@lattice-engines.com") == null) {
             assertTrue(globalUserManagementService.deleteUser("tsanghavi@lattice-engines.com"));
             createUser("tsanghavi@lattice-engines.com", "tsanghavi@lattice-engines.com", "Tejas", "Sanghavi");
         }
@@ -165,7 +168,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         grantRight(GrantedRight.VIEW_PLS_USERS, tenant2, "tsanghavi@lattice-engines.com");
         grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "tsanghavi@lattice-engines.com");
 
-        if (globalUserManagementService.getUser("rgonzalez") == null) {
+        if (globalUserManagementService.getUserByEmail("rgonzalez@lattice-engines.com") == null) {
             assertTrue(globalUserManagementService.deleteUser("rgonzalez"));
             assertTrue(globalUserManagementService.deleteUser("rgonzalez@lattice-engines.com"));
             createUser("rgonzalez", "rgonzalez@lattice-engines.com", "Ron", "Gonzalez");
@@ -173,7 +176,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
 
-        if (globalUserManagementService.getUser("ysong") == null) {
+        if (globalUserManagementService.getUserByEmail("ysong@lattice-engines.com") == null) {
             assertTrue(globalUserManagementService.deleteUser("ysong"));
             assertTrue(globalUserManagementService.deleteUser("ysong@lattice-engines.com"));
             createUser("ysong", "ysong@lattice-engines.com", "Yintao", "Song");

@@ -1,13 +1,27 @@
 package com.latticeengines.pls.controller;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.pls.DeleteUsersResult;
+import com.latticeengines.domain.exposed.pls.RegistrationResult;
+import com.latticeengines.domain.exposed.pls.ResponseDocument;
+import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.pls.UserUpdateData;
+import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.UserRegistration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,13 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.pls.UserDocument;
-import com.latticeengines.domain.exposed.security.Credentials;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.exception.LoginException;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
@@ -51,38 +58,214 @@ public class UserResource {
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
 
-    @RequestMapping(value = "/add", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Register a new user to the current tenant")
-    @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public Boolean registerUser(@RequestBody UserRegistration userRegistration, HttpServletRequest request) {
-        Credentials creds = userRegistration.getCredentials();
-        boolean registered = globalUserManagementService.registerUser(userRegistration.getUser(), creds);
-
-        if (!registered) {
-            throw new LedpException(LedpCode.LEDP_18004, new String[] { creds.getUsername() });
+    @ApiOperation(value = "Get all users that have at least one access right to the current tenant")
+    @PreAuthorize("hasRole('View_PLS_Users')")
+    public ResponseDocument<List<User>> getAll(HttpServletRequest request) {
+        ResponseDocument<List<User>> response = new ResponseDocument<>();
+        try {
+            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            String tenantId = globalSessionManagementService.retrieve(ticket).getTenant().getId();
+            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId);
+            List<User> users = new ArrayList<>();
+            for (AbstractMap.SimpleEntry<User, List<String>> userRights : userRightsList) {
+                if (!RightsUtilities.isAdmin(RightsUtilities.translateRights(userRights.getValue()))) {
+                    users.add(userRights.getKey());
+                }
+            }
+            response.setSuccess(true);
+            response.setResult(users);
+            return response;
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
         }
-
-        Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
-        Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
-        AttributeMap aMap = new AttributeMap();
-        aMap.put("Username", creds.getUsername());
-        aMap.put("TenantId", tenant.getId());
-        return grantDefaultRights(aMap);
     }
 
-    @RequestMapping(value = "/grant", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Grant default rights to a user in the current tenant")
+    @ApiOperation(value = "Register or validate a new user in the current tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public Boolean grantDefaultRights(@RequestBody AttributeMap attrMap) {
-        String username = attrMap.get("Username");
-        String tenantId = attrMap.get("TenantId");
-        boolean viewModelRightsGranted = globalUserManagementService.grantRight(GrantedRight.VIEW_PLS_MODELS.getAuthority(), tenantId, username);
-        boolean viewReportRightsGranted = globalUserManagementService.grantRight(GrantedRight.VIEW_PLS_REPORTING.getAuthority(), tenantId, username);
-        boolean viewConfigRightsGranted = globalUserManagementService.grantRight(GrantedRight.VIEW_PLS_CONFIGURATION.getAuthority(), tenantId, username);
-        
-        return viewModelRightsGranted && viewReportRightsGranted && viewConfigRightsGranted;
+    public ResponseDocument<RegistrationResult> register(@RequestBody UserRegistration userReg, HttpServletRequest request) throws  JsonProcessingException {
+        ResponseDocument<RegistrationResult> response = new ResponseDocument<>();
+        RegistrationResult result = new RegistrationResult();
+        User user = userReg.getUser();
+
+        String tenantId;
+        try {
+            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            tenantId = globalSessionManagementService.retrieve(ticket).getTenant().getId();
+        } catch (Exception e) {
+            response.setErrors(Arrays.asList("Could not authenticate current user."));
+            return response;
+        }
+
+        // validate new user
+        User oldUser = globalUserManagementService.getUserByEmail(user.getEmail());
+        if (oldUser != null) {
+            result.setValid(false);
+            response.setErrors(Arrays.asList("The requested email conflicts with that of an existing user."));
+            if (!inTenant(tenantId, oldUser.getUsername()) || !isAdmin(tenantId, oldUser.getUsername())) {
+                result.setConflictingUser(oldUser);
+            }
+        } else {
+            result.setValid(true);
+        }
+
+        if (!result.isValid()) {
+            response.setResult(result);
+            return response;
+        }
+
+        // register new user
+        if (tenantId != null) {
+            Credentials creds = userReg.getCredentials();
+
+            if (!globalUserManagementService.registerUser(user, creds)) {
+                globalUserManagementService.deleteUser(user.getUsername());
+                throw new LedpException(LedpCode.LEDP_18004, new String[]{creds.getUsername()});
+            }
+            grantDefaultRights(tenantId, user.getUsername());
+            response.setSuccess(true);
+            String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());
+            result.setPassword(tempPass);
+            response.setResult(result);
+        }
+        return response;
+    }
+
+    @RequestMapping(value = "/{username:.+}/creds", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update password of user")
+    public SimpleBooleanResponse updateCredentials(@PathVariable String username, @RequestBody UserUpdateData data, HttpServletRequest request) {
+        User user;
+        Ticket ticket;
+        try {
+            ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            user = globalUserManagementService.getUserByEmail(globalSessionManagementService.retrieve(ticket).getEmailAddress());
+            if (!user.getUsername().equals(username)) {
+                throw new LedpException(LedpCode.LEDP_18001);
+            }
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
+        }
+
+        // change password
+        String oldPassword  = data.getOldPassword();
+        String newPassword  = data.getNewPassword();
+        if (oldPassword != null && newPassword != null) {
+            Credentials oldCreds = new Credentials();
+            oldCreds.setUsername(user.getUsername());
+            oldCreds.setPassword(oldPassword);
+
+            Credentials newCreds = new Credentials();
+            newCreds.setUsername(user.getUsername());
+            newCreds.setPassword(newPassword);
+
+            try {
+                if (globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds)) {
+                    return SimpleBooleanResponse.getSuccessResponse();
+                }
+            } catch (LedpException e) {
+                if (e.getCode() == LedpCode.LEDP_18001) {
+                    throw new LoginException(e);
+                }
+            }
+        }
+        return SimpleBooleanResponse.getFailResponse(Arrays.asList("Could not change password."));
+    }
+
+    @RequestMapping(value = "/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update users")
+    public SimpleBooleanResponse update(@PathVariable String username, @RequestBody UserUpdateData data, HttpServletRequest request) {
+        String tenantId;
+        try {
+            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            tenantId = globalSessionManagementService.retrieve(ticket).getTenant().getId();
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
+        }
+
+        if (!inTenant(tenantId, username)) {
+            return SimpleBooleanResponse.getFailResponse(Arrays.asList("Cannot update users in another tenant."));
+        }
+
+        // update rights
+        List<String> rights = RightsUtilities.translateRights(data.getRights());
+        if (!rights.isEmpty()) {
+            for (String right: rights) {
+                globalUserManagementService.grantRight(right, tenantId, username);
+            }
+        }
+
+        return SimpleBooleanResponse.getSuccessResponse();
+    }
+
+    @RequestMapping(value = "", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete users (?usernames=) from current tenant. Request parameter should be a stringified JSON array.")
+    @PreAuthorize("hasRole('Edit_PLS_Users')")
+    public ResponseDocument<DeleteUsersResult> delete(@RequestParam(value = "usernames") String usernames, HttpServletRequest request)
+    {
+        String tenantId;
+        try {
+            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
+            tenantId = tenant.getId();
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
+        }
+
+        ResponseDocument<DeleteUsersResult> response = new ResponseDocument<>();
+        JsonNode userNodes;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            userNodes = mapper.readTree(usernames);
+        } catch (IOException e) {
+            response.setErrors(Arrays.asList("Could not parse the input name array."));
+            return response;
+        }
+
+        List<String> successUsers = new ArrayList<>();
+        List<String> failUsers = new ArrayList<>();
+
+        for (JsonNode node: userNodes) {
+            String username = node.asText();
+            if (!isAdmin(tenantId, username)) {
+                try {
+                    if (softDelete(tenantId, username)) {
+                        if (globalUserManagementService.isRedundant(username)) {
+                            globalUserManagementService.deleteUser(username);
+                        }
+                        successUsers.add(username);
+                        continue;
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+            failUsers.add(username);
+        }
+
+        DeleteUsersResult result = new DeleteUsersResult();
+        result.setSuccessUsers(successUsers);
+        result.setFailUsers(failUsers);
+        response.setResult(result);
+        response.setSuccess(true);
+        return response;
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -98,195 +281,11 @@ public class UserResource {
         return doc;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get a user by username (?username=) or email address (?email=) [CROSS TENANT]")
-    public User getUser(@RequestParam(value = "username", required=false) String username, @RequestParam(value = "email", required=false) String email) {
-        if (username == null && email == null) {
-            return null;
-        }
-        if (username != null) {
-            try {
-                return globalUserManagementService.getUser(username);
-            } catch (LedpException e) {
-                if (e.getCode() == LedpCode.LEDP_18001) {
-                    throw new LoginException(e);
-                }
-                throw e;
-            }
-        } else {
-            try {
-                return globalUserManagementService.getUserByEmail(email);
-            } catch (LedpException e) {
-                if (e.getCode() == LedpCode.LEDP_18001) {
-                    throw new LoginException(e);
-                }
-                throw e;
-            }
-        }
-    }
-
-    @RequestMapping(value = "/{username:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get a user by username [CROSS TENANT]")
-    public User getUserByPath(@PathVariable String username) {
-        try {
-            return globalUserManagementService.getUser(username);
-        } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
-                throw new LoginException(e);
-            }
-            throw e;
-        }
-    }
-
-
-    @RequestMapping(value = "/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Update a user [CROSS TENANT]")
-    @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public Boolean update(@PathVariable String username, @RequestBody AttributeMap attrMap) {
-        boolean success = false;
-        //TODO:song update other User attributes
-        return success;
-    }
-
-    @RequestMapping(value = "/{username:.+}", method = RequestMethod.DELETE, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Soft delete a user by revoking all rights to the current tenant")
-    @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public Boolean delete(@PathVariable String username, HttpServletRequest request) {
-        try {
-            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
-            Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
-            return softDelete(tenant.getId(), username);
-        } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
-                throw new LoginException(e);
-            }
-            throw e;
-        }
-    }
-
-    @RequestMapping(value = "/self", method = RequestMethod.PUT, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Update the login user [CROSS TENANT]")
-    public Boolean updateSelf(@RequestBody AttributeMap attrMap, HttpServletRequest request) {
-        boolean success = false;
-        User user;
-        try {
-            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
-            user = globalUserManagementService.getUserByEmail(globalSessionManagementService.retrieve(ticket).getEmailAddress());
-        } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
-                throw new LoginException(e);
-            }
-            throw e;
-        }
-
-        // change password
-        if (attrMap.containsKey("OldPassword") && attrMap.containsKey("NewPassword")) {
-            String oldPassword  = attrMap.get("OldPassword");
-            String newPassword  = attrMap.get("NewPassword");
-
-            Credentials oldCreds = new Credentials();
-            oldCreds.setUsername(user.getUsername());
-            oldCreds.setPassword(oldPassword);
-
-            Credentials newCreds = new Credentials();
-            newCreds.setUsername(user.getUsername());
-            newCreds.setPassword(newPassword);
-
-            try {
-                Ticket ticket = globalAuthenticationService.authenticateUser(user.getUsername(), oldPassword);
-                success = globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
-            } catch (LedpException e) {
-                if (e.getCode() == LedpCode.LEDP_18001) {
-                    throw new LoginException(e);
-                }
-                throw e;
-            }
-        }
-
-        //TODO:song update other User attributes
-        return success;
-    }
-
-    @RequestMapping(value = "/bulkdelete", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Soft delete a group of users from the current tenant")
-    @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public Map<String, Object> bulkDelete(@RequestBody List<User> users, HttpServletRequest request) {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
-            Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
-            String tenantId = tenant.getId();
-            List<User> successUsers = new ArrayList<>();
-            List<User> failUsers = new ArrayList<>();
-            for (User user : users) {
-                try {
-                    if (softDelete(tenantId, user.getUsername())) {
-                        successUsers.add(user);
-                    }
-                } catch (Exception e) {
-                    failUsers.add(user);
-                }
-            }
-            result.put("SuccessUsers", successUsers);
-            result.put("FailUsers", failUsers);
-            return result;
-        } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
-                throw new LoginException(e);
-            }
-            throw e;
-        }
-    }
-
-    @RequestMapping(value = "/resetpassword/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Reset the password for a user [CROSS TENANT]")
-    @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public String resetPassword(@PathVariable String username) {
-        try {
-            return globalUserManagementService.resetLatticeCredentials(username);
-        } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
-                throw new LoginException(e);
-            }
-            throw e;
-        }
-    }
-
-    @RequestMapping(value = "/all", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get all users have at least one access right to the current tenant")
-    @PreAuthorize("hasRole('View_PLS_Users')")
-    public List<User> getAllUsersOfTenant(HttpServletRequest request) {
-        try {
-            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
-            String tenantId = globalSessionManagementService.retrieve(ticket).getTenant().getId();
-            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId);
-            List<User> users = new ArrayList<>();
-            for (AbstractMap.SimpleEntry<User, List<String>> userRights : userRightsList) {
-                if (RightsUtilities.isAdmin(RightsUtilities.translateRights(userRights.getValue()))) { continue; }
-                users.add(userRights.getKey());
-            }
-            return users;
-        } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
-                throw new LoginException(e);
-            }
-            throw e;
-        }
-    }
-
     private void revokeRightWithoutException(String right, String tenant, String username) {
         try {
             globalUserManagementService.revokeRight(right, tenant, username);
         } catch (Exception e) {
-            return;
+            // ignore
         }
     }
 
@@ -306,5 +305,38 @@ public class UserResource {
             }
             throw e;
         }
+    }
+
+    private void grantDefaultRights(String tenantId, String username) {
+        List<GrantedRight> rights = GrantedRight.getDefaultRights();
+        for (GrantedRight right: rights) {
+            try {
+                globalUserManagementService.grantRight(right.getAuthority(), tenantId, username);
+            } catch (LedpException e) {
+                // ignore
+            }
+        }
+    }
+
+    private boolean isAdmin(String tenantId, String username) {
+        //TODO:song this is temporary until GlboalAuth's GetRights method works properly
+        List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId);
+        for (AbstractMap.SimpleEntry<User, List<String>> userRight: userRightsList) {
+            if (userRight.getKey().getUsername().equals(username)) {
+                return RightsUtilities.isAdmin(RightsUtilities.translateRights(userRight.getValue()));
+            }
+        }
+        return false;
+    }
+
+    private boolean inTenant(String tenantId, String username) {
+        //TODO:song this is temporary until GlboalAuth's GetRights method works properly
+        List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId);
+        for (AbstractMap.SimpleEntry<User, List<String>> userRight: userRightsList) {
+            if (userRight.getKey().getUsername().equals(username)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -40,6 +40,16 @@ if "%cmd%"=="compile" (
         -DargLine="" ^
         -Dtest=*ModelSummaryResourceTestNG
 
+) else if "%cmd%"=="test" (
+
+    echo populate testing data using shared GlobalAuth ...
+
+    mvn -Pfunctional -Pgenerate ^
+        -Djavax.net.ssl.trustStore=certificates\%certificate% ^
+        -DPLS_PROPDIR=conf\env\dev-windows ^
+        -DargLine="" ^
+        -Dtest=*%2
+
 ) else if "%cmd%"=="run" (
 
     echo running clean verify using shared GlobalAuth ...
@@ -83,6 +93,18 @@ if "%cmd%"=="compile" (
         -Dglobalauth.base.url=https://localhost/Bard ^
         -DargLine="" ^
         -Dtest=*ModelSummaryResourceTestNG
+
+) else if "%cmd%"=="test-local" (
+
+    echo populate testing data using localhost GlobalAuth ...
+
+    mvn -Pfunctional -Pgenerate ^
+        -Djavax.net.ssl.trustStore=certificates\localhost.jks ^
+        -DPLS_PROPDIR=conf\env\dev-windows-localGA ^
+        -Dcertificate.name=localhost.jks ^
+        -Dglobalauth.base.url=https://localhost/Bard ^
+        -DargLine="" ^
+        -Dtest=*%2
 
 ) else if "%cmd%"=="run-local" (
 

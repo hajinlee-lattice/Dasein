@@ -5,6 +5,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -129,6 +130,20 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
     }
 
+    protected void grantDefaultRights(String tenant, String username) {
+        List<GrantedRight> rights = GrantedRight.getDefaultRights();
+        for (GrantedRight right: rights) {
+            grantRight(right, tenant, username);
+        }
+    }
+
+    protected void grantAdminRights(String tenant, String username) {
+        List<GrantedRight> rights = GrantedRight.getAdminRights();
+        for (GrantedRight right: rights) {
+            grantRight(right, tenant, username);
+        }
+    }
+
     protected static class GetHttpStatusErrorHandler implements ResponseErrorHandler {
 
         public GetHttpStatusErrorHandler() {
@@ -209,6 +224,21 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", doc.getResult().getTenants().get(0),
                 UserDocument.class, new Object[] {});
+    }
+
+    protected UserDocument loginAndAttach(String username, Tenant tenant) {
+        Credentials creds = new Credentials();
+        creds.setUsername(username);
+        creds.setPassword(DigestUtils.sha256Hex("admin"));
+
+        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds,
+            LoginDocument.class, new Object[] {});
+
+        addAuthHeader.setAuthValue(doc.getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+
+        return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", tenant,
+            UserDocument.class, new Object[] {});
     }
 
     private ModelSummary getDetails(Tenant tenant, String suffix) throws Exception {

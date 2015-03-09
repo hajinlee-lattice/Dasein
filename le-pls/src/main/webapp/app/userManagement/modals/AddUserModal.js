@@ -74,27 +74,36 @@ angular.module('mainApp.userManagement.modals.AddUserModal', [
             return;
         }
 
-        UserManagementService.GetUserByEmail($scope.user.Email).then(function(result){
+        UserManagementService.AddUser($scope.user).then(function(result){
             if (result.Success) {
-                $scope.existingUser = result.ResultObj;
-                $scope.showExistingUser = true;
+                $scope.showAddUserSuccess = true;
+                $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_USER_SUCCESS", [result.ResultObj.Username, result.ResultObj.Password]);
+                $scope.saveInProgress = false;
+                $scope.showExistingUser = false;
+                $event.target.blur();
             } else {
-                UserManagementService.AddUser($scope.user).then(function(result){
-                    if (result.Success) {
-                        $scope.showAddUserSuccess = true;
-                        $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_USER_SUCCESS", [result.ResultObj.Username, result.ResultObj.Password]);
-                    } else {
+                if (result.ResultObj.ConflictingUser != null) {
+                    $scope.existingUser = result.ResultObj.ConflictingUser;
+                    $scope.showExistingUser = true;
+                } else {
+                    if (result.ResultErrors === ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')) {
                         $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_GENERAL_ERROR");
-                        $scope.showAddUserSuccess = false;
-                        $scope.showAddUserError = true;
+                    } else {
+                        $scope.addUserErrorMessage = result.ResultErrors;
                     }
+                    $scope.showAddUserSuccess = false;
+                    $scope.showAddUserError = true;
                     $scope.saveInProgress = false;
                     $scope.showExistingUser = false;
                     $event.target.blur();
-                });
+                }
             }
         });
+    };
 
+    $scope.cancelClick = function () {
+        $("#modalContainer").modal('hide');
+        $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
     };
 
     $scope.yesClick = function ($event) {
@@ -120,11 +129,6 @@ angular.module('mainApp.userManagement.modals.AddUserModal', [
             $scope.saveInProgress = false;
             $event.target.blur();
         });
-    };
-
-    $scope.cancelClick = function () {
-        $("#modalContainer").modal('hide');
-        $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
     };
 
     $scope.noClick = function () {

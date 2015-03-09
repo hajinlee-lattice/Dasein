@@ -1,5 +1,6 @@
 package com.latticeengines.pls.security;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,29 @@ public class RightsUtilities {
         }
 
         return availableRights;
+    }
+
+    public static List<String> translateRights(Map<String, EntityAccessRightsData> rightsDataMap) {
+        List<String> accessRights = new ArrayList<>();
+        if (rightsDataMap != null) {
+            for (Map.Entry<String, EntityAccessRightsData> entry : rightsDataMap.entrySet()) {
+                String key = entry.getKey();
+                EntityAccessRightsData rightsDocument = entry.getValue();
+                if (rightsDocument.isMayView()) {
+                    accessRights.add("View_" + key);
+                }
+                if (rightsDocument.isMayEdit()) {
+                    accessRights.add("Edit_" + key);
+                }
+                if (rightsDocument.isMayExecute()) {
+                    accessRights.add("Execute_" + key);
+                }
+                if (rightsDocument.isMayCreate()) {
+                    accessRights.add("Create_" + key);
+                }
+            }
+        }
+        return accessRights;
     }
 
     public static boolean isAdmin(Map<String, EntityAccessRightsData> availableRights) {

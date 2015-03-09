@@ -1,9 +1,13 @@
 package com.latticeengines.pls.security;
 
-import java.util.HashMap;
-import java.util.Map;
+
 
 import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public enum GrantedRight implements GrantedAuthority {
 
@@ -60,6 +64,26 @@ public enum GrantedRight implements GrantedAuthority {
 
     public static GrantedRight getGrantedRight(String value) {
         return grantedRightsMap.get(value);
+    }
+
+    public static List<GrantedRight> getDefaultRights() {
+        return Arrays.asList(
+            GrantedRight.VIEW_PLS_MODELS,
+            GrantedRight.VIEW_PLS_REPORTING,
+            GrantedRight.VIEW_PLS_CONFIGURATION
+        );
+    }
+
+    public static List<GrantedRight> getAdminRights() {
+        return Arrays.asList(
+            GrantedRight.VIEW_PLS_MODELS,
+            GrantedRight.VIEW_PLS_REPORTING,
+            GrantedRight.VIEW_PLS_CONFIGURATION,
+            GrantedRight.VIEW_PLS_USERS,
+            GrantedRight.EDIT_PLS_MODELS,
+            GrantedRight.EDIT_PLS_CONFIGURATION,
+            GrantedRight.EDIT_PLS_USERS
+        );
     }
 
 }

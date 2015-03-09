@@ -73,4 +73,12 @@ angular.module('mainApp.core.utilities.RightsUtility', [])
         );
     };
 
+    this.getDefaultRights = function () {
+        return {
+            PLS_Models: {MayView: true},
+            PLS_Reporting: {MayView: true},
+            PLS_Configuration: {MayView: true}
+        };
+    };
+
 });
