@@ -166,7 +166,9 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             var element = predictor.Elements[y];
             var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
             var percentTotal = (element.Count / totalLeads) * 100;
-            if (attributeValue.toUpperCase() == "NULL" && percentTotal >= 99.5) {
+            if (attributeValue != null && 
+                (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") && 
+                percentTotal >= 99.5) {
                 toReturn = false;
                 break;
             }
@@ -299,7 +301,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                         var lift = element.Lift.toPrecision(2);
                         var description = cleanupForExcel(predictor.Description ? predictor.Description : "");
                         var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
-                        if (attributeValue.toUpperCase() == "NULL") {
+                        if (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") {
                             attributeValue = "N/A";
                         }
                         var predictivePower = predictor.UncertaintyCoefficient * 100;
@@ -408,7 +410,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             }
             percentTotal = Math.round(percentTotal);
             var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
-            if (attributeValue.toUpperCase() == "NULL") {
+            if (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") {
                 attributeValue = "N/A";
             }
             var dataToDisplay = {
