@@ -18,6 +18,7 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ntp.TimeStamp;
@@ -120,7 +121,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
             globalUserManagementService.deleteUser(user.getUsername());
         }
         for (Tenant tenant : tenantList) {
-            //globalTenantManagementService.discardTenant(tenant);
+            globalTenantManagementService.discardTenant(tenant);
         }
     }
 
@@ -129,7 +130,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
             Tenant tenant = new Tenant();
             tenant.setId("T" + i);
             tenant.setName("T" + i);
-            //globalTenantManagementService.registerTenant(tenant);
+            globalTenantManagementService.registerTenant(tenant);
             tenantEntityMgr.create(tenant);
             tenantList.add(tenant);
             createModel(tenant);
@@ -246,6 +247,9 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                                     .asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
                             userDoc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", tenant,
                                     UserDocument.class, new Object[] {});
+                            if(!userDoc.isSuccess()){
+                                System.out.println(StringUtils.concatenate(userDoc.getErrors().toArray()));
+                            }
                             finishTime = TimeStamp.getCurrentTime();
                             assertTrue(userDoc.isSuccess());
                             return finishTime.getSeconds() - startTime.getSeconds();
