@@ -1,11 +1,9 @@
 package com.latticeengines.domain.exposed.pls;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.security.User;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class DeleteUsersResult {
     private List<String> successUsers;

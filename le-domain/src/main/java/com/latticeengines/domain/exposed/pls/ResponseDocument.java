@@ -53,9 +53,8 @@ public class ResponseDocument<ResultType> {
         return JsonUtils.serialize(this);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static ResponseDocument generateFromJSON(String json, Class resultType) {
-        ResponseDocument deserializedDoc = new ResponseDocument<>();
+    public static <T> ResponseDocument<T> generateFromJSON(String json, Class<T> resultType) {
+        ResponseDocument<T> deserializedDoc = new ResponseDocument<>();
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node;
         try {
