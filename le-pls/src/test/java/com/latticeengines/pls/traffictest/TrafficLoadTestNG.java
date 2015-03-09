@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +19,6 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ntp.TimeStamp;
@@ -27,7 +27,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -210,7 +213,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                         public List<Long> call() throws Exception {
                             Random random = new Random();
                             List<Long> timeConsumptions = new ArrayList<>();
-                            restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+                            restTemplate.setErrorHandler(new ThrowExceptionResponseErrorHandler());
 
                             timeConsumptions.add(loginMainPage());
                             Thread.sleep(random.nextInt(10) * 500L);
@@ -247,9 +250,6 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                                     .asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
                             userDoc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", tenant,
                                     UserDocument.class, new Object[] {});
-                            if(!userDoc.isSuccess()){
-                                System.out.println(StringUtils.concatenate(userDoc.getErrors().toArray()));
-                            }
                             finishTime = TimeStamp.getCurrentTime();
                             assertTrue(userDoc.isSuccess());
                             return finishTime.getSeconds() - startTime.getSeconds();
@@ -310,6 +310,27 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
             System.out.println(String.format("Get Model Summaries: %f seconds", Math.ceil(modelSummariesTime / users.size())));
             System.out.println(String.format("Get Model Summary: %f seconds", Math.ceil(modelSummaryTime / users.size())));
             System.out.println(String.format("Log out: %f seconds", Math.ceil(logOutTime / users.size())));
+        }
+    }
+    
+    class ThrowExceptionResponseErrorHandler implements ResponseErrorHandler {
+
+        @Override
+        public boolean hasError(ClientHttpResponse response) throws IOException {
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public void handleError(ClientHttpResponse response) throws IOException {
+
+            String responseBody = IOUtils.toString(response.getBody());
+
+            log.info("Error response from rest call: " + response.getStatusCode() + " " + response.getStatusText()
+                    + " " + responseBody);
+            throw new RuntimeException(responseBody);
         }
     }
 }
