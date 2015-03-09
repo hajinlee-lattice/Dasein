@@ -7,7 +7,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     $scope.attributeName = data.name;
     $scope.attributeFullDescription = data.description;
     $scope.attributeDescription = data.description;
-    if ($scope.attributeDescription.length > 150) {
+    if ($scope.attributeDescription != null && $scope.attributeDescription.length > 150) {
        $scope.attributeDescription = $scope.attributeDescription.substring(0, 150) + "...";
     }
     $scope.attributeColor = data.color;

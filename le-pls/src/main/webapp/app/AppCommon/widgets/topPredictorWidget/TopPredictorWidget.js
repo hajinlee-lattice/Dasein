@@ -190,7 +190,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     
     $scope.categoryClicked = function (category) {
         clearTimeout(showAttributeTimeout);
-        var categoryList = TopPredictorService.GetAttributesByCategory(data.Predictors, category.name, category.color, 50);
+        var categoryList = TopPredictorService.GetAttributesByCategory(data, category.name, category.color, 50);
         TopPredictorService.CalculateAttributeSize(categoryList);
         $scope.backToSummaryView = true;
         var prefix = categoryList.length >= 50 ? ResourceUtility.getString("TOP_PREDICTORS_CHART_CATEGORY_HEADER_PREFIX") : "";

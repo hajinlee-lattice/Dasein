@@ -25,7 +25,7 @@ describe('TopPredictorServiceSpec Tests', function () {
 
     describe('GetAttributesByCategory tests', function () {
         it('should only return 50 attributes if 50 is specified and there are more than 50 in total', function () {
-            var categoryList = topPredictorService.GetAttributesByCategory(sampleModelSummary.Predictors, "Technologies", "blah", 50);
+            var categoryList = topPredictorService.GetAttributesByCategory(sampleModelSummary, "Technologies", "blah", 50);
             expect(categoryList.length).toEqual(50);
         });
     });

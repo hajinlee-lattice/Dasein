@@ -41,7 +41,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 
                 if (predictor.Category == category.name && 
                     this.ShowBasedOnTags(predictor, isExternal) &&
-                    AnalyticAttributeUtility.IsAllowedForInsights(predictor)) {
+                    AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
+                    this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
 
                         for (var y = 0; y < predictor.Elements.length; y++) {
                             var element = predictor.Elements[y];
@@ -121,26 +122,28 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         }
     };
     
-    this.GetAttributesByCategory = function (predictorList, categoryName, categoryColor, maxNumber) {
-        if (StringUtility.IsEmptyString(categoryName) || predictorList == null  || maxNumber == null) {
+    this.GetAttributesByCategory = function (modelSummary, categoryName, categoryColor, maxNumber) {
+        if (StringUtility.IsEmptyString(categoryName) || modelSummary.Predictors == null  || maxNumber == null) {
             return [];
         }
         
         var totalPredictors = [];
-        for (var i = 0; i < predictorList.length; i++) {
-            if (categoryName == predictorList[i].Category) {
-                totalPredictors.push(predictorList[i]);
+        for (var i = 0; i < modelSummary.Predictors.length; i++) {
+            if (categoryName == modelSummary.Predictors[i].Category) {
+                totalPredictors.push(modelSummary.Predictors[i]);
             }
         }
         totalPredictors = totalPredictors.sort(this.SortByPredictivePower);
         
         var toReturn = [];
-        for (var y = 0; y < totalPredictors.length; y++) {
+        for (var x = 0; x < totalPredictors.length; x++) {
             if (toReturn.length == maxNumber) {
                 break;
             }
-            var predictor = totalPredictors[y];
-            if (AnalyticAttributeUtility.IsAllowedForInsights(predictor)) {
+            var predictor = totalPredictors[x];
+            if (AnalyticAttributeUtility.IsAllowedForInsights(predictor) && 
+                this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
+                
                 var displayPredictor = {
                   name: predictor.Name,
                   categoryName: categoryName,
@@ -152,7 +155,24 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             } 
         }
         return toReturn;
+    };
+    
+    this.PredictorHasValidBuckets = function (predictor, totalLeads) {
+        if (predictor == null || totalLeads == null) {
+            return false;
+        }
+        var toReturn = true;
+        for (var y = 0; y < predictor.Elements.length; y++) {
+            var element = predictor.Elements[y];
+            var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
+            var percentTotal = (element.Count / totalLeads) * 100;
+            if (attributeValue.toUpperCase() == "NULL" && percentTotal >= 99.5) {
+                toReturn = false;
+                break;
+            }
+        }
         
+        return toReturn;
     };
     
     this.CalculateAttributeSize = function (attributeList, numLargeCategories, numMediumCategories) {
@@ -197,6 +217,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         for (var i = 0; i < modelSummary.Predictors.length; i++) {
             var predictor = modelSummary.Predictors[i];
             if (AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
+                this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads) &&
                 !StringUtility.IsEmptyString(predictor.Category) && 
                 topCategoryNames.indexOf(predictor.Category) === -1 && topCategoryNames.length < 8) {
                 topCategoryNames.push(predictor.Category);
@@ -265,7 +286,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 
                 if (predictor.Category == category.name && 
                     (this.ShowBasedOnTags(predictor, true) || this.ShowBasedOnTags(predictor, false)) &&
-                    AnalyticAttributeUtility.IsAllowedForInsights(predictor)) {
+                    AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
+                    this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
                     for (var y = 0; y < predictor.Elements.length; y++) {
                         var element = predictor.Elements[y];
                         var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
@@ -273,7 +295,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                         if (isCategorical && percentTotal < 1) {
                             continue;
                         }
-                        percentTotal = Math.round(percentTotal);
+                        percentTotal = percentTotal.toFixed(1);
                         var lift = element.Lift.toPrecision(2);
                         var description = cleanupForExcel(predictor.Description ? predictor.Description : "");
                         var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
@@ -313,7 +335,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         var category;
         for (var x = 0; x < topCategories.length; x++) {
             category = topCategories[x];
-            category.children = this.GetAttributesByCategory(modelSummary.Predictors, category.name, category.color, attributesPerCategory);
+            category.children = this.GetAttributesByCategory(modelSummary, category.name, category.color, attributesPerCategory);
             for (var y = 0; y < category.children.length; y++) {
                 totalAttributes.push(category.children[y]);
             }
@@ -379,11 +401,12 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         
         for (var i = 0; i < predictor.Elements.length; i++) {
             var element = predictor.Elements[i];
-            var percentTotal = Math.round((element.Count / modelSummary.ModelDetails.TotalLeads) * 100);
+            var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
             var isCategorical = this.IsPredictorElementCategorical(element);
             if (isCategorical && percentTotal < 1) {
                 continue;
             }
+            percentTotal = Math.round(percentTotal);
             var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
             if (attributeValue.toUpperCase() == "NULL") {
                 attributeValue = "N/A";
