@@ -124,7 +124,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
             globalUserManagementService.deleteUser(user.getUsername());
         }
         for (Tenant tenant : tenantList) {
-            //globalTenantManagementService.discardTenant(tenant);
+            globalTenantManagementService.discardTenant(tenant);
         }
     }
 
@@ -133,7 +133,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
             Tenant tenant = new Tenant();
             tenant.setId("T" + i);
             tenant.setName("T" + i);
-            //globalTenantManagementService.registerTenant(tenant);
+            globalTenantManagementService.registerTenant(tenant);
             tenantEntityMgr.create(tenant);
             tenantList.add(tenant);
             createModel(tenant);
