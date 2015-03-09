@@ -68,7 +68,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
                 hiddenAnchor.target = '_blank';
                 hiddenAnchor.download = attr.filename;
                 hiddenAnchor.click();
-                scope.downloadFile = function () { hiddenAnchor.click() };
+                scope.downloadFile = function () { hiddenAnchor.click(); };
                 $(anchor).removeAttr('disabled');
             });
 
