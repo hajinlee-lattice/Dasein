@@ -21,7 +21,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     var metadata = $scope.metadata;
     var data = $scope.data;
     $scope.mayEditModels = RightsUtility.mayEditModels(clientSession.availableRights);
-
+    $scope.mayEditModelsClass = $scope.mayEditModels ? "model-name-editable" : "";
     if (widgetConfig == null || data == null) {
         return;
     }
@@ -43,8 +43,11 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         if ($event != null) {
             $event.stopPropagation();
         }
-        //Changing the name of the model
-        $scope.nameStatus.editing = true;
+        
+        if ($scope.mayEditModels) {
+            //Changing the name of the model
+            $scope.nameStatus.editing = true;
+        }
     };
 
     $scope.tileClick = function ($event) {

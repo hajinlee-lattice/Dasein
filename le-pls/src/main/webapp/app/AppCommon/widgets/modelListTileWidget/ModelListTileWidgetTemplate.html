@@ -1,9 +1,6 @@
 <div class="col-md-4" data-ng-controller="ModelListTileWidgetController" data-ng-click="tileClick($event)">
     <div class="model-title" data-ng-hide="nameStatus.editing">
-        <h2 class="editable editable-click" data-type="text" data-placement="right">{{displayName}}</h2>
-        <h2 class="edit" data-ng-if="mayEditModels">
-            <button type="button" class="btn btn-link" data-ng-click="modelNameEditClick($event)" data-title="Enter Model Name"><i class="fa fa-pencil"></i></button>
-        </h2>
+        <h2 class="editable editable-click" data-ng-class="mayEditModelsClass" data-type="text" data-placement="right" data-ng-click="modelNameEditClick($event)">{{displayName}}</h2>
     </div>
     <button type="button" data-ng-if="mayEditModels" class="btn btn-link delete-model"><i class="fa fa-trash-o"></i></button>
     <div class="model-title" data-ng-if="nameStatus.editing" data-ng-controller="ChangeModelNameController">

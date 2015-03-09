@@ -133,6 +133,18 @@ Model list title
   background: transparent;
 }
 
+.model-title h2:hover {
+    background: transparent;      
+}
+
+.model-title h2.model-name-editable {
+  background: url(../images/ico-pencil.png) no-repeat top right;
+}
+
+.model-title h2.model-name-editable:hover {
+    background: url(../images/ico-pencil-hover.png) no-repeat top right;
+}
+
 .model-title h2.edit {
   margin-top: 3px;
   padding-right: 0;
