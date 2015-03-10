@@ -7,8 +7,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     $scope.attributeName = data.name;
     $scope.attributeFullDescription = data.description;
     $scope.attributeDescription = data.description;
-    if ($scope.attributeDescription != null && $scope.attributeDescription.length > 150) {
-       $scope.attributeDescription = $scope.attributeDescription.substring(0, 150) + "...";
+    if ($scope.attributeDescription != null && $scope.attributeDescription.length > 110) {
+       $scope.attributeDescription = $scope.attributeDescription.substring(0, 110) + "...";
     }
     $scope.attributeColor = data.color;
     
@@ -59,7 +59,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         labelSize = "10px",
         fontSize = "12px",
         commonDy = ".18em",
-        labelDx = 3;
+        labelDx = 0;
     
     var x = d3.scale.linear()
         .domain([0, d3.max(liftValues) + 1])
@@ -124,7 +124,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         })
         .attr("dy", -6)
         .attr("font-weight", "semi-bold")
-        .attr("font-size", fontSize)
+        .attr("font-size", "10px")
         .attr("text-anchor", "middle")
         .style("fill", "#666666")
         .text(function(d) {
@@ -133,7 +133,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             } else if (d === 1) {
                 return ""; 
             } else {
-                return d + "x"; 
+                return d; 
             }
         });
     
@@ -189,10 +189,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("dy", -6)
         .attr("dx", labelDx)
         .attr("font-weight", "semi-bold")
-        .attr("font-size", fontSize)
+        .attr("font-size", "10px")
         .attr("text-anchor", "middle")
         .style("fill", "#666666")
-        .text(function(d) { return d + "x"; } );
+        .text(function(d) { return d; } );
     
     // This is the 1x line label at the top    
     chart.selectAll(".baselineLiftTop")
@@ -270,7 +270,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             return (i * (bar_height + 2 * gap)) + 42; 
         })
         .attr("dy", commonDy)
-        .attr("font-weight", "bold")
+        .attr("font-weight", 600)
         .attr("font-size", fontSize)
         .attr("text-anchor", "end")
         .style("fill", "black")
