@@ -14,7 +14,7 @@ public class HdfsUriGenerator {
         String defaultFS = config.get("fs.defaultFS").replace("hdfs://", "hdfs2://");
         String targetPath = importContext.getProperty(ImportProperty.TARGETPATH, String.class);
         
-        return defaultFS + targetPath + "/" + table.getName() + "/" + fileName + "?connectOnStartup=true";
+        return defaultFS + targetPath + "/" + table.getName() + "/" + fileName;
     }
 
 }
