@@ -19,7 +19,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         $("#topPredictorAttributeHover").css("top", donutChartLocation.top - 50);
         
         if (xPos > 0) {
-            $("#topPredictorAttributeHover").css("left", donutChartLocation.left + donutChartSvg.width());
+            $("#topPredictorAttributeHover").css("left", donutChartLocation.left + donutChartSvg.width() - 10);
             attributeHover.removeClass("attribute-hover-left-arrow");
             attributeHover.addClass("attribute-hover-right-arrow");
         } else {
