@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.EntityAccessRightsData;
+import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
@@ -22,8 +23,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.web.client.HttpClientErrorException;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -43,6 +47,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 
 public class UserResourceTestNG extends PlsFunctionalTestNGBase {
@@ -57,33 +62,33 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private GlobalTenantManagementService globalTenantManagementService;
 
-    private String testTenant;
+    @Autowired
+    private GlobalSessionManagementService globalSessionManagementService;
+
+    private Tenant testTenant;
     private UserRegistration testReg;
     private User testUser;
     private Credentials testCreds;
+
     private UserDocument adminDoc;
+    private UserDocument generalDoc;
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        try {
-            globalUserManagementService.deleteUser("hford");
-            globalUserManagementService.deleteUser("hford@ford.com");
-            globalUserManagementService.deleteUser(testCreds.getUsername());
-        } catch (Exception e) {
-            //ignore
-        }
-
-        testTenant =
-            globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"))
-                .getTenants().get(0).getId();
+        adminDoc = loginAndAttachAdmin();
+        generalDoc = loginAndAttachGeneral();
+        testTenant = globalSessionManagementService.retrieve(adminDoc.getTicket()).getTenant();
 
         testReg = createUserRegistration();
         testUser = testReg.getUser();
         testCreds = testReg.getCredentials();
-        adminDoc = loginAndAttach("admin", "admin");
-        addAuthHeader.setAuthValue(adminDoc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
-        setupDb(testTenant, null);
+
+        globalUserManagementService.deleteUser(testCreds.getUsername());
+
+        setupDb(testTenant.getId(), null);
+
+        createUser(testUser.getUsername(), testUser.getEmail(), testUser.getFirstName(), testUser.getLastName());
+        grantDefaultRights(testTenant.getId(), testUser.getUsername());
     }
 
     @AfterClass(groups = { "functional", "deployment" })
@@ -92,52 +97,54 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         globalAuthenticationService.discard(adminDoc.getTicket());
     }
 
+    @BeforeMethod(groups = { "functional", "deployment" })
+    public void beforeMethod() {
+        // using admin session by default
+        addAuthHeader.setAuthValue(adminDoc.getTicket().getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+    }
+
+    @AfterMethod(groups = { "functional", "deployment" })
+    public void afterMethod() {
+    }
+
     @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void registerUser() {
-        globalUserManagementService.deleteUser(testCreds.getUsername());
+        UserRegistration userReg = createUserRegistration();
+        assertTrue(globalUserManagementService.deleteUser(userReg.getCredentials().getUsername()));
 
-        addAuthHeader.setAuthValue(adminDoc.getTicket().getData());
-        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", testReg, String.class);
+        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
         ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
-
         assertTrue(response.isSuccess());
         assertNotNull(response.getResult().getPassword());
 
-        User newUser = globalUserManagementService.getUserByEmail(testUser.getEmail());
-        assertEquals(newUser.getFirstName(), testUser.getFirstName());
-        assertEquals(newUser.getLastName(), testUser.getLastName());
-        assertEquals(newUser.getPhoneNumber(), testUser.getPhoneNumber());
-        assertEquals(newUser.getTitle(), testUser.getTitle());
+        User newUser = globalUserManagementService.getUserByEmail(userReg.getUser().getEmail());
+        assertEquals(newUser.getFirstName(), userReg.getUser().getFirstName());
+        assertEquals(newUser.getLastName(), userReg.getUser().getLastName());
+        assertEquals(newUser.getPhoneNumber(), userReg.getUser().getPhoneNumber());
+        assertEquals(newUser.getTitle(), userReg.getUser().getTitle());
 
+        // try log in new user
         String password = response.getResult().getPassword();
-        Ticket ticket = globalAuthenticationService.authenticateUser(testCreds.getUsername(), DigestUtils.sha256Hex(password));
+        Ticket ticket = globalAuthenticationService.authenticateUser(userReg.getUser().getUsername(), DigestUtils.sha256Hex(password));
         assertEquals(ticket.getTenants().size(), 1);
-
         globalAuthenticationService.discard(ticket);
-        globalUserManagementService.deleteUser(testCreds.getUsername());
+
+        assertTrue(globalUserManagementService.deleteUser(userReg.getCredentials().getUsername()));
     }
 
     @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void validateUser() throws JsonProcessingException {
-        UserDocument doc;
-        ObjectMapper mapper = new ObjectMapper();
-
-        globalUserManagementService.deleteUser(testCreds.getUsername());
-        createUser(testUser.getUsername(), testUser.getEmail(), testUser.getFirstName(), testUser.getLastName());
-        grantDefaultRights(testTenant, testUser.getUsername());
-
-        doc = loginAndAttach(testCreds.getUsername());
-        addAuthHeader.setAuthValue(doc.getTicket().getData());
-
         // conflict with the email of a non-admin user
+        ObjectMapper mapper = new ObjectMapper();
         UserRegistration uReg = mapper.treeToValue(mapper.valueToTree(testReg), UserRegistration.class);
         User newUser = mapper.treeToValue(mapper.valueToTree(testUser), User.class);
         newUser.setFirstName("John");
         newUser.setLastName("Dodge");
         uReg.setUser(newUser);
-        addAuthHeader.setAuthValue(adminDoc.getTicket().getData());
+
         String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
         ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
 
@@ -147,32 +154,37 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(conflictingUser.getLastName(), testUser.getLastName());
         assertEquals(conflictingUser.getEmail(), testUser.getEmail());
 
-//        // conflict with the email of an admin user
-//        grantAdminRights(doc.getTicket().getTenants().get(0).getId(), testUser.getUsername());
-//
-//        json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
-//        response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
-//
-//        assertFalse(response.getResult().isValid());
-//        assertNull(response.getResult().getConflictingUser());
+        // conflict with the email of an admin user
+        UserRegistration userReg = createUserRegistration();
+        createUser(userReg.getCredentials().getUsername(), userReg.getUser().getEmail(), userReg.getUser().getFirstName(), userReg.getUser().getLastName());
+        grantAdminRights(testTenant.getId(), userReg.getCredentials().getUsername());
+        newUser.setEmail(userReg.getUser().getEmail());
+        uReg.setUser(newUser);
+        Credentials newCreds = mapper.treeToValue(mapper.valueToTree(testCreds), Credentials.class);
+        newCreds.setUsername(userReg.getUser().getEmail());
+        uReg.setCredentials(newCreds);
+        newUser.setUsername(newCreds.getUsername());
+
+        json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
+        response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+        assertFalse(response.getResult().isValid());
+        assertNull(response.getResult().getConflictingUser());
 
         // valid email
         newUser.setEmail("jdodge@dodge.com");
         uReg.setUser(newUser);
-        Credentials newCreds = mapper.treeToValue(mapper.valueToTree(testCreds), Credentials.class);
-        newCreds.setUsername("jdodge");
+        newCreds = mapper.treeToValue(mapper.valueToTree(testCreds), Credentials.class);
+        newCreds.setUsername("jdodge@dodge.com");
         uReg.setCredentials(newCreds);
         newUser.setUsername(newCreds.getUsername());
 
-        globalUserManagementService.deleteUser(newCreds.getUsername());
+        assertTrue(globalUserManagementService.deleteUser(newCreds.getUsername()));
 
         json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
         response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
         assertTrue(response.getResult().isValid());
 
-        globalAuthenticationService.discard(doc.getTicket());
-        globalUserManagementService.deleteUser(uReg.getCredentials().getUsername());
-        globalUserManagementService.deleteUser(testCreds.getUsername());
+        assertTrue(globalUserManagementService.deleteUser(uReg.getCredentials().getUsername()));
     }
 
     @SuppressWarnings("rawtypes")
@@ -183,11 +195,8 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         tenant.setId("Test_" + UUID.randomUUID().toString());
         try {
             globalTenantManagementService.registerTenant(tenant);
-            globalUserManagementService.deleteUser(testCreds.getUsername());
-            createUser(testUser.getUsername(), testUser.getEmail(), testUser.getFirstName(), testUser.getLastName());
             grantAdminRights(tenant.getId(), testUser.getUsername());
-
-            UserDocument doc = loginAndAttach(testCreds.getUsername(), tenant);
+            UserDocument doc = loginAndAttach(testUser.getUsername(), tenant);
             addAuthHeader.setAuthValue(doc.getTicket().getData());
 
             String json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
@@ -196,9 +205,9 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
             assertEquals(users.size(), 0);
 
             for (int i = 0; i < 10; i++) {
-                String username = "tester" + String.valueOf(i);
-                globalUserManagementService.deleteUser(username);
-                createUser(username, username + "@test.com", "Test", "Tester");
+                String username = "tester" + String.valueOf(i) + "@test.com";
+                assertTrue(globalUserManagementService.deleteUser(username));
+                createUser(username, username, "Test", "Tester");
                 grantDefaultRights(tenant.getId(), username);
             }
 
@@ -215,27 +224,34 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
             globalAuthenticationService.discard(doc.getTicket());
         } finally {
             for (int i = 0; i < 10; i++) {
-                String username = "tester" + String.valueOf(i);
-                globalUserManagementService.deleteUser(username);
-                globalUserManagementService.deleteUser(username + "@test.com");
+                globalUserManagementService.deleteUser("tester" + String.valueOf(i) + "@test.com");
             }
             globalTenantManagementService.discardTenant(tenant);
         }
-
-        globalUserManagementService.deleteUser(testCreds.getUsername());
     }
 
     @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void changePassword() {
-        UserDocument doc;
+        UserRegistration userReg = createUserRegistration();
+        assertTrue(globalUserManagementService.deleteUser(userReg.getCredentials().getUsername()));
 
-        globalUserManagementService.deleteUser(testCreds.getUsername());
-        createUser(testUser.getUsername(), testUser.getEmail(), testUser.getFirstName(), testUser.getLastName());
-        grantDefaultRights(testTenant, testUser.getUsername());
+        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
+        ResponseDocument<RegistrationResult> response1 = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+        assertTrue(response1.isSuccess());
+        assertNotNull(response1.getResult().getPassword());
 
-        doc = loginAndAttach(testCreds.getUsername());
-        addAuthHeader.setAuthValue(doc.getTicket().getData());
+        User newUser = globalUserManagementService.getUserByEmail(userReg.getUser().getEmail());
+        assertEquals(newUser.getFirstName(), userReg.getUser().getFirstName());
+        assertEquals(newUser.getLastName(), userReg.getUser().getLastName());
+        assertEquals(newUser.getPhoneNumber(), userReg.getUser().getPhoneNumber());
+        assertEquals(newUser.getTitle(), userReg.getUser().getTitle());
+
+        // try log in new user
+        String password = response1.getResult().getPassword();
+        Ticket ticket = globalAuthenticationService.authenticateUser(userReg.getUser().getUsername(), DigestUtils.sha256Hex(password));
+        assertEquals(ticket.getTenants().size(), 1);
+        globalAuthenticationService.discard(ticket);
 
         UserUpdateData data = new UserUpdateData();
         data.setOldPassword(DigestUtils.sha256Hex("wrong"));
@@ -246,11 +262,13 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         headers.add("Accept", "application/json");
         HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
 
-        String url = getRestAPIHostPort() + "/pls/users/" + testCreds.getUsername() + "/creds";
+        UserDocument doc = loginAndAttach(userReg.getCredentials().getUsername(), password);
+        addAuthHeader.setAuthValue(doc.getTicket().getData());
+        String url = getRestAPIHostPort() + "/pls/users/" + userReg.getCredentials().getUsername() + "/creds";
         ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
         assertFalse(response.getBody().isSuccess());
 
-        data.setOldPassword(DigestUtils.sha256Hex("admin"));
+        data.setOldPassword(DigestUtils.sha256Hex(password));
         requestEntity = new HttpEntity<>(data.toString(), headers);
         response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
         assertEquals(response.getStatusCode().value(), 200);
@@ -258,49 +276,43 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
 
         globalAuthenticationService.discard(doc.getTicket());
 
-        Ticket ticket = globalAuthenticationService.authenticateUser(testCreds.getUsername(), DigestUtils.sha256Hex("newpass"));
+        ticket = globalAuthenticationService.authenticateUser(userReg.getCredentials().getUsername(), DigestUtils.sha256Hex("newpass"));
         globalAuthenticationService.discard(ticket);
 
-        globalUserManagementService.deleteUser(testCreds.getUsername());
+        assertTrue(globalUserManagementService.deleteUser(userReg.getCredentials().getUsername()));
     }
 
-//    @SuppressWarnings("rawtypes")
-//    @Test(groups = { "functional", "deployment" })
-//    public void updateRights() {
-//        globalUserManagementService.deleteUser(testCreds.getUsername());
-//        createUser(testUser.getUsername(), testUser.getEmail(), testUser.getFirstName(), testUser.getLastName());
-//        grantDefaultRights(adminDoc.getTicket().getTenants().get(0).getId(), testUser.getUsername());
-//
-//        UserUpdateData data = new UserUpdateData();
-//        Map<String, EntityAccessRightsData> rightsDataMap = new HashMap<>();
-//        EntityAccessRightsData rightsData = new EntityAccessRightsData();
-//        rightsData.setMayView(true);
-//        rightsDataMap.put("PLS_Models", rightsData);
-//        rightsDataMap.put("PLS_Configuration", rightsData);
-//        rightsDataMap.put("PLS_Reporting", rightsData);
-//        rightsDataMap.put("PLS_Users", rightsData);
-//        data.setRights(rightsDataMap);
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.add("Content-Type", "application/json");
-//        headers.add("Accept", "application/json");
-//        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
-//
-//        addAuthHeader.setAuthValue(adminDoc.getTicket().getData());
-//        String url = getRestAPIHostPort() + "/pls/users/" + testCreds.getUsername();
-//        ResponseEntity<ResponseDocument> response2 = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
-//        assertTrue(response2.getBody().isSuccess());
-//
-//        UserDocument doc = loginAndAttach(testCreds.getUsername());
-//        addAuthHeader.setAuthValue(doc.getTicket().getData());
-//        response2 = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
-//        assertEquals(response2.getStatusCode().value(), 403);
-//        globalAuthenticationService.discard(doc.getTicket());
-//
-//        //TODO:song check rights after GlobalAuth' GetRights works properly
-//
-//        globalUserManagementService.deleteUser(testCreds.getUsername());
-//    }
+    @SuppressWarnings("rawtypes")
+    @Test(groups = { "functional", "deployment" })
+    public void updateRights() {
+        UserUpdateData data = new UserUpdateData();
+        Map<String, EntityAccessRightsData> rightsDataMap = new HashMap<>();
+        EntityAccessRightsData rightsData = new EntityAccessRightsData();
+        rightsData.setMayView(true);
+        rightsDataMap.put("PLS_Models", rightsData);
+        rightsDataMap.put("PLS_Configuration", rightsData);
+        rightsDataMap.put("PLS_Reporting", rightsData);
+        rightsDataMap.put("PLS_Users", rightsData);
+        data.setRights(rightsDataMap);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+
+        String url = getRestAPIHostPort() + "/pls/users/" + testCreds.getUsername();
+        ResponseEntity<ResponseDocument> response2 = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+        assertTrue(response2.getBody().isSuccess());
+
+        //TODO:song check rights after GlobalAuth' GetRights works properly
+
+        addAuthHeader.setAuthValue(generalDoc.getTicket().getData());
+        try {
+            restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+        } catch (HttpClientErrorException e) {
+            assertEquals(e.getStatusCode().value(), 403);
+        }
+    }
 
     @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
@@ -309,13 +321,9 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         tenant.setName("Test Tenant");
         tenant.setId("Test_" + UUID.randomUUID().toString());
         try {
-            globalUserManagementService.deleteUser(testCreds.getUsername());
-            createUser(testUser.getUsername(), testUser.getEmail(), testUser.getFirstName(), testUser.getLastName());
-
             globalTenantManagementService.registerTenant(tenant);
             grantAdminRights(tenant.getId(), testUser.getUsername());
-
-            UserDocument doc = loginAndAttach(testCreds.getUsername(), tenant);
+            UserDocument doc = loginAndAttach(testUser.getUsername(), tenant);
             addAuthHeader.setAuthValue(doc.getTicket().getData());
 
             String json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
@@ -324,9 +332,9 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
             assertEquals(users.size(), 0);
 
             for (int i = 0; i < 10; i++) {
-                String username = "tester" + String.valueOf(i);
-                globalUserManagementService.deleteUser(username);
-                createUser(username, username + "@test.com", "Test", "Tester");
+                String username = "tester" + String.valueOf(i) + "@test.com";
+                assertTrue(globalUserManagementService.deleteUser(username));
+                createUser(username, username, "Test", "Tester");
                 grantDefaultRights(tenant.getId(), username);
             }
 
@@ -335,7 +343,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
             users = response.getResult();
             assertEquals(users.size(), 10);
 
-            List<String> usersToBeDeleted = Arrays.asList("tester0", "tester1", "tester2");
+            List<String> usersToBeDeleted = Arrays.asList("tester0@test.com", "tester1@test.com", "tester2@test.com");
 
             ObjectMapper mapper = new ObjectMapper();
             String param = mapper.valueToTree(usersToBeDeleted).toString();
@@ -361,7 +369,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
             assertEquals(users.size(), 7);
 
             // delete admin user
-            usersToBeDeleted = Arrays.asList("tester3", "tester4", testCreds.getUsername());
+            usersToBeDeleted = Arrays.asList("tester3@test.com", "tester4@test.com", testCreds.getUsername());
             param = mapper.valueToTree(usersToBeDeleted).toString();
 
             responseEntity = restTemplate.exchange(
@@ -392,13 +400,9 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
             globalAuthenticationService.discard(doc.getTicket());
         } finally {
             for (int i = 0; i < 10; i++) {
-                String username = "tester" + String.valueOf(i);
-                globalUserManagementService.deleteUser(username);
-                globalUserManagementService.deleteUser(username + "@test.com");
+                globalUserManagementService.deleteUser("tester" + String.valueOf(i)  + "@test.com");
             }
             globalTenantManagementService.discardTenant(tenant);
-
-            globalUserManagementService.deleteUser(testCreds.getUsername());
         }
     }
 
@@ -406,15 +410,15 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         UserRegistration userReg = new UserRegistration();
 
         User user = new User();
-        user.setEmail("hford@ford.com");
-        user.setFirstName("Henry");
-        user.setLastName("Ford");
+        user.setEmail("test" + UUID.randomUUID().toString() + "@test.com");
+        user.setFirstName("Test");
+        user.setLastName("Tester");
         user.setPhoneNumber("650-555-5555");
         user.setTitle("CEO");
 
         Credentials creds = new Credentials();
-        creds.setUsername("hford");
-        creds.setPassword("EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
+        creds.setUsername(user.getEmail());
+        creds.setPassword("WillBeModifiedImmediately");
 
         user.setUsername(creds.getUsername());
 

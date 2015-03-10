@@ -57,6 +57,13 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(PlsFunctionalTestNGBase.class);
 
+    protected static final String adminUsername = "admin";
+    protected static final String adminPassword = "admin";
+    protected static final String adminPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
+    protected static final String generalUsername = "lming";
+    protected static final String generalPassword = "admin";
+    protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
+
     @Autowired
     private GlobalAuthenticationServiceImpl globalAuthenticationService;
 
@@ -205,6 +212,13 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         public void setAuthValue(String headerValue) {
             this.headerValue = headerValue;
         }
+    }
+
+    protected UserDocument loginAndAttachAdmin() {
+        return loginAndAttach(adminUsername, adminPassword);
+    }
+    protected UserDocument loginAndAttachGeneral() {
+        return loginAndAttach(generalUsername, generalPassword);
     }
 
     protected UserDocument loginAndAttach(String username) {

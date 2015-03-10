@@ -184,6 +184,7 @@ public class UserResource {
     @RequestMapping(value = "/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update users")
+    @PreAuthorize("hasRole('Edit_PLS_Users')")
     public SimpleBooleanResponse update(@PathVariable String username, @RequestBody UserUpdateData data, HttpServletRequest request) {
         String tenantId;
         try {
