@@ -14,7 +14,6 @@ import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementS
 import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
-import com.latticeengines.pls.security.GrantedRight;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +25,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.HttpClientErrorException;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -52,6 +50,7 @@ import static org.testng.Assert.assertNull;
 
 
 public class UserResourceTestNG extends PlsFunctionalTestNGBase {
+    @SuppressWarnings("unused")
     private static Log log = LogFactory.getLog(UserResourceTestNG.class);
 
     @Autowired
