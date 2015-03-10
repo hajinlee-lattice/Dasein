@@ -6,7 +6,10 @@ var Login = function() {
     this.loginButton = element(by.id('loginButton'));
  
 	this.get = function() {
-	    browser.get('/');
+	    var width = 1024;
+        var height = 768;
+        browser.driver.manage().window().setSize(width, height);
+        browser.get('/');
 	};
 
     this.loginUser = function(name, password) {

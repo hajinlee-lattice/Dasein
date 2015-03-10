@@ -13,11 +13,11 @@ var Logout = function() {
     }
 
   	this.logoutAsAdmin = function() {
-        this.logout('Everything IsAwesome');
+        this.logout(browser.params.adminDisplayName);
     }
 
   	this.logoutAsNonAdmin = function() {
-        this.logout('General User');
+        this.logout(browser.params.nonAdminDisplayName);
     }
 
 };
