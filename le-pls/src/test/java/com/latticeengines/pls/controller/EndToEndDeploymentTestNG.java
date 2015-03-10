@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -27,7 +28,6 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
-import com.latticeengines.pls.security.GrantedRight;
 
 public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
 
@@ -52,42 +52,39 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     @Value("${pls.modelingservice.testdsdbport}")
     private int dataSourcePort;
 
+    @SuppressWarnings("unused")
     @Autowired
     private Configuration yarnConfiguration;
 
+    @SuppressWarnings("unused")
     @Autowired
     private GlobalAuthenticationServiceImpl globalAuthenticationService;
 
+    @SuppressWarnings("unused")
     @Autowired
     private GlobalSessionManagementServiceImpl globalSessionManagementService;
 
+    @SuppressWarnings("unused")
     @Autowired
     private GlobalUserManagementServiceImpl globalUserManagementService;
 
-    private Ticket ticket = null;
-    
     private static String tenant;
+    private static Tenant tenantToAttach;
 
     @BeforeClass(groups = "deployment", enabled = true)
     public void setup() throws Exception {
-        ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
+        setupUsers();
+
+        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
         assertEquals(ticket.getTenants().size(), 2);
         assertNotNull(ticket);
-        createUser("rgonzalez", "rgonzalez@lattice-engines.com", "Ron", "Gonzalez");
-        createUser(adminUsername, "bnguyen@lattice-engines.com", "Everything", "IsAwesome", adminPasswordHash);
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
-        tenant = tenant2;
-        revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
-
-        grantAdminRights(tenant2, adminUsername);
-
-        grantAdminRights(tenant1, "admin");
-        grantAdminRights(tenant2, "admin");
-
+        tenantToAttach = ticket.getTenants().get(1);
+        tenant = tenantToAttach.getId();
         setupDb(tenant1, tenant2, false);
-        
+
+        globalAuthenticationService.discard(ticket);
     }
     
     private ModelingServiceExecutor buildModel(String tenant, String modelName, String metadata, String table) throws Exception {
@@ -143,7 +140,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "runPipeline" })
     public void checkModels() {
-        UserDocument doc = loginAndAttach("bnguyen", "tahoe");
+        UserDocument doc = loginAndAttachAdmin(tenantToAttach);
         addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());

@@ -74,7 +74,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        setupUsers();
+        if (!usersInitialized) { setupUsers(); }
 
         adminDoc = loginAndAttachAdmin();
         generalDoc = loginAndAttachGeneral();

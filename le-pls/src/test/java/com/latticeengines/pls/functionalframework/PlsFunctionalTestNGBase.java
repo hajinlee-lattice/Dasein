@@ -58,10 +58,11 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(PlsFunctionalTestNGBase.class);
 
-    protected static final String adminUsername = "bnguyen";
+    protected static boolean usersInitialized = false;
+    protected static final String adminUsername = "bnguyen@lattice-engines.com";
     protected static final String adminPassword = "tahoe";
     protected static final String adminPasswordHash = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
-    protected static final String generalUsername = "lming";
+    protected static final String generalUsername = "lming@lattice-engines.com";
     protected static final String generalPassword = "admin";
     protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
 
@@ -218,6 +219,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected UserDocument loginAndAttachAdmin() {
         return loginAndAttach(adminUsername, adminPassword);
     }
+    protected UserDocument loginAndAttachAdmin(Tenant tenant) {
+        return loginAndAttach(adminUsername, adminPassword, tenant);
+    }
     protected UserDocument loginAndAttachGeneral() {
         return loginAndAttach(generalUsername, generalPassword);
     }
@@ -242,9 +246,13 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected UserDocument loginAndAttach(String username, Tenant tenant) {
+        return loginAndAttach(username, "admin", tenant);
+    }
+
+    protected UserDocument loginAndAttach(String username, String password, Tenant tenant) {
         Credentials creds = new Credentials();
         creds.setUsername(username);
-        creds.setPassword(DigestUtils.sha256Hex("admin"));
+        creds.setPassword(DigestUtils.sha256Hex(password));
 
         LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds,
             LoginDocument.class, new Object[] {});
@@ -394,6 +402,8 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
+
+        usersInitialized = true;
     }
 
     protected void setupSecurityContext(ModelSummary summary) {
