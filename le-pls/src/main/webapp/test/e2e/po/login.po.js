@@ -19,11 +19,11 @@ var Login = function() {
     }
 
   	this.loginAsAdmin = function() {
-  		this.loginUser('bnguyen', 'tahoe');
+  		this.loginUser('bnguyen@lattice-engines.com', 'tahoe');
     }
 
   	this.loginAsNonAdmin = function() {
-  		this.loginUser('lming', 'admin');
+  		this.loginUser('lming@lattice-engines.com', 'admin');
     }
 
 };
