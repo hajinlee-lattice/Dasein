@@ -77,76 +77,16 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
+        setupUsers();
+
         ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
-
-        if (ticket.getTenants().size() == 1) {
-            Tenant newTenant = new Tenant();
-            newTenant.setId("NEW_TENANT");
-            newTenant.setName("NEW_TENANT");
-
-            assertTrue(globalTenantManagementService.registerTenant(newTenant));
-            grantRight(GrantedRight.VIEW_PLS_MODELS, "NEW_TENANT", "admin");
-
-            globalAuthenticationService.discard(ticket);
-            ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
-        }
-
         assertEquals(ticket.getTenants().size(), 2);
         assertNotNull(ticket);
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
-
-        // UI admin user
-        grantAdminRights(tenant1, "admin");
-        grantAdminRights(tenant2, "admin");
-
-        // UI general user
-        assertTrue(globalUserManagementService.deleteUser("ysong"));
-        assertTrue(globalUserManagementService.deleteUser("ysong@lattice-engines.com"));
-        createUser("ysong", "ysong@lattice-engines.com", "General", "User", "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
-        grantDefaultRights(tenant1, "ysong");
-        grantDefaultRights(tenant2, "ysong");
-
-        // testing admin user
-        User user = globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com");
-        if (user == null || !user.getUsername().equals(adminUsername)) {
-            assertTrue(globalUserManagementService.deleteUser("bnguyen"));
-            assertTrue(globalUserManagementService.deleteUser("bnguyen@lattice-engines.com"));
-            createUser(adminUsername, "bnguyen@lattice-engines.com", "Everything", "IsAwesome", adminPasswordHash);
-        }
-        grantAdminRights(tenant1, adminUsername);
-        grantAdminRights(tenant2, adminUsername);
-
-        // testing general user
-        user = globalUserManagementService.getUserByEmail("lming@lattice-engines.com");
-        if (user == null || !user.getUsername().equals(generalUsername)) {
-            assertTrue(globalUserManagementService.deleteUser("lming"));
-            assertTrue(globalUserManagementService.deleteUser("lming@lattice-engines.com"));
-            createUser(generalUsername, "lming@lattice-engines.com", "General", "User", generalPasswordHash);
-        }
-        grantDefaultRights(tenant1, generalUsername);
-        grantDefaultRights(tenant2, generalUsername);
-
-        // PM admin user
-        if (globalUserManagementService.getUserByEmail("tsanghavi@lattice-engines.com") == null) {
-            assertTrue(globalUserManagementService.deleteUser("tsanghavi@lattice-engines.com"));
-            createUser("tsanghavi@lattice-engines.com", "tsanghavi@lattice-engines.com", "Tejas", "Sanghavi");
-        }
-        grantAdminRights(tenant1, "tsanghavi@lattice-engines.com");
-        grantAdminRights(tenant2, "tsanghavi@lattice-engines.com");
-
-        // empty rights user
-        if (globalUserManagementService.getUserByEmail("rgonzalez@lattice-engines.com") == null) {
-            assertTrue(globalUserManagementService.deleteUser("rgonzalez"));
-            assertTrue(globalUserManagementService.deleteUser("rgonzalez@lattice-engines.com"));
-            createUser("rgonzalez", "rgonzalez@lattice-engines.com", "Ron", "Gonzalez");
-        }
-        revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
-
         setupDb(tenant1, tenant2);
 
-        adminDoc = loginAndAttach(adminUsername, adminPassword);
+        adminDoc = loginAndAttachAdmin();
     }
 
     @AfterClass(groups = { "functional", "deployment" })

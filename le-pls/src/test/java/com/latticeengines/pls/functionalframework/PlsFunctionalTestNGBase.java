@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -44,7 +46,6 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.globalauth.authentication.impl.Constants;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
 import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
@@ -68,7 +69,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     private GlobalAuthenticationServiceImpl globalAuthenticationService;
 
     @Autowired
-    private GlobalSessionManagementServiceImpl globalSessionManagementService;
+    private GlobalTenantManagementService globalTenantManagementService;
 
     @Autowired
     private GlobalUserManagementServiceImpl globalUserManagementService;
@@ -98,7 +99,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             "");
 
     protected void createUser(String username, String email, String firstName, String lastName) {
-        createUser(username, email, firstName, lastName, "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
+        createUser(username, email, firstName, lastName, generalPasswordHash);
     }
 
     protected void createUser(String username, String email, String firstName, String lastName, String password) {
@@ -326,6 +327,73 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
                 modelSummaryEntityMgr.create(summary2);
             }
         }
+    }
+
+    protected void setupUsers() {
+        Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
+
+        if (ticket.getTenants().size() == 1) {
+            Tenant newTenant = new Tenant();
+            newTenant.setId("NEW_TENANT");
+            newTenant.setName("NEW_TENANT");
+
+            globalTenantManagementService.registerTenant(newTenant);
+            grantRight(GrantedRight.VIEW_PLS_MODELS, "NEW_TENANT", "admin");
+
+            globalAuthenticationService.discard(ticket);
+            ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
+        }
+
+        String tenant1 = ticket.getTenants().get(0).getId();
+        String tenant2 = ticket.getTenants().get(1).getId();
+
+        // UI admin user
+        grantAdminRights(tenant1, "admin");
+        grantAdminRights(tenant2, "admin");
+
+        // UI general user
+        globalUserManagementService.deleteUser("ysong");
+        globalUserManagementService.deleteUser("ysong@lattice-engines.com");
+        createUser("ysong", "ysong@lattice-engines.com", "General", "User", "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
+        grantDefaultRights(tenant1, "ysong");
+        grantDefaultRights(tenant2, "ysong");
+
+        // testing admin user
+        User user = globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com");
+        if (user == null || !user.getUsername().equals(adminUsername)) {
+            globalUserManagementService.deleteUser("bnguyen");
+            globalUserManagementService.deleteUser("bnguyen@lattice-engines.com");
+            createUser(adminUsername, "bnguyen@lattice-engines.com", "Everything", "IsAwesome", adminPasswordHash);
+        }
+        grantAdminRights(tenant1, adminUsername);
+        grantAdminRights(tenant2, adminUsername);
+
+        // testing general user
+        user = globalUserManagementService.getUserByEmail("lming@lattice-engines.com");
+        if (user == null || !user.getUsername().equals(generalUsername)) {
+            globalUserManagementService.deleteUser("lming");
+            globalUserManagementService.deleteUser("lming@lattice-engines.com");
+            createUser(generalUsername, "lming@lattice-engines.com", "General", "User", generalPasswordHash);
+        }
+        grantDefaultRights(tenant1, generalUsername);
+        grantDefaultRights(tenant2, generalUsername);
+
+        // PM admin user
+        if (globalUserManagementService.getUserByEmail("tsanghavi@lattice-engines.com") == null) {
+            globalUserManagementService.deleteUser("tsanghavi@lattice-engines.com");
+            createUser("tsanghavi@lattice-engines.com", "tsanghavi@lattice-engines.com", "Tejas", "Sanghavi");
+        }
+        grantAdminRights(tenant1, "tsanghavi@lattice-engines.com");
+        grantAdminRights(tenant2, "tsanghavi@lattice-engines.com");
+
+        // empty rights user
+        if (globalUserManagementService.getUserByEmail("rgonzalez@lattice-engines.com") == null) {
+            globalUserManagementService.deleteUser("rgonzalez");
+            globalUserManagementService.deleteUser("rgonzalez@lattice-engines.com");
+            createUser("rgonzalez", "rgonzalez@lattice-engines.com", "Ron", "Gonzalez");
+        }
+        revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
+        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
     }
 
     protected void setupSecurityContext(ModelSummary summary) {

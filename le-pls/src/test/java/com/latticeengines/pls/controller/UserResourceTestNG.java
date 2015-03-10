@@ -14,6 +14,7 @@ import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementS
 import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
+import com.latticeengines.pls.security.GrantedRight;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,6 +76,8 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
+        setupUsers();
+
         adminDoc = loginAndAttachAdmin();
         generalDoc = loginAndAttachGeneral();
         testTenant = globalSessionManagementService.retrieve(adminDoc.getTicket()).getTenant();
