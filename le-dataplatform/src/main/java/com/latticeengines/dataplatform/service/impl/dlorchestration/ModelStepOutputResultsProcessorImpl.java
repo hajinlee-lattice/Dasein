@@ -246,11 +246,11 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         modelCommandLogService.log(modelCommand, "Top Predictors csv file download link: " + httpFsPrefix + modelCSVFileHdfsPath
                 + HTTPFS_SUFFIX);
         
-        String scoreFileHdfsPath = jobStatus.getResultDirectory() + "/scored.txt";
+        String scoreFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "scored.txt");
         modelCommandLogService.log(modelCommand, "Score file download link: " + httpFsPrefix + scoreFileHdfsPath
                 + HTTPFS_SUFFIX);
 
-        String readOutSampleFileHdfsPath = jobStatus.getResultDirectory() + "/readoutsample.csv";
+        String readOutSampleFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "readoutsample.csv");
         modelCommandLogService.log(modelCommand, "ReadOutSample file download link: " + httpFsPrefix + readOutSampleFileHdfsPath
                 + HTTPFS_SUFFIX);
     }
