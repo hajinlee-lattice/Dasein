@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,8 +22,6 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -53,7 +50,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ModelSummaryResourceTestNG.class);
 
-    private Ticket ticket = null;
     private UserDocument adminDoc;
 
     @Autowired
@@ -67,7 +63,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     public void setup() throws Exception {
         setupUsers();
 
-        ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
+        Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         assertEquals(ticket.getTenants().size(), 2);
         assertNotNull(ticket);
         String tenant1 = ticket.getTenants().get(0).getId();
