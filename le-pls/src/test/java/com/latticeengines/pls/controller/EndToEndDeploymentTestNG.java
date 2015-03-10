@@ -74,21 +74,17 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         assertEquals(ticket.getTenants().size(), 2);
         assertNotNull(ticket);
         createUser("rgonzalez", "rgonzalez@lattice-engines.com", "Ron", "Gonzalez");
-        createUser("bnguyen", "bnguyen@lattice-engines.com", "Everything", "IsAwesome", "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=");
+        createUser(adminUsername, "bnguyen@lattice-engines.com", "Everything", "IsAwesome", adminPasswordHash);
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
         tenant = tenant2;
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
-        revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "bnguyen");
-        revokeRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "bnguyen");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "bnguyen");
-        grantRight(GrantedRight.EDIT_PLS_USERS, tenant1, "admin");
-        grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "admin");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "admin");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "admin");
+
+        grantAdminRights(tenant2, adminUsername);
+
+        grantAdminRights(tenant1, "admin");
+        grantAdminRights(tenant2, "admin");
 
         setupDb(tenant1, tenant2, false);
         

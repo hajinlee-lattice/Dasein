@@ -57,9 +57,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     private static final Log log = LogFactory.getLog(PlsFunctionalTestNGBase.class);
 
-    protected static final String adminUsername = "admin";
-    protected static final String adminPassword = "admin";
-    protected static final String adminPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
+    protected static final String adminUsername = "bnguyen";
+    protected static final String adminPassword = "tahoe";
+    protected static final String adminPasswordHash = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
     protected static final String generalUsername = "lming";
     protected static final String generalPassword = "admin";
     protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";

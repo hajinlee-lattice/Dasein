@@ -6,13 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -55,6 +58,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     private static final Log log = LogFactory.getLog(ModelSummaryResourceTestNG.class);
 
     private Ticket ticket = null;
+    private UserDocument adminDoc;
 
     @Autowired
     private GlobalAuthenticationServiceImpl globalAuthenticationService;
@@ -81,12 +85,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
             newTenant.setName("NEW_TENANT");
 
             assertTrue(globalTenantManagementService.registerTenant(newTenant));
-            grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, "NEW_TENANT", "admin");
-            grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, "NEW_TENANT", "admin");
-            grantRight(GrantedRight.VIEW_PLS_REPORTING, "NEW_TENANT", "admin");
             grantRight(GrantedRight.VIEW_PLS_MODELS, "NEW_TENANT", "admin");
-            grantRight(GrantedRight.EDIT_PLS_MODELS, "NEW_TENANT", "admin");
-            grantRight(GrantedRight.EDIT_PLS_USERS, "NEW_TENANT", "admin");
 
             globalAuthenticationService.discard(ticket);
             ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
@@ -97,77 +96,46 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
 
-        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant1, "admin");
-        grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, tenant1, "admin");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "admin");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant1, "admin");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "admin");
-        grantRight(GrantedRight.VIEW_PLS_USERS, tenant1, "admin");
-        grantRight(GrantedRight.EDIT_PLS_USERS, tenant1, "admin");
+        // UI admin user
+        grantAdminRights(tenant1, "admin");
+        grantAdminRights(tenant2, "admin");
 
-        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant2, "admin");
-        grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, tenant2, "admin");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "admin");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "admin");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "admin");
-        grantRight(GrantedRight.VIEW_PLS_USERS, tenant2, "admin");
-        grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "admin");
+        // UI general user
+        assertTrue(globalUserManagementService.deleteUser("ysong"));
+        assertTrue(globalUserManagementService.deleteUser("ysong@lattice-engines.com"));
+        createUser("ysong", "ysong@lattice-engines.com", "General", "User", "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
+        grantDefaultRights(tenant1, "ysong");
+        grantDefaultRights(tenant2, "ysong");
 
-        if (globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com") == null) {
+        // testing admin user
+        User user = globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com");
+        if (user == null || !user.getUsername().equals(adminUsername)) {
             assertTrue(globalUserManagementService.deleteUser("bnguyen"));
             assertTrue(globalUserManagementService.deleteUser("bnguyen@lattice-engines.com"));
-            createUser("bnguyen", "bnguyen@lattice-engines.com", "Everything", "IsAwesome", "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=");
+            createUser(adminUsername, "bnguyen@lattice-engines.com", "Everything", "IsAwesome", adminPasswordHash);
         }
-        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant1, "bnguyen");
-        grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, tenant1, "bnguyen");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "bnguyen");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant1, "bnguyen");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "bnguyen");
-        grantRight(GrantedRight.VIEW_PLS_USERS, tenant1, "bnguyen");
-        grantRight(GrantedRight.EDIT_PLS_USERS, tenant1, "bnguyen");
+        grantAdminRights(tenant1, adminUsername);
+        grantAdminRights(tenant2, adminUsername);
 
-        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant2, "bnguyen");
-        grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, tenant2, "bnguyen");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "bnguyen");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "bnguyen");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "bnguyen");
-        grantRight(GrantedRight.VIEW_PLS_USERS, tenant2, "bnguyen");
-        grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "bnguyen");
-
-        if (globalUserManagementService.getUserByEmail("lming@lattice-engines.com") == null) {
+        // testing general user
+        user = globalUserManagementService.getUserByEmail("lming@lattice-engines.com");
+        if (user == null || !user.getUsername().equals(generalUsername)) {
             assertTrue(globalUserManagementService.deleteUser("lming"));
             assertTrue(globalUserManagementService.deleteUser("lming@lattice-engines.com"));
-            createUser("lming", "lming@lattice-engines.com", "General", "User", "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
+            createUser(generalUsername, "lming@lattice-engines.com", "General", "User", generalPasswordHash);
         }
-        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant1, "lming");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "lming");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant1, "lming");
+        grantDefaultRights(tenant1, generalUsername);
+        grantDefaultRights(tenant2, generalUsername);
 
-        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant2, "lming");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "lming");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "lming");
-
-
+        // PM admin user
         if (globalUserManagementService.getUserByEmail("tsanghavi@lattice-engines.com") == null) {
             assertTrue(globalUserManagementService.deleteUser("tsanghavi@lattice-engines.com"));
             createUser("tsanghavi@lattice-engines.com", "tsanghavi@lattice-engines.com", "Tejas", "Sanghavi");
         }
-        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant1, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, tenant1, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant1, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.VIEW_PLS_USERS, tenant1, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.EDIT_PLS_USERS, tenant1, "tsanghavi@lattice-engines.com");
+        grantAdminRights(tenant1, "tsanghavi@lattice-engines.com");
+        grantAdminRights(tenant2, "tsanghavi@lattice-engines.com");
 
-        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant2, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.EDIT_PLS_CONFIGURATION, tenant2, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.VIEW_PLS_USERS, tenant2, "tsanghavi@lattice-engines.com");
-        grantRight(GrantedRight.EDIT_PLS_USERS, tenant2, "tsanghavi@lattice-engines.com");
-
+        // empty rights user
         if (globalUserManagementService.getUserByEmail("rgonzalez@lattice-engines.com") == null) {
             assertTrue(globalUserManagementService.deleteUser("rgonzalez"));
             assertTrue(globalUserManagementService.deleteUser("rgonzalez@lattice-engines.com"));
@@ -176,28 +144,28 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
 
-        if (globalUserManagementService.getUserByEmail("ysong@lattice-engines.com") == null) {
-            assertTrue(globalUserManagementService.deleteUser("ysong"));
-            assertTrue(globalUserManagementService.deleteUser("ysong@lattice-engines.com"));
-            createUser("ysong", "ysong@lattice-engines.com", "Yintao", "Song");
-        }
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "ysong");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant1, "ysong");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant1, "ysong");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant2, "ysong");
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant2, "ysong");
-        grantRight(GrantedRight.EDIT_PLS_MODELS, tenant2, "ysong");
-        grantRight(GrantedRight.VIEW_PLS_USERS, tenant2, "ysong");
-
         setupDb(tenant1, tenant2);
+
+        adminDoc = loginAndAttach(adminUsername, adminPassword);
+    }
+
+    @AfterClass(groups = { "functional", "deployment" })
+    public void tearDown() {
+        globalAuthenticationService.discard(adminDoc.getTicket());
+    }
+
+    @BeforeMethod(groups = { "functional", "deployment" })
+    public void beforeMethod() {
+        // using admin session by default
+        addAuthHeader.setAuthValue(adminDoc.getTicket().getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
     }
 
     @Test(groups = { "functional", "deployment" })
     public void getModelSummariesNoViewPlsModelsRight() {
         UserDocument doc = loginAndAttach("rgonzalez");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
         try {
             restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
@@ -211,8 +179,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     public void deleteModelSummaryNoEditPlsModelsRight() {
         UserDocument doc = loginAndAttach("rgonzalez");
         addAuthHeader.setAuthValue(doc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
 
         try {
             restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/123");
@@ -225,10 +191,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = { "functional", "deployment" })
     public void getModelSummariesHasViewPlsModelsRight() {
-        UserDocument doc = loginAndAttach("bnguyen", "tahoe");
-        addAuthHeader.setAuthValue(doc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), 1);
@@ -241,10 +203,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "getModelSummariesHasViewPlsModelsRight" })
     public void updateModelSummaryHasEditPlsModelsRight() {
-        UserDocument doc = loginAndAttach("bnguyen", "tahoe");
-        addAuthHeader.setAuthValue(doc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), 1);
@@ -261,10 +219,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateModelSummaryHasEditPlsModelsRight" })
     public void updateAsDeletedModelSummaryHasEditPlsModelsRight() {
-        UserDocument doc = loginAndAttach("bnguyen", "tahoe");
-        addAuthHeader.setAuthValue(doc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), 1);
@@ -301,11 +255,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateAsDeletedModelSummaryHasEditPlsModelsRight" })
     public void deleteModelSummaryHasEditPlsModelsRight() {
-        UserDocument doc = loginAndAttach("bnguyen", "tahoe");
-        addAuthHeader.setAuthValue(doc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
-
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), 1);

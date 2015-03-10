@@ -104,10 +104,6 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
     }
 
-    @AfterMethod(groups = { "functional", "deployment" })
-    public void afterMethod() {
-    }
-
     @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void registerUser() {
