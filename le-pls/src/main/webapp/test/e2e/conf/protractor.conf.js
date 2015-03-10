@@ -1,8 +1,7 @@
 exports.config = {
     // Spec patterns are relative to the current working directly when
     // protractor is called.
-    //specs: ['../**/*_spec.js'],
-    specs: ['../**/usermgmt_spec.js'],
+    specs: ['../**/*_spec.js'],
 
 	params: {
 		tenantIndex: 0,
