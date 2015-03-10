@@ -38,7 +38,7 @@ describe('user management', function() {
         element(by.linkText('Manage Users')).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-        expect(element.any(by.repeater('user in data')).isDisplayed());
+        expect(userManagement.getPanelBody().isDisplayed()).toBe(true);
 
         logoutPage.logoutAsAdmin();
 
@@ -61,35 +61,36 @@ describe('user management', function() {
         logoutPage.logoutAsNonAdmin();
     });
 
-    //it('should verify create and delete user', function () {
-    //
-    //    loginPage.loginAsAdmin();
-    //
-    //    // choose tenant
-    //    tenants.getTenantByIndex(params.tenantIndex).click();
-    //    browser.waitForAngular();
-    //    browser.driver.sleep(1000);
-    //
-    //    // check existence of Manage Users link
-    //    userDropdown.getUserLink(params.adminDisplayName).click();
-    //    browser.waitForAngular();
-    //    //browser.driver.sleep(1000);
-    //    element(by.linkText('Manage Users')).click();
-    //    browser.waitForAngular();
-    //    browser.driver.sleep(1000);
-    //
-    //    // check existence of users table
-    //    //var originalUserNum = element.all(by.repeater('user in data')).count();
-    //
-    //    userManagement.addNewUser.click();
-    //    browser.waitForAngular();
-    //    browser.driver.sleep(5000);
-    //
-    //    userDropdown.getUserLink(params.adminDisplayName).click();
-    //    browser.waitForAngular();
-    //    browser.driver.sleep(1000);
-    //    logoutPage.logoutAsAdmin();
-    //});
+    it('should verify create and delete user', function () {
+
+        loginPage.loginAsAdmin();
+
+        // choose tenant
+        tenants.getTenantByIndex(params.tenantIndex).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        // check existence of Manage Users link
+        userDropdown.getUserLink(params.adminDisplayName).click();
+        browser.waitForAngular();
+        //browser.driver.sleep(1000);
+        element(by.linkText('Manage Users')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        // check existence of users table
+        //var originalUserNum = element.all(by.repeater('user in data')).count();
+
+        userManagement.getAddNewUserButton().click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        userManagement.getAddNewUserCancelButton().click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        logoutPage.logoutAsAdmin();
+    });
 
 });
 
