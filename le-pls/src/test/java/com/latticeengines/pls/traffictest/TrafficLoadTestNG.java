@@ -137,6 +137,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
             Tenant tenant = new Tenant();
             tenant.setId("T" + i);
             tenant.setName("T" + i);
+            //globalTenantManagementService.discardTenant(tenant);
             globalTenantManagementService.registerTenant(tenant);
             tenantEntityMgr.create(tenant);
             tenantList.add(tenant);
@@ -181,7 +182,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                 userCreds.setUsername(tenant.getName() + "_testuser_" + i);
                 user.setUsername(userCreds.getUsername());
                 userCreds.setPassword(password);
-                globalUserManagementService.deleteUser(user.getUsername());
+                //globalUserManagementService.deleteUser(user.getUsername());
                 globalUserManagementService.registerUser(user, userCreds);
                 users.get(tenant).add(user);
                 grantRights(tenant, user);
@@ -309,12 +310,12 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                 modelSummaryTime += timeConsumptions.get(3);
                 logOutTime += timeConsumptions.get(4);
             }
-
-            System.out.println(String.format("Log in to main page: %f seconds", Math.ceil(loginMainPageTime / users.size())));
-            System.out.println(String.format("Log and Attach: %f seconds", Math.ceil(loginAndAttachTime / users.size())));
-            System.out.println(String.format("Get Model Summaries: %f seconds", Math.ceil(modelSummariesTime / users.size())));
-            System.out.println(String.format("Get Model Summary: %f seconds", Math.ceil(modelSummaryTime / users.size())));
-            System.out.println(String.format("Log out: %f seconds", Math.ceil(logOutTime / users.size())));
+            int userSize = this.numOfTenants * this.numOfUsers;
+            System.out.println(String.format("Log in to main page: %f seconds", Math.ceil(loginMainPageTime / userSize)));
+            System.out.println(String.format("Log and Attach: %f seconds", Math.ceil(loginAndAttachTime / userSize)));
+            System.out.println(String.format("Get Model Summaries: %f seconds", Math.ceil(modelSummariesTime / userSize)));
+            System.out.println(String.format("Get Model Summary: %f seconds", Math.ceil(modelSummaryTime / userSize)));
+            System.out.println(String.format("Log out: %f seconds", Math.ceil(logOutTime / userSize)));
         }
     }
     
