@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -97,7 +98,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
 
     private List<Tenant> tenantList = new ArrayList<>();
 
-    private List<User> users = new ArrayList<>();
+    private Map<Tenant, List<User>> users = new HashMap<>();
 
     private static final String password = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
 
@@ -120,10 +121,13 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
 
     @AfterClass(groups = { "load" })
     public void destroy() {
-        for (User user : users) {
-            globalUserManagementService.deleteUser(user.getUsername());
-        }
         for (Tenant tenant : tenantList) {
+            for (User user : users.get(tenant)) {
+                revokeRight(GrantedRight.VIEW_PLS_MODELS, tenant.getId(), user.getUsername());
+                revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant.getId(), user.getUsername());
+                revokeRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant.getId(), user.getUsername());
+                globalUserManagementService.deleteUser(user.getUsername());
+            }
             globalTenantManagementService.discardTenant(tenant);
         }
     }
@@ -167,6 +171,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
 
     private void createUsers() throws Exception {
         for (Tenant tenant : tenantList) {
+            users.put(tenant, new ArrayList<User>());
             for (int i = 0; i < numOfUsers; i++) {
                 User user = new User();
                 user.setFirstName("test");
@@ -178,7 +183,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                 userCreds.setPassword(password);
                 globalUserManagementService.deleteUser(user.getUsername());
                 globalUserManagementService.registerUser(user, userCreds);
-                users.add(user);
+                users.get(tenant).add(user);
                 grantRights(tenant, user);
             }
         }
