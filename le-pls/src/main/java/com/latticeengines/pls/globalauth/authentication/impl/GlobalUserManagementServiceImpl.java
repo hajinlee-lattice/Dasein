@@ -63,6 +63,19 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
+    public List<String> getRights(String username, String tenantId) {
+        IUserManagementService service = getService();
+        addMagicHeaderAndSystemProperty(service);
+        try {
+            log.info(String.format("Getting rights of user %s in tenant %s.", username, tenantId));
+            return service.getRights(tenantId, username).getString();
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18000,
+                "Getting rights of user " + username + " in tenant " + tenantId + ".", e);
+        }
+    }
+
+    @Override
     public Boolean revokeRight(String right, String tenant, String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);

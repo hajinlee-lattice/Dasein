@@ -108,7 +108,7 @@ public class UserResource {
         if (oldUser != null) {
             result.setValid(false);
             response.setErrors(Arrays.asList("The requested email conflicts with that of an existing user."));
-            if (!inTenant(tenantId, oldUser.getUsername()) || !isAdmin(tenantId, oldUser.getUsername())) {
+            if (!inTenant(tenantId, oldUser.getUsername())) {
                 result.setConflictingUser(oldUser);
             }
         } else {
@@ -203,10 +203,8 @@ public class UserResource {
 
         // update rights
         List<String> rights = RightsUtilities.translateRights(data.getRights());
-        if (!rights.isEmpty()) {
-            for (String right: rights) {
-                globalUserManagementService.grantRight(right, tenantId, username);
-            }
+        for (String right: rights) {
+            globalUserManagementService.grantRight(right, tenantId, username);
         }
 
         return SimpleBooleanResponse.getSuccessResponse();
@@ -320,24 +318,14 @@ public class UserResource {
     }
 
     private boolean isAdmin(String tenantId, String username) {
-        //TODO:song this is temporary until GlboalAuth's GetRights method works properly
-        List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId);
-        for (AbstractMap.SimpleEntry<User, List<String>> userRight: userRightsList) {
-            if (userRight.getKey().getUsername().equals(username)) {
-                return RightsUtilities.isAdmin(RightsUtilities.translateRights(userRight.getValue()));
-            }
-        }
-        return false;
+        return RightsUtilities.isAdmin(
+            RightsUtilities.translateRights(
+                globalUserManagementService.getRights(username, tenantId)
+            )
+        );
     }
 
     private boolean inTenant(String tenantId, String username) {
-        //TODO:song this is temporary until GlboalAuth's GetRights method works properly
-        List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId);
-        for (AbstractMap.SimpleEntry<User, List<String>> userRight: userRightsList) {
-            if (userRight.getKey().getUsername().equals(username)) {
-                return true;
-            }
-        }
-        return false;
+        return !globalUserManagementService.getRights(username, tenantId).isEmpty();
     }
 }

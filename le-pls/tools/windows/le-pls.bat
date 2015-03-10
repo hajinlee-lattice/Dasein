@@ -16,6 +16,7 @@ if "%cmd%"=="compile" (
     echo compiling using shared GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
+        -Djava.util.logging.config.file=conf\env\dev-windows\logging-test.properties ^
         -Djavax.net.ssl.trustStore=certificates\%certificate% ^
         -DPLS_PROPDIR=conf\env\dev-windows ^
         clean compile
@@ -25,6 +26,7 @@ if "%cmd%"=="compile" (
     echo running clean verify using shared GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
+        -Djava.util.logging.config.file=conf\env\dev-windows\logging-test.properties ^
         -Djavax.net.ssl.trustStore=certificates\%certificate% ^
         -DPLS_PROPDIR=conf\env\dev-windows ^
         -DargLine="" ^
@@ -35,6 +37,7 @@ if "%cmd%"=="compile" (
     echo populate testing data using shared GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
+        -Djava.util.logging.config.file=conf\env\dev-windows\logging-test.properties ^
         -Djavax.net.ssl.trustStore=certificates\%certificate% ^
         -DPLS_PROPDIR=conf\env\dev-windows ^
         -DargLine="" ^
@@ -45,6 +48,7 @@ if "%cmd%"=="compile" (
     echo populate testing data using shared GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
+        -Djava.util.logging.config.file=conf\env\dev-windows\logging-test.properties ^
         -Djavax.net.ssl.trustStore=certificates\%certificate% ^
         -DPLS_PROPDIR=conf\env\dev-windows ^
         -DargLine="" ^
@@ -55,6 +59,7 @@ if "%cmd%"=="compile" (
     echo running clean verify using shared GlobalAuth ...
 
     mvn -Pfunctional ^
+        -Djava.util.logging.config.file=conf\env\dev-windows\logging-test.properties ^
         -Djavax.net.ssl.trustStore=certificates\%certificate% ^
         -DPLS_PROPDIR=conf\env\dev-windows ^
         jetty:run

@@ -37,7 +37,7 @@ public class UserUpdateData {
     }
 
     @JsonProperty("Rights")
-    public void setRights(Map<String, EntityAccessRightsData> newPassword) {
+    public void setRights(Map<String, EntityAccessRightsData> rights) {
         this.rights = rights;
     }
 

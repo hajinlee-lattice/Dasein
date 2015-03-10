@@ -66,7 +66,6 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
     private GlobalSessionManagementService globalSessionManagementService;
 
     private Tenant testTenant;
-    private UserRegistration testReg;
     private User testUser;
     private Credentials testCreds;
 
@@ -81,7 +80,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         generalDoc = loginAndAttachGeneral();
         testTenant = globalSessionManagementService.retrieve(adminDoc.getTicket()).getTenant();
 
-        testReg = createUserRegistration();
+        UserRegistration testReg = createUserRegistration();
         testUser = testReg.getUser();
         testCreds = testReg.getCredentials();
 
@@ -135,48 +134,41 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void validateUser() throws JsonProcessingException {
-        // conflict with the email of a non-admin user
+        // conflict with the email of a user outside the current tenant
+        UserRegistration conflictingUserReg = createUserRegistration();
+        createUser(
+            conflictingUserReg.getCredentials().getUsername(),
+            conflictingUserReg.getUser().getEmail(),
+            conflictingUserReg.getUser().getFirstName(),
+            conflictingUserReg.getUser().getLastName()
+        );
+
         ObjectMapper mapper = new ObjectMapper();
-        UserRegistration uReg = mapper.treeToValue(mapper.valueToTree(testReg), UserRegistration.class);
-        User newUser = mapper.treeToValue(mapper.valueToTree(testUser), User.class);
-        newUser.setFirstName("John");
-        newUser.setLastName("Dodge");
-        uReg.setUser(newUser);
+        UserRegistration uReg = mapper.treeToValue(mapper.valueToTree(conflictingUserReg), UserRegistration.class);
+        uReg.getUser().setFirstName("John");
+        uReg.getUser().setLastName("Dodge");
 
         String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
         ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
 
         assertFalse(response.getResult().isValid());
         User conflictingUser = response.getResult().getConflictingUser();
-        assertEquals(conflictingUser.getFirstName(), testUser.getFirstName());
-        assertEquals(conflictingUser.getLastName(), testUser.getLastName());
-        assertEquals(conflictingUser.getEmail(), testUser.getEmail());
+        assertEquals(conflictingUser.getFirstName(), conflictingUserReg.getUser().getFirstName());
+        assertEquals(conflictingUser.getLastName(), conflictingUserReg.getUser().getLastName());
+        assertEquals(conflictingUser.getEmail(), conflictingUserReg.getUser().getEmail());
 
-        // conflict with the email of an admin user
-        UserRegistration userReg = createUserRegistration();
-        createUser(userReg.getCredentials().getUsername(), userReg.getUser().getEmail(), userReg.getUser().getFirstName(), userReg.getUser().getLastName());
-        grantAdminRights(testTenant.getId(), userReg.getCredentials().getUsername());
-        newUser.setEmail(userReg.getUser().getEmail());
-        uReg.setUser(newUser);
-        Credentials newCreds = mapper.treeToValue(mapper.valueToTree(testCreds), Credentials.class);
-        newCreds.setUsername(userReg.getUser().getEmail());
-        uReg.setCredentials(newCreds);
-        newUser.setUsername(newCreds.getUsername());
-
+        // conflict with the email of a user in the current tenant
+        grantDefaultRights(testTenant.getId(), conflictingUserReg.getCredentials().getUsername());
         json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
         response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
         assertFalse(response.getResult().isValid());
         assertNull(response.getResult().getConflictingUser());
 
         // valid email
-        newUser.setEmail("jdodge@dodge.com");
-        uReg.setUser(newUser);
-        newCreds = mapper.treeToValue(mapper.valueToTree(testCreds), Credentials.class);
-        newCreds.setUsername("jdodge@dodge.com");
-        uReg.setCredentials(newCreds);
-        newUser.setUsername(newCreds.getUsername());
+        uReg.getUser().setEmail("jdodge@dodge.com");
+        uReg.getCredentials().setUsername("jdodge@dodge.com");
 
-        assertTrue(globalUserManagementService.deleteUser(newCreds.getUsername()));
+        assertTrue(globalUserManagementService.deleteUser(uReg.getCredentials().getUsername()));
 
         json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
         response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
@@ -302,7 +294,8 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         ResponseEntity<ResponseDocument> response2 = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
         assertTrue(response2.getBody().isSuccess());
 
-        //TODO:song check rights after GlobalAuth' GetRights works properly
+        List<String> rights = globalUserManagementService.getRights(testCreds.getUsername(), testTenant.getId());
+        assertTrue(rights.contains("View_PLS_Users"));
 
         addAuthHeader.setAuthValue(generalDoc.getTicket().getData());
         try {
