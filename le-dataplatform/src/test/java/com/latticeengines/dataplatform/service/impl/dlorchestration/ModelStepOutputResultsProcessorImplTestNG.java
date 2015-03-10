@@ -73,8 +73,8 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         jobStatus.setResultDirectory(resultDirectory);
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testmodel.json", linkContents.get(0));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testmodel.csv", linkContents.get(1));
-        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "scored.txt", linkContents.get(2));
-        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "readoutsample.csv", linkContents.get(3));
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testscored.txt", linkContents.get(2));
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testreadoutsample.csv", linkContents.get(3));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "diagnostics.json", "diagnostics");
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "rfpmml.xml", pmmlContents);
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/modelsummary.json", modelSummaryContents);
