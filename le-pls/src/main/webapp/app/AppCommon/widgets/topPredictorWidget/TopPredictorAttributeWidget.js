@@ -23,7 +23,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             attributeHover.removeClass("attribute-hover-left-arrow");
             attributeHover.addClass("attribute-hover-right-arrow");
         } else {
-            $("#topPredictorAttributeHover").css("left", donutChartLocation.left - 410);
+            $("#topPredictorAttributeHover").css("left", donutChartLocation.left - 340);
             attributeHover.removeClass("attribute-hover-right-arrow");
             attributeHover.addClass("attribute-hover-left-arrow");
         }
@@ -51,14 +51,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     }
     
     var chart,
-        width = 200,
+        width = 150,
         left_width = 101,
-        bar_height = 24,
-        height = bar_height * bucketNames.length,
-        gap = 8,
+        barHeight = 20,
+        gap = 6,
+        baseHeight = (barHeight + gap * 2) * chartData.length,
         labelSize = "10px",
         fontSize = "12px",
-        commonDy = ".18em",
+        commonDy = "0em",
         labelDx = 0;
     
     var x = d3.scale.linear()
@@ -71,7 +71,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
       .append('svg')
       .attr('class', 'chart')
       .attr('width', left_width + width + 40)
-      .attr('height', (bar_height + gap * 2) * bucketNames.length + 80)
+      .attr('height', baseHeight + 80)
       .append("g")
       .attr("transform", "translate(0, 0)");
     
@@ -84,12 +84,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         }) 
         .attr("x", left_width)
         .attr("y", function(d, i) { 
-            return (i * (bar_height + 2 * gap)) + 24; 
+            return (i * (barHeight + 2 * gap)) + 24; 
         })
         .attr("width", function (d) {
             return width + 80;
         })
-        .attr("height", bar_height + 8)
+        .attr("height", barHeight + 8)
         .style("fill", "#EEF3F7")
         .attr('opacity', 0.7);
         
@@ -106,7 +106,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
                 return 20;
             }
         })
-        .attr("y2", (bar_height + gap * 2) * bucketNames.length + 20);
+        .attr("y2", baseHeight + 20);
         
     // These are the background tick labels
     chart.selectAll(".rule")
@@ -114,7 +114,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .enter().append("text")
         .attr("class", "rule")
         .attr("x", function(d) { return x(d) + left_width; })
-        .attr("y", (bar_height + gap * 2) * bucketNames.length + 40)
+        .attr("y", baseHeight + 40)
         .attr("dx", function(d) {
             if (d === 0) {
                 return 0;
@@ -143,7 +143,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("x", function () {
             return left_width + (width/2) - 20;
         })
-        .attr("y", (bar_height + gap * 2) * bucketNames.length + 55)
+        .attr("y", baseHeight + 55)
         .attr("dy", commonDy)
         .attr("font-size", labelSize)
         .style("fill", "#999999")
@@ -155,10 +155,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .enter().append("rect")
         .attr("x", left_width)
         .attr("y", function(d, i) { 
-            return (i * (bar_height + 2 * gap)) + 28; 
+            return (i * (barHeight + 2 * gap)) + 28; 
         })
         .attr("width", x)
-        .attr("height", bar_height)
+        .attr("height", barHeight)
         .style("fill", data.color)
         .attr('opacity', function(d) {
             if (d > 1) {
@@ -176,7 +176,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("x1", function(d) { return x(d) + left_width; })
         .attr("x2", function(d) { return x(d) + left_width; })
         .attr("y1", 20)
-        .attr("y2", (bar_height + gap * 2) * bucketNames.length + 20)
+        .attr("y2", baseHeight + 20)
         .style("fill", "#BBBBBB")
         .attr('opacity', 1);
         
@@ -185,7 +185,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .data([1])
         .enter().append("text")
         .attr("x", function(d) { return x(d) + left_width; })
-        .attr("y", (bar_height + gap * 2) * bucketNames.length + 40)
+        .attr("y", baseHeight + 40)
         .attr("dy", -6)
         .attr("dx", labelDx)
         .attr("font-weight", "semi-bold")
@@ -214,7 +214,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .enter().append("text")
         .attr("x", width + 135)
         .attr("y", function(d, i) {
-            return (i * (bar_height + 2 * gap)) + 42; 
+            return (i * (barHeight + 2 * gap)) + 42; 
         })
         .attr("dx", -5)
         .attr("dy", commonDy)
@@ -229,7 +229,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     chart.append("text")
         .attr("x", width + 110)
         .attr("y", 5)
-        .attr("dy", commonDy)
+        .attr("dy", "0.36em")
         .attr("font-size", labelSize)
         .style("fill", "#999999")
         .text(liftText);
@@ -240,7 +240,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .enter().append("text")
         .attr("x", width + 180)
         .attr("y", function(d, i) { 
-            return (i * (bar_height + 2 * gap)) + 42; 
+            return (i * (barHeight + 2 * gap)) + 42; 
         })
         .attr("dx", -5)
         .attr("dy", commonDy)
@@ -256,7 +256,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     chart.append("text")
         .attr("x", width + 142)
         .attr("y", 5)
-        .attr("dy", commonDy)
+        .attr("dy", "0.36em")
         .attr("font-size", labelSize)
         .style("fill", "#999999")
         .text(leadsText);
@@ -267,7 +267,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .enter().append("text")
         .attr("x", left_width - 5)
         .attr("y", function(d, i) {
-            return (i * (bar_height + 2 * gap)) + 42; 
+            return (i * (barHeight + 2 * gap)) + 42; 
         })
         .attr("dy", commonDy)
         .attr("font-weight", 600)
@@ -294,7 +294,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
                 line.push(word);
                 tspan.text(line.join(" "));
                 if (tspan.node().getComputedTextLength() > width) {
-                    dy = dy * -1;
+                    dy = -0.36;
                     tspan.attr("dy", dy + "em");
                     line.pop();
                     tspan.text(line.join(" "));
