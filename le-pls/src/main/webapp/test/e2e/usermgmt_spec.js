@@ -7,6 +7,8 @@ describe('user management', function() {
     var tenants = require('./po/tenantselection.po');
     var userDropdown = require('./po/userdropdown.po');
     var userManagement = require('./po/usermgmt.po');
+    var numOfUsers = 0;
+    var newUserEmail;
 
     function randomName()
     {
@@ -19,7 +21,7 @@ describe('user management', function() {
         return text;
     }
 
-    it('should verify user management only visible to admin users', function () {
+    it('should verify user management is visible to admin users', function () {
 
         loginPage.loginAsAdmin();
 
@@ -40,8 +42,14 @@ describe('user management', function() {
         browser.driver.sleep(1000);
         expect(userManagement.getPanelBody().isDisplayed()).toBe(true);
 
-        logoutPage.logoutAsAdmin();
+        element.all(by.repeater('user in data')).then(function(elements){
+            numOfUsers = elements.length;
+        });
 
+        logoutPage.logoutAsAdmin();
+    });
+
+    it('should verify user management is invisible to non-admin users', function () {
         loginPage.loginAsNonAdmin();
 
         // choose tenant
@@ -61,8 +69,7 @@ describe('user management', function() {
         logoutPage.logoutAsNonAdmin();
     });
 
-    it('should verify create and delete user', function () {
-
+    it('should verify canceling adding new user will not add user', function () {
         loginPage.loginAsAdmin();
 
         // choose tenant
@@ -70,18 +77,26 @@ describe('user management', function() {
         browser.waitForAngular();
         browser.driver.sleep(1000);
 
-        // check existence of Manage Users link
         userDropdown.getUserLink(params.adminDisplayName).click();
         browser.waitForAngular();
-        //browser.driver.sleep(1000);
+        browser.driver.sleep(1000);
+
+        // enter user managemant page
         element(by.linkText('Manage Users')).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
 
-        // check existence of users table
-        //var originalUserNum = element.all(by.repeater('user in data')).count();
-
+        // popup add user
         userManagement.getAddNewUserButton().click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        expect(userManagement.getAddNewUserModal().isDisplayed()).toBe(true);
+
+        var email = randomName() + '@e2e.com';
+        element(by.model('user.FirstName')).sendKeys('E2E');
+        element(by.model('user.LastName')).sendKeys('Tester');
+        element(by.model('user.Email')).sendKeys(email);
         browser.waitForAngular();
         browser.driver.sleep(1000);
 
@@ -89,8 +104,75 @@ describe('user management', function() {
         browser.waitForAngular();
         browser.driver.sleep(1000);
 
+        // check cancel by button
+        expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
+
+        // add a user
+        userManagement.getAddNewUserButton().click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+        element(by.model('user.FirstName')).sendKeys('E2E');
+        element(by.model('user.LastName')).sendKeys('Tester');
+        element(by.model('user.Email')).sendKeys(email);
+        browser.waitForAngular();
+
+        userManagement.getAddNewUserCrossSymbol().click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        // check cancel by cross symbol
+        expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
+
         logoutPage.logoutAsAdmin();
     });
+
+    //it('should verify create and delete user', function () {
+    //
+    //    loginPage.loginAsAdmin();
+    //
+    //    // choose tenant
+    //    tenants.getTenantByIndex(params.tenantIndex).click();
+    //    browser.waitForAngular();
+    //    browser.driver.sleep(1000);
+    //
+    //    userDropdown.getUserLink(params.adminDisplayName).click();
+    //    browser.waitForAngular();
+    //    browser.driver.sleep(1000);
+    //
+    //    // enter user managemant page
+    //    element(by.linkText('Manage Users')).click();
+    //    browser.waitForAngular();
+    //    browser.driver.sleep(1000);
+    //
+    //    // popup add user
+    //    userManagement.getAddNewUserButton().click();
+    //    browser.waitForAngular();
+    //    browser.driver.sleep(1000);
+    //
+    //    newUserEmail = randomName() + '@e2e.com';
+    //    element(by.model('user.FirstName')).sendKeys('E2E');
+    //    element(by.model('user.LastName')).sendKeys('Tester');
+    //    element(by.model('user.Email')).sendKeys(newUserEmail);
+    //    browser.waitForAngular();
+    //    browser.driver.sleep(1000);
+    //
+    //    userManagement.getAddNewUserSaveButton().click();
+    //    browser.waitForAngular();
+    //    browser.driver.sleep(1000);
+    //
+    //    expect(userManagement.getAddNewUserSuccessAlert().isDisplayed()).toBe(true);
+    //    userManagement.getAddNewUserSuccessAlert().getText().then(function(text){
+    //        console.log(text);
+    //    });
+    //
+    //    userManagement.getAddNewUserSuccessOKButton().click();
+    //    browser.waitForAngular();
+    //    browser.driver.sleep(1000);
+    //
+    //    expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers + 1);
+    //
+    //    logoutPage.logoutAsAdmin();
+    //});
 
 });
 

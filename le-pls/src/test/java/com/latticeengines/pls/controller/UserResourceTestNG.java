@@ -175,6 +175,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(response.getResult().isValid());
 
         assertTrue(globalUserManagementService.deleteUser(uReg.getCredentials().getUsername()));
+        assertTrue(globalUserManagementService.deleteUser(conflictingUserReg.getCredentials().getUsername()));
     }
 
     @SuppressWarnings("rawtypes")
