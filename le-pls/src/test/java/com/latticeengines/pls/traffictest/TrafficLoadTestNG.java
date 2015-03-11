@@ -57,7 +57,6 @@ import com.latticeengines.pls.service.impl.ModelSummaryParser;
 
 public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
 
-    @SuppressWarnings("unused")
     private static Log log = LogFactory.getLog(TrafficLoadTestNG.class);
 
     @Value("${pls.modelingservice.basedir}")

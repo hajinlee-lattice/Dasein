@@ -1,19 +1,17 @@
 package com.latticeengines.pls.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.latticeengines.domain.exposed.pls.DeleteUsersResult;
-import com.latticeengines.domain.exposed.pls.RegistrationResult;
-import com.latticeengines.domain.exposed.pls.ResponseDocument;
-import com.latticeengines.domain.exposed.pls.UserDocument;
-import com.latticeengines.domain.exposed.pls.UserUpdateData;
-import com.latticeengines.domain.exposed.security.EntityAccessRightsData;
-import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
-import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
-import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,24 +27,26 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.domain.exposed.pls.DeleteUsersResult;
+import com.latticeengines.domain.exposed.pls.RegistrationResult;
+import com.latticeengines.domain.exposed.pls.ResponseDocument;
+import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.EntityAccessRightsData;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
+import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
+import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
+import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
 
 
 public class UserResourceTestNG extends PlsFunctionalTestNGBase {
@@ -105,7 +105,6 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
     }
 
-    @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void registerUser() {
         UserRegistration userReg = createUserRegistration();
@@ -131,7 +130,7 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(globalUserManagementService.deleteUser(userReg.getCredentials().getUsername()));
     }
 
-    @SuppressWarnings("rawtypes")
+
     @Test(groups = { "functional", "deployment" })
     public void validateUser() throws JsonProcessingException {
         // conflict with the email of a user outside the current tenant
@@ -178,7 +177,6 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(globalUserManagementService.deleteUser(conflictingUserReg.getCredentials().getUsername()));
     }
 
-    @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void getAllUsers() {
         Tenant tenant = new Tenant();
@@ -306,7 +304,6 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void delete() {
         Tenant tenant = new Tenant();

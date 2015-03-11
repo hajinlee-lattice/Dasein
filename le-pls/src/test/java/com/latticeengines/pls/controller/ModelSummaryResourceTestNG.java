@@ -1,5 +1,9 @@
 package com.latticeengines.pls.controller;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,10 +26,6 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 /**
  * This test has two users with particular privileges:
@@ -55,7 +55,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private GlobalAuthenticationServiceImpl globalAuthenticationService;
 
-    @SuppressWarnings("unused")
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 

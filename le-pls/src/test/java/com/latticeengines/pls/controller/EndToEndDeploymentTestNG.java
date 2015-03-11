@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.security.Tenant;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -22,6 +21,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.functionalframework.ModelingServiceExecutor;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
@@ -52,19 +52,15 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     @Value("${pls.modelingservice.testdsdbport}")
     private int dataSourcePort;
 
-    @SuppressWarnings("unused")
     @Autowired
     private Configuration yarnConfiguration;
 
-    @SuppressWarnings("unused")
     @Autowired
     private GlobalAuthenticationServiceImpl globalAuthenticationService;
 
-    @SuppressWarnings("unused")
     @Autowired
     private GlobalSessionManagementServiceImpl globalSessionManagementService;
 
-    @SuppressWarnings("unused")
     @Autowired
     private GlobalUserManagementServiceImpl globalUserManagementService;
 
