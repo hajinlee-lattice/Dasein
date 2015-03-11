@@ -365,6 +365,18 @@ module.exports = function (grunt) {
             }
         }
     },
+
+    rename: {
+        moveAppToBak: {
+            src: '<%= pls.app %>',
+            dest: '<%= pls.app %>-bak'
+        },
+ 
+        moveDistToApp: {
+            src: '<%= pls.dist %>',
+            dest: '<%= pls.app %>'
+        }
+    },
     
     // Find all instances of @@versionString in our index.html page and replace
     // them with the passed in version string (defaults to '')
@@ -461,6 +473,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-ng-annotate');  
   grunt.loadNpmTasks('grunt-protractor-runner');
   grunt.loadNpmTasks('grunt-usemin');
+  grunt.loadNpmTasks('grunt-rename');
   grunt.loadNpmTasks('grunt-replace');
   
   var defaultText = 'The default grunt build task. Runs a full build for everything including: file linting and minification (including css), running unit tests, and versioning for production. This website ready for distribution will be placed in the <SVN Directory>\<Product>\Projects\dist directory. This can be called just with the grunt command. The production files will then be named production_.js and production_.css.';
@@ -479,6 +492,12 @@ module.exports = function (grunt) {
     'copy:main',
     'usemin',
     'clean:post'
+  ]);
+
+  var prepWarText = 'Move dist into webapp directory for maven webapp packager to pick up.  This should only be run on build machine because it messes with the source webapp.';
+  grunt.registerTask('prepwar', prepWarText, [
+    'rename:moveDistToApp',
+    'rename:moveAppToBak'
   ]);
   
   var devText = 'Compiles sass into css, and checks javascript files for errors. This needs to be run if you don\'t have sentry running, and you don\'t have a production.css file in the styles directory';
