@@ -1,10 +1,10 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.security.EntityAccessRightsData;
-
-import java.util.Map;
 
 public class UserUpdateData {
     private String oldPassword;
