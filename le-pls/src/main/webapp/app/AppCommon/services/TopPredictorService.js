@@ -114,7 +114,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (categoryList == null || categoryList.length === 0) {
             return;
         }
-        var possibleNumberofCategories = categoryList.length <=8 ? categoryList.length : 8;
+        var possibleNumberofCategories = categoryList.length <= 8 ? categoryList.length : 8;
         var colorChoices = ["#4bd1bb", "#00a2d0", "#f6b300", "#a981e1", "#95cb2c", "#9a9a9a", "#3488d3", "#e55e1b"];
         categoryList = categoryList.sort(this.SortByCategoryName);
         for (var i = 0; i < possibleNumberofCategories; i++) {

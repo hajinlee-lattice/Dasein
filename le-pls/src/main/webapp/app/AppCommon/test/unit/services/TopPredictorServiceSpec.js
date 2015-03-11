@@ -79,6 +79,86 @@ describe('TopPredictorServiceSpec Tests', function () {
             expect(categoryList.length).toEqual(50);
         });
     });
-
-
+    
+    describe('SortBySize tests', function () {
+        
+        var unsorted = [{
+                size: 1
+            }, {
+                size: 2.56
+            }, {
+                size: 6.55
+            }
+        ];
+        
+        var sorted = [{
+                size: 6.55
+            }, {
+                size: 2.56
+            }, {
+                size: 1
+            }
+        ];
+        
+        it('should return the list sorted by size descending', function () {
+            var toReturn = unsorted.sort(topPredictorService.SortBySize);
+            expect(toReturn).toEqual(sorted);
+        });
+    });
+    
+    describe('SortByPredictivePower tests', function () {
+        
+        var unsorted = [{
+                UncertaintyCoefficient: 2
+            }, {
+                UncertaintyCoefficient: 1
+            }, {
+                UncertaintyCoefficient: 5
+            }
+        ];
+        
+        var sorted = [{
+                UncertaintyCoefficient: 5
+            }, {
+                UncertaintyCoefficient: 2
+            }, {
+                UncertaintyCoefficient: 1
+            }
+        ];
+        
+        it('should return the list sorted by UncertaintyCoefficient descending', function () {
+            var toReturn = unsorted.sort(topPredictorService.SortByPredictivePower);
+            expect(toReturn).toEqual(sorted);
+        });
+    });
+    
+    describe('SortByCategoryName tests', function () {
+        
+        var unsorted = [{
+                name: "b"
+            }, {
+                name: "a"
+            }, {
+                name: "d"
+            },  {
+                name: "c"
+            }
+        ];
+        
+        var sorted = [{
+                name: "a"
+            }, {
+                name: "b"
+            }, {
+                name: "c"
+            },  {
+                name: "d"
+            }
+        ];
+        
+        it('should return the list sorted by name ascending', function () {
+            var toReturn = unsorted.sort(topPredictorService.SortByCategoryName);
+            expect(toReturn).toEqual(sorted);
+        });
+    });
 });
