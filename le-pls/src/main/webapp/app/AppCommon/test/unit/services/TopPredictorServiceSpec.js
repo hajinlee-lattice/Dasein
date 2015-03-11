@@ -22,6 +22,56 @@ describe('TopPredictorServiceSpec Tests', function () {
         ]);
 
     });
+    
+    describe('ShowBasedOnTags tests', function () {
+        var nullPredictor = {
+            Tags: null
+        };
+        it('should return false if Tags is null', function () {
+            var toReturn = topPredictorService.ShowBasedOnTags(nullPredictor, true);
+            expect(toReturn).toEqual(false);
+        });
+        
+        var externalPredictor = {
+            Tags: ["External"]
+        };
+        it('should return true if Tags contains External and we are looking for External', function () {
+            var toReturn = topPredictorService.ShowBasedOnTags(externalPredictor, true);
+            expect(toReturn).toEqual(true);
+        });
+        
+        var externalPredictor2 = {
+            Tags: ["External"]
+        };
+        it('should return false if Tags contains External and we are looking for Internal', function () {
+            var toReturn = topPredictorService.ShowBasedOnTags(externalPredictor2, false);
+            expect(toReturn).toEqual(false);
+        });
+        
+        var internalPredictor = {
+            Tags: ["Internal"]
+        };
+        it('should return true if Tags contains Internal and we are looking for Internal', function () {
+            var toReturn = topPredictorService.ShowBasedOnTags(internalPredictor, false);
+            expect(toReturn).toEqual(true);
+        });
+        
+        var internalPredictor2 = {
+            Tags: ["Internal"]
+        };
+        it('should return false if Tags contains Internal and we are looking for External', function () {
+            var toReturn = topPredictorService.ShowBasedOnTags(internalPredictor, true);
+            expect(toReturn).toEqual(false);
+        });
+        
+        var badPredictor = {
+            Tags: ["Nope"]
+        };
+        it('should return false if Tags contains an invalid value', function () {
+            var toReturn = topPredictorService.ShowBasedOnTags(badPredictor, true);
+            expect(toReturn).toEqual(false);
+        });
+    });
 
     describe('GetAttributesByCategory tests', function () {
         it('should only return 50 attributes if 50 is specified and there are more than 50 in total', function () {

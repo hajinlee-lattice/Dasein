@@ -8,7 +8,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
     this.ShowBasedOnTags = function (predictor, isExternal) {
         var toReturn = false;
         var tag = isExternal ? "External" : "Internal";
-        if (predictor.Tags != null) {
+        if (predictor != null && predictor.Tags != null) {
             for (var x=0; x<predictor.Tags.length; x++) {
                 if (tag == predictor.Tags[x]) {
                     toReturn = true;
