@@ -8,8 +8,11 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -29,6 +32,7 @@ import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
@@ -76,6 +80,8 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
     private JdbcTemplate dlOrchestrationJdbcTemplate;
 
     private StandaloneHttpServer httpServer;
+
+    private RestTemplate restTemplate = new RestTemplate();
 
     protected boolean doDependencyLibraryCopy() {
         return false;
@@ -190,6 +196,14 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
         List<ModelCommandLog> logs = modelCommandLogEntityMgr.findAll();
         assertTrue(logs.size() >= 15);
+        for(ModelCommandLog log : logs){
+            String message = log.getMessage();
+            if(message.contains("http")){
+                String link = message.substring(message.indexOf("http"));
+                ResponseEntity<String> response = restTemplate.getForEntity(link, String.class);
+                assertTrue(response.getStatusCode().equals(HttpStatus.OK));
+            }
+        }
         List<ModelCommandState> states = modelCommandStateEntityMgr.findAll();
         assertEquals(states.size(), 7);
         List<ModelCommandResult> results = modelCommandResultEntityMgr.findAll();
