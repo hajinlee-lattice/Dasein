@@ -1,16 +1,9 @@
 package com.latticeengines.pls.controller;
 
-import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.DeleteUsersResult;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
@@ -22,18 +15,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.exception.LoginException;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
@@ -43,6 +24,21 @@ import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.security.RightsUtilities;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Api(value = "user", description = "REST resource for user management")
 @RestController
@@ -89,7 +85,7 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Register or validate a new user in the current tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public ResponseDocument<RegistrationResult> register(@RequestBody UserRegistration userReg, HttpServletRequest request) throws  JsonProcessingException {
+    public ResponseDocument<RegistrationResult> register(@RequestBody UserRegistration userReg, HttpServletRequest request) {
         ResponseDocument<RegistrationResult> response = new ResponseDocument<>();
         RegistrationResult result = new RegistrationResult();
         User user = userReg.getUser();
