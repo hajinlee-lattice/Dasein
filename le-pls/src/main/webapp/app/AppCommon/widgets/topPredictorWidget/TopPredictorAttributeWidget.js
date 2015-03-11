@@ -16,7 +16,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         var donutChartSvg = $(".js-top-predictor-donut > svg");
         var donutChartLocation = donutChartSvg.offset();
         var attributeHover = $(".attribute-hover");
-        $("#topPredictorAttributeHover").css("top", donutChartLocation.top - 50);
+        $("#topPredictorAttributeHover").css("top", donutChartLocation.top - 30);
         
         if (xPos > 0) {
             $("#topPredictorAttributeHover").css("left", donutChartLocation.left + donutChartSvg.width() - 10);
