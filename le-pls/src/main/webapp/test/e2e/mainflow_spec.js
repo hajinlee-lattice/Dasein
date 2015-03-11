@@ -59,7 +59,7 @@ describe('smoketest main flow of app', function() {
         
         // logout
         logoutPage.logoutAsAdmin();     
-    });   
+    }, 60000);
 
     it('should validate model back button', function () {
         // element(by.css('.back-button')).click();

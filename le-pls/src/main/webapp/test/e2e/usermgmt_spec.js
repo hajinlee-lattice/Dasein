@@ -47,7 +47,8 @@ describe('user management', function() {
         });
 
         logoutPage.logoutAsAdmin();
-    });
+        browser.driver.sleep(1000);
+    }, 45000);
 
     it('should verify user management is invisible to non-admin users', function () {
         loginPage.loginAsNonAdmin();
@@ -58,31 +59,28 @@ describe('user management', function() {
         browser.driver.sleep(1000);
 
         // check existence of Manage Users link
-        userDropdown.getUserLink(params.nonAdminDisplayName).click();
+        userDropdown.getUserLink(params.nonAdminDisplayName).click().then(function(){
+            expect(element(by.linkText('Manage Users')).isPresent()).toBe(false);
+        });
         browser.waitForAngular();
         browser.driver.sleep(1000);
-        expect(element(by.linkText('Manage Users')).isPresent()).toBe(false);
 
-        userDropdown.getUserLink(params.nonAdminDisplayName).click();
+        userDropdown.getUserLink(params.nonAdminDisplayName).click().then(function(){
+            logoutPage.logoutAsNonAdmin();
+        });
         browser.waitForAngular();
         browser.driver.sleep(1000);
-        logoutPage.logoutAsNonAdmin();
     });
 
     it('should verify canceling adding new user will not add user', function () {
         loginPage.loginAsAdmin();
 
         // choose tenant
-        tenants.getTenantByIndex(params.tenantIndex).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
-
-        userDropdown.getUserLink(params.adminDisplayName).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
-
-        // enter user managemant page
-        element(by.linkText('Manage Users')).click();
+        tenants.getTenantByIndex(params.tenantIndex).click().then(function(){
+            userDropdown.getUserLink(params.adminDisplayName).click().then(function(){
+                element(by.linkText('Manage Users')).click();
+            });
+        });
         browser.waitForAngular();
         browser.driver.sleep(1000);
 
@@ -124,7 +122,7 @@ describe('user management', function() {
         expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
 
         logoutPage.logoutAsAdmin();
-    });
+    }, 60000);
 
     //it('should verify create and delete user', function () {
     //
