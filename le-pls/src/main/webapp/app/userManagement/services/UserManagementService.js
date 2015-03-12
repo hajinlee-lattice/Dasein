@@ -15,7 +15,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
         };
         $http({
             method: 'PUT',
-            url: '/pls/users/' + username + '/rights',
+            url: '/pls/users/' + username,
             data: { Rights: RightsUtility.getDefaultRights() },
             headers: {"Content-Type": "application/json"}
         }).success(function(data){
