@@ -5,6 +5,22 @@ var UserManagement = function() {
         return browser.driver.findElement(By.xpath("//div[@class='panel-body']"));
     };
 
+    this.selectUser = function(username) {
+        function clickCheckbox(row) {
+            row.all(by.css('td')).getText().then(function (text) {
+                if (text[3] === username) {
+                    console.log(text[3]);
+                    row.element(by.css('input')).click();
+                }
+            });
+        }
+        element.all(by.repeater('user in data')).then(function(userRows){
+            for (var i in userRows) {
+                clickCheckbox(userRows[i]);
+            }
+        });
+    };
+
     this.getAddNewUserModal = function(){
         return browser.driver.findElement(By.xpath("//div[@data-ng-controller='AddUserController']"));
     };
@@ -33,9 +49,14 @@ var UserManagement = function() {
         return browser.driver.findElement(By.xpath("//div[@class='alert alert-success' and @data-ng-show='showAddUserSuccess']"));
     };
 
-    this.getUserLink = function(name) {
-        return element(by.linkText(name));
+    this.getDeleteUsersButton = function() {
+        return browser.driver.findElement(By.xpath("//button[@data-ng-click='deleteUsersClicked($event)']"));
     };
+
+    this.getDeleteUserModal = function() {
+        return element(by.xpath('//div[@data-ng-controller="DeleteUsersController"]'));
+    };
+
 };
 
 module.exports = new UserManagement();

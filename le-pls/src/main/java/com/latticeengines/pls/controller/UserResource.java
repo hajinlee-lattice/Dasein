@@ -143,7 +143,7 @@ public class UserResource {
             ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
             user = globalUserManagementService.getUserByEmail(globalSessionManagementService.retrieve(ticket).getEmailAddress());
             if (!user.getUsername().equals(username)) {
-                throw new LedpException(LedpCode.LEDP_18001);
+                throw new LedpException(LedpCode.LEDP_18001, new String[] {username});
             }
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {

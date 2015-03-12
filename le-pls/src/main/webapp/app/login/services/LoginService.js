@@ -146,9 +146,10 @@ angular.module('mainApp.login.services.LoginService', [
             NewPassword : CryptoJS.SHA256(newPassword).toString()
         };
 
+        var username = BrowserStorageUtility.getLoginDocument().UserName;
         $http({
             method: 'PUT',
-            url: '/pls/users/self',
+            url: '/pls/users/' + username + '/creds',
             data: creds,
             headers: {
                 "Content-Type": "application/json"
@@ -160,7 +161,7 @@ angular.module('mainApp.login.services.LoginService', [
                 Status:     status
             };
 
-            if (data !== true && data !== 'true') {
+            if (!data.Success) {
                 result.Success = false;
                 SessionService.HandleResponseErrors(data, status);
             }

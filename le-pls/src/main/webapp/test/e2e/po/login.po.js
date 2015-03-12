@@ -19,15 +19,15 @@ var Login = function() {
         this.loginButton.click();
         browser.waitForAngular();                    
         browser.driver.sleep(2000);
-    }
+    };
 
   	this.loginAsAdmin = function() {
-  		this.loginUser('bnguyen@lattice-engines.com', 'tahoe');
-    }
+  		this.loginUser(browser.params.adminUsername, browser.params.adminPassword);
+    };
 
   	this.loginAsNonAdmin = function() {
-  		this.loginUser('lming@lattice-engines.com', 'admin');
-    }
+  		this.loginUser(browser.params.nonAdminUsername, browser.params.nonAdminPassword);
+    };
 
 };
 
