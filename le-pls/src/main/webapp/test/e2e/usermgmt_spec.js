@@ -50,7 +50,7 @@ describe('user management', function() {
         tenants.getTenantByIndex(params.tenantIndex).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-    });
+    }, 60000);
 
     it('should see user management link', function () {
         // check existence of Manage Users link
@@ -134,7 +134,7 @@ describe('user management', function() {
 
         expect(userManagement.getAddNewUserSuccessAlert().isDisplayed()).toBe(true);
         userManagement.getAddNewUserSuccessAlert().getText().then(function(text){
-            console.log(text);
+            //console.log(text);
         });
 
         userManagement.getAddNewUserSuccessOKButton().click();

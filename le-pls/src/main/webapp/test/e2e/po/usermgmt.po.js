@@ -9,7 +9,7 @@ var UserManagement = function() {
         function clickCheckbox(row) {
             row.all(by.css('td')).getText().then(function (text) {
                 if (text[3] === username) {
-                    console.log(text[3]);
+                    //console.log(text[3]);
                     row.element(by.css('input')).click();
                 }
             });
