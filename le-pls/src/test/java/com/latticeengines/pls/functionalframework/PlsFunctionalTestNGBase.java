@@ -7,8 +7,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -40,13 +38,15 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
+import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
+import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
+import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.globalauth.authentication.impl.Constants;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
 import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.security.TicketAuthenticationToken;
@@ -67,13 +67,13 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
 
     @Autowired
-    private GlobalAuthenticationServiceImpl globalAuthenticationService;
+    private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
     private GlobalTenantManagementService globalTenantManagementService;
 
     @Autowired
-    private GlobalUserManagementServiceImpl globalUserManagementService;
+    private GlobalUserManagementService globalUserManagementService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;

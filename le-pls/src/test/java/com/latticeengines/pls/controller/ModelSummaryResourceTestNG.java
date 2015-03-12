@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
+import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 
 /**
  * This test has two users with particular privileges:
@@ -53,7 +53,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     private UserDocument adminDoc;
 
     @Autowired
-    private GlobalAuthenticationServiceImpl globalAuthenticationService;
+    private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
