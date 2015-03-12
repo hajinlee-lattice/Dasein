@@ -234,4 +234,32 @@ describe('TopPredictorServiceSpec Tests', function () {
             expect(uiTotal).toEqual(csvTotal);
         });
     });
+    
+    describe('Upload a model with no External Attributes (Lattice), verify the UI remove the header for External Attributes', function () {
+        it('should return chart data with no external attributes', function () {
+            
+            // Turn all predictors into Internal predictors for testing purposes
+            for (var x = 0; x < sampleModelSummary.Predictors.length; x++) {
+                sampleModelSummary.Predictors[x].Tags = ["Internal"];
+            }
+            var chartData = topPredictorService.FormatDataForTopPredictorChart(sampleModelSummary);
+            
+            var externalAttributesObj = topPredictorService.GetNumberOfAttributesByCategory(chartData.children, true, sampleModelSummary);
+            expect(externalAttributesObj.total).toEqual(0);
+        });
+    });
+    
+    describe('Upload a model with no Internal Attributes (MAP), verify the UI remove the header for Internal Attributes', function () {
+        it('should return chart data with no internal attributes', function () {
+            
+            // Turn all predictors into External predictors for testing purposes
+            for (var x = 0; x < sampleModelSummary.Predictors.length; x++) {
+                sampleModelSummary.Predictors[x].Tags = ["External"];
+            }
+            var chartData = topPredictorService.FormatDataForTopPredictorChart(sampleModelSummary);
+            
+            var internalAttributesObj = topPredictorService.GetNumberOfAttributesByCategory(chartData.children, false, sampleModelSummary);
+            expect(internalAttributesObj.total).toEqual(0);
+        });
+    });
 });
