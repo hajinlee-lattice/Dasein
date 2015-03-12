@@ -80,6 +80,27 @@ describe('TopPredictorServiceSpec Tests', function () {
         });
     });
     
+    describe('GetNumberOfAttributesByCategory tests', function () {
+        var testCategory = {
+            name: "Technologies",
+            count: 0,
+            color: "#4bd1bb"
+        };
+        
+        var expected = {
+            total: 188,
+            categories: [{
+                name: "Technologies",
+                count: 188,
+                color: "#4bd1bb"
+            }]
+        };
+        it('should return 188 as the total for Technologies attribute-value in the test modelSummary', function () {
+            var toReturn = topPredictorService.GetNumberOfAttributesByCategory([testCategory], true, sampleModelSummary);
+            expect(toReturn).toEqual(expected);
+        });
+    });
+    
     describe('SortBySize tests', function () {
         
         var unsorted = [{
@@ -159,6 +180,37 @@ describe('TopPredictorServiceSpec Tests', function () {
         it('should return the list sorted by name ascending', function () {
             var toReturn = unsorted.sort(topPredictorService.SortByCategoryName);
             expect(toReturn).toEqual(sorted);
+        });
+    });
+    
+    describe('AssignColorsToCategories tests', function () {
+        it('should return a constant set of colors so the same categories get about the same color', function () {
+            var topCategories = topPredictorService.GetTopCategories(sampleModelSummary);
+            var toReturn = topPredictorService.AssignColorsToCategories(topCategories);
+            
+            expect(topCategories[0].color).toEqual("#4bd1bb");
+            expect(topCategories[1].color).toEqual("#00a2d0");
+            expect(topCategories[2].color).toEqual("#f6b300");
+            expect(topCategories[3].color).toEqual("#a981e1");
+            expect(topCategories[4].color).toEqual("#95cb2c");
+            expect(topCategories[5].color).toEqual("#9a9a9a");
+        });
+    });
+    
+    // START: Top Predictor acceptance tests
+    
+    describe('Verify that: Total # of Attributes == Sum of # of each attributes == Attributes in CSV', function () {
+        it('should return the same number of attributes for the CSV and UI', function () {
+            var topCategories = topPredictorService.GetTopCategories(sampleModelSummary);
+            var externalAttributes = topPredictorService.GetNumberOfAttributesByCategory(topCategories, true, sampleModelSummary);
+            var internalAttributes = topPredictorService.GetNumberOfAttributesByCategory(topCategories, false, sampleModelSummary);
+            var uiTotal = externalAttributes.total + internalAttributes.total;
+            
+            var csvAttributes = topPredictorService.GetTopPredictorExport(sampleModelSummary);
+            // Subtracting 1 because of the column headers
+            var csvTotal = csvAttributes.length - 1;
+            
+            expect(uiTotal).toEqual(csvTotal);
         });
     });
 });
