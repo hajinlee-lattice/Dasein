@@ -9,7 +9,11 @@ public class ScoreHistoryEntry {
 
     public CustomerSpace space;
     public String recordID;
-    public String match;
+
+    public String modelName;
+    public int modelVersion;
+
+    public String totality;
 
     public String request;
     public String response;

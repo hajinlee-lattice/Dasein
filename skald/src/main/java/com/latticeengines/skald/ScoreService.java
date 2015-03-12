@@ -16,7 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.latticeengines.common.exposed.util.LogContext;
+import com.latticeengines.domain.exposed.skald.model.FieldInterpretation;
 import com.latticeengines.domain.exposed.skald.model.FieldSchema;
 import com.latticeengines.domain.exposed.skald.model.FieldSource;
 import com.latticeengines.domain.exposed.skald.model.FieldType;
@@ -38,8 +43,6 @@ public class ScoreService {
                     .getRequestAttributes();
             ScoreHistoryEntry history = (ScoreHistoryEntry) attributes.getRequest().getAttribute(
                     ScoreHistorian.ENTRY_KEY);
-
-            // TODO Populate other history fields.
             history.space = request.space;
 
             List<CombinationElement> combination = combinationRetriever.getCombination(request.space,
@@ -64,6 +67,8 @@ public class ScoreService {
                 }
             }
 
+            // TODO Verify only one RECORD_ID field.
+
             // Verify the combined schema against the incoming record.
             List<String> wrong = new ArrayList<String>();
             for (String name : combined.keySet()) {
@@ -79,6 +84,10 @@ public class ScoreService {
                         if (field.type == FieldType.INTEGER && value instanceof Integer) {
                             value = ((Integer) value).longValue();
                             request.record.put(name, value);
+                        }
+
+                        if (field.interpretation == FieldInterpretation.RECORD_ID) {
+                            history.recordID = value.toString();
                         }
 
                         if (value != null && !field.type.type().isInstance(value)) {
@@ -104,13 +113,24 @@ public class ScoreService {
             }
 
             // Match and join Prop Data.
-            Map<String, Object> properietary = matcher.match(request.space, combined, request.record);
-            request.record.putAll(properietary);
+            Map<String, Object> proprietary = matcher.match(request.space, combined, request.record);
+            request.record.putAll(proprietary);
 
             // TODO Query and join aggregate data.
 
             // TODO Evaluate the filters to determine the selected model.
             CombinationElement selected = combination.get(0);
+            history.modelName = selected.model.name;
+            history.modelVersion = selected.model.version;
+
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+            ObjectWriter writer = mapper.writer();
+            try {
+                history.totality = writer.writeValueAsString(request.record);
+            } catch (JsonProcessingException ex) {
+                throw new RuntimeException("Failed to serialize data totality", ex);
+            }
 
             Map<String, Object> transformed = transformer.transform(selected.data.transforms, request.record);
 
@@ -118,6 +138,7 @@ public class ScoreService {
 
             Map<ScoreType, Object> result = evaluator.evaluate(transformed, selected.derivation);
             result.put(ScoreType.MODEL_NAME, selected.model.name);
+
             return result;
         }
     }
