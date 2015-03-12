@@ -262,4 +262,13 @@ describe('TopPredictorServiceSpec Tests', function () {
             expect(internalAttributesObj.total).toEqual(0);
         });
     });
+    
+    describe('For an attribute with a blank category name, it should NOT show up in UI', function () {
+        it('should return chart data with no null category names', function () {
+            var chartData = topPredictorService.FormatDataForTopPredictorChart(sampleModelSummary);
+            for (var i = 0; i < chartData.children.length; i++) {
+                expect(chartData.children[i].name).not.toBe(null);
+            }
+        });
+    });
 });
