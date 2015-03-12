@@ -12,6 +12,5 @@ public class ScoreHistoryEntry {
     public String match;
 
     public String request;
-    public String result;
-    public String error;
+    public String response;
 }

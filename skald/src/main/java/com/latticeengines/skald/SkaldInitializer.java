@@ -2,6 +2,7 @@ package com.latticeengines.skald;
 
 import java.util.Properties;
 
+import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
@@ -32,5 +33,10 @@ public class SkaldInitializer extends AbstractAnnotationConfigDispatcherServletI
     @Override
     protected String[] getServletMappings() {
         return new String[] { "/" };
+    }
+
+    @Override
+    protected Filter[] getServletFilters() {
+        return new Filter[] { new BodyBufferFilter() };
     }
 }

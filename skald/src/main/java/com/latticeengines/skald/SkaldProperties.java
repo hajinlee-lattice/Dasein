@@ -20,6 +20,10 @@ public class SkaldProperties {
         return getProperty("skald.matcher.address");
     }
 
+    public String getHistoryConnection() {
+        return getProperty("skald.history.connection");
+    }
+
     private String getProperty(String name) {
         String result = System.getProperty(name);
         if (result == null) {
