@@ -183,7 +183,9 @@ describe('TopPredictorServiceSpec Tests', function () {
         });
     });
     
-    describe('AssignColorsToCategories tests', function () {
+    // START: Top Predictor acceptance tests
+    
+    describe('The categories are colored and ordered', function () {
         it('should return a constant set of colors so the same categories get about the same color', function () {
             var topCategories = topPredictorService.GetTopCategories(sampleModelSummary);
             var toReturn = topPredictorService.AssignColorsToCategories(topCategories);
@@ -197,7 +199,26 @@ describe('TopPredictorServiceSpec Tests', function () {
         });
     });
     
-    // START: Top Predictor acceptance tests
+    describe('The donut chart is colored, ordered and sized', function () {
+        it('should return a correct chartObject that is used to populate the donut chart', function () {
+            var chartData = topPredictorService.FormatDataForTopPredictorChart(sampleModelSummary);
+            
+            // Verify there will only be 3 attributes per category
+            expect(chartData.attributesPerCategory).toEqual(3);
+            
+            // Verify that the chart data is sortied by highest predictive power
+            var firstcategory = chartData.children[0];
+            expect(firstcategory.name).toEqual("Technologies");
+            expect(firstcategory.children.length).toEqual(3);
+            var secondcategory = chartData.children[1];
+            expect(secondcategory.name).toEqual("Website");
+            
+            // Verify that the first attribute for the first category is a large size and has the same color as the category
+            var firstcategoryFirstAttribute = firstcategory.children[0];
+            expect(firstcategoryFirstAttribute.size).toEqual(6.55);
+            expect(firstcategoryFirstAttribute.color).toEqual(firstcategory.color);
+        });
+    });
     
     describe('Verify that: Total # of Attributes == Sum of # of each attributes == Attributes in CSV', function () {
         it('should return the same number of attributes for the CSV and UI', function () {
