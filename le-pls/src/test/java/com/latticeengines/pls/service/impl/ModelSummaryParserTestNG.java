@@ -1,23 +1,19 @@
 package com.latticeengines.pls.service.impl;
 
-import static org.testng.Assert.assertEquals;
+import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import org.apache.commons.io.IOUtils;
+import org.testng.annotations.Test;
 
 import java.io.InputStream;
 
-import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
-import com.latticeengines.common.exposed.util.CompressionUtils;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-
-public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBase {
+public class ModelSummaryParserTestNG {
     
-    @Autowired
-    private ModelSummaryParser modelSummaryParser;
+    private ModelSummaryParser modelSummaryParser = new ModelSummaryParser();
 
-    @Test(groups = "functional")
+    @Test(groups = "unit functional")
     public void parse() throws Exception {
         InputStream is = ClassLoader.getSystemResourceAsStream(
                 "com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
@@ -38,5 +34,4 @@ public class ModelSummaryParserTestNG extends PlsFunctionalTestNGBase {
         String decompressedDetails = new String(CompressionUtils.decompressByteArray(summary.getDetails().getData()));
         assertEquals(decompressedDetails, data);
     }
-
 }

@@ -3,10 +3,6 @@ package com.latticeengines.domain.exposed.pls;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
@@ -14,7 +10,6 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
-import org.apache.commons.io.IOUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
 import org.hibernate.annotations.OnDelete;
@@ -35,15 +30,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
-import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
@@ -70,6 +60,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private KeyValue details;
     private Long constructionTime;
     private ModelSummaryStatus status = ModelSummaryStatus.INACTIVE;
+    private String rawFile;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -305,96 +296,11 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
         this.status = status;
     }
 
-    public static ModelSummary generateFromJSON(InputStream jsonIns, Tenant tenant) {
-        ModelSummary summary = generateFromJSON(jsonIns);
-        summary.setTenant(tenant);
-        return summary;
-    }
+    @Transient
+    @JsonIgnoreProperties("RawFile")
+    public String getRawFile() { return rawFile; }
 
-    public static ModelSummary generateFromJSON(InputStream jsonIns) {
-        if (jsonIns == null) { return null; }
-
-        ModelSummary summary = new ModelSummary();
-        byte[] data;
-        try {
-            data = IOUtils.toByteArray(jsonIns);
-            KeyValue keyValue = new KeyValue();
-            keyValue.setData(CompressionUtils.compressByteArray(data));
-            summary.setDetails(keyValue);
-        } catch (IOException e) {
-            // ignore
-            return null;
-        }
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode json;
-        try {
-            json = mapper.readValue(data, JsonNode.class);
-        } catch (IOException e) {
-            // ignore
-            return null;
-        }
-
-        JsonNode details = json.get("ModelDetails");
-
-        String name = getOrDefault(details.get("Name"), String.class, "New Model");
-        Long constructionTime = getOrDefault(details.get("ConstructionTime"), Long.class, System.currentTimeMillis() / 1000) * 1000;
-        summary.setName(String.format("%s-%s", name.replace(' ', '_'), getDate(constructionTime, "MM/dd/yyyy hh:mm:ss z")));
-        summary.setName(getOrDefault(details.get("Name"), String.class, "New Model"));
-        summary.setLookupId(getOrDefault(details.get("LookupID"), String.class, "Unknown"));
-        summary.setRocScore(getOrDefault(details.get("RocScore"), Double.class, 0.0));
-        summary.setTrainingRowCount(getOrDefault(details.get("TrainingLeads"), Long.class, 0L));
-        summary.setTestRowCount(getOrDefault(details.get("TestingLeads"), Long.class, 0L));
-        summary.setTotalRowCount(getOrDefault(details.get("TotalLeads"), Long.class, 0L));
-        summary.setTrainingConversionCount(getOrDefault(details.get("TrainingConversions"), Long.class, 0L));
-        summary.setTestConversionCount(getOrDefault(details.get("TestingConversions"), Long.class, 0L));
-        summary.setTotalConversionCount(getOrDefault(details.get("TotalConversions"), Long.class, 0L));
-        summary.setConstructionTime(constructionTime);
-
-        // if no ModelID is passed in, generate a fake one
-        if (json.has("ModelID")) {
-            summary.setId(json.get("ModelID").asText());
-        } else {
-            String fakeID = "ms__" + UUID.randomUUID().toString() + "-" + name.replace(' ', '_');
-            summary.setId(getOrDefault(details.get("ModelID"), String.class, fakeID));
-        }
-
-        try {
-            if (json.has("Tenant")) {
-                summary.setTenant(mapper.treeToValue(json.get("Tenant"), Tenant.class));
-            } else if (details.has("Tenant")) {
-                summary.setTenant(mapper.treeToValue(details.get("Tenant"), Tenant.class));
-            } else {
-                Tenant tenant = new Tenant();
-                tenant.setPid(-1L);
-                tenant.setRegisteredTime(System.currentTimeMillis());
-                tenant.setId("FAKE_TENANT");
-                tenant.setName("Fake Tenant");
-                summary.setTenant(tenant);
-            }
-        } catch (JsonProcessingException e) {
-            // ignore
-        }
-
-        return summary;
-    }
-
-    private static <T> T getOrDefault(JsonNode node, Class<T> targetClass, T defaultValue) {
-        if (node == null) { return defaultValue; }
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            return mapper.treeToValue(node, targetClass);
-        } catch (JsonProcessingException e) {
-            return defaultValue;
-        }
-    }
-
-    private static String getDate(long milliSeconds, String dateFormat) {
-        SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(milliSeconds);
-        return formatter.format(calendar.getTime());
-    }
-
+    @Transient
+    @JsonIgnoreProperties("RawFile")
+    public void setRawFile(String rawFile) { this.rawFile = rawFile; }
 }

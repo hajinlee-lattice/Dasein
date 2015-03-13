@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -9,6 +10,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
+import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,9 @@ public class ModelSummaryResource {
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
+
+    @Autowired
+    private ModelSummaryParser modelSummaryParser;
 
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -74,17 +79,36 @@ public class ModelSummaryResource {
     @ResponseBody
     @ApiOperation(value = "Register a model summary")
     @PreAuthorize("hasRole('Create_PLS_Models')")
-    public Boolean createModelSummary(@RequestBody ModelSummary modelSummary, HttpServletRequest request) {
+    public ModelSummary createModelSummary(@RequestBody ModelSummary modelSummary, @RequestParam(value = "raw", required = false) boolean usingRaw, HttpServletRequest request) {
+
+        if (usingRaw) {
+            modelSummary = modelSummaryParser.parse("", modelSummary.getRawFile());
+        }
+
+        // avoid id conflict
+        int version = 0;
+        String possibleID = modelSummary.getId();
+        String name = modelSummaryParser.parseOriginalName(modelSummary.getName());
+        ModelSummary existingSummary = getModelSummary(possibleID);
+        while (existingSummary != null) {
+            possibleID = modelSummary.getId().replace(name, name + "-" + String.format("%03d", ++version));
+            existingSummary = getModelSummary(possibleID);
+        }
+        modelSummary.setId(possibleID);
+        if (version > 0) {
+            modelSummary.setName(modelSummary.getName().replace(name, name + "-" + String.format("%03d", version)));
+        }
+
         Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
         Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
-        if (tenant == null) { return false; }
+        if (tenant == null) { return null; }
 
         tenant = tenantEntityMgr.findByTenantId(tenant.getId());
         modelSummary.setTenant(tenant);
 
         modelSummaryEntityMgr.create(modelSummary);
 
-        return true;
+        return modelSummary;
     }
 
     @RequestMapping(value = "/{modelId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
