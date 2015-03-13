@@ -46,7 +46,6 @@ public class MetricsAspectTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass
     public void beforeClass() {
-
         origLog = MetricsAspect.log;
         origSummaryEntityMgr = modelSummaryResource.getModelSummaryEntityMgr();
     }
@@ -55,12 +54,10 @@ public class MetricsAspectTestNG extends PlsFunctionalTestNGBase {
     public void afterClass() {
         MetricsAspect.log = origLog;
         modelSummaryResource.setModelSummaryEntityMgr(origSummaryEntityMgr);
-
     }
 
     @Test(groups = { "functional" })
     public void logMetrics() throws Exception {
-
         Log newLog = mock(Log.class);
         MetricsAspect.log = newLog;
 

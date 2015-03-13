@@ -13,16 +13,15 @@ public class MetricsAspect {
 
     @Around("execution(* com.latticeengines.pls.controller.*.*(..)) && @annotation(com.wordnik.swagger.annotations.ApiOperation)")
     public Object logRestApi(ProceedingJoinPoint joinPoint) throws Throwable {
-
-        return longMetrics(joinPoint);
+        return logMetrics(joinPoint);
     }
 
     @Around("execution(public * com.latticeengines.pls.globalauth.authentication.impl.*.*(..))")
     public Object logGlobalAuth(ProceedingJoinPoint joinPoint) throws Throwable {
-        return longMetrics(joinPoint);
+        return logMetrics(joinPoint);
     }
 
-    private Object longMetrics(ProceedingJoinPoint joinPoint) throws Throwable {
+    private Object logMetrics(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 
         Object retVal = joinPoint.proceed();
