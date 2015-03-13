@@ -1,14 +1,13 @@
 package com.latticeengines.pls.controller;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
+import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,13 +18,17 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.UserDocument;
-import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * This test has two users with particular privileges:
@@ -54,6 +57,9 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
+
+    @Autowired
+    private GlobalSessionManagementService globalSessionManagementService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -168,7 +174,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         attrMap = new AttributeMap();
         attrMap.put("Status", "UpdateAsInactive");
         restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
-        
+
         attrMap = new AttributeMap();
         attrMap.put("Status", "UpdateAsActive");
         restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
@@ -187,4 +193,39 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertNull(summary);
     }
 
+
+    @Test(groups = { "functional", "deployment" })
+    public void postModelSummariesNoCreatePlsModelsRight() {
+        addAuthHeader.setAuthValue(loginAndAttachGeneral().getTicket().getData());
+        try {
+            InputStream ins = getClass().getClassLoader().getResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+            assertNotNull(ins, "Testing json file is missing");
+            ModelSummary modelSummary = ModelSummary.generateFromJSON(ins);
+            restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries/", modelSummary, Boolean.class);
+        } catch (Exception e) {
+            String code = e.getMessage();
+            assertEquals(code, "403");
+        }
+    }
+
+    @Test(groups = { "functional", "deployment" })
+    public void postModelSummariesHasCreatePlsModelsRight() throws IOException {
+        InputStream ins = getClass().getClassLoader().getResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+        assertNotNull(ins, "Testing json file is missing");
+        ModelSummary modelSummary = ModelSummary.generateFromJSON(ins);
+        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+        int originalNumModels = response.size();
+
+        try {
+            boolean success = restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries/", modelSummary, Boolean.class);
+            assertTrue(success);
+            response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+            assertNotNull(response);
+            assertEquals(response.size(), originalNumModels + 1);
+        } finally {
+            restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/" + modelSummary.getId());
+            response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+            assertEquals(response.size(), originalNumModels);
+        }
+    }
 }

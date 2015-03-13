@@ -1,8 +1,16 @@
 package com.latticeengines.pls.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.TenantEntityMgr;
+import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
+import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,12 +21,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.Predictor;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 @Api(value = "modelsummary", description = "REST resource for model summaries")
 @RestController
@@ -28,6 +33,12 @@ public class ModelSummaryResource {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private TenantEntityMgr tenantEntityMgr;
+
+    @Autowired
+    private GlobalSessionManagementService globalSessionManagementService;
 
     @RequestMapping(value = "/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -57,6 +68,23 @@ public class ModelSummaryResource {
             summary.setDetails(null);
         }
         return summaries;
+    }
+
+    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Register a model summary")
+    @PreAuthorize("hasRole('Create_PLS_Models')")
+    public Boolean createModelSummary(@RequestBody ModelSummary modelSummary, HttpServletRequest request) {
+        Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+        Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
+        if (tenant == null) { return false; }
+
+        tenant = tenantEntityMgr.findByTenantId(tenant.getId());
+        modelSummary.setTenant(tenant);
+
+        modelSummaryEntityMgr.create(modelSummary);
+
+        return true;
     }
 
     @RequestMapping(value = "/{modelId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
