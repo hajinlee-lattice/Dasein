@@ -15,6 +15,7 @@
         <jpmml.version>2.0.0</jpmml.version>
         <le.camille.version>1.0.27-SNAPSHOT</le.camille.version>
         <jackson.version>2.4.1</jackson.version>
+        <postgresql.version>9.4-1201-jdbc41</postgresql.version>
     </properties>
 
     <parent>
@@ -99,6 +100,12 @@
 		    <groupId>org.jpmml</groupId>
 		    <artifactId>pmml-evaluator</artifactId>
 		    <version>${jpmml.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${postgresql.version}</version>
 		</dependency>
     </dependencies>
 

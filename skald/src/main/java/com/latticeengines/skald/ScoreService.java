@@ -43,7 +43,7 @@ public class ScoreService {
                     .getRequestAttributes();
             ScoreHistoryEntry history = (ScoreHistoryEntry) attributes.getRequest().getAttribute(
                     ScoreHistorian.ENTRY_KEY);
-            history.space = request.space;
+            history.space = request.space.toString();
 
             List<CombinationElement> combination = combinationRetriever.getCombination(request.space,
                     request.combination, request.tag);

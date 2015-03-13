@@ -1,20 +1,41 @@
 package com.latticeengines.skald;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
+@Entity
+@Table(name = "ScoreHistory")
 public class ScoreHistoryEntry {
-    public String requestID;
-    long received;
-    long duration;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public int id;
 
-    public CustomerSpace space;
+    @Column(nullable = false)
+    public String space;
+    @Column
     public String recordID;
 
+    @Column(nullable = false)
+    public String requestID;
+    @Column(nullable = false)
+    long received;
+    @Column(nullable = false)
+    long duration;
+
+    @Column
     public String modelName;
+    @Column
     public int modelVersion;
 
+    @Column
     public String totality;
 
+    @Column
     public String request;
+    @Column
     public String response;
 }
