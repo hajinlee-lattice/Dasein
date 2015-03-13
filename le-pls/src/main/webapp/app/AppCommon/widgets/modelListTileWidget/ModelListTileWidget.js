@@ -64,7 +64,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     };
     
 })
-.controller('ChangeModelNameController', function ($scope, $rootScope, GriotNavUtility, ModelService) {
+.controller('ChangeModelNameController', function ($scope, $rootScope, GriotNavUtility, ResourceUtility, ModelService) {
     $scope.data = {name: $scope.$parent.displayName};
     $scope.submitting = false;
     $scope.showNameEditError = false;
@@ -84,6 +84,13 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
 
         if ($scope.submitting) return;
         $scope.submitting = true;
+
+        if ($scope.data.name.replace(/ /g,'') === "") {
+            $scope.nameEditErrorMessage = ResourceUtility.getString('MODEL_TILE_EDIT_TITLE_EMPTY_ERROR');
+            $scope.showNameEditError = true;
+            $scope.submitting = false;
+            return;
+        }
 
         ModelService.ChangeModelName($scope.$parent.data.Id, $scope.data.name).then(function(result) {
             if (result.Success) {
