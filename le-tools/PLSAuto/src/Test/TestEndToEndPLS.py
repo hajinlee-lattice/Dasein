@@ -55,7 +55,7 @@ class TestEndToEndPLS(object):
     def TestEndToEndMKTO(self):
         models = Models();
         models.modelingGenerate(PLSEnvironments.pls_marketing_app_MKTO,PLSEnvironments.pls_url_2);
-        scoring = Scoring(PLSEnvironments.pls_bard_1);
+        scoring = Scoring(PLSEnvironments.pls_bard_2);
         scoring.runBulkScoring();
         scoring.runHourlyScoring();
         
