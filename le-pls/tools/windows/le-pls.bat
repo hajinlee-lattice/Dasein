@@ -16,7 +16,6 @@ if "%cmd%"=="compile" (
     echo compiling using shared GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
-        -Djava.util.logging.config.file=conf\env\dev-windows\logging-test.properties ^
         -Djavax.net.ssl.trustStore=certificates\%certificate% ^
         -DPLS_PROPDIR=conf\env\dev-windows ^
         clean compile
@@ -80,6 +79,7 @@ if "%cmd%"=="compile" (
     echo running clean verify using localhost GlobalAuth ...
 
      mvn -Pfunctional -Pgenerate ^
+        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
         -Djavax.net.ssl.trustStore=certificates\localhost.jks ^
         -DPLS_PROPDIR=conf\env\dev-windows-localGA ^
         -Dcertificate.name=localhost.jks ^
@@ -92,6 +92,7 @@ if "%cmd%"=="compile" (
     echo populate testing data using localhost GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
+        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
         -Djavax.net.ssl.trustStore=certificates\localhost.jks ^
         -DPLS_PROPDIR=conf\env\dev-windows-localGA ^
         -Dcertificate.name=localhost.jks ^
@@ -104,6 +105,7 @@ if "%cmd%"=="compile" (
     echo populate testing data using localhost GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
+        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
         -Djavax.net.ssl.trustStore=certificates\localhost.jks ^
         -DPLS_PROPDIR=conf\env\dev-windows-localGA ^
         -Dcertificate.name=localhost.jks ^
@@ -116,6 +118,7 @@ if "%cmd%"=="compile" (
     echo running clean verify using localhost GlobalAuth ...
 
     mvn -Pfunctional ^
+        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
         -Djavax.net.ssl.trustStore=certificates\localhost.jks ^
         -DargLine="" ^
         -DPLS_PROPDIR=conf\env\dev-windows-localGA ^

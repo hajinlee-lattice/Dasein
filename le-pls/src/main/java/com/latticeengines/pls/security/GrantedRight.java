@@ -35,6 +35,12 @@ public enum GrantedRight implements GrantedAuthority {
             return "View_PLS_Models";
         }
     }, //
+    CREATE_PLS_MODELS {
+        @Override
+        public String getAuthority() {
+            return "Create_PLS_Models";
+        }
+    }, //
     EDIT_PLS_MODELS {
         @Override
         public String getAuthority() {
@@ -77,11 +83,12 @@ public enum GrantedRight implements GrantedAuthority {
     public static List<GrantedRight> getAdminRights() {
         return Arrays.asList(
             GrantedRight.VIEW_PLS_MODELS,
+            GrantedRight.EDIT_PLS_MODELS,
+            GrantedRight.CREATE_PLS_MODELS,
             GrantedRight.VIEW_PLS_REPORTING,
             GrantedRight.VIEW_PLS_CONFIGURATION,
-            GrantedRight.VIEW_PLS_USERS,
-            GrantedRight.EDIT_PLS_MODELS,
             GrantedRight.EDIT_PLS_CONFIGURATION,
+            GrantedRight.VIEW_PLS_USERS,
             GrantedRight.EDIT_PLS_USERS
         );
     }
