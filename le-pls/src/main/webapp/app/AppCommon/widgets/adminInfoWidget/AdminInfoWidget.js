@@ -50,12 +50,11 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
 .directive('fileDownloader', function() {
     return {
         restrict:    'E',
-        template:   '<a href="" data-ng-click="downloadFile()" data-ng-hide="fetching">{{ResourceUtility.getString("MODEL_ADMIN_DOWNLOAD")}}</a>' +
+        template:   '<a href="" data-ng-click="downloadFile($event)" data-ng-hide="fetching">{{ResourceUtility.getString("MODEL_ADMIN_DOWNLOAD")}}</a>' +
                     '<span data-ng-show="fetching">{{ResourceUtility.getString("MODEL_ADMIN_FETCHING")}}</span>',
         scope:       true,
         link:        function (scope, element, attr) {
             var anchor = element.children()[0];
-            var hiddenAnchor = document.createElement('a');
 
             // When the download starts, disable the link
             scope.$on('download-start', function () {
@@ -64,23 +63,22 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
 
             // When the download finishes, attach the data to the link. Enable the link and change its appearance.
             scope.$on('downloaded', function (event, data) {
-                hiddenAnchor.href = 'data:' + attr.filetype + ';base64,' + data;
-                hiddenAnchor.target = '_blank';
-                hiddenAnchor.download = attr.filename;
-                hiddenAnchor.click();
-                scope.downloadFile = function () { hiddenAnchor.click(); };
-                $(anchor).removeAttr('disabled');
+                scope.downloadFile = function ($event) { };
+                $(anchor).attr({
+                    href: 'data:' + attr.filetype + ';base64,' + data,
+                    download: attr.filename
+                }).removeAttr('disabled');
             });
 
             scope.$on('download-failed', function () {
                 $(anchor).removeAttr('disabled');
             });
         },
-        controller:  ['$scope', '$attrs', '$http', '$timeout', 'ResourceUtility', function ($scope, $attrs, $http, $timeout, ResourceUtility) {
+        controller:  ['$scope', '$attrs', '$http', 'ResourceUtility', function ($scope, $attrs, $http, ResourceUtility) {
             $scope.fetching = false;
             $scope.fetched = false;
             $scope.ResourceUtility = ResourceUtility;
-            $scope.downloadFile = function() {
+            $scope.downloadFile = function($event) {
                 $scope.fetching = true;
                 $scope.$parent.Error.ShowError = false;
                 $scope.$emit('download-start');
@@ -91,6 +89,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
                         $scope.$emit('downloaded', btoa(unescape(encodeURIComponent(response.data))));
                     }
                     $scope.fetching = false;
+                    setTimeout($event.target.click(), 500);
                 }, function () {
                     $scope.$parent.Error.ShowError = true;
                     $scope.$parent.Error.ErrorMsg = ResourceUtility.getString("MODEL_ADMIN_FETCH_ERROR", [$attrs.filename]);
