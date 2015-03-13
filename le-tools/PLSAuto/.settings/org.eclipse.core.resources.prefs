@@ -1,0 +1,9 @@
+eclipse.preferences.version=1
+encoding//src/BasicOperations/LeadCreator.py=utf-8
+encoding//src/BasicOperations/Operations.py=utf-8
+encoding//src/BasicOperations/ServiceRunner.py=utf-8
+encoding//src/BasicOperations/TestHelpers.py=utf-8
+encoding//src/BasicOperations/TestRunner.py=utf-8
+encoding//src/Env/Properties.py=utf-8
+encoding//src/Env/TestConfigs.py=utf-8
+encoding//src/Test/TestEndToEndPLS.py=utf-8
