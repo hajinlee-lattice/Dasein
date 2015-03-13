@@ -82,6 +82,7 @@ public enum LedpCode {
     LEDP_18016("Could not get users and rights for tenant {0}."), //
     LEDP_18017("Could not get user by email {0}."), //
     LEDP_18018("Could not get user {0}."), //
+    LEDP_18019("Granted right {0} from session is not a recognized privilege."), //
     LEDP_18020("Cannot parse file {0}."), //
     LEDP_18021("Cannot delete active model."), //
     LEDP_18022("Failed to download file."), //
