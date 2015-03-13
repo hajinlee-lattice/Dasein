@@ -32,7 +32,6 @@ import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandLog;
-import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
