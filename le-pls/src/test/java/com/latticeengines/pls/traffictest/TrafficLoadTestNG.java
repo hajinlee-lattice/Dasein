@@ -50,8 +50,8 @@ import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalTenantManagementServiceImpl;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
+import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
+import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 
@@ -75,10 +75,10 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
     private KeyValueEntityMgr keyValueEntityMgr;
 
     @Autowired
-    private GlobalTenantManagementServiceImpl globalTenantManagementService;
+    private GlobalTenantManagementService globalTenantManagementService;
 
     @Autowired
-    private GlobalUserManagementServiceImpl globalUserManagementService;
+    private GlobalUserManagementService globalUserManagementService;
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;
