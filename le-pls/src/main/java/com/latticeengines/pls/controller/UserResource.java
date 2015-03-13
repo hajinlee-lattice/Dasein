@@ -193,14 +193,14 @@ public class UserResource {
             throw e;
         }
 
-        if (!inTenant(tenantId, username)) {
-            return SimpleBooleanResponse.getFailResponse(Arrays.asList("Cannot update users in another tenant."));
-        }
-
         // update rights
         List<String> rights = RightsUtilities.translateRights(data.getRights());
         for (String right: rights) {
             globalUserManagementService.grantRight(right, tenantId, username);
+        }
+
+        if (!inTenant(tenantId, username)) {
+            return SimpleBooleanResponse.getFailResponse(Arrays.asList("Cannot update users in another tenant."));
         }
 
         return SimpleBooleanResponse.getSuccessResponse();
