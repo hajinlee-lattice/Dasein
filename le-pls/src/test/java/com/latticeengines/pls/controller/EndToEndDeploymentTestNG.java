@@ -1,14 +1,14 @@
 package com.latticeengines.pls.controller;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.pls.functionalframework.ModelingServiceExecutor;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
+import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
+import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -19,15 +19,14 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.UserDocument;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.pls.functionalframework.ModelingServiceExecutor;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
 
@@ -56,13 +55,13 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     private Configuration yarnConfiguration;
 
     @Autowired
-    private GlobalAuthenticationServiceImpl globalAuthenticationService;
+    private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
-    private GlobalSessionManagementServiceImpl globalSessionManagementService;
+    private GlobalSessionManagementService globalSessionManagementService;
 
     @Autowired
-    private GlobalUserManagementServiceImpl globalUserManagementService;
+    private GlobalUserManagementService globalUserManagementService;
 
     private static String tenant;
     private static Tenant tenantToAttach;
