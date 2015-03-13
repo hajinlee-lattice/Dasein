@@ -1,20 +1,19 @@
 package com.latticeengines.pls.security;
 
-import com.latticeengines.domain.exposed.security.EntityAccessRightsData;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
+import org.testng.annotations.Test;
 
-public class RightsUtilityTestNG extends PlsFunctionalTestNGBase {
+import com.latticeengines.domain.exposed.security.EntityAccessRightsData;
 
-    @Test(groups = {"functional", "deployment"})
+public class RightsUtilityUnitTestNG {
+
+    @Test(groups = "unit")
     public void translate() {
         // from list of strings to map or rights data
         List<String> rights = Arrays.asList("View_PLS_Models", "View_PLS_Users", "Edit_PLS_Users", "View_PLS_Reporting", "Edit_PLS_Configuration");

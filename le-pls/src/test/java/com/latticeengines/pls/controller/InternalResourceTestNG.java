@@ -26,13 +26,13 @@ import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.impl.Constants;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
 
 public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
-    private GlobalAuthenticationServiceImpl globalAuthenticationService;
+    private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;

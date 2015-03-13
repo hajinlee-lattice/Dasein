@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.GrantedRight;
 
@@ -25,7 +26,7 @@ public class GlobalUserManagementServiceImplTestNG extends PlsFunctionalTestNGBa
     private GlobalUserManagementService globalUserManagementService;
 
     @Autowired
-    private GlobalAuthenticationServiceImpl globalAuthenticationService;
+    private GlobalAuthenticationService globalAuthenticationService;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {

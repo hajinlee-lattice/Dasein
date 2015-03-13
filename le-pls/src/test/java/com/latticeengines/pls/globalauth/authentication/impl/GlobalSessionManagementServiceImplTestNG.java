@@ -11,6 +11,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
+import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 
 /**
  * Simulate login at the service level which authenticates then attaches.
@@ -22,10 +24,10 @@ public class GlobalSessionManagementServiceImplTestNG extends PlsFunctionalTestN
     private Ticket ticket;
 
     @Autowired
-    private GlobalAuthenticationServiceImpl globalAuthenticationService;
+    private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
-    private GlobalSessionManagementServiceImpl globalSessionManagementService;
+    private GlobalSessionManagementService globalSessionManagementService;
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {

@@ -36,9 +36,9 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalAuthenticationServiceImpl;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalSessionManagementServiceImpl;
-import com.latticeengines.pls.globalauth.authentication.impl.GlobalUserManagementServiceImpl;
+import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
+import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
+import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.GrantedRight;
 
 public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
@@ -49,13 +49,13 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     private Ticket ticket = null;
 
     @Autowired
-    private GlobalAuthenticationServiceImpl globalAuthenticationService;
+    private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
-    private GlobalSessionManagementServiceImpl globalSessionManagementService;
+    private GlobalSessionManagementService globalSessionManagementService;
 
     @Autowired
-    private GlobalUserManagementServiceImpl globalUserManagementService;
+    private GlobalUserManagementService globalUserManagementService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;

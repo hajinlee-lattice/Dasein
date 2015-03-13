@@ -12,11 +12,12 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 
 public class GlobalAuthenticationServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
-    private GlobalAuthenticationServiceImpl globalAuthenticationService;
+    private GlobalAuthenticationService globalAuthenticationService;
 
     @Test(groups = "functional")
     public void authenticateThenDiscardUser() {
