@@ -10,3 +10,4 @@
 	totality	TEXT,
 	request		TEXT,
 	response	TEXT
+)
