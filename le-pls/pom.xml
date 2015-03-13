@@ -55,8 +55,11 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>-XX:MaxPermSize=256m
-                                        ${argLine}</argLine>
+                                    <argLine>
+                                        -XX:MaxPermSize=256m
+                                        -Djava.util.logging.config.file=src/test/resource/logging.properties
+                                        ${argLine}
+                                    </argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${functional.classes.include}</include>
@@ -123,7 +126,11 @@
                                         <numOfRuns>${RUNS_NUMBER}</numOfRuns>
                                         <threadSleep>${SLEEP_TIME}</threadSleep>
                                     </systemPropertyVariables>
-                                    <argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
+                                    <argLine>
+                                        -XX:MaxPermSize=256m
+                                        -Djava.util.logging.config.file=src/test/resource/logging.properties
+                                        ${argLine}
+                                    </argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${load.classes.include}</include>
