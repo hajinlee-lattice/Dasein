@@ -1,6 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
