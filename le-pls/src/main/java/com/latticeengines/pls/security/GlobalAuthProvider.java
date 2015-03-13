@@ -3,6 +3,8 @@ package com.latticeengines.pls.security;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -10,12 +12,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 
 @Component("globalAuthProvider")
 public class GlobalAuthProvider implements AuthenticationProvider {
+    private static final Log log = LogFactory.getLog(GlobalAuthProvider.class);
     
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
@@ -29,7 +34,14 @@ public class GlobalAuthProvider implements AuthenticationProvider {
             List<GrantedRight> rights = new ArrayList<>();
             
             for (String right : session.getRights()) {
-                rights.add(GrantedRight.getGrantedRight(right));
+                GrantedRight grantedRight = GrantedRight.getGrantedRight(right); 
+                
+                if (grantedRight != null) {
+                    rights.add(grantedRight);
+                } else {
+                    log.error(LedpException.buildMessageWithCode(LedpCode.LEDP_18019, new String[] { right }));
+                }
+                
             }
             TicketAuthenticationToken token = new TicketAuthenticationToken( //
                     authentication.getPrincipal(), ticket, rights);
