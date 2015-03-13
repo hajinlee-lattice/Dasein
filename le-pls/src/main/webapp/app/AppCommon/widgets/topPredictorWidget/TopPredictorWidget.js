@@ -224,8 +224,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                 .on("mouseout", function (d) {
                     d3.select(this).attr("xlink:href", "assets/images/Donut-Center-Back-Click.png");
                 })
-                .on("click", function (d) {
-                    $scope.backToSummaryClicked();
+                .on("click", function () {
+                    $("#back-to-summary-link").click();
                 });
                 
         }, 1000);

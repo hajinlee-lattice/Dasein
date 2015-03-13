@@ -23,6 +23,10 @@
     position: absolute;
 }
 
+a#back-to-summary-link:hover {
+  cursor: pointer;
+}
+
 .donut-chart-back-button {
     cursor: pointer;
 }
