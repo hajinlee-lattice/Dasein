@@ -311,7 +311,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
             scope.mouseY = mouseY;
             scope.data = TopPredictorService.FormatDataForAttributeValueChart(attributeName, attributeColor, data);
             $compile(topPredictorAttributeHover.html('<div data-top-predictor-attribute-widget></div>'))(scope);
-        }, 1000);
+        }, 500);
     }
     
     function hideAttributeHover () {
