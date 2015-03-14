@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.jython.JythonEvaluator;
 
 @SuppressWarnings("rawtypes")
 public class JythonFunction extends BaseOperation implements Function {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(JythonFunction.class);
     private static final long serialVersionUID = 7015322136073224137L;
     private static JythonEvaluator evaluator;

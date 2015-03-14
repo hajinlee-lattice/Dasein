@@ -45,6 +45,7 @@ import cascading.property.AppProps;
 import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.SequenceFile;
 import cascading.tap.Tap;
+import cascading.tap.hadoop.GlobHfs;
 import cascading.tap.hadoop.Hfs;
 import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
@@ -109,7 +110,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     @Override
     protected void addSource(String sourceName, String sourcePath) {
-        Tap<?, ?, ?> tap = new Hfs(new AvroScheme(), sourcePath);
+        Tap<?, ?, ?> tap = new GlobHfs(new AvroScheme(), sourcePath);
         if (isLocal()) {
             sourcePath = "file://" + sourcePath;
             tap = new Lfs(new AvroScheme(), sourcePath);
