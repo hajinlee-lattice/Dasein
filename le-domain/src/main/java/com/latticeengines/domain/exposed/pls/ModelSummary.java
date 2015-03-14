@@ -80,7 +80,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
 
     @Override
     @JsonProperty("Name")
-    @Column(name = "NAME", unique = true, nullable = false)
+    @Column(name = "NAME", nullable = false)
     @Index(name = "MODEL_SUMMARY_NAME_IDX")
     public String getName() {
         return name;
@@ -297,10 +297,10 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     }
 
     @Transient
-    @JsonIgnoreProperties("RawFile")
+    @JsonProperty("RawFile")
     public String getRawFile() { return rawFile; }
 
     @Transient
-    @JsonIgnoreProperties("RawFile")
+    @JsonProperty("RawFile")
     public void setRawFile(String rawFile) { this.rawFile = rawFile; }
 }
