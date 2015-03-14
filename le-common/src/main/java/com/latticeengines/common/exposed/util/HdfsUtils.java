@@ -131,12 +131,20 @@ public class HdfsUtils {
     
     public static final List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir,
             HdfsFileFilter filter) throws Exception {
+        return getFilesForDirRecursive(configuration, hdfsDir, filter, false);
+    }
+
+    public static final List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir,
+            HdfsFileFilter filter, boolean returnFirstMatch) throws Exception {
         FileSystem fs = FileSystem.get(configuration);
         FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
         Set<String> filePaths = new HashSet<String>();
         for (FileStatus status : statuses) {
             if (status.isDirectory()) {
                 filePaths.addAll(getFilesForDir(configuration, status.getPath().toString(), filter));
+                if (returnFirstMatch && filePaths.size() > 0) {
+                    break;
+                }
                 filePaths.addAll(getFilesForDirRecursive(configuration, status.getPath().toString(), filter));
             }
         }
