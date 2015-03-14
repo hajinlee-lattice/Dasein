@@ -279,4 +279,19 @@ angular.module('mainApp.models.services.ModelService', [
         return toReturn;
     };
 
+
+    this.validateModelName = function(name) {
+        var result = {
+            valid: false,
+            errMsg: null
+        };
+        if (name.replace(/ /g,'') === "") {
+            result.errMsg = ResourceUtility.getString('MODEL_TILE_EDIT_TITLE_EMPTY_ERROR');
+            return result;
+        }
+        if (name.length > 50) {
+            result.errMsg = ResourceUtility.getString('MODEL_TILE_EDIT_TITLE_LONG_ERROR');
+            return result;
+        }
+    };
 });

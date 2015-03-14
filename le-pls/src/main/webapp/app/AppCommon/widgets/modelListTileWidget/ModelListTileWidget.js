@@ -85,8 +85,10 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         if ($scope.submitting) return;
         $scope.submitting = true;
 
-        if ($scope.data.name.replace(/ /g,'') === "") {
-            $scope.nameEditErrorMessage = ResourceUtility.getString('MODEL_TILE_EDIT_TITLE_EMPTY_ERROR');
+        var validationResult = ModelService.validateModelName($scope.data.name);
+
+        if (!validationResult.valid) {
+            $scope.nameEditErrorMessage = validationResult.errMsg;
             $scope.showNameEditError = true;
             $scope.submitting = false;
             return;
@@ -110,7 +112,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         $scope.nameStatus.editing = false;
     };
 })
-.directive('modelListTileWidget', function ($compile) {
+.directive('modelListTileWidget', function () {
     var directiveDefinitionObject = {
         templateUrl: 'app/AppCommon/widgets/modelListTileWidget/ModelListTileWidgetTemplate.html'
     };
