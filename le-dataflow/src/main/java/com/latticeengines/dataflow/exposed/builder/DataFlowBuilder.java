@@ -33,6 +33,8 @@ public abstract class DataFlowBuilder {
     public abstract void runFlow(DataFlowContext dataFlowCtx);
 
     protected abstract void addSource(String sourceName, String sourcePath);
+    
+    protected abstract void addSource(String sourceName, String sourcePath, boolean regex);
 
     protected abstract String addInnerJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields);
     

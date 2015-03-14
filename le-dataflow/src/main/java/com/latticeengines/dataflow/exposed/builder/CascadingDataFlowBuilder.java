@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
 import cascading.avro.AvroScheme;
@@ -51,6 +53,7 @@ import cascading.tap.hadoop.Lfs;
 import cascading.tuple.Fields;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataflow.exposed.builder.DataFlowBuilder.GroupByCriteria.AggregationType;
 import com.latticeengines.dataflow.exposed.exception.DataFlowCode;
 import com.latticeengines.dataflow.exposed.exception.DataFlowException;
@@ -58,12 +61,14 @@ import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
 import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 
 @SuppressWarnings("rawtypes")
 public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     private Integer counter = 1;
-    
+
     private Map<String, Tap> taps = new HashMap<>();
 
     private Map<String, Schema> schemas = new HashMap<>();
@@ -71,7 +76,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     private Map<String, AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>>> pipesAndOutputSchemas = new HashMap<>();
 
     private Map<String, AbstractMap.SimpleEntry<Checkpoint, Tap>> checkpoints = new HashMap<>();
-    
+
     public CascadingDataFlowBuilder() {
         this(false, false);
     }
@@ -87,7 +92,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     public Map<String, Tap> getSources() {
         return taps;
     }
-    
+
     @SuppressWarnings({ "deprecation", "unchecked" })
     private Pipe doCheckpoint(Pipe pipe) {
         if (isCheckpoint()) {
@@ -101,7 +106,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 ckptTap = new Hfs(scheme, targetPath, true);
             }
             checkpoints.put(pipe.getName(), new AbstractMap.SimpleEntry<>(ckpt, ckptTap));
-            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas.get(pipe.getName());
+            AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndFields = pipesAndOutputSchemas
+                    .get(pipe.getName());
             pipesAndOutputSchemas.put(ckptName, new AbstractMap.SimpleEntry<>((Pipe) ckpt, pipeAndFields.getValue()));
             return ckpt;
         }
@@ -110,6 +116,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     @Override
     protected void addSource(String sourceName, String sourcePath) {
+        addSource(sourceName, sourcePath, true);
+    }
+
+    @Override
+    protected void addSource(String sourceName, String sourcePath, boolean regex) {
         Tap<?, ?, ?> tap = new GlobHfs(new AvroScheme(), sourcePath);
         if (isLocal()) {
             sourcePath = "file://" + sourcePath;
@@ -117,6 +128,23 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         taps.put(sourceName, tap);
+
+        if (regex) {
+            DataFlowContext ctx = getDataFlowCtx();
+            Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
+            try {
+                List<String> files = HdfsUtils.getFilesForDirRecursive(config, "/", new RegexFilter(sourcePath));
+
+                if (files.size() > 0) {
+                    sourcePath = files.get(0);
+                } else {
+                    throw new LedpException(LedpCode.LEDP_00000);
+                }
+
+            } catch (Exception e) {
+                throw new LedpException(LedpCode.LEDP_00000, e);
+            }
+        }
 
         Schema sourceSchema = AvroUtils.getSchema(new Configuration(), new Path(sourcePath));
         List<FieldMetadata> fields = new ArrayList<>(sourceSchema.getFields().size());
@@ -129,7 +157,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         pipesAndOutputSchemas.put(sourceName, new AbstractMap.SimpleEntry<>(new Pipe(sourceName), fields));
         schemas.put(sourceName, sourceSchema);
     }
-    
+
     @Override
     protected String addInnerJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields) {
         return addJoin(lhs, lhsJoinFields, rhs, rhsJoinFields, JoinType.INNER);
@@ -147,7 +175,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { rhs });
         }
         Set<String> seenFields = new HashSet<>();
-        
+
         List<String> outputFields = new ArrayList<>();
         outputFields.addAll(getFieldNames(lhsPipesAndFields.getValue()));
         Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(lhsPipesAndFields.getValue());
@@ -171,9 +199,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                     origfm.getField(), origfm.getProperties());
             declaredFields.add(fm);
         }
-        
+
         BaseJoiner joiner = null;
-        
+
         switch (joinType) {
         case LEFT:
             joiner = new LeftJoin();
@@ -188,7 +216,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             joiner = new InnerJoin();
             break;
         }
-        
+
         Pipe join = new CoGroup(lhsPipesAndFields.getKey(), //
                 convertToFields(lhsJoinFields.getFields()), //
                 rhsPipesAndFields.getKey(), //
@@ -198,7 +226,6 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         pipesAndOutputSchemas.put(join.getName(), new AbstractMap.SimpleEntry<>(join, declaredFields));
         return doCheckpoint(join).getName();
     }
-
 
     private static Class<?>[] getTypes(List<String> fieldNames, List<FieldMetadata> full) {
         List<FieldMetadata> fmList = getIntersection(fieldNames, full);
@@ -323,7 +350,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         for (GroupByCriteria groupByCriterion : groupByCriteria) {
             String aggFieldName = groupByCriterion.getAggregatedFieldName();
             Fields outputStrategy = Fields.ALL;
-            
+
             if (groupByCriterion.getOutputFieldStrategy() != null) {
                 switch (groupByCriterion.getOutputFieldStrategy().getKind()) {
                 case GROUP:
@@ -395,13 +422,13 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Fields fieldStrategy = Fields.ALL;
 
         List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
-        
+
         if (fieldsToApply.getFields().length == 1 && fieldsToApply.getFields()[0].equals(targetField.getFieldName())) {
             fieldStrategy = Fields.REPLACE;
         }
 
         Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFieldsAsList()), function, fieldStrategy);
-        
+
         if (fieldStrategy != Fields.REPLACE) {
             fm.add(targetField);
         } else {
@@ -426,7 +453,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         if (pm == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
         }
-        Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFields()), new AddMD5Hash(new Fields(targetFieldName)), Fields.ALL);
+        Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFields()), new AddMD5Hash(new Fields(
+                targetFieldName)), Fields.ALL);
         List<FieldMetadata> newFm = new ArrayList<>(pm.getValue());
         FieldMetadata pdHashFm = new FieldMetadata(Type.STRING, String.class, targetFieldName, null);
         pdHashFm.setPropertyValue("length", "32");
@@ -456,9 +484,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         pipesAndOutputSchemas.put(each.getName(), new AbstractMap.SimpleEntry<>(each, newFm));
         return doCheckpoint(each).getName();
     }
-    
+
     @Override
-    protected String addJythonFunction(String prior, String scriptName, String functionName, FieldList fieldsToApply, FieldMetadata targetField) {
+    protected String addJythonFunction(String prior, String scriptName, String functionName, FieldList fieldsToApply,
+            FieldMetadata targetField) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
         if (pm == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
@@ -472,7 +501,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 fieldsToApply, //
                 targetField);
     }
-    
+
     @Override
     protected List<FieldMetadata> getMetadata(String operator) {
         return pipesAndOutputSchemas.get(operator).getValue();
@@ -491,7 +520,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
         System.out.println(schema);
         Tap<?, ?, ?> sink = new Lfs(new AvroScheme(schema), targetPath, true);
-        //Tap<?, ?, ?> sink = new Lfs(new TextDelimited(), targetPath, true);
+        // Tap<?, ?, ?> sink = new Lfs(new TextDelimited(), targetPath, true);
         if (!isLocal()) {
             sink = new Hfs(new AvroScheme(schema), targetPath, true);
         }
@@ -503,7 +532,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         FlowDef flowDef = FlowDef.flowDef().setName(flowName) //
                 .addSources(getSources()) //
                 .addTailSink(getPipeByName(lastOperator), sink);
-        
+
         for (AbstractMap.SimpleEntry<Checkpoint, Tap> entry : checkpoints.values()) {
             flowDef = flowDef.addCheckpoint(entry.getKey(), entry.getValue());
         }
@@ -513,4 +542,44 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         flow.complete();
     }
 
+    public static class RegexFilter implements HdfsUtils.HdfsFileFilter {
+
+        private Pattern pattern;
+
+        public RegexFilter(String glob) {
+            String regex = createRegexFromGlob(glob);
+            pattern = Pattern.compile(regex);
+        }
+
+        @Override
+        public boolean accept(FileStatus file) {
+            String filePath = Path.getPathWithoutSchemeAndAuthority(file.getPath()).toString();
+            return pattern.matcher(filePath).matches();
+        }
+    }
+
+    private static String createRegexFromGlob(String glob) {
+        String out = "^";
+        for (int i = 0; i < glob.length(); ++i) {
+            final char c = glob.charAt(i);
+            switch (c) {
+            case '*':
+                out += ".*";
+                break;
+            case '?':
+                out += '.';
+                break;
+            case '.':
+                out += "\\.";
+                break;
+            case '\\':
+                out += "\\\\";
+                break;
+            default:
+                out += c;
+            }
+        }
+        out += '$';
+        return out;
+    }
 }

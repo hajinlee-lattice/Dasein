@@ -37,9 +37,9 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        createFinalEventTable.setLocal(true);
-        createInitialEventTable.setLocal(true);
-        createPropDataInput.setLocal(true);
+        //createFinalEventTable.setLocal(true);
+        //createInitialEventTable.setLocal(true);
+        //createPropDataInput.setLocal(true);
         lead = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Lead.avro").getPath();
         opportunity = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Opportunity.avro").getPath();
         contact = ClassLoader.getSystemResource("com/latticeengines/dataflow/exposed/service/impl/Contact.avro").getPath();
@@ -80,16 +80,17 @@ public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
         ctx.setProperty("QUEUE", "Priority0.MapReduce.0");
         ctx.setProperty("FLOWNAME", "CreateInitialEventTable");
         ctx.setProperty("CHECKPOINT", false);
+        ctx.setProperty("HADOOPCONF", new Configuration());
         dataTransformationService.executeNamedTransformation(ctx, "createInitialEventTable");
         
         // Execute the second flow, with the output of the first flow as input into the second
-        sources.put("EventTable", "/tmp/TmpEventTable/part-00000.avro");
+        sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
         ctx.setProperty("TARGETPATH", "/tmp/PDTable");
         ctx.setProperty("FLOWNAME", "CreatePropDataInput");
         dataTransformationService.executeNamedTransformation(ctx, "createPropDataInput");
         
         // Execute the third flow, with the output of the first flow as input into the third
-        sources.put("EventTable", "/tmp/TmpEventTable/part-00000.avro");
+        sources.put("EventTable", "/tmp/TmpEventTable/*.avro");
         ctx.setProperty("TARGETPATH", "/tmp/EventTable");
         ctx.setProperty("FLOWNAME", "CreateFinalEventTable");
         
