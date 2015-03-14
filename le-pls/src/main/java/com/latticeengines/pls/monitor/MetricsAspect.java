@@ -32,14 +32,14 @@ public class MetricsAspect {
 
         long endTime = System.currentTimeMillis();
 
-        String ticketId = null;
+        String ticketId = "";
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth instanceof TicketAuthenticationToken) {
             TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
             ticketId = token.getSession().getTicket().getUniqueness();
         }
 
-        log.info(String.format("Metrics for API=%s ElapsedTime=%d ms Ticket Id=%d", joinPoint.getSignature()
+        log.info(String.format("Metrics for API=%s ElapsedTime=%d ms Ticket Id=%s", joinPoint.getSignature()
                 .toShortString(), endTime - startTime, ticketId));
 
         return retVal;
