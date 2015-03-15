@@ -105,6 +105,24 @@ describe('threshold explorer', function() {
         expect(tds.get(10).getText()).toEqual("1.00x");
 
         //==================================================
+        // Check Leads/Score (Assume Reasonable Window Size)
+        //==================================================
+        browser.actions().mouseMove({x: 0, y: 100}).perform();
+        element(by.css(".lytext")).getText().then(function (leads1) {
+            element(by.css(".rytext")).getText().then(function (score1) {
+                browser.actions().mouseMove({x: 40, y: 100}).perform();
+                element(by.css(".lytext")).getText().then(function (leads2) {
+                    element(by.css(".rytext")).getText().then(function (score2) {
+                        expect(parseInt(leads2.slice(0, -1)) >
+                               parseInt(leads1.slice(0, -1))).toBe(true);
+                        expect(parseInt(score1.slice(2)) >
+                               parseInt(score2.slice(2))).toBe(true);
+                    });
+                });
+            });
+        });
+
+        //==================================================
         // Logout
         //==================================================
         logoutPage.logoutAsNonAdmin();
