@@ -11,50 +11,52 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
             return {"ChartData": [], "DecileData": []};
         }
 
-        chartData = this.GetChartData(modelSummary);
-        decileData = this.GetDecileData(chartData);
+        var chartData = this.GetChartData(modelSummary);
+        var decileData = this.GetDecileData(chartData);
 
         return {"ChartData" : chartData, "DecileData": decileData};
     };
 
     this.GetChartData = function (modelSummary) {
+        var conversion;
+        var i;
         //==================================================
         // Prepare
         //==================================================
-        totalLeads = modelSummary.ModelDetails.TestingLeads;
-        totalConversions = modelSummary.ModelDetails.TestingConversions;
-        avgConversion = totalConversions / totalLeads;
+        var totalLeads = modelSummary.ModelDetails.TestingLeads;
+        var totalConversions = modelSummary.ModelDetails.TestingConversions;
+        var avgConversion = totalConversions / totalLeads;
 
-        segments = modelSummary.Segmentations[0].Segments;
+        var segments = modelSummary.Segmentations[0].Segments;
 
-        percentLeads = []; for (i = 0; i < 101; i++) percentLeads.push(i);
+        var percentLeads = []; for (i = 0; i < 101; i++) percentLeads.push(i);
 
-        cumConversions = []; cumConversions.push(0);
-        cumCount = []; cumCount.push(0);
+        var cumConversions = []; cumConversions.push(0);
+        var cumCount = []; cumCount.push(0);
         for (i = 1; i < 101; i++) {
             cumConversions.push(cumConversions[i - 1] + segments[i - 1].Converted);
             cumCount.push(cumCount[i - 1] + segments[i - 1].Count);
         }
 
-        cumPctConversions = []; cumPctConversions.push(0);
+        var cumPctConversions = []; cumPctConversions.push(0);
         for (i = 1; i < 101; i++) {
             cumPctConversions.push(100 * (cumConversions[i] / totalConversions));
         }
 
-        leftLift = []; leftLift.push(0);
+        var leftLift = []; leftLift.push(0);
         for (i = 1; i < 101; i++) {
             conversion = cumConversions[i] / cumCount[i];
             leftLift.push(conversion / avgConversion);
         }
 
-        rightLift = [];
+        var rightLift = [];
         for (i = 0; i < 100; i++) {
             conversion = (totalConversions - cumConversions[i]) / (totalLeads - cumCount[i]);
             rightLift.push(conversion / avgConversion);
         }
         rightLift.push(0);
 
-        score = []; score.push(0);
+        var score = []; score.push(0);
         for (i = 100; i > 0; i--) {
             score.push(i);
         }
@@ -62,7 +64,7 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
         //==================================================
         // Load
         //==================================================
-        data = [];
+        var data = [];
         for (i = 0; i < 101; i++) {
             data.push({
                 "leads": percentLeads[i],
@@ -76,7 +78,8 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
     };
 
     this.GetDecileData = function (chartData) {
-        result = [];
+        var result = [];
+        var i;
 
         //==================================================
         // Conversions
@@ -100,15 +103,15 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
     };
 
     this.PrepareExportData = function (modelSummary) {
-        result = [];
+        var result = [];
 
-        chartData = modelSummary.hasOwnProperty("ThresholdChartData") ?
-                    modelSummary.ThresholdChartData :
-                    this.GetChartData(modelSummary);
+        var chartData = modelSummary.hasOwnProperty("ThresholdChartData") ?
+                        modelSummary.ThresholdChartData :
+                        this.GetChartData(modelSummary);
 
-        segments = modelSummary.Segmentations[0].Segments;
+        var segments = modelSummary.Segmentations[0].Segments;
 
-        columns = [
+        var columns = [
             ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_SCORE_LABEL"),
             ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_LEADS_LABEL"),
             ResourceUtility.getString("MODEL_ADMIN_THRESHOLD_EXPORT_CONVERSIONS_LABEL"),
@@ -119,8 +122,8 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
         ];
         result.push(columns);
 
-        for (i = 1; i < 101; i++) {
-            row = [];
+        for (var i = 1; i < 101; i++) {
+            var row = [];
             row.push(chartData[i].score);
             row.push(chartData[i].leads + "%");
             row.push(chartData[i].conversions.toFixed(0) + "%");

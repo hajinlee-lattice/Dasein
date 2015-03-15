@@ -11,7 +11,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         return;
     }
 
-    data = modelSummary.ThresholdChartData;
+    var data = modelSummary.ThresholdChartData;
 
     //==================================================
     // Specify Dimensions
@@ -178,8 +178,8 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
     //==================================================
     // Append Grid Lines
     //==================================================
-    for (i = 1; i < 10; i++) {
-        xLoc = x(i * 10);
+    for (var i = 1; i < 10; i++) {
+        var xLoc = x(i * 10);
         svg.append("line")
             .attr("x1", xLoc)
             .attr("y1", "0")
@@ -488,7 +488,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
     //==================================================
     // Capture Area: MouseMove
     //==================================================
-    bisectLeads = d3.bisector(function(d) { return d.leads; }).left;
+    var bisectLeads = d3.bisector(function(d) { return d.leads; }).left;
     function captureMouseMove() {
         var x0 = x.invert(d3.mouse(this)[0]),
             i = bisectLeads(data, x0, 1),

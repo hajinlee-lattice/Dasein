@@ -33,7 +33,7 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
         });
 
         it('chart-data leads should increment by 1', function () {
-            for (i = 1; i < 101; i++) {
+            for (var i = 1; i < 101; i++) {
                 expect(thresholdChartData[i].leads).toEqual(i);
             }
         });
@@ -50,7 +50,7 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
 
         it('chart-data score should decrement by 1', function () {
             expect(thresholdChartData[0].score).toEqual(0);
-            for (i = 1; i < 101; i++) {
+            for (var i = 1; i < 101; i++) {
                 expect(thresholdChartData[i].score).toEqual(101 - i);
             }
         });
@@ -66,7 +66,7 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
         });
 
         it('chart-data conversions should increase', function () {
-            for (i = 1; i < 101; i++) {
+            for (var i = 1; i < 101; i++) {
                 expect(parseInt(thresholdChartData[i].conversions.toFixed(0)) >=
                     parseInt(thresholdChartData[i - 1].conversions.toFixed(0))).toBe(true);
             }
@@ -102,19 +102,19 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
     //==================================================
     describe('decile-data tests', function () {
         it('decile-data should have 10 conversions', function () {
-            for (i = 1; i < 10; i++) {
+            for (var i = 1; i < 10; i++) {
                 expect(thresholdDecileData[0].hasOwnProperty("D" + String(i))).toBe(true);
             }
         });
 
         it('decile-data should have 10 lifts', function () {
-            for (i = 1; i < 10; i++) {
+            for (var i = 1; i < 10; i++) {
                 expect(thresholdDecileData[1].hasOwnProperty("D" + String(i))).toBe(true);
             }
         });
 
         it('decile-data conversions should increase', function () {
-            for (i = 1; i < 10; i++) {
+            for (var i = 1; i < 10; i++) {
                 expect(parseInt(thresholdDecileData[0]["D" + String(i + 1)].slice(0, -1)) >=
                     parseInt(thresholdDecileData[0]["D" + String(i)].slice(0, -1))).toBe(true);
             }
@@ -126,14 +126,14 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
     //==================================================
     describe('chart-decile tests', function () {
         it('chart-decile conversions should match', function () {
-            for (i = 1; i < 10; i++) {
+            for (var i = 1; i < 10; i++) {
                 expect(thresholdChartData[10 * i].conversions.toFixed(0)).
                     toEqual(thresholdDecileData[0]["D" + String(i)].slice(0, -1));
             }
         });
 
         it('chart-decile leftLift should match', function () {
-            for (i = 1; i < 10; i++) {
+            for (var i = 1; i < 10; i++) {
                 expect(thresholdChartData[10 * i].leftLift.toFixed(2)).
                     toEqual(thresholdDecileData[1]["D" + String(i)].slice(0, -1));
             }
@@ -145,49 +145,49 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
     //==================================================
     describe('export tests', function () {
         it('chart-export score should match', function () {
-            for (i = 1; i < 101; i++) {
+            for (var i = 1; i < 101; i++) {
                 expect(thresholdChartData[i].score).
                     toEqual(thresholdExportData[i][0]);
             }
         });
 
         it('chart-export leads should match', function () {
-            for (i = 1; i < 101; i++) {
+            for (var i = 1; i < 101; i++) {
                 expect(thresholdChartData[i].leads).
                     toEqual(parseInt(thresholdExportData[i][1].slice(0, -1)));
             }
         });
 
         it('chart-export conversions should match', function () {
-            for (i = 1; i < 101; i++) {
+            for (var i = 1; i < 101; i++) {
                 expect(thresholdChartData[i].conversions.toFixed(0)).
                     toEqual(thresholdExportData[i][2].slice(0, -1));
             }
         });
 
         it('chart-export leftLift should match', function () {
-            for (i = 1; i < 101; i++) {
+            for (var i = 1; i < 101; i++) {
                 expect(thresholdChartData[i].leftLift.toFixed(2)).
                     toEqual(thresholdExportData[i][3]);
             }
         });
 
         it('chart-export rightLift should match', function () {
-            for (i = 1; i < 101; i++) {
+            for (var i = 1; i < 101; i++) {
                 expect(thresholdChartData[i].rightLift.toFixed(2)).
                     toEqual(thresholdExportData[i][4]);
             }
         });
 
         it('segment-export count should match', function () {
-            for (i = 1; i < 101; i++) {
+            for (var i = 1; i < 101; i++) {
                 expect(modelSummary.Segmentations[0].Segments[i - 1].Count).
                     toEqual(thresholdExportData[i][5]);
             }
         });
 
         it('segment-export converted should match', function () {
-            for (i = 1; i < 101; i++) {
+            for (var i = 1; i < 101; i++) {
                 expect(modelSummary.Segmentations[0].Segments[i - 1].Converted).
                     toEqual(thresholdExportData[i][6]);
             }
