@@ -1,9 +1,10 @@
 angular.module('mainApp.appCommon.services.TopPredictorService', [
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.appCommon.utilities.AnalyticAttributeUtility',
-    'mainApp.appCommon.utilities.ResourceUtility'
+    'mainApp.appCommon.utilities.ResourceUtility',
+    'mainApp.appCommon.utilities.UnderscoreUtility'
 ])
-.service('TopPredictorService', function (StringUtility, AnalyticAttributeUtility, ResourceUtility) {
+.service('TopPredictorService', function (_, StringUtility, AnalyticAttributeUtility, ResourceUtility) {
     
     this.ShowBasedOnTags = function (predictor, isExternal) {
         var toReturn = false;
@@ -382,7 +383,20 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         
         return null;
     };
-    
+
+    this.mergeAttributeData = function(elems) {
+        if (elems.length === 0) { return []; }
+        if (elems.length === 1) { return elems; }
+        var mergedElem = {
+            name: "Other",
+            percentTotal: _.reduce(elems, function(memo, e){return memo + e.percentTotal}, 0)
+        };
+        mergedElem.lift = _.reduce(elems,
+            function(memo, e){ return e.lift * e.percentTotal + memo}, 0
+        ) / mergedElem.percentTotal;
+        return [mergedElem];
+    }
+
     this.FormatDataForAttributeValueChart = function (attributeName, attributeColor, modelSummary) {
         if (attributeName == null || modelSummary == null) {
             return null;
@@ -399,28 +413,59 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             description: predictor.Description,
             elementList: []
         };
-        
-        
+
+        var isCategoricalOverall = false;
+        var concreteAttributes = [];
+        var nullAttributes = [];
         for (var i = 0; i < predictor.Elements.length; i++) {
             var element = predictor.Elements[i];
-            var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
+            var percentTotal = parseFloat(element.Count / modelSummary.ModelDetails.TotalLeads) * 100.0;
             var isCategorical = this.IsPredictorElementCategorical(element);
+            var isNull = false;
             if (isCategorical && percentTotal < 1) {
                 continue;
             }
             percentTotal = Math.round(percentTotal);
             var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
+
             if (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") {
                 attributeValue = "N/A";
+                isNull = true;
+            } else if (isCategorical) {
+                isCategoricalOverall = true;
             }
+
             var dataToDisplay = {
                 name: attributeValue,
-                lift: element.Lift.toPrecision(2),
+                lift: element.Lift,
                 percentTotal: percentTotal
             };
-            toReturn.elementList.push(dataToDisplay);
+            if (isNull) {
+                nullAttributes.push(dataToDisplay);
+            } else {
+                concreteAttributes.push(dataToDisplay);
+            }
         }
-        
+
+        if (isCategoricalOverall) {
+            var significantAttributes = _.sortBy(_.filter(concreteAttributes, function(e){
+                return (e.name.toUpperCase() !== "OTHER" && e.percentTotal > 1);
+            }), "lift").reverse();
+
+            var negligibleAttributes = _.filter(concreteAttributes, function(e){
+                return (e.name.toUpperCase() === "OTHER" || e.percentTotal <= 1);
+            });
+
+            while (significantAttributes.length > 6 - (negligibleAttributes.length > 0)) {
+                var attr = significantAttributes.pop();
+                negligibleAttributes.push(attr);
+            }
+            negligibleAttributes = this.mergeAttributeData(negligibleAttributes);
+            concreteAttributes = _.union(significantAttributes, negligibleAttributes);
+        }
+
+        toReturn.elementList = _.union(concreteAttributes, nullAttributes);
+
         return toReturn;
     };
 });

@@ -1,9 +1,10 @@
 angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.UnderscoreUtility'
+    'mainApp.appCommon.utilities.UnderscoreUtility',
+    'mainApp.appCommon.services.TopPredictorService'
 ])
 
-.controller('TopPredictorAttributeWidgetController', function ($scope, _, ResourceUtility) {
+.controller('TopPredictorAttributeWidgetController', function ($scope, _, ResourceUtility, TopPredictorService) {
     var data = $scope.data;
     $scope.attributeName = data.name;
     $scope.attributeFullDescription = data.description;
@@ -32,13 +33,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         $("#topPredictorAttributeHover").show();
     }
     setHoverPosition($scope.mouseX);
-    
     var chartData = data.elementList;
-    chartData = _.sortBy(chartData, "lift").reverse();
-
-    var liftValues = _.map(chartData, function(d){ return parseFloat(d.lift); });
+    var liftValues = _.map(chartData, function(d){ return parseFloat(d.lift.toPrecision(2)); });
     var bucketNames = _.map(chartData, "name");
-    var percentLeads = _.map(chartData, "percentTotal");
+    var percentLeads = _.map(chartData, function(d){ return parseInt(d.percentTotal); });
     
     var chart,
         width = 150,
