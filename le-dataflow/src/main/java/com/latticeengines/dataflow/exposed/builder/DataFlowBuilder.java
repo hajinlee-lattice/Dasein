@@ -37,6 +37,8 @@ public abstract class DataFlowBuilder {
     protected abstract void addSource(String sourceName, String sourcePath, boolean regex);
 
     protected abstract String addInnerJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields);
+
+    protected abstract String addLeftOuterJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields);
     
     protected abstract String addJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields, JoinType joinType);
 

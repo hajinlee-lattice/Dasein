@@ -133,8 +133,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             DataFlowContext ctx = getDataFlowCtx();
             Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
             try {
-                List<String> files = HdfsUtils.getFilesForDirRecursive(config, "/", new RegexFilter(sourcePath), true);
-
+                // List<String> files =
+                // HdfsUtils.getFilesForDirRecursive(config, "/", new
+                // RegexFilter(sourcePath), true);
+                List<String> files = HdfsUtils.getFilesByGlob(config, sourcePath);
                 if (files.size() > 0) {
                     sourcePath = files.get(0);
                 } else {
@@ -161,6 +163,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     @Override
     protected String addInnerJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields) {
         return addJoin(lhs, lhsJoinFields, rhs, rhsJoinFields, JoinType.INNER);
+    }
+
+    @Override
+    protected String addLeftOuterJoin(String lhs, FieldList lhsJoinFields, String rhs, FieldList rhsJoinFields) {
+        return addJoin(lhs, lhsJoinFields, rhs, rhsJoinFields, JoinType.LEFT);
     }
 
     @Override
