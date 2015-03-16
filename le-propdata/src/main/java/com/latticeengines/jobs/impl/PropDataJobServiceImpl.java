@@ -1,4 +1,7 @@
-package com.latticeengines.propdata.service.db.impl;
+package com.latticeengines.jobs.impl;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -9,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.impl.JobServiceImpl;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.propdata.service.db.PropDataJobService;
+import com.latticeengines.jobs.PropDataJobService;
 
 @Component("propDataJobService")
 public class PropDataJobServiceImpl extends JobServiceImpl implements PropDataJobService {
@@ -20,10 +23,7 @@ public class PropDataJobServiceImpl extends JobServiceImpl implements PropDataJo
     @Override
     public ApplicationId importData(String table, String targetDir, String queue, String customer, String splitCols,
             String jdbcUrl) {
-        int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 4);
-        if (!splitCols.equalsIgnoreCase("Source_RowId")) {
-            numDefaultMappers = 1;
-        }
+        int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
         return importData(table, targetDir, queue, customer, splitCols, numDefaultMappers, jdbcUrl);
     }
 
@@ -60,23 +60,24 @@ public class PropDataJobServiceImpl extends JobServiceImpl implements PropDataJo
 
     private void importSync(final String table, final String targetDir, final String queue, final String jobName,
             final String splitCols, final int numMappers, String jdbcUrl) {
-        LedpSqoop.runTool(new String[] { //
-                "import", //
-                        "-Dmapred.job.queue.name=" + queue, //
-                        "--connect", //
-                        jdbcUrl, //
-                        "--m", //
-                        Integer.toString(numMappers), //
-                        "--table", //
-                        table, //
-                        "--as-avrodatafile", //
-                        "--compress", //
-                        "--mapreduce-job-name", //
-                        jobName, //
-                        "--split-by", //
-                        splitCols, //
-                        "--target-dir", //
-                        targetDir }, new Configuration(yarnConfiguration));
+        List<String> cmds = new ArrayList<>();
+        cmds.add("import");
+        cmds.add("-Dmapred.job.queue.name=" + queue);
+        cmds.add("--connect");
+        cmds.add(jdbcUrl);
+        cmds.add("--m");
+        cmds.add(Integer.toString(numMappers));
+        cmds.add("--table");
+        cmds.add(table);
+        cmds.add("--as-avrodatafile");
+        cmds.add("--compress");
+        cmds.add("--mapreduce-job-name");
+        cmds.add(jobName);
+        cmds.add("--split-by");
+        cmds.add(splitCols);
+        cmds.add("--target-dir");
+        cmds.add(targetDir);
+        LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
 
     }
 
@@ -89,7 +90,7 @@ public class PropDataJobServiceImpl extends JobServiceImpl implements PropDataJo
     public ApplicationId exportData(String table, String sourceDir, String queue, String customer, String splitCols,
             String jdbcUrl) {
 
-        int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 4);
+        int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
         return exportData(table, sourceDir, queue, customer, splitCols, numDefaultMappers, jdbcUrl);
     }
 

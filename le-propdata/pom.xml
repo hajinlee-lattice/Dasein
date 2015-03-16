@@ -19,6 +19,7 @@
     <properties>
         <component-name>propdata</component-name>
         <le.db.version>1.0.27-SNAPSHOT</le.db.version>
+        <le.dataflow.version>1.0.27-SNAPSHOT</le.dataflow.version>
         <le.dataplatform.version>1.0.27-SNAPSHOT</le.dataplatform.version>
     </properties>
 
@@ -73,6 +74,11 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-db</artifactId>
             <version>${le.db.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dataflow</artifactId>
+            <version>${le.dataflow.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>

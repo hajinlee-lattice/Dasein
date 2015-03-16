@@ -1,4 +1,4 @@
-package com.latticeengines.propdata.service.db;
+package com.latticeengines.jobs;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
