@@ -46,7 +46,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         return ((PropDataMadisonServiceImpl) propDataService).getHdfsDataflowIncrementalRawPathWithDate(date);
     }
 
-//    @Test(groups = "functional")
+    @Test(groups = "functional")
     public void importFromDB() throws Exception {
 
         String outputDir1 = null;
@@ -97,7 +97,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = "importFromDB")
     public void transform() throws Exception {
 
         ReflectionTestUtils.setField(propDataService, "numOfPastDays", 1);
