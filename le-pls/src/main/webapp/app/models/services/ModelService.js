@@ -282,7 +282,7 @@ angular.module('mainApp.models.services.ModelService', [
 
     this.validateModelName = function(name) {
         var result = {
-            valid: false,
+            valid: true,
             errMsg: null
         };
         if (name.replace(/ /g,'') === "") {
@@ -293,6 +293,7 @@ angular.module('mainApp.models.services.ModelService', [
             result.errMsg = ResourceUtility.getString('MODEL_TILE_EDIT_TITLE_LONG_ERROR');
             return result;
         }
+        return result;
     };
 
     this.uploadRawModelJSON = function(json) {

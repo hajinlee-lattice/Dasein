@@ -21,7 +21,8 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
         }).success(function(data){
             result.Success = data.Success;
             deferred.resolve(result);
-        }).error(function(){
+        }).error(function(data, status){
+            SessionService.HandleResponseErrors(data, status);
             result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
             deferred.resolve(result);
         });
@@ -50,6 +51,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
             var result = {
                 Success: false,
                 ReportErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
@@ -108,6 +110,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
             }
         })
         .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
             var result = {
                 Success: false,
                 ReportErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
@@ -150,7 +153,8 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
             }
             deferred.resolve(result);
         })
-        .error(function() {
+        .error(function(data, status) {
+            SessionService.HandleResponseErrors(data, status);
             deferred.resolve(result);
         });
         return deferred.promise;

@@ -19,6 +19,7 @@ angular.module('mainApp.appCommon.widgets.ModelListCreationHistoryWidget', [
                 $rootScope.$broadcast(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
             } else {
                 //TODO:song handle errors
+                $rootScope.$broadcast(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
             }
         });
     };
