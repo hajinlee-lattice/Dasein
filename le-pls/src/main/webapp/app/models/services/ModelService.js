@@ -326,15 +326,14 @@ angular.module('mainApp.models.services.ModelService', [
                     Success: false,
                     ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
                 };
-                deferred.resolve(result);
             } else {
                 result = {
                     Success: true,
                     ResultErrors: null
                 };
             }
-
             deferred.resolve(result);
+
         })
         .error(function(data, status, headers, config) {
             SessionService.HandleResponseErrors(data, status);
