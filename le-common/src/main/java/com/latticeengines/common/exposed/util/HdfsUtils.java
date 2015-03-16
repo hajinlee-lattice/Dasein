@@ -63,8 +63,9 @@ public class HdfsUtils {
         }
 
     }
-    
-    public static final void copyLocalToHdfs(Configuration configuration, String localPath, String hdfsPath) throws Exception {
+
+    public static final void copyLocalToHdfs(Configuration configuration, String localPath, String hdfsPath)
+            throws Exception {
         FileSystem fs = FileSystem.get(configuration);
         fs.copyFromLocalFile(new Path(localPath), new Path(hdfsPath));
     }
@@ -108,9 +109,9 @@ public class HdfsUtils {
 
         return filePaths;
     }
-    
-    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter) throws Exception {
+
+    public static final List<String> getFilesForDir(Configuration configuration, String hdfsDir, HdfsFileFilter filter)
+            throws Exception {
         FileSystem fs = FileSystem.get(configuration);
         FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
         List<String> filePaths = new ArrayList<String>();
@@ -128,7 +129,7 @@ public class HdfsUtils {
 
         return filePaths;
     }
-    
+
     public static final List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir,
             HdfsFileFilter filter) throws Exception {
         return getFilesForDirRecursive(configuration, hdfsDir, filter, false);
@@ -189,5 +190,18 @@ public class HdfsUtils {
             }
         }
         return is;
+    }
+
+    public static List<String> getFilesByGlob(Configuration configuration, String globPath) throws IOException {
+        FileSystem fs = FileSystem.get(configuration);
+        FileStatus[] statuses = fs.globStatus(new Path(globPath));
+        List<String> filePaths = new ArrayList<String>();
+        for (FileStatus status : statuses) {
+            Path filePath = status.getPath();
+            filePaths.add(Path.getPathWithoutSchemeAndAuthority(filePath).toString());
+            
+        }
+        return filePaths;
+
     }
 }
