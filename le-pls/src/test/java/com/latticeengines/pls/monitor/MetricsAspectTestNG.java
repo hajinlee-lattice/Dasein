@@ -78,7 +78,7 @@ public class MetricsAspectTestNG extends PlsFunctionalTestNGBase {
         modelSummaryResource.delete("1");
         verify(newLog, times(1)).info(anyString());
         Assert.assertTrue(logs.get(0).contains("Metrics for API=ModelSummaryResource.delete(..) ElapsedTime="));
-        Assert.assertTrue(logs.get(0).contains("Ticket Id="));
+        Assert.assertTrue(logs.get(0).contains("Track Id="));
 
         modelSummaryResource.getModelSummaries(null);
         verify(newLog, times(2)).info(anyString());
@@ -94,7 +94,7 @@ public class MetricsAspectTestNG extends PlsFunctionalTestNGBase {
         assertTrue(result);
         Assert.assertTrue(logs.get(2).contains(
                 "Metrics for API=GlobalAuthenticationService.authenticateUser(..) ElapsedTime="));
-        Assert.assertTrue(logs.get(2).contains("Ticket Id="));
+        Assert.assertTrue(logs.get(2).contains("Track Id="));
 
     }
 }
