@@ -287,6 +287,7 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/models/controllers/ModelDetailController.js',
                     '<%= pls.app %>/app/models/controllers/AdminInfoController.js',
                     '<%= pls.app %>/app/models/modals/DeleteModelModal.js',
+                    '<%= pls.app %>/app/models/modals/ImportModelModal.js',
                     '<%= pls.app %>/app/login/modals/TenantSelectionModal.js',
                     '<%= pls.app %>/app/userManagement/modals/AddUserModal.js',
                     '<%= pls.app %>/app/config/modals/EnterCredentialsModal.js'

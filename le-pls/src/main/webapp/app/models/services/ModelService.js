@@ -60,12 +60,12 @@ angular.module('mainApp.models.services.ModelService', [
                         resultObj: null,
                         resultErrors: null
                     };
-                } else if (data.errorMsg.indexOf("No tenant found")) {
-                    result = {
-                        success: false,
-                        resultObj: null,
-                        resultErrors: "NO TENANT FOUND"
-                    };
+                //} else if (data.errorMsg.indexOf("No tenant found")) {
+                //    result = {
+                //        success: false,
+                //        resultObj: null,
+                //        resultErrors: "NO TENANT FOUND"
+                //    };
                 } else {
                     result = {
                         success: false,
@@ -227,32 +227,32 @@ angular.module('mainApp.models.services.ModelService', [
                 "Content-Type": "application/json"
             }
         })
-            .success(function(data, status, headers, config) {
-                if (data == null) {
-                    result = {
-                        Success: false,
-                        ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
-                    };
-                    deferred.resolve(result);
-                } else {
-                    result = {
-                        Success: true,
-                        ResultErrors: null
-                    };
-                }
-
-                deferred.resolve(result);
-            })
-            .error(function(data, status, headers, config) {
-                SessionService.HandleResponseErrors(data, status);
+        .success(function(data, status, headers, config) {
+            if (data == null) {
                 result = {
                     Success: false,
-                    ResultErrors: ResourceUtility.getString('MODEL_TILE_EDIT_SERVICE_ERROR')
+                    ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
                 };
-                if (data.errorCode == 'LEDP_18003') result.ResultErrors = ResourceUtility.getString('CHANGE_MODEL_NAME_ACCESS_DENIED');
-                if (data.errorCode == 'LEDP_18014') result.ResultErrors = ResourceUtility.getString('CHANGE_MODEL_NAME_CONFLICT');
                 deferred.resolve(result);
-            });
+            } else {
+                result = {
+                    Success: true,
+                    ResultErrors: null
+                };
+            }
+
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('MODEL_TILE_EDIT_SERVICE_ERROR')
+            };
+            if (data.errorCode == 'LEDP_18003') result.ResultErrors = ResourceUtility.getString('CHANGE_MODEL_NAME_ACCESS_DENIED');
+            if (data.errorCode == 'LEDP_18014') result.ResultErrors = ResourceUtility.getString('CHANGE_MODEL_NAME_CONFLICT');
+            deferred.resolve(result);
+        });
 
         return deferred.promise;
     };
@@ -294,4 +294,53 @@ angular.module('mainApp.models.services.ModelService', [
             return result;
         }
     };
+
+    this.uploadRawModelJSON = function(json) {
+        var deferred = $q.defer();
+
+        var data = {
+            Tenant: {
+                Identifier: "FAKE_TENANT",
+                DisplayName: "Fake Tenant"
+            },
+            RawFile: json
+        };
+
+        $http({
+            method: 'POST',
+            url: '/pls/modelsummaries?raw=true',
+            data: data,
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .success(function(data, status, headers, config) {
+            if (data == null) {
+                var result = {
+                    Success: false,
+                    ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                };
+                deferred.resolve(result);
+            } else {
+                var result = {
+                    Success: true,
+                    ResultErrors: null
+                };
+            }
+
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            var result = {
+                Success: false,
+                ResultErrors: ResourceUtility.getString('MODEL_TILE_EDIT_SERVICE_ERROR')
+            };
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+
+    };
+
 });

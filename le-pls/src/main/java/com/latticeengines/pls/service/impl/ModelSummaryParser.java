@@ -46,9 +46,16 @@ public class ModelSummaryParser {
 
         JsonNode details = json.get("ModelDetails");
 
-        String name = getOrDefault(details.get("Name"), String.class, "New Model");
-        Long constructionTime = getOrDefault(details.get("ConstructionTime"), Long.class, System.currentTimeMillis() / 1000) * 1000;
-        String lookupId = getOrDefault(details.get("LookupID"), String.class, "Unknown");
+        String name = getOrDefault(details.get("Name"), String.class, "PLSModel");
+        Long constructionTime;
+        try {
+            long currentMillis = details.get("ConstructionTime").asLong() * 1000;
+            getDate(currentMillis, "MM/dd/yyyy hh:mm:ss z");
+            constructionTime = currentMillis;
+        } catch (Exception e) {
+            constructionTime = System.currentTimeMillis();
+        }
+        String lookupId = getOrDefault(details.get("LookupID"), String.class, "");
         summary.setName(String.format("%s-%s", name.replace(' ', '_'), getDate(constructionTime, "MM/dd/yyyy hh:mm:ss z")));
         summary.setLookupId(lookupId);
         summary.setRocScore(getOrDefault(details.get("RocScore"), Double.class, 0.0));
@@ -60,8 +67,19 @@ public class ModelSummaryParser {
         summary.setTotalConversionCount(getOrDefault(details.get("TotalConversions"), Long.class, 0L));
         summary.setConstructionTime(constructionTime);
 
-        String modelId = lookupId.equals("Unknown") ? UUID.randomUUID().toString() : lookupId.split("\\|")[2];
-        summary.setId(String.format("ms__%s-%s", modelId, name));
+        String uuid;
+        try {
+            Pattern uuidPattern = Pattern.compile("[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}");
+            Matcher matcher = uuidPattern.matcher(lookupId);
+            if(matcher.find()) {
+                uuid = lookupId.substring(matcher.start());
+            } else {
+                uuid = UUID.randomUUID().toString();
+            }
+        } catch (Exception e) {
+            uuid = UUID.randomUUID().toString();
+        }
+        summary.setId(String.format("ms__%s-%s", uuid, name));
 
         try {
             if (json.has("Tenant")) {
@@ -83,7 +101,7 @@ public class ModelSummaryParser {
         return summary;
     }
 
-    private static String getDate(long milliSeconds, String dateFormat) {
+    private String getDate(long milliSeconds, String dateFormat) {
         SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
         formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
         Calendar calendar = Calendar.getInstance();
@@ -91,7 +109,7 @@ public class ModelSummaryParser {
         return formatter.format(calendar.getTime());
     }
 
-    private static <T> T getOrDefault(JsonNode node, Class<T> targetClass, T defaultValue) {
+    private <T> T getOrDefault(JsonNode node, Class<T> targetClass, T defaultValue) {
         if (node == null) { return defaultValue; }
         ObjectMapper mapper = new ObjectMapper();
         try {

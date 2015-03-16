@@ -1,0 +1,28 @@
+<div class="modal-dialog" data-ng-controller="ImportModelModalController">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button id="close-button" type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">{{ResourceUtility.getString('MODEL_IMPORT_TITLE')}}</h4>
+        </div>
+        <div data-ng-controller="jsonUploaderCtrl">
+            <div class="modal-body" data-ng-show="importing">
+                <div class="loader"> </div>
+                <h2 class="text-center">{{ResourceUtility.getString('MODEL_IMPORT_WAIT')}}</h2>
+            </div>
+            <div class="modal-body" data-ng-show="!importing && !showImportSuccess">
+                <input type="file" json-uploader="jsonFile"/>
+                <div class="global-error" data-ng-show="showImportError">
+                    <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{importErrorMsg}}</span>
+                    <button class="close btn btn-link" data-ng-click="showImportError = false;"><i class="fa fa-times fa-inverse"></i></button>
+                </div>
+            </div>
+            <div class="modal-body" data-ng-show="showImportSuccess">
+                <h2 class="text-center">{{ResourceUtility.getString('MODEL_IMPORT_SUCCESS')}}</h2>
+            </div>
+            <div class="modal-footer">
+                <button data-ng-hide="showImportSuccess" class="btn btn-primary" data-ng-click="uploadFile()" data-ng-class="{disabled: importing}">{{ResourceUtility.getString('MODEL_IMPORT_UPLOAD')}}</button>
+                <button data-ng-show="showImportSuccess" class="btn btn-primary" data-ng-click="okClicked()">{{ResourceUtility.getString('BUTTON_OK_LABEL')}}</button>
+            </div>
+        </div>
+    </div>
+</div>

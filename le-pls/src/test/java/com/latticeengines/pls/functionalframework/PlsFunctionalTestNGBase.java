@@ -11,7 +11,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.SessionFactory;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,9 +82,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
-
-    @Autowired
-    private SessionFactory sessionFactory;
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;

@@ -5,7 +5,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
-import org.hibernate.SessionFactory;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -53,8 +52,8 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Autowired
     private TenantDao tenantDao;
 
-    @Autowired
-    private SessionFactory sessionFactory;
+//    @Autowired
+//    private SessionFactory sessionFactory;
 
     @Override
     public BaseDao<ModelSummary> getDao() {
@@ -156,7 +155,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         }
  
         KeyValue kv = keyValueDao.findByKey(KeyValue.class, detailsPid);
-        if (kv.getTenantId() != summary.getTenantId()) {
+        if (!kv.getTenantId().equals(summary.getTenantId())) {
             log.error("Model and detail tenants are different!");
         }
         keyValueDao.delete(kv);

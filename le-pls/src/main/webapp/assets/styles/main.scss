@@ -280,6 +280,38 @@ Model-detail
   padding-bottom: 3em;
 }
 
+.model-mgmt p,h4 {
+  margin-left: 20%;
+}
+
+.model-mgmt table {
+  width: 60%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.model-mgmt table th {
+  min-width: 150px;
+}
+
+.model-mgmt table tbody tr:last-of-type {
+  border-bottom: #ccc solid 1px;
+}
+
+.model-mgmt-error {
+  border-radius: 4px 4px 4px 4px;
+  margin-top: 0.5em;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.panel-body.model-mgmt {
+  margin-top: 8em;
+  padding-top: 4em;
+  padding-bottom: 3em;
+}
+
 .leads-table .data-table {
   border: none;
 }

@@ -1,17 +1,10 @@
 package com.latticeengines.pls.controller;
 
-import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.Predictor;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
-import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
-import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
-import com.latticeengines.pls.service.impl.ModelSummaryParser;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,9 +15,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
+import com.latticeengines.domain.exposed.pls.AttributeMap;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.Predictor;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.TenantEntityMgr;
+import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
+import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
+import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.pls.service.impl.ModelSummaryParser;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
 
 @Api(value = "modelsummary", description = "REST resource for model summaries")
 @RestController
@@ -40,6 +43,9 @@ public class ModelSummaryResource {
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
+
+    @Autowired
+    private ModelSummaryService modelSummaryService;
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;
@@ -79,28 +85,13 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Register a model summary")
     @PreAuthorize("hasRole('Create_PLS_Models')")
     public ModelSummary createModelSummary(@RequestBody ModelSummary modelSummary, @RequestParam(value = "raw", required = false) boolean usingRaw, HttpServletRequest request) {
-
-        if (usingRaw) {
-            modelSummary = modelSummaryParser.parse("", modelSummary.getRawFile());
-        }
-
-        // avoid id conflict
-        int version = 0;
-        String possibleID = modelSummary.getId();
-        String name = modelSummaryParser.parseOriginalName(modelSummary.getName());
-        ModelSummary existingSummary = getModelSummary(possibleID);
-        while (existingSummary != null) {
-            possibleID = modelSummary.getId().replace(name, name + "-" + String.format("%03d", ++version));
-            existingSummary = getModelSummary(possibleID);
-        }
-        modelSummary.setId(possibleID);
-        if (version > 0) {
-            modelSummary.setName(modelSummary.getName().replace(name, name + "-" + String.format("%03d", version)));
-        }
+        if (usingRaw) modelSummary = modelSummaryParser.parse("", modelSummary.getRawFile());
 
         Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
         Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
         if (tenant == null) { return null; }
+
+        modelSummaryService.resolveNameIdConflict(modelSummary, tenant.getId());
 
         tenant = tenantEntityMgr.findByTenantId(tenant.getId());
         modelSummary.setTenant(tenant);

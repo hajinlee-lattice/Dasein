@@ -110,11 +110,7 @@
 					"Widgets" : [{
 							"ID" : "modelListTileRepeater",
 							"Type" : "RepeaterWidget",
-							"Sorts" : [{
-									"Property" : "DisplayName",
-									"IsAscending" : true
-								}
-							],
+							"Sorts" : [],
 							"Widgets" : [{
 									"ID" : "modelListTileWidget",
 									"Type" : "ModelListTileWidget",
