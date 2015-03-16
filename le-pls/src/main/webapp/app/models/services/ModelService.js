@@ -306,6 +306,11 @@ angular.module('mainApp.models.services.ModelService', [
             RawFile: json
         };
 
+        var result = {
+            Success: false,
+            ResultErrors: ''
+        };
+
         $http({
             method: 'POST',
             url: '/pls/modelsummaries?raw=true',
@@ -316,13 +321,13 @@ angular.module('mainApp.models.services.ModelService', [
         })
         .success(function(data, status, headers, config) {
             if (data == null) {
-                var result = {
+                result = {
                     Success: false,
                     ResultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
                 };
                 deferred.resolve(result);
             } else {
-                var result = {
+                result = {
                     Success: true,
                     ResultErrors: null
                 };

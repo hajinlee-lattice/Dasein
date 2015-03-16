@@ -14,8 +14,13 @@ angular.module('mainApp.appCommon.widgets.ModelListCreationHistoryWidget', [
             return;
         }
 
-        ModelService.undoDeletedModel(modelId);
-        $rootScope.$broadcast(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
+        ModelService.undoDeletedModel(modelId).then(function(result){
+            if (result.Success) {
+                $rootScope.$broadcast(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
+            } else {
+                //TODO:song handle errors
+            }
+        });
     };
 
     $scope.importClicked = function() {
