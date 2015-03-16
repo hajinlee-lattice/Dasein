@@ -67,7 +67,7 @@ describe('smoketest main flow of app', function() {
     });  
 
     it('should verify nonadmins do not see admin functionality', function () {    
-        loginPage.loginAsNonAdmin();
+      //  loginPage.loginAsNonAdmin();
 
      //   logoutPage.logoutAsNonAdmin();
     });  

@@ -1,6 +1,7 @@
 describe('user management', function() {
 
     var params = browser.params;
+    console.log(params);
 
     var loginPage = require('./po/login.po');
     var logoutPage = require('./po/logout.po');
@@ -9,6 +10,7 @@ describe('user management', function() {
     var userManagement = require('./po/usermgmt.po');
     var numOfUsers = 0;
     var newUserEmail;
+    var newUserPassword;
 
     function randomName()
     {
@@ -21,29 +23,25 @@ describe('user management', function() {
         return text;
     }
 
-    it('should login as a non-admin user', function () {
+    it('should verify user management is invisible to non-admin users', function () {
         loginPage.loginAsNonAdmin();
 
         tenants.getTenantByIndex(params.tenantIndex).click();
         browser.waitForAngular();
-        browser.driver.sleep(1000);
-    }, 60000);
+        browser.driver.sleep(2000);
 
-    it('should verify user management is invisible to non-admin users', function () {
         // check existence of Manage Users link
         userDropdown.getUserLink(params.nonAdminDisplayName).click().then(function(){
             expect(element(by.linkText('Manage Users')).isPresent()).toBe(false);
         });
         browser.waitForAngular();
         browser.driver.sleep(2000);
-    });
 
-    it('should logout as a non-admin user', function () {
         userDropdown.getUserLink(params.nonAdminDisplayName).click().then(function(){
+            browser.driver.sleep(500);
             logoutPage.logoutAsNonAdmin();
         });
-        browser.driver.sleep(2000);
-    });
+    }, 60000);
 
     it('should login as an admin users', function () {
         loginPage.loginAsAdmin();
@@ -52,7 +50,7 @@ describe('user management', function() {
         tenants.getTenantByIndex(params.tenantIndex).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-    }, 60000);
+    }, 50000);
 
     it('should see user management link', function () {
         // check existence of Manage Users link
@@ -74,15 +72,13 @@ describe('user management', function() {
         });
     });
 
-    it('should see add new user modal', function () {
+    it('should be able to canceling by clicking cancel button', function () {
         // popup add user
         userManagement.getAddNewUserButton().click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
         expect(userManagement.getAddNewUserModal().isDisplayed()).toBe(true);
-    });
 
-    it('should be able to canceling by clicking cancel button', function () {
         var email = randomName() + '@e2e.com';
         element(by.model('user.FirstName')).sendKeys('E2E');
         element(by.model('user.LastName')).sendKeys('Tester');
@@ -96,10 +92,7 @@ describe('user management', function() {
 
         // check cancel by button
         expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
-    });
 
-    it('should be able to canceling by clicking cross symbol', function () {
-        var email = randomName() + '@e2e.com';
         // add a user
         userManagement.getAddNewUserButton().click();
         browser.waitForAngular();
@@ -136,7 +129,7 @@ describe('user management', function() {
 
         expect(userManagement.getAddNewUserSuccessAlert().isDisplayed()).toBe(true);
         userManagement.getAddNewUserSuccessAlert().getText().then(function(text){
-            //console.log(text);
+            newUserPassword = text.split('temporary password: ')[1];
         });
 
         userManagement.getAddNewUserSuccessOKButton().click();
@@ -145,9 +138,86 @@ describe('user management', function() {
 
         expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers + 1);
 
+        logoutPage.logoutAsAdmin();
+    });
+
+    it('should be able to login the new user', function () {
+        loginPage.loginUser(newUserEmail, newUserPassword);
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        expect(element(by.css('h1')).getText()).toEqual('All Models');
+
+        logoutPage.logout("E2E Tester");
+    });
+
+    it('should be able to add an exsiting user', function () {
+        loginPage.loginAsAdmin();
+        tenants.getTenantByIndex(params.alternativeTenantIndex).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        // check existence of Manage Users link
+        userDropdown.getUserLink(params.adminDisplayName).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+        element(by.linkText('Manage Users')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+        userManagement.getAddNewUserButton().click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        element(by.model('user.FirstName')).sendKeys('E2E');
+        element(by.model('user.LastName')).sendKeys('Tester');
+        element(by.model('user.Email')).sendKeys(newUserEmail);
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+        userManagement.getAddNewUserSaveButton().click();
+        browser.waitForAngular();
+        browser.driver.sleep(3000);
+
+        expect(element(by.xpath('//div[@data-ng-show="showExistingUser"]')).isDisplayed()).toBe(true);
+        element(by.id('add-user-btn-ok-2')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(3000);
+
+        element(by.buttonText('OK')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(3000);
+
+        logoutPage.logoutAsAdmin();
+    }, 60000);
+
+
+    it('should be able to login the new user to the second tenant', function () {
+        loginPage.loginUser(newUserEmail, newUserPassword);
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        tenants.getTenantByIndex(params.alternativeTenantIndex).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        expect(element(by.css('h1')).getText()).toEqual('All Models');
+
+        logoutPage.logout("E2E Tester");
     });
 
     it('should verify delete user', function () {
+        loginPage.loginAsAdmin();
+        tenants.getTenantByIndex(params.tenantIndex).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        userDropdown.getUserLink(params.adminDisplayName).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        element(by.linkText('Manage Users')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(2000);
+
         userManagement.selectUser(newUserEmail);
         browser.waitForAngular();
         browser.driver.sleep(1000);
@@ -163,13 +233,55 @@ describe('user management', function() {
         expect(element(by.xpath('//div[@data-ng-show="successUsers.length > 0"]')).isDisplayed()).toBe(true);
         element(by.id('delete-user-btn-ok')).click();
         browser.waitForAngular();
-        browser.driver.sleep(1000);
+        browser.driver.sleep(3000);
         expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
 
         logoutPage.logoutAsAdmin();
+    }, 60000);
 
-        browser.driver.sleep(2000);
+    it('should verify that the new user will be automatically attached the second tenant', function () {
+        loginPage.loginUser(newUserEmail, newUserPassword);
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        expect(element(by.css('h1')).getText()).toEqual('All Models');
+
+        logoutPage.logout("E2E Tester");
     });
+
+    it('should be able to hard delete the new user', function () {
+        loginPage.loginAsAdmin();
+        tenants.getTenantByIndex(params.alternativeTenantIndex).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        userDropdown.getUserLink(params.adminDisplayName).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        element(by.linkText('Manage Users')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(2000);
+
+        userManagement.selectUser(newUserEmail);
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        userManagement.getDeleteUsersButton().click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        element(by.id('delete-user-btn-ok')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        expect(element(by.xpath('//div[@data-ng-show="successUsers.length > 0"]')).isDisplayed()).toBe(true);
+        element(by.id('delete-user-btn-ok')).click();
+        browser.waitForAngular();
+        browser.driver.sleep(3000);
+
+        logoutPage.logoutAsAdmin();
+    }, 60000);
 
 });
 
