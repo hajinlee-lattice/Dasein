@@ -71,6 +71,9 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
 
     var widgetConfig = $scope.widgetConfig;
     var metadata = $scope.metadata;
+    if( Object.prototype.toString.call( $scope.data ) !== '[object Array]' ) {
+        $scope.data = [$scope.data];
+    }
     var data = $scope.data;
     $scope.mayEditUsers = metadata.mayAddUser;
 
