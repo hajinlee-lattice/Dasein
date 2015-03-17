@@ -29,7 +29,7 @@ public class ScoreHistoryEntry {
     @Column(name = "model_name")
     public String modelName;
     @Column(name = "model_version")
-    public int modelVersion;
+    public Integer modelVersion;
 
     @Column
     public String totality;
