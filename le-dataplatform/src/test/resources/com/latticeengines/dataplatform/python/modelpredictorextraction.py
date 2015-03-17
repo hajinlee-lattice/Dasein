@@ -77,20 +77,23 @@ def main(argv):
                 writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predictor, predictorElement)
                 
             if (len(otherPredictorElements)  > 0):
-                mergedPredictorElement = mergePredictorElements(otherPredictorElements)
+                mergedPredictorElement = mergePredictorElements(otherPredictorElements, averageProb)
                 writePredictorElement(debugFlag, len, averageProb, csvFile, dictArray, predictor, mergedPredictorElement)
 
-def mergePredictorElements(otherElements):
+def mergePredictorElements(otherElements, averageProb):
     mergedElement = dict()
     mergedElement["Values"] = ["Other"]
     mergedCount = 0
-    mergedLift = 0
+    mergedEvents = 0;
     for element in otherElements:
-        mergedCount += element["Count"] if element["Count"] is not None else 0
-        mergedLift += element["Lift"] if element["Lift"] is not None else 0
-        
+        leadCount = element["Count"]
+        mergedCount += leadCount if leadCount is not None else 0
+        if (element["Lift"] is not None and leadCount is not None):
+            mergedEvents += element["Lift"] * averageProb * leadCount; 
+            
     mergedElement["Count"] = mergedCount
-    mergedElement["Lift"] = mergedLift / float(len(otherElements))
+    if (mergedCount != 0) :
+        mergedElement["Lift"] = mergedEvents / float(mergedCount) / averageProb
     return mergedElement
     
 def isMergeWithOther(predictor, element, dictArray):
