@@ -20,8 +20,16 @@ public class SkaldProperties {
         return getProperty("skald.matcher.address");
     }
 
-    public String getHistoryConnection() {
-        return getProperty("skald.history.connection");
+    public String getHistoryAddress() {
+        return getProperty("skald.history.address");
+    }
+
+    public String getHistoryUser() {
+        return getProperty("skald.history.user");
+    }
+
+    public String getHistoryPassword() {
+        return getProperty("skald.history.password");
     }
 
     private String getProperty(String name) {
