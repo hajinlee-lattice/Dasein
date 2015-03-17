@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "ScoreHistory")
+@Table(name = "score_history")
 public class ScoreHistoryEntry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,19 +16,19 @@ public class ScoreHistoryEntry {
 
     @Column(nullable = false)
     public String space;
-    @Column
+    @Column(name = "record_id")
     public String recordID;
 
-    @Column(nullable = false)
+    @Column(name = "request_id", nullable = false)
     public String requestID;
     @Column(nullable = false)
     long received;
     @Column(nullable = false)
     long duration;
 
-    @Column
+    @Column(name = "model_name")
     public String modelName;
-    @Column
+    @Column(name = "model_version")
     public int modelVersion;
 
     @Column
