@@ -6,10 +6,13 @@ angular.module('mainApp.appCommon.utilities.EvergageUtility', [])
         if (options == null) {
             return;
         }
-        var dataset = this.GetEnvironment(window.location.hostname);
-        var company = this.GetDeploymentName(window.location.pathname);
+        var dataset = 'lp_multitenant_production';
         var evergageAccount = 'latticeengines';
-        var userName = company + "-";
+        var userName = '';
+
+        if (options.company != null) {
+            username += options.company + "-";
+        }        
         
         // Add title if available
         if (options.title != null) {
@@ -21,10 +24,6 @@ angular.module('mainApp.appCommon.utilities.EvergageUtility', [])
         } else {
             userName += Math.floor((Math.random()*1000)+1);
         }
-        
-        if (options.datasetPrefix != null) {
-            dataset = options.datasetPrefix + dataset;
-        }
 
         //TODO: entry point for Evergage user title story.
         // _aaq is created on the salesprism.aspx page so it becomes a global variable.
@@ -33,7 +32,7 @@ angular.module('mainApp.appCommon.utilities.EvergageUtility', [])
                   ['setDataset', dataset], 
                   ['setUseSiteConfig', true],
                   ['setUser', userName],
-                  ['setCompany', company],
+                  ['setCompany', options.company],
                   ['setAccountType', 'Standard'],
                   ['setLoggingLevel', 'NONE']);
 
