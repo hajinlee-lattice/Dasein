@@ -322,14 +322,7 @@ module.exports = function (grunt) {
         options: {        
             configFile: '<%= testenv.protractorConf %>',
             noColor: false,
-            keepAlive: false, // don't keep browser process alive after failures                       
-            args: {
-                allScriptsTimeout: 110000,
-                jasmineNodeOpts: {
-                    showColors: true,
-                    defaultTimeoutInterval: 120000
-                }
-            }                     
+            keepAlive: false // don't keep browser process alive after failures                                           
         },
         chrome: {           
             options: { 

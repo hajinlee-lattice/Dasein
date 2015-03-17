@@ -4,6 +4,7 @@ exports.config = {
     specs: ['../**/*_spec.js'],
     //specs: ['../**/mainflow_spec.js'],
     //specs: ['../**/usermgmt_spec.js'],
+    //specs: ['../**/leadsample_spec.js'],
 
 	params: {
 		tenantIndex:            0,
@@ -15,6 +16,13 @@ exports.config = {
         nonAdminUsername:       'lming@lattice-engines.com',
         nonAdminPassword:       'admin'
 	},
+
+    allScriptsTimeout: 110000,
+
+    jasmineNodeOpts: {
+        showColors: true,
+        defaultTimeoutInterval: 120000
+    },    
 
     onPrepare: function() {
     	require('jasmine-reporters');

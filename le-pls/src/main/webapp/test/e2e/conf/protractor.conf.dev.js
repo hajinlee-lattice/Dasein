@@ -4,8 +4,22 @@ exports.config = {
     specs: ['../**/*_spec.js'],
 
 	params: {
-		tenantIndex: 1
+		tenantIndex: 1,
+        alternativeTenantIndex: 1,
+        adminDisplayName:       'Everything IsAwesome',
+        adminUsername:          'bnguyen@lattice-engines.com',
+        adminPassword:          'tahoe',
+        nonAdminDisplayName:    'General User',
+        nonAdminUsername:       'lming@lattice-engines.com',
+        nonAdminPassword:       'admin'        
 	},
+
+    allScriptsTimeout: 110000,
+
+    jasmineNodeOpts: {
+        showColors: true,
+        defaultTimeoutInterval: 120000
+    },  
 
     onPrepare: function() {
     	require('jasmine-reporters');
