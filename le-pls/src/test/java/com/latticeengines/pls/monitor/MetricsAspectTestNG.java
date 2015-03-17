@@ -95,6 +95,7 @@ public class MetricsAspectTestNG extends PlsFunctionalTestNGBase {
         Assert.assertTrue(logs.get(2).contains(
                 "Metrics for API=GlobalAuthenticationService.authenticateUser(..) ElapsedTime="));
         Assert.assertTrue(logs.get(2).contains("Track Id="));
+        Assert.assertTrue(logs.get(2).contains("Ticket Id="));
 
     }
 }

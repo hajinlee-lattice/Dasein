@@ -7,6 +7,10 @@ import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.latticeengines.pls.security.TicketAuthenticationToken;
 
 @Aspect
 public class MetricsAspect {
@@ -45,8 +49,15 @@ public class MetricsAspect {
 
         long endTime = System.currentTimeMillis();
 
-        log.info(String.format("Metrics for API=%s ElapsedTime=%d ms Track Id=%s", joinPoint.getSignature()
-                .toShortString(), endTime - startTime, trackId));
+        String ticketId = "";
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth instanceof TicketAuthenticationToken) {
+            TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
+            ticketId = token.getSession().getTicket().getUniqueness();
+        }
+        
+        log.info(String.format("Metrics for API=%s ElapsedTime=%d ms Track Id=%s Ticket Id=%s", joinPoint.getSignature()
+                .toShortString(), endTime - startTime, trackId, ticketId));
 
         return retVal;
     }
