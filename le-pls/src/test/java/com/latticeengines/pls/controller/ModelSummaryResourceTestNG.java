@@ -239,6 +239,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(response.size(), originalNumModels);
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void postModelSummariesUsingRaw() throws IOException {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);

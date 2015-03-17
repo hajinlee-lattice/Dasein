@@ -5,6 +5,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -39,6 +40,8 @@ import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.UserRegistration;
+import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
@@ -113,6 +116,41 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         } catch (Exception e) {
             log.info("User " + username + " already created.");
         }
+    }
+    
+    protected boolean createTenantByRestCall(String tenantName) {
+        Tenant tenant = new Tenant();
+        tenant.setId(tenantName);
+        tenant.setName(tenantName);
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        return restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class, new HashMap<>());
+    }
+    
+    protected boolean createAdminUserByRestCall(String tenant, String username, String email, String firstName, String lastName,
+            String password) {
+        UserRegistrationWithTenant userRegistrationWithTenant = new UserRegistrationWithTenant();
+        userRegistrationWithTenant.setTenant(tenant);
+        UserRegistration userRegistration = new UserRegistration();
+        userRegistrationWithTenant.setUserRegistration(userRegistration);
+        User user = new User();
+        user.setActive(true);
+        user.setEmail(email);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setUsername(username);
+        Credentials creds = new Credentials();
+        creds.setUsername(username);
+        creds.setPassword(password);
+        userRegistration.setUser(user);
+        userRegistration.setCredentials(creds);
+
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+
+        
+        return restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/users",
+                userRegistrationWithTenant, Boolean.class);
     }
 
     protected String getRestAPIHostPort() {
@@ -330,6 +368,14 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
                 modelSummaryEntityMgr.create(summary2);
             }
+        }
+    }
+    
+    protected void deleteUser(String username) {
+        try {
+            globalUserManagementService.deleteUser(username);
+        } catch (Exception e) {
+            log.warn(e);
         }
     }
 

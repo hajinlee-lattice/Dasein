@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +14,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.TenantEntityMgr;
+import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
+import com.latticeengines.pls.service.TenantService;
+import com.latticeengines.pls.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -20,16 +24,21 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(value = "/admin")
 public class AdminResource extends InternalResourceBase {
+    @SuppressWarnings("unused")
+    private static final Log log = LogFactory.getLog(AdminResource.class);
     
     @Autowired
-    private TenantEntityMgr tenantEntityMgr;
+    private TenantService tenantService;
+    
+    @Autowired
+    private UserService userService;
 
     @RequestMapping(value = "/tenants", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Add a PLS tenant")
     public Boolean addTenant(@RequestBody Tenant tenant, HttpServletRequest request) {
         checkHeader(request);
-        tenantEntityMgr.create(tenant);
+        tenantService.registerTenant(tenant);
         return true;
     }
 
@@ -38,9 +47,15 @@ public class AdminResource extends InternalResourceBase {
     @ApiOperation(value = "Get list of registered tenants")
     public List<Tenant> getTenants(HttpServletRequest request) {
         checkHeader(request);
-        return tenantEntityMgr.findAll();
+        return tenantService.getAllTenants();
     }
     
+    @RequestMapping(value = "/users", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Add a PLS admin user")
+    public Boolean addAdminUser(@RequestBody UserRegistrationWithTenant userRegistrationWithTenant, HttpServletRequest request) {
+        checkHeader(request);
+        return userService.addAdminUser(userRegistrationWithTenant);
+    }
     
-
 }
