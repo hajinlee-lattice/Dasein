@@ -37,16 +37,16 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     @Autowired
     private PropDataMadisonEntityMgr propDataMadisonEntityMgr;
 
-    private String setupProgress(Date date, MadisonLogicDailyProgress dailyProgress) throws Exception {
+    private String setupProgress(Date date, MadisonLogicDailyProgress dailyProgress, String tableName) throws Exception {
         dailyProgress.setCreateTime(date);
         dailyProgress.setFileDate(date);
-        dailyProgress.setDestinationTable("MadisonLogicDepivoted_test");
+        dailyProgress.setDestinationTable(tableName);
         dailyProgress.setStatus(MadisonLogicDailyProgressStatus.DEPIVOTED.getStatus());
         propDataMadisonEntityMgr.create(dailyProgress);
         return ((PropDataMadisonServiceImpl) propDataService).getHdfsDataflowIncrementalRawPathWithDate(date);
     }
 
-    @Test(groups = "functional")
+//    @Test(groups = "functional")
     public void importFromDB() throws Exception {
 
         String outputDir1 = null;
@@ -59,11 +59,11 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
             Date yesterday = DateUtils.addDays(today, -1);
 
             dailyProgress1 = new MadisonLogicDailyProgress();
-            outputDir1 = setupProgress(yesterday, dailyProgress1);
+            outputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_test1");
             downloadFile(dailyProgress1, outputDir1);
 
             dailyProgress2 = new MadisonLogicDailyProgress();
-            outputDir2 = setupProgress(today, dailyProgress2);
+            outputDir2 = setupProgress(today, dailyProgress2, "MadisonLogicDepivoted_test2");
             downloadFile(dailyProgress2, outputDir2);
 
         } finally {
@@ -97,14 +97,29 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
     }
 
-    @Test(groups = "functional", dependsOnMethods = "importFromDB")
+    @Test(groups = "functional")
     public void transform() throws Exception {
 
         ReflectionTestUtils.setField(propDataService, "numOfPastDays", 1);
-        propDataService.transform(new PropDataContext());
-        String transformOutput = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(new Date());
+        PropDataContext requestContext = new PropDataContext();
+        Date today = new Date();
+        String transformOutput = null;
+        
+        Date yesterday = DateUtils.addDays(today, -1);
+        requestContext.setProperty("today", yesterday);
+        propDataService.transform(requestContext);
+        transformOutput = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(yesterday);
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
                 ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput)));
+        
+        requestContext = new PropDataContext();
+        requestContext.setProperty("today", today);
+        propDataService.transform(requestContext);
+        transformOutput = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(today);
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
+                ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput)));
+        
+        
 
     }
 }

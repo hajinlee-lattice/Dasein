@@ -118,7 +118,10 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     @Override
     public PropDataContext transform(PropDataContext requestContext) {
         PropDataContext response = new PropDataContext();
-        Date today = new Date();
+        Date today = requestContext.getProperty("today", Date.class);
+        if (today == null) {
+            today = new Date();
+        }
         String targetDir = getHdfsWorkflowTotalRawPath(today);
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
