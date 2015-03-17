@@ -327,7 +327,7 @@ module.exports = function (grunt) {
                 allScriptsTimeout: 110000,
                 jasmineNodeOpts: {
                     showColors: true,
-                    defaultTimeoutInterval: 30000
+                    defaultTimeoutInterval: 120000
                 }
             }                     
         },
