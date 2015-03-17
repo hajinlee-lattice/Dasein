@@ -389,13 +389,13 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (elems.length === 1) { return elems; }
         var mergedElem = {
             name: "Other",
-            percentTotal: _.reduce(elems, function(memo, e){return memo + e.percentTotal}, 0)
+            percentTotal: _.reduce(elems, function(memo, e){return memo + e.percentTotal;}, 0)
         };
         mergedElem.lift = _.reduce(elems,
-            function(memo, e){ return e.lift * e.percentTotal + memo}, 0
+            function(memo, e){ return e.lift * e.percentTotal + memo;}, 0
         ) / mergedElem.percentTotal;
         return [mergedElem];
-    }
+    };
 
     this.FormatDataForAttributeValueChart = function (attributeName, attributeColor, modelSummary) {
         if (attributeName == null || modelSummary == null) {
