@@ -1,10 +1,9 @@
 angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.UnderscoreUtility',
-    'mainApp.appCommon.services.TopPredictorService'
+    'mainApp.appCommon.utilities.UnderscoreUtility'
 ])
 
-.controller('TopPredictorAttributeWidgetController', function ($scope, _, ResourceUtility, TopPredictorService) {
+.controller('TopPredictorAttributeWidgetController', function ($scope, _, ResourceUtility) {
     var data = $scope.data;
     $scope.attributeName = data.name;
     $scope.attributeFullDescription = data.description;
@@ -37,7 +36,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     var liftValues = _.map(chartData, function(d){ return parseFloat(d.lift.toPrecision(2)); });
     var bucketNames = _.map(chartData, "name");
     var percentLeads = _.map(chartData, function(d){ return parseInt(d.percentTotal); });
-    
+
     var chart,
         width = 150,
         left_width = 101,
@@ -210,7 +209,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("font-size", fontSize)
         .attr("text-anchor", "end")
         .attr("class", "lift")
-        .style("fill", "black")
+        .style("fill", "#666")
         .text(function(d) { return d + "x"; } );
         
     // This is the lift label to the right of the chart
@@ -236,7 +235,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("font-size", fontSize)
         .attr("text-anchor", "end")
         .attr("class", "lift")
-        .style("fill", "black")
+        .style("fill", "#666")
         .text(function(d) { return d + "%"; } );
     
     // This is the %Leads label to the right of the chart
@@ -258,7 +257,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             return (i * (barHeight + 2 * gap)) + 42; 
         })
         .attr("dy", commonDy)
-        .attr("font-weight", 600)
+        .attr("font-weight", "semi-bold")
         .attr("font-size", fontSize)
         .attr("text-anchor", "end")
         .style("fill", "black")
@@ -273,16 +272,17 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
                 word,
                 line = [],
                 lineNumber = 0,
-                lineHeight = 1.1, // ems
+                lineHeight = 1.05, // ems
                 y = text.attr("y"),
                 dy = parseFloat(text.attr("dy")),
                 tspan = text.text(null).append("tspan").attr("x", left_width - 5).attr("y", y).attr("dy", dy + "em");
             for (var i = 0; i < wordLength; i++) {
+                if (lineNumber >= 1) { break; }
                 word = words.pop();
                 line.push(word);
                 tspan.text(line.join(" "));
                 if (tspan.node().getComputedTextLength() > width) {
-                    dy = -0.36;
+                    dy = -0.5;
                     tspan.attr("dy", dy + "em");
                     line.pop();
                     tspan.text(line.join(" "));
@@ -292,13 +292,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             }
         });
     }
-        
+
+    $scope.showtitle = true;
 })
 
 .directive('topPredictorAttributeWidget', function () {
-    var directiveDefinitionObject = {
+    return {
         templateUrl: 'app/AppCommon/widgets/topPredictorWidget/TopPredictorAttributeWidgetTemplate.html'
     };
-
-    return directiveDefinitionObject;
 });

@@ -159,19 +159,19 @@ Model list title
 .model-title .edit button {
   background: transparent;
   border: 0;
-  color: #999;
+  color: #BFBFBF;
   margin-right: 0.3px;
   font-size: larger;
 }
 
 .model-title .edit button:hover {
-  color: #428bca;
+  color: #3888E8;
 }
 
 .model-title .editableform {
-  -webkit-border-radius: 10px;
-  -moz-border-radius: 10px;
-  border-radius: 10px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
 }
 
 .model-title .editableform .control-group {
@@ -186,8 +186,8 @@ Model list title
 }
 
 .model-title .editable-buttons {
-  margin-top: 0.5em;
-  margin-bottom: 2.7em;
+  margin-top: 1.5em;
+  margin-bottom: 4.5em;
 }
 
 .model-error {

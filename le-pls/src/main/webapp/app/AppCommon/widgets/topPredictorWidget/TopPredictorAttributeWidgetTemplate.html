@@ -17,7 +17,7 @@
 </div>
 <div data-ng-controller="TopPredictorAttributeWidgetController" class="attribute-hover">
     <div>
-        <div class="attribute-hover-header">
+        <div data-ng-if="showtitle" class="attribute-hover-header">
             <h4 style="border-left: {{attributeColor}} solid 6px;" title="{{attributeName}}">{{attributeName}}</h4>
             <p title="{{attributeFullDescription}}">{{attributeDescription}}</p>
         </div>

@@ -9,7 +9,6 @@
     <div class="model-title" data-ng-if="nameStatus.editing" data-ng-controller="ChangeModelNameController">
         <form novalidate class="form-inline editable-container editableform" name="form">
             <div class="control-group">
-                <h3 class="popover-title">{{ResourceUtility.getString('MODEL_TILE_EDIT_TITLE_LABEL')}}</h3>
                 <input type="text" class="form-control" data-ng-model="data.name" placeholder="{{data.name}}"/>
                 <div class="editable-buttons">
                     <button class="btn btn-secondary editable-cancel" data-ng-click="cancel($event)">Cancel</button>
