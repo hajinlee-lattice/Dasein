@@ -34,6 +34,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.showLoginForm = true;
     $scope.showForgotPassword = false;
     $scope.forgotPasswordUsername = "";
+    $scope.forgotPasswordErrorMessage = "";
     
     // Controller methods
     $scope.loginClick = function () {
@@ -162,14 +163,19 @@ angular.module('mainApp.login.controllers.LoginController', [
             if (result == null) {
                 return;
             }
-            
             if (result.Success === true) {
                 $scope.showForgotPassword = false;
                 $scope.resetPasswordSuccess = true;
             } else {
-                //TODO:pierce need to handle errors from forgot password
-                $scope.showForgotPasswordError = true;
-                $scope.forgotPasswordUsernameInvalid = false;
+                $scope.showForgotPasswordError = true;                
+
+                if (result.Error.errorCode == 'LEDP_18018') {
+                    $scope.forgotPasswordUsernameInvalid = true;
+                    $scope.forgotPasswordErrorMessage = ResourceUtility.getString('RESET_PASSWORD_USERNAME_INVALID');
+                } else {
+                    $scope.forgotPasswordUsernameInvalid = false;
+                    $scope.forgotPasswordErrorMessage = ResourceUtility.getString('RESET_PASSWORD_FAIL');
+                }                            
             }
         });
     };

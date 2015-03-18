@@ -6,7 +6,7 @@
             </p>
         </div>
         <div class="global-error" data-ng-show="showForgotPasswordError">
-            <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{ResourceUtility.getString('RESET_PASSWORD_FAIL')}}</span>
+            <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{forgotPasswordErrorMessage}}</span>
             <button class="close btn btn-link" data-ng-click="showForgotPasswordError = false;"><i class="fa fa-times fa-inverse"></i></button>
         </div>
 

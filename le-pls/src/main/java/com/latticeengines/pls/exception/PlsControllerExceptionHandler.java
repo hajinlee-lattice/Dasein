@@ -56,12 +56,12 @@ public class PlsControllerExceptionHandler {
     public ModelAndView handleException(LedpException e) {
         MappingJacksonJsonView jsonView = new MappingJacksonJsonView();
         String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils.getStackTrace(e);
-        log.error(stackTrace);
-        
+        log.error(e.getCode() + "\n" + stackTrace);
+
         List<BasicNameValuePair> details = new ArrayList<>();
-        details.add(new BasicNameValuePair("stackTrace", stackTrace));    
+        details.add(new BasicNameValuePair("stackTrace", stackTrace));
         alertService.triggerCriticalEvent(e.getMessage(), details);
-        
+
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", e.getCode().name(), //
                 "errorMsg", e.getMessage()));
 
@@ -73,11 +73,11 @@ public class PlsControllerExceptionHandler {
         MappingJacksonJsonView jsonView = new MappingJacksonJsonView();
         String stackTrace = ExceptionUtils.getFullStackTrace(e);
         log.error(stackTrace);
-        
+
         List<BasicNameValuePair> details = new ArrayList<>();
-        details.add(new BasicNameValuePair("stackTrace", stackTrace));    
+        details.add(new BasicNameValuePair("stackTrace", stackTrace));
         alertService.triggerCriticalEvent(e.getMessage(), details);
-        
+
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_00002.name(), //
                 "errorMsg", stackTrace));
     }

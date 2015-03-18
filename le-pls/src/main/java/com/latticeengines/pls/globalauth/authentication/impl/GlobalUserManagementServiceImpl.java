@@ -91,6 +91,12 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     public Boolean forgotLatticeCredentials(String username, String tenantId) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
+
+        // Validate that username exists before reset
+        if (getUserByEmail(username) == null) {
+            throw new LedpException(LedpCode.LEDP_18018, new String[] { username });
+        }
+
         try {
             log.info(String.format("Resetting credentials for user %s and tenant %s.", username, tenantId));
             String deploymentId = tenantId;
