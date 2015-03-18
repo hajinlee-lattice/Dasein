@@ -84,16 +84,16 @@ def mergePredictorElements(otherElements, averageProb):
     mergedElement = dict()
     mergedElement["Values"] = ["Other"]
     mergedCount = 0
-    mergedEvents = 0;
+    mergedLift = 0;
     for element in otherElements:
         leadCount = element["Count"]
         mergedCount += leadCount if leadCount is not None else 0
         if (element["Lift"] is not None and leadCount is not None):
-            mergedEvents += element["Lift"] * averageProb * leadCount; 
+            mergedLift += element["Lift"] * leadCount; 
             
     mergedElement["Count"] = mergedCount
     if (mergedCount != 0) :
-        mergedElement["Lift"] = mergedEvents / float(mergedCount) / averageProb
+        mergedElement["Lift"] = mergedLift / float(mergedCount)
     return mergedElement
     
 def isMergeWithOther(predictor, element, dictArray):
