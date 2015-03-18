@@ -25,8 +25,9 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         barHeight = 20,
         gap = 6,
         baseHeight = (barHeight + gap * 2) * chartData.length - gap * 2,
-        titleHeight = 120,
-        chartHeight = baseHeight + titleHeight,
+        titleHeight = 80,
+        labelHeight = 65,
+        chartHeight = baseHeight + labelHeight + titleHeight,
         labelSize = "10px",
         fontSize = "12px",
         commonDy = "0em",
@@ -41,7 +42,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         var attributeHover = $(".attribute-hover");
 
         $("#topPredictorAttributeHover").css("position", "absolute");
-        $("#topPredictorAttributeHover").css("top", wrapperTop + 0.5 * wrapperHeight - chartHeight *0.5  - 48 );
+        $("#topPredictorAttributeHover").css("top", wrapperTop + 0.5 * wrapperHeight - chartHeight *0.5  + 5 );
 
         if (xPos > 0) {
             $("#topPredictorAttributeHover").css("left", donutChartLocation.left + donutChartSvg.width() - 10);
@@ -67,7 +68,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
       .append('svg')
       .attr('class', 'chart')
       .attr('width', chartWidth)
-      .attr('height', chartHeight)
+      .attr('height', baseHeight + labelHeight)
       .append("g")
       .attr("transform", "translate(0, 0)");
 
@@ -142,7 +143,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("y", baseHeight + 55)
         .attr("dy", commonDy)
         .attr("font-size", labelSize)
-        .style("fill", "#999999")
+        .style("fill", "#999")
         .text(liftText);
 
     // These are the bars
@@ -173,7 +174,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("x2", function(d) { return x(d) + left_width; })
         .attr("y1", 20)
         .attr("y2", baseHeight + 20)
-        .style("fill", "#BBBBBB")
+        .style("fill", "#BBB")
         .attr('opacity', 1);
 
     // This is the 1x line label at the bottom
@@ -187,7 +188,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("font-weight", "semi-bold")
         .attr("font-size", "10px")
         .attr("text-anchor", "middle")
-        .style("fill", "#666666")
+        .style("fill", "#666")
         .text(function(d) { return d; } );
 
     // This is the 1x line label at the top
@@ -201,7 +202,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("font-weight", "semi-bold")
         .attr("font-size", fontSize)
         .attr("text-anchor", "middle")
-        .style("fill", "#666666")
+        .style("fill", "#666")
         .text(function(d) { return d + "x"; } );
 
     // These are the lift numbers to the right of the chart
@@ -227,7 +228,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("y", 5)
         .attr("dy", "0.36em")
         .attr("font-size", labelSize)
-        .style("fill", "#999999")
+        .style("fill", "#999")
         .text(liftText);
 
     // These are the percent numbers to the right of the chart
@@ -254,7 +255,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("y", 5)
         .attr("dy", "0.36em")
         .attr("font-size", labelSize)
-        .style("fill", "#999999")
+        .style("fill", "#999")
         .text(leadsText);
 
     // These are the bucket names to the left of the chart

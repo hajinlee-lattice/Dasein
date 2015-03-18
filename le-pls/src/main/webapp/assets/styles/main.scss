@@ -37,15 +37,14 @@ a#back-to-summary-link:hover {
 
 .attribute-hover > div {
     position: absolute;
-    background: #ffffff;
-    border: 4px solid rgba(229, 229, 229, 1);
+    background: white;
+    border: #E5E5E5 solid 3px;
     width: 350px;
     text-align: left;
 }
 
 .attribute-hover-header {
     padding: 10px 10px 0 10px;
-    height: 100px;
 }
 
 .attribute-hover p {
@@ -64,11 +63,10 @@ a#back-to-summary-link:hover {
     font-size: 16px;
 }
 
-.attribute-hover-left-arrow > div:after, 
+.attribute-hover-left-arrow > div:after,
 .attribute-hover-left-arrow > div:before {
     left: 100%;
     top: 50%;
-    border: solid transparent;
     content: " ";
     height: 0;
     width: 0;
@@ -83,12 +81,12 @@ a#back-to-summary-link:hover {
 }
 
 .attribute-hover-left-arrow > div:before {
-    border: rgba(255, 225, 255, 0) solid 18px;
+    border: rgba(255, 225, 255, 0) solid 17px;
     border-left-color: rgba(229, 229, 229, 1);
-    margin-top: -18px;
+    margin-top: -17px;
 }
 
-.attribute-hover-right-arrow > div:after, 
+.attribute-hover-right-arrow > div:after,
 .attribute-hover-right-arrow > div:before {
     right: 100%;
     top: 50%;
@@ -107,9 +105,9 @@ a#back-to-summary-link:hover {
 }
 
 .attribute-hover-right-arrow > div:before {
-    border: rgba(255, 225, 255, 0) solid 18px;
+    border: rgba(255, 225, 255, 0) solid 17px;
     border-right-color: rgba(229, 229, 229, 1);
-    margin-top: -18px;
+    margin-top: -17px;
 }
 
 .label-primary {
