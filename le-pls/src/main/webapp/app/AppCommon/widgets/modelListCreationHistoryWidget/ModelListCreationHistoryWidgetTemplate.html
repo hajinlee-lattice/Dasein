@@ -1,5 +1,8 @@
 <div class="panel panel-default" data-ng-controller="ModelListCreationHistoryWidgetController">
     <div class="panel-body model-mgmt">
+        <div class="text-left"><p>
+            <button id="model-mgmt-import-model-btn" class="btn btn-primary" data-ng-click="importClicked()">{{ResourceUtility.getString('MODEL_LIST_MODEL_IMPORT_LABEL')}}</button>
+        </p></div>
         <div class="table data-table">
             <h4>{{ResourceUtility.getString('MODEL_LIST_CREATION_HISTORY')}}</h4>
             <table>
@@ -24,8 +27,5 @@
                  </tbody>
             </table>
         </div>
-        <div class="text-left"><p>
-            <button id="model-mgmt-import-model-btn" class="btn btn-primary" data-ng-click="importClicked()">{{ResourceUtility.getString('MODEL_LIST_MODEL_IMPORT_LABEL')}}</button>
-        </p></div>
     </div>
 </div>

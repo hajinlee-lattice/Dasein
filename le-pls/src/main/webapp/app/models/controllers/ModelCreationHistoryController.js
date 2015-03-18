@@ -34,18 +34,14 @@ angular.module('mainApp.models.controllers.ModelCreationHistoryController', [
         $scope.loading = false;
         if (result != null && result.success === true) {
             var modelList = result.resultObj;
-            if (modelList == null || modelList.length === 0) {
-                $scope.showNoModels = true;
-            } else {
-                var contentContainer = $('#modelCreationHistoryContainer');
-                WidgetFrameworkService.CreateWidget({
-                    element: contentContainer,
-                    widgetConfig: screenWidgetConfig,
-                    metadata: null,
-                    data: modelList,
-                    parentData: modelList
-                });
-            }
+            var contentContainer = $('#modelCreationHistoryContainer');
+            WidgetFrameworkService.CreateWidget({
+                element: contentContainer,
+                widgetConfig: screenWidgetConfig,
+                metadata: null,
+                data: modelList,
+                parentData: modelList
+            });
         } else if (result.resultErrors === "NO TENANT FOUND") {
             $scope.showNoModels = true;
         }
