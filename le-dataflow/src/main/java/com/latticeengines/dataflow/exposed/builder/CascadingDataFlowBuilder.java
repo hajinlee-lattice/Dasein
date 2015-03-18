@@ -140,11 +140,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 if (files.size() > 0) {
                     sourcePath = files.get(0);
                 } else {
-                    throw new LedpException(LedpCode.LEDP_00000);
+                    throw new LedpException(LedpCode.LEDP_18023);
                 }
 
             } catch (Exception e) {
-                throw new LedpException(LedpCode.LEDP_00000, e);
+                throw new LedpException(LedpCode.LEDP_00002, e);
             }
         }
 
@@ -407,6 +407,17 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     @Override
     protected String addFunction(String prior, String expression, FieldList fieldsToApply, FieldMetadata targetField) {
+        return addFunctionWithExpression(prior, expression, fieldsToApply, targetField, null);
+    }
+
+    @Override
+    protected String addFunction(String prior, String expression, FieldList fieldsToApply, FieldMetadata targetField,
+            FieldList outputFields) {
+        return addFunctionWithExpression(prior, expression, fieldsToApply, targetField, outputFields);
+    }
+
+    private String addFunctionWithExpression(String prior, String expression, FieldList fieldsToApply,
+            FieldMetadata targetField, FieldList outputFields) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
 
         if (pm == null) {
@@ -417,10 +428,11 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 fieldsToApply.getFields(), //
                 getTypes(fieldsToApply.getFieldsAsList(), pm.getValue()));
 
-        return addFunction(prior, function, fieldsToApply, targetField);
+        return addFunction(prior, function, fieldsToApply, targetField, outputFields);
     }
 
-    private String addFunction(String prior, Function<?> function, FieldList fieldsToApply, FieldMetadata targetField) {
+    private String addFunction(String prior, Function<?> function, FieldList fieldsToApply, FieldMetadata targetField,
+            FieldList outputFields) {
         AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
 
         if (pm == null) {
@@ -434,10 +446,14 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             fieldStrategy = Fields.REPLACE;
         }
 
+        if (outputFields != null) {
+            fieldStrategy = convertToFields(outputFields.getFields());
+        }
         Pipe each = new Each(pm.getKey(), convertToFields(fieldsToApply.getFieldsAsList()), function, fieldStrategy);
 
         if (fieldStrategy != Fields.REPLACE) {
             fm.add(targetField);
+            fm = retainOutputFields(outputFields, fm);
         } else {
             Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(fm);
             FieldMetadata targetFm = nameToFieldMetadataMap.get(targetField.getFieldName());
@@ -452,6 +468,22 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         pipesAndOutputSchemas.put(each.getName(), new AbstractMap.SimpleEntry<>(each, fm));
         return doCheckpoint(each).getName();
+    }
+
+    private List<FieldMetadata> retainOutputFields(FieldList outputFields, List<FieldMetadata> fm) {
+        if (outputFields != null) {
+            List<FieldMetadata> newFieldMetadata = new ArrayList<>();
+            Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(fm);
+            Set<String> metadataKeySet = nameToFieldMetadataMap.keySet();
+            List<String> outputFieldList = outputFields.getFieldsAsList();
+            for (String outputField : outputFieldList) {
+                if (metadataKeySet.contains(outputField)) {
+                    newFieldMetadata.add(nameToFieldMetadataMap.get(outputField));
+                }
+            }
+            return newFieldMetadata;
+        }
+        return fm;
     }
 
     @Override
@@ -506,7 +538,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                         convertToFields(fieldsToApply.getFields()), //
                         convertToFields(targetField.getFieldName())), //
                 fieldsToApply, //
-                targetField);
+                targetField, null);
     }
 
     @Override

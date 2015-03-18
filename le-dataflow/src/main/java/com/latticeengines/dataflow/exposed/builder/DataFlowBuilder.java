@@ -50,6 +50,8 @@ public abstract class DataFlowBuilder {
     protected abstract String addFilter(String prior, String expression, FieldList filterFields);
 
     protected abstract String addFunction(String prior, String expression, FieldList fieldsToApply, FieldMetadata fieldToCreate);
+    protected abstract String addFunction(String prior, String expression, FieldList fieldsToApply, FieldMetadata targetField,
+            FieldList outputFields);
     
     protected abstract String addRowId(String prior, String fieldName, String tableName);
     
