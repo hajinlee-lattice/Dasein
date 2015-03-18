@@ -213,7 +213,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         setTimeout(function () {
             svg.append("svg:image")
                 .attr("class", "donut-chart-back-button")
-                .attr("xlink:href", "assets/images/Donut-Center-Back-Click.png")
+                .attr("xlink:href", "assets/images/Donut-Center-Back.png")
                 .attr("x", -14)
                 .attr("y", -13)
                 .attr("width", "29px")
@@ -222,7 +222,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
                     d3.select(this).attr("xlink:href", "assets/images/Donut-Center-Back-Hover.png");
                 })
                 .on("mouseout", function (d) {
-                    d3.select(this).attr("xlink:href", "assets/images/Donut-Center-Back-Click.png");
+                    d3.select(this).attr("xlink:href", "assets/images/Donut-Center-Back.png");
                 })
                 .on("click", function () {
                     $("#back-to-summary-link").click();

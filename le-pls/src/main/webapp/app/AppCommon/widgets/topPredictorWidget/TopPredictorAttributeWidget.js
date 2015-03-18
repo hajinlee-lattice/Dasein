@@ -280,7 +280,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
                 if (lineNumber >= 1) { break; }
                 word = words.pop();
                 line.push(word);
-                tspan.text(line.join(" "));
+                tspan.text(line.join(" ").substring(0, 14));
                 if (tspan.node().getComputedTextLength() > width) {
                     dy = -0.5;
                     tspan.attr("dy", dy + "em");
