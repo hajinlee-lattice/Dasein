@@ -31,6 +31,14 @@ a#back-to-summary-link:hover {
     cursor: pointer;
 }
 
+#attributes .data>div {
+  width: 20%;
+}
+
+#attributes .data>div#chart {
+  width: 60%;
+}
+
 .attribute-hover {
     position: relative;
 }
@@ -82,7 +90,7 @@ a#back-to-summary-link:hover {
 
 .attribute-hover-left-arrow > div:before {
     border: rgba(255, 225, 255, 0) solid 17px;
-    border-left-color: rgba(229, 229, 229, 1);
+    border-left-color: #E5E5E5;
     margin-top: -17px;
 }
 
@@ -106,7 +114,7 @@ a#back-to-summary-link:hover {
 
 .attribute-hover-right-arrow > div:before {
     border: rgba(255, 225, 255, 0) solid 17px;
-    border-right-color: rgba(229, 229, 229, 1);
+    border-right-color: #E5E5E5;
     margin-top: -17px;
 }
 
@@ -274,7 +282,7 @@ Model-detail
   padding-bottom: 3em;
 }
 
-.model-mgmt p,h4 {
+.model-mgmt p, .model-mgmt h4 {
   margin-left: 20%;
 }
 
