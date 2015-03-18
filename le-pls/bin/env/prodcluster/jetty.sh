@@ -93,7 +93,7 @@ JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.75.x86_64/jre
 
 
 
-JAVA_OPTIONS=(-XX:MaxPermSize=2048m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common.jar:/etc/hadoop/conf.empty -DPLS_PROPDIR=/etc/ledp -Djetty.keystore=/etc/pki/java/cacerts -Djetty.keystore.password=OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0  -Djetty.truststore=/etc/pki/java/cacerts -Djetty.truststore.password=OBF:1vn21ugu1saj1v9i1v941sar1ugw1vo0)
+JAVA_OPTIONS=(-XX:MaxPermSize=2048m -Dsqoop.throwOnError=true -Djetty.class.path=$JAVA_HOME/lib/tools.jar:$HADOOP_HOME/hadoop-common.jar:/etc/hadoop/conf.empty -DPLS_PROPDIR=/etc/ledp -Djavax.net.ssl.trustStore=/etc/ledp/bodcprodviweb73.prod.lattice.local.jks)
 JAVA_OPTIONS+=(-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=1099)
 
 usage()

@@ -10,7 +10,6 @@
     <properties>
         <le.rpm.version>1.0.27-SNAPSHOT</le.rpm.version>
     </properties>
-
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
@@ -31,6 +30,7 @@
             <properties>
                 <pls.properties.path>conf/env/devcluster</pls.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
+                <jks.name>bodcdevvcus209.dev.lattice.local.jks</jks.name>
             </properties>
         </profile>
         <profile>
@@ -45,6 +45,7 @@
             <properties>
                 <pls.properties.path>conf/env/intcluster</pls.properties.path>
                 <bin.env.path>bin/env/intcluster</bin.env.path>
+                <jks.name>bodcdevvcus209.dev.lattice.local.jks</jks.name>
             </properties>
         </profile>
         <profile>
@@ -58,6 +59,7 @@
             <properties>
                 <pls.properties.path>conf/env/qacluster</pls.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
+                <jks.name>bodcdevvcus209.dev.lattice.local.jks</jks.name>
             </properties>
         </profile>
         <profile>
@@ -71,6 +73,7 @@
             <properties>
                 <pls.properties.path>conf/env/prodcluster</pls.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
+                <jks.name>bodcprodviweb73.prod.lattice.local.jks</jks.name>
             </properties>
         </profile>
         <profile>
@@ -84,6 +87,7 @@
             <properties>
                 <pls.properties.path>conf/env/loadtest</pls.properties.path>
                 <bin.env.path>bin/env/loadtest</bin.env.path>
+                <jks.name>bodcdevvcus209.dev.lattice.local.jks</jks.name>
             </properties>
         </profile>
     </profiles>
@@ -124,7 +128,7 @@
                                     <location>${pls.properties.path}/pls.properties</location>
                                 </source>
                                 <source>
-                                    <location>certificates/bodcdevvcus209.dev.lattice.local.jks</location>
+                                    <location>certificates/${jks.name}</location>
                                 </source>
                             </sources>
                         </mapping>
