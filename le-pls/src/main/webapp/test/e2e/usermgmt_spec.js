@@ -1,7 +1,6 @@
 describe('user management', function() {
 
     var params = browser.params;
-    console.log(params);
 
     var loginPage = require('./po/login.po');
     var logoutPage = require('./po/logout.po');
@@ -177,7 +176,7 @@ describe('user management', function() {
         browser.waitForAngular();
         browser.driver.sleep(3000);
 
-        expect(element(by.xpath('//div[@data-ng-show="showExistingUser"]')).isDisplayed()).toBe(true);
+        expect(element.all(by.xpath('//div[@data-ng-show="showExistingUser"]')).first().isDisplayed()).toBe(true);
         element(by.id('add-user-btn-ok-2')).click();
         browser.waitForAngular();
         browser.driver.sleep(3000);
