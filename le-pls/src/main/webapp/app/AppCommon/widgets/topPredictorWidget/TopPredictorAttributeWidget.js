@@ -296,12 +296,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
                     if (lineNumber >= 1) { break; }
                     word = words.pop();
                     line.push(word);
-                    tspan.text(line.join(" ").substring(0, 14));
+                    tspan.text(line.join(" "));
                     if (tspan.node().getComputedTextLength() > width) {
                         dy = -0.5;
                         tspan.attr("dy", dy + "em");
                         line.pop();
-                        tspan.text(line.join(" "));
+                        tspan.text(line.join(" ").substring(0, 18));
                         line = [word];
                         tspan = text.append("tspan").attr("x", left_width - 5).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
                     }
