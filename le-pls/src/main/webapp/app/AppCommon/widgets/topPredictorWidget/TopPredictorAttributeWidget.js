@@ -14,7 +14,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         $scope.attributeColor = data.color;
 
         var chartData = data.elementList;
-        var liftValues = _.map(chartData, function(d){ return parseFloat(d.lift.toPrecision(2)); });
+        var liftValues = _.map(chartData, function(d){ return parseFloat(d.lift).toPrecision(2); });
         var bucketNames = _.map(chartData, "name");
         var percentLeads = _.map(chartData, function(d){ return parseInt(d.percentTotal); });
 
@@ -59,16 +59,16 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         }
         setHoverPosition($scope.mouseX, chartHeight);
 
+        var maxTicks = Math.ceil(d3.max(liftValues));
+        if (maxTicks == 1) {
+            maxTicks = 1.5;
+        } else {
+            maxTicks = maxTicks > 5 ? 5 : maxTicks;
+        }
         var x = d3.scale.linear()
-            .domain([0, Math.ceil(d3.max(liftValues))])
+            .domain([0, maxTicks])
             .range([0, width - 5]);
-
-        var maxTicks = d3.max(liftValues) > 5 ? 5 : d3.max(liftValues);
         var xTicks = x.ticks(maxTicks + 1);
-
-        _.each(xTicks, function(d) {
-            console.log(x(d) + left_width);
-        });
 
         chart = d3.select("#attributeChart")
             .append('svg')
