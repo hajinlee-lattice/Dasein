@@ -43,6 +43,7 @@ CURRENT_PASSWORD_LABEL=Current Password
 NEW_PASSWORD_LABEL=New Password
 CONFIRM_NEW_PASSWORD_LABEL=Confirm New Password
 LOGIN_PASSWORD_MATCH_ERROR=The new passwords do not match.
+LOGIN_PASSWORD_EMPTY_OLDPASSWORD=The current password is required.
 CHANGE_MODEL_NAME_ACCESS_DENIED=You do not have permission to change the model name.
 CHANGE_MODEL_NAME_CONFLICT=There is already a model with this name. Enter a new name to continue.
 CHANGE_PASSWORD_BAD_CREDS=The existing password is incorrect.

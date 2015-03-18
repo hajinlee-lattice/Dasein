@@ -28,13 +28,17 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
         $scope.oldPasswordInputError = StringUtility.IsEmptyString($scope.oldPassword) ? "error" : "";
         $scope.newPasswordInputError = StringUtility.IsEmptyString($scope.newPassword) ? "error" : "";
         $scope.confirmPasswordInputError = StringUtility.IsEmptyString($scope.confirmPassword) ? "error" : "";
-        
+
+        if ($scope.form.oldPassword.$error.required) {
+            $scope.validateErrorMessage = ResourceUtility.getString("LOGIN_PASSWORD_EMPTY_OLDPASSWORD");
+            $scope.oldPasswordInputError = "error";
+            return false;
+        }
+
         if ($scope.oldPasswordInputError === "error" || $scope.newPasswordInputError === "error" ||
         $scope.confirmPasswordInputError === "error") {
             return false;
         }
-
-
 
         if ($scope.newPassword !== $scope.confirmPassword) {
             $scope.validateErrorMessage = ResourceUtility.getString("LOGIN_PASSWORD_MATCH_ERROR");
@@ -43,7 +47,7 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
             return false;
         }
 
-        if (!PasswordUtility.validPassword($scope.newPassword)) {
+        if (!PasswordUtility.validPassword($scope.newPassword).Valid) {
             $scope.newPasswordInputError = "error";
             $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_HELP");
             return false;
