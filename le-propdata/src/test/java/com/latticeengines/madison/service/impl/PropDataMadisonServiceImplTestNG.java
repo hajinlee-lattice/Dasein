@@ -10,7 +10,6 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.ReflectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -29,13 +28,65 @@ import com.latticeengines.propdata.service.db.PropDataContext;
 public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
-    protected Configuration yarnConfiguration;
+    private Configuration yarnConfiguration;
 
     @Autowired
     private PropDataMadisonService propDataService;
 
     @Autowired
     private PropDataMadisonEntityMgr propDataMadisonEntityMgr;
+
+    private Date today;
+    private Date yesterday;
+    private String importOutputDir1 = null;
+    private MadisonLogicDailyProgress dailyProgress1 = null;
+    private String importOutputDir2 = null;
+    private MadisonLogicDailyProgress dailyProgress2 = null;
+
+    private String transformOutput1;
+    private String transformOutput2;
+
+    @BeforeClass
+    public void beforeClass() throws Exception {
+        today = new Date();
+        yesterday = DateUtils.addDays(today, -1);
+
+        dailyProgress1 = new MadisonLogicDailyProgress();
+        importOutputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_test1");
+        HdfsUtils.rmdir(yarnConfiguration, importOutputDir1);
+
+        dailyProgress2 = new MadisonLogicDailyProgress();
+        importOutputDir2 = setupProgress(today, dailyProgress2, "MadisonLogicDepivoted_test2");
+        HdfsUtils.rmdir(yarnConfiguration, importOutputDir2);
+
+        transformOutput1 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(yesterday);
+        HdfsUtils.rmdir(yarnConfiguration, transformOutput1);
+        transformOutput2 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(today);
+        HdfsUtils.rmdir(yarnConfiguration, transformOutput2);
+    }
+
+    @AfterClass
+    public void afterClass() throws Exception {
+        if (importOutputDir1 != null) {
+            HdfsUtils.rmdir(yarnConfiguration, importOutputDir1);
+        }
+        if (dailyProgress1 != null) {
+            propDataMadisonEntityMgr.delete(dailyProgress1);
+        }
+        if (importOutputDir2 != null) {
+            HdfsUtils.rmdir(yarnConfiguration, importOutputDir2);
+        }
+        if (dailyProgress2 != null) {
+            propDataMadisonEntityMgr.delete(dailyProgress2);
+        }
+
+        if (transformOutput1 != null) {
+            HdfsUtils.rmdir(yarnConfiguration, transformOutput1);
+        }
+        if (transformOutput2 != null) {
+            HdfsUtils.rmdir(yarnConfiguration, transformOutput2);
+        }
+    }
 
     private String setupProgress(Date date, MadisonLogicDailyProgress dailyProgress, String tableName) throws Exception {
         dailyProgress.setCreateTime(date);
@@ -46,45 +97,16 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         return ((PropDataMadisonServiceImpl) propDataService).getHdfsDataflowIncrementalRawPathWithDate(date);
     }
 
-//    @Test(groups = "functional")
+    @Test(groups = "functional")
     public void importFromDB() throws Exception {
 
-        String outputDir1 = null;
-        MadisonLogicDailyProgress dailyProgress1 = null;
-        String outputDir2 = null;
-        MadisonLogicDailyProgress dailyProgress2 = null;
+        downloadFile(dailyProgress1, importOutputDir1);
+        downloadFile(dailyProgress2, importOutputDir2);
 
-        try {
-            Date today = new Date();
-            Date yesterday = DateUtils.addDays(today, -1);
-
-            dailyProgress1 = new MadisonLogicDailyProgress();
-            outputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_test1");
-            downloadFile(dailyProgress1, outputDir1);
-
-            dailyProgress2 = new MadisonLogicDailyProgress();
-            outputDir2 = setupProgress(today, dailyProgress2, "MadisonLogicDepivoted_test2");
-            downloadFile(dailyProgress2, outputDir2);
-
-        } finally {
-            if (outputDir1 != null) {
-                // HdfsUtils.rmdir(yarnConfiguration, outputDir1);
-            }
-            if (dailyProgress1 != null) {
-                propDataMadisonEntityMgr.delete(dailyProgress1);
-            }
-            if (outputDir2 != null) {
-                // HdfsUtils.rmdir(yarnConfiguration, outputDir2);
-            }
-            if (dailyProgress2 != null) {
-                propDataMadisonEntityMgr.delete(dailyProgress2);
-            }
-
-        }
     }
 
     private void downloadFile(MadisonLogicDailyProgress dailyProgress, String outputDir) throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, outputDir);
+
         propDataService.importFromDB(new PropDataContext());
 
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, outputDir));
@@ -97,29 +119,22 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = "importFromDB")
     public void transform() throws Exception {
 
-        ReflectionTestUtils.setField(propDataService, "numOfPastDays", 1);
+        ReflectionTestUtils.setField(propDataService, "numOfPastDays", 30);
         PropDataContext requestContext = new PropDataContext();
-        Date today = new Date();
-        String transformOutput = null;
-        
-        Date yesterday = DateUtils.addDays(today, -1);
+
         requestContext.setProperty("today", yesterday);
         propDataService.transform(requestContext);
-        transformOutput = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(yesterday);
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
-                ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput)));
-        
+                ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput1)));
+
         requestContext = new PropDataContext();
         requestContext.setProperty("today", today);
         propDataService.transform(requestContext);
-        transformOutput = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(today);
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
-                ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput)));
-        
-        
+                ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput2)));
 
     }
 }

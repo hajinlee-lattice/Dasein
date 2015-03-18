@@ -102,8 +102,6 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             response.setProperty("applicationId", applicationId);
             response.setProperty("result", dailyProgress);
 
-            HdfsUtils.writeToFile(yarnConfiguration, getSuccessFile(targetDir),
-                    MadisonLogicDailyProgressStatus.FINISHED.getStatus());
             log.info("Finished job id=" + dailyProgress.getPid() + " applicaiton Id=" + applicationId);
 
         } catch (Exception ex) {
@@ -158,10 +156,10 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         List<String> sourcePaths = new ArrayList<>();
         sourcePaths.add(getHdfsDataflowIncrementalRawPathWithName(sourcePathRegEx) + "/*.avro");
 
-        Date yesterday = DateUtils.addDays(today, -1);
-        String yesterdayAggregation = getHdfsWorkflowTotalRawPath(yesterday);
+        Date pastday = DateUtils.addDays(today, numOfPastDays);
+        String yesterdayAggregation = getHdfsWorkflowTotalRawPath(pastday);
         if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(yesterdayAggregation))) {
-            sourcePaths.add(getHdfsWorkflowTotalRawPath(yesterday) + "/*.avro");
+            sourcePaths.add(getHdfsWorkflowTotalRawPath(pastday) + "/*.avro");
         }
         propDataMadisonDataFlowService.execute("MadisonLogic-" + getDateStringFormat(today), sourcePaths,
                 getHdfsWorkflowTotalRawPath(today));
@@ -170,23 +168,22 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     private String getSourcePathRegEx(List<Date> pastDays) {
         StringBuilder builder = new StringBuilder();
-        builder.append("");
+        builder.append("{");
         for (Date date : pastDays) {
             String formatted = getDateStringFormat(date);
             builder.append(formatted).append(",");
         }
         builder.setLength(builder.length() - 1);
-        builder.append("");
-        return builder.toString().replaceAll("\\-", "\\-");
+        builder.append("}");
+        return builder.toString();
 
     }
 
     private void getPastIncrementalPaths(Date today, List<Date> pastDays, List<String> pastDaysPaths) {
         try {
             String todayTotalAggregationPath = getHdfsWorkflowTotalRawPath(today);
-            if (HdfsUtils.fileExists(yarnConfiguration, todayTotalAggregationPath)
-                    && HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(todayTotalAggregationPath))) {
-                log.info("Today's aggregation is already done.");
+            if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(todayTotalAggregationPath))) {
+                log.info("Today's aggregation was already done.");
                 return;
             }
 
@@ -203,8 +200,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             for (int i = 0; i < numOfPastDays - 1; i++) {
                 date = DateUtils.addDays(date, -1);
                 path = getHdfsDataflowIncrementalRawPathWithDate(date);
-                if (HdfsUtils.fileExists(yarnConfiguration, path)
-                        && HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(path))) {
+                if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(path))) {
                     pastDays.add(date);
                     pastDaysPaths.add(path);
                 }
