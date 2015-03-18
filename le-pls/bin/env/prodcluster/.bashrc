@@ -16,5 +16,5 @@ export HADOOP_HOME=/usr/lib/hadoop
 export HADOOP_MAPRED_HOME=/usr/lib/hadoop
 export HADOOP_CONF=/etc/hadoop/conf.empty
 export SQOOP_HOME=/usr/lib/sqoop
-export JAVA_HOME=/usr/java/default
+export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk-1.7.0.75.x86_64/jre
 export MODEL_DL_QUARTZ_ENABLED=enabled
