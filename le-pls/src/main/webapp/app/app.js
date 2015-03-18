@@ -40,7 +40,8 @@ var mainApp = angular.module('mainApp', [
                     EvergageUtility.Initialize({
                         userID: data.Result.User.Identifier, 
                         title: data.Result.User.Title,
-                        datasetPrefix: "pls"
+                        datasetPrefix: "pls",
+                        company: data.Ticket.Tenants[0].DisplayName
                     });
                     
                     $scope.getLocaleSpecificResourceStrings(data.Result.User.Locale);

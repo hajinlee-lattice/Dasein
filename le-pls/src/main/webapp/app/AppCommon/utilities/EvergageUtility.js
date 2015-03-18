@@ -11,7 +11,7 @@ angular.module('mainApp.appCommon.utilities.EvergageUtility', [])
         var userName = '';
 
         if (options.company != null) {
-            username += options.company + "-";
+            userName += options.company + "-";
         }        
         
         // Add title if available
