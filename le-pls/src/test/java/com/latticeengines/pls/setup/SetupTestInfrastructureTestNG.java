@@ -28,13 +28,13 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class SetupTestEnvironmentTestNG extends PlsFunctionalTestNGBase {
-    private static final Log log = LogFactory.getLog(SetupTestEnvironmentTestNG.class);
+public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
+    private static final Log log = LogFactory.getLog(SetupTestInfrastructureTestNG.class);
     
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @BeforeClass(groups = "functional.production", enabled = true)
+    @BeforeClass(groups = "infrastructure", enabled = true)
     public void setup() throws Exception {
         tenantEntityMgr.deleteAll();
         List<Tenant> tenants = getTenants(5);
@@ -109,7 +109,7 @@ public class SetupTestEnvironmentTestNG extends PlsFunctionalTestNGBase {
         return tenants;
     }
 
-    @Test(groups = "functional.production")
+    @Test(groups = "infrastructure")
     public void dummy() {
 
     }
