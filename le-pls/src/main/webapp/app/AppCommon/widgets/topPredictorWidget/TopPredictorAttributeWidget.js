@@ -13,12 +13,36 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     }
     $scope.attributeColor = data.color;
     
-    function setHoverPosition(xPos) {
+    var chartData = data.elementList;
+    var liftValues = _.map(chartData, function(d){ return parseFloat(d.lift.toPrecision(2)); });
+    var bucketNames = _.map(chartData, "name");
+    var percentLeads = _.map(chartData, function(d){ return parseInt(d.percentTotal); });
+
+    var chart,
+        width = 150,
+        left_width = 101,
+        chartWidth = left_width + width + 40,
+        barHeight = 20,
+        gap = 6,
+        baseHeight = (barHeight + gap * 2) * chartData.length - gap * 2,
+        titleHeight = 120,
+        chartHeight = baseHeight + titleHeight,
+        labelSize = "10px",
+        fontSize = "12px",
+        commonDy = "0em",
+        labelDx = 0;
+
+    function setHoverPosition(xPos, chartHeight) {
+        var topPredictorWrapper = $("#top-predictor-wrapper");
+        var wrapperTop = topPredictorWrapper.offset().top;
+        var wrapperHeight = topPredictorWrapper.height();
         var donutChartSvg = $(".js-top-predictor-donut > svg");
         var donutChartLocation = donutChartSvg.offset();
         var attributeHover = $(".attribute-hover");
-        $("#topPredictorAttributeHover").css("top", donutChartLocation.top - 30);
-        
+
+        $("#topPredictorAttributeHover").css("position", "absolute");
+        $("#topPredictorAttributeHover").css("top", wrapperTop + 0.5 * wrapperHeight - chartHeight *0.5  - 48 );
+
         if (xPos > 0) {
             $("#topPredictorAttributeHover").css("left", donutChartLocation.left + donutChartSvg.width() - 10);
             attributeHover.removeClass("attribute-hover-left-arrow");
@@ -28,50 +52,35 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             attributeHover.removeClass("attribute-hover-right-arrow");
             attributeHover.addClass("attribute-hover-left-arrow");
         }
-        
+
         $("#topPredictorAttributeHover").show();
     }
-    setHoverPosition($scope.mouseX);
-    var chartData = data.elementList;
-    var liftValues = _.map(chartData, function(d){ return parseFloat(d.lift.toPrecision(2)); });
-    var bucketNames = _.map(chartData, "name");
-    var percentLeads = _.map(chartData, function(d){ return parseInt(d.percentTotal); });
+    setHoverPosition($scope.mouseX, chartHeight);
 
-    var chart,
-        width = 150,
-        left_width = 101,
-        barHeight = 20,
-        gap = 6,
-        baseHeight = (barHeight + gap * 2) * chartData.length,
-        labelSize = "10px",
-        fontSize = "12px",
-        commonDy = "0em",
-        labelDx = 0;
-    
     var x = d3.scale.linear()
         .domain([0, d3.max(liftValues) + 1])
         .range([0, width]);
-    
+
     var maxTicks = d3.max(liftValues) > 5 ? 5 : d3.max(liftValues);
     var xTicks = x.ticks(maxTicks + 1);
-    chart = d3.select("#attributeChart") 
+    chart = d3.select("#attributeChart")
       .append('svg')
       .attr('class', 'chart')
-      .attr('width', left_width + width + 40)
-      .attr('height', baseHeight + 80)
+      .attr('width', chartWidth)
+      .attr('height', chartHeight)
       .append("g")
       .attr("transform", "translate(0, 0)");
-    
+
     // These are the background bars that alternate
     chart.selectAll("rect.background")
         .data(liftValues)
         .enter().append("rect")
-        .attr("display", function(d, i) { 
-            return i % 2 == 1 ? "none" : null; 
-        }) 
+        .attr("display", function(d, i) {
+            return i % 2 == 1 ? "none" : null;
+        })
         .attr("x", left_width)
-        .attr("y", function(d, i) { 
-            return (i * (barHeight + 2 * gap)) + 24; 
+        .attr("y", function(d, i) {
+            return (i * (barHeight + 2 * gap)) + 24;
         })
         .attr("width", function (d) {
             return width + 80;
@@ -79,7 +88,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("height", barHeight + 8)
         .style("fill", "#EEF3F7")
         .attr('opacity', 0.7);
-        
+
     // These are the background ticks
     chart.selectAll("line")
         .data(xTicks)
@@ -94,7 +103,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             }
         })
         .attr("y2", baseHeight + 20);
-        
+
     // These are the background tick labels
     chart.selectAll(".rule")
         .data(xTicks)
@@ -118,12 +127,12 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             if (d === 0) {
                 return d;
             } else if (d === 1) {
-                return ""; 
+                return "";
             } else {
-                return d; 
+                return d;
             }
         });
-    
+
     // This is the lift label at the bottom of the chart
     var liftText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LIFT_LABEL").toUpperCase();
     chart.append("text")
@@ -135,14 +144,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("font-size", labelSize)
         .style("fill", "#999999")
         .text(liftText);
-        
+
     // These are the bars
     chart.selectAll("rect.bar")
         .data(liftValues)
         .enter().append("rect")
         .attr("x", left_width)
-        .attr("y", function(d, i) { 
-            return (i * (barHeight + 2 * gap)) + 28; 
+        .attr("y", function(d, i) {
+            return (i * (barHeight + 2 * gap)) + 28;
         })
         .attr("width", x)
         .attr("height", barHeight)
@@ -153,9 +162,9 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             } else {
                 return 0.4;
             }
-            
+
         });
-    
+
     // This is the 1x line
     chart.selectAll("line.baselineLift")
         .data([1])
@@ -166,7 +175,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("y2", baseHeight + 20)
         .style("fill", "#BBBBBB")
         .attr('opacity', 1);
-        
+
     // This is the 1x line label at the bottom
     chart.selectAll(".baselineLiftBottom")
         .data([1])
@@ -180,8 +189,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("text-anchor", "middle")
         .style("fill", "#666666")
         .text(function(d) { return d; } );
-    
-    // This is the 1x line label at the top    
+
+    // This is the 1x line label at the top
     chart.selectAll(".baselineLiftTop")
         .data([1])
         .enter().append("text")
@@ -194,14 +203,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("text-anchor", "middle")
         .style("fill", "#666666")
         .text(function(d) { return d + "x"; } );
-        
+
     // These are the lift numbers to the right of the chart
     chart.selectAll("text.lift")
         .data(liftValues)
         .enter().append("text")
         .attr("x", width + 135)
         .attr("y", function(d, i) {
-            return (i * (barHeight + 2 * gap)) + 42; 
+            return (i * (barHeight + 2 * gap)) + 42;
         })
         .attr("dx", -5)
         .attr("dy", commonDy)
@@ -211,7 +220,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("class", "lift")
         .style("fill", "#666")
         .text(function(d) { return d + "x"; } );
-        
+
     // This is the lift label to the right of the chart
     chart.append("text")
         .attr("x", width + 110)
@@ -220,14 +229,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("font-size", labelSize)
         .style("fill", "#999999")
         .text(liftText);
-    
+
     // These are the percent numbers to the right of the chart
     chart.selectAll("text.percentLeads")
         .data(percentLeads)
         .enter().append("text")
         .attr("x", width + 180)
-        .attr("y", function(d, i) { 
-            return (i * (barHeight + 2 * gap)) + 42; 
+        .attr("y", function(d, i) {
+            return (i * (barHeight + 2 * gap)) + 42;
         })
         .attr("dx", -5)
         .attr("dy", commonDy)
@@ -237,7 +246,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("class", "lift")
         .style("fill", "#666")
         .text(function(d) { return d + "%"; } );
-    
+
     // This is the %Leads label to the right of the chart
     var leadsText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LEADS_LABEL").toUpperCase();
     chart.append("text")
@@ -247,14 +256,14 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .attr("font-size", labelSize)
         .style("fill", "#999999")
         .text(leadsText);
-        
+
     // These are the bucket names to the left of the chart
     chart.selectAll("text.name")
         .data(bucketNames)
         .enter().append("text")
         .attr("x", left_width - 5)
         .attr("y", function(d, i) {
-            return (i * (barHeight + 2 * gap)) + 42; 
+            return (i * (barHeight + 2 * gap)) + 42;
         })
         .attr("dy", commonDy)
         .attr("font-weight", "semi-bold")
@@ -263,7 +272,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         .style("fill", "black")
         .text(String)
         .call(wrap, left_width - 20);
-    
+
     function wrap(text, width) {
         text.each(function() {
             var text = d3.select(this),
