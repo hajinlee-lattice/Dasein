@@ -9,7 +9,7 @@
 
 //START: Style overrides (NOTE: This should only be done in extreme cases because it will make maintaining the css more difficult going forward)
 .model-details .tab-widget {
-    margin-top: 3em;
+    margin-top: 15px;
 }
 
 .tab-contents > .tab-pane {
@@ -201,33 +201,8 @@ Model list title
 Model-detail
 */
 
-.model-details .nav-tabs {
-  width: 100%;
-  list-style-type: none;
-  text-align: center;
-}
 
-.model-details .nav-tabs li {
-  float: none;
-  margin-right: 1px;
-  margin-left: 1px;
-  margin-bottom: -2px;
-  display: inline-block;
-}
 
-.model-details .nav li.active a {
-  border-width: 1px;
-  border-bottom-color: white;
-  height: 41px;
-}
-
-.model-details .nav li:first-of-type.active a {
-  border-width: 1px;
-}
-
-.model-details .nav li:last-of-type.active a {
-  border-width: 1px;
-}
 
 .model-admin-link {
   padding-left: 5px;
