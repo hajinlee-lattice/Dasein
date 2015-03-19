@@ -17,7 +17,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         var chartData = data.elementList;
         var liftValues = _.map(chartData, function(d){ return parseFloat(d.lift).toPrecision(2); });
         var bucketNames = _.map(chartData, "name");
-        var percentLeads = _.map(chartData, function(d){ return parseInt(d.percentTotal); });
+        var percentLeads = _.map(chartData, function(d){ return Math.round(d.percentTotal); });
 
         var chart,
             width = 145,
