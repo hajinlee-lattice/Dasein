@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertNotNull;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -21,7 +22,7 @@ public class LoginResourceTestNG extends PlsFunctionalTestNGBase {
 
         LoginDocument loginDoc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds, LoginDocument.class,
                 new Object[] {});
-        assertEquals(loginDoc.getResult().getTenants().size(), 2);
+        assertTrue(loginDoc.getResult().getTenants().size() >= 2);
         assertNotNull(loginDoc.getData());
     }
 

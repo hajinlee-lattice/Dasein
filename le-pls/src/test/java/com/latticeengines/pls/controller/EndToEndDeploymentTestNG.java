@@ -71,7 +71,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         setupUsers();
 
         Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
-        assertEquals(ticket.getTenants().size(), 2);
+        assertTrue(ticket.getTenants().size() >= 2);
         assertNotNull(ticket);
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();

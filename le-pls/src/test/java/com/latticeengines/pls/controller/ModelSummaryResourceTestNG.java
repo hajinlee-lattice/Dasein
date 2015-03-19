@@ -3,7 +3,7 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
-
+import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -67,7 +67,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         setupUsers();
 
         Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
-        assertEquals(ticket.getTenants().size(), 2);
+        assertTrue(ticket.getTenants().size() >= 2);
         assertNotNull(ticket);
         String tenant1 = ticket.getTenants().get(0).getId();
         String tenant2 = ticket.getTenants().get(1).getId();
