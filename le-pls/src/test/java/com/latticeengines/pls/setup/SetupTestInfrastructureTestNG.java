@@ -1,8 +1,5 @@
 package com.latticeengines.pls.setup;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,6 +40,7 @@ public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
         for (Tenant tenant : tenants) {
             try {
                 createTenantByRestCall(tenant.getId());
+                createAdminUserByRestCall(tenant.getId(), "admin", "build@lattice-engines.com", "Real", "Admin", generalPasswordHash);
                 createAdminUserByRestCall(tenant.getId(), adminUsername, adminUsername, "Super", "User", adminPasswordHash);
                 
                 UserDocument userDoc = loginAndAttach(adminUsername, adminPassword, tenant);
@@ -54,9 +52,11 @@ public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
                     UserRegistration commonUserReg = getUserRegistration(generalUsername, generalUsername, "Lei", "Ming", generalPasswordHash);
                     String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", commonUserReg, String.class);
                     ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
-                    assertTrue(response.isSuccess());
-                    assertNotNull(response.getResult().getPassword());
-                    System.out.println("New password = " + response.getResult().getPassword());
+                    String pwd = response.getResult().getPassword(); 
+                    if (pwd != null) {
+                        System.out.println("New password = " + pwd);
+                    }
+                    
                     registeredUser = true;
                 } else {
                     // Modify user and add general rights for the rest of the tenants
