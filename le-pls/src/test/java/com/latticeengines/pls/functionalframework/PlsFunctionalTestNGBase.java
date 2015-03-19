@@ -404,9 +404,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         // UI general user
         globalUserManagementService.deleteUser("ysong");
         globalUserManagementService.deleteUser("ysong@lattice-engines.com");
-        createUser("ysong", "ysong@lattice-engines.com", "General", "User", "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
-        grantDefaultRights(tenant1, "ysong");
-        grantDefaultRights(tenant2, "ysong");
 
         // testing admin user
         User user = globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com");
