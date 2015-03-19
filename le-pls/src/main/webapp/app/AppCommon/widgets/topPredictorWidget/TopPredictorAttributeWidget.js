@@ -1,9 +1,10 @@
 angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.UnderscoreUtility'
+    'mainApp.appCommon.utilities.UnderscoreUtility',
+    'mainApp.appCommon.services.TopPredictorService'
 ])
 
-    .controller('TopPredictorAttributeWidgetController', function ($scope, _, ResourceUtility) {
+    .controller('TopPredictorAttributeWidgetController', function ($scope, _, ResourceUtility, TopPredictorService) {
         var data = $scope.data;
         $scope.attributeName = data.name;
         $scope.attributeFullDescription = data.description;
@@ -59,16 +60,15 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         }
         setHoverPosition($scope.mouseX, chartHeight);
 
-        var maxTicks = Math.ceil(d3.max(liftValues));
-        if (maxTicks == 1) {
+        var maxTicks = d3.max(liftValues);
+        if (maxTicks <= 1.5) {
             maxTicks = 1.5;
-        } else {
-            maxTicks = maxTicks > 5 ? 5 : maxTicks;
         }
+        // var xTicks = x.ticks(maxTicks + 1);
+        var xTicks = TopPredictorService.createTicks(maxTicks, 5);
         var x = d3.scale.linear()
-            .domain([0, maxTicks])
+            .domain([0, xTicks[xTicks.length - 1]])
             .range([0, width - 5]);
-        var xTicks = x.ticks(maxTicks + 1);
 
         chart = d3.select("#attributeChart")
             .append('svg')
