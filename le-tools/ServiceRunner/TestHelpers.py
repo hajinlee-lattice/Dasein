@@ -13,19 +13,86 @@ __email__ = "ivinnichenko@lattice-engines.com"
 __status__ = "Alpha"
 
 # import modules
-import logging
-import os
-import traceback
 from copy import deepcopy
 from datetime import datetime
-from TestConfigs import ConfigCSV
-from TestConfigs import ConfigDLC
-from TestConfigs import EtlConfig
-from TestRunner import SessionRunner
+import logging
+import os
+import time
+import traceback
 
+from selenium import webdriver
+
+from TestConfigs import ConfigCSV, ConfigDLC, EtlConfig
+from TestRunner import SessionRunner
+from plsEnd2EndTests.Properties import PLSEnvironments
+
+
+def runLoadGroups(dlc, params, load_groups, max_run_time_in_sec=7200, sleep_time=300):
+    command = "Launch Load Group"
+    for lg in load_groups:
+        params["-g"] = lg
+        print "Running %s Load Group" % lg
+        status = dlc.runDLCcommand(command, params)
+        dlc.getStatus()
+        creation_datetime = datetime.now()
+        if not status:
+            print "Load Group %s failed" % lg
+            return False;
+        start = time.time()
+        lg_status = "New"
+        while(True):
+            old_status = lg_status
+            lg_status = getLoadGroupStatus(dlc, params, lg, creation_datetime)
+            if lg_status == "Idle" and old_status == "Processing":
+                print "Load Group %s status is Success" % lg
+                break
+            if lg_status == "Success":
+                print "Load Group %s status is Success" % lg
+                break
+            if (time.time() - start) >= max_run_time_in_sec:
+                print "Load Group %s did not succeed in %s seconds, moving on" % (lg, max_run_time_in_sec)
+                return False;
+            print "Load Group %s status is %s, will try again in %s seconds" % (lg, lg_status, sleep_time)
+            time.sleep(sleep_time)
+    return True;
+
+def getLoadGroupStatus(dlc, params, load_group, start_datetime):
+    command = "Get Load Group Status"
+    params["-g"] = load_group
+    print load_group
+    print dlc.runDLCcommand(command, params)
+    text = dlc.request_text[-1].replace("<br/>", "\n")
+    print text
+    status = "Still working on it"
+    for line in text.split("\n"):
+        if line.startswith("State:"):
+            #print line
+            status = line[line.find("State:")+7:]
+            print "%s load group is %s" % (load_group, status)
+            if status == "Launch Succeeded":
+                return "Success"
+        if line.startswith("Last Succeeded:"):
+            success = line[line.find("Last Succeeded:")+16:]
+            print "%s load group last succeeded: %s" % (load_group, success)
+            if success == "Never":
+                return status
+            else:
+                try:
+                    d = datetime.strptime(success, "%Y-%m-%d %H:%M:%S")
+                    if start_datetime < d:
+                        print "%s succeeded after the start date '%s' on '%s'" % (load_group,
+                                                                                  start_datetime,
+                                                                                  success)
+                        return "Success"
+                except ValueError:
+                    print "Incorrectly formated string, should be YYYY-MM-DD HH:MM:SS"
+                    return "Weird..."
+                return status      
+        
+        
 class DLCRunner(SessionRunner):
 
-    def __init__(self, dlc_path=None, host="http://localhost:5000", logfile=None, exception=False):
+    def __init__(self, dlc_path=PLSEnvironments.dl_dlc_path, host=PLSEnvironments.pls_test_server, logfile=None, exception=False):
         super(DLCRunner, self).__init__(host, logfile)
         self.exception = exception
         self.ignore = ["command", "definition"]
@@ -117,7 +184,7 @@ class DLCRunner(SessionRunner):
         return self.runCommand(cmd, local)
 
     def testRun(self):
-        print "Starting tests. All should be True"
+        print "Starting plsEnd2EndTests. All should be True"
         command = ""
         params = {}
         self.verify(self.validateInput(command, params), False, "1")
@@ -140,8 +207,9 @@ class DLCRunner(SessionRunner):
 
 class PretzelRunner(SessionRunner):
 
-    def __init__(self, svn_location, build_path, specs_path,
-                 host="http://localhost:5000",
+    def __init__(self, svn_location=PLSEnvironments.svn_location_local, 
+                 build_path=PLSEnvironments.pls_install_dir, 
+                 host=PLSEnvironments.pls_test_server,
                  logfile=None, exception=False):
         super(PretzelRunner, self).__init__(host, logfile)
         self.exception = exception
@@ -156,7 +224,7 @@ class PretzelRunner(SessionRunner):
                            "SalesforceToSalesforce"]
         self.svn_location = os.path.expanduser(svn_location)
         self.build_path = os.path.expanduser(build_path)
-        self.specs_path = os.path.expanduser(specs_path)
+        self.specs_path = os.path.expanduser("%s\PLS_Templates" % build_path)
         self.revision = 1
         self.pretzel_tool = os.path.join(self.build_path,"Pretzel", "Install", "bin", "PretzelAdminTool.exe")
         self.main_py = os.path.join(self.svn_location, "Python script", "main.py")
@@ -190,6 +258,7 @@ class PretzelRunner(SessionRunner):
 
     def getSpecs(self, topology, localCopy=False):
         location = os.path.join(self.svn_location, topology)
+        print location;
         status = False
         if not os.path.exists(location):
             return status
@@ -253,17 +322,23 @@ class PretzelRunner(SessionRunner):
             status = status and self.setTopologyRevison(topology)
             self.getStatus()
             return status
-
+    def setupPretzel(self,marketting_app):
+        assert self.getMain()
+        if marketting_app == PLSEnvironments.pls_marketing_app_ELQ:
+            return self.testTopology("EloquaAndSalesforceToEloqua");
+        else:
+            return self.testTopology("MarketoAndSalesforceToMarketo");
+        
 class BardAdminRunner(SessionRunner):
 
-    def __init__(self, bard_path=None, host="http://localhost:5000", logfile=None, exception=False):
+    def __init__(self, bard_path=None, host=PLSEnvironments.pls_test_server, logfile=None, exception=False):
         super(BardAdminRunner, self).__init__(host, logfile)
         self.exception = exception
         self.bard_path = ""
         if bard_path is not None:
             self.bard_path = bard_path
 
-    def getModelListInfo(self, output):
+    def getModelListInfo(self, output, bard_name=None):
         output = output.replace("<br/>", "\n")
         latest_output = output.split("\n")
         #print latest_output
@@ -281,17 +356,21 @@ class BardAdminRunner(SessionRunner):
                         print "~"*20
                         model_id = line[id_index+4:name_index-1].strip(" ")
                         model_name = line[name_index+6:]
-                        model_info[model_name] = model_id
-                        print "%s : %s" % (model_name, model_id)
+                        if bard_name == None:
+                            model_info[model_name] = model_id
+                            print "%s : %s" % (model_name, model_id)
+                        elif model_name.startswith(bard_name):
+                            model_info[model_name] = model_id
+                            print "%s : %s" % (model_name, model_id)
         return model_info
 
-    def getLatestModelInfo(self):
+    def getLatestModelInfo(self,bard_name=None):
         if len(self.request_text) < 1:
             warning_str =  "There is nothing in the request_text list!!!"
             print warning_str
             logging.error(warning_str)
             return None 
-        return self.getModelListInfo(self.request_text[-1])
+        return self.getModelListInfo(self.request_text[-1],bard_name)
 
     def getModelId(self, name, model_info):
         if name in model_info:
@@ -302,8 +381,8 @@ class BardAdminRunner(SessionRunner):
             logging.warning(warning_str)
             return None
 
-    def getLatestModelId(self):
-        model_info = self.getLatestModelInfo()
+    def getLatestModelId(self,bard_name=None):
+        model_info = self.getLatestModelInfo(bard_name)
         #print model_info
         if len(model_info.keys()) < 1:
             return None
@@ -328,7 +407,7 @@ class BardAdminRunner(SessionRunner):
         
 
     def setProperty(self, config_key, config_property, config_value):
-        bard_command = os.path.join(os.path.expanduser(self.bard_path), "BardAdminTool.exe")
+        bard_command = self.bard_path
         bard_command = "%s ConfigStore -SetProperty -Key %s -Property %s -Value %s" % (bard_command, config_key,
                                                                                        config_property, config_value)
         bard_command = bard_command.replace("/", "\\")
@@ -336,28 +415,28 @@ class BardAdminRunner(SessionRunner):
         return bard_command
 
     def getDocument(self, config_key):
-        bard_command = os.path.join(os.path.expanduser(self.bard_path), "BardAdminTool.exe")
+        bard_command = self.bard_path
         bard_command = "%s ConfigStore -GetDocument -Key %s" % (bard_command, config_key)
         bard_command = bard_command.replace("/", "\\")
         print(bard_command)
         return bard_command
 
     def listModels(self):
-        bard_command = os.path.join(os.path.expanduser(self.bard_path), "BardAdminTool.exe")
+        bard_command = self.bard_path
         bard_command = "%s Model -List" % bard_command
         bard_command = bard_command.replace("/", "\\")
         print(bard_command)
         return bard_command
 
     def downloadModels(self):
-        bard_command = os.path.join(os.path.expanduser(self.bard_path), "BardAdminTool.exe")
+        bard_command = self.bard_path
         bard_command = "%s Model -Download" % bard_command
         bard_command = bard_command.replace("/", "\\")
         print(bard_command)
         return bard_command
 
     def activateModel(self, model_id):
-        bard_command = os.path.join(os.path.expanduser(self.bard_path), "BardAdminTool.exe")
+        bard_command = self.bard_path
         bard_command = "%s Model -Activate -ID %s" % (bard_command, model_id)
         bard_command = bard_command.replace("/", "\\")
         print(bard_command)
@@ -381,10 +460,303 @@ class BardAdminRunner(SessionRunner):
     def runDownloadModels(self):
         return self.runCommand(self.downloadModels())
 
+class PLSConfigRunner(SessionRunner):
+    def __init__(self, pls_url=None, logfile=None, exception=False):
+        super(PLSConfigRunner, self).__init__(pls_url, logfile);
+        self.exception = exception;
+        self.pls_url=pls_url;
+        self.plsUI = webdriver.Firefox();
+        
+    def plsLogin(self):
+        self.plsUI.get(self.pls_url);
+        time.sleep(30);
+        self.plsUI.find_element_by_id("username").clear();
+        self.plsUI.find_element_by_id("username").send_keys(PLSEnvironments.pls_server_user);
+        self.plsUI.find_element_by_id("password").clear();
+        self.plsUI.find_element_by_id("password").send_keys(PLSEnvironments.pls_server_pwd);
+        self.plsUI.find_element_by_id("loginButton").click();
+        time.sleep(15);
+        
+        self.plsUI.find_element_by_name("bardConfigStartButton").click();
+        time.sleep(30);
+        
+    def plsSFDCCredentials(self):
+        self.plsUI.find_element_by_xpath("//input[@value='']").clear();
+        self.plsUI.find_element_by_xpath("//input[@value='']").send_keys(PLSEnvironments.pls_SFDC_user);
+        self.plsUI.find_element_by_xpath("(//input[@value=''])[2]").clear();
+        self.plsUI.find_element_by_xpath("(//input[@value=''])[2]").send_keys(PLSEnvironments.pls_SFDC_pwd);
+        self.plsUI.find_element_by_css_selector("input.js-bard-config-api-input.js-bard-config-api-security-token-input").clear();
+        self.plsUI.find_element_by_css_selector("input.js-bard-config-api-input.js-bard-config-api-security-token-input").send_keys(PLSEnvironments.pls_SFDC_key);
+        self.plsUI.find_element_by_xpath("//button[@type='button']").click();
 
+        time.sleep(30);        
+        assert "(edit)" == self.plsUI.find_element_by_link_text("(edit)").text;
+        
+    def plsElQCredentials(self):
+        self.plsUI.find_element_by_name("apiConfigOptionsMAP").click();
+        self.plsUI.find_element_by_xpath("//input[@value='']").clear();
+        self.plsUI.find_element_by_xpath("//input[@value='']").send_keys(PLSEnvironments.pls_ELQ_user);
+        self.plsUI.find_element_by_xpath("(//input[@value=''])[2]").clear();
+        self.plsUI.find_element_by_xpath("(//input[@value=''])[2]").send_keys(PLSEnvironments.pls_ELQ_pwd);
+        self.plsUI.find_element_by_css_selector("input.js-bard-config-api-input.js-bard-config-api-security-token-input").clear();
+        self.plsUI.find_element_by_css_selector("input.js-bard-config-api-input.js-bard-config-api-security-token-input").send_keys(PLSEnvironments.pls_ELQ_company);
+        self.plsUI.find_element_by_xpath("//button[@type='button']").click();
+        time.sleep(30);
+        assert "(edit)" == self.plsUI.find_element_by_css_selector("a.js-bard-tab-links.js-bard-api-config-edit-link-MAP").text;
+        
+    def plsMKTOCredentials(self):
+        self.plsUI.find_element_by_xpath("(//input[@name='apiConfigOptionsMAP'])[2]").click();
+        self.plsUI.find_element_by_xpath("//input[@value='']").clear();
+        self.plsUI.find_element_by_xpath("//input[@value='']").send_keys("latticeenginessandbox1_9026948050BD016F376AE6");
+        self.plsUI.find_element_by_css_selector("input.js-bard-config-api-input.js-bard-config-api-security-token-input").clear();
+        self.plsUI.find_element_by_css_selector("input.js-bard-config-api-input.js-bard-config-api-security-token-input").send_keys("41802295835604145500BBDD0011770133777863CA58");
+        self.plsUI.find_element_by_xpath("(//input[@value=''])[2]").clear();
+        self.plsUI.find_element_by_xpath("(//input[@value=''])[2]").send_keys("https://na-sj02.marketo.com/soap/mktows/2_0");
+        self.plsUI.find_element_by_xpath("//button[@type='button']").click();
+        time.sleep(30);
+        assert "(edit)" == self.plsUI.find_element_by_css_selector("a.js-bard-tab-links.js-bard-api-config-edit-link-MAP").text;
+
+    def configELQ(self):
+        
+        self.plsLogin();
+        self.plsSFDCCredentials();
+        self.plsElQCredentials();
+        
+        self.plsUI.find_element_by_id("bardConfigNextButton").click();
+        self.plsUI.find_element_by_css_selector("input.js-lead-publish-map-field-text").clear();
+        self.plsUI.find_element_by_css_selector("input.js-lead-publish-map-field-text").send_keys("C_Lattice_Predictive_Score1");
+        self.plsUI.find_element_by_id("bardConfigNextButton").click()  ;      
+        time.sleep(10);
+        
+        self.plsUI.find_element_by_xpath("(//button[@type='button'])[3]").click();
+        time.sleep(60);
+        
+        assert self.plsUI.find_element_by_xpath("//div[10]/div[2]/h3/img").get_attribute("src").endswith("assets/images/logo_eloqua_small.png");
+
+    def configMKTO(self):
+        self.plsLogin();
+        self.plsSFDCCredentials();
+        self.plsMKTOCredentials();
+ 
+        self.plsUI.find_element_by_id("bardConfigNextButton").click();
+        self.plsUI.find_element_by_css_selector("input.js-lead-publish-map-field-text").clear();
+        self.plsUI.find_element_by_css_selector("input.js-lead-publish-map-field-text").send_keys("latticeforleads__Score__c");
+        self.plsUI.find_element_by_id("bardConfigNextButton").click()  ;      
+        time.sleep(10);
+         
+        self.plsUI.find_element_by_xpath("(//button[@type='button'])[3]").click();
+        time.sleep(60);
+
+        assert self.plsUI.find_element_by_xpath("//div[10]/div[2]/h3/img").get_attribute("src").endswith("assets/images/logo_marketo_small.png");
+ 
+    def config(self,marketting_app):
+        if marketting_app == PLSEnvironments.pls_marketing_app_ELQ:
+            self.configELQ();
+        else:
+            self.configMKTO();
+        
+        self.plsUI.quit();    
+
+class DLConfigRunner(SessionRunner):  
+    def __init__(self, logfile=None, exception=False):
+        super(DLConfigRunner, self).__init__(logfile);
+        self.exception = exception;
+        
+    def editDataProviders(self, tenant, dp, connection_string,host=PLSEnvironments.pls_test_server, dlc_path=PLSEnvironments.dl_dlc_path,
+                      dl_server=PLSEnvironments.dl_server,
+                      user=PLSEnvironments.dl_server_user,
+                      password=PLSEnvironments.dl_server_pwd):
+
+        dlc = DLCRunner(host=host, dlc_path=dlc_path)
+        command = "Edit Data Provider"
+        params = {"-s": dl_server,
+                  "-u": user,
+                  "-p": password,
+                  "-t": tenant,
+                  "-v": "true"
+                 }
+        params["-cs"] = '"%s"' % connection_string
+        params["-dpn"] = dp
+        print dp
+        dlc.runDLCcommand(command, params)
+        dlc.getStatus()
+
+    def configDLTables(self,tenant,marketting_app):
+
+        self.editDataProviders(tenant, "SQL_PropDataForModeling", PLSEnvironments.SQL_PropDataForModeling);
+        self.editDataProviders(tenant, "SQL_PropDataForScoring", PLSEnvironments.SQL_PropDataForScoring);
+        self.editDataProviders(tenant, "SQL_LeadScoring", PLSEnvironments.SQL_LeadScoring);
+        self.editDataProviders(tenant, "SQL_DanteDB_DataProvider", PLSEnvironments.SQL_DanteDB_DataProvider);
+        
+        if "ELQ" == marketting_app:
+            self.editDataProviders(tenant, "SQL_ReportsDB_DataProvider", PLSEnvironments.SQL_ReportsDB_DataProvider_ELQ);
+        elif "MKTO" == marketting_app:
+            self.editDataProviders(tenant, "SQL_ReportsDB_DataProvider", PLSEnvironments.SQL_ReportsDB_DataProvider_MKTO);    
+
+
+    def createMockDataProviders(self, tenant, marketting_app,host=PLSEnvironments.pls_test_server, dlc_path=PLSEnvironments.dl_dlc_path,
+                      dl_server=PLSEnvironments.dl_server,
+                      user=PLSEnvironments.dl_server_user,
+                      password=PLSEnvironments.dl_server_pwd):
+    
+        dlc = DLCRunner(host=host, dlc_path=dlc_path)
+        command = "New Data Provider"
+        params = {"-s": dl_server,
+                  "-u": user,
+                  "-p": password,
+                  "-t": tenant,
+                  "-dpf": '"upload|validation extract|leaf extract|itc|fstable"',
+                  "-v": "true"
+                 }
+        # Mock SFDC
+        if "ELQ" == marketting_app:
+            params["-cs"] = '"%s"' % PLSEnvironments.mock_ELQ_SFDC_DataProvider;
+            params["-dpn"] = "mock_SFDC_DataProvider";
+        elif "MKTO" == marketting_app:
+            params["-cs"] = '"%s"' % PLSEnvironments.mock_MKTO_SFDC_DataProvider;
+            params["-dpn"] = "mock_SFDC_DataProvider";
+            
+        params["-dpt"] = "sqlserver"
+        print "Mock SFDC"
+        dlc.runDLCcommand(command, params)
+        dlc.getStatus()
+    
+        # Mock Marketting App
+        if "ELQ" == marketting_app:
+            params["-cs"] = '"%s"' % PLSEnvironments.mock_ELQ_ELQ_DataProvider;
+            params["-dpn"] = "mock_ELQ_ELQ_DataProvider";
+        elif "MKTO" == marketting_app:
+            params["-cs"] = '"%s"' % PLSEnvironments.mock_MKTO_MKTO_DataProvider;
+            params["-dpn"] = "mock_MKTO_MKTO_DataProvider";
+            
+        params["-dpt"] = "sqlserver"
+        print "Mock %s" % marketting_app
+        dlc.runDLCcommand(command, params)
+        dlc.getStatus()
+    
+    def editMockRefreshDataSources(self, tenant, marketting_app,host=PLSEnvironments.pls_test_server, dlc_path=PLSEnvironments.dl_dlc_path,
+                               dl_server=PLSEnvironments.dl_server,
+                               user=PLSEnvironments.dl_server_user,
+                               password=PLSEnvironments.dl_server_pwd):
+
+        dlc = DLCRunner(host=host, dlc_path=dlc_path)
+        command = "Edit Refresh Data Source"
+        params = {"-s": dl_server,
+                  "-u": user,
+                  "-p": password,
+                  "-t": tenant,
+                  "-f": "@recordcount(2000000)"
+                 }
+    
+        #LoadCRMDataForModeling
+        rds_list = ["SFDC_User", "SFDC_Contact", "SFDC_Lead", "SFDC_Opportunity", "SFDC_OpportunityContactRole"]
+        for rds in rds_list:
+            params["-g"] = "LoadCRMDataForModeling"
+            params["-rn"] = rds
+            params["-cn"] = "mock_SFDC_DataProvider"
+            print "Updating Refresh Data Source %s for Mock_SFDC_DataProvider" % rds
+            dlc.runDLCcommand(command, params)
+            #dlc.getStatus()
+    
+        #LoadMAPDataForModeling
+        if marketting_app == "ELQ":
+            params["-g"] = "LoadMAPDataForModeling"
+            params["-rn"] = "ELQ_Contact"
+            params["-cn"] = "mock_ELQ_ELQ_DataProvider";
+            print "Updating Refresh Data SourceELQ_Contact for mock_ELQ_ELQ_DataProvider"
+            dlc.runDLCcommand(command, params)
+            #print dlc.getStatus()
+            
+    
+        #"LoadMAPDataForModeling_ActivityRecord_OtherThanNewLead": "ActivityRecord_OtherThanNewLead",
+        elif marketting_app == "MKTO":
+            params["-cn"] = "mock_MKTO_MKTO_DataProvider"
+            rds_dict = {"LoadMAPDataForModeling_ActivityRecord_NewLead": "ActivityRecord_NewLead",
+                        "LoadMAPDataForModeling_LeadRecord": "MKTO_LeadRecord"}
+            for lg in rds_dict:
+                params["-g"] = lg
+                params["-rn"] = rds_dict[lg]
+                print "Updating Refresh Data Source %s for Mock_Marketo_Data_Provider" % rds_dict[lg]
+                dlc.runDLCcommand(command, params)
+                #dlc.getStatus()
+        else:
+            print "!!![%s] MARKETTING UP IS NOT SUPPORTED!!!" % marketting_app
+
+
+    # Step 2.75
+    def loadCfgTables(self,tenant,marketting_app, svn_location=PLSEnvironments.svn_location_local, dp_folder=PLSEnvironments.template_location , dlc_host=PLSEnvironments.pls_test_server, dlc_path=PLSEnvironments.dl_dlc_path,
+                          local=False, cp=True,
+                          dl_server=PLSEnvironments.dl_server,
+                          user=PLSEnvironments.dl_server_user,
+                          password=PLSEnvironments.dl_server_pwd):
+    
+        dlc = DLCRunner(host=dlc_host, dlc_path=dlc_path)
+        params = {"-s": dl_server,
+                  "-u": user,
+                  "-p": password,
+                  "-t": tenant
+                 }
+    
+        runLoadGroups(dlc, params, ["ImportMetaData"], sleep_time=30)
+        dlc.getStatus()
+    
+        utils = UtilsRunner(host=dlc_host)
+        if marketting_app == PLSEnvironments.pls_marketing_app_ELQ:
+            marketting = "Eloqua";
+        else:
+            marketting = "Marketo";
+        
+        # Pre-process templates
+        location = os.path.join(svn_location, "%s csv files for QA to load standard Cfg tables" % marketting)        
+        files = utils.getFiles(location, [".csv"])
+        schema_map = utils.createSchemaDir(location, files, marketting)
+        reloc_dir = utils.relocateCsvFile(dp_folder, schema_map, marketting, local, cp)
+
+        # Create New Load Group
+        print "Creating New Load Group"
+        lg_name = "Group_LoadCfgTables_%s" % marketting
+        lg_params = deepcopy(params)
+        lg_params["-g"] = lg_name
+        #dlc.constructCommand("New Load Group", lg_params)
+        dlc.runDLCcommand("New Load Group", lg_params)
+        dlc.getStatus()
+  
+        # Create new Data Provider for each Schema:
+        print "Creating new Data Provider for each Schema"
+        command = "New Data Provider"
+        dp_params = deepcopy(params)
+        dp_params["-dpf"] = "upload"
+        dp_params["-v"] = "true"
+        dp_params["-dpt"] = "sftp"
+            
+        for schema in reloc_dir:
+            dp_params["-dpn"] = "%s_%s_DataProvider" % (marketting, schema)
+            dp_location = reloc_dir[schema].replace("/", "\\")
+            dp_params["-cs"] = '"File=%s;BatchSize=5000"' % dp_location
+            #dlc.constructCommand(command, dp_params)
+            print dlc.runDLCcommand(command, dp_params)
+            dlc.getStatus()
+   
+        # Create new Refresh Data Source for each Schema:
+        print "Creating new Refresh Data Source for each Schema"
+        command = "New Refresh Data Source"
+        rd_params = deepcopy(params)
+        rd_params["-g"] = lg_name
+    
+        for schema in reloc_dir:
+            data_provider = "%s_%s_DataProvider" % (marketting, schema)
+            rd_params["-rn"] = "%s_RDS" % data_provider
+            rd_params["-sn"] = schema
+            rd_params["-cn"] = data_provider
+            #dlc.constructCommand(command, rd_params)
+            dlc.runDLCcommand(command, rd_params)
+            dlc.getStatus()
+    
+        runLoadGroups(dlc, params, [lg_name],sleep_time=120)
+        
 class UtilsRunner(SessionRunner):
 
-    def __init__(self, host="http://localhost:5000", logfile=None, exception=False):
+    def __init__(self, host=PLSEnvironments.pls_test_server, logfile=None, exception=False):
         super(UtilsRunner, self).__init__(host, logfile)
         self.exception = exception
 
@@ -394,6 +766,7 @@ class UtilsRunner(SessionRunner):
             original_location = os.path.expanduser(original_location)
         file_map = ConfigCSV[tag]
         for filename in file_list:
+            print filename;
             if filename not in file_map:
                 print "No known schema for %s" % filename
                 continue
@@ -401,6 +774,9 @@ class UtilsRunner(SessionRunner):
                 schema_map[file_map[filename]].append(os.path.join(original_location, filename))
             else:
                 schema_map[file_map[filename]] = [os.path.join(original_location, filename)]
+                
+            print schema_map[file_map[filename]];
+            
         return schema_map
 
     def relocateCsvFile(self, new_location, schema_map, tag, local=False, cp=True):
@@ -414,13 +790,12 @@ class UtilsRunner(SessionRunner):
                     self.cpFile(fname, new_directory, local)
         return relocation_map
 
-
 class EtlRunner(PretzelRunner):
 
     def __init__(self, svn_location, etl_dir,
-                 host="http://localhost:5000",
+                 host=PLSEnvironments.pls_test_server,
                  logfile=None, exception=False):
-        super(EtlRunner, self).__init__(svn_location, ".", ".", host, logfile, exception)
+        super(EtlRunner, self).__init__()
         self.exception = exception
         self.svn_location = os.path.expanduser(svn_location)
         self.etl_dir = os.path.expanduser(etl_dir)
@@ -544,7 +919,37 @@ class EtlRunner(PretzelRunner):
         print type(xml)
         return xml
 
+class JamsRunner(SessionRunner):
+    def __init__(self, jams_conn=PLSEnvironments.SQL_JAMS_CFG, logfile=None, exception=False):
+        super(JamsRunner, self).__init__(logfile)
+        self.exception = exception
+        self.connection_string = jams_conn;
 
+    def setJamsTenant(self,bard_name,queue_name=None):
+        # Wait for the leads to be scored
+        dlc = SessionRunner()
+        if queue_name == None:
+            queue = PLSEnvironments.pls_server[0:PLSEnvironments.pls_server.find(".")];  # @UndefinedVariable
+        else:
+            queue=queue_name;
+        query="exec AlterJAMSDanteCfg '%s', '%s'" % (bard_name,queue);
+#         print self.connection_string;
+#         print query;
+        results = dlc.execQuery(self.connection_string, query);
+        return results[0][0];
+    def setJamsTenantCycles(self,bard_name,queue_name=None,cycle_times=3):
+        wait_cycle = 0
+        while(wait_cycle < cycle_times):
+            result = self.setJamsTenant(bard_name);
+            if 1 == result:
+                print "==>Jams set up successfully!";
+                return True;
+            print "Sleeping for 600 seconds";
+            wait_cycle += 1
+            time.sleep(600)
+        print "==>Jams set up failedd!";
+        return False;
+    
 def main():
     #basePretzelTest()
     DLCRunner().testRun()

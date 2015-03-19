@@ -14,12 +14,12 @@ __status__ = "Alpha"
 
 # import modules
 import os
+
+from TestHelpers import BardAdminRunner, DLCRunner, PretzelRunner
+
+
 #from TestConfigs import ConfigDLC
 #from TestRunner import SessionRunner
-from TestHelpers import PretzelRunner
-from TestHelpers import DLCRunner
-from TestHelpers import BardAdminRunner
-
 def testHelperClasses():
     DLCRunner().testRun()
 

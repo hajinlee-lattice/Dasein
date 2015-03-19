@@ -1,9 +1,22 @@
 #!/usr/local/bin/python
 # coding: utf-8
 from __builtin__ import str
+import argparse
+from collections import OrderedDict
+import datetime
+import json
+from logging import FileHandler
+import os.path
+import platform
+import shutil
+from subprocess import PIPE, Popen
+import sys
+import traceback
+
+from flask import Flask, request
+
 
 # Base test framework
-
 __author__ = "Illya Vinnichenko"
 __copyright__ = "Copyright 2014"
 __credits__ = ["Illya Vinnichenko"]
@@ -14,20 +27,6 @@ __email__ = "ivinnichenko@lattice-engines.com"
 __status__ = "Alpha"
 
 # import modules
-from collections import OrderedDict
-from flask import Flask
-from flask import request
-from logging import FileHandler
-from subprocess import PIPE
-from subprocess import Popen
-import argparse
-import datetime
-import json
-import os.path
-import platform
-import sys
-import shutil
-import traceback
 
 EXECUTION_DIARY = OrderedDict()
 EXECUTION_DIARY[datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")] = "And so it begins..."

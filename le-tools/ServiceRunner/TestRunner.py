@@ -1,9 +1,19 @@
 #!/usr/local/bin/python
 # coding: utf-8
 from __builtin__ import str
+import datetime
+import json
+import logging
+import os.path
+import shutil
+from subprocess import PIPE, Popen
+import traceback
+
+import pypyodbc
+import requests
+
 
 # Base test framework
-
 __author__ = "Illya Vinnichenko"
 __copyright__ = "Copyright 2014"
 __credits__ = ["Illya Vinnichenko"]
@@ -14,15 +24,6 @@ __email__ = "ivinnichenko@lattice-engines.com"
 __status__ = "Alpha"
 
 # import modules
-from subprocess import PIPE
-from subprocess import Popen
-import datetime
-import json
-import logging
-import os.path
-import requests
-import shutil
-import traceback
 
 
 class SessionRunner(object):
@@ -42,14 +43,14 @@ class SessionRunner(object):
         logging.basicConfig(filename=self.logfile, level=logging.DEBUG)
 
     def getQuery(self, connection_string, query):
-        try:
-            import pypyodbc
-        except Exception:
-            e = traceback.format_exc()
-            print "\nERROR:Could not import pypyodbc. it MUST be installed", e, "\n"
-            print "Linux:https://code.google.com/p/pypyodbc/wiki/Linux_ODBC_in_3_steps"
-            print "Windows:https://code.google.com/p/pyodbc/wiki/ConnectionStrings"
-            return None
+#         try:
+#             import pypyodbc
+#         except Exception:
+#             e = traceback.format_exc()
+#             print "\nERROR:Could not import pypyodbc. it MUST be installed", e, "\n"
+#             print "Linux:https://code.google.com/p/pypyodbc/wiki/Linux_ODBC_in_3_steps"
+#             print "Windows:https://code.google.com/p/pyodbc/wiki/ConnectionStrings"
+#             return None
         try:
             conn = pypyodbc.connect(connection_string)
             cur = conn.cursor()
@@ -62,7 +63,22 @@ class SessionRunner(object):
             e = traceback.format_exc()
             print "\nFAILED:Could not fetch query results", e, "\n"
             return None
-
+    def execQuery(self, connection_string, query):
+        
+        try:
+            conn = pypyodbc.connect(connection_string)
+            cur = conn.cursor()
+            results = cur.execute(query)            
+            results = cur.fetchall()
+            cur.commit();
+            cur.close()
+            conn.close()
+            return results
+        except Exception:
+            e = traceback.format_exc()
+            print "\nFAILED:Could not fetch query results", e, "\n"
+            return None
+        
     def getSTDoutputs(self, text):
         stdo = ""
         stde = ""
@@ -361,7 +377,7 @@ class SessionRunner(object):
         return status
  
     def testRun(self, os_type="Linux"):
-        print "Starting tests. All should be True"
+        print "Starting plsEnd2EndTests. All should be True"
         cmd_list = ["pwd", "ls -lah"]
         cmd_dict = {"pwd": "~"}
         cmd_str = "ls -lah ~"

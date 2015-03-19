@@ -13,10 +13,11 @@ __email__ = "ivinnichenko@lattice-engines.com"
 __status__ = "Alpha"
 
 # import modules
-import requests
+import base64
 import json
 
-import base64
+import requests
+
 
 class EloquaRequest():
     headers = ''

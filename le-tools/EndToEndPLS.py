@@ -20,13 +20,13 @@ import json
 import time
 from copy import deepcopy
 from datetime import datetime
-from TestHelpers import BardAdminRunner
-from TestHelpers import DLCRunner
-from TestHelpers import EtlRunner
-from TestHelpers import PretzelRunner
-from TestHelpers import UtilsRunner
-from TestHelpers import SessionRunner
-
+from ServiceRunner.TestHelpers import BardAdminRunner
+from ServiceRunner.TestHelpers import DLCRunner
+from ServiceRunner.TestHelpers import EtlRunner
+from ServiceRunner.TestHelpers import PretzelRunner
+from ServiceRunner.TestHelpers import UtilsRunner
+from ServiceRunner.TestHelpers import SessionRunner
+from plsEnd2EndTests.Properties import PLSEnvironments
 
 #### PLS End-to-End pieces ####
 def runLoadGroups(dlc, params, load_groups, max_run_time_in_sec=7200, sleep_time=300):
@@ -94,17 +94,18 @@ def getLoadGroupStatus(dlc, params, load_group, start_datetime):
         
 
 # Step 1
-def setupPretzelTest(host, build_path, svn_location, topologies_list):
-    location = "%s\PLS_Templates" % build_path
-    pretzel = PretzelRunner(host=host, svn_location=svn_location, build_path=build_path, specs_path=location)
-    pretzel.getMain()
-    for topology in topologies_list:
-        print pretzel.testTopology(topology)
+def setupPretzelTest(marketting_app):
+    if marketting_app == "Marketo":
+        marketting_app = PLSEnvironments.pls_marketing_app_MKTO
+    elif marketting_app == "Eloqua":
+        marketting_app = PLSEnvironments.pls_marketing_app_ELQ
+    pretzel = PretzelRunner();
+    assert pretzel.setupPretzel(marketting_app);
 
 
 # Step 2
 def runEtl(host, marketting_app, tenant, sql_server, scoring_db, dante_db,
-           svn_location="~/Code/Templates/PLS",
+           svn_location="~/workspace/plsTemplates/PLS",
            etl_dir="C:\ETL"):
     etl = EtlRunner(svn_location, etl_dir, host)
     topology = ""
@@ -173,7 +174,7 @@ def configurePLSCredentialsTest(host, dlc_path, tenant, marketting_app,
     # SFDC
     connection_string = '"User=apeters-widgettech@lattice-engines.com;' + \
                         'Password=Happy2010;' + \
-                        'SecurityToken=uMWcnIq9rCOxtRteKKgixE26;' + \
+                        'SecurityToken=oIogZVEFGbL3n0qiAp6F66TC;' + \
                         'Timeout=100;RetryTimesForTimeout=3;BatchSize=2000"'
     params["-cs"] = connection_string
     params["-dpn"] = "SFDC_DataProvider"
@@ -239,23 +240,33 @@ def configDLTables(host, dlc_path, tenant,
     # SQL_PropDataForModeling
     connection_string = "Data Source=bodcprodvsql130;" + \
                         "Initial Catalog=PropDataMatchDB;" + \
-                        "Authentication=SQL Server Authentication;" + \
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_prod;" + \
                         "Password=L@ttice2;"
 
     editDataProviders(host, dlc_path, tenant, "SQL_PropDataForModeling", connection_string,
                       dl_server, user, password)
+    
+    # SQL_PropDataForScoring
+    connection_string = "Data Source=bodcprodvsql130;" + \
+                        "Initial Catalog=PropDataMatchDB;" + \
+                        "Persist Security Info=True;" + \
+                        "User ID=dataloader_prod;" + \
+                        "Password=L@ttice2;"
+
+    editDataProviders(host, dlc_path, tenant, "SQL_PropDataForScoring", connection_string,
+                      dl_server, user, password)
 
     # SQL_LeadScoring
     connection_string = "Data Source=10.41.1.187\sql2008r2;" + \
                         "Initial Catalog=LeadScoringDB;" + \
-                        "Authentication=SQL Server Authentication;" + \
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_user;" + \
                         "Password=password;"
     editDataProviders(host, dlc_path, tenant, "SQL_LeadScoring", connection_string,
                       dl_server, user, password)
+    
+
 
 
 def createMockDataProviders(host, dlc_path, tenant, marketting_app,
@@ -272,15 +283,20 @@ def createMockDataProviders(host, dlc_path, tenant, marketting_app,
               "-dpf": '"upload|validation extract|leaf extract|itc|fstable"',
               "-v": "true"
              }
-    # Mock SFDC
-    init_catalog = "PLS_MKTO_SFDC_ReleaseQA_20150630"
-    market_dp = "Mock_Marketo_Data_Provider"
-    if marketting_app == "Eloqua":
-        init_catalog = "PLS_MKTO_SFDC_ReleaseQA_20150630"
+    
+    # data source setup
+    if marketting_app == "Marketo":
+        init_catalog_SFDC = "PLS_MKTO_SFDC_ReleaseQA_20150630"
+        init_catalog_MAP = "PLS_MKTO_MKTO_ReleaseQA_20150630"
+        market_dp = "Mock_Marketo_Data_Provider"
+    elif marketting_app == "Eloqua":
+        init_catalog_SFDC = "PLS_ELQ_SFDC_ReleaseQA_20150930"
+        init_catalog_MAP = "PLS_ELQ_ELQ_ReleaseQA_20150930"
         market_dp = "Mock_Eloqua_Data_Provider"
 
+    # Creating Mock SFDC
     connection_string = '"Data Source=10.41.1.187\sql2008;' + \
-                        'Initial Catalog=%s;' % init_catalog + \
+                        'Initial Catalog=%s;' % init_catalog_SFDC + \
                         'Persist Security Info=True;' + \
                         "User ID=dataloader_user;" + \
                         "Password=password;"
@@ -291,9 +307,9 @@ def createMockDataProviders(host, dlc_path, tenant, marketting_app,
     dlc.runDLCcommand(command, params)
     dlc.getStatus()
 
-    # Mock Marketting App
+    # Creating Mock Marketting App
     connection_string = '"Data Source=10.41.1.187\sql2008;' + \
-                        'Initial Catalog=%s;' % init_catalog + \
+                        'Initial Catalog=%s;' % init_catalog_MAP + \
                         'Persist Security Info=True;' + \
                         "User ID=dataloader_user;" + \
                         "Password=password;"
@@ -315,7 +331,7 @@ def editMockRefreshDataSources(host, dlc_path, tenant, marketting_app,
               "-u": user,
               "-p": password,
               "-t": tenant,
-              "-f": '"@recordcount(1000000)"'
+              "-f": '"@recordcount(2000000)"'
              }
     
     #LoadCRMDataForModeling
@@ -559,28 +575,28 @@ def runPlsEndToEndTest(marketting_app, run_setup=False, run_test=True, use_secon
     ############ Generic Parameters ######################
     # this parameter should be in format "http://ip:5000" IP, NOT the name!!!
     # for ex. for bodcdevvint57.dev.lattice.local it should be "http://10.41.1.57:5000"
-    pls_test_server = "http://10.41.1.66:5000"
+    pls_test_server = "http://10.41.1.83:5000"
 
     # this parameter should be in format "http://ip:5000" IP, NOT the name!!!
     # for ex. for bodcdevvint57.dev.lattice.local it should be "http://10.41.1.187:5000"
     dlc_test_server = "http://10.41.1.187:5000"
 
-    # Generic path for AUT locatio, for example:
+    # Generic path for AUT location, for example:
     # D:\B\spda0__DE-DT-BD_SQ-d__7_0_0_64254nD_2_6_1_63627r_1_3_3_0c\ADEDTBDd70064254nD26163627r1
-    install_dir = "D:\B\spda0__DE-DT-BD_SQ-d__6_9_2_64090rC_2_6_2_63627n_1_3_4\ADEDTBDd69264090rC26263627n1"
+    install_dir = "D:\B\spda0__DE-DT-BD_SQ-d__7_0_0_64747nX_2_6_2_63627n_1_4_0\ADEDTBDd70064747nX26263627n1"
 
     # Server name for SOAP url generation:
-    soap_host = "BODCDEVVQAP25.dev.lattice.local"
+    soap_host = "BODCDEVVINT57.dev.lattice.local"
 
     # Local svn location to grab the required templates from
-    svn_location = "~/Code/Templates/PLS"
+    svn_location = "~/workspace/templates/pls_1.4/PLS"
     #svn_location = "~/Code/PLS_1.3.3/Templates"
 
     # Tenant for BARD
-    tenant = "BD_ADEDTBDd69264090rC26263627n1"
+    tenant = "BD_ADEDTBDd70064747nX26263627n1"
 
     # Tenant for BARD2
-    tenant_2 = "BD2_ADEDTBDd69264090rC26263627n12"
+    tenant_2 = "BD2_ADEDTBDd70064747nX26263627n12"
     #######################################################
 
     ############ Pretzel Parameters ######################
@@ -609,9 +625,9 @@ def runPlsEndToEndTest(marketting_app, run_setup=False, run_test=True, use_secon
         load_csv_for.append("Eloqua")
 
     # SQL Server params
-    sql_server = "BODCDEVVCUS66.dev.lattice.local\SQL2012STD"
-    scoring_db_name = "SD_ADEDTBDd69264090rC26263627n1"
-    dante_db_name = "DT_ADEDTBDd69264090rC26263627n1"
+    sql_server = "BODCDEVVINT83.dev.lattice.local\SQL2012STD"
+    scoring_db_name = "SD_ADEDTBDd70064747nX26263627n1"
+    dante_db_name = "DT_ADEDTBDd70064747nX26263627n1"
 
     # Start execution
     tenant_to_use = tenant
@@ -621,6 +637,7 @@ def runPlsEndToEndTest(marketting_app, run_setup=False, run_test=True, use_secon
 
     # Initial Setup, should be run only once
     if run_setup:
+        
         # Refresh SVN
         print "Refreshing SVN"
         runner = SessionRunner()
@@ -628,7 +645,7 @@ def runPlsEndToEndTest(marketting_app, run_setup=False, run_test=True, use_secon
 
         print "Running Setup"
         # Step 1 - Setup Pretzel
-        setupPretzelTest(pls_test_server, install_dir, svn_location, topologies_list)
+        #setupPretzelTest(marketting_app)
         
         # Step 2 - Configure PLS Credentials
         runEtl(pls_test_server, marketting_app, tenant_to_use,
@@ -641,8 +658,9 @@ def runPlsEndToEndTest(marketting_app, run_setup=False, run_test=True, use_secon
 
         # Create Mock Data Providers
         createMockDataProviders(dlc_test_server, dlc_path, tenant_to_use, marketting_app)
+        
         editMockRefreshDataSources(dlc_test_server, dlc_path, tenant_to_use, marketting_app)
-
+        
         # Step 2.75 - Need to rework
         loadCfgTablesTest(dlc_test_server, dlc_path, tenant_to_use, svn_location, dp_folder, load_csv_for)
 
@@ -652,27 +670,26 @@ def runPlsEndToEndTest(marketting_app, run_setup=False, run_test=True, use_secon
         # Step 3 - Run LoadGroups and Download Model
         
         runModelingLoadGroups(dlc_test_server, dlc_path, tenant_to_use)
-        getModelFromModelingServiceTest(pls_test_server, bard_path, bard_path_2,
-                                        second_bard_tenant=use_second_bard)
+        getModelFromModelingServiceTest(pls_test_server, bard_path, bard_path_2, second_bard_tenant=use_second_bard)
     
         # Step 4 - Deal with JAMS (only for Dante - WIP)
     
         # Step 5 - Activate the Model
-        activateModelTest(pls_test_server, bard_path, bard_path_2,
-                          use_second_bard_tenant=use_second_bard)
+        activateModelTest(pls_test_server, bard_path, bard_path_2, use_second_bard_tenant=use_second_bard)
     
         """
         """
         # Steps 6 - Not really a step, let's keep the slot for verification
-        doScoring(dlc_test_server, dlc_path, tenant, sql_server, scoring_db_name)
+        # doScoring(dlc_test_server, dlc_path, tenant, sql_server, scoring_db_name)
     
         # Step 7 - Upload to Dante and Deal with that - WIP
+        
 
 
 def main():
     print "Welcome to PLS End to End Automation!"
-    runPlsEndToEndTest("Eloqua", run_setup=True, use_second_bard=False, run_test=True)
-    runPlsEndToEndTest("Marketo", run_setup=True, use_second_bard=True, run_test=True)
+    #runPlsEndToEndTest("Eloqua", run_setup=True, use_second_bard=False, run_test=False)
+    runPlsEndToEndTest("Marketo", run_setup=False, use_second_bard=True, run_test=True)
 
 
 if __name__ == '__main__':
