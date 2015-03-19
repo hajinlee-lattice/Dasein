@@ -454,7 +454,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             var bucketToDisplay = {
                 name: bucketName,
                 lift: bucket.Lift,
-                percentTotal: Math.round((bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100)
+                percentTotal: (bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100.0
             };
             
             // Set sort property based on whether it is a discrete versus a continuous value
@@ -516,7 +516,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             otherBucket = {
                 name: "Other",
                 lift: averagedLift / otherBucketTotalPercentage,
-                percentTotal: Math.round(otherBucketTotalPercentage * 100)
+                percentTotal: otherBucketTotalPercentage * 100.0
             };
         }
         
@@ -532,7 +532,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
         if (toReturn.elementList.length > 1) {
             // Ensure percentages sum to 100
-            var topPercentage = 100;
+            var topPercentage = 100.0;
             
             // Find the bucket with the largest percentage
             var index = 0;

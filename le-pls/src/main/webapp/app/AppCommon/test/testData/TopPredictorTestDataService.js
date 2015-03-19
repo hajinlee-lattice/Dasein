@@ -10494,7 +10494,7 @@ angular.module('test.testData.TopPredictorTestDataService', [])
                         {
                             "CorrelationSign": -1,
                             "Count": 20000,
-                            "Lift": 0.05,
+                            "Lift": 1,
                             "Values": [
                                 "null"
                             ],
@@ -10508,56 +10508,56 @@ angular.module('test.testData.TopPredictorTestDataService', [])
                     "Elements": [
                         {
                             "CorrelationSign": 1,
-                            "Count": 1884,
-                            "Lift": 1.1,
+                            "Count": 1227,
+                            "Lift": 1.78,
                             "Values": [
                                 "Bucket 1"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 1098,
-                            "Lift": 1.2,
+                            "Count": 1839,
+                            "Lift": 1.1,
                             "Values": [
                                 "Bucket 2"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 1179,
-                            "Lift": 1.3,
+                            "Count": 1507,
+                            "Lift": 1.81,
                             "Values": [
                                 "Bucket 3"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 1496,
-                            "Lift": 1.4,
+                            "Count": 1211,
+                            "Lift": 1.88,
                             "Values": [
                                 "Bucket 4"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 1208,
-                            "Lift": 1.5,
+                            "Count": 1757,
+                            "Lift": 1.11,
                             "Values": [
                                 "Bucket 5"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 1650,
-                            "Lift": 2.1,
+                            "Count": 1790,
+                            "Lift": 1.4,
                             "Values": [
                                 "Other"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 11485,
-                            "Lift": 0.46275,
+                            "Count": 10669,
+                            "Lift": 0.5935345393195237,
                             "Values": [
                                 "null"
                             ],
@@ -10622,7 +10622,7 @@ angular.module('test.testData.TopPredictorTestDataService', [])
                             "Count": 1582,
                             "Lift": 1.31,
                             "Values": [
-                                "Bucket 5"
+                                "Bucket 6"
                             ],
                             "IsVisible": true
                         },{
@@ -10650,56 +10650,56 @@ angular.module('test.testData.TopPredictorTestDataService', [])
                     "Elements": [
                         {
                             "CorrelationSign": 1,
-                            "Count": 1884,
-                            "Lift": 1.1,
+                            "Count": 1227,
+                            "Lift": 1.78,
                             "Values": [
                                 "Bucket 1"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 1098,
-                            "Lift": 1.2,
+                            "Count": 1839,
+                            "Lift": 1.1,
                             "Values": [
                                 "Bucket 2"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 1179,
-                            "Lift": 1.3,
+                            "Count": 1507,
+                            "Lift": 1.81,
                             "Values": [
                                 "Bucket 3"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 1496,
-                            "Lift": 1.4,
+                            "Count": 1211,
+                            "Lift": 1.88,
                             "Values": [
                                 "Bucket 4"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 1208,
-                            "Lift": 1.5,
+                            "Count": 1757,
+                            "Lift": 1.11,
                             "Values": [
                                 "Bucket 5"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 1650,
-                            "Lift": 2.1,
+                            "Count": 1790,
+                            "Lift": 1.4,
                             "Values": [
                                 "Bucket 6"
                             ],
                             "IsVisible": true
                         },{
                             "CorrelationSign": 1,
-                            "Count": 11485,
-                            "Lift": 0.46275,
+                            "Count": 10669,
+                            "Lift": 0.5935345393195237,
                             "Values": [
                                 "null"
                             ],

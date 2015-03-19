@@ -289,6 +289,11 @@ describe('TopPredictorServiceSpec Tests', function () {
             // examine the sum of counts equals the total leads for each predictor
             _.each(hoverTestModelSummary.Predictors, function(p){
                 expect(_.reduce(p.Elements, function(memo, e){ return memo + e.Count; }, 0)).toEqual(hoverTestModelSummary.ModelDetails.TotalLeads);
+                // examine total average lift should be one
+                var weightedLiftSum = _.reduce(p.Elements, function(memo, e){
+                    return e.Lift * e.Count + memo;
+                }, 0);
+                expect(Math.round(weightedLiftSum)).toEqual(hoverTestModelSummary.ModelDetails.TotalLeads);
             });
 
             var chartData = topPredictorService.FormatDataForAttributeValueChart("NullAttribute", "#FFFFFF", hoverTestModelSummary);
@@ -342,7 +347,7 @@ describe('TopPredictorServiceSpec Tests', function () {
             var chartData = topPredictorService.FormatDataForAttributeValueChart("CategoricalAttribute3", "#FFFFFF", hoverTestModelSummary);
             expect(chartData.elementList.length).toEqual(7);
             expect(chartData.elementList[chartData.elementList.length - 1].name).toEqual('N/A');
-            expect(chartData.elementList[chartData.elementList.length - 2].name).toEqual('Bucket 1');
+            expect(chartData.elementList[chartData.elementList.length - 2].name).toEqual('Bucket 2');
         });
     });
 });
