@@ -334,12 +334,11 @@ describe('TopPredictorServiceSpec Tests', function () {
                 return memo + e.percentTotal;
             }, 0)).toEqual(100);
 
-            //// examine total average lift should be one
-            //printHoverData(chartData.elementList);
-            //var weightedLiftSum = _.reduce(chartData.elementList, function(memo, e){
-            //    return e.lift * e.percentTotal + memo;
-            //}, 0);
-            //expect(weightedLiftSum).toEqual(100);
+            // examine total average lift should be one
+            var weightedLiftSum = _.reduce(chartData.elementList, function(memo, e){
+                return e.lift * e.percentTotal + memo;
+            }, 0);
+           expect(weightedLiftSum).toEqual(100);
         });
 
 

@@ -507,7 +507,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             for (i = 0; i < otherBucketElements.length; i++) {
                 var otherBucketElement = otherBucketElements[i];
                 var otherBucketPercentage = otherBucketElement.Count != null? otherBucketElement.Count / modelSummary.ModelDetails.TotalLeads :
-                	otherBucketElement.percentTotal;
+                	otherBucketElement.percentTotal/100;
                 otherBucketTotalPercentage += otherBucketPercentage;
                 var otherBucketLift = otherBucketElement.Lift != null ? otherBucketElement.Lift : otherBucketElement.lift;
                 averagedLift += otherBucketLift * otherBucketPercentage;
