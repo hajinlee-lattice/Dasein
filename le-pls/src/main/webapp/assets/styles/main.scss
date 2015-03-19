@@ -46,7 +46,7 @@ a#back-to-summary-link:hover {
 .attribute-hover > div {
     position: absolute;
     background: white;
-    border: #E5E5E5 solid 3px;
+    border: #BBB solid 1px;
     width: 350px;
     text-align: left;
 }
@@ -89,9 +89,9 @@ a#back-to-summary-link:hover {
 }
 
 .attribute-hover-left-arrow > div:before {
-    border: rgba(255, 225, 255, 0) solid 17px;
-    border-left-color: #E5E5E5;
-    margin-top: -17px;
+    border: rgba(255, 225, 255, 0) solid 13px;
+    border-left-color: #BBB;
+    margin-top: -13px;
 }
 
 .attribute-hover-right-arrow > div:after,
@@ -113,9 +113,9 @@ a#back-to-summary-link:hover {
 }
 
 .attribute-hover-right-arrow > div:before {
-    border: rgba(255, 225, 255, 0) solid 17px;
-    border-right-color: #E5E5E5;
-    margin-top: -17px;
+    border: rgba(255, 225, 255, 0) solid 13px;
+    border-right-color: #BBB;
+    margin-top: -13px;
 }
 
 .label-primary {
