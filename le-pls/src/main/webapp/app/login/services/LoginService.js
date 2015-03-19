@@ -84,7 +84,8 @@ angular.module('mainApp.login.services.LoginService', [
         $http({
             method: 'PUT',
             url: "/pls/forgotpassword/",
-            data: {Username: username}
+            data: {Username: username},
+            headers: {"Content-Type": "application/json"}
         })
         .success(function(data, status, headers, config) {
             var result = { Success: false };
