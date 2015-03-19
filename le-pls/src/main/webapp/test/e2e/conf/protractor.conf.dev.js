@@ -10,7 +10,7 @@ exports.config = {
 	params: {
 		tenantIndex: 1,
         alternativeTenantIndex: 0,
-        adminDisplayName:       'Everything IsAwesome',
+        adminDisplayName:       'Super User',
         adminUsername:          'bnguyen@lattice-engines.com',
         adminPassword:          'tahoe',
         nonAdminDisplayName:    'General User',

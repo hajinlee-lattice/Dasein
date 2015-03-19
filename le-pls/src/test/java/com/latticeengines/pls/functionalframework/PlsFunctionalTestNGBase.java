@@ -117,7 +117,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             log.info("User " + username + " already created.");
         }
     }
-    
+
     protected boolean createTenantByRestCall(String tenantName) {
         Tenant tenant = new Tenant();
         tenant.setId(tenantName);
@@ -126,7 +126,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class, new HashMap<>());
     }
-    
+
     protected boolean createAdminUserByRestCall(String tenant, String username, String email, String firstName, String lastName,
             String password) {
         UserRegistrationWithTenant userRegistrationWithTenant = new UserRegistrationWithTenant();
@@ -148,7 +148,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
-        
+
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/users",
                 userRegistrationWithTenant, Boolean.class);
     }
@@ -370,7 +370,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             }
         }
     }
-    
+
     protected void deleteUser(String username) {
         try {
             globalUserManagementService.deleteUser(username);
@@ -410,7 +410,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         if (user == null || !user.getUsername().equals(adminUsername)) {
             globalUserManagementService.deleteUser("bnguyen");
             globalUserManagementService.deleteUser("bnguyen@lattice-engines.com");
-            createUser(adminUsername, "bnguyen@lattice-engines.com", "Everything", "IsAwesome", adminPasswordHash);
+            createUser(adminUsername, "bnguyen@lattice-engines.com", "Super", "User", adminPasswordHash);
         }
         grantAdminRights(tenant1, adminUsername);
         grantAdminRights(tenant2, adminUsername);
