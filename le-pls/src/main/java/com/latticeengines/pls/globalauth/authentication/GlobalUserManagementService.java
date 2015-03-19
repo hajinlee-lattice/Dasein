@@ -27,6 +27,8 @@ public interface GlobalUserManagementService {
 
     User getUserByEmail(String email);
 
+    User getUserByUsername(String username);
+
     Boolean isRedundant(String username);
 
     List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId);

@@ -93,7 +93,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         addMagicHeaderAndSystemProperty(service);
 
         // Validate that username exists before reset
-        if (getUserByEmail(username) == null) {
+        if (getUserByUsername(username) == null) {
             throw new LedpException(LedpCode.LEDP_18018, new String[] { username });
         }
 
@@ -141,6 +141,20 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         try {
             log.info(String.format("Getting user having the email %s.", email));
             return new UserBuilder(service.findUserByEmail(email)).build();
+        } catch (Exception e) {
+            //throw new LedpException(LedpCode.LEDP_18017, e, new String[] { email });
+            //TODO: handle different exceptions returned from GlobalAuth
+            return null;
+        }
+    }
+
+    @Override
+    public User getUserByUsername(String username) {
+        IUserManagementService service = getService();
+        addMagicHeaderAndSystemProperty(service);
+        try {
+            log.info(String.format("Getting user %s.", username));
+            return new UserBuilder(service.findUserByUsername(username)).build();
         } catch (Exception e) {
             //throw new LedpException(LedpCode.LEDP_18017, e, new String[] { email });
             //TODO: handle different exceptions returned from GlobalAuth
