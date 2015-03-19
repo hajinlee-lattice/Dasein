@@ -141,9 +141,11 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/AppCommon/vendor/jquery-2.1.1.js',
                     '<%= pls.app %>/app/AppCommon/vendor/angular/angular.js',
                     '<%= pls.app %>/app/AppCommon/vendor/angular/angular-mocks.js',
+                    '<%= pls.app %>/app/AppCommon/vendor/underscore.js',
                     '<%= pls.app %>/app/AppCommon/test/testData/**/*.js',
                     '<%= pls.app %>/app/AppCommon/test/unit/**/*.js',
                     '<%= pls.app %>/app/**/*.js'
+
                 ],
                 frameworks: ['jasmine']               
                 

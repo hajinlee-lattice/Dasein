@@ -557,25 +557,25 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
         return toReturn;
     };
-    
-    this.createTicks = function(maxTickValue, maxTickNumber) {
-        var steps = [0.5, 1, 2, 5, 10];
-        // iterate options in steps, find the maximum appropriate step
-        var step = _.reduce(steps, function(memo, s){
-            return (maxTickNumber * memo >= maxTickValue) ? memo : s;
-        }, 0);
-        // continue doubling step until find an appropriate one
-        while (maxTickNumber * step < maxTickValue) {
-            step *= 2;
-        }
-        // construct ticks
-        var tick = 0;
-        var ticks = [tick];
-        while (tick < maxTickValue) {
-            tick += step;
-            ticks.push(tick);
-        }
 
-        return ticks;
-    };
+        this.createTicks = function(maxTickValue, maxTickNumber) {
+            var steps = [0.5, 1, 2, 5, 10];
+            // iterate options in steps, find the maximum appropriate step
+            var step = _.find(steps.reverse(), function(s){
+                return  maxTickNumber * s <= maxTickValue;
+            });
+            // continue doubling step until find an appropriate one
+            while (maxTickNumber * step < maxTickValue) {
+                step *= 2;
+            }
+            // construct ticks
+            var tick = 0;
+            var ticks = [tick];
+            while (tick < maxTickValue) {
+                tick += step;
+                ticks.push(tick);
+            }
+
+            return ticks;
+        };
 });

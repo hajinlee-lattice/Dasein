@@ -10416,4 +10416,332 @@ angular.module('test.testData.TopPredictorTestDataService', [])
         };
     };
 
+    this.GetHoverTestData = function() {
+        return {
+            "ModelDetails": {
+                "TotalLeads": 20000,
+                "TotalConversions": 1000
+            },
+            "Predictors": [
+                {
+                    "Elements": [
+                        {
+                            "CorrelationSign": 1,
+                            "Count": 5000,
+                            "Lift": 3.124,
+                            "Values": [
+                                "False"
+                            ],
+                            "IsVisible": true
+                        },
+                        {
+                            "CorrelationSign": 1,
+                            "Count": 1000,
+                            "Lift": 3.975,
+                            "Values": [
+                                "True"
+                            ],
+                            "IsVisible": true
+                        },
+                        {
+                            "CorrelationSign": -1,
+                            "Count": 14000,
+                            "Lift": 0.0289285714286,
+                            "Values": [
+                                "null"
+                            ],
+                            "IsVisible": true
+                        }
+                    ],
+                    "Name": "BooleanAttribute",
+                    "FundamentalType": "boolean"
+                },
+                {
+                    "Elements": [
+                        {
+                            "CorrelationSign": 1,
+                            "Count": 5000,
+                            "Lift": 0.8,
+                            "Values": [
+                                "False"
+                            ],
+                            "IsVisible": true
+                        },
+                        {
+                            "CorrelationSign": 1,
+                            "Count": 10000,
+                            "Lift": 0.5,
+                            "Values": [
+                                "True"
+                            ],
+                            "IsVisible": true
+                        },
+                        {
+                            "CorrelationSign": -1,
+                            "Count": 5000,
+                            "Lift": 2.2,
+                            "Values": [
+                                "null"
+                            ],
+                            "IsVisible": true
+                        }
+                    ],
+                    "Name": "BooleanAttribute2",
+                    "FundamentalType": "boolean"
+                },
+                {
+                    "Elements": [
+                        {
+                            "CorrelationSign": -1,
+                            "Count": 20000,
+                            "Lift": 0.05,
+                            "Values": [
+                                "null"
+                            ],
+                            "IsVisible": true
+                        }
+                    ],
+                    "Name": "NullAttribute",
+                    "FundamentalType": "unknown"
+                },
+                {
+                    "Elements": [
+                        {
+                            "CorrelationSign": 1,
+                            "Count": 1884,
+                            "Lift": 1.1,
+                            "Values": [
+                                "Bucket 1"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1098,
+                            "Lift": 1.2,
+                            "Values": [
+                                "Bucket 2"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1179,
+                            "Lift": 1.3,
+                            "Values": [
+                                "Bucket 3"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1496,
+                            "Lift": 1.4,
+                            "Values": [
+                                "Bucket 4"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1208,
+                            "Lift": 1.5,
+                            "Values": [
+                                "Bucket 5"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1650,
+                            "Lift": 2.1,
+                            "Values": [
+                                "Other"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 11485,
+                            "Lift": 0.46275,
+                            "Values": [
+                                "null"
+                            ],
+                            "IsVisible": true
+                        }
+                    ],
+                    "Name": "CategoricalAttribute",
+                    "FundamentalType": "unknown"
+                },
+                {
+                    "Elements": [
+                        {
+                            "CorrelationSign": 1,
+                            "Count": 1704,
+                            "Lift": 1.2,
+                            "Values": [
+                                "Bucket 1"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1933,
+                            "Lift": 1.7,
+                            "Values": [
+                                "Bucket 2"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1458,
+                            "Lift": 1.63,
+                            "Values": [
+                                "Bucket 3"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1988,
+                            "Lift": 1.62,
+                            "Values": [
+                                "Bucket 4"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1971,
+                            "Lift": 1.17,
+                            "Values": [
+                                "Bucket 5"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1222,
+                            "Lift": 1.26,
+                            "Values": [
+                                "Bucket 5"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1582,
+                            "Lift": 1.31,
+                            "Values": [
+                                "Bucket 5"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1202,
+                            "Lift": 1.4,
+                            "Values": [
+                                "Other"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 6940,
+                            "Lift": 0.21195821325648437,
+                            "Values": [
+                                "null"
+                            ],
+                            "IsVisible": true
+                        }
+                    ],
+                    "Name": "CategoricalAttribute2",
+                    "FundamentalType": "unknown"
+                },
+                {
+                    "Elements": [
+                        {
+                            "CorrelationSign": 1,
+                            "Count": 1884,
+                            "Lift": 1.1,
+                            "Values": [
+                                "Bucket 1"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1098,
+                            "Lift": 1.2,
+                            "Values": [
+                                "Bucket 2"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1179,
+                            "Lift": 1.3,
+                            "Values": [
+                                "Bucket 3"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1496,
+                            "Lift": 1.4,
+                            "Values": [
+                                "Bucket 4"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1208,
+                            "Lift": 1.5,
+                            "Values": [
+                                "Bucket 5"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 1650,
+                            "Lift": 2.1,
+                            "Values": [
+                                "Bucket 6"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 11485,
+                            "Lift": 0.46275,
+                            "Values": [
+                                "null"
+                            ],
+                            "IsVisible": true
+                        }
+                    ],
+                    "Name": "CategoricalAttribute3",
+                    "FundamentalType": "unknown"
+                },
+                {
+                    "Elements": [
+                        {
+                            "CorrelationSign": 1,
+                            "Count": 5000,
+                            "Lift": 0.2,
+                            "Values": [
+                                "Bucket 1"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 10000,
+                            "Lift": 0.8,
+                            "Values": [
+                                "Other"
+                            ],
+                            "IsVisible": true
+                        },{
+                            "CorrelationSign": 1,
+                            "Count": 5000,
+                            "Lift": 2.2,
+                            "Values": [
+                                "null"
+                            ],
+                            "IsVisible": true
+                        }
+                    ],
+                    "Name": "CategoricalAttribute4",
+                    "FundamentalType": "unknown"
+                },
+            ]
+        };
+    };
+
 });
