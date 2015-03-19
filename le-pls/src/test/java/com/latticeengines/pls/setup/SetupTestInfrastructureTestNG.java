@@ -33,9 +33,13 @@ public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = "infrastructure", enabled = true)
     public void setup() throws Exception {
-        tenantEntityMgr.deleteAll();
+        
         List<Tenant> tenants = getTenants(5);
 
+        for (Tenant tenant : tenants) {
+            tenantEntityMgr.delete(tenant);
+        }
+        
         boolean registeredUser = false;
         for (Tenant tenant : tenants) {
             try {
