@@ -409,8 +409,11 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         
         // Do "Other" bucketing if discrete and more than 0 elements
         var doOtherBucket = false;
-        for (var i = 0; i < predictor.Elements.length; i++) {
-        	var bucket = predictor.Elements[i];
+        var i = 0;
+        var bucket = null;
+        var bucketName = null;
+        for (i = 0; i < predictor.Elements.length; i++) {
+        	bucket = predictor.Elements[i];
           	if (this.IsPredictorElementCategorical(bucket)) {
           		doOtherBucket = true;
           		break;
@@ -423,9 +426,9 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         
         if (doOtherBucket) {
             // Group elements less than 1% frequency into "Other" bucket
-            for (var i = 0; i < predictor.Elements.length; i++) {
-                var bucket = predictor.Elements[i];               
-                var bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
+            for (i = 0; i < predictor.Elements.length; i++) {
+                bucket = predictor.Elements[i];               
+                bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
 
                 var percentTotal = (bucket.Count / modelSummary.ModelDetails.TotalLeads) * 100.0;
                 if (percentTotal < 1 || (bucketName != null && typeof bucketName === 'string' && bucketName.toLowerCase() == "other")) {
@@ -443,10 +446,10 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             topPredictorElements = predictor.Elements;
         }
         
-        for (var i = 0; i < topPredictorElements.length; i++) {
+        for (i = 0; i < topPredictorElements.length; i++) {
             
-            var bucket = topPredictorElements[i];
-            var bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
+            bucket = topPredictorElements[i];
+            bucketName = AnalyticAttributeUtility.GetAttributeBucketName(bucket, predictor);
             
             var bucketToDisplay = {
                 name: bucketName,
@@ -488,8 +491,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 return 0;
         });
         
-        var nullBucketLength = nullBucket == null? 0 : 1;
-        var otherBucketLength = otherBucketElements.length == 0? 0 : 1; 
+        var nullBucketLength = nullBucket == null ? 0 : 1;
+        var otherBucketLength = otherBucketElements.length > 0 ? 1 : 0; 
         var currentTotalNumBuckets = toReturn.elementList.length + nullBucketLength + otherBucketLength; 
         if (currentTotalNumBuckets > maxElementsToDisplay) {
         	var numToRemove = currentTotalNumBuckets - maxElementsToDisplay;
@@ -501,7 +504,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         if (otherBucketElements.length > 0) {            
             var otherBucketTotalPercentage = 0;
             var averagedLift = 0;
-            for (var i = 0; i < otherBucketElements.length; i++) {
+            for (i = 0; i < otherBucketElements.length; i++) {
                 var otherBucketElement = otherBucketElements[i];
                 var otherBucketPercentage = otherBucketElement.Count != null? otherBucketElement.Count / modelSummary.ModelDetails.TotalLeads :
                 	otherBucketElement.percentTotal;
@@ -534,7 +537,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             // Find the bucket with the largest percentage
             var index = 0;
             var maxPercentage = 0;
-            for (var i = 0; i < toReturn.elementList.length; i++) {
+            for (i = 0; i < toReturn.elementList.length; i++) {
                 var currentPercentage = toReturn.elementList[i].percentTotal;
                 if (currentPercentage > maxPercentage) {
                     index = i;
@@ -542,7 +545,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                 }
             }
             // Make the max percentage equal to 100 minus the sum of all the other percentages
-            for (var i = 0; i < toReturn.elementList.length; i++) {
+            for (i = 0; i < toReturn.elementList.length; i++) {
                 if (i == index) {
                     continue;
                 } else {
