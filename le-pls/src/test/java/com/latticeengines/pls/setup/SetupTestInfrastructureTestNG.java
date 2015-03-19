@@ -53,7 +53,7 @@ public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBase {
                 
                 if (!registeredUser) {
                     // Create user and add general rights.
-                    UserRegistration commonUserReg = getUserRegistration(generalUsername, generalUsername, "Lei", "Ming", generalPasswordHash);
+                    UserRegistration commonUserReg = getUserRegistration(generalUsername, generalUsername, "General", "User", generalPasswordHash);
                     String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", commonUserReg, String.class);
                     ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
                     String pwd = response.getResult().getPassword(); 
