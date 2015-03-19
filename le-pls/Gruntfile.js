@@ -21,7 +21,7 @@ module.exports = function (grunt) {
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js'
             },
             prod: {
-                url: 'TBD',
+                url: 'https://app.lattice-engines.com',
                 protractorConf: sourceDir + '/test/e2e/conf/protractor.conf.js'
             }
         }
