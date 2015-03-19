@@ -103,10 +103,8 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
 
     @Parameters({ "numOfThreads", "numOfTenants", "numOfUsers", "numOfRuns", "threadSleep" })
     @BeforeClass(groups = { "load" })
-    public void setup(String numOfThreads, String numOfTenants, String numOfUsers, String numOfRuns, String threadSleep) throws Exception {
-        tenantEntityMgr.deleteAll();
-        keyValueEntityMgr.deleteAll();
-        modelSummaryEntityMgr.deleteAll();
+    public void setup(String numOfThreads, String numOfTenants, String numOfUsers, String numOfRuns, String threadSleep)
+            throws Exception {
         this.numOfThreads = Integer.parseInt(numOfThreads);
         this.numOfTenants = Integer.parseInt(numOfTenants);
         this.numOfUsers = Integer.parseInt(numOfUsers);
@@ -127,16 +125,34 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                 revokeRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant.getId(), user.getUsername());
                 globalUserManagementService.deleteUser(user.getUsername());
             }
-            globalTenantManagementService.discardTenant(tenant);
+            try {
+                globalTenantManagementService.discardTenant(tenant);
+            } catch (Exception e) {
+            }
         }
     }
 
     private void createTenants() throws Exception {
         for (int i = 0; i < numOfTenants; i++) {
+            String tenantId = "T" + i;
             Tenant tenant = new Tenant();
-            tenant.setId("T" + i);
+            tenant.setId(tenantId);
             tenant.setName("T" + i);
-            //globalTenantManagementService.discardTenant(tenant);
+            Tenant existingTenant = tenantEntityMgr.findByTenantId(tenantId);
+            if(existingTenant != null){
+                for (KeyValue keyValue : keyValueEntityMgr.findByTenantId(existingTenant.getPid())) {
+                    keyValueEntityMgr.delete(keyValue);
+                }
+                ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(tenantId);
+                if (modelSummary != null) {
+                    modelSummaryEntityMgr.delete(modelSummary);
+                }
+                tenantEntityMgr.delete(existingTenant);
+            }
+            try {
+                globalTenantManagementService.discardTenant(tenant);
+            } catch (Exception e) {
+            }
             globalTenantManagementService.registerTenant(tenant);
             tenantEntityMgr.create(tenant);
             tenantList.add(tenant);
@@ -181,7 +197,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                 userCreds.setUsername(tenant.getName() + "_testuser_" + i);
                 user.setUsername(userCreds.getUsername());
                 userCreds.setPassword(password);
-                //globalUserManagementService.deleteUser(user.getUsername());
+                // globalUserManagementService.deleteUser(user.getUsername());
                 globalUserManagementService.registerUser(user, userCreds);
                 users.get(tenant).add(user);
                 grantRights(tenant, user);
@@ -310,14 +326,16 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                 logOutTime += timeConsumptions.get(4);
             }
             int userSize = this.numOfTenants * this.numOfUsers;
-            System.out.println(String.format("Log in to main page: %f seconds", Math.ceil(loginMainPageTime / userSize)));
+            System.out
+                    .println(String.format("Log in to main page: %f seconds", Math.ceil(loginMainPageTime / userSize)));
             System.out.println(String.format("Log and Attach: %f seconds", Math.ceil(loginAndAttachTime / userSize)));
-            System.out.println(String.format("Get Model Summaries: %f seconds", Math.ceil(modelSummariesTime / userSize)));
+            System.out.println(String.format("Get Model Summaries: %f seconds",
+                    Math.ceil(modelSummariesTime / userSize)));
             System.out.println(String.format("Get Model Summary: %f seconds", Math.ceil(modelSummaryTime / userSize)));
             System.out.println(String.format("Log out: %f seconds", Math.ceil(logOutTime / userSize)));
         }
     }
-    
+
     class ThrowExceptionResponseErrorHandler implements ResponseErrorHandler {
 
         @Override
