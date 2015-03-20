@@ -469,16 +469,16 @@ class PLSConfigRunner(SessionRunner):
         
     def plsLogin(self):
         self.plsUI.get(self.pls_url);
-        time.sleep(30);
+        time.sleep(45);
         self.plsUI.find_element_by_id("username").clear();
         self.plsUI.find_element_by_id("username").send_keys(PLSEnvironments.pls_server_user);
         self.plsUI.find_element_by_id("password").clear();
         self.plsUI.find_element_by_id("password").send_keys(PLSEnvironments.pls_server_pwd);
         self.plsUI.find_element_by_id("loginButton").click();
-        time.sleep(15);
+        time.sleep(25);
         
         self.plsUI.find_element_by_name("bardConfigStartButton").click();
-        time.sleep(30);
+        time.sleep(35);
         
     def plsSFDCCredentials(self):
         self.plsUI.find_element_by_xpath("//input[@value='']").clear();
@@ -489,7 +489,7 @@ class PLSConfigRunner(SessionRunner):
         self.plsUI.find_element_by_css_selector("input.js-bard-config-api-input.js-bard-config-api-security-token-input").send_keys(PLSEnvironments.pls_SFDC_key);
         self.plsUI.find_element_by_xpath("//button[@type='button']").click();
 
-        time.sleep(30);        
+        time.sleep(35);        
         assert "(edit)" == self.plsUI.find_element_by_link_text("(edit)").text;
         
     def plsElQCredentials(self):
@@ -501,7 +501,7 @@ class PLSConfigRunner(SessionRunner):
         self.plsUI.find_element_by_css_selector("input.js-bard-config-api-input.js-bard-config-api-security-token-input").clear();
         self.plsUI.find_element_by_css_selector("input.js-bard-config-api-input.js-bard-config-api-security-token-input").send_keys(PLSEnvironments.pls_ELQ_company);
         self.plsUI.find_element_by_xpath("//button[@type='button']").click();
-        time.sleep(30);
+        time.sleep(35);
         assert "(edit)" == self.plsUI.find_element_by_css_selector("a.js-bard-tab-links.js-bard-api-config-edit-link-MAP").text;
         
     def plsMKTOCredentials(self):
@@ -526,7 +526,7 @@ class PLSConfigRunner(SessionRunner):
         self.plsUI.find_element_by_css_selector("input.js-lead-publish-map-field-text").clear();
         self.plsUI.find_element_by_css_selector("input.js-lead-publish-map-field-text").send_keys("C_Lattice_Predictive_Score1");
         self.plsUI.find_element_by_id("bardConfigNextButton").click()  ;      
-        time.sleep(10);
+        time.sleep(20);
         
         self.plsUI.find_element_by_xpath("(//button[@type='button'])[3]").click();
         time.sleep(60);
@@ -542,7 +542,7 @@ class PLSConfigRunner(SessionRunner):
         self.plsUI.find_element_by_css_selector("input.js-lead-publish-map-field-text").clear();
         self.plsUI.find_element_by_css_selector("input.js-lead-publish-map-field-text").send_keys("latticeforleads__Score__c");
         self.plsUI.find_element_by_id("bardConfigNextButton").click()  ;      
-        time.sleep(10);
+        time.sleep(20);
          
         self.plsUI.find_element_by_xpath("(//button[@type='button'])[3]").click();
         time.sleep(60);
