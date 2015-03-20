@@ -212,6 +212,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
         // Append a back button
         setTimeout(function () {
             svg.append("svg:image")
+                .attr("id", "donutChartBackButton")
                 .attr("class", "donut-chart-back-button")
                 .attr("xlink:href", "assets/images/Donut-Center-Back.png")
                 .attr("x", -14)
