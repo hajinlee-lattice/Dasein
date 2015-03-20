@@ -53,11 +53,14 @@ public class MetricsAspect {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth instanceof TicketAuthenticationToken) {
             TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
-            ticketId = token.getSession().getTicket().getUniqueness();
+            if (token.getSession() != null && token.getSession().getTicket() != null
+                    && token.getSession().getTicket().getUniqueness() != null) {
+                ticketId = token.getSession().getTicket().getUniqueness();
+            }
         }
-        
-        log.info(String.format("Metrics for API=%s ElapsedTime=%d ms Track Id=%s Ticket Id=%s", joinPoint.getSignature()
-                .toShortString(), endTime - startTime, trackId, ticketId));
+
+        log.info(String.format("Metrics for API=%s ElapsedTime=%d ms Track Id=%s Ticket Id=%s", joinPoint
+                .getSignature().toShortString(), endTime - startTime, trackId, ticketId));
 
         return retVal;
     }
