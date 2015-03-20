@@ -51,12 +51,12 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     };
 
     $scope.tileClick = function ($event) {
-        if ($event != null && !$scope.nameStatus.editing) {
+        if ($event != null && $scope.nameStatus.editing) {
             $event.preventDefault();
         }
 
         var targetElement = $($event.target);
-        if (targetElement.hasClass("fa-trash-o")) {
+        if (targetElement.hasClass("fa-trash-o") || targetElement.hasClass("delete-model")) {
             DeleteModelModal.show($scope.data.Id);
         } else if (!$scope.nameStatus.editing) {
             $rootScope.$broadcast(GriotNavUtility.MODEL_DETAIL_NAV_EVENT, data);
