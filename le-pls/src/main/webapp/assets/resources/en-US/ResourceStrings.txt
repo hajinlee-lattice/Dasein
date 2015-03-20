@@ -144,6 +144,7 @@ MODEL_DELETE_ACCESS_DENIED=You do not have access to delete this model.
 MODEL_DELETE_SERVICE_ERROR=We are unable to delete the model at this time.
 MODEL_IMPORT_TITLE=Import Model JSON
 MODEL_IMPORT_UPLOAD=Upload
+MODEL_IMPORT_ERROR_TITLE=The following errors are found in the json to be uploaded:
 MODEL_IMPORT_GENERAL_ERROR=Unable to import this model.
 MODEL_IMPORT_WAIT=Importing model ...
 MODEL_IMPORT_SUCCESS=The model JSON has been successfully imported.

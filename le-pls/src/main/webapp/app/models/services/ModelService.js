@@ -3,9 +3,10 @@ angular.module('mainApp.models.services.ModelService', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.core.services.SessionService'
+    'mainApp.core.services.SessionService',
+    'mainApp.appCommon.services.ModelSummaryValidationService'
 ])
-.service('ModelService', function ($http, $q, _, ServiceErrorUtility, ResourceUtility, StringUtility, SessionService) {
+.service('ModelService', function ($http, $q, _, ServiceErrorUtility, ResourceUtility, StringUtility, SessionService, ModelSummaryValidationService) {
 
     this.GetAllModels = function (isValidOnly) {
             var deferred = $q.defer();
@@ -313,6 +314,13 @@ angular.module('mainApp.models.services.ModelService', [
             ResultErrors: ''
         };
 
+        var errors = ModelSummaryValidationService.ValidateModelSummary(JSON.parse(json));
+        if (errors.length > 0) {
+            result.ResultErrors = ResourceUtility.getString('MODEL_IMPORT_ERROR_TITLE') + " " + errors.join(", ") + ".";
+            deferred.resolve(result);
+            return deferred.promise;
+        }
+
         $http({
             method: 'POST',
             url: '/pls/modelsummaries?raw=true',
@@ -340,7 +348,7 @@ angular.module('mainApp.models.services.ModelService', [
             SessionService.HandleResponseErrors(data, status);
             var result = {
                 Success: false,
-                ResultErrors: ResourceUtility.getString('MODEL_TILE_EDIT_SERVICE_ERROR')
+                ResultErrors: ResourceUtility.getString('MODEL_IMPORT_GENERAL_ERROR')
             };
             deferred.resolve(result);
         });

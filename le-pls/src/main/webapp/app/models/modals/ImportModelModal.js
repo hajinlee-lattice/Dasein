@@ -36,7 +36,7 @@ angular.module('mainApp.models.modals.ImportModelModal', [
                     $scope.showImportSuccess = true;
                 } else {
                     $scope.showImportError = true;
-                    $scope.importErrorMsg = ResourceUtility.getString('MODEL_IMPORT_GENERAL_ERROR');
+                    $scope.importErrorMsg = result.ResultErrors;
                 }
                 $scope.importing = false;
             });

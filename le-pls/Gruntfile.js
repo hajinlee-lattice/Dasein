@@ -238,6 +238,7 @@ module.exports = function (grunt) {
                     '<%= pls.app %>/app/AppCommon/services/PlayTileService.js',
                     '<%= pls.app %>/app/AppCommon/services/TopPredictorService.js',
                     '<%= pls.app %>/app/AppCommon/services/ThresholdExplorerService.js',
+                    '<%= pls.app %>/app/AppCommon/services/ModelSummaryValidationService.js',
                     '<%= pls.app %>/app/AppCommon/widgets/WidgetEventConstantUtility.js',
                     '<%= pls.app %>/app/AppCommon/widgets/screenWidget/ScreenWidget.js',
                     '<%= pls.app %>/app/AppCommon/widgets/screenHeaderWidget/ScreenHeaderWidget.js',
