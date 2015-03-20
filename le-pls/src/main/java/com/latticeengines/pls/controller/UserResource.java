@@ -306,6 +306,7 @@ public class UserResource {
             revokeRightWithoutException(GrantedRight.EDIT_PLS_MODELS.getAuthority(), tenantId, username);
             revokeRightWithoutException(GrantedRight.EDIT_PLS_CONFIGURATION.getAuthority(), tenantId, username);
             revokeRightWithoutException(GrantedRight.EDIT_PLS_USERS.getAuthority(), tenantId, username);
+            revokeRightWithoutException(GrantedRight.CREATE_PLS_MODELS.getAuthority(), tenantId, username);
             return true;
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {

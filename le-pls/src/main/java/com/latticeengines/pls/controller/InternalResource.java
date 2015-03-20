@@ -1,13 +1,20 @@
 package com.latticeengines.pls.controller;
 
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,8 +23,13 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
+import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
+import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
+import com.latticeengines.pls.security.GrantedRight;
+import com.latticeengines.pls.security.RightsUtilities;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -25,6 +37,11 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(value = "/internal")
 public class InternalResource extends InternalResourceBase {
+
+    private static final Log log = LogFactory.getLog(InternalResource.class);
+
+    @Autowired
+    private GlobalUserManagementService globalUserManagementService;
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -64,6 +81,38 @@ public class InternalResource extends InternalResourceBase {
         return response;
     }
 
+    @RequestMapping(value = "/users", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete users. Mainly for cleaning up testing users.")
+    public SimpleBooleanResponse deleteUsers(
+        @RequestParam(value="namepattern", required=false) String namePattern,
+        @RequestParam(value="tenant", required=false) String tenantId
+    ) {
+        if (namePattern != null) {
+            if (tenantId == null) {
+                return SimpleBooleanResponse.getFailResponse(Arrays.asList("Must specify tenant when deleting users by a name pattern."));
+            }
+
+            log.info(String.format("Deleting users matching %s from the tenant %s using internal API", namePattern, tenantId));
+            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId);
+            for (AbstractMap.SimpleEntry<User, List<String>> userRight: userRightsList) {
+                User user = userRight.getKey();
+                boolean isAdmin = RightsUtilities.isAdmin(
+                    RightsUtilities.translateRights(userRight.getValue())
+                );
+                if (!isAdmin && user.getUsername().matches(namePattern)) {
+                    softDelete(tenantId, user.getUsername());
+                    if (globalUserManagementService.isRedundant(user.getUsername())) {
+                        globalUserManagementService.deleteUser(user.getUsername());
+                    }
+                    log.info(String.format("User %s has been deleted from the tenant %s through internal API", namePattern, tenantId));
+                }
+            }
+        }
+
+        return SimpleBooleanResponse.getSuccessResponse();
+    }
+
     @RequestMapping(value = "/{op}/{left}/{right}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Status check for this endpoint")
@@ -93,6 +142,25 @@ public class InternalResource extends InternalResourceBase {
             c.setResult(left + right);
         }
         return c;
+    }
+
+    private void softDelete(String tenantId, String username) {
+        revokeRightWithoutException(GrantedRight.VIEW_PLS_MODELS.getAuthority(), tenantId, username);
+        revokeRightWithoutException(GrantedRight.VIEW_PLS_CONFIGURATION.getAuthority(), tenantId, username);
+        revokeRightWithoutException(GrantedRight.VIEW_PLS_USERS.getAuthority(), tenantId, username);
+        revokeRightWithoutException(GrantedRight.VIEW_PLS_REPORTING.getAuthority(), tenantId, username);
+        revokeRightWithoutException(GrantedRight.EDIT_PLS_MODELS.getAuthority(), tenantId, username);
+        revokeRightWithoutException(GrantedRight.EDIT_PLS_CONFIGURATION.getAuthority(), tenantId, username);
+        revokeRightWithoutException(GrantedRight.EDIT_PLS_USERS.getAuthority(), tenantId, username);
+        revokeRightWithoutException(GrantedRight.CREATE_PLS_MODELS.getAuthority(), tenantId, username);
+    }
+
+    private void revokeRightWithoutException(String right, String tenant, String username) {
+        try {
+            globalUserManagementService.revokeRight(right, tenant, username);
+        } catch (Exception e) {
+            // ignore
+        }
     }
 
 }
