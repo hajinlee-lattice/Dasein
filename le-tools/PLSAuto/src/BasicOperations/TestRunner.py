@@ -70,7 +70,7 @@ class SessionRunner(object):
             conn = pypyodbc.connect(connection_string)
             cur = conn.cursor()
             results = cur.execute(query)            
-            results = cur.fetchall()
+#             results = cur.fetchall()
             cur.commit();
             cur.close()
             conn.close()
