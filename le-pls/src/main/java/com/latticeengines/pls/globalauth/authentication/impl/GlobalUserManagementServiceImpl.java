@@ -168,7 +168,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         addMagicHeaderAndSystemProperty(service);
         try {
             log.info(String.format("Deleting user %s.", username));
-            return service.deleteUser(username);
+            boolean result = service.deleteUser(username);
+            log.info(String.format("Deleting user %s success = %s", username, result));
+            return result;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18015, e, new String[] { username });
         }

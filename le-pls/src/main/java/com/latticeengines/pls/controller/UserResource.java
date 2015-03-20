@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,6 +49,8 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/users")
 public class UserResource {
+
+    private static final Log log = LogFactory.getLog(UserResource.class);
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
@@ -250,10 +254,16 @@ public class UserResource {
                         }
                         successUsers.add(username);
                         continue;
+                    } else {
+                        log.warn(String.format("Failed to delete the user %s in the tenant %s", username, tenantId));
                     }
                 } catch (Exception e) {
                     // ignore
+                    log.warn(String.format("Exception encountered when deleting the user %s in the tenant %s", username, tenantId));
                 }
+            } else {
+                log.warn(String.format("Trying to delete the admin user %s in the tenant %s", username, tenantId));
+                System.out.println(globalUserManagementService.getRights(username, tenantId));
             }
             failUsers.add(username);
         }
