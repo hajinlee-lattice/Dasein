@@ -4,7 +4,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     'mainApp.appCommon.services.TopPredictorService'
 ])
 
-    .controller('TopPredictorAttributeWidgetController', function ($scope, _, ResourceUtility, TopPredictorService) {
+    .controller('TopPredictorAttributeWidgetController', function ($scope, _, $filter, ResourceUtility, TopPredictorService) {
         var data = $scope.data;
         $scope.attributeName = data.name;
         $scope.attributeFullDescription = data.description;
@@ -226,7 +226,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             .attr("text-anchor", "end")
             .attr("class", "lift")
             .style("fill", "#666")
-            .text(function(d) { return d + "x"; } );
+            .text(function(d) { return $filter('number')(d, 1) + "x"; } );
 
         // This is the lift label to the right of the chart
         chart.append("text")
