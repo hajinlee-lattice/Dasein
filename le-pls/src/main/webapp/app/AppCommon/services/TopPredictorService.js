@@ -559,11 +559,12 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
     };
 
         this.createTicks = function(maxTickValue, maxTickNumber) {
+            if (typeof maxTickValue === 'string') { maxTickValue = parseInt(maxTickValue); }
             var steps = [0.5, 1, 2, 5, 10];
             // iterate options in steps, find the maximum appropriate step
-            var step = _.find(steps.reverse(), function(s){
-                return  maxTickNumber * s <= maxTickValue;
-            });
+            var step = _.reduce(steps, function(memo, s){
+                return (maxTickNumber * memo >= maxTickValue) ? memo : s;
+            }, 0);
             // continue doubling step until find an appropriate one
             while (maxTickNumber * step < maxTickValue) {
                 step *= 2;
