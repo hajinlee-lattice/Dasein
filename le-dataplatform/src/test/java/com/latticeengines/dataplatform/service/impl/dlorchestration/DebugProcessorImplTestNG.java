@@ -58,7 +58,8 @@ public class DebugProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testExecute() throws Exception {
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE, true, false);
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters(TEMP_EVENTTABLE, true,
+                false);
         modelCommandEntityMgr.create(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
@@ -78,22 +79,23 @@ public class DebugProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
                     + TEMP_EVENTTABLE + "'");
             dataSize = (String) resMap.get("data");
             rowSize = (String) resMap.get("rows");
-            columnSize = dlOrchestrationJdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM sys.columns where object_id = OBJECT_ID('["
-                            + commandParameters.getEventTable() + "]')", Integer.class);
+            columnSize = dlOrchestrationJdbcTemplate
+                    .queryForObject(
+                            "SELECT COUNT(*) FROM sys.columns where object_id = OBJECT_ID('[" + command.getEventTable()
+                                    + "]')", Integer.class);
         } else {
             // MySQL Connector Java
             tableCopy = dlOrchestrationJdbcTemplate.queryForObject("SHOW TABLES LIKE '" + TEMP_EVENTTABLE_COPY + "'",
                     String.class);
             Map<String, Object> resMap = dlOrchestrationJdbcTemplate.queryForMap("show table status where name = '"
-                    + commandParameters.getEventTable() + "'");
+                    + command.getEventTable() + "'");
             dataSize = (BigInteger) resMap.get("Data_length");
 
             rowSize = (BigInteger) resMap.get("Rows");
 
             columnSize = dlOrchestrationJdbcTemplate.queryForObject(
-                    "select count(*) from INFORMATION_SCHEMA.COLUMNS where table_name='"
-                            + commandParameters.getEventTable() + "'", Integer.class);
+                    "select count(*) from INFORMATION_SCHEMA.COLUMNS where table_name='" + command.getEventTable()
+                            + "'", Integer.class);
         }
         assertNotNull(dataSize);
         assertNotNull(rowSize);

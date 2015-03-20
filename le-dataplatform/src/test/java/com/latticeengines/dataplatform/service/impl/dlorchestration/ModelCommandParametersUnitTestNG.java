@@ -26,7 +26,6 @@ public class ModelCommandParametersUnitTestNG {
             new ModelCommandParameters(new ArrayList<ModelCommandParameter>());
         } catch (LedpException e) {
             String msg = e.getMessage();
-            assertTrue(msg.contains(ModelCommandParameters.EVENT_TABLE));
             assertTrue(msg.contains(ModelCommandParameters.KEY_COLS));
             assertTrue(msg.contains(ModelCommandParameters.MODEL_NAME));
             assertTrue(msg.contains(ModelCommandParameters.MODEL_TARGETS));

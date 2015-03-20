@@ -23,6 +23,7 @@ import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
+import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
@@ -90,10 +91,10 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
 
     @Value("${dataplatform.dlorchestrationjob.postiveevent.warn.threshold}")
     private int positiveEventWarnThreshold;
-    
+
     @Autowired
     private MetadataService metadataService;
-    
+
     @BeforeClass(groups = "functional")
     public void setup() {
         alertService.enableTestMode();
@@ -101,7 +102,8 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
 
     @Test(groups = "functional")
     public void testHandleJobFailed() throws ParseException {
-        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE);
+        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
+                ModelingServiceTestUtils.EVENT_TABLE);
         command.setModelCommandStep(ModelCommandStep.PROFILE_DATA);
         modelCommandEntityMgr.create(command);
 
@@ -116,7 +118,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
                 modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
                 modelStepRetrieveMetadataProcessor, debugProcessorImpl, alertService, httpFsPrefix,
-                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold, 
+                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold,
                 positiveEventFailThreshold, positiveEventWarnThreshold, metadataService);
 
         PagerDutyTestUtils.confirmPagerDutyIncident(callable.handleJobFailed());
@@ -128,7 +130,8 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
 
     @Test(groups = "functional")
     public void generateDataDiagnostics() throws Exception {
-        ModelCommand command = new ModelCommand(2L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE);
+        ModelCommand command = new ModelCommand(2L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
+                ModelingServiceTestUtils.EVENT_TABLE);
         command.setModelCommandStep(ModelCommandStep.SUBMIT_MODELS);
         modelCommandEntityMgr.create(command);
 
@@ -136,7 +139,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
                 modelCommandEntityMgr, modelCommandStateEntityMgr, modelStepYarnProcessor, modelCommandLogService,
                 modelCommandResultEntityMgr, modelStepFinishProcessor, modelStepOutputResultsProcessor,
                 modelStepRetrieveMetadataProcessor, debugProcessorImpl, alertService, httpFsPrefix,
-                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold, 
+                resourceManagerWebAppAddress, appTimeLineWebAppAddress, rowFailThreshold, rowWarnThreshold,
                 positiveEventFailThreshold, positiveEventWarnThreshold, metadataService);
         ModelCommandState commandState = new ModelCommandState(command, ModelCommandStep.SUBMIT_MODELS);
         JobStatus jobStatus = new JobStatus();
@@ -168,7 +171,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
     }
 
     private String getContent() {
-        return " { \"Summary\": { \"SampleSize\": 130768, \"ColumnSize\": 317, \"PositiveEventRate\": 0.0094212651413189772, " 
+        return " { \"Summary\": { \"SampleSize\": 130768, \"ColumnSize\": 317, \"PositiveEventRate\": 0.0094212651413189772, "
                 + "\"NumberOfSkippedRows\": 0, \"NumberOfSkippedRows\": 10, \"HighUCColumns\": \"IsPublicDomain, AwardCategory\"} "
                 + " \"MetadataDiagnostics\": { \"IsPublicDomain\": \"DisplayDiscretizationStrategy\" }, "
                 + " \"ColumnDiagnostics\": [ { \"Colname\": \"IsPublicDomain\", \"DisplayName\": \"IsPublicDomain\", "

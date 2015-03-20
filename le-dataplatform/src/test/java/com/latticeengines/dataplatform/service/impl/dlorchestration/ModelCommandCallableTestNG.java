@@ -43,7 +43,7 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
     private static final String TEMP_EVENTTABLE = "ModelCommandCallableTestNG_eventtable";
 
-	private static final String TEMP_EVENTTABLE_FEW_ROWS = "ModelCommandCallableTestNG_eventtable_fewrows";
+    private static final String TEMP_EVENTTABLE_FEW_ROWS = "ModelCommandCallableTestNG_eventtable_fewrows";
 
     @Autowired
     private ModelingJobService modelingJobService;
@@ -102,9 +102,10 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
             dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE + "', 'U') IS NOT NULL DROP TABLE "
                     + TEMP_EVENTTABLE);
             dlOrchestrationJdbcTemplate.execute("select * into " + TEMP_EVENTTABLE + " from Q_EventTable_Nutanix");
-            dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE_FEW_ROWS + "', 'U') IS NOT NULL DROP TABLE "
-                    + TEMP_EVENTTABLE_FEW_ROWS);
-            dlOrchestrationJdbcTemplate.execute("select * into " + TEMP_EVENTTABLE_FEW_ROWS + " from Q_EventTableDepivot_Nutanix_FewRows");
+            dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + TEMP_EVENTTABLE_FEW_ROWS
+                    + "', 'U') IS NOT NULL DROP TABLE " + TEMP_EVENTTABLE_FEW_ROWS);
+            dlOrchestrationJdbcTemplate.execute("select * into " + TEMP_EVENTTABLE_FEW_ROWS
+                    + " from Q_EventTableDepivot_Nutanix_FewRows");
         } else {
             // MySQL Connector Java
             dlOrchestrationJdbcTemplate.execute("drop table if exists " + TEMP_EVENTTABLE);
@@ -132,9 +133,11 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
     @Test(groups = "functional", enabled = true)
     public void testWorkflowValidationFailed() throws Exception {
-        // Comment out below 2 lines when testing against an integration database
+        // Comment out below 2 lines when testing against an integration
+        // database
         // Validation failure due to too few rows
-        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithFewRowsAndReadoutTargets(TEMP_EVENTTABLE_FEW_ROWS, false, true);
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithFewRowsAndReadoutTargets(
+                TEMP_EVENTTABLE_FEW_ROWS, false, true);
         modelCommandEntityMgr.create(command);
 
         int iterations = 0;
@@ -212,7 +215,8 @@ public class ModelCommandCallableTestNG extends DataPlatformFunctionalTestNGBase
 
     @Test(groups = "functional")
     public void testMissingParameters() throws Exception {
-        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE);
+        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
+                ModelingServiceTestUtils.EVENT_TABLE);
         modelCommandEntityMgr.create(command);
 
         int iterations = 0;

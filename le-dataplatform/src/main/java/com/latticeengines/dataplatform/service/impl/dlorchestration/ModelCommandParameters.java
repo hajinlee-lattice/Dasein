@@ -18,7 +18,6 @@ public class ModelCommandParameters {
     public static final String EVENT_METADATA = "EventMetadata";
 
     // Mandatory parameters
-    public static final String EVENT_TABLE = "EventTable";
     public static final String KEY_COLS = "KeyCols";
     public static final String MODEL_NAME = "ModelName";
     public static final String MODEL_TARGETS = "ModelTargets";
@@ -35,7 +34,6 @@ public class ModelCommandParameters {
     public static final String DEBUG = "Debug";
     public static final String VALIDATE = "Validate";
 
-    private String eventTable = null;
     private String depivotedEventTable = null;
     private String metadataTable = EVENT_METADATA;
     private List<String> keyCols = Collections.emptyList();
@@ -51,16 +49,12 @@ public class ModelCommandParameters {
     private boolean debug = false;
     private boolean validate = true;
 
-    public ModelCommandParameters (List<ModelCommandParameter> commandParameters) {
+    public ModelCommandParameters(List<ModelCommandParameter> commandParameters) {
         super();
-
         for (ModelCommandParameter parameter : commandParameters) {
             switch (parameter.getKey()) {
             case ModelCommandParameters.DEPIVOTED_EVENT_TABLE:
                 this.setDepivotedEventTable(parameter.getValue());
-                break;
-            case ModelCommandParameters.EVENT_TABLE:
-                this.setEventTable(parameter.getValue());
                 break;
             case ModelCommandParameters.KEY_COLS:
                 this.setKeyCols(splitCommaSeparatedStringToList(parameter.getValue()));
@@ -102,9 +96,6 @@ public class ModelCommandParameters {
         }
 
         List<String> missingParameters = new ArrayList<>();
-        if (Strings.isNullOrEmpty(this.getEventTable())) {
-            missingParameters.add(ModelCommandParameters.EVENT_TABLE);
-        }
         if (this.getKeyCols().isEmpty()) {
             missingParameters.add(ModelCommandParameters.KEY_COLS);
         }
@@ -157,15 +148,6 @@ public class ModelCommandParameters {
         this.dlTenant = dlTenant;
     }
 
-    public String getEventTable() {
-        return eventTable;
-    }
-
-    @VisibleForTesting
-    void setEventTable(String eventTable) {
-        this.eventTable = eventTable;
-    }
-
     public String getDepivotedEventTable() {
         return depivotedEventTable;
     }
@@ -179,7 +161,8 @@ public class ModelCommandParameters {
     }
 
     public void setMetadataTable(String metadataTable) {
-        this.metadataTable = metadataTable;;
+        this.metadataTable = metadataTable;
+        ;
     }
 
     public List<String> getKeyCols() {
@@ -205,12 +188,12 @@ public class ModelCommandParameters {
     private void setModelName(String modelName) {
         this.modelName = modelName;
     }
-    
+
     public String getEventColumnName() {
         String eventColumn = getModelTargets().get(0);
-        
+
         String[] cols = eventColumn.split(":");
-        
+
         if (cols.length == 2) {
             return cols[1].trim();
         } else {
@@ -269,7 +252,7 @@ public class ModelCommandParameters {
     public boolean isValidate() {
         return validate;
     }
-    
+
     public void setValidate(boolean validate) {
         this.validate = validate;
     }

@@ -20,28 +20,27 @@ public class DebugProcessorImpl {
 
     public void execute(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
         try {
-            String dbCopy = modelCommandParameters.getEventTable() + COPY_SUFFIX;
+            String dbCopy = modelCommand.getEventTable() + COPY_SUFFIX;
             String dbDriverName = dlOrchestrationJdbcTemplate.getDataSource().getConnection().getMetaData()
                     .getDriverName();
             if (dbDriverName.contains("Microsoft")) {
                 dlOrchestrationJdbcTemplate.execute("IF OBJECT_ID('" + dbCopy + "', 'U') IS NOT NULL DROP TABLE "
                         + dbCopy);
-                dlOrchestrationJdbcTemplate.execute("select * into " + dbCopy + " from "
-                        + modelCommandParameters.getEventTable());
+                dlOrchestrationJdbcTemplate
+                        .execute("select * into " + dbCopy + " from " + modelCommand.getEventTable());
             } else {
                 dlOrchestrationJdbcTemplate.execute("drop table if exists " + dbCopy);
-                dlOrchestrationJdbcTemplate.execute("CREATE TABLE " + dbCopy + " LIKE "
-                        + modelCommandParameters.getEventTable());
+                dlOrchestrationJdbcTemplate.execute("CREATE TABLE " + dbCopy + " LIKE " + modelCommand.getEventTable());
                 dlOrchestrationJdbcTemplate.execute("INSERT " + dbCopy + " SELECT * FROM "
-                        + modelCommandParameters.getEventTable());
+                        + modelCommand.getEventTable());
             }
             modelCommandLogService.log(modelCommand, "Created copy of event table into: " + dbCopy);
         } catch (Exception e) {
             modelCommandLogService.logException(modelCommand, "Problem creating copy of event table", e);
         }
     }
-    
-    public JdbcTemplate getDlOrchestrationJdbcTemplate(){
+
+    public JdbcTemplate getDlOrchestrationJdbcTemplate() {
         return dlOrchestrationJdbcTemplate;
     }
 }

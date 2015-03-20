@@ -13,14 +13,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.interfaces.data.DataInterfacePublisher;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;
-import com.latticeengines.camille.exposed.interfaces.data.DataInterfacePublisher;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -45,7 +45,6 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
             + "    JsonPath varchar(512) NULL,\n" + "    Timestamp datetime NULL\n" + ")\n" + "";
     private static final String HTTPFS_SUFFIX = "?op=OPEN&user.name=yarn";
 
-    
     private static final String INSERT_OUTPUT_TABLE_SQL = "(Id, CommandId, SampleSize, Algorithm, JsonPath, Timestamp) values (?, ?, ?, ?, ?, ?)";
 
     @Value("${dataplatform.fs.web.defaultFS}")
@@ -78,33 +77,30 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
         try {
             publishModel(modelCommand, jobStatus, modelCommandParameters, modelFilePath, appId);
             publishModelArtifacts(modelCommand, jobStatus, modelCommandParameters, appId);
-        }
-        finally {
+        } finally {
             publishLinks(modelCommand, jobStatus, modelFilePath);
-            updateEventTable(modelCommand, modelCommandParameters, modelFilePath);
+            updateEventTable(modelCommand, modelFilePath);
         }
     }
 
-    private String getModelFilePath(
-            ModelCommand modelCommand,
-            JobStatus jobStatus,
-            String appId) throws LedpException {
+    private String getModelFilePath(ModelCommand modelCommand, JobStatus jobStatus, String appId) throws LedpException {
         try {
 
             String hdfsResultDirectory = jobStatus.getResultDirectory();
 
-            //Assume one non-diagnostic json file in hdfsResultDirectory!
-            List<String> jsonFiles = HdfsUtils.getFilesForDir(
-                    yarnConfiguration,
-                    hdfsResultDirectory,
+            // Assume one non-diagnostic json file in hdfsResultDirectory!
+            List<String> jsonFiles = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsResultDirectory,
                     new HdfsFilenameFilter() {
                         @Override
                         public boolean accept(String filename) {
-                            if (filename.equals("diagnostics" + JSON_SUFFIX)) { return false; }
+                            if (filename.equals("diagnostics" + JSON_SUFFIX)) {
+                                return false;
+                            }
                             Pattern p = Pattern.compile(".*" + JSON_SUFFIX);
                             Matcher matcher = p.matcher(filename.toString());
                             return matcher.matches();
-                        }});
+                        }
+                    });
 
             if (jsonFiles.size() == 1) {
                 return jsonFiles.get(0);
@@ -114,59 +110,53 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                 throw new Exception("Too many model files exist.");
             }
 
-        }
-        catch (Exception e) {
-          throw new LedpException(LedpCode.LEDP_16002, e,
-                  new String[] { String.valueOf(modelCommand.getPid()), appId });
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_16002, e,
+                    new String[] { String.valueOf(modelCommand.getPid()), appId });
         }
     }
 
-    private String getUniqueModelName(
-            JobStatus jobStatus,
-            ModelCommandParameters modelCommandParameters) {
-        //This is apparently a BARD restriction.
+    private String getUniqueModelName(JobStatus jobStatus, ModelCommandParameters modelCommandParameters) {
+        // This is apparently a BARD restriction.
         int modelIdLengthLimit = 45;
 
         String modelName = modelCommandParameters.getModelName();
-        
+
         String modelId = jobStatus.getResultDirectory().split("/")[7] + "-" + modelName;
         if (modelId.length() > modelIdLengthLimit) {
             modelId = modelId.substring(0, modelIdLengthLimit);
         }
-        
+
         return modelId;
     }
-    
-    private int getModelVersion()
-    {
-        // TODO This should be set to the actual model version once that's supported.
-    	return 1;
+
+    private int getModelVersion() {
+        // TODO This should be set to the actual model version once that's
+        // supported.
+        return 1;
     }
-    
-    private void publishModel(
-            ModelCommand modelCommand,
-            JobStatus jobStatus,
-            ModelCommandParameters modelCommandParameters,
-            String modelFilePath,
-            String appId) throws LedpException {
+
+    private void publishModel(ModelCommand modelCommand, JobStatus jobStatus,
+            ModelCommandParameters modelCommandParameters, String modelFilePath, String appId) throws LedpException {
         try {
 
             String hdfsResultDirectory = jobStatus.getResultDirectory();
 
             String[] tokens = hdfsResultDirectory.split("/");
 
-            if (tokens.length > 7) { //Chances are, this is good.
+            if (tokens.length > 7) { // Chances are, this is good.
                 String consumer = "BARD";
 
                 StringBuilder hdfsCustomersDirectory = new StringBuilder();
                 for (int i = 0; i < 4; i++) {
-                	hdfsCustomersDirectory.append(tokens[i]).append("/");
+                    hdfsCustomersDirectory.append(tokens[i]).append("/");
                 }
-                
+
                 String modelId = getUniqueModelName(jobStatus, modelCommandParameters);
 
                 StringBuilder hdfsConsumerDirectory = new StringBuilder();
-                hdfsConsumerDirectory.append(hdfsCustomersDirectory).append(tokens[4]).append("/").append(consumer).append("/").append(modelId);
+                hdfsConsumerDirectory.append(hdfsCustomersDirectory).append(tokens[4]).append("/").append(consumer)
+                        .append("/").append(modelId);
                 String hdfsConsumerFile = hdfsConsumerDirectory + "/" + getModelVersion() + ".json";
 
                 if (HdfsUtils.fileExists(yarnConfiguration, hdfsConsumerFile)) {
@@ -175,98 +165,92 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
 
                 String modelContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, modelFilePath);
                 HdfsUtils.writeToFile(yarnConfiguration, hdfsConsumerFile, modelContent);
-                
+
                 // Publish the PMML model and associated artifacts.
                 String deploymentExternalId = modelCommand.getDeploymentExternalId();
                 CustomerSpace space = CustomerSpace.parse(deploymentExternalId);
-                
+
                 StringBuilder artifactPath = new StringBuilder();
-                artifactPath.append(hdfsCustomersDirectory).append(space).append("/models/").append(modelId).append("/").append(getModelVersion()).append("/");
-                
-                String pmmlContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsResultDirectory + "/rfpmml.xml");
+                artifactPath.append(hdfsCustomersDirectory).append(space).append("/models/").append(modelId)
+                        .append("/").append(getModelVersion()).append("/");
+
+                String pmmlContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsResultDirectory
+                        + "/rfpmml.xml");
                 HdfsUtils.writeToFile(yarnConfiguration, artifactPath + "ModelPmml.xml", pmmlContent);
-                
-                String dataContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsResultDirectory + "/enhancements/DataComposition.json");
+
+                String dataContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsResultDirectory
+                        + "/enhancements/DataComposition.json");
                 HdfsUtils.writeToFile(yarnConfiguration, artifactPath + "DataComposition.json", dataContent);
-                
-                String scoreContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsResultDirectory + "/enhancements/ScoreDerivation.json");
+
+                String scoreContent = HdfsUtils.getHdfsFileContents(yarnConfiguration, hdfsResultDirectory
+                        + "/enhancements/ScoreDerivation.json");
                 HdfsUtils.writeToFile(yarnConfiguration, artifactPath + "ScoreDerivation.json", scoreContent);
-            } else {               
+            } else {
                 throw new Exception("Unexpected result directory: " + hdfsResultDirectory);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_16010, e,
-                  new String[] { String.valueOf(modelCommand.getPid()), appId });
+                    new String[] { String.valueOf(modelCommand.getPid()), appId });
         }
     }
 
-    private void publishModelArtifacts(
-            ModelCommand modelCommand,
-            JobStatus jobStatus,
-            ModelCommandParameters modelCommandParameters,
-            String appId) {
+    private void publishModelArtifacts(ModelCommand modelCommand, JobStatus jobStatus,
+            ModelCommandParameters modelCommandParameters, String appId) {
         try {
 
             String deploymentExternalId = modelCommand.getDeploymentExternalId();
             CustomerSpace space = CustomerSpace.parse(deploymentExternalId);
 
-            // Publish model artifacts into ZooKeeper.            
+            // Publish model artifacts into ZooKeeper.
             DataInterfacePublisher modelPublisher = new DataInterfacePublisher("ModelArtifact", space);
             String modelName = getUniqueModelName(jobStatus, modelCommandParameters);
             String basePath = "/Models/" + modelName + "/" + getModelVersion() + "/";
 
-            String dataComposition = HdfsUtils.getHdfsFileContents(yarnConfiguration,
-            		jobStatus.getResultDirectory() + "/enhancements/DataComposition.json");
+            String dataComposition = HdfsUtils.getHdfsFileContents(yarnConfiguration, jobStatus.getResultDirectory()
+                    + "/enhancements/DataComposition.json");
             modelPublisher.publish(new Path(basePath + "DataComposition.json"), new Document(dataComposition));
 
-            String scoreDerivation = HdfsUtils.getHdfsFileContents(yarnConfiguration,
-            		jobStatus.getResultDirectory() + "/enhancements/ScoreDerivation.json");
+            String scoreDerivation = HdfsUtils.getHdfsFileContents(yarnConfiguration, jobStatus.getResultDirectory()
+                    + "/enhancements/ScoreDerivation.json");
             modelPublisher.publish(new Path(basePath + "ScoreDerivation.json"), new Document(scoreDerivation));
-        }
-        catch (Exception e) {
-            LedpException exc =
-                    new LedpException(LedpCode.LEDP_16011, e,
-                    new String[] { String.valueOf(modelCommand.getPid()), appId });
+        } catch (Exception e) {
+            LedpException exc = new LedpException(LedpCode.LEDP_16011, e, new String[] {
+                    String.valueOf(modelCommand.getPid()), appId });
             log.error("", exc);
         }
     }
 
-    private void publishLinks(
-            ModelCommand modelCommand,
-            JobStatus jobStatus,
-            String modelFilePath) {
+    private void publishLinks(ModelCommand modelCommand, JobStatus jobStatus, String modelFilePath) {
 
         // Provide link to result files
         String modelJsonFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath);
-        modelCommandLogService.log(modelCommand, "Model json file download link: " + httpFsPrefix + modelJsonFileHdfsPath
-                + HTTPFS_SUFFIX);
-        
-        String modelCSVFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath).replace(JSON_SUFFIX, CSV_SUFFIX);
-        modelCommandLogService.log(modelCommand, "Top Predictors csv file download link: " + httpFsPrefix + modelCSVFileHdfsPath
-                + HTTPFS_SUFFIX);
-        
-        String scoreFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "scored.txt");
+        modelCommandLogService.log(modelCommand, "Model json file download link: " + httpFsPrefix
+                + modelJsonFileHdfsPath + HTTPFS_SUFFIX);
+
+        String modelCSVFileHdfsPath = jobStatus.getResultDirectory() + "/"
+                + StringTokenUtils.stripPath(modelFilePath).replace(JSON_SUFFIX, CSV_SUFFIX);
+        modelCommandLogService.log(modelCommand, "Top Predictors csv file download link: " + httpFsPrefix
+                + modelCSVFileHdfsPath + HTTPFS_SUFFIX);
+
+        String scoreFileHdfsPath = jobStatus.getResultDirectory() + "/"
+                + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "scored.txt");
         modelCommandLogService.log(modelCommand, "Score file download link: " + httpFsPrefix + scoreFileHdfsPath
                 + HTTPFS_SUFFIX);
 
-        String readOutSampleFileHdfsPath = jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "readoutsample.csv");
-        modelCommandLogService.log(modelCommand, "ReadOutSample file download link: " + httpFsPrefix + readOutSampleFileHdfsPath
-                + HTTPFS_SUFFIX);
+        String readOutSampleFileHdfsPath = jobStatus.getResultDirectory() + "/"
+                + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "readoutsample.csv");
+        modelCommandLogService.log(modelCommand, "ReadOutSample file download link: " + httpFsPrefix
+                + readOutSampleFileHdfsPath + HTTPFS_SUFFIX);
     }
-    
 
-    private void updateEventTable(
-            ModelCommand modelCommand,
-            ModelCommandParameters modelCommandParameters,
-            String modelFilePath) {
+    private void updateEventTable(ModelCommand modelCommand, String modelFilePath) {
 
         ModelCommandOutput output = new ModelCommandOutput(1, modelCommand.getPid().intValue(), SAMPLE_SIZE,
                 RANDOM_FOREST, modelFilePath, new Date());
-        dlOrchestrationJdbcTemplate.execute("drop table " + modelCommandParameters.getEventTable());
-        dlOrchestrationJdbcTemplate.execute("create table " + modelCommandParameters.getEventTable() + " "
+        dlOrchestrationJdbcTemplate.execute("drop table " + modelCommand.getEventTable());
+        dlOrchestrationJdbcTemplate.execute("create table " + modelCommand.getEventTable() + " "
                 + CREATE_OUTPUT_TABLE_SQL);
-        dlOrchestrationJdbcTemplate.update("insert into " + modelCommandParameters.getEventTable() + " "
+        dlOrchestrationJdbcTemplate.update("insert into " + modelCommand.getEventTable() + " "
                 + INSERT_OUTPUT_TABLE_SQL, output.getId(), output.getCommandId(), output.getSampleSize(),
                 output.getAlgorithm(), output.getJsonPath(), output.getTimestamp());
     }

@@ -53,9 +53,9 @@ import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorith
  * This is an end-to-end test against a SQL Server database without having to go
  * through the REST API. It allows for an easier development-test cycle without
  * having to either deploy to Jetty or run from le-api.
- *
+ * 
  * @author rgonzalez
- *
+ * 
  */
 @Transactional
 public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunctionalTestNGBase {
@@ -144,8 +144,8 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
 
     private DbCreds getCreds() {
         DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB)
-                .user(dataSourceUser).password(dataSourcePasswd).dbType(dataSourceDBType);
+        builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
+                .password(dataSourcePasswd).dbType(dataSourceDBType);
         return new DbCreds(builder);
     }
 
@@ -166,7 +166,6 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         loadConfig.setTable("SomeBogusTableName");
         modelingService.loadData(loadConfig);
     }
-
 
     @Test(groups = "functional")
     public void retrieveMetadataAndWriteToHdfs() throws Exception {

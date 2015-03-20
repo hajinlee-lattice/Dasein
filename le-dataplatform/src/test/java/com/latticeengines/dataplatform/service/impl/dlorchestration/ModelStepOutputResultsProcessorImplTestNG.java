@@ -65,7 +65,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     private String consumerDirectory = "/user/s-analytics/customers/Nutanix/BARD/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/";
     private String hdfsArtifactsDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
     private String zkArtifactsPath = "/Models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
-    
+
     @BeforeClass(groups = "functional")
     public void beforeClass() throws Exception {
         initMocks(this);
@@ -77,9 +77,12 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testreadoutsample.csv", linkContents.get(3));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "diagnostics.json", "diagnostics");
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "rfpmml.xml", pmmlContents);
-        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/modelsummary.json", modelSummaryContents);
-        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/ScoreDerivation.json", scoreDerivationContents);
-        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/DataComposition.json", dataCompositionContents);
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/modelsummary.json",
+                modelSummaryContents);
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/ScoreDerivation.json",
+                scoreDerivationContents);
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "enhancements/DataComposition.json",
+                dataCompositionContents);
         when(modelingService.getJobStatus(YARN_APPLICATION_ID)).thenReturn(jobStatus);
 
         ReflectionTestUtils.setField(modelStepOutputResultsProcessor, "modelingService", modelingService);
@@ -115,8 +118,8 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
 
         modelStepOutputResultsProcessor.executeStep(command, commandParameters);
 
-        String outputAlgorithm = dlOrchestrationJdbcTemplate.queryForObject("select Algorithm from "
-                + commandParameters.getEventTable(), String.class);
+        String outputAlgorithm = dlOrchestrationJdbcTemplate.queryForObject(
+                "select Algorithm from " + command.getEventTable(), String.class);
         assertEquals(outputAlgorithm, ModelStepOutputResultsProcessorImpl.RANDOM_FOREST);
 
         List<String> outputLogs = dlOrchestrationJdbcTemplate.queryForList("select Message from LeadScoringCommandLog",

@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Access(AccessType.FIELD)
 @Table(name = "LeadScoringCommand")
 public class ModelCommand implements HasPid, Serializable {
-    
+
     public static final String TAHOE = "Tahoe";
     private static final long serialVersionUID = 1L;
 
@@ -42,6 +42,9 @@ public class ModelCommand implements HasPid, Serializable {
 
     @Column(name = "Deployment_External_ID", nullable = false)
     private String deploymentExternalId;
+
+    @Column(name = "LeadInputTableName", nullable = false)
+    private String eventTable;
 
     @Column(name = "CommandStatus", nullable = false)
     @Type(type = "com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatusUserType", parameters = {
@@ -70,26 +73,27 @@ public class ModelCommand implements HasPid, Serializable {
     @LazyCollection(LazyCollectionOption.TRUE)
     @OrderBy("Created ASC")
     private List<ModelCommandState> commandStates;
-    
+
     @Column(name = "ModelId", nullable = false)
     private String modelId;
-    
+
     @OneToOne(mappedBy = "modelCommand", fetch = FetchType.LAZY)
     private ModelCommandResult modelCommandResult;
-    
+
     ModelCommand() {
         super();
     }
-    
+
     @VisibleForTesting
     public ModelCommand(Long commandId, String deploymentExternalId, ModelCommandStatus commandStatus,
-            List<ModelCommandParameter> commandParameters, String modelId) {
+            List<ModelCommandParameter> commandParameters, String modelId, String eventTable) {
         super();
         this.commandId = commandId;
         this.deploymentExternalId = deploymentExternalId;
         this.commandStatus = commandStatus;
         this.commandParameters = commandParameters;
         this.modelId = modelId;
+        this.eventTable = eventTable;
     }
 
     @Override
@@ -104,6 +108,10 @@ public class ModelCommand implements HasPid, Serializable {
 
     public String getDeploymentExternalId() {
         return deploymentExternalId;
+    }
+
+    public String getEventTable() {
+        return eventTable;
     }
 
     public ModelCommandStatus getCommandStatus() {
@@ -139,7 +147,7 @@ public class ModelCommand implements HasPid, Serializable {
     public List<ModelCommandLog> getCommandLogs() {
         return Collections.unmodifiableList(commandLogs);
     }
-    
+
     public List<ModelCommandState> getCommandStates() {
         return commandStates;
     }

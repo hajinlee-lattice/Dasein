@@ -89,7 +89,7 @@ public class ModelCommandCallable implements Callable<Long> {
     private int positiveEventFailThreshold;
 
     private int positiveEventWarnThreshold;
-    
+
     private MetadataService metadataService;
 
     public ModelCommandCallable() {
@@ -151,14 +151,14 @@ public class ModelCommandCallable implements Callable<Long> {
         }
         return modelCommand.getPid();
     }
-    
+
     private static String readableFileSize(long size) {
         if (size <= 0) {
             return "0";
         }
         final String[] units = new String[] { "B", "kB", "MB", "GB", "TB" };
-        int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
-        return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
     private void executeWorkflow() throws Exception {
@@ -190,10 +190,12 @@ public class ModelCommandCallable implements Callable<Long> {
             executeYarnStep(ModelCommandStep.LOAD_DATA, commandParameters);
 
             JdbcTemplate dlOrchestrationJdbcTemplate = debugProcessorImpl.getDlOrchestrationJdbcTemplate();
-            Long rowSize = metadataService.getRowCount(dlOrchestrationJdbcTemplate, commandParameters.getEventTable());
-            Long dataSize = metadataService.getDataSize(dlOrchestrationJdbcTemplate, commandParameters.getEventTable());
-            Integer columnSize = metadataService.getColumnCount(dlOrchestrationJdbcTemplate, commandParameters.getEventTable());
-            modelCommandLogService.log(modelCommand, "Data Size: " + readableFileSize(dataSize) + " Row count: " + rowSize + " Column count: " + columnSize);
+            Long rowSize = metadataService.getRowCount(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
+            Long dataSize = metadataService.getDataSize(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
+            Integer columnSize = metadataService.getColumnCount(dlOrchestrationJdbcTemplate,
+                    modelCommand.getEventTable());
+            modelCommandLogService.log(modelCommand, "Data Size: " + readableFileSize(dataSize) + " Row count: "
+                    + rowSize + " Column count: " + columnSize);
         } else { // modelCommand IN_PROGRESS
             List<ModelCommandState> commandStates = modelCommandStateEntityMgr.findByModelCommandAndStep(modelCommand,
                     modelCommand.getModelCommandStep());
@@ -232,9 +234,9 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private boolean validateDataSize(ModelCommandParameters commandParameters) throws SQLException {
         JdbcTemplate dlOrchestrationJdbcTemplate = debugProcessorImpl.getDlOrchestrationJdbcTemplate();
-        Long rowCount = metadataService.getRowCount(dlOrchestrationJdbcTemplate, commandParameters.getEventTable());
-        Long positiveEventCount = metadataService.getPositiveEventCount(dlOrchestrationJdbcTemplate, 
-                commandParameters.getEventTable(), commandParameters.getEventColumnName());
+        Long rowCount = metadataService.getRowCount(dlOrchestrationJdbcTemplate, modelCommand.getEventTable());
+        Long positiveEventCount = metadataService.getPositiveEventCount(dlOrchestrationJdbcTemplate,
+                modelCommand.getEventTable(), commandParameters.getEventColumnName());
 
         if (rowCount < rowFailThreshold && positiveEventCount < positiveEventFailThreshold) {
             modelCommandLogService.log(modelCommand,
@@ -316,7 +318,7 @@ public class ModelCommandCallable implements Callable<Long> {
         modelCommandLogService.logBeginStep(modelCommand, step);
 
         List<ApplicationId> appIds = modelStepYarnProcessor.executeYarnStep(modelCommand.getDeploymentExternalId(),
-                step, commandParameters);
+                step, modelCommand, commandParameters);
         for (ApplicationId appId : appIds) {
             String appIdString = appId.toString();
             modelCommandLogService.logYarnAppId(modelCommand, appIdString, step);

@@ -11,6 +11,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
+import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 
@@ -35,14 +36,16 @@ public class ModelCommandLogEntityMgrImplTestNG extends DataPlatformFunctionalTe
 
     @Test(groups = "functional")
     public void testFindByModelCommand() throws Exception {
-        ModelCommand modelCommand = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE);
+        ModelCommand modelCommand = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE,
+                ModelingServiceTestUtils.EVENT_TABLE);
         modelCommandEntityMgr.create(modelCommand);
 
-        ModelCommand anotherModelCommand = new ModelCommand(2L, "Nutanix", ModelCommandStatus.NEW, null, ModelCommand.TAHOE);
+        ModelCommand anotherModelCommand = new ModelCommand(2L, "Nutanix", ModelCommandStatus.NEW, null,
+                ModelCommand.TAHOE, ModelingServiceTestUtils.EVENT_TABLE);
         modelCommandEntityMgr.create(anotherModelCommand);
 
         for (int i = 0; i < 3; i++) {
-            modelCommandLogService.log(modelCommand, "a message"+i);
+            modelCommandLogService.log(modelCommand, "a message" + i);
         }
 
         modelCommandLogService.log(anotherModelCommand, "a message");

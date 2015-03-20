@@ -41,7 +41,8 @@ public class ModelCommandEntityMgrImplTestNG extends DataPlatformFunctionalTestN
         commands = modelCommandEntityMgr.getNewAndInProgress();
         assertEquals(commands.size(), 1);
 
-        ModelCommand nonTahoeCommand = new ModelCommand(2L, "Nutanix", ModelCommandStatus.NEW, new ArrayList<ModelCommandParameter>(), "NotTahoe");
+        ModelCommand nonTahoeCommand = new ModelCommand(2L, "Nutanix", ModelCommandStatus.NEW,
+                new ArrayList<ModelCommandParameter>(), "NotTahoe", ModelingServiceTestUtils.EVENT_TABLE);
         modelCommandEntityMgr.create(nonTahoeCommand);
         commands = modelCommandEntityMgr.getNewAndInProgress();
         assertEquals(commands.size(), 1);

@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceImpl;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 
@@ -28,23 +29,25 @@ public class ModelStepYarnProcessorImplUnitTestNG {
         ReflectionTestUtils.setField(processor, "modelingService", modelingService);
     }
 
-    public ModelCommandParameters createModelCommandParameters() {
-        return new ModelCommandParameters(ModelingServiceTestUtils
-                .createModelCommandWithCommandParameters().getCommandParameters());
+    public ModelCommandParameters createModelCommandParameters(ModelCommand command) {
+        return new ModelCommandParameters(command.getCommandParameters());
     }
 
     @Test(groups = "unit")
     public void testGenerateSamplingConfiguration() {
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
         SamplingConfiguration samplingConfig = processor.generateSamplingConfiguration(
-                ModelStepYarnProcessorImpl.DataSetType.STANDARD, "Nutanix", createModelCommandParameters());
+                ModelStepYarnProcessorImpl.DataSetType.STANDARD, "Nutanix", command,
+                createModelCommandParameters(command));
         assertEquals(samplingConfig.getTable(), "Q_EventTable_Nutanix");
         assertEquals(1, samplingConfig.getSamplingElements().size());
     }
 
     @Test(groups = "unit")
     public void testGenerateModel() {
-        Model model = processor.generateModel(ModelStepYarnProcessorImpl.DataSetType.STANDARD, "Nutanix",
-                createModelCommandParameters());
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        Model model = processor.generateModel(ModelStepYarnProcessorImpl.DataSetType.STANDARD, "Nutanix", command,
+                createModelCommandParameters(command));
         assertEquals(1, model.getModelDefinition().getAlgorithms().size());
     }
 

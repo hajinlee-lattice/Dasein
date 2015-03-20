@@ -52,7 +52,8 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         Integer[] types = new Integer[] { 0, 0, 0 };
         httpServer.addServlet(new VisiDBMetadataServlet(cols, types), "/DLRestService/GetQueryMetaDataColumns");
         httpServer.addServlet(new EmptyResponseServlet(), "/DLEmptyResponseRestService/GetQueryMetaDataColumns");
-        httpServer.addServlet(new VisiDBMetadataErrorResponseServlet(), "/DLErrorResponseRestService/GetQueryMetaDataColumns");
+        httpServer.addServlet(new VisiDBMetadataErrorResponseServlet(),
+                "/DLErrorResponseRestService/GetQueryMetaDataColumns");
         httpServer.start();
     }
 

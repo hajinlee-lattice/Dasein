@@ -13,6 +13,8 @@ public class ModelingServiceTestUtils {
 
     public static final int NUM_SAMPLES = 1;
 
+    public static final String EVENT_TABLE = "Q_EventTable_Nutanix";
+
     public static List<String> createExcludeList() {
         List<String> excludeList = new ArrayList<>();
         excludeList.add("Nutanix_EventTable_Clean");
@@ -41,26 +43,30 @@ public class ModelingServiceTestUtils {
     }
 
     public static ModelCommand createModelCommandWithCommandParameters() {
-        return createModelCommandWithCommandParameters("Q_EventTable_Nutanix");
+        return createModelCommandWithCommandParameters(EVENT_TABLE);
     }
 
     public static ModelCommand createModelCommandWithCommandParameters(String eventTable) {
         return createModelCommandWithCommandParameters(eventTable, false, true);
     }
 
-    public static ModelCommand createModelCommandWithCommandParameters(String eventTable, boolean debug, boolean validate) {
+    public static ModelCommand createModelCommandWithCommandParameters(String eventTable, boolean debug,
+            boolean validate) {
         List<ModelCommandParameter> parameters = new ArrayList<>();
-        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, parameters, ModelCommand.TAHOE);
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE, "Q_EventTableDepivot_Nutanix"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, eventTable));
+        ModelCommand command = new ModelCommand(1L, "Nutanix", ModelCommandStatus.NEW, parameters, ModelCommand.TAHOE,
+                eventTable);
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE,
+                "Q_EventTableDepivot_Nutanix"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_NAME, "Model_Submission1"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "P1_Event"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.NUM_SAMPLES, String.valueOf(NUM_SAMPLES)));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.NUM_SAMPLES, String
+                .valueOf(NUM_SAMPLES)));
         String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://localhost:8082/DLRestService"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL,
+                "http://localhost:8082/DLRestService"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_QUERY, "Q_DataForModeling"));
         if (debug) {
             parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEBUG, "true"));
@@ -70,20 +76,25 @@ public class ModelingServiceTestUtils {
         }
         return command;
     }
-    
-    public static ModelCommand createModelCommandWithFewRowsAndReadoutTargets(String eventTable, boolean debug, boolean validate) {
+
+    public static ModelCommand createModelCommandWithFewRowsAndReadoutTargets(String eventTable, boolean debug,
+            boolean validate) {
         List<ModelCommandParameter> parameters = new ArrayList<>();
-        ModelCommand command = new ModelCommand(1L, "FewRowsNutanix", ModelCommandStatus.NEW, parameters, ModelCommand.TAHOE);
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE, "Q_EventTableDepivot_Nutanix_FewRows"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EVENT_TABLE, eventTable));
+        ModelCommand command = new ModelCommand(1L, "FewRowsNutanix", ModelCommandStatus.NEW, parameters,
+                ModelCommand.TAHOE, eventTable);
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEPIVOTED_EVENT_TABLE,
+                "Q_EventTableDepivot_Nutanix_FewRows"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.KEY_COLS, "Nutanix_EventTable_Clean"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_NAME, "Model Submission1"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS, "Event: CATEGORY, Readouts: LeadID | Email"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.NUM_SAMPLES, String.valueOf(NUM_SAMPLES)));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.MODEL_TARGETS,
+                "Event: CATEGORY, Readouts: LeadID | Email"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.NUM_SAMPLES, String
+                .valueOf(NUM_SAMPLES)));
         String excludeString = Joiner.on(",").join(ModelingServiceTestUtils.createExcludeList());
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.EXCLUDE_COLUMNS, excludeString));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_TENANT, "VisiDBTest"));
-        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL, "http://localhost:8082/DLRestService"));
+        parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_URL,
+                "http://localhost:8082/DLRestService"));
         parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DL_QUERY, "Q_DataForModeling"));
         if (debug) {
             parameters.add(new ModelCommandParameter(command, ModelCommandParameters.DEBUG, "true"));

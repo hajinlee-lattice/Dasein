@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.util.StringTokenUtils;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepYarnProcessor;
+import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
@@ -89,29 +90,32 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
     @Override
     @SuppressWarnings("incomplete-switch")
-    public List<ApplicationId> executeYarnStep(String deploymentExternalId, ModelCommandStep currentStep, ModelCommandParameters commandParameters) {
+    public List<ApplicationId> executeYarnStep(String deploymentExternalId, ModelCommandStep currentStep,
+            ModelCommand modelCommand, ModelCommandParameters commandParameters) {
         List<ApplicationId> appIds = Collections.emptyList();
         switch (currentStep) {
         case LOAD_DATA:
-            appIds = load(deploymentExternalId, commandParameters);
+            appIds = load(deploymentExternalId, modelCommand, commandParameters);
             break;
         case GENERATE_SAMPLES:
-            appIds = generateSamples(deploymentExternalId, commandParameters);
+            appIds = generateSamples(deploymentExternalId, modelCommand, commandParameters);
             break;
         case PROFILE_DATA:
-            appIds = profileData(deploymentExternalId, commandParameters);
+            appIds = profileData(deploymentExternalId, modelCommand, commandParameters);
             break;
         case SUBMIT_MODELS:
-            appIds = submitModel(deploymentExternalId, commandParameters);
+            appIds = submitModel(deploymentExternalId, modelCommand, commandParameters);
             break;
         }
 
         return appIds;
     }
 
-    private List<ApplicationId> load(String customer, ModelCommandParameters commandParameters) {
+    private List<ApplicationId> load(String customer, ModelCommand modelCommand,
+            ModelCommandParameters commandParameters) {
         List<ApplicationId> appIds = new ArrayList<>();
-        ApplicationId unpivotedAppId = modelingService.loadData(generateLoadConfiguration(DataSetType.STANDARD, customer, commandParameters));
+        ApplicationId unpivotedAppId = modelingService.loadData(generateLoadConfiguration(DataSetType.STANDARD,
+                customer, modelCommand, commandParameters));
         appIds.add(unpivotedAppId);
         // No LR for now.
         // ApplicationId pivotedAppId =
@@ -122,7 +126,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         return appIds;
     }
 
-    private LoadConfiguration generateLoadConfiguration(DataSetType type, String customer, ModelCommandParameters commandParameters) {
+    private LoadConfiguration generateLoadConfiguration(DataSetType type, String customer, ModelCommand modelcommand,
+            ModelCommandParameters commandParameters) {
         LoadConfiguration config = new LoadConfiguration();
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).dbType(dbType);
@@ -130,7 +135,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         config.setCreds(creds);
         config.setCustomer(customer);
         if (type == DataSetType.STANDARD) {
-            config.setTable(commandParameters.getEventTable());
+            config.setTable(modelcommand.getEventTable());
         } else {
             config.setTable(commandParameters.getDepivotedEventTable());
         }
@@ -158,12 +163,14 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         return list;
     }
 
-    private List<ApplicationId> generateSamples(String customer, ModelCommandParameters commandParameters) {
+    private List<ApplicationId> generateSamples(String customer, ModelCommand modelCommand,
+            ModelCommandParameters commandParameters) {
         // No LR for now.
         // ApplicationId lrAppId =
         // modelingService.createSamples(generateSamplingConfiguration(AlgorithmType.LOGISTIC_REGRESSION,
         // customer, commandParameters));
-        ApplicationId unpivotedAppId = modelingService.createSamples(generateSamplingConfiguration(DataSetType.STANDARD, customer, commandParameters));
+        ApplicationId unpivotedAppId = modelingService.createSamples(generateSamplingConfiguration(
+                DataSetType.STANDARD, customer, modelCommand, commandParameters));
 
         return Arrays.asList(/* lrAppId, */unpivotedAppId);
     }
@@ -173,7 +180,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     }
 
     @VisibleForTesting
-    SamplingConfiguration generateSamplingConfiguration(DataSetType type, String customer, ModelCommandParameters commandParameters) {
+    SamplingConfiguration generateSamplingConfiguration(DataSetType type, String customer, ModelCommand modelCommand,
+            ModelCommandParameters commandParameters) {
         SamplingConfiguration samplingConfig = new SamplingConfiguration();
         samplingConfig.setTrainingPercentage(80);
 
@@ -187,7 +195,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         samplingConfig.setCustomer(customer);
 
         if (type.equals(DataSetType.STANDARD)) {
-            samplingConfig.setTable(commandParameters.getEventTable());
+            samplingConfig.setTable(modelCommand.getEventTable());
         } else {
             samplingConfig.setTable(commandParameters.getDepivotedEventTable());
         }
@@ -196,12 +204,14 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     }
 
     /*
-     * No commented out code exists in this method to handle logistic regression.
+     * No commented out code exists in this method to handle logistic
+     * regression.
      */
-    private List<ApplicationId> profileData(String customer, ModelCommandParameters commandParameters) {
+    private List<ApplicationId> profileData(String customer, ModelCommand modelCommand,
+            ModelCommandParameters commandParameters) {
         DataProfileConfiguration config = new DataProfileConfiguration();
         config.setCustomer(customer);
-        config.setTable(commandParameters.getEventTable());
+        config.setTable(modelCommand.getEventTable());
         config.setMetadataTable(commandParameters.getMetadataTable());
         config.setExcludeColumnList(commandParameters.getExcludeColumns());
         config.setSamplePrefix(SAMPLENAME_PREFIX + "100");
@@ -211,10 +221,12 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         return Arrays.asList(appId);
     }
 
-    private List<ApplicationId> submitModel(String customer, ModelCommandParameters commandParameters) {
+    private List<ApplicationId> submitModel(String customer, ModelCommand modelCommand,
+            ModelCommandParameters commandParameters) {
         List<ApplicationId> appIds = new ArrayList<>();
         // No LR for now.
-        List<ApplicationId> unpivotedModelAppIds = modelingService.submitModel(generateModel(DataSetType.STANDARD, customer, commandParameters));
+        List<ApplicationId> unpivotedModelAppIds = modelingService.submitModel(generateModel(DataSetType.STANDARD,
+                customer, modelCommand, commandParameters));
         // List<ApplicationId> lrAppIds =
         // modelingService.submitModel(generateModel(AlgorithmType.LOGISTIC_REGRESSION,
         // customer, commandParameters));
@@ -244,7 +256,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
     }
 
     @VisibleForTesting
-    Model generateModel(DataSetType type, String customer, ModelCommandParameters commandParameters) {
+    Model generateModel(DataSetType type, String customer, ModelCommand modelCommand,
+            ModelCommandParameters commandParameters) {
         List<Algorithm> algorithms = new ArrayList<>();
 
         int sampleIndex = 0;
@@ -263,7 +276,8 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
 
             int priority = calculatePriority(sampleIndex);
             algorithm.setPriority(calculatePriority(sampleIndex));
-            algorithm.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY=" + priority);
+            algorithm.setContainerProperties("VIRTUALCORES=" + virtualCores + " MEMORY=" + memory + " PRIORITY="
+                    + priority);
             if (!Strings.isNullOrEmpty(commandParameters.getAlgorithmProperties())) {
                 algorithm.setAlgorithmProperties(commandParameters.getAlgorithmProperties());
             }
@@ -281,7 +295,7 @@ public class ModelStepYarnProcessorImpl implements ModelStepYarnProcessor {
         model.setModelDefinition(modelDef);
         model.setName(commandParameters.getModelName());
         if (type.equals(DataSetType.STANDARD)) {
-            model.setTable(commandParameters.getEventTable());
+            model.setTable(modelCommand.getEventTable());
         } else {
             model.setTable(commandParameters.getDepivotedEventTable());
         }
