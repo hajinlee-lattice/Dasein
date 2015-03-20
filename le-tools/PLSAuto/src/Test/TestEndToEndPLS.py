@@ -10,6 +10,11 @@ from BasicOperations.TestHelpers import PLSConfigRunner;
 from BasicOperations.Operations import Models;
 from BasicOperations.TestHelpers import JamsRunner;
 from BasicOperations.Operations import Scoring;
+import BasicOperations.LeadCreator;
+from BasicOperations.LeadCreator import EloquaRequest;
+from BasicOperations.LeadCreator import MarketoRequest;
+from BasicOperations import LeadCreator
+from BasicOperations.LeadCreator import SFDCRequest
 
 class TestEndToEndPLS(object):
     '''
@@ -110,3 +115,76 @@ class TestProperties(object):
         plsUI = PLSConfigRunner(self);
         print PLSEnvironments.pls_url_2;
         plsUI.config(PLSEnvironments.pls_url_2);
+        
+
+class TestLeadCreator(object):
+    '''
+    classdocs
+    '''
+
+
+    def __init__(self):
+        '''
+        Constructor
+        '''
+      
+
+    def TestMetaDataPrint(self):
+        print "the first try on this: ";
+        print BasicOperations.LeadCreator.getDomains(PLSEnvironments.pls_marketing_app_ELQ);
+        print BasicOperations.LeadCreator.getAddresses();
+        print BasicOperations.LeadCreator.getActivityTypes();
+        print BasicOperations.LeadCreator.getStageNames();
+        print BasicOperations.LeadCreator.getTitles();  
+        
+    def TestEloquaDataCreate(self):
+        elq = EloquaRequest();
+        elq.addEloquaContact(5);
+    def TestEloquaDataGet(self):
+#         elq = EloquaRequest();
+#         contact_ids={};
+#         contact_ids["403636"]="F97F534F@pwbonline.com";
+#         contact_ids["403637"]="F97F534F@pwbonline.com";
+#         contact_ids["403638"]="F97F534F@pwbonline.com";
+#         contact_ids["403639"]="F97F534F@pwbonline.com";
+#         elq.getEloquaContact(contact_ids);
+        LeadCreator.getSequence();
+    
+    def TestEloquaDataDelete(self):
+        elq = EloquaRequest();
+        contact_ids={};
+        contact_ids["403636"]="F97F534F@pwbonline.com";
+        contact_ids["403637"]="F97F534F@pwbonline.com";
+        contact_ids["403638"]="F97F534F@pwbonline.com";
+        contact_ids["403639"]="F97F534F@pwbonline.com";
+        elq.deleteContact("403635");
+           
+    def TestMarketoDataCreate(self):
+        mkto = MarketoRequest();
+        mkto.addLeadToMarketo(3);
+        
+    def TestMarketoDataGet(self):
+        mkto = MarketoRequest();
+        contact_ids={};
+        contact_ids["1011700"]="F97F534F@pwbonline.com";
+        contact_ids["1011702"]="F97F534F@pwbonline.com";
+        contact_ids["1011703"]="F97F534F@pwbonline.com";
+        contact_ids["1011704"]="F97F534F@pwbonline.com";
+        mkto.getLeadFromMarketo(contact_ids);  
+        
+    def TestMarketoDataDelete(self):
+        mkto = MarketoRequest();
+        contact_ids={};
+        contact_ids["1011705"]="F97F534F@pwbonline.com";
+        contact_ids["1011702"]="F97F534F@pwbonline.com";
+        contact_ids["1011703"]="F97F534F@pwbonline.com";
+        contact_ids["1011704"]="F97F534F@pwbonline.com";
+        print mkto.delete("1011700").text;
+
+    def TestSFDC(self):
+        sfdc = SFDCRequest();
+#         print sfdc.updateAccountToSFDC("0018000001IDmSOAA1", name="newTestForIt")
+#         print sfdc.deleteAccount("0018000001IDmSOAA1");
+        print sfdc.addOpportunityToSFDC();
+
+
