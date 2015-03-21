@@ -87,40 +87,55 @@ public class PropDataJobServiceImpl extends JobServiceImpl implements PropDataJo
     }
 
     @Override
-    public ApplicationId exportData(String table, String sourceDir, String queue, String customer, String splitCols,
-            String jdbcUrl) {
+    public ApplicationId exportData(String table, String sourceDir, String queue, String customer, String jdbcUrl) {
 
         int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
-        return exportData(table, sourceDir, queue, customer, splitCols, numDefaultMappers, jdbcUrl);
+        return exportData(table, sourceDir, queue, customer, numDefaultMappers, jdbcUrl);
     }
 
     @Override
-    public ApplicationId exportData(String table, String sourceDir, String queue, String customer, String splitCols,
-            int numMappers, String jdbcUrl) {
+    public ApplicationId exportData(String table, String sourceDir, String queue, String customer, int numMappers,
+            String jdbcUrl) {
 
         final String jobName = jobNameService.createJobName(customer, "propdata-export");
 
-        exportSync(table, sourceDir, queue, jobName, splitCols, numMappers, jdbcUrl);
+        exportSync(table, sourceDir, queue, jobName, numMappers, jdbcUrl, null);
 
         return getApplicationId(jobName);
     }
 
-    private void exportSync(final String table, final String sourceDir, final String queue, final String jobName,
-            final String splitCols, final int numMappers, String jdbcUrl) {
-        LedpSqoop.runTool(new String[] { //
-                "export", //
-                        "-Dmapred.job.queue.name=" + queue, //
-                        "--connect", //
-                        jdbcUrl, //
-                        "--m", //
-                        Integer.toString(numMappers), //
-                        "--table", //
-                        table, //
-                        "--direct", "--mapreduce-job-name", //
-                        jobName, //
-                        "--export-dir", //
-                        sourceDir }, new Configuration(yarnConfiguration));
+    @Override
+    public ApplicationId exportData(String table, String sourceDir, String queue, String customer, int numMappers,
+            String jdbcUrl, String javaColumnTypeMappings) {
 
+        final String jobName = jobNameService.createJobName(customer, "propdata-export");
+
+        exportSync(table, sourceDir, queue, jobName, numMappers, jdbcUrl, javaColumnTypeMappings);
+
+        return getApplicationId(jobName);
+    }
+    
+    private void exportSync(final String table, final String sourceDir, final String queue, final String jobName,
+            final int numMappers, String jdbcUrl, String javaColumnTypeMappings) {
+        List<String> cmds = new ArrayList<>();
+        cmds.add("export");
+        cmds.add("-Dmapred.job.queue.name=" + queue);
+        cmds.add("--connect");
+        cmds.add(jdbcUrl);
+        cmds.add("--m");
+        cmds.add(Integer.toString(numMappers));
+        cmds.add("--table");
+        cmds.add(table);
+        cmds.add("--direct");
+        cmds.add("--mapreduce-job-name");
+        cmds.add(jobName);
+        cmds.add("--export-dir");
+        cmds.add(sourceDir);
+        if (javaColumnTypeMappings != null) {
+            cmds.add("--map-column-java");
+            cmds.add(javaColumnTypeMappings);
+        }
+        LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
     }
 
 }

@@ -33,7 +33,7 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
         groupByCriteria = new ArrayList<>();
         groupByCriteria.add(new GroupByCriteria("HashedEmailID", "ML_30Day_Category_UniqueUsers",
                 GroupByCriteria.AggregationType.COUNT));
-        groupByCriteria.add(new GroupByCriteria("Topic_Total", "ML_30Day_Category_TOTAL",
+        groupByCriteria.add(new GroupByCriteria("Topic_Total", "ML_30Day_Category_Total",
                 GroupByCriteria.AggregationType.SUM));
         lastAggregatedOperatorName = addGroupBy(lastAggregatedOperatorName, new FieldList("DomainID", "Category"),
                 groupByCriteria);
@@ -45,15 +45,19 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
                     new FieldList("DomainID", "Category"), "MadisonLogicForYesterday", new FieldList("DomainID",
                             "Category"));
             FieldMetadata fieldMetaData = new FieldMetadata(Type.DOUBLE, Float.class,
-                    "ML_30Day_Category_TOTAL_PctChange", null);
-            ;
+                    "ML_30Day_Category_Total_PctChange", null);
             lastAggregatedOperatorName = addFunction(
                     lastAggregatedOperatorName, //
-                    "MadisonLogicForYesterday__ML_30Day_Category_TOTAL != null ? "
-                            + "new Double((ML_30Day_Category_TOTAL.doubleValue() - MadisonLogicForYesterday__ML_30Day_Category_TOTAL.doubleValue())/MadisonLogicForYesterday__ML_30Day_Category_TOTAL.doubleValue()) : null", //
-                    new FieldList("ML_30Day_Category_TOTAL", "MadisonLogicForYesterday__ML_30Day_Category_TOTAL"), //
+                    "MadisonLogicForYesterday__ML_30Day_Category_Total != null ? "
+                            + "new Double((ML_30Day_Category_Total.doubleValue() - MadisonLogicForYesterday__ML_30Day_Category_Total.doubleValue())/MadisonLogicForYesterday__ML_30Day_Category_Total.doubleValue()) : null", //
+                    new FieldList("ML_30Day_Category_Total", "MadisonLogicForYesterday__ML_30Day_Category_Total"), //
                     fieldMetaData);
-
+            fieldMetaData = new FieldMetadata(Type.LONG, Long.class, "ML_30Day_Category_Total", null);
+            lastAggregatedOperatorName = addFunction(
+                    lastAggregatedOperatorName, //
+                    "ML_30Day_Category_Total != null ? new Long(ML_30Day_Category_Total.longValue()) : null ",
+                    new FieldList("ML_30Day_Category_Total"), //
+                    fieldMetaData);
             fieldMetaData = new FieldMetadata(Type.DOUBLE, Float.class, "ML_30Day_Category_UniqueUsers_PctChange", null);
             lastAggregatedOperatorName = addFunction(
                     lastAggregatedOperatorName, //
@@ -61,11 +65,9 @@ public class MadisonDataFlowBuilder extends CascadingDataFlowBuilder {
                             + "new Double((ML_30Day_Category_UniqueUsers.doubleValue() - "
                             + "MadisonLogicForYesterday__ML_30Day_Category_UniqueUsers.doubleValue())/MadisonLogicForYesterday__ML_30Day_Category_UniqueUsers.doubleValue()) : null", //
                     new FieldList("ML_30Day_Category_UniqueUsers",
-                            "MadisonLogicForYesterday__ML_30Day_Category_UniqueUsers"
-                            ), 
-                   fieldMetaData, 
-                   new FieldList(new String[] { "DomainID", "Category", "ML_30Day_Category_TOTAL",
-                                    "ML_30Day_Category_TOTAL_PctChange", "ML_30Day_Category_UniqueUsers",
+                            "MadisonLogicForYesterday__ML_30Day_Category_UniqueUsers"), fieldMetaData, new FieldList(
+                            new String[] { "DomainID", "Category", "ML_30Day_Category_Total",
+                                    "ML_30Day_Category_Total_PctChange", "ML_30Day_Category_UniqueUsers",
                                     "ML_30Day_Category_UniqueUsers_PctChange" }));
         }
 

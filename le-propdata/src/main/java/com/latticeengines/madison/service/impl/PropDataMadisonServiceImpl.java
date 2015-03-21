@@ -46,11 +46,11 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     protected Configuration yarnConfiguration;
 
     @Value("${propdata.madison.datasource.url}")
-    private String jdbcUrl;
+    private String sourceJdbcUrl;
     @Value("${propdata.madison.datasource.user}")
-    private String jdbcUser;
+    private String sourceJdbcUser;
     @Value("${propdata.madison.datasource.password.encrypted}")
-    private String jdbcPassword;
+    private String sourceJdbcPassword;
 
     @Value("${propdata.basedir}")
     private String propdataBaseDir;
@@ -65,11 +65,22 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     @Value("${propdata.madison.num.past.days}")
     private int numOfPastDays;
 
+    @Value("${propdata.madison.target.table}")
+    private String targetTable;
+    @Value("${propdata.madison.target.jdbc}")
+    private String targetJdbcUrl;
+    @Value("${propdata.madison.datatarget.user}")
+    private String targetJdbcUser;
+    @Value("${propdata.madison.datatarget.password.encrypted}")
+    private String targetJdbcPassword;
+
     @Override
     public PropDataContext importFromDB(PropDataContext requestContext) {
         PropDataContext response = new PropDataContext();
-        MadisonLogicDailyProgress dailyProgress = propDataMadisonEntityMgr.getNextAvailableDailyProgress();
-
+        MadisonLogicDailyProgress dailyProgress = requestContext.getProperty(RECORD_KEY, MadisonLogicDailyProgress.class);
+        if (dailyProgress == null) {
+            dailyProgress = propDataMadisonEntityMgr.getNextAvailableDailyProgress();
+        }
         if (dailyProgress == null) {
             log.info("there's no record in daily progress table.");
             return response;
@@ -93,8 +104,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
             String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
             ApplicationId applicationId = propDataJobService.importData(dailyProgress.getDestinationTable(), targetDir,
-                    assignedQueue, "MadisonLogic-" + dailyProgress.getPid(), splitColumns, numMappers,
-                    getConnectionString());
+                    assignedQueue, getJobName() + "-Progress Id-" + dailyProgress.getPid(), splitColumns, numMappers,
+                    getConnectionString(sourceJdbcUrl, sourceJdbcUser, sourceJdbcPassword));
 
             dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
             propDataMadisonEntityMgr.executeUpdate(dailyProgress);
@@ -116,7 +127,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     @Override
     public PropDataContext transform(PropDataContext requestContext) {
         PropDataContext response = new PropDataContext();
-        Date today = requestContext.getProperty("today", Date.class);
+        Date today = requestContext.getProperty(TODAY_KEY, Date.class);
         if (today == null) {
             today = new Date();
         }
@@ -143,6 +154,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             log.info("The incremental timestamps of incremental data = " + pastDaysPaths);
 
             transformData(today, pastDays);
+            response.setProperty(TODAY_KEY, today);
 
         } catch (Exception ex) {
             log.info("Transform failed!", ex);
@@ -156,13 +168,12 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         List<String> sourcePaths = new ArrayList<>();
         sourcePaths.add(getHdfsDataflowIncrementalRawPathWithName(sourcePathRegEx) + "/*.avro");
 
-        Date pastday = DateUtils.addDays(today, numOfPastDays);
-        String yesterdayAggregation = getHdfsWorkflowTotalRawPath(pastday);
-        if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(yesterdayAggregation))) {
+        Date pastday = DateUtils.addDays(today, -1 * numOfPastDays);
+        String pastDayAggregation = getHdfsWorkflowTotalRawPath(pastday);
+        if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(pastDayAggregation))) {
             sourcePaths.add(getHdfsWorkflowTotalRawPath(pastday) + "/*.avro");
         }
-        propDataMadisonDataFlowService.execute("MadisonLogic-" + getDateStringFormat(today), sourcePaths,
-                getHdfsWorkflowTotalRawPath(today));
+        propDataMadisonDataFlowService.execute(getJobName(), sourcePaths, getHdfsWorkflowTotalRawPath(today));
 
     }
 
@@ -179,7 +190,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     }
 
-    private void getPastIncrementalPaths(Date today, List<Date> pastDays, List<String> pastDaysPaths) {
+    private void getPastIncrementalPaths(Date today, List<Date> pastDays, List<String> pastDaysPaths) throws Exception {
         try {
             String todayTotalAggregationPath = getHdfsWorkflowTotalRawPath(today);
             if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(todayTotalAggregationPath))) {
@@ -207,14 +218,42 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             }
 
         } catch (Exception ex) {
-            log.warn("Failed to get HDFS paths", ex);
+            log.error("Failed to get HDFS paths", ex);
+            throw ex;
         }
     }
 
     @Override
     public PropDataContext exportToDB(PropDataContext requestContext) {
 
-        return null;
+        PropDataContext response = new PropDataContext();
+        Date today = requestContext.getProperty(TODAY_KEY, Date.class);
+        if (today == null) {
+            log.warn("There's no aggregated data for today.");
+            return response;
+        }
+
+        String sourceDir = getHdfsWorkflowTotalRawPath(today);
+        try {
+            if (!HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(sourceDir))) {
+                log.warn("There's no aggregated data for today.");
+                return response;
+            }
+
+            String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+            propDataJobService.exportData(targetTable, sourceDir, assignedQueue, getJobName(), numMappers,
+                    getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+            response.setProperty(TODAY_KEY, today);
+
+        } catch (Exception ex) {
+            log.info("exportToDB failed!", ex);
+            throw new LedpException(LedpCode.LEDP_00002, ex);
+        }
+        return response;
+    }
+
+    private String getJobName() {
+        return "MadisonLogic-Days-" + numOfPastDays;
     }
 
     String getSuccessFile(String targetDir) {
@@ -244,10 +283,11 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     String getHdfsWorkflowTotalRawPath(Date fileDate) {
         String formatted = getDateStringFormat(fileDate);
-        return propdataBaseDir + "/" + propdataSourceDir + "/workflow/total_aggregation/" + formatted;
+        return propdataBaseDir + "/" + propdataSourceDir + "/workflow/" + getJobName() + "/total_aggregation/"
+                + formatted;
     }
 
-    private String getConnectionString() {
+    private String getConnectionString(String jdbcUrl, String jdbcuser, String jdbcPassord) {
 
         String driverClass = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
         try {
@@ -255,6 +295,6 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         } catch (ClassNotFoundException e) {
             throw new LedpException(LedpCode.LEDP_11000, e, new String[] { driverClass });
         }
-        return jdbcUrl + "user=" + jdbcUser + ";password=" + jdbcPassword;
+        return jdbcUrl + "user=" + jdbcuser + ";password=" + jdbcPassord;
     }
 }

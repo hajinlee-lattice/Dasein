@@ -50,42 +50,46 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     public void beforeClass() throws Exception {
         today = new Date();
         yesterday = DateUtils.addDays(today, -1);
+        ReflectionTestUtils.setField(propDataService, "numOfPastDays", 1);
 
         dailyProgress1 = new MadisonLogicDailyProgress();
         importOutputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_test1");
-        HdfsUtils.rmdir(yarnConfiguration, importOutputDir1);
 
         dailyProgress2 = new MadisonLogicDailyProgress();
         importOutputDir2 = setupProgress(today, dailyProgress2, "MadisonLogicDepivoted_test2");
-        HdfsUtils.rmdir(yarnConfiguration, importOutputDir2);
+        // importOutputDir2 = setupProgress(today, dailyProgress2,
+        // "MadisonLogicDepivoted_20150311");
 
         transformOutput1 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(yesterday);
-        HdfsUtils.rmdir(yarnConfiguration, transformOutput1);
         transformOutput2 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(today);
-        HdfsUtils.rmdir(yarnConfiguration, transformOutput2);
+
+        removeImportHdfsDirs();
+        removeTransformHdfsDirs();
     }
 
     @AfterClass
     public void afterClass() throws Exception {
-        if (importOutputDir1 != null) {
-            HdfsUtils.rmdir(yarnConfiguration, importOutputDir1);
-        }
         if (dailyProgress1 != null) {
             propDataMadisonEntityMgr.delete(dailyProgress1);
-        }
-        if (importOutputDir2 != null) {
-            HdfsUtils.rmdir(yarnConfiguration, importOutputDir2);
         }
         if (dailyProgress2 != null) {
             propDataMadisonEntityMgr.delete(dailyProgress2);
         }
+        
+//        removeImportHdfsDirs();
+//        removeTransformHdfsDirs();
+    }
 
-        if (transformOutput1 != null) {
-            HdfsUtils.rmdir(yarnConfiguration, transformOutput1);
-        }
-        if (transformOutput2 != null) {
-            HdfsUtils.rmdir(yarnConfiguration, transformOutput2);
-        }
+    private void removeTransformHdfsDirs() throws Exception {
+
+        HdfsUtils.rmdir(yarnConfiguration, transformOutput1);
+        HdfsUtils.rmdir(yarnConfiguration, transformOutput2);
+    }
+
+    private void removeImportHdfsDirs() throws Exception {
+
+        HdfsUtils.rmdir(yarnConfiguration, importOutputDir1);
+        HdfsUtils.rmdir(yarnConfiguration, importOutputDir2);
     }
 
     private String setupProgress(Date date, MadisonLogicDailyProgress dailyProgress, String tableName) throws Exception {
@@ -107,7 +111,9 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
     private void downloadFile(MadisonLogicDailyProgress dailyProgress, String outputDir) throws Exception {
 
-        propDataService.importFromDB(new PropDataContext());
+        PropDataContext requestContext = new PropDataContext();
+        requestContext.setProperty(PropDataMadisonService.RECORD_KEY, dailyProgress);
+        propDataService.importFromDB(requestContext);
 
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, outputDir));
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
@@ -122,19 +128,26 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     @Test(groups = "functional", dependsOnMethods = "importFromDB")
     public void transform() throws Exception {
 
-        ReflectionTestUtils.setField(propDataService, "numOfPastDays", 30);
         PropDataContext requestContext = new PropDataContext();
 
-        requestContext.setProperty("today", yesterday);
+        requestContext.setProperty(PropDataMadisonService.TODAY_KEY, yesterday);
         propDataService.transform(requestContext);
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
                 ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput1)));
 
         requestContext = new PropDataContext();
-        requestContext.setProperty("today", today);
+        requestContext.setProperty(PropDataMadisonService.TODAY_KEY, today);
         propDataService.transform(requestContext);
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
                 ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput2)));
 
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "transform")
+    public void exportToDB() throws Exception {
+
+        PropDataContext requestContext = new PropDataContext();
+        requestContext.setProperty("today", today);
+        propDataService.exportToDB(requestContext);
     }
 }

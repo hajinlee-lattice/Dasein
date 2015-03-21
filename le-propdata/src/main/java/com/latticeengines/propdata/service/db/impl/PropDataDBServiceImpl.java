@@ -374,7 +374,7 @@ public class PropDataDBServiceImpl implements PropDataDBService {
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
 
         Integer appId = propDataJobService.exportData(table, getDataHdfsPath(customer, table, PROPDATA_INPUT),
-                assignedQueue, customer, keyCols, getConnectionString()).getId();
+                assignedQueue, customer, getConnectionString()).getId();
 
         Integer applicationId;
         if (appId != null) {
