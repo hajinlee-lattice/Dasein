@@ -212,25 +212,23 @@ public abstract class JobServiceImpl implements JobService, ApplicationContextAw
     }
 
     protected ApplicationId getAppIdFromName(String appName) {
-        for (int i = 0; i < MAX_TRIES; i++) {
-            // Running state means one of:
-            // YarnApplicationState.NEW
-            // YarnApplicationState.NEW_SAVING
-            // YarnApplicationState.SUBMITTED 
-            // YarnApplicationState.ACCEPTED
-            // YarnApplicationState.RUNNING
-            ApplicationId appId = getAppIdFromName(appName, defaultYarnClient.listRunningApplications("MAPREDUCE"));
-            if (appId != null) {
-                return appId;
-            }
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                // Do nothing
-            }
+        // Running state means one of:
+        // YarnApplicationState.NEW
+        // YarnApplicationState.NEW_SAVING
+        // YarnApplicationState.SUBMITTED 
+        // YarnApplicationState.ACCEPTED
+        // YarnApplicationState.RUNNING
+        ApplicationId appId = getAppIdFromName(appName, defaultYarnClient.listRunningApplications("MAPREDUCE"));
+        if (appId != null) {
+            return appId;
+        }
+        try {
+            Thread.sleep(APP_WAIT_TIME);
+        } catch (InterruptedException e) {
+            // Do nothing
         }
         // If it still comes here, then go through all the existing applications of type MAPREDUCE
-        ApplicationId appId = getAppIdFromName(appName, defaultYarnClient.listApplications("MAPREDUCE"));
+        appId = getAppIdFromName(appName, defaultYarnClient.listApplications("MAPREDUCE"));
         return appId;
     }
 }

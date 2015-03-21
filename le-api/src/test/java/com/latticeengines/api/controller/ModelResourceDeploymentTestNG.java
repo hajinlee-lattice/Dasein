@@ -103,8 +103,8 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         LoadConfiguration config = getLoadConfig();
         Map<String, String> errorResult = ignoreErrorRestTemplate.postForObject("http://" + restEndpointHost + "/rest/load",
                 config, HashMap.class, new Object[] {});
-        assertEquals(errorResult.get("errorCode"), "LEDP_00002");
-        assertTrue(errorResult.get("errorMsg").contains("FileAlreadyExistsException"));
+        assertEquals(errorResult.get("errorCode"), "LEDP_12002");
+        assertTrue(errorResult.get("errorMsg").contains("Could not retrieve application id for load job"));
     }
 
     private LoadConfiguration getLoadConfig() {
