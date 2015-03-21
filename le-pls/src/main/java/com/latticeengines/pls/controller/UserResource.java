@@ -263,7 +263,6 @@ public class UserResource {
                 }
             } else {
                 log.warn(String.format("Trying to delete the admin user %s in the tenant %s", username, tenantId));
-                System.out.println(globalUserManagementService.getRights(username, tenantId));
             }
             failUsers.add(username);
         }

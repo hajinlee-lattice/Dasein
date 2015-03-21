@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,8 +89,9 @@ public class InternalResource extends InternalResourceBase {
     public SimpleBooleanResponse deleteUsers(
         @RequestParam(value="namepattern", required=false) String namePattern,
         @RequestParam(value="tenant", required=false) String tenantId
-    ) {
+    ) throws URIException {
         if (namePattern != null) {
+            namePattern = URIUtil.decode(namePattern);
             if (tenantId == null) {
                 return SimpleBooleanResponse.getFailResponse(Arrays.asList("Must specify tenant when deleting users by a name pattern."));
             }
@@ -100,12 +103,13 @@ public class InternalResource extends InternalResourceBase {
                 boolean isAdmin = RightsUtilities.isAdmin(
                     RightsUtilities.translateRights(userRight.getValue())
                 );
-                if (!isAdmin && user.getUsername().matches(namePattern)) {
+                if ((!isAdmin) && user.getUsername().matches(namePattern)) {
                     softDelete(tenantId, user.getUsername());
+                    log.info(String.format("User %s has been soft deleted from the tenant %s through internal API", user.getUsername(), tenantId));
                     if (globalUserManagementService.isRedundant(user.getUsername())) {
                         globalUserManagementService.deleteUser(user.getUsername());
+                        log.info(String.format("User %s has been hard deleted through internal API", user.getUsername()));
                     }
-                    log.info(String.format("User %s has been deleted from the tenant %s through internal API", namePattern, tenantId));
                 }
             }
         }
