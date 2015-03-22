@@ -118,6 +118,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(status);
     }
 
+    @SuppressWarnings("rawtypes")
     @Test(groups = "functional")
     public void deleteTestingUsers() throws URIException {
         Tenant tenant = new Tenant();
