@@ -43,12 +43,19 @@ class TestEndToEndPLS(object):
         scoring.runBulkScoring();
     
     def TestHourlyScoringELQ(self):
+        elq = EloquaRequest();
+        contact_lists = elq.addEloquaContact(5);
         scoring = Scoring(PLSEnvironments.pls_bard_1);
         scoring.runHourlyScoring();
+        
+        print elq.getEloquaContact(contact_lists);
        
     def TestHourlyScoringMKTO(self):
+        mkto = MarketoRequest();
+        leads_list = mkto.addLeadToMarketo(3);
         scoring = Scoring(PLSEnvironments.pls_bard_2);
         scoring.runHourlyScoring();
+        print mkto.getLeadFromMarketo(leads_list); 
    
     def TestEndToEndELQ(self):
         models = Models();

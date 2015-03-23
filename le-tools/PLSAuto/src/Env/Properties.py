@@ -9,9 +9,9 @@ Created on 2015��2��28��
 class PLSEnvironments(object):
     
     pls_server="BODCDEVVQAP27.dev.lattice.local";    
-    pls_server_folder="D:\\B\\spda0__DE-DT-BD_SQ-d__6_9_2_64296nS_2_6_2_63627n_1_3_4";
-    pls_bard_1="BD_ADEDTBDd69264296nS26263627n1";
-    pls_bard_2="BD2_ADEDTBDd69264296nS26263627n12";
+    pls_server_folder="D:\\B\\spda0__DE-DT-BD_SQ-d__6_9_2_64296nY_2_6_2_63627n_1_3_4";
+    pls_bard_1="BD_ADEDTBDd69264296nY26263627n1";
+    pls_bard_2="BD2_ADEDTBDd69264296nY26263627n12";
     dl_server="https://bodcdevvint187.dev.lattice.local:8080/";
     visidb_server="bodcdevvint187.dev.lattice.local";
     

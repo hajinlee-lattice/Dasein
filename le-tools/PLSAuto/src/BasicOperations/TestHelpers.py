@@ -933,9 +933,10 @@ class JamsRunner(SessionRunner):
         else:
             queue=queue_name;
         query="exec AlterJAMSDanteCfg '%s', '%s'" % (bard_name,queue);
-#         print self.connection_string;
-#         print query;
-        results = dlc.execQuery(self.connection_string, query);
+        print self.connection_string;
+        print query;
+        results = dlc.execProc(self.connection_string, query);
+#         print results;
         return results[0][0];
     def setJamsTenantCycles(self,bard_name,queue_name=None,cycle_times=3):
         wait_cycle = 0

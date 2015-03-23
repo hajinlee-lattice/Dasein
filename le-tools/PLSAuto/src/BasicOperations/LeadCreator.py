@@ -318,6 +318,12 @@ class SFDCRequest():
         response = requests.delete(request_url,headers = self.headers);
         print response.text;
         return True;
+    def getRecord(self,sobjects,record_id):
+        fields = "fields=Email,Latticeforleads__Last_Score_Date__c,Latticeforleads__Score__c"
+        request_url = "%s/sobjects/%s/%s?%s"  % (self.base_url, sobjects,record_id,fields);
+
+        response = requests.get(request_url,headers = self.headers);
+        print response;
     
     def addAccountsToSFDC(self, account_num=3):
         addresses = getAddresses(account_num);        
@@ -461,6 +467,26 @@ class SFDCRequest():
                 if failed>3:
                     break;
         return opportunity_lists;
+    
+    def addOpportunityConTactRoleToSFDC(self,opportunity_id,contact_id, role_num=3):        
+        role_lists={};
+        failed = 0;
+        sequence = getSequence();
+        
+        for i in range(role_num):
+            role = {}
+            role["OpportunityId"] = opportunity_id;
+            role["ContactId"] = contact_id;
+            role["Role"]="Business User";
+            role_id = self.createRecord("OpportunityContactRole",role);
+            if role_id != None:
+                role_lists[role_id] = role["Role"];
+                recordNewAdded(sequence, PLSEnvironments.pls_marketing_app_SFDC, "OpportunityContactRole", role_id, role_lists[role_id]); 
+            else:
+                failed += 1;
+                if failed>3:
+                    break;
+        return role_lists;
         
     def getAuthToken(self,OAuth2_url=PLSEnvironments.pls_SFDC_OAuth2,
                      user=PLSEnvironments.pls_SFDC_OAuth2_user,

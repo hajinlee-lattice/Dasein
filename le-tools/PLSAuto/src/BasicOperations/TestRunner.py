@@ -24,6 +24,7 @@ import requests
 import shutil
 import traceback
 import pypyodbc
+import pyodbc
 from Env.Properties import PLSEnvironments
 
 
@@ -79,7 +80,22 @@ class SessionRunner(object):
             e = traceback.format_exc()
             print "\nFAILED:Could not fetch query results", e, "\n"
             return None
+    def execProc(self, connection_string, procQuery):
         
+        try:
+            conn = pypyodbc.connect(connection_string)
+            cur = conn.cursor()
+            results = cur.execute(procQuery)            
+            results = cur.fetchall()
+            cur.commit();
+            cur.close()
+            conn.close()
+            return results
+        except Exception:
+            e = traceback.format_exc()
+            print "\nFAILED:Could not fetch query results", e, "\n"
+            return None
+            
     def getSTDoutputs(self, text):
         stdo = ""
         stde = ""
