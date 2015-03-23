@@ -15,7 +15,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         $scope.attributeColor = data.color;
 
         var chartData = data.elementList;
-        var liftValues = _.map(chartData, function(d){ return parseFloat(d.lift).toPrecision(2); });
+        var liftValues = _.map(chartData, function(d){ return d.lift; });
         var bucketNames = _.map(chartData, "name");
         var percentLeads = _.map(chartData, function(d){ return Math.round(d.percentTotal); });
 
@@ -60,11 +60,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         }
         setHoverPosition($scope.mouseX, chartHeight);
 
-        var maxTicks = d3.max(liftValues);
-        if (maxTicks <= 1.5) {
-            maxTicks = 1.5;
-        }
-        // var xTicks = x.ticks(maxTicks + 1);
+        var maxTicks = _.max(_.union(liftValues, [1.5]));
         var xTicks = TopPredictorService.createTicks(maxTicks, 5);
         var x = d3.scale.linear()
             .domain([0, xTicks[xTicks.length - 1]])
