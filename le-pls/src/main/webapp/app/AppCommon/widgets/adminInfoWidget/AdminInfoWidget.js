@@ -1,7 +1,8 @@
 angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
     'mainApp.appCommon.services.ThresholdExplorerService',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.DateTimeFormatUtility'
+    'mainApp.appCommon.utilities.DateTimeFormatUtility',
+    'mainApp.core.services.SessionService'
 ])
 .controller('AdminInfoWidgetController', function ($scope, $rootScope, $http, ResourceUtility, ThresholdExplorerService) {
     $scope.ResourceUtility = ResourceUtility;
@@ -74,7 +75,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
                 $(anchor).removeAttr('disabled');
             });
         },
-        controller:  ['$scope', '$attrs', '$http', 'ResourceUtility', function ($scope, $attrs, $http, ResourceUtility) {
+        controller:  ['$scope', '$attrs', '$http', 'ResourceUtility', 'SessionService', function ($scope, $attrs, $http, ResourceUtility, SessionService) {
             $scope.fetching = false;
             $scope.fetched = false;
             $scope.ResourceUtility = ResourceUtility;
@@ -82,6 +83,19 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
                 $scope.fetching = true;
                 $scope.$parent.Error.ShowError = false;
                 $scope.$emit('download-start');
+
+                $http({
+                    method: 'GET',
+                    url: $attrs.url,
+                }).success(function(data){
+                    result.Success = data.Success;
+                    deferred.resolve(result);
+                }).error(function(data, status){
+                    SessionService.HandleResponseErrors(data, status);
+                    result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+                    deferred.resolve(result);
+                });
+
                 $http.get($attrs.url).then(function (response) {
                     if ($attrs.filetype === "application/json") {
                         $scope.$emit('downloaded', btoa(unescape(encodeURIComponent(JSON.stringify(response.data)))));
@@ -90,7 +104,8 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
                     }
                     $scope.fetching = false;
                     setTimeout($event.target.click(), 500);
-                }, function () {
+                }, function (response) {
+                    SessionService.HandleResponseErrors(response.data, response.status);
                     $scope.$parent.Error.ShowError = true;
                     $scope.$parent.Error.ErrorMsg = ResourceUtility.getString("MODEL_ADMIN_FETCH_ERROR", [$attrs.filename]);
                     $scope.fetching = false;

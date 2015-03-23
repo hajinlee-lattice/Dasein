@@ -2,9 +2,10 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.UnderscoreUtility'
+    'mainApp.appCommon.utilities.UnderscoreUtility',
+    'mainApp.core.services.SessionService'
 ])
-.service('UserManagementService', function ($http, $q, _, BrowserStorageUtility, ResourceUtility, RightsUtility) {
+.service('UserManagementService', function ($http, $q, _, BrowserStorageUtility, ResourceUtility, RightsUtility, SessionService) {
 
     this.GrantDefaultRights = function(username){
         var deferred = $q.defer();

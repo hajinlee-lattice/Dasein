@@ -61,7 +61,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
         } else {
             createUpdatePasswordView();
         }
-
     });
     
     function createUpdatePasswordView() {
