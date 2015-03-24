@@ -36,7 +36,7 @@ def recordNewAdded(sequence,marketting_app,sobjects, lead_id,email):
 def recordResultSet(id,email,operation,modified_date,scored,result):
     dlc = SessionRunner()
     connection_string = PLSEnvironments.SQL_BasicDataForIntegrationTest;    
-    query = "update results set operation='%s', executed_date=getdate(),modifiedDate='%s',scored=%d,result=%d where id='%s' and email='%s'" % (operation,modified_date,scored,result,id,email);        
+    query = "update results set operation='%s', executed_date=getdate(),modifiedDate='%s',scored=%s,result=%d where id='%s' and email='%s'" % (operation,modified_date,scored,result,id,email);        
     
     return dlc.execQuery(connection_string, query);
 def getSequence():
@@ -88,7 +88,7 @@ def verifyResult(operation,records):
         if not passed:
             results.append(r);
             
-        recordResultSet(r["id"], r["Email"], operation, r["latticeforleads__Last_Score_Date__c"], r["latticeforleads__Score__c"], passed);           
+        recordResultSet(r["id"], r["email"], operation, r["latticeforleads__Last_Score_Date__c"], r["latticeforleads__Score__c"], passed);           
         
     return results;
         
@@ -358,7 +358,9 @@ class SFDCRequest():
                 result = json.loads(response.text);
                 print "==>    %s    %s    %s    %s" % (k, result["Email"], result["latticeforleads__Score__c"], result["latticeforleads__Last_Score_Date__c"]);
                 result["id"]=result["Id"];
-                del result["Id"];                
+                del result["Id"];
+                result["email"]=result["Email"];
+                del result["Email"];                 
                 records.append(result);
             
         return records;
