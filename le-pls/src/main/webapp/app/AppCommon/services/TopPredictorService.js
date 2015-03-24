@@ -212,17 +212,16 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         // First sort all predictors by UncertaintyCoefficient
         modelSummary.Predictors = modelSummary.Predictors.sort(this.SortByPredictivePower);
         
-        // Then pull all unique categories
-        var topCategories = [];
-        var topCategoryNames = [];
+        var categories = [];
+        var categoryNames = [];
         var category;
         for (var i = 0; i < modelSummary.Predictors.length; i++) {
             var predictor = modelSummary.Predictors[i];
             if (AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
                 this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads) &&
                 !StringUtility.IsEmptyString(predictor.Category) && 
-                topCategoryNames.indexOf(predictor.Category) === -1 && topCategoryNames.length < 8) {
-                topCategoryNames.push(predictor.Category);
+                categoryNames.indexOf(predictor.Category) === -1) {
+                categoryNames.push(predictor.Category);
                 category = {
                     name: predictor.Category,
                     categoryName: predictor.Category,
@@ -231,13 +230,42 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     color: null,
                     children: []
                 };
-                topCategories.push(category);
+                categories.push(category);
             }
         }
-        
-        return topCategories;
+
+        return this.SelectTopCategories(modelSummary, categories);
     };
-    
+
+    //=======================================================================
+    // Top categories should be determined based on sum of predictive power
+    // for top X attributes in a given category. Note: X is currently 3.
+    //=======================================================================
+    this.SelectTopCategories = function (modelSummary, categories) {
+        if (categories == null) {
+            return null;
+        }
+
+        //Introduce PowerSum
+        var category, attributes;
+        for (var i = 0; i < categories.length; i++) {
+            category = categories[i];
+            attributes = this.GetAttributesByCategory(modelSummary, category.name, category.color, 3);
+            category.PowerSum = _.reduce(attributes, function(acc, e) { return acc + e.power; }, 0);
+        }
+
+        //Sort Descending and Remove PowerSum
+        categories = _.sortBy(categories, function(e) { return -e.PowerSum; });
+        _.each(categories, function(e) { delete e.PowerSum; });
+
+        //Select Maximum of 8 Categories
+        if (categories.length > 8) {
+            categories = categories.slice(0, 8);
+        }
+
+        return categories;
+    };
+
     this.IsPredictorElementCategorical = function (predictorElement) {
         if (predictorElement == null) {
             return false;
@@ -276,7 +304,6 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         ];
         var toReturn = []; 
         toReturn.push(columns);
-        // Get all unique categories
         var topCategories = this.GetTopCategories(modelSummary);
         
         var totalPredictors = modelSummary.Predictors.sort(this.SortByPredictivePower);

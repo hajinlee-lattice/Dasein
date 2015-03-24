@@ -421,7 +421,7 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
             return true;
         } else {
             return this.IsApprovedForUsage(this.ApprovedUsage.ModelAndAllInsights, attributeMetadata) === true ||
-                this.IsApprovedForUsage(this.ApprovedUsage.IndividualDisplay, attributeMetadata) === true;
+                this.IsApprovedForUsage(this.ApprovedUsage.ModelAndModelInsights, attributeMetadata) === true;
         }
     };
 
