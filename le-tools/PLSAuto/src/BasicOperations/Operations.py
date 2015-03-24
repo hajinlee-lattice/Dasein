@@ -240,17 +240,21 @@ class Scoring(object):
         return self.runScoringGroups(load_groups);
 
     def runEndHourlyScoring(self):
-        load_groups = ["PushToLeadDestination","LoadScoreHistoryData", "PushToReportsDB", "InsightsAllSteps"];   
+        load_groups = ["PushToLeadDestination"];   
         return self.runScoringGroups(load_groups);
 
+    def runHourlyDanteProcess(self):
+        load_groups = ["LoadScoreHistoryData", "PushToReportsDB", "InsightsAllSteps"];   
+        return self.runScoringGroups(load_groups);
+    
     def runBulkScoring(self):
-        self.runPushToBulkScoring();
-        self.waitForLeadInputQueue(cycle_times=100);
-        self.runEndBulkScoring();
+        assert self.runPushToBulkScoring();
+        assert self.waitForLeadInputQueue(cycle_times=100);
+        assert self.runEndBulkScoring();
         
     def runHourlyScoring(self):
-        self.runPushToHourlyScoring();
-        self.waitForLeadInputQueue(cycle_times=20);
-        self.runEndHourlyScoring();
+        assert self.runPushToHourlyScoring();
+        assert self.waitForLeadInputQueue(cycle_times=20);
+        assert self.runEndHourlyScoring();
 
         

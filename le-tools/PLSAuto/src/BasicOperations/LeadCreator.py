@@ -33,6 +33,12 @@ def recordNewAdded(sequence,marketting_app,sobjects, lead_id,email):
     connection_string = PLSEnvironments.SQL_BasicDataForIntegrationTest;    
     query = "INSERT INTO [Results]([sequence],[maps],[s_objects],[id],[email]) VALUES(%d,'%s','%s','%s','%s')" % (sequence,marketting_app,sobjects,lead_id,email);        
     return dlc.execQuery(connection_string, query);
+def recordResultSet(id,email,operation,modified_date,scored,result):
+    dlc = SessionRunner()
+    connection_string = PLSEnvironments.SQL_BasicDataForIntegrationTest;    
+    query = "update results set operation='%s', executed_date=getdate(),modifiedDate='%s',scored=%d,result=%d where id='%s' and email='%s'" % (operation,modified_date,scored,result,id,email);        
+    
+    return dlc.execQuery(connection_string, query);
 def getSequence():
     dlc = SessionRunner()
     connection_string = PLSEnvironments.SQL_BasicDataForIntegrationTest;
@@ -65,7 +71,27 @@ def getTitles(leads_number=3,conn=PLSEnvironments.SQL_BasicDataForIntegrationTes
     return getMetaData("meta_title", leads_number, conn);
 def getActivityTypes(leads_number=3,conn=PLSEnvironments.SQL_BasicDataForIntegrationTest):
     return getMetaData("meta_activityType", leads_number, conn);
-    
+
+def verifyResult(operation,records):
+    results = [{}]
+    for r in records[1:]:
+        print r;
+        passed = True;
+        if r["latticeforleads__Last_Score_Date__c"]==None:
+            r["latticeforleads__Last_Score_Date__c"]="1900-01-01";
+            passed=False;
+        if r["latticeforleads__Score__c"] == None:
+            r["latticeforleads__Score__c"]=0;
+            passed=False;
+        if r["latticeforleads__Score__c"]<10 or r["latticeforleads__Score__c"]>100:
+            passed=False; 
+        if not passed:
+            results.append(r);
+            
+        recordResultSet(r["id"], r["Email"], operation, r["latticeforleads__Last_Score_Date__c"], r["latticeforleads__Score__c"], passed);           
+        
+    return results;
+        
 class EloquaRequest():
     
     def __init__(self,base_url=PLSEnvironments.pls_ELQ_url, company=PLSEnvironments.pls_ELQ_company, user=PLSEnvironments.pls_ELQ_user, password=PLSEnvironments.pls_ELQ_pwd):
@@ -323,7 +349,19 @@ class SFDCRequest():
         request_url = "%s/sobjects/%s/%s?%s"  % (self.base_url, sobjects,record_id,fields);
 
         response = requests.get(request_url,headers = self.headers);
-        print response;
+        return response;
+    def getRecords(self,sobjects,record_ids={}):
+        records = [{}]
+        for k in record_ids.keys():
+            response=self.getRecord(sobjects,k);            
+            if response.status_code == 200:
+                result = json.loads(response.text);
+                print "==>    %s    %s    %s    %s" % (k, result["Email"], result["latticeforleads__Score__c"], result["latticeforleads__Last_Score_Date__c"]);
+                result["id"]=result["Id"];
+                del result["Id"];                
+                records.append(result);
+            
+        return records;
     
     def addAccountsToSFDC(self, account_num=3):
         addresses = getAddresses(account_num);        
@@ -405,6 +443,8 @@ class SFDCRequest():
                 if failed>3:
                     break;
         return contact_lists;
+    def getContactsFromSFDC(self,contact_ids={}):
+        return  self.getRecords("Contact",contact_ids);
 
     def addLeadsToSFDC(self, lead_num=3):
         addresses = getAddresses(lead_num); 
@@ -438,6 +478,8 @@ class SFDCRequest():
                 if failed>3:
                     break;
         return lead_lists;
+    def getLeadsFromSFDC(self,lead_ids={}):
+        return  self.getRecords("Lead",lead_ids);
     
     def addOpportunityToSFDC(self,account_id=None, opportunity_num=3):        
         opportunity_lists={};

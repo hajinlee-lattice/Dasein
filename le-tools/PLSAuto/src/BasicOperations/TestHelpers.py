@@ -27,7 +27,7 @@ from BasicOperations.TestRunner import SessionRunner
 from Env.Properties import PLSEnvironments
 
 
-def runLoadGroups(dlc, params, load_groups, max_run_time_in_sec=7200, sleep_time=300):
+def runLoadGroups(dlc, params, load_groups, max_run_time_in_sec=7200, sleep_time=150):
     command = "Launch Load Group"
     for lg in load_groups:
         params["-g"] = lg
