@@ -17,7 +17,7 @@ public class PropDataEntityMgrImplTestNG extends AbstractTestNGSpringContextTest
     @Autowired
     private PropDataEntityMgr propDataEntityMgr;
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled=false)
     public void createCommands() throws Exception {
         Commands commands = PropDataTestUtils.createNewCommands("Docusign", "Match_source_ForPropDataMatching999");
         propDataEntityMgr.createCommands(commands);

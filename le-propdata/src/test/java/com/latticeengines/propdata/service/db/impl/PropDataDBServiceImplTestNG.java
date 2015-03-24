@@ -50,7 +50,7 @@ public class PropDataDBServiceImplTestNG extends AbstractTestNGSpringContextTest
     protected String customerBaseDir;
     private PropDataContext previousResponseContext;
 
-    @Test(groups = "functional", dataProvider = "initData")
+    @Test(groups = "functional", dataProvider = "initData", enabled=false)
     public void init(String customer, String table, String inputFile) throws Exception {
         String outputDir = ((PropDataDBServiceImpl) propDataDBService)
                 .getDataHdfsPath(customer, table, PROPDATA_OUTPUT);
@@ -64,7 +64,7 @@ public class PropDataDBServiceImplTestNG extends AbstractTestNGSpringContextTest
 
     }
 
-    @Test(groups = "functional", dataProvider = "exportToDBData", dependsOnMethods = { "init" })
+    @Test(groups = "functional", dataProvider = "exportToDBData", dependsOnMethods = { "init" }, enabled=false)
     public void exportToDB(String customer, String table, boolean mapColumn) throws Exception {
 
         PropDataContext requestContext = getRequestContextForExport(customer, table, mapColumn);
@@ -76,7 +76,7 @@ public class PropDataDBServiceImplTestNG extends AbstractTestNGSpringContextTest
         Assert.assertEquals(responseContext.getProperty(ImportExportKey.CUSTOMER.getKey(), String.class), customer);
     }
 
-    @Test(groups = "functional", dataProvider = "addCommandData", dependsOnMethods = { "exportToDB" })
+    @Test(groups = "functional", dataProvider = "addCommandData", dependsOnMethods = { "exportToDB" }, enabled=false)
     public void addCommand(String customer, String table) {
         PropDataContext requestContext = getRequestContextForAddCommand(customer, table);
         PropDataContext responseContext = propDataDBService.addCommandAndWaitForComplete(requestContext);
@@ -87,7 +87,7 @@ public class PropDataDBServiceImplTestNG extends AbstractTestNGSpringContextTest
         previousResponseContext = responseContext;
     }
 
-    @Test(groups = "functional", dataProvider = "importFromDBData", dependsOnMethods = { "addCommand" })
+    @Test(groups = "functional", dataProvider = "importFromDBData", dependsOnMethods = { "addCommand" }, enabled=false)
     public void importFromDB(String customer, String table, String keyCols) throws Exception {
 
         PropDataContext requestContext = getRequestContextForImport(customer, table, keyCols, previousResponseContext);
@@ -100,7 +100,7 @@ public class PropDataDBServiceImplTestNG extends AbstractTestNGSpringContextTest
 
     }
 
-    @Test(groups = "functional", dataProvider = "singleImportFromDBData")
+    @Test(groups = "functional", dataProvider = "singleImportFromDBData", enabled=false)
     public void createSingleAVROFromTable(String customer, String table, String keyCols) throws Exception {
 
         String outputDir = ((PropDataDBServiceImpl) propDataDBService)
