@@ -169,7 +169,7 @@ describe('user management', function() {
     it('should verify new password and confirm new password are the same', function () {
         element(by.model("oldPassword")).sendKeys('Admin123');
         element(by.model("newPassword")).sendKeys('Admin123');
-        element(by.model("confirmPassword")).sendKeys('Admin123');
+        element(by.model("confirmPassword")).sendKeys('Admin1234');
         browser.waitForAngular();
         browser.driver.sleep(1000);
 
@@ -180,9 +180,22 @@ describe('user management', function() {
         expect(element.all(by.css('div.global-error')).first().isDisplayed()).toBe(true);
     });
 
-    it('should be able to change password', function () {
+    it('should verify that old passowrd must be correct', function () {
         element(by.model("oldPassword")).clear();
         element(by.model("oldPassword")).sendKeys(newUserPassword);
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        element(by.buttonText("UPDATE")).click();
+        browser.waitForAngular();
+        browser.driver.sleep(2000);
+
+        expect(element.all(by.css('div.global-error')).first().isDisplayed()).toBe(true);
+    });
+
+    it('should be able to change password', function () {
+        element(by.model("confirmPassword")).clear();
+        element(by.model("confirmPassword")).sendKeys('Admin123');
         browser.waitForAngular();
         browser.driver.sleep(1000);
 
@@ -194,6 +207,7 @@ describe('user management', function() {
         browser.driver.sleep(1000);
 
         element(by.buttonText("RETURN TO LOGIN")).click();
+        browser.driver.sleep(2000);
     }, 60000);
 
     it('should be able to login using the new password', function () {
@@ -202,6 +216,7 @@ describe('user management', function() {
         browser.driver.sleep(1000);
 
         expect(element(by.css('h1')).getText()).toEqual('All Models');
+        browser.driver.sleep(1000);
 
         logoutPage.logout("E2E Tester");
     });
