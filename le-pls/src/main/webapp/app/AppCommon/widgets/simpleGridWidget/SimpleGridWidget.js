@@ -19,11 +19,20 @@ angular.module('mainApp.appCommon.widgets.SimpleGridWidget', [
         return;
     }
     
+    $scope.customGridClass = "";
+    if (widgetConfig.CustomGridClass != null) {
+        $scope.customGridClass = widgetConfig.CustomGridClass;
+    }
+    
     // Build up the list of column headings
     $scope.columnTitles = [];
     for (var i = 0; i < widgetConfig.Columns.length; i++) {
         var column = widgetConfig.Columns[i];
-        $scope.columnTitles.push(ResourceUtility.getString(column.TitleString));
+        var columnTitle = {
+            title: ResourceUtility.getString(column.TitleString),
+            subtitle: ResourceUtility.getString(column.SubtitleString)
+        };
+        $scope.columnTitles.push(columnTitle);
     }
     
     // Build up the list of rows and columns
