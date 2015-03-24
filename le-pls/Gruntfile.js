@@ -520,37 +520,43 @@ module.exports = function (grunt) {
   var e2eChromeText = 'Runs selenium end to end (protractor) unit tests on Chrome';
   grunt.registerTask('e2eChrome', e2eChromeText, [
     'http:cleanupUsers',
-    'protractor:chrome'
+    'protractor:chrome',
+      'http:cleanupUsers'
   ]);
 
   var e2eFirefoxText = 'Runs selenium end to end (protractor) unit tests on Firefox';
   grunt.registerTask('e2eFirefox', e2eFirefoxText, [
     'http:cleanupUsers',
-    'protractor:firefox'
+    'protractor:firefox',
+      'http:cleanupUsers'
   ]);
 
   var e2eInternetExplorerText = 'Runs selenium end to end (protractor) unit tests on Internet Explorer';
   grunt.registerTask('e2eInternetExplorer', e2eInternetExplorerText, [
     'http:cleanupUsers',
-    'protractor:internetexplorer'
+    'protractor:internetexplorer',
+      'http:cleanupUsers'
   ]);
 
   var e2eSafariText = 'Runs selenium end to end (protractor) unit tests on Safari';
   grunt.registerTask('e2eSafari', e2eSafariText, [
       'http:cleanupUsers',
-    'protractor:safari'
+    'protractor:safari',
+      'http:cleanupUsers'
   ]);
 
   var e2eMacText = 'Runs selenium end to end (protractor) Mac tests';
   grunt.registerTask('e2eMac', e2eMacText, [
     'http:cleanupUsers',
-    'concurrent:mac'
+    'concurrent:mac',
+    'http:cleanupUsers'
   ]);
 
   var e2eWinText = 'Runs selenium end to end (protractor) Windows tests';
   grunt.registerTask('e2eWin', e2eWinText, [
     'http:cleanupUsers',
-    'concurrent:windows'
+    'concurrent:windows',
+      'http:cleanupUsers'
   ]);
 
   var lintText = 'Checks all JavaScript code for possible errors. This should be run before a checkin if you aren\'t using grunt sentry';
