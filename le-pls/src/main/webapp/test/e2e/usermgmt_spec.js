@@ -1,4 +1,4 @@
-describe('user management', function($http) {
+describe('user management', function() {
 
     var params = browser.params;
 
@@ -146,6 +146,62 @@ describe('user management', function($http) {
         browser.driver.sleep(1000);
 
         expect(element(by.css('h1')).getText()).toEqual('All Models');
+    });
+
+    it('should be able to open change password page', function () {
+        userDropdown.getUserLink("E2E Tester").click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        element(by.linkText("Update Password")).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+    });
+
+    it('should verify the current password is not empty', function () {
+        element(by.buttonText("UPDATE")).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        expect(element.all(by.css('div.global-error')).first().isDisplayed()).toBe(true);
+    });
+
+    it('should verify new password and confirm new password are the same', function () {
+        element(by.model("oldPassword")).sendKeys('Admin123');
+        element(by.model("newPassword")).sendKeys('Admin123');
+        element(by.model("confirmPassword")).sendKeys('Admin123');
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        element(by.buttonText("UPDATE")).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        expect(element.all(by.css('div.global-error')).first().isDisplayed()).toBe(true);
+    });
+
+    it('should be able to change password', function () {
+        element(by.model("oldPassword")).clear();
+        element(by.model("oldPassword")).sendKeys(newUserPassword);
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        element(by.buttonText("UPDATE")).click();
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        expect(element(by.css('div.centered h1')).isDisplayed()).toBe(true);
+        browser.driver.sleep(1000);
+
+        element(by.buttonText("RETURN TO LOGIN")).click();
+    }, 60000);
+
+    it('should be able to login using the new password', function () {
+        loginPage.loginUser(newUserEmail, "Admin123");
+        browser.waitForAngular();
+        browser.driver.sleep(1000);
+
+        expect(element(by.css('h1')).getText()).toEqual('All Models');
 
         logoutPage.logout("E2E Tester");
     });
@@ -190,7 +246,7 @@ describe('user management', function($http) {
 
 
     it('should be able to login the new user to the second tenant', function () {
-        loginPage.loginUser(newUserEmail, newUserPassword);
+        loginPage.loginUser(newUserEmail, "Admin123");
         browser.waitForAngular();
         browser.driver.sleep(1000);
 
@@ -239,7 +295,7 @@ describe('user management', function($http) {
     }, 60000);
 
     it('should verify that the new user will be automatically attached the second tenant', function () {
-        loginPage.loginUser(newUserEmail, newUserPassword);
+        loginPage.loginUser(newUserEmail, "Admin123");
         browser.waitForAngular();
         browser.driver.sleep(1000);
 
