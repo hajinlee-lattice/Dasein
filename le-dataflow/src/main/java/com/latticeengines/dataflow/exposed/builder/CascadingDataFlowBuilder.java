@@ -38,6 +38,7 @@ import cascading.pipe.Each;
 import cascading.pipe.Every;
 import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
+import cascading.pipe.assembly.Retain;
 import cascading.pipe.joiner.BaseJoiner;
 import cascading.pipe.joiner.InnerJoin;
 import cascading.pipe.joiner.LeftJoin;
@@ -59,6 +60,7 @@ import com.latticeengines.dataflow.exposed.exception.DataFlowCode;
 import com.latticeengines.dataflow.exposed.exception.DataFlowException;
 import com.latticeengines.dataflow.runtime.cascading.AddMD5Hash;
 import com.latticeengines.dataflow.runtime.cascading.AddRowId;
+import com.latticeengines.dataflow.runtime.cascading.GroupAndExpandFieldsBuffer;
 import com.latticeengines.dataflow.runtime.cascading.JythonFunction;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -136,12 +138,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 // List<String> files =
                 // HdfsUtils.getFilesForDirRecursive(config, "/", new
                 // RegexFilter(sourcePath), true);
-                List<String> files = HdfsUtils.getFilesByGlob(config, sourcePath);
-                if (files.size() > 0) {
-                    sourcePath = files.get(0);
-                } else {
-                    throw new LedpException(LedpCode.LEDP_18023);
-                }
+                sourcePath = getSchemaPath(config, sourcePath);
 
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_00002, e);
@@ -158,6 +155,16 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         pipesAndOutputSchemas.put(sourceName, new AbstractMap.SimpleEntry<>(new Pipe(sourceName), fields));
         schemas.put(sourceName, sourceSchema);
+    }
+
+    private String getSchemaPath(Configuration config, String sourcePath) throws Exception {
+        List<String> files = HdfsUtils.getFilesByGlob(config, sourcePath);
+        if (files.size() > 0) {
+            sourcePath = files.get(0);
+        } else {
+            throw new LedpException(LedpCode.LEDP_18023);
+        }
+        return sourcePath;
     }
 
     @Override
@@ -316,15 +323,29 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
     @Override
     public Schema getSchema(String flowName, String name, DataFlowContext dataFlowCtx) {
-        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndMetadata = pipesAndOutputSchemas.get(name);
 
+        Schema schema = getSchemaFromFile(dataFlowCtx);
+        if (schema != null) {
+            return schema;
+        }
+
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pipeAndMetadata = pipesAndOutputSchemas.get(name);
         if (pipeAndMetadata == null) {
             throw new DataFlowException(DataFlowCode.DF_10003, new String[] { name });
         }
         return super.createSchema(flowName, pipeAndMetadata.getValue(), dataFlowCtx);
     }
 
-    protected String addAggregation(String prior, AggregationType aggType) {
+    protected Schema getSchemaFromFile(DataFlowContext dataFlowCtx) {
+        String taregetSchemaPath = dataFlowCtx.getProperty("TARGETSCHEMAPATH", String.class);
+        if (taregetSchemaPath != null) {
+            Configuration config = new Configuration();
+            try {
+                return AvroUtils.getSchema(config, new Path(getSchemaPath(config, taregetSchemaPath)));
+            } catch (Exception ex) {
+                throw new DataFlowException(DataFlowCode.DF_10004, ex);
+            }
+        }
         return null;
     }
 
@@ -388,6 +409,28 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         pipesAndOutputSchemas.put(groupby.getName(), new AbstractMap.SimpleEntry<>(groupby, declaredFields));
+
+        return doCheckpoint(groupby).getName();
+    }
+
+    /* This method will use .avro file as schema for the sink */
+    @Override
+    protected String addGroupByAndExpand(String prior, FieldList groupByFieldList, String expandField,
+            List<String> expandFormats, FieldList argumentsFieldList, FieldList declaredFieldList) {
+        List<String> groupByFields = groupByFieldList.getFieldsAsList();
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        if (pm == null) {
+            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+        }
+        Pipe groupby = null;
+        groupby = new GroupBy(pm.getKey(), convertToFields(groupByFields));
+        groupby = new Every(groupby, argumentsFieldList == null ? Fields.ALL
+                : convertToFields(argumentsFieldList.getFieldsAsList()), //
+                new GroupAndExpandFieldsBuffer(argumentsFieldList.getFieldsAsList().size(), expandField, expandFormats,
+                        convertToFields(declaredFieldList.getFieldsAsList())), Fields.RESULTS);
+
+        List<FieldMetadata> fieldMetadata = new ArrayList<FieldMetadata>();
+        pipesAndOutputSchemas.put(groupby.getName(), new AbstractMap.SimpleEntry<>(groupby, fieldMetadata));
 
         return doCheckpoint(groupby).getName();
     }
@@ -462,12 +505,31 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 FieldMetadata replaceFm = new FieldMetadata(targetField.getAvroType(), targetField.getJavaType(),
                         targetField.getFieldName(), null);
                 nameToFieldMetadataMap.put(targetField.getFieldName(), replaceFm);
-                fm = new ArrayList<>(nameToFieldMetadataMap.values());
+                for (int i = 0; i < fm.size(); i++) {
+                    if (fm.get(i).getFieldName().equals(replaceFm.getFieldName())) {
+                        fm.set(i, replaceFm);
+                    }
+                }
             }
         }
 
         pipesAndOutputSchemas.put(each.getName(), new AbstractMap.SimpleEntry<>(each, fm));
         return doCheckpoint(each).getName();
+    }
+
+    protected String addRetainFunction(String prior, FieldList outputFields) {
+        AbstractMap.SimpleEntry<Pipe, List<FieldMetadata>> pm = pipesAndOutputSchemas.get(prior);
+        if (pm == null) {
+            throw new DataFlowException(DataFlowCode.DF_10003, new String[] { prior });
+        }
+
+        Pipe retain = new Retain(pm.getKey(), convertToFields(outputFields.getFields()));
+
+        List<FieldMetadata> fm = new ArrayList<>(pm.getValue());
+        fm = retainOutputFields(outputFields, fm);
+        pipesAndOutputSchemas.put(retain.getName(), new AbstractMap.SimpleEntry<>(retain, fm));
+
+        return doCheckpoint(retain).getName();
     }
 
     private List<FieldMetadata> retainOutputFields(FieldList outputFields, List<FieldMetadata> fm) {
