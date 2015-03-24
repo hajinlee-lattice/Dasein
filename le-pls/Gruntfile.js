@@ -363,6 +363,17 @@ module.exports = function (grunt) {
         }
     },
 
+    http: {
+        cleanupUsers: {
+            options: {
+                url: '<%= testenv.url %>/pls/internal/users?namepattern=LE_%5B0-9a-zA-Z%5D%7B5%7D%40e2e.test.com',
+                method: 'DELETE',
+                headers: {"MagicAuthentication": "Security through obscurity!"}
+            }
+        }
+
+    },
+
     rename: {
         moveAppToBak: {
             src: '<%= pls.app %>',
@@ -473,6 +484,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-usemin');
   grunt.loadNpmTasks('grunt-rename');
   grunt.loadNpmTasks('grunt-replace');
+  grunt.loadNpmTasks('grunt-http');
   
   var defaultText = 'The default grunt build task. Runs a full build for everything including: file linting and minification (including css), running unit tests, and versioning for production. This website ready for distribution will be placed in the <SVN Directory>\<Product>\Projects\dist directory. This can be called just with the grunt command. The production files will then be named production_.js and production_.css.';
   grunt.registerTask('default', defaultText, [
@@ -507,31 +519,37 @@ module.exports = function (grunt) {
   
   var e2eChromeText = 'Runs selenium end to end (protractor) unit tests on Chrome';
   grunt.registerTask('e2eChrome', e2eChromeText, [
+    'http:cleanupUsers',
     'protractor:chrome'
   ]);
 
   var e2eFirefoxText = 'Runs selenium end to end (protractor) unit tests on Firefox';
   grunt.registerTask('e2eFirefox', e2eFirefoxText, [
+    'http:cleanupUsers',
     'protractor:firefox'
   ]);
 
   var e2eInternetExplorerText = 'Runs selenium end to end (protractor) unit tests on Internet Explorer';
   grunt.registerTask('e2eInternetExplorer', e2eInternetExplorerText, [
+    'http:cleanupUsers',
     'protractor:internetexplorer'
   ]);
 
   var e2eSafariText = 'Runs selenium end to end (protractor) unit tests on Safari';
   grunt.registerTask('e2eSafari', e2eSafariText, [
+      'http:cleanupUsers',
     'protractor:safari'
   ]);
 
   var e2eMacText = 'Runs selenium end to end (protractor) Mac tests';
   grunt.registerTask('e2eMac', e2eMacText, [
+    'http:cleanupUsers',
     'concurrent:mac'
   ]);
 
   var e2eWinText = 'Runs selenium end to end (protractor) Windows tests';
   grunt.registerTask('e2eWin', e2eWinText, [
+    'http:cleanupUsers',
     'concurrent:windows'
   ]);
 

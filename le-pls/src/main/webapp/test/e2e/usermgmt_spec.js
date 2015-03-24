@@ -1,4 +1,4 @@
-describe('user management', function() {
+describe('user management', function($http) {
 
     var params = browser.params;
 
@@ -78,7 +78,7 @@ describe('user management', function() {
         browser.driver.sleep(1000);
         expect(userManagement.getAddNewUserModal().isDisplayed()).toBe(true);
 
-        var email = randomName() + '@e2e.com';
+        var email = 'LE_' + randomName() + '@e2e.test.com';
         element(by.model('user.FirstName')).sendKeys('E2E');
         element(by.model('user.LastName')).sendKeys('Tester');
         element(by.model('user.Email')).sendKeys(email);
@@ -115,7 +115,7 @@ describe('user management', function() {
         browser.waitForAngular();
         browser.driver.sleep(1000);
 
-        newUserEmail = randomName() + '@e2e.com';
+        newUserEmail = 'LE_' + randomName() + '@e2e.test.com';
         element(by.model('user.FirstName')).sendKeys('E2E');
         element(by.model('user.LastName')).sendKeys('Tester');
         element(by.model('user.Email')).sendKeys(newUserEmail);

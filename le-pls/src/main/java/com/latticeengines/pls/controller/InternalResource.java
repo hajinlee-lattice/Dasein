@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,12 +27,14 @@ import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RightsUtilities;
+import com.latticeengines.pls.service.TenantService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -47,6 +50,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private TenantService tenantService;
 
     @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
@@ -88,30 +94,44 @@ public class InternalResource extends InternalResourceBase {
     @ApiOperation(value = "Delete users. Mainly for cleaning up testing users.")
     public SimpleBooleanResponse deleteUsers(
         @RequestParam(value="namepattern", required=false) String namePattern,
-        @RequestParam(value="tenant", required=false) String tenantId
+        @RequestParam(value="tenant", required=false) String tenantId,
+        HttpServletRequest request
     ) throws URIException {
+        checkHeader(request);
+
         if (namePattern != null) {
             namePattern = URIUtil.decode(namePattern);
+            List<String> tenants = new ArrayList<>();
             if (tenantId == null) {
-                return SimpleBooleanResponse.getFailResponse(Arrays.asList("Must specify tenant when deleting users by a name pattern."));
+                log.info(String.format("Deleting users matching %s from all tenants using internal API", namePattern));
+                for (Tenant t: tenantService.getAllTenants()){
+                    tenants.add(t.getId());
+                }
+                // return SimpleBooleanResponse.getFailResponse(Arrays.asList("Must specify tenant when deleting users by a name pattern."));
+            } else {
+                tenants.add(tenantId);
+                log.info(String.format("Deleting users matching %s from the tenant %s using internal API", namePattern, tenantId));
             }
 
-            log.info(String.format("Deleting users matching %s from the tenant %s using internal API", namePattern, tenantId));
-            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId);
-            for (AbstractMap.SimpleEntry<User, List<String>> userRight: userRightsList) {
-                User user = userRight.getKey();
-                boolean isAdmin = RightsUtilities.isAdmin(
-                    RightsUtilities.translateRights(userRight.getValue())
-                );
-                if ((!isAdmin) && user.getUsername().matches(namePattern)) {
-                    softDelete(tenantId, user.getUsername());
-                    log.info(String.format("User %s has been soft deleted from the tenant %s through internal API", user.getUsername(), tenantId));
-                    if (globalUserManagementService.isRedundant(user.getUsername())) {
-                        globalUserManagementService.deleteUser(user.getUsername());
-                        log.info(String.format("User %s has been hard deleted through internal API", user.getUsername()));
+            for (String tid: tenants) {
+                List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tid);
+                for (AbstractMap.SimpleEntry<User, List<String>> userRight: userRightsList) {
+                    User user = userRight.getKey();
+                    boolean isAdmin = RightsUtilities.isAdmin(
+                        RightsUtilities.translateRights(userRight.getValue())
+                    );
+                    if ((!isAdmin) && user.getUsername().matches(namePattern)) {
+                        softDelete(tid, user.getUsername());
+                        log.info(String.format("User %s has been soft deleted from the tenant %s through internal API", user.getUsername(), tid));
+                        if (globalUserManagementService.isRedundant(user.getUsername())) {
+                            globalUserManagementService.deleteUser(user.getUsername());
+                            log.info(String.format("User %s has been hard deleted through internal API", user.getUsername()));
+                        }
                     }
                 }
             }
+        } else {
+            log.info(String.format("Username pattern not found"));
         }
 
         return SimpleBooleanResponse.getSuccessResponse();

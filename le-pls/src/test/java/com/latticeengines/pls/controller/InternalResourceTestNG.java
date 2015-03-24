@@ -149,15 +149,6 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
             ResponseDocument.class
         );
         ResponseDocument response = responseEntity.getBody();
-        assertFalse(response.isSuccess());
-
-        responseEntity = restTemplate.exchange(
-            getRestAPIHostPort() + "/pls/internal/users?namepattern=" + pattern + "&tenant=" + tenant.getId(),
-            HttpMethod.DELETE,
-            requestEntity,
-            ResponseDocument.class
-        );
-        response = responseEntity.getBody();
         assertTrue(response.isSuccess());
 
         List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenant.getId());
