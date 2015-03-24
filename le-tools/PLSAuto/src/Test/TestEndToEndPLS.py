@@ -34,56 +34,141 @@ class TestEndToEndPLS(object):
         models = Models();
         models.modelingGenerate(PLSEnvironments.pls_marketing_app_MKTO,PLSEnvironments.pls_url_2); 
         
-    def TestBulkScoringELQ(self):        
+    def TestBulkScoringELQ(self): 
+        elq = EloquaRequest();
+        contact_lists = elq.addEloquaContact(15);
+               
         scoring = Scoring(PLSEnvironments.pls_bard_1);
-        scoring.runBulkScoring();
+        scoring.runBulkScoring();        
+              
+        contact_lists = elq.getEloquaContact(contact_lists);
+        
+        contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ",contact_lists);
+        assert len(contact_faileds)>1, contact_faileds;
       
     def TestBulkScoringMKTO(self): 
+        mkto = MarketoRequest();
+        leads_list = mkto.addLeadToMarketo(15);
+        
         scoring = Scoring(PLSEnvironments.pls_bard_2);
         scoring.runBulkScoring();
+        
+        lead_lists = mkto.getLeadFromMarketo(leads_list); 
+        
+        lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
+        assert len(lead_faileds)>1, lead_faileds;
     
     def TestHourlyScoringELQ(self):
         elq = EloquaRequest();
-        contact_lists = elq.addEloquaContact(5);
-        scoring = Scoring(PLSEnvironments.pls_bard_1);
-        scoring.runHourlyScoring();
+        contact_lists = elq.addEloquaContact(3);
         
-        print elq.getEloquaContact(contact_lists);
+        scoring = Scoring(PLSEnvironments.pls_bard_1);
+        scoring.runHourlyScoring(); 
+               
+        contact_lists = elq.getEloquaContact(contact_lists);
+        
+        contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",contact_lists);
+        assert len(contact_faileds)>1, contact_faileds;
+        
+        scoring.runHourlyDanteProcess();
        
     def TestHourlyScoringMKTO(self):
         mkto = MarketoRequest();
         leads_list = mkto.addLeadToMarketo(3);
+        
         scoring = Scoring(PLSEnvironments.pls_bard_2);
         scoring.runHourlyScoring();
-        print mkto.getLeadFromMarketo(leads_list); 
+        
+        lead_lists = mkto.getLeadFromMarketo(leads_list); 
+        
+        lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
+        assert len(lead_faileds)>1, lead_faileds;
+        
+        scoring.runHourlyDanteProcess();
    
     def TestEndToEndELQ(self):
         models = Models();
         models.modelingGenerate(PLSEnvironments.pls_marketing_app_ELQ,PLSEnvironments.pls_url_1);
+        
+        elq = EloquaRequest();
+        contact_lists = elq.addEloquaContact(15);
         scoring = Scoring(PLSEnvironments.pls_bard_1);
         scoring.runBulkScoring();
+        contact_lists = elq.getEloquaContact(contact_lists);        
+        contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ",contact_lists);
+        assert len(contact_faileds)>1, contact_faileds;
+        
+        contact_lists = elq.addEloquaContact(3);
         scoring.runHourlyScoring();
+        contact_lists = elq.getEloquaContact(contact_lists);        
+        contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",contact_lists);
+        assert len(contact_faileds)>1, contact_faileds;
+        
+        scoring.runHourlyDanteProcess();
         
     def TestEndToEndMKTO(self):
         models = Models();
         models.modelingGenerate(PLSEnvironments.pls_marketing_app_MKTO,PLSEnvironments.pls_url_2);
+        
+        mkto = MarketoRequest();
+        leads_list = mkto.addLeadToMarketo(15);        
         scoring = Scoring(PLSEnvironments.pls_bard_2);
-        scoring.runBulkScoring();
-        scoring.runHourlyScoring();
+        scoring.runBulkScoring();        
+        lead_lists = mkto.getLeadFromMarketo(leads_list);         
+        lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
+        assert len(lead_faileds)>1, lead_faileds;
+        
+        leads_list = mkto.addLeadToMarketo(3);
+        scoring.runHourlyScoring();        
+        lead_lists = mkto.getLeadFromMarketo(leads_list);        
+        lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
+        assert len(lead_faileds)>1, lead_faileds;
+        
+        scoring.runHourlyDanteProcess();
         
         
     def TestEndToEndELQFromDLConfig(self):
         models = Models();
         models.modelingGenerateFromDLConfig(PLSEnvironments.pls_marketing_app_ELQ,PLSEnvironments.pls_url_1);
-        scoring = Scoring(PLSEnvironments.pls_bard_1);
-        scoring.runBulkScoring();
-        scoring.runHourlyScoring();
+        
+        mkto = MarketoRequest();
+        leads_list = mkto.addLeadToMarketo(15);        
+        scoring = Scoring(PLSEnvironments.pls_bard_2);
+        scoring.runBulkScoring();        
+        lead_lists = mkto.getLeadFromMarketo(leads_list);         
+        lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
+        assert len(lead_faileds)>1, lead_faileds;
+        
+        leads_list = mkto.addLeadToMarketo(3);
+        scoring.runHourlyScoring();        
+        lead_lists = mkto.getLeadFromMarketo(leads_list);        
+        lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
+        assert len(lead_faileds)>1, lead_faileds;
+        
+        scoring.runHourlyDanteProcess();
+        
+
     def TestEndToEndMKTOFromDLConfig(self):
         models = Models();
         models.modelingGenerateFromDLConfig(PLSEnvironments.pls_marketing_app_MKTO,PLSEnvironments.pls_url_2);
+        
+        mkto = MarketoRequest();
+        leads_list = mkto.addLeadToMarketo(15);        
         scoring = Scoring(PLSEnvironments.pls_bard_2);
-        scoring.runBulkScoring();
-        scoring.runHourlyScoring();
+        scoring.runBulkScoring();        
+        lead_lists = mkto.getLeadFromMarketo(leads_list);         
+        lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
+        assert len(lead_faileds)>1, lead_faileds;
+        
+        leads_list = mkto.addLeadToMarketo(3);
+        scoring.runHourlyScoring();        
+        lead_lists = mkto.getLeadFromMarketo(leads_list);        
+        lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
+        assert len(lead_faileds)>1, lead_faileds;
+        
+        scoring.runHourlyDanteProcess();
+        
+
     
 class TestProperties(object):
     '''
@@ -188,10 +273,31 @@ class TestLeadCreator(object):
         contact_ids["1011704"]="F97F534F@pwbonline.com";
         print mkto.delete("1011700").text;
 
+    def TestVerification(self):
+        results = [{}];
+        result ={};
+        result["id"] = "403711";
+        result["email"] = "lwmMBY5eC0IvZ79AX_bQ1KSO8WpFJTuPNHo2D4L6s@kitv.com";
+        result["latticeforleads__Score__c"] = "89.0000";
+        result["latticeforleads__Last_Score_Date__c"] = "2015-03-24 15:27:40";
+        results.append(result);
+        result ={};
+        result["id"] = "403710";
+        result["email"] = "p5vgetNAR7TCISnbEk8PDBQGmZ_ijhq1lX0@afsifilters.com";
+        result["latticeforleads__Score__c"] = "78.0000";
+        result["latticeforleads__Last_Score_Date__c"] = "2015-03-24 15:27:40";
+        results.append(result);
+        
+        results = LeadCreator.verifyResult("HourlyScoring", results);
+        assert len(results)>1,results;
+        
     def TestSFDC(self):
         sfdc = SFDCRequest();
 #         print sfdc.updateAccountToSFDC("0018000001IDmSOAA1", name="newTestForIt")
 #         print sfdc.deleteAccount("0018000001IDmSOAA1");
-        print sfdc.addOpportunityToSFDC();
+        contacts = sfdc.addContactsToSFDC(contact_num=4);
+        contacts_result = sfdc.getContactsFromSFDC(contacts);
+        results = LeadCreator.verifyResult("BulkScoring", contacts_result);
+        assert len(results)>1,results;
 
 
