@@ -18,9 +18,11 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgress;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatus;
+import com.latticeengines.jobs.PropDataJobService;
 import com.latticeengines.madison.entitymanager.PropDataMadisonEntityMgr;
 import com.latticeengines.madison.service.PropDataMadisonService;
 import com.latticeengines.propdata.service.db.PropDataContext;
+import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:propdata-madison-context.xml",
@@ -32,6 +34,9 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
     @Autowired
     private PropDataMadisonService propDataService;
+
+    @Autowired
+    private PropDataJobService propDataJobService;
 
     @Autowired
     private PropDataMadisonEntityMgr propDataMadisonEntityMgr;
@@ -65,6 +70,8 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
         removeImportHdfsDirs();
         removeTransformHdfsDirs();
+
+        // ((PropDataMadisonServiceImpl)propDataService).cleanupTargetRawData();
     }
 
     @AfterClass
@@ -75,9 +82,9 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         if (dailyProgress2 != null) {
             propDataMadisonEntityMgr.delete(dailyProgress2);
         }
-        
-//        removeImportHdfsDirs();
-//        removeTransformHdfsDirs();
+
+        // removeImportHdfsDirs();
+        // removeTransformHdfsDirs();
     }
 
     private void removeTransformHdfsDirs() throws Exception {
@@ -113,8 +120,10 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
         PropDataContext requestContext = new PropDataContext();
         requestContext.setProperty(PropDataMadisonService.RECORD_KEY, dailyProgress);
-        propDataService.importFromDB(requestContext);
+        PropDataContext responseContext = propDataService.importFromDB(requestContext);
 
+        Assert.assertEquals(responseContext.getProperty(PropDataMadisonService.STATUS_KEY, String.class),
+                PropDataMadisonService.STATUS_OK);
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, outputDir));
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
                 ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(outputDir)));
@@ -131,15 +140,18 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         PropDataContext requestContext = new PropDataContext();
 
         requestContext.setProperty(PropDataMadisonService.TODAY_KEY, yesterday);
-        propDataService.transform(requestContext);
+        PropDataContext responseContext = propDataService.transform(requestContext);
+
+        Assert.assertEquals(responseContext.getProperty(PropDataMadisonService.STATUS_KEY, String.class),
+                PropDataMadisonService.STATUS_OK);
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
-                ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput1)));
+                ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput1 + "/output")));
 
         requestContext = new PropDataContext();
         requestContext.setProperty(PropDataMadisonService.TODAY_KEY, today);
         propDataService.transform(requestContext);
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
-                ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput2)));
+                ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput2 + "/output")));
 
     }
 
@@ -148,6 +160,15 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
         PropDataContext requestContext = new PropDataContext();
         requestContext.setProperty("today", today);
-        propDataService.exportToDB(requestContext);
+        PropDataContext responseContext = propDataService.exportToDB(requestContext);
+        Assert.assertEquals(responseContext.getProperty(PropDataMadisonService.STATUS_KEY, String.class),
+                PropDataMadisonService.STATUS_OK);
+    }
+
+    // @Test(groups = "functional")
+    public void swapTables() {
+        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        ((PropDataMadisonServiceImpl) propDataService).swapTargetTables(assignedQueue);
+
     }
 }

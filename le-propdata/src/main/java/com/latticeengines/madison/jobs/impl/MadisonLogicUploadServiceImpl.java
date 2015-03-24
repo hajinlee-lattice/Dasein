@@ -1,5 +1,8 @@
 package com.latticeengines.madison.jobs.impl;
 
+
+import java.util.Date;
+
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,7 +22,7 @@ public class MadisonLogicUploadServiceImpl extends QuartzJobBean implements Madi
 
     private static final Log log = LogFactory.getLog(MadisonLogicUploadServiceImpl.class);
 
-    private PropDataMadisonService propMadisonDataService;
+    private PropDataMadisonService propDataMadisonService;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
@@ -27,24 +30,33 @@ public class MadisonLogicUploadServiceImpl extends QuartzJobBean implements Madi
         long startTime = System.currentTimeMillis();
 
         try {
+            log.info("Started!");
             PropDataContext requestContextForTransformaton = new PropDataContext();
-
-            PropDataContext responseContextForTransformaton = propMadisonDataService
+            PropDataContext responseContextForTransformaton = propDataMadisonService
                     .transform(requestContextForTransformaton);
+            if (!responseContextForTransformaton.getProperty(PropDataMadisonService.STATUS_KEY, String.class).equals(
+                    PropDataMadisonService.STATUS_OK)) {
+                log.info("Finished! Upload job has no transformation.");
+                return;
+            }
 
+            Date today = responseContextForTransformaton.getProperty(PropDataMadisonService.TODAY_KEY, Date.class);
             PropDataContext requestContextForUpload = new PropDataContext();
-            PropDataContext responseContextForUpload = propMadisonDataService.transform(requestContextForUpload);
+            requestContextForUpload.setProperty(PropDataMadisonService.TODAY_KEY, today);
+            PropDataContext responseContextForUpload = propDataMadisonService.exportToDB(requestContextForUpload);
 
             long endTime = System.currentTimeMillis();
-            log.info("Eclipsed time=" + DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS"));
+            log.info("Finished! Eclipsed time=" + DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS"));
 
         } catch (Exception ex) {
-            log.error("MadisonLogicUploadServiceImpl job failed!", ex);
+            log.error("Failed!", ex);
         }
     }
 
     public void setPropDataMadisonService(PropDataMadisonService propDataMadisonService) {
-        this.propMadisonDataService = propDataMadisonService;
+        this.propDataMadisonService = propDataMadisonService;
     }
+    
+    
 
 }

@@ -18,4 +18,6 @@ public interface PropDataJobService {
     ApplicationId exportData(String table, String sourceDir, String queue, String customer, int numMappers,
             String jdbcUrl, String javaTypeMappings);
 
+    void eval(String sql, String assignedQueue, String jobName, int i, String connectionString);
+
 }

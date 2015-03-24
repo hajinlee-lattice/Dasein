@@ -19,20 +19,29 @@ public class MadisonLogicDownloadServiceImpl extends QuartzJobBean implements Ma
 
     private static final Log log = LogFactory.getLog(MadisonLogicDownloadServiceImpl.class);
 
-    private PropDataMadisonService propMadisonDataService;
+    private PropDataMadisonService propDataMadisonService;
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 
         long startTime = System.currentTimeMillis();
         try {
+            log.info("Started!");
             PropDataContext requestContext = new PropDataContext();
-            PropDataContext responseContext = propMadisonDataService.importFromDB(requestContext);
+            PropDataContext responseContext = propDataMadisonService.importFromDB(requestContext);
 
             long endTime = System.currentTimeMillis();
-            log.info("Eclipsed time=" + DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS"));
+            log.info("Finished! Eclipsed time=" + DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS"));
+            
         } catch (Exception ex) {
-            log.error("MadisonLogicDownloadService job failed!", ex);
+            log.error("Failed!", ex);
         }
     }
+
+    public void setPropDataMadisonService(PropDataMadisonService propDataMadisonService) {
+        this.propDataMadisonService = propDataMadisonService;
+    }
+
+    
+    
 }

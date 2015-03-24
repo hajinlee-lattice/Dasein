@@ -20,7 +20,7 @@
     <bean id="propDataMadisonDownloadCronTrigger"
         class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="madisonLogicDownloadJob" />
-        <property name="cronExpression" value="0 0 * * * ?" />
+        <property name="cronExpression" value="${propdata.madison.download.schedule}" />
     </bean>
 
     <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
@@ -47,7 +47,7 @@
     <bean id="propDataMadisonUploadCronTrigger"
         class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="madisonLogicUploadJob" />
-        <property name="cronExpression" value="0 0 4/8 * * ?" />
+        <property name="cronExpression" value="${propdata.madison.upload.schedule}" />
     </bean>
 
     <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">

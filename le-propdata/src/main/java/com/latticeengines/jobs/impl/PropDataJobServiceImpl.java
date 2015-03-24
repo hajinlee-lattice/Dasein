@@ -138,4 +138,16 @@ public class PropDataJobServiceImpl extends JobServiceImpl implements PropDataJo
         LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
     }
 
+    @Override
+    public void eval(String sql, String queue, String jobName, int numMappers, String jdbcUrl) {
+        List<String> cmds = new ArrayList<>();
+        cmds.add("eval");
+        cmds.add("-Dmapred.job.queue.name=" + queue);
+        cmds.add("--connect");
+        cmds.add(jdbcUrl);
+        cmds.add("--query");
+        cmds.add(sql);
+        LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
+    }
+
 }

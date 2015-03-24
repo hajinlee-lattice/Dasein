@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,6 +53,13 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     @Value("${propdata.madison.datasource.password.encrypted}")
     private String sourceJdbcPassword;
 
+    @Value("${propdata.madison.datasource.data.url}")
+    private String sourceDataJdbcUrl;
+    @Value("${propdata.madison.datasource.data.user}")
+    private String sourceDataJdbcUser;
+    @Value("${propdata.madison.datasource.data.password.encrypted}")
+    private String sourceDataJdbcPassword;
+
     @Value("${propdata.basedir}")
     private String propdataBaseDir;
     @Value("${propdata.data.source.dir}")
@@ -65,9 +73,11 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     @Value("${propdata.madison.num.past.days}")
     private int numOfPastDays;
 
+    @Value("${propdata.madison.target.raw.table}")
+    private String targetRawTable;
     @Value("${propdata.madison.target.table}")
     private String targetTable;
-    @Value("${propdata.madison.target.jdbc}")
+    @Value("${propdata.madison.datatarget.url}")
     private String targetJdbcUrl;
     @Value("${propdata.madison.datatarget.user}")
     private String targetJdbcUser;
@@ -76,8 +86,10 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     @Override
     public PropDataContext importFromDB(PropDataContext requestContext) {
+
         PropDataContext response = new PropDataContext();
-        MadisonLogicDailyProgress dailyProgress = requestContext.getProperty(RECORD_KEY, MadisonLogicDailyProgress.class);
+        MadisonLogicDailyProgress dailyProgress = requestContext.getProperty(RECORD_KEY,
+                MadisonLogicDailyProgress.class);
         if (dailyProgress == null) {
             dailyProgress = propDataMadisonEntityMgr.getNextAvailableDailyProgress();
         }
@@ -103,17 +115,17 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             }
 
             String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-            ApplicationId applicationId = propDataJobService.importData(dailyProgress.getDestinationTable(), targetDir,
-                    assignedQueue, getJobName() + "-Progress Id-" + dailyProgress.getPid(), splitColumns, numMappers,
-                    getConnectionString(sourceJdbcUrl, sourceJdbcUser, sourceJdbcPassword));
+            propDataJobService.importData(dailyProgress.getDestinationTable(), targetDir, assignedQueue, getJobName()
+                    + "-Progress Id-" + dailyProgress.getPid(), splitColumns, numMappers,
+                    getConnectionString(sourceDataJdbcUrl, sourceDataJdbcUser, sourceDataJdbcPassword));
 
             dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
             propDataMadisonEntityMgr.executeUpdate(dailyProgress);
 
-            response.setProperty("applicationId", applicationId);
-            response.setProperty("result", dailyProgress);
+            response.setProperty(RESULT_KEY, dailyProgress);
+            response.setProperty(STATUS_KEY, STATUS_OK);
 
-            log.info("Finished job id=" + dailyProgress.getPid() + " applicaiton Id=" + applicationId);
+            log.info("Finished job id=" + dailyProgress.getPid());
 
         } catch (Exception ex) {
             setFailed(dailyProgress, ex);
@@ -134,7 +146,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         String targetDir = getHdfsWorkflowTotalRawPath(today);
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, targetDir)) {
-                if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(targetDir))) {
+                if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(getOutputDir(targetDir)))) {
                     log.info("Data is already transformed for today=" + today.toString());
                     return response;
                 } else {
@@ -155,6 +167,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
             transformData(today, pastDays);
             response.setProperty(TODAY_KEY, today);
+            response.setProperty(STATUS_KEY, STATUS_OK);
 
         } catch (Exception ex) {
             log.info("Transform failed!", ex);
@@ -166,15 +179,39 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     private void transformData(Date today, List<Date> pastDays) throws Exception {
         String sourcePathRegEx = getSourcePathRegEx(pastDays);
         List<String> sourcePaths = new ArrayList<>();
-        sourcePaths.add(getHdfsDataflowIncrementalRawPathWithName(sourcePathRegEx) + "/*.avro");
+        sourcePaths.add(getHdfsDataflowIncrementalRawPathWithName(sourcePathRegEx));
 
         Date pastday = DateUtils.addDays(today, -1 * numOfPastDays);
         String pastDayAggregation = getHdfsWorkflowTotalRawPath(pastday);
-        if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(pastDayAggregation))) {
-            sourcePaths.add(getHdfsWorkflowTotalRawPath(pastday) + "/*.avro");
+        if (pastday.before(today)
+                && HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(getOutputDir(pastDayAggregation)))) {
+            sourcePaths.add(getHdfsWorkflowTotalRawPath(pastday));
         }
-        propDataMadisonDataFlowService.execute(getJobName(), sourcePaths, getHdfsWorkflowTotalRawPath(today));
 
+        String targetSchemaPath = getHdfsWorkflowTargetSchemaPath();
+        propDataMadisonDataFlowService.execute(getJobName(), sourcePaths, getHdfsWorkflowTotalRawPath(today),
+                targetSchemaPath);
+
+    }
+
+    private String getHdfsWorkflowTargetSchemaPath() {
+        String schemaPath = propdataBaseDir + "/" + propdataSourceDir + "/workflow/" + getJobName() + "/schema";
+        try {
+            if (!HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(schemaPath))) {
+                if (HdfsUtils.fileExists(yarnConfiguration, schemaPath)) {
+                    HdfsUtils.rmdir(yarnConfiguration, schemaPath);
+                }
+                String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+                propDataJobService.importData(targetTable + "_new", schemaPath, assignedQueue,
+                        getJobName() + "-schema", "DomainID", 1,
+                        getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+                log.info("Finished getting targetTable's schema file=" + schemaPath);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Can not get tareget table's schema file");
+        }
+
+        return schemaPath;
     }
 
     private String getSourcePathRegEx(List<Date> pastDays) {
@@ -192,12 +229,6 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     private void getPastIncrementalPaths(Date today, List<Date> pastDays, List<String> pastDaysPaths) throws Exception {
         try {
-            String todayTotalAggregationPath = getHdfsWorkflowTotalRawPath(today);
-            if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(todayTotalAggregationPath))) {
-                log.info("Today's aggregation was already done.");
-                return;
-            }
-
             String todayIncrementalPath = getHdfsDataflowIncrementalRawPathWithDate(today);
             if (!HdfsUtils.fileExists(yarnConfiguration, todayIncrementalPath)) {
                 log.info("There's no incremental data for today.");
@@ -206,7 +237,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
             String path = todayIncrementalPath;
             Date date = today;
-            pastDays.add(today);
+            pastDays.add(date);
             pastDaysPaths.add(path);
             for (int i = 0; i < numOfPastDays - 1; i++) {
                 date = DateUtils.addDays(date, -1);
@@ -235,21 +266,68 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
         String sourceDir = getHdfsWorkflowTotalRawPath(today);
         try {
-            if (!HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(sourceDir))) {
+            if (!HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(getOutputDir(sourceDir)))) {
                 log.warn("There's no aggregated data for today.");
                 return response;
             }
-
+            log.info("Uploading today's incremental data=" + sourceDir);
             String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-            propDataJobService.exportData(targetTable, sourceDir, assignedQueue, getJobName(), numMappers,
+            propDataJobService.exportData(getTableNew(), getOutputDir(sourceDir), assignedQueue, getJobName()
+                    + "-uploadAggregationData", numMappers,
                     getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+
+            swapTargetTables(assignedQueue);
+            uploadTodayRawData(today);
+
             response.setProperty(TODAY_KEY, today);
+            response.setProperty(STATUS_KEY, STATUS_OK);
 
         } catch (Exception ex) {
             log.info("exportToDB failed!", ex);
             throw new LedpException(LedpCode.LEDP_00002, ex);
         }
         return response;
+    }
+
+    private String getOutputDir(String sourceDir) {
+        return sourceDir + "/output";
+    }
+
+    private String getTableNew() {
+        return targetTable + "_new";
+    }
+
+    private void uploadTodayRawData(Date today) throws Exception {
+        String todayIncrementalPath = getHdfsDataflowIncrementalRawPathWithDate(today);
+        if (!HdfsUtils.fileExists(yarnConfiguration, todayIncrementalPath)) {
+            log.error("There's no incremental data for today.");
+            return;
+        }
+        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        propDataJobService.exportData(targetRawTable, todayIncrementalPath, assignedQueue, getJobName()
+                + "-uploadRawData", getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+
+    }
+
+    void cleanupTargetRawData() throws Exception {
+        String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        propDataJobService.eval("TRUNCATE TABLE " + targetRawTable, assignedQueue, getJobName() + "-cleanRawTable", 1,
+                getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+    }
+
+    void swapTargetTables(String assignedQueue) {
+        List<String> sqls = buildSqls(targetTable);
+        propDataJobService.eval(StringUtils.join(sqls, ";"), assignedQueue, getJobName() + "-swapTables", 1,
+                getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+    }
+
+    private List<String> buildSqls(String targetTable) {
+        List<String> sqls = new ArrayList<>();
+        sqls.add("EXEC sp_rename " + targetTable + ", " + targetTable + "_bak");
+        sqls.add("EXEC sp_rename " + targetTable + "_new, " + targetTable);
+        sqls.add("EXEC sp_rename " + targetTable + "_bak, " + targetTable + "_new");
+        sqls.add("TRUNCATE TABLE " + targetTable + "_new");
+        return sqls;
     }
 
     private String getJobName() {

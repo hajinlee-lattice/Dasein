@@ -45,6 +45,5 @@ public class CommandsDaoImpl extends BaseDaoImpl<Commands> implements CommandsDa
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-
     }
 }
