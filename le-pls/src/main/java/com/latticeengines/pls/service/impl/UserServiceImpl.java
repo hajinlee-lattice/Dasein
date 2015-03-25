@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
             try {
                 globalUserManagementService.grantRight(right.getAuthority(), tenant, username);
             } catch (Exception e) {
-                log.warn(String.format("Error granting right %s to user %s.", right.getAuthority(), username));
+                log.warn(String.format("Error granting right %s to user %s.", right.getAuthority(), username), e);
             }
         }
 
