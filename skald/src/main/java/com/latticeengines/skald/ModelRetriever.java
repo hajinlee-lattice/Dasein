@@ -28,18 +28,11 @@ public class ModelRetriever {
                     @Override
                     public ModelEvaluator load(AbstractMap.SimpleEntry<CustomerSpace, ModelIdentifier> key)
                             throws Exception {
-                        // TODO This path should be parameterized with the full
-                        // space, not just the contract.
-
-                        // TODO This path should be parameterized with the model
-                        // version instead of random (and hard-coded) GUIDs.
-
                         URL address;
                         try {
-                            String pattern = "http://%s/webhdfs/v1/user/s-analytics/customers/%s/models/%s/%s/rfpmml.xml?op=OPEN";
-                            address = new URL(String.format(pattern, properties.getHdfsAddress(), key.getKey()
-                                    .getContractId(), key.getValue().name,
-                                    "b2d0c3f4-b767-4483-8c3c-f36d5cbe197d/1416355548818_22888"));
+                            String pattern = "http://%s/webhdfs/v1/user/s-analytics/customers/%s/models/%s/%s/ModelPmml.xml?op=OPEN";
+                            address = new URL(String.format(pattern, properties.getHdfsAddress(), key.getKey(),
+                                    key.getValue().name, key.getValue().version));
                         } catch (MalformedURLException ex) {
                             throw new RuntimeException("Failed to generate WebHDFS URL", ex);
                         }

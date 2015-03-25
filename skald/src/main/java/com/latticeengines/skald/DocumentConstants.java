@@ -6,7 +6,7 @@ public class DocumentConstants {
     public static final int DATA_VERSION = 1;
 
     // Interface names
-    public static final String MODEL_INTERFACE = "Model";
+    public static final String MODEL_INTERFACE = "ModelArtifact";
 
     // Documents
     public static final String COMBINATION = "/Combinations/%s.json";

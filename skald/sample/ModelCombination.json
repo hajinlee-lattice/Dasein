@@ -1,0 +1,5 @@
+{
+	"space": {"contractId": "Lattice_Relaunch", "tenantId": "Lattice_Relaunch", "spaceId": "Production"},
+	"name": "realtime",
+	"combination": [{"filter": null, "model": "54819c16-3298-4a1d-accb-646f92ae2c3e-PLSModel"}]
+}
