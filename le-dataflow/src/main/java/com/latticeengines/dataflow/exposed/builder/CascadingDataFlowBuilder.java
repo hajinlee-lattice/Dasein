@@ -135,11 +135,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
             DataFlowContext ctx = getDataFlowCtx();
             Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
             try {
-                // List<String> files =
-                // HdfsUtils.getFilesForDirRecursive(config, "/", new
-                // RegexFilter(sourcePath), true);
                 sourcePath = getSchemaPath(config, sourcePath);
-
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_00002, e);
             }
