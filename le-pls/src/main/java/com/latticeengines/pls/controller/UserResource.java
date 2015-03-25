@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -50,7 +52,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping("/users")
 public class UserResource {
 
-    private static final Log log = LogFactory.getLog(UserResource.class);
+    private static final Log LOGGER = LogFactory.getLog(UserResource.class);
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
@@ -70,9 +72,10 @@ public class UserResource {
         try {
             Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
             String tenantId = globalSessionManagementService.retrieve(ticket).getTenant().getId();
-            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenantId);
+            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList
+                = globalUserManagementService.getAllUsersOfTenant(tenantId);
             List<User> users = new ArrayList<>();
-            for (AbstractMap.SimpleEntry<User, List<String>> userRights : userRightsList) {
+            for (Map.Entry<User, List<String>> userRights : userRightsList) {
                 if (!RightsUtilities.isAdmin(RightsUtilities.translateRights(userRights.getValue()))) {
                     users.add(userRights.getKey());
                 }
@@ -92,7 +95,8 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Register or validate a new user in the current tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public ResponseDocument<RegistrationResult> register(@RequestBody UserRegistration userReg, HttpServletRequest request) {
+    public ResponseDocument<RegistrationResult> register(@RequestBody UserRegistration userReg,
+                                                         HttpServletRequest request) {
         ResponseDocument<RegistrationResult> response = new ResponseDocument<>();
         RegistrationResult result = new RegistrationResult();
         User user = userReg.getUser();
@@ -101,8 +105,8 @@ public class UserResource {
         try {
             Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
             tenantId = globalSessionManagementService.retrieve(ticket).getTenant().getId();
-        } catch (Exception e) {
-            response.setErrors(Arrays.asList("Could not authenticate current user."));
+        } catch (LedpException e) {
+            response.setErrors(Collections.singletonList("Could not authenticate current user."));
             return response;
         }
 
@@ -110,7 +114,9 @@ public class UserResource {
         User oldUser = globalUserManagementService.getUserByEmail(user.getEmail());
         if (oldUser != null) {
             result.setValid(false);
-            response.setErrors(Arrays.asList("The requested email conflicts with that of an existing user."));
+            response.setErrors(Collections.singletonList(
+                "The requested email conflicts with that of an existing user."
+            ));
             if (!inTenant(tenantId, oldUser.getUsername())) {
                 result.setConflictingUser(oldUser);
             }
@@ -143,12 +149,15 @@ public class UserResource {
     @RequestMapping(value = "/{username:.+}/creds", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update password of user")
-    public SimpleBooleanResponse updateCredentials(@PathVariable String username, @RequestBody UserUpdateData data, HttpServletRequest request) {
+    public SimpleBooleanResponse updateCredentials(@PathVariable String username, @RequestBody UserUpdateData data,
+                                                   HttpServletRequest request) {
         User user;
         Ticket ticket;
         try {
             ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
-            user = globalUserManagementService.getUserByEmail(globalSessionManagementService.retrieve(ticket).getEmailAddress());
+            user = globalUserManagementService.getUserByEmail(
+                globalSessionManagementService.retrieve(ticket).getEmailAddress()
+            );
             if (!user.getUsername().equals(username)) {
                 throw new LedpException(LedpCode.LEDP_18001, new String[] { username });
             }
@@ -188,7 +197,8 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Update users")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public SimpleBooleanResponse update(@PathVariable String username, @RequestBody UserUpdateData data, HttpServletRequest request) {
+    public SimpleBooleanResponse update(@PathVariable String username, @RequestBody UserUpdateData data,
+                                        HttpServletRequest request) {
         String tenantId;
         try {
             Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
@@ -215,9 +225,11 @@ public class UserResource {
 
     @RequestMapping(value = "", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Delete users (?usernames=) from current tenant. Request parameter should be a stringified JSON array.")
+    @ApiOperation(value = "Delete users (?usernames=) from current tenant. "
+        + "Request parameter should be a stringified JSON array.")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public ResponseDocument<DeleteUsersResult> delete(@RequestParam(value = "usernames") String usernames, HttpServletRequest request)
+    public ResponseDocument<DeleteUsersResult> delete(@RequestParam(value = "usernames") String usernames,
+                                                      HttpServletRequest request)
     {
         String tenantId;
         try {
@@ -255,14 +267,17 @@ public class UserResource {
                         successUsers.add(username);
                         continue;
                     } else {
-                        log.warn(String.format("Failed to delete the user %s in the tenant %s", username, tenantId));
+                        LOGGER.warn(String.format("Failed to delete the user %s in the tenant %s", username, tenantId));
                     }
-                } catch (Exception e) {
+                } catch (LedpException e) {
                     // ignore
-                    log.warn(String.format("Exception encountered when deleting the user %s in the tenant %s", username, tenantId));
+                    LOGGER.warn(String.format(
+                        "Exception encountered when deleting the user %s in the tenant %s",
+                        username, tenantId
+                    ));
                 }
             } else {
-                log.warn(String.format("Trying to delete the admin user %s in the tenant %s", username, tenantId));
+                LOGGER.warn(String.format("Trying to delete the admin user %s in the tenant %s", username, tenantId));
             }
             failUsers.add(username);
         }
@@ -291,12 +306,12 @@ public class UserResource {
     private void revokeRightWithoutException(String right, String tenant, String username) {
         try {
             globalUserManagementService.revokeRight(right, tenant, username);
-        } catch (Exception e) {
+        } catch (LedpException e) {
             // ignore
         }
     }
 
-    private Boolean softDelete(String tenantId, String username) {
+    private boolean softDelete(String tenantId, String username) {
         try {
             revokeRightWithoutException(GrantedRight.VIEW_PLS_MODELS.getAuthority(), tenantId, username);
             revokeRightWithoutException(GrantedRight.VIEW_PLS_CONFIGURATION.getAuthority(), tenantId, username);
