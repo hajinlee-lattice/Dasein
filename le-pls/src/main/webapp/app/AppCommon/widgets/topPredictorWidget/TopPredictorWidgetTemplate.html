@@ -15,7 +15,7 @@
                 <h4>{{externalPredictorTotal}}</h4>
                 <ul>    
                     <li data-ng-repeat="category in externalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
-                        <a href="#">{{category.name}}<span style="background-color:{{category.color}}">{{category.count}}</span></a>
+                        <a href="#" data-ng-bind-html="generateCategoryLabel(category)"></a>
                     </li>
                 </ul>
             </div>
@@ -26,7 +26,7 @@
                 <h4>{{internalPredictorTotal}}</h4>
                 <ul>
                     <li data-ng-repeat="category in internalCategories | orderBy: 'name'" data-ng-click="categoryClicked(category)">
-                        <a href="#">{{category.name}}<span style="background-color:{{category.color}}">{{category.count}}</span></a>
+                        <a href="#" data-ng-bind-html="generateCategoryLabel(category)"></a>
                     </li>
                 </ul>
             </div>

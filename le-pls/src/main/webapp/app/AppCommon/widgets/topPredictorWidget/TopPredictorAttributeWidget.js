@@ -1,10 +1,11 @@
 angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
-    'mainApp.appCommon.services.TopPredictorService'
+    'mainApp.appCommon.services.TopPredictorService',
+    'ngSanitize'
 ])
 
-    .controller('TopPredictorAttributeWidgetController', function ($scope, _, $filter, ResourceUtility, TopPredictorService) {
+    .controller('TopPredictorAttributeWidgetController', function ($scope, _, $sce, $filter, ResourceUtility, TopPredictorService) {
         var data = $scope.data;
         $scope.attributeName = data.name;
         $scope.attributeFullDescription = data.description;
@@ -19,6 +20,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         var bucketNames = _.map(chartData, "name");
         var percentLeads = _.map(chartData, function(d){ return TopPredictorService.FormatPercent(d.percentTotal); });
         percentLeads = TopPredictorService.SumToOne(percentLeads);
+        
+        $scope.generateAttributeName = function() { return $sce.trustAsHtml('<h4 style="border-left: ' + $scope.attributeColor + 
+        		' solid 6px;" title="' + $scope.attributeName + '">' + $scope.attributeName + '</h4>' + '<p title="' +  
+        		$scope.attributeDescription + '">' + $scope.attributeDescription+ '</p>');
+        };
 
         var chart,
             width = 145,

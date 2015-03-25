@@ -2,10 +2,11 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
     'mainApp.appCommon.services.TopPredictorService',
-    'mainApp.appCommon.widgets.TopPredictorAttributeWidget'
+    'mainApp.appCommon.widgets.TopPredictorAttributeWidget',
+    'ngSanitize'
 ])
 
-.controller('TopPredictorWidgetController', function ($scope, $element, $compile, $rootScope, 
+.controller('TopPredictorWidgetController', function ($scope, $sce, $element, $compile, $rootScope, 
     ResourceUtility, WidgetFrameworkService, TopPredictorService) {
     
     var widgetConfig = $scope.widgetConfig;
@@ -46,6 +47,10 @@ angular.module('mainApp.appCommon.widgets.TopPredictorWidget', [
     // Calculate total
     var totalAttributes = internalCategoryObj.total + externalCategoryObj.total;
     $scope.topPredictorTitle = totalAttributes + " " + ResourceUtility.getString("TOP_PREDICTORS_TITLE");
+    
+    $scope.generateCategoryLabel = function(category) {
+    	return $sce.trustAsHtml(category.name + '<span style="background-color:' + category.color + '">' + category.count + '</span>');
+    };
     
     // Methods used for the Sunburst chart
     // Stash the old values for transition.
