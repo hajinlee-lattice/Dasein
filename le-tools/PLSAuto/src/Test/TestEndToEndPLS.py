@@ -44,7 +44,7 @@ class TestEndToEndPLS(object):
         contact_lists = elq.getEloquaContact(contact_lists);
         
         contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ",contact_lists);
-        assert len(contact_faileds)>1, contact_faileds;
+        assert len(contact_faileds)==1, contact_faileds;
       
     def TestBulkScoringMKTO(self): 
         mkto = MarketoRequest();
@@ -56,7 +56,7 @@ class TestEndToEndPLS(object):
         lead_lists = mkto.getLeadFromMarketo(leads_list); 
         
         lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
-        assert len(lead_faileds)>1, lead_faileds;
+        assert len(lead_faileds)==1, lead_faileds;
     
     def TestHourlyScoringELQ(self):
         elq = EloquaRequest();
@@ -68,7 +68,7 @@ class TestEndToEndPLS(object):
         contact_lists = elq.getEloquaContact(contact_lists);
         
         contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",contact_lists);
-        assert len(contact_faileds)>1, contact_faileds;
+        assert len(contact_faileds)==1, contact_faileds;
         
         scoring.runHourlyDanteProcess();
        
@@ -82,7 +82,7 @@ class TestEndToEndPLS(object):
         lead_lists = mkto.getLeadFromMarketo(leads_list); 
         
         lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
-        assert len(lead_faileds)>1, lead_faileds;
+        assert len(lead_faileds)==1, lead_faileds;
         
         scoring.runHourlyDanteProcess();
    
@@ -96,13 +96,13 @@ class TestEndToEndPLS(object):
         scoring.runBulkScoring();
         contact_lists = elq.getEloquaContact(contact_lists);        
         contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ",contact_lists);
-        assert len(contact_faileds)>1, contact_faileds;
+        assert len(contact_faileds)==1, contact_faileds;
         
         contact_lists = elq.addEloquaContact(3);
         scoring.runHourlyScoring();
         contact_lists = elq.getEloquaContact(contact_lists);        
         contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",contact_lists);
-        assert len(contact_faileds)>1, contact_faileds;
+        assert len(contact_faileds)==1, contact_faileds;
         
         scoring.runHourlyDanteProcess();
         
@@ -116,13 +116,13 @@ class TestEndToEndPLS(object):
         scoring.runBulkScoring();        
         lead_lists = mkto.getLeadFromMarketo(leads_list);         
         lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
-        assert len(lead_faileds)>1, lead_faileds;
+        assert len(lead_faileds)==1, lead_faileds;
         
         leads_list = mkto.addLeadToMarketo(3);
         scoring.runHourlyScoring();        
         lead_lists = mkto.getLeadFromMarketo(leads_list);        
         lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
-        assert len(lead_faileds)>1, lead_faileds;
+        assert len(lead_faileds)==1, lead_faileds;
         
         scoring.runHourlyDanteProcess();
         
@@ -137,13 +137,13 @@ class TestEndToEndPLS(object):
         scoring.runBulkScoring();        
         lead_lists = mkto.getLeadFromMarketo(leads_list);         
         lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
-        assert len(lead_faileds)>1, lead_faileds;
+        assert len(lead_faileds)==1, lead_faileds;
         
         leads_list = mkto.addLeadToMarketo(3);
         scoring.runHourlyScoring();        
         lead_lists = mkto.getLeadFromMarketo(leads_list);        
         lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
-        assert len(lead_faileds)>1, lead_faileds;
+        assert len(lead_faileds)==1, lead_faileds;
         
         scoring.runHourlyDanteProcess();
         
@@ -158,13 +158,13 @@ class TestEndToEndPLS(object):
         scoring.runBulkScoring();        
         lead_lists = mkto.getLeadFromMarketo(leads_list);         
         lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
-        assert len(lead_faileds)>1, lead_faileds;
+        assert len(lead_faileds)==1, lead_faileds;
         
         leads_list = mkto.addLeadToMarketo(3);
         scoring.runHourlyScoring();        
         lead_lists = mkto.getLeadFromMarketo(leads_list);        
         lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
-        assert len(lead_faileds)>1, lead_faileds;
+        assert len(lead_faileds)==1, lead_faileds;
         
         scoring.runHourlyDanteProcess();
         
@@ -276,20 +276,20 @@ class TestLeadCreator(object):
     def TestVerification(self):
         results = [{}];
         result ={};
-        result["id"] = "403711";
-        result["email"] = "lwmMBY5eC0IvZ79AX_bQ1KSO8WpFJTuPNHo2D4L6s@kitv.com";
-        result["latticeforleads__Score__c"] = "89.0000";
+        result["id"] = "403709";
+        result["email"] = "2LVsQHnBi7h4fAFYbqvoJgXG59tauTwKIe_30UlmEDPZxkO@weberd.com";
+        result["latticeforleads__Score__c"] = 89.0000;
         result["latticeforleads__Last_Score_Date__c"] = "2015-03-24 15:27:40";
         results.append(result);
         result ={};
-        result["id"] = "403710";
-        result["email"] = "p5vgetNAR7TCISnbEk8PDBQGmZ_ijhq1lX0@afsifilters.com";
+        result["id"] = "1011799";
+        result["email"] = "sqmOCKaVlfYWJvAN83Skg4yuP9jQxGD@marteau.org";
         result["latticeforleads__Score__c"] = "78.0000";
         result["latticeforleads__Last_Score_Date__c"] = "2015-03-24 15:27:40";
         results.append(result);
         
         results = LeadCreator.verifyResult("HourlyScoring", results);
-        assert len(results)>1,results;
+        assert len(results)==1,results;
         
     def TestSFDC(self):
         sfdc = SFDCRequest();
@@ -298,6 +298,6 @@ class TestLeadCreator(object):
         contacts = sfdc.addContactsToSFDC(contact_num=4);
         contacts_result = sfdc.getContactsFromSFDC(contacts);
         results = LeadCreator.verifyResult("BulkScoring", contacts_result);
-        assert len(results)>1,results;
+        assert len(results)==1,results;
 
 
