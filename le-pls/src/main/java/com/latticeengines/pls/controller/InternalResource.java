@@ -2,8 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.api.Status;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -43,7 +44,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/internal")
 public class InternalResource extends InternalResourceBase {
 
-    private static final Log log = LogFactory.getLog(InternalResource.class);
+    private static final Log LOGGER = LogFactory.getLog(InternalResource.class);
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
@@ -54,25 +55,29 @@ public class InternalResource extends InternalResourceBase {
     @Autowired
     private TenantService tenantService;
 
-    @RequestMapping(value = "/modelsummaries/{modelId}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/modelsummaries/{modelId}",
+        method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update a model summary")
-    public ResponseDocument<ModelActivationResult> update(@PathVariable String modelId,
-            @RequestBody AttributeMap attrMap, HttpServletRequest request) {
+    public ResponseDocument<ModelActivationResult> update(
+        @PathVariable String modelId,
+        @RequestBody AttributeMap attrMap, HttpServletRequest request
+    ) {
         checkHeader(request);
         ModelSummary summary = modelSummaryEntityMgr.getByModelId(modelId);
 
         if (summary == null) {
             ModelActivationResult result = new ModelActivationResult();
             result.setExists(false);
-            ResponseDocument<ModelActivationResult> response = new ResponseDocument<>();
+            ResponseDocument<ModelActivationResult> response
+                = new ResponseDocument<>();
             response.setSuccess(false);
             response.setResult(result);
             return response;
         }
 
-        ((ModelSummaryEntityMgrImpl) modelSummaryEntityMgr).manufactureSecurityContextForInternalAccess(summary
-                .getTenant());
+        ((ModelSummaryEntityMgrImpl) modelSummaryEntityMgr)
+            .manufactureSecurityContextForInternalAccess(summary.getTenant());
 
         // Reuse the logic in the ModelSummaryResource to do the updates
         ModelSummaryResource msr = new ModelSummaryResource();
@@ -89,49 +94,62 @@ public class InternalResource extends InternalResourceBase {
         return response;
     }
 
-    @RequestMapping(value = "/users", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/users",
+        method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete users. Mainly for cleaning up testing users.")
     public SimpleBooleanResponse deleteUsers(
-        @RequestParam(value="namepattern", required=false) String namePattern,
-        @RequestParam(value="tenant", required=false) String tenantId,
+        @RequestParam(value = "namepattern", required = false) String namePattern,
+        @RequestParam(value = "tenant", required = false) String tenantId,
         HttpServletRequest request
     ) throws URIException {
         checkHeader(request);
-
-        if (namePattern != null) {
-            namePattern = URIUtil.decode(namePattern);
+        String decodedNamePattern = namePattern;
+        if (decodedNamePattern != null) {
+            decodedNamePattern = URIUtil.decode(namePattern);
             List<String> tenants = new ArrayList<>();
             if (tenantId == null) {
-                log.info(String.format("Deleting users matching %s from all tenants using internal API", namePattern));
-                for (Tenant t: tenantService.getAllTenants()){
+                LOGGER.info(String.format(
+                    "Deleting users matching %s from all tenants using internal API",
+                    decodedNamePattern
+                ));
+                for (Tenant t: tenantService.getAllTenants()) {
                     tenants.add(t.getId());
                 }
-                // return SimpleBooleanResponse.getFailResponse(Arrays.asList("Must specify tenant when deleting users by a name pattern."));
             } else {
                 tenants.add(tenantId);
-                log.info(String.format("Deleting users matching %s from the tenant %s using internal API", namePattern, tenantId));
+                LOGGER.info(String.format(
+                    "Deleting users matching %s from the tenant %s using internal API",
+                    decodedNamePattern, tenantId
+                ));
             }
 
             for (String tid: tenants) {
-                List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tid);
-                for (AbstractMap.SimpleEntry<User, List<String>> userRight: userRightsList) {
+                List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList
+                    = globalUserManagementService.getAllUsersOfTenant(tid);
+                for (Map.Entry<User, List<String>> userRight: userRightsList) {
                     User user = userRight.getKey();
                     boolean isAdmin = RightsUtilities.isAdmin(
                         RightsUtilities.translateRights(userRight.getValue())
                     );
-                    if ((!isAdmin) && user.getUsername().matches(namePattern)) {
+                    if ((!isAdmin) && user.getUsername().matches(decodedNamePattern)) {
                         softDelete(tid, user.getUsername());
-                        log.info(String.format("User %s has been soft deleted from the tenant %s through internal API", user.getUsername(), tid));
+                        LOGGER.info(String.format(
+                            "User %s has been soft deleted from the tenant %s through internal API",
+                            user.getUsername(), tid
+                        ));
                         if (globalUserManagementService.isRedundant(user.getUsername())) {
                             globalUserManagementService.deleteUser(user.getUsername());
-                            log.info(String.format("User %s has been hard deleted through internal API", user.getUsername()));
+                            LOGGER.info(String.format(
+                                "User %s has been hard deleted through internal API",
+                                user.getUsername()
+                            ));
                         }
                     }
                 }
             }
         } else {
-            log.info(String.format("Username pattern not found"));
+            LOGGER.info("Username pattern not found");
         }
 
         return SimpleBooleanResponse.getSuccessResponse();
@@ -140,8 +158,8 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "/{op}/{left}/{right}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Status check for this endpoint")
-    public Status calculate(@PathVariable("op") String op, @PathVariable("left") Integer left,
-            @PathVariable("right") Integer right) {
+    public Status calculate(@PathVariable("op") String op, @PathVariable("left") int left,
+            @PathVariable("right") int right) {
         Assert.notNull(op);
         Assert.notNull(left);
         Assert.notNull(right);
@@ -182,9 +200,8 @@ public class InternalResource extends InternalResourceBase {
     private void revokeRightWithoutException(String right, String tenant, String username) {
         try {
             globalUserManagementService.revokeRight(right, tenant, username);
-        } catch (Exception e) {
+        } catch (LedpException e) {
             // ignore
         }
     }
-
 }
