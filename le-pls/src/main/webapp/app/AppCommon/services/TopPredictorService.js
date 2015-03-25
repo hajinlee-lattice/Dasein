@@ -557,31 +557,6 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             toReturn.elementList.push(nullBucket);
         }
 
-        if (toReturn.elementList.length > 1) {
-            // Ensure percentages sum to 100
-            var topPercentage = 100.0;
-            
-            // Find the bucket with the largest percentage
-            var index = 0;
-            var maxPercentage = 0;
-            for (i = 0; i < toReturn.elementList.length; i++) {
-                var currentPercentage = toReturn.elementList[i].percentTotal;
-                if (currentPercentage > maxPercentage) {
-                    index = i;
-                    maxPercentage = currentPercentage;
-                }
-            }
-            // Make the max percentage equal to 100 minus the sum of all the other percentages
-            for (i = 0; i < toReturn.elementList.length; i++) {
-                if (i == index) {
-                    continue;
-                } else {
-                     topPercentage -= toReturn.elementList[i].percentTotal;
-                }
-            }
-            toReturn.elementList[index].percentTotal = topPercentage;
-        }
-
         return toReturn;
     };
     

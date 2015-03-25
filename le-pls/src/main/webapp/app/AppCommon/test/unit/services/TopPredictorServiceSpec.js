@@ -330,15 +330,15 @@ describe('TopPredictorServiceSpec Tests', function () {
             expect(chartData.elementList[chartData.elementList.length - 2].name).toEqual('Other');
             
             // the sum of percentage should be 100
-            expect(_.reduce(chartData.elementList, function(memo, e){
+            expect(Math.round(_.reduce(chartData.elementList, function(memo, e){
                 return memo + e.percentTotal;
-            }, 0)).toEqual(100);
+            }, 0))).toEqual(100);
 
             // examine total average lift should be one
             var weightedLiftSum = _.reduce(chartData.elementList, function(memo, e){
                 return e.lift * e.percentTotal + memo;
             }, 0);
-           expect(weightedLiftSum).toEqual(100);
+           expect(Math.round(weightedLiftSum)).toEqual(100);
         });
 
 
