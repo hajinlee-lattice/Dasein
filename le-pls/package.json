@@ -2,7 +2,8 @@
   "name": "plsGrunt",
   "version": "0.0.1",
   "dependencies": {
-    "grunt-http": "^1.6.0"
+    "grunt-http": "^1.6.0",
+    "underscore": "^1.8.2"
   },
   "devDependencies": {
     "grunt": "^0.4.5",
