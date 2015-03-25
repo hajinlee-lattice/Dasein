@@ -83,7 +83,7 @@ def verifyResult(operation,records):
         if r["latticeforleads__Score__c"] == None:
             r["latticeforleads__Score__c"]=0;
             passed=False;
-        if r["latticeforleads__Score__c"]<10 or r["latticeforleads__Score__c"]>100:
+        if float(r["latticeforleads__Score__c"])-10<0 or float(r["latticeforleads__Score__c"])-100>0:
             passed=False; 
         if not passed:
             results.append(r);
