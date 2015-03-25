@@ -86,7 +86,7 @@ describe('threshold explorer', function() {
         var tab = element(by.id("modelDetailsExplorerTab"));
         var body = tab.element(by.tagName("tbody"));
         var rows = body.all(by.tagName("tr"));
-        expect(rows.count()).toEqual(2);
+        expect(rows.count()).toEqual(1);
 
         //==================================================
         // Check Default/Max Conversions
@@ -95,16 +95,6 @@ describe('threshold explorer', function() {
         expect(tds.get(0).getText()).toEqual("% TOTAL CONVERSIONS");
         expect(tds.get(2).getText()).toEqual(chartConversions);
         expect(tds.get(10).getText()).toEqual("100%");
-
-        //==================================================
-        // Check Default/Max Lift
-        //==================================================
-        tds = rows.get(1).all(by.tagName("td"));
-        expect(tds.get(0).getText()).toEqual("LIFT");
-        tds.get(2).getText().then(function(text){
-            expect(chartLeftLift).toEqual(text.toLowerCase());
-        });
-        expect(tds.get(10).getText()).toEqual("1.00X");
 
         //==================================================
         // Check Leads/Score (Assume Reasonable Window Size)

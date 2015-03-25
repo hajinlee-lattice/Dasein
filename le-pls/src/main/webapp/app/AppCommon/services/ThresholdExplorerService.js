@@ -90,15 +90,6 @@ angular.module('mainApp.appCommon.services.ThresholdExplorerService', [
         }
         result.push(conversions);
 
-        //==================================================
-        // Lift
-        //==================================================
-        var leftLift = {Leads: ResourceUtility.getString("DECILE_GRID_LIFT")};
-        for (i = 1; i < 11; i++) {
-            leftLift["D" + String(i)] = String(chartData[i * 10].leftLift.toFixed(2)) + "x";
-        }
-        result.push(leftLift);
-
         return result;
     };
 

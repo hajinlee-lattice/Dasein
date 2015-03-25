@@ -107,12 +107,6 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
             }
         });
 
-        it('decile-data should have 10 lifts', function () {
-            for (var i = 1; i < 10; i++) {
-                expect(thresholdDecileData[1].hasOwnProperty("D" + String(i))).toBe(true);
-            }
-        });
-
         it('decile-data conversions should increase', function () {
             for (var i = 1; i < 10; i++) {
                 expect(parseInt(thresholdDecileData[0]["D" + String(i + 1)].slice(0, -1)) >=
@@ -129,13 +123,6 @@ describe('ThresholdExplorerServiceSpec Tests', function () {
             for (var i = 1; i < 10; i++) {
                 expect(thresholdChartData[10 * i].conversions.toFixed(0)).
                     toEqual(thresholdDecileData[0]["D" + String(i)].slice(0, -1));
-            }
-        });
-
-        it('chart-decile leftLift should match', function () {
-            for (var i = 1; i < 10; i++) {
-                expect(thresholdChartData[10 * i].leftLift.toFixed(2)).
-                    toEqual(thresholdDecileData[1]["D" + String(i)].slice(0, -1));
             }
         });
     });
