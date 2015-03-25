@@ -1,7 +1,9 @@
 package com.latticeengines.dataflow.runtime.cascading;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -17,12 +19,25 @@ public class GroupAndExpandFieldsBuffer extends BaseOperation implements Buffer 
     private static final long serialVersionUID = 1505662991286452847L;
     private String expandFieldName;
     private List<String> expandFormas;
+    private Map<String, Integer> namePositionMap;
 
     public GroupAndExpandFieldsBuffer(int numArgs, String expandField, List<String> expandFormats,
             Fields fieldDeclaration) {
         super(numArgs, fieldDeclaration);
+        this.namePositionMap = getPositionMap(fieldDeclaration);
         this.expandFieldName = expandField;
         this.expandFormas = expandFormats;
+    }
+
+    private Map<String, Integer> getPositionMap(Fields fieldDeclaration) {
+        Map<String, Integer> positionMap = new HashMap<>();
+        Iterator iterator = fieldDeclaration.iterator();
+        int pos = 0;
+        while (iterator.hasNext()) {
+            String fieldName = (String) iterator.next();
+            positionMap.put(fieldName.toLowerCase(), pos++);
+        }
+        return positionMap;
     }
 
     @Override
@@ -49,8 +64,8 @@ public class GroupAndExpandFieldsBuffer extends BaseOperation implements Buffer 
             if (fieldName.equals(expandFieldName)) {
                 continue;
             }
-            int loc = getFieldDeclaration().getPos(fieldName);
-            if (loc >= 0) {
+            Integer loc = namePositionMap.get(fieldName.toLowerCase());
+            if (loc != null && loc >= 0) {
                 result.set(loc, group.getObject(fieldName));
             }
         }
@@ -70,8 +85,8 @@ public class GroupAndExpandFieldsBuffer extends BaseOperation implements Buffer 
             String format = expandFormas.get(i++);
             String formatedFieldName = String.format(format, expandFieldValue);
             formatedFieldName = formatedFieldName.replaceAll("[ ,&]+", "");
-            int loc = getFieldDeclaration().getPos(formatedFieldName);
-            if (loc >= 0) {
+            Integer loc = namePositionMap.get(formatedFieldName.toLowerCase());
+            if (loc != null && loc >= 0) {
                 result.set(loc, tupleEntry.getObject(fieldName));
             }
         }

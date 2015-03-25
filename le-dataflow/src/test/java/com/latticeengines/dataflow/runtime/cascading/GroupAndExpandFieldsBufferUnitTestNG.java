@@ -38,7 +38,7 @@ public class GroupAndExpandFieldsBufferUnitTestNG {
 
         fields = new Fields("Category", "ML_Category_Topic", "ML_Category_User");
         tuple = new Tuple();
-        tuple.add("Category1");
+        tuple.add("category1");
         tuple.add("topic1");
         tuple.add("user1");
 
@@ -47,7 +47,7 @@ public class GroupAndExpandFieldsBufferUnitTestNG {
         entries.add(arg);
 
         tuple = new Tuple();
-        tuple.add("Category2");
+        tuple.add("CAtegory2");
         tuple.add("topic2");
         tuple.add("user2");
 
