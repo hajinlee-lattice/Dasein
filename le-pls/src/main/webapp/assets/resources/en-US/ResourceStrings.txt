@@ -149,6 +149,7 @@ MODEL_IMPORT_GENERAL_ERROR=Unable to import this model.
 MODEL_IMPORT_WAIT=Importing model ...
 MODEL_IMPORT_SUCCESS=The model JSON has been successfully imported.
 MODEL_ADMIN_LINK_LABEL=Admin
+MODEL_ADMIN_LINK_DISABLED=Download not available for uploaded models
 MODEL_ADMIN_FETCH=Fetch
 MODEL_ADMIN_FETCHING=Fetching ...
 MODEL_ADMIN_DOWNLOAD=Download

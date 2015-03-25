@@ -65,7 +65,7 @@ public class ModelSummaryResource {
     @ResponseBody
     @ApiOperation(value = "Get list of model summary ids available to the user")
     public List<ModelSummary> getModelSummaries(@RequestParam(value="selection", required=false) String selection) {
-        
+
         List<ModelSummary> summaries = null;
         if (selection != null && selection.equalsIgnoreCase("all")) {
             summaries = modelSummaryEntityMgr.findAll();
@@ -85,7 +85,10 @@ public class ModelSummaryResource {
     @ApiOperation(value = "Register a model summary")
     @PreAuthorize("hasRole('Create_PLS_Models')")
     public ModelSummary createModelSummary(@RequestBody ModelSummary modelSummary, @RequestParam(value = "raw", required = false) boolean usingRaw, HttpServletRequest request) {
-        if (usingRaw) modelSummary = modelSummaryParser.parse("", modelSummary.getRawFile());
+        if (usingRaw) {
+            modelSummary = modelSummaryParser.parse("", modelSummary.getRawFile());
+            modelSummary.setUploaded(true);
+        }
 
         Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
         Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
@@ -120,7 +123,7 @@ public class ModelSummaryResource {
         modelSummaryEntityMgr.updateModelSummary(modelSummary, attrMap);
         return true;
     }
-    
+
     public void setModelSummaryEntityMgr(ModelSummaryEntityMgr modelSummaryEntityMgr) {
         this.modelSummaryEntityMgr = modelSummaryEntityMgr;
     }

@@ -51,6 +51,7 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     private Double rocScore;
     private String lookupId;
     private Boolean downloaded = false;
+    private Boolean uploaded = false;
     private Long trainingRowCount;
     private Long testRowCount;
     private Long totalRowCount;
@@ -190,6 +191,17 @@ public class ModelSummary implements HasId<String>, HasName, HasPid, HasTenant, 
     @JsonIgnore
     public void setDownloaded(Boolean downloaded) {
         this.downloaded = downloaded;
+    }
+
+    @JsonProperty("Uploaded")
+    @Column(name = "UPLOADED", nullable = false)
+    public Boolean isUploaded() {
+        return uploaded;
+    }
+
+    @JsonProperty("Uploaded")
+    public void setUploaded(Boolean uploaded) {
+        this.uploaded = uploaded;
     }
 
     @JsonProperty("TrainingRowCount")

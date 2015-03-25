@@ -12,6 +12,7 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
     $scope.ModelId = data.ModelId;
     $scope.TenantId = data.TenantId;
     $scope.ModelHealthScore = data.ModelDetails.RocScore;
+    $scope.modelUploaded = data.ModelDetails.Uploaded;
 
     $scope.exportThresholdClicked = function () {
         var csvRows = ThresholdExplorerService.PrepareExportData(data);
@@ -51,8 +52,9 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
 .directive('fileDownloader', function() {
     return {
         restrict:    'E',
-        template:   '<a href="" data-ng-click="downloadFile($event)" data-ng-hide="fetching">{{ResourceUtility.getString("MODEL_ADMIN_DOWNLOAD")}}</a>' +
-                    '<span data-ng-show="fetching">{{ResourceUtility.getString("MODEL_ADMIN_FETCHING")}}</span>',
+        template:   '<a href="" data-ng-click="downloadFile($event)" data-ng-hide="modelUploaded||fetching">{{ResourceUtility.getString("MODEL_ADMIN_DOWNLOAD")}}</a>' +
+                    '<span data-ng-show="fetching">{{ResourceUtility.getString("MODEL_ADMIN_FETCHING")}}</span>' +
+                    '<span data-ng-show="modelUploaded">{{ResourceUtility.getString("MODEL_ADMIN_LINK_DISABLED")}}</span>',
         scope:       true,
         link:        function (scope, element, attr) {
             var anchor = element.children()[0];
@@ -78,7 +80,8 @@ angular.module('mainApp.appCommon.widgets.AdminInfoWidget', [
         controller:  ['$scope', '$attrs', '$http', 'ResourceUtility', 'SessionService', function ($scope, $attrs, $http, ResourceUtility, SessionService) {
             $scope.fetching = false;
             $scope.fetched = false;
-            $scope.ResourceUtility = ResourceUtility;
+            $scope.ResourceUtility = ResourceUtility;            
+
             $scope.downloadFile = function($event) {
                 $scope.fetching = true;
                 $scope.$parent.Error.ShowError = false;
