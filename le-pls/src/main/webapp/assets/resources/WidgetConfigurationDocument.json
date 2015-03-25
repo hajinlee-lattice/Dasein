@@ -47,8 +47,8 @@
                                             "DataProvider": "ThresholdDecileData",
                                             "CustomGridClass": "threshold-data","CustomGridClass": "threshold-data",
                                             "Columns": [{
-                                                    "TitleString": "DECILE_GRID_LEADS_LABEL",
-                                                    "SubtitleString": "",
+                                                    "TitleString": "",
+                                                    "SubtitleString": "DECILE_GRID_LEADS_LABEL",
                                                     "PropertyName": "Leads",
                                                     "DisplayType": "String"
                                                 }, {
