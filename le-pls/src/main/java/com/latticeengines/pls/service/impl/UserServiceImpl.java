@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
         try {
             globalUserManagementService.registerUser(userRegistration.getUser(), userRegistration.getCredentials());
         } catch (Exception e) {
-            log.warn("Error creating admin user.");
+            log.warn("Error creating admin user.", e);
         }
 
         for (GrantedRight right : GrantedRight.getAdminRights()) {
