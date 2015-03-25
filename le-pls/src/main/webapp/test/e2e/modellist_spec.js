@@ -58,7 +58,7 @@ describe('model list', function() {
 
     it('should order models by created date', function () {
         for (var i = 0; i < createdDates.length - 1; i++) {
-            expect(createdDates[i] - createdDates[i + 1]  > 0).toBe(true);
+            expect(createdDates[i] >= createdDates[i + 1]).toBe(true);
         }
     });
 
