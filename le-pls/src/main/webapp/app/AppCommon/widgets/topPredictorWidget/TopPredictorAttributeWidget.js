@@ -61,8 +61,8 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         }
         setHoverPosition($scope.mouseX, chartHeight);
 
-        var maxTicks = _.max(_.union(liftValues, [1.5]));
-        var xTicks = TopPredictorService.createTicks(maxTicks, 5);
+        var maxTick = _.max([_.max(liftValues), 1.5]);
+        var xTicks = TopPredictorService.createTicks(maxTick, 5);
         var x = d3.scale.linear()
             .domain([0, xTicks[xTicks.length - 1]])
             .range([0, width - 5]);
@@ -86,7 +86,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             .attr("y", function(d, i) {
                 return (i * (barHeight + 2 * gap)) + 24;
             })
-            .attr("width", function (d) {
+            .attr("width", function () {
                 return width + 80;
             })
             .attr("height", barHeight + 8)
