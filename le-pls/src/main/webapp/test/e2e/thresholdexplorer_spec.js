@@ -101,8 +101,10 @@ describe('threshold explorer', function() {
         //==================================================
         tds = rows.get(1).all(by.tagName("td"));
         expect(tds.get(0).getText()).toEqual("LIFT");
-        expect(tds.get(2).getText()).toEqual(chartLeftLift);
-        expect(tds.get(10).getText()).toEqual("1.00x");
+        tds.get(2).getText().then(function(text){
+            expect(chartLeftLift).toEqual(text.toLowerCase());
+        });
+        expect(tds.get(10).getText()).toEqual("1.00X");
 
         //==================================================
         // Check Leads/Score (Assume Reasonable Window Size)
