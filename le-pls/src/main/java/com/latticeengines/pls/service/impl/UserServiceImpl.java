@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
@@ -27,6 +28,14 @@ public class UserServiceImpl implements UserService {
             log.error("User registration cannot be null.");
             return false;
         }
+
+        User userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
+        
+        if (userByEmail != null) {
+            log.error(String.format("A user with the same email address %s already exists.", userByEmail));
+            return false;
+        }
+
         if (userRegistration.getUser() == null) {
             log.error("User cannot be null.");
             return false;
