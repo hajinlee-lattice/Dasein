@@ -20,13 +20,18 @@ public class MadisonLogicDownloadServiceImpl extends QuartzJobBean implements Ma
     private static final Log log = LogFactory.getLog(MadisonLogicDownloadServiceImpl.class);
 
     private PropDataMadisonService propDataMadisonService;
-
+    private boolean propdataJobsEnabled = false;
+    
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 
         long startTime = System.currentTimeMillis();
         try {
             log.info("Started!");
+            if (propdataJobsEnabled == false) {
+                log.info("Job is disabled");
+                return;
+            }
             PropDataContext requestContext = new PropDataContext();
             PropDataContext responseContext = propDataMadisonService.importFromDB(requestContext);
 
@@ -42,6 +47,9 @@ public class MadisonLogicDownloadServiceImpl extends QuartzJobBean implements Ma
         this.propDataMadisonService = propDataMadisonService;
     }
 
+    public void setPropdataJobsEnabled(boolean propdataJobsEnabled) {
+        this.propdataJobsEnabled = propdataJobsEnabled;
+    }
     
     
 }

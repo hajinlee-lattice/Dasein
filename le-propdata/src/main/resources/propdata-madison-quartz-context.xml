@@ -12,6 +12,7 @@
         <property name="jobDataAsMap">
             <map>
                 <entry key="propDataMadisonService" value-ref="propDataMadisonService" />
+                <entry key="propdataJobsEnabled" value-ref="${propdata.jobs.enabled}" />
             </map>
         </property>
     </bean>
@@ -39,6 +40,7 @@
         <property name="jobDataAsMap">
             <map>
                 <entry key="propDataMadisonService" value-ref="propDataMadisonService" />
+                <entry key="propdataJobsEnabled" value-ref="${propdata.jobs.enabled}" />
             </map>
         </property>
     </bean>

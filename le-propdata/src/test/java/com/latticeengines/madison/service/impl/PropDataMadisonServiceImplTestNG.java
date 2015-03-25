@@ -58,12 +58,13 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         ReflectionTestUtils.setField(propDataService, "numOfPastDays", 1);
 
         dailyProgress1 = new MadisonLogicDailyProgress();
-        importOutputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_test1");
-
         dailyProgress2 = new MadisonLogicDailyProgress();
+
+        importOutputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_test1");
         importOutputDir2 = setupProgress(today, dailyProgress2, "MadisonLogicDepivoted_test2");
-        // importOutputDir2 = setupProgress(today, dailyProgress2,
-        // "MadisonLogicDepivoted_20150311");
+
+//        importOutputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_20150311");
+//        importOutputDir2 = setupProgress(today, dailyProgress2, "MadisonLogicDepivoted_20150323");
 
         transformOutput1 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(yesterday);
         transformOutput2 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(today);
@@ -159,16 +160,62 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     public void exportToDB() throws Exception {
 
         PropDataContext requestContext = new PropDataContext();
-        requestContext.setProperty("today", today);
+        requestContext.setProperty(PropDataMadisonService.TODAY_KEY, today);
         PropDataContext responseContext = propDataService.exportToDB(requestContext);
         Assert.assertEquals(responseContext.getProperty(PropDataMadisonService.STATUS_KEY, String.class),
                 PropDataMadisonService.STATUS_OK);
     }
 
-    // @Test(groups = "functional")
+    // @Test(groups = "manual")
     public void swapTables() {
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         ((PropDataMadisonServiceImpl) propDataService).swapTargetTables(assignedQueue);
 
+    }
+
+    // @Test(groups="manual")
+    public void loadTest() throws Exception {
+
+        for (int i = 0; i < 30; i++) {
+
+            MadisonLogicDailyProgress progress = propDataMadisonEntityMgr.getNextAvailableDailyProgress();
+            if (progress == null) {
+                System.out.println("Finished! progressed record count=" + i);
+                break;
+            }
+            System.out.println("Progress Id=" + progress.getPid());
+
+            // import
+            PropDataContext requestContext = new PropDataContext();
+            requestContext.setProperty(PropDataMadisonService.RECORD_KEY, progress);
+            PropDataContext responseContext = propDataService.importFromDB(requestContext);
+            Assert.assertEquals(responseContext.getProperty(PropDataMadisonService.STATUS_KEY, String.class),
+                    PropDataMadisonService.STATUS_OK);
+
+            // transform
+            requestContext = new PropDataContext();
+            requestContext.setProperty(PropDataMadisonService.TODAY_KEY, progress.getFileDate());
+            responseContext = propDataService.transform(requestContext);
+            Assert.assertEquals(responseContext.getProperty(PropDataMadisonService.STATUS_KEY, String.class),
+                    PropDataMadisonService.STATUS_OK);
+
+            // export
+            requestContext = new PropDataContext();
+            requestContext.setProperty(PropDataMadisonService.TODAY_KEY, progress.getFileDate());
+            responseContext = propDataService.exportToDB(requestContext);
+            Assert.assertEquals(responseContext.getProperty(PropDataMadisonService.STATUS_KEY, String.class),
+                    PropDataMadisonService.STATUS_OK);
+
+            // cleanup
+            propDataMadisonEntityMgr.delete(progress);
+            String importOutputDir = ((PropDataMadisonServiceImpl) propDataService)
+                    .getHdfsDataflowIncrementalRawPathWithDate(progress.getFileDate());
+            HdfsUtils.rmdir(yarnConfiguration, importOutputDir);
+            ((PropDataMadisonServiceImpl) propDataService).cleanupTargetRawData();
+            String transformOutput = ((PropDataMadisonServiceImpl) propDataService)
+                    .getHdfsWorkflowTotalRawPath(progress.getFileDate());
+            HdfsUtils.rmdir(yarnConfiguration, transformOutput);
+
+        }
     }
 }

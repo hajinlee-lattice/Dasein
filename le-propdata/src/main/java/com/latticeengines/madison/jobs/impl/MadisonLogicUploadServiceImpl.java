@@ -1,6 +1,5 @@
 package com.latticeengines.madison.jobs.impl;
 
-
 import java.util.Date;
 
 import org.apache.commons.lang.time.DurationFormatUtils;
@@ -24,6 +23,8 @@ public class MadisonLogicUploadServiceImpl extends QuartzJobBean implements Madi
 
     private PropDataMadisonService propDataMadisonService;
 
+    private boolean propdataJobsEnabled = false;
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 
@@ -31,6 +32,10 @@ public class MadisonLogicUploadServiceImpl extends QuartzJobBean implements Madi
 
         try {
             log.info("Started!");
+            if (propdataJobsEnabled == false) {
+                log.info("Job is disabled");
+                return;
+            }
             PropDataContext requestContextForTransformaton = new PropDataContext();
             PropDataContext responseContextForTransformaton = propDataMadisonService
                     .transform(requestContextForTransformaton);
@@ -46,7 +51,8 @@ public class MadisonLogicUploadServiceImpl extends QuartzJobBean implements Madi
             PropDataContext responseContextForUpload = propDataMadisonService.exportToDB(requestContextForUpload);
 
             long endTime = System.currentTimeMillis();
-            log.info("Finished! Eclipsed time=" + DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS"));
+            log.info("Finished! Eclipsed time="
+                    + DurationFormatUtils.formatDuration(endTime - startTime, "HH:mm:ss:SS"));
 
         } catch (Exception ex) {
             log.error("Failed!", ex);
@@ -56,7 +62,9 @@ public class MadisonLogicUploadServiceImpl extends QuartzJobBean implements Madi
     public void setPropDataMadisonService(PropDataMadisonService propDataMadisonService) {
         this.propDataMadisonService = propDataMadisonService;
     }
-    
-    
+
+    public void setPropdataJobsEnabled(boolean propdataJobsEnabled) {
+        this.propdataJobsEnabled = propdataJobsEnabled;
+    }
 
 }

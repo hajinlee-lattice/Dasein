@@ -270,7 +270,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 log.warn("There's no aggregated data for today.");
                 return response;
             }
-            log.info("Uploading today's incremental data=" + sourceDir);
+            log.info("Uploading today's aggregation data=" + sourceDir);
             String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
             propDataJobService.exportData(getTableNew(), getOutputDir(sourceDir), assignedQueue, getJobName()
                     + "-uploadAggregationData", numMappers,
@@ -303,9 +303,11 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             log.error("There's no incremental data for today.");
             return;
         }
+        log.info("Uploading today's raw data=" + todayIncrementalPath);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         propDataJobService.exportData(targetRawTable, todayIncrementalPath, assignedQueue, getJobName()
-                + "-uploadRawData", getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+                + "-uploadRawData", numMappers, getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+        log.info("Finished uploading today's raw data=" + todayIncrementalPath);
 
     }
 
