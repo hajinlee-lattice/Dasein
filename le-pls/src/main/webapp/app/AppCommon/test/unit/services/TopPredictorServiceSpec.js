@@ -312,7 +312,7 @@ describe('TopPredictorServiceSpec Tests', function () {
             expect(chartData.elementList[2].name).toEqual('N/A');
         });
 
-        it('should put "Other" and "N/A" at bottome', function () {
+        it('should put "Other" and "N/A" at bottom', function () {
             var chartData = topPredictorService.FormatDataForAttributeValueChart("CategoricalAttribute", "#FFFFFF", hoverTestModelSummary);
             expect(chartData.elementList[chartData.elementList.length - 1].name).toEqual('N/A');
             expect(chartData.elementList[chartData.elementList.length - 2].name).toEqual('Other');
@@ -328,7 +328,7 @@ describe('TopPredictorServiceSpec Tests', function () {
             expect(chartData.elementList.length).toEqual(7);
             expect(chartData.elementList[chartData.elementList.length - 1].name).toEqual('N/A');
             expect(chartData.elementList[chartData.elementList.length - 2].name).toEqual('Other');
-
+            
             // the sum of percentage should be 100
             expect(_.reduce(chartData.elementList, function(memo, e){
                 return memo + e.percentTotal;

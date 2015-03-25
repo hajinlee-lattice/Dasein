@@ -584,8 +584,56 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
 
         return toReturn;
     };
+    
+    this.SumToOne = function (percentList) {
+    	var topPercentage = 100.0;
+        
+        // Find the bucket with the largest percentage
+        var index = 0;
+        var maxPercentage = 0;
+        for (i = 0; i < percentList.length; i++) {
+            var currentPercentage = 0;
+            if (typeof percentList[i] === 'string' && percentList[i] == "<0.1") {
+                currentPercentage = 0.1;
+            } else {
+                currentPercentage = percentList[i];
+            }
+            
+            if (currentPercentage > maxPercentage) {
+                index = i;
+                maxPercentage = currentPercentage;
+            }
+        }
+        // Make the max percentage equal to 100 minus the sum of all the other percentages
+        for (i = 0; i < percentList.length; i++) {
+            if (i == index) {
+                continue;
+            } else {
+            	if (typeof percentList[i] === 'string' && percentList[i] == "<0.1") {
+            		topPercentage -= 0.1;
+            	} else {
+                	topPercentage -= percentList[i];
+            	}
+            }
+        }
+        percentList[index] = topPercentage;
+        
+        return percentList;
+    };
 
-        this.createTicks = function(maxTickValue, maxTickNumber) {
+    this.FormatPercent = function (percent) {
+        var formattedPercent = percent;
+        if (formattedPercent >= 0.95) {
+            formattedPercent = Math.round(formattedPercent);
+        } else if (formattedPercent <= 0.95 && formattedPercent >= 0.1) {
+            formattedPercent = Number(formattedPercent.toFixed(1));
+        } else {
+            formattedPercent = "<0.1";
+        }
+        return formattedPercent;
+    };
+    
+    this.createTicks = function(maxTickValue, maxTickNumber) {
             var steps = [0.5, 1, 2, 5, 10];
             // iterate options in steps, find the maximum appropriate step
             var step = _.reduce(steps, function(memo, s){
