@@ -10,11 +10,10 @@ var Logout = function() {
             return userDropdown.signout.isPresent();
         }, 10000, 'dropdown menu should appear with in 10 sec.');
         userDropdown.signout.click();
-        browser.waitForAngular();
         browser.driver.sleep(3000);
-        browser.driver.wait(function(){
-            return element(by.model('username')).isPresent();
-        }, 20000, 'login page should appear with in 20 sec.');
+        //browser.driver.wait(function(){
+        //    return element(by.model('username')).isPresent();
+        //}, 20000, 'login page should appear with in 20 sec.');
     };
 
   	this.logoutAsAdmin = function() {
