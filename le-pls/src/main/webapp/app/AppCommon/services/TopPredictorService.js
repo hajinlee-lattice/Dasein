@@ -43,23 +43,13 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     this.ShowBasedOnTags(predictor, isExternal) &&
                     AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
                     this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
-
-                        for (var y = 0; y < predictor.Elements.length; y++) {
-                            var element = predictor.Elements[y];
-                            var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
-                            var isCategorical = this.IsPredictorElementCategorical(element);
-                            if (isCategorical && percentTotal < 1) {
-                                continue;
-                            }
-                            toReturn.total++;
-                            displayCategory.count++;
-                            
-                        }
+                        displayCategory.count++;
                     }
             }
-            
+
             if (displayCategory.count > 0) {
                 toReturn.categories.push(displayCategory);
+                toReturn.total += displayCategory.count;
             }
         }
         

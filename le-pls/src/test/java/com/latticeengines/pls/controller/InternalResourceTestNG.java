@@ -129,7 +129,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 3; i++) {
             String username = "tester_" + UUID.randomUUID().toString() + "@test.com";
             assertTrue(globalUserManagementService.deleteUser(username));
             createUser(username, username, "Test", "Tester");
