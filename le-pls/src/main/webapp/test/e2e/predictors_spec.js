@@ -19,7 +19,7 @@ describe('top predictors', function() {
         //==================================================
         // Select Tenant
         //==================================================
-        tenants.getTenantByIndex(params.tenantIndex).click();
+        tenants.selectTenantByIndex(params.tenantIndex);
         browser.waitForAngular();
 
         //==================================================
