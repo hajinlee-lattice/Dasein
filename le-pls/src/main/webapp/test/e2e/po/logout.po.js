@@ -9,7 +9,7 @@ var Logout = function() {
         browser.waitForAngular(); 
         browser.driver.sleep(1000);
         userDropdown.signout.click();
-        browser.driver.sleep(3000);
+        browser.driver.sleep(1000);
     };
 
   	this.logoutAsAdmin = function() {

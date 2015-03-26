@@ -22,40 +22,31 @@ describe('user management', function() {
         return text;
     }
 
-    it('should verify user management is invisible to non-admin users', function () {
+    it('log in as a non-admin users', function () {
         loginPage.loginAsNonAdmin();
-
         tenants.getTenantByIndex(params.tenantIndex).click();
-        browser.waitForAngular();
-        browser.driver.sleep(2000);
+    }, 60000);
 
+    it('should verify user management is invisible to non-admin users', function () {
         // check existence of Manage Users link
         userDropdown.getUserLink(params.nonAdminDisplayName).click().then(function(){
             expect(element(by.linkText('Manage Users')).isPresent()).toBe(false);
         });
-        browser.waitForAngular();
-        browser.driver.sleep(2000);
+        userDropdown.getUserLink(params.nonAdminDisplayName).click();
+    });
 
-        userDropdown.getUserLink(params.nonAdminDisplayName).click().then(function(){
-            browser.driver.sleep(500);
-            logoutPage.logoutAsNonAdmin();
-        });
+    it('log out the non-admin users', function () {
+        logoutPage.logoutAsNonAdmin();
     }, 60000);
 
     it('should login as an admin users', function () {
         loginPage.loginAsAdmin();
-
-        // choose tenant
         tenants.getTenantByIndex(params.tenantIndex).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
-    }, 50000);
+    }, 60000);
 
     it('should see user management link', function () {
         // check existence of Manage Users link
         userDropdown.getUserLink(params.adminDisplayName).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
         expect(element(by.linkText('Manage Users')).isDisplayed()).toBe(true);
     });
 
@@ -64,35 +55,32 @@ describe('user management', function() {
         element(by.linkText('Manage Users')).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-        expect(userManagement.getPanelBody().isDisplayed()).toBe(true);
-
+        expect(element(by.xpath(userManagement.xpath.PanelBody)).isDisplayed()).toBe(true);
         element.all(by.repeater('user in data')).then(function(elements){
             numOfUsers = elements.length;
         });
     });
 
-    it('should be able to canceling by clicking cancel button', function () {
+    it('should see add new user model', function () {
         // popup add user
         userManagement.getAddNewUserButton().click();
-        browser.waitForAngular();
         browser.driver.sleep(1000);
         expect(userManagement.getAddNewUserModal().isDisplayed()).toBe(true);
+    });
 
+    it('should be able to canceling by clicking cancel button', function () {
         var email = 'LE_' + randomName() + '@e2e.test.com';
         element(by.model('user.FirstName')).sendKeys('E2E');
         element(by.model('user.LastName')).sendKeys('Tester');
         element(by.model('user.Email')).sendKeys(email);
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
-
         userManagement.getAddNewUserCancelButton().click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-
-        // check cancel by button
         expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
+    });
 
-        // add a user
+    it('should be able to canceling by clicking cross symbol', function () {
+        var email = 'LE_' + randomName() + '@e2e.test.com';
         userManagement.getAddNewUserButton().click();
         browser.waitForAngular();
         browser.driver.sleep(1000);

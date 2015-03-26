@@ -21,36 +21,40 @@ var UserManagement = function() {
         });
     };
 
+    this.xpath = {
+        PanelBody: "//div[@class='panel-body']"
+    };
+
     this.getAddNewUserModal = function(){
-        return browser.driver.findElement(By.xpath("//div[@data-ng-controller='AddUserController']"));
+        return element(by.xpath("//div[@data-ng-controller='AddUserController']"));
     };
 
     this.getAddNewUserButton = function() {
-        return browser.driver.findElement(By.xpath("//button[@data-ng-click='addUserClicked($event)']"));
+        return element(by.buttonText('ADD NEW USER'));
     };
 
     this.getAddNewUserSaveButton = function() {
-        return browser.driver.findElement(By.xpath("//button[@data-ng-click='addUserClick($event)' and @data-ng-hide='showAddUserSuccess']"));
+        return element(by.buttonText('SAVE'));
     };
 
     this.getAddNewUserCancelButton = function() {
-        return browser.driver.findElement(By.xpath("//button[@data-ng-hide='showAddUserSuccess' and @data-ng-click='cancelClick()']"));
+        return element(by.buttonText('CANCEL'));
     };
 
     this.getAddNewUserSuccessOKButton = function() {
-        return browser.driver.findElement(By.xpath("//button[@data-ng-show='showAddUserSuccess']"));
+        return element(by.buttonText('OK'));
     };
 
     this.getAddNewUserCrossSymbol = function() {
-        return browser.driver.findElement(By.xpath("//button[@class='close' and @data-ng-click='cancelClick()']"));
+        return element(by.xpath("//button[@class='close' and @data-ng-click='cancelClick()']"));
     };
 
     this.getAddNewUserSuccessAlert = function() {
-        return browser.driver.findElement(By.xpath("//div[@class='alert alert-success' and @data-ng-show='showAddUserSuccess']"));
+        return element(by.xpath("//div[@class='alert alert-success' and @data-ng-show='showAddUserSuccess']"));
     };
 
     this.getDeleteUsersButton = function() {
-        return browser.driver.findElement(By.xpath("//button[@data-ng-click='deleteUsersClicked($event)']"));
+        return element(by.xpath("//button[@data-ng-click='deleteUsersClicked($event)']"));
     };
 
     this.getDeleteUserModal = function() {
