@@ -4,7 +4,7 @@ from optparse import OptionParser
 import subprocess
 import sys
 
-request = '{"Tenant": "%s", "UserRegistration": {"User":{"Username":"%s","Email":"%s","FirstName":"%s","LastName":"%s","PhoneNumber":"650-555-5555","Active":false,"Title":"DemoUser"},"Credentials":{"Username":"%s","Password":"%s"},"Validation":false}}}'
+request = '{"Tenant": "%s", "UserRegistration": {"User":{"Username":"%s","Email":"%s","FirstName":"%s","LastName":"%s","PhoneNumber":"650-555-5555","Active":false,"Title":"DemoUser"},"Credentials":{"Username":"%s","Password":"%s"},"Validation":false}}'
 
 class UserDeployer(object):
     
@@ -17,7 +17,7 @@ class UserDeployer(object):
                "MagicAuthentication: Security through obscurity!", "-X", "POST", \
                "-d", self.filledInRequest, \
                self.url]
-        subprocess.call(cmd)
+        print(subprocess.check_output(cmd))
 
 if __name__ == "__main__":
     parser = OptionParser()

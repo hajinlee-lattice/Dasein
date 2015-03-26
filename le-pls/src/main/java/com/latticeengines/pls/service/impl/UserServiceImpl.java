@@ -29,13 +29,6 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
-        User userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
-        
-        if (userByEmail != null) {
-            log.error(String.format("A user with the same email address %s already exists.", userByEmail));
-            return false;
-        }
-
         if (userRegistration.getUser() == null) {
             log.error("User cannot be null.");
             return false;
@@ -46,6 +39,13 @@ public class UserServiceImpl implements UserService {
         }
         if (tenant == null) {
             log.error("Tenant cannot be null.");
+            return false;
+        }
+
+        User userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
+        
+        if (userByEmail != null) {
+            log.error(String.format("A user with the same email address %s already exists.", userByEmail));
             return false;
         }
 
