@@ -17,7 +17,7 @@ public interface GlobalUserManagementService {
 
     List<String> getRights(String username, String tenantId);
 
-    Boolean forgotLatticeCredentials(String username, String tenantId);
+    Boolean forgotLatticeCredentials(String username);
 
     Boolean modifyLatticeCredentials(Ticket ticket, Credentials oldCreds, Credentials newCreds);
 

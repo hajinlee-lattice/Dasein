@@ -117,14 +117,7 @@ public class LoginResource {
     @ResponseBody
     @ApiOperation(value = "Reset password and send an email")
     public Boolean forgotPassword(@RequestBody AttributeMap attrMap) {
-
-        String userName = attrMap.get("Username");
-
-        //TODO:[13Feb2015] GlobalAuth requires a deployment Id. UI does not require such an input. Using a fake one.
-        Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
-        String tenantId = ticket.getTenants().get(0).getId();
-
-        return globalUserManagementService.forgotLatticeCredentials(userName, tenantId);
+        return globalUserManagementService.forgotLatticeCredentials(attrMap.get("Username"));
     }
 
     class TenantNameSorter implements Comparator<Tenant>{

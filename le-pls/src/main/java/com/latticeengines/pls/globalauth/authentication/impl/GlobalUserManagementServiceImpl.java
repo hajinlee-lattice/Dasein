@@ -10,16 +10,19 @@ import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.EmailSettings;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.globalauth.generated.usermgr.IUserManagementService;
 import com.latticeengines.pls.globalauth.generated.usermgr.ObjectFactory;
+import com.latticeengines.pls.globalauth.generated.usermgr.SOAPEmailSettings;
 import com.latticeengines.pls.globalauth.generated.usermgr.UserManagementService;
 
 @Component("globalUserManagementService")
@@ -27,6 +30,24 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         GlobalUserManagementService {
 
     private static final Log log = LogFactory.getLog(GlobalUserManagementServiceImpl.class);
+
+    @Value("${pls.emailsettings.from}")
+    private String EMAIL_FROM;
+
+    @Value("${pls.emailsettings.server}")
+    private String EMAIL_SERVER;
+
+    @Value("${pls.emailsettings.username}")
+    private String EMAIL_USERNAME;
+
+    @Value("${pls.emailsettings.password}")
+    private String EMAIL_PASSWORD;
+
+    @Value("${pls.emailsettings.port}")
+    private int EMAIL_PORT;
+
+    @Value("${pls.emailsettings.useSSL}")
+    private boolean EMAIL_USESSL;
 
     private IUserManagementService getService() {
         UserManagementService service;
@@ -88,7 +109,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     @Override
-    public Boolean forgotLatticeCredentials(String username, String tenantId) {
+    public Boolean forgotLatticeCredentials(String username) {
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
 
@@ -97,10 +118,17 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             throw new LedpException(LedpCode.LEDP_18018, new String[] { username });
         }
 
+        EmailSettings emailsettings = new EmailSettings();
+        emailsettings.setFrom(EMAIL_FROM);
+        emailsettings.setServer(EMAIL_SERVER);
+        emailsettings.setUsername(EMAIL_USERNAME);
+        emailsettings.setPassword(EMAIL_PASSWORD);
+        emailsettings.setPort(EMAIL_PORT);
+        emailsettings.setUseSSL(EMAIL_USESSL);
+
         try {
-            log.info(String.format("Resetting credentials for user %s and tenant %s.", username, tenantId));
-            String deploymentId = tenantId;
-            return service.forgotLatticeCredentials(username, deploymentId);
+            log.info(String.format("Resetting credentials for user %s.", username));
+            return service.forgotLatticeCredentialsBySettings(username, new SoapEmailSettingsBuilder(emailsettings).build());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18011, e, new String[] { username });
         }
@@ -243,11 +271,11 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         public com.latticeengines.pls.globalauth.generated.usermgr.Credentials build() {
             com.latticeengines.pls.globalauth.generated.usermgr.Credentials c = new ObjectFactory().createCredentials();
             c.setUsername(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Username"), //
-                    String.class, creds.getUsername()));
+                new QName("http://schemas.lattice-engines.com/2008/Poet", "Username"), //
+                String.class, creds.getUsername()));
             c.setPassword(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Password"), //
-                    String.class, creds.getPassword()));
+                new QName("http://schemas.lattice-engines.com/2008/Poet", "Password"), //
+                String.class, creds.getPassword()));
 
             return c;
 
@@ -265,9 +293,36 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             com.latticeengines.pls.globalauth.generated.usermgr.Ticket t = new ObjectFactory().createTicket();
             t.setUniquness(ticket.getUniqueness());
             t.setRandomness(new JAXBElement<String>( //
-                    new QName("http://schemas.lattice-engines.com/2008/Poet", "Randomness"), //
-                    String.class, ticket.getRandomness()));
+                new QName("http://schemas.lattice-engines.com/2008/Poet", "Randomness"), //
+                String.class, ticket.getRandomness()));
             return t;
+        }
+    }
+
+    static class SoapEmailSettingsBuilder {
+        private EmailSettings emailSettings;
+
+        public SoapEmailSettingsBuilder(EmailSettings emailSettings) {
+            this.emailSettings = emailSettings;
+        }
+
+        public SOAPEmailSettings build() {
+            SOAPEmailSettings s = new ObjectFactory().createSOAPEmailSettings();
+            s.setFrom(new JAXBElement<String>( //
+                new QName("http://schemas.lattice-engines.com/2008/Poet", "From"), //
+                String.class, emailSettings.getFrom()));
+            s.setPassword(new JAXBElement<String>( //
+                new QName("http://schemas.lattice-engines.com/2008/Poet", "Password"), //
+                String.class, emailSettings.getPassword()));
+            s.setServer(new JAXBElement<String>( //
+                new QName("http://schemas.lattice-engines.com/2008/Poet", "Server"), //
+                String.class, emailSettings.getServer()));
+            s.setUsername(new JAXBElement<String>( //
+                new QName("http://schemas.lattice-engines.com/2008/Poet", "Username"), //
+                String.class, emailSettings.getUsername()));
+            s.setPort(emailSettings.getPort());
+            s.setUseSSL(emailSettings.isUseSSL());
+            return s;
         }
     }
 
