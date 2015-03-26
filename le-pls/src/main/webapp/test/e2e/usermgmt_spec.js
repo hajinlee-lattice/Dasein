@@ -24,7 +24,7 @@ describe('user management', function() {
 
     it('log in as a non-admin users', function () {
         loginPage.loginAsNonAdmin();
-        tenants.getTenantByIndex(params.tenantIndex).click();
+        tenants.selectTenantByIndex(params.tenantIndex);
     }, 60000);
 
     it('should verify user management is invisible to non-admin users', function () {
@@ -41,7 +41,7 @@ describe('user management', function() {
 
     it('should login as an admin users', function () {
         loginPage.loginAsAdmin();
-        tenants.getTenantByIndex(params.tenantIndex).click();
+        tenants.selectTenantByIndex(params.tenantIndex);
     }, 60000);
 
     it('should see user management link', function () {
@@ -211,9 +211,8 @@ describe('user management', function() {
 
     it('should be able to add an exsiting user', function () {
         loginPage.loginAsAdmin();
-        tenants.getTenantByIndex(params.alternativeTenantIndex).click();
+        tenants.selectTenantByIndex(params.alternativeTenantIndex);
         browser.waitForAngular();
-        browser.driver.sleep(1000);
 
         // check existence of Manage Users link
         userDropdown.getUserLink(params.adminDisplayName).click();
@@ -250,12 +249,7 @@ describe('user management', function() {
 
     it('should be able to login the new user to the second tenant', function () {
         loginPage.loginUser(newUserEmail, "Admin123");
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
-
-        tenants.getTenantByIndex(params.alternativeTenantIndex).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
+        tenants.selectTenantByIndex(params.alternativeTenantIndex);
 
         expect(element(by.css('h1')).getText()).toEqual('All Models');
 
@@ -264,9 +258,7 @@ describe('user management', function() {
 
     it('should verify delete user', function () {
         loginPage.loginAsAdmin();
-        tenants.getTenantByIndex(params.tenantIndex).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
+        tenants.selectTenantByIndex(params.tenantIndex);
 
         userDropdown.getUserLink(params.adminDisplayName).click();
         browser.waitForAngular();
@@ -309,9 +301,7 @@ describe('user management', function() {
 
     it('should be able to hard delete the new user', function () {
         loginPage.loginAsAdmin();
-        tenants.getTenantByIndex(params.alternativeTenantIndex).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
+        tenants.selectTenantByIndex(params.alternativeTenantIndex);
 
         userDropdown.getUserLink(params.adminDisplayName).click();
         browser.waitForAngular();

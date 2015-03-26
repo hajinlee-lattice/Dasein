@@ -17,8 +17,7 @@ var Login = function() {
         this.email.sendKeys(name);
         this.password.sendKeys(password);     
         this.loginButton.click();
-        browser.waitForAngular();                    
-        browser.driver.sleep(2000);
+        browser.waitForAngular();
     };
 
   	this.loginAsAdmin = function() {

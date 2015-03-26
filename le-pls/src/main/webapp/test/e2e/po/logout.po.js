@@ -5,11 +5,14 @@ var Logout = function() {
     var userDropdown = require('./userdropdown.po');    
  
     this.logout = function(name) {
-        userDropdown.getUserLink(name).click();  
-        browser.waitForAngular(); 
-        browser.driver.sleep(1000);
+        userDropdown.getUserLink(name).click();
+        browser.driver.wait(function(){
+            return userDropdown.signout.isPresent();
+        }, 10000, 'dropdown menu should appear with in 10 sec.');
         userDropdown.signout.click();
-        browser.driver.sleep(2000);
+        browser.driver.wait(function(){
+            return element(by.model('username')).isPresent();
+        }, 10000, 'login page should appear with in 10 sec.');
     };
 
   	this.logoutAsAdmin = function() {

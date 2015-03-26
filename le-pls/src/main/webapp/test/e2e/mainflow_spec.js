@@ -12,13 +12,12 @@ describe('smoketest main flow of app', function() {
 
     it('should allow admin user to log in, choose tenant, choose model, verify existence of donut, verify existence of threshold explorer, and log out', function () {
         loginPage.loginAsAdmin();
-        browser.driver.sleep(3000);
 
         // choose tenant
         console.log('tenant index:' + params.tenantIndex); 
-        tenants.getTenantByIndex(params.tenantIndex).click();
-        browser.waitForAngular(); 
-        browser.driver.sleep(1000);     
+        tenants.selectTenantByIndex(params.tenantIndex);
+        //browser.waitForAngular();
+        //browser.driver.sleep(1000);
 
         // choose any model
         expect(element(by.css('.js-top-predictor-donut')).isPresent()).toBe(false);
