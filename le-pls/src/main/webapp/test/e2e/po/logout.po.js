@@ -12,7 +12,7 @@ var Logout = function() {
         userDropdown.signout.click();
         browser.driver.wait(function(){
             return element(by.model('username')).isPresent();
-        }, 10000, 'login page should appear with in 10 sec.');
+        }, 20000, 'login page should appear with in 20 sec.');
     };
 
   	this.logoutAsAdmin = function() {
