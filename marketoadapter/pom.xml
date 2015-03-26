@@ -8,15 +8,15 @@
     <name>${component-name}</name>
 
     <properties>
-        <le.common.version>1.0.27-SNAPSHOT</le.common.version>
-        <le.camille.version>1.0.27-SNAPSHOT</le.camille.version>
+        <le.common.version>1.0.28-SNAPSHOT</le.common.version>
+        <le.camille.version>1.0.28-SNAPSHOT</le.camille.version>
         <component-name>marketoadapter</component-name>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.27-SNAPSHOT</version>
+        <version>1.0.28-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
     
