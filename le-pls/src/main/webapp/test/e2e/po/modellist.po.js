@@ -2,7 +2,7 @@
 
 var ModelList = function() {
     this.getAnyModel = function() {    	   
-     	return element(by.binding('createdDate'));      
+     	return element.all(by.binding('createdDate')).get(0);      
     };
 
     this.xpath = {

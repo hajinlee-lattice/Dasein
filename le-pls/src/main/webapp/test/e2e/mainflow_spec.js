@@ -45,11 +45,11 @@ describe('smoketest main flow of app', function() {
         expect(element(by.id('moreDataPoints')).isDisplayed()).toBe(true); 
 
         // check existence of sample leads tab
-        expect(element(by.css('.leads-table')).isDisplayed()).toBe(false); 
+        expect(element(by.id('topSampleTable')).isDisplayed()).toBe(false); 
         modelTabs.getTabByIndex(2).click();
         browser.waitForAngular();
         browser.driver.sleep(1000);
-        expect(element(by.css('.leads-table')).isDisplayed()).toBe(true);  
+        expect(element(by.id('topSampleTable')).isDisplayed()).toBe(true);  
 
         // check existence of hidden admin page
         expect(element(by.id('adminInfoContainer')).isPresent()).toBe(false);  
