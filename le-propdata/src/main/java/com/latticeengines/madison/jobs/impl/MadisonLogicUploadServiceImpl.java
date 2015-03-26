@@ -39,8 +39,9 @@ public class MadisonLogicUploadServiceImpl extends QuartzJobBean implements Madi
             PropDataContext requestContextForTransformaton = new PropDataContext();
             PropDataContext responseContextForTransformaton = propDataMadisonService
                     .transform(requestContextForTransformaton);
-            if (!responseContextForTransformaton.getProperty(PropDataMadisonService.STATUS_KEY, String.class).equals(
-                    PropDataMadisonService.STATUS_OK)) {
+            if (responseContextForTransformaton.getProperty(PropDataMadisonService.STATUS_KEY, String.class) == null
+                    || !responseContextForTransformaton.getProperty(PropDataMadisonService.STATUS_KEY, String.class)
+                            .equals(PropDataMadisonService.STATUS_OK)) {
                 log.info("Finished! Upload job has no transformation.");
                 return;
             }
