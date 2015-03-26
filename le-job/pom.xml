@@ -8,10 +8,10 @@
 
     <properties>
         <component-name>job</component-name>
-        <le.common.version>1.0.27-SNAPSHOT</le.common.version>
+        <le.dataplatform.version>1.0.27-SNAPSHOT</le.dataplatform.version>
         <le.db.version>1.0.27-SNAPSHOT</le.db.version>
-        <le.domain.version>1.0.27-SNAPSHOT</le.domain.version>
         <le.camille.version>1.0.27-SNAPSHOT</le.camille.version>
+        <le.propdata.version>1.0.27-SNAPSHOT</le.propdata.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
     </properties>
@@ -23,7 +23,61 @@
         <relativePath>../le-parent</relativePath>
     </parent>
 
-
+    <profiles>
+        <profile>
+            <id>functional</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven.surefire.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unit-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>default-test</id>
+                                <configuration>
+                                    <skip>true</skip>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>functional-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <phase>integration-test</phase>
+                                <configuration>
+                                    <argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
+                                    <skip>false</skip>
+                                    <includes>
+                                        <include>${functional.classes.include}</include>
+                                        <exclude>${functional.classes.exclude}</exclude>
+                                    </includes>
+                                    <groups>${functional.groups}</groups>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>${jetty.version}</version>
+                        <configuration>
+                            <webAppConfig>
+                                <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar</extraClasspath>
+                            </webAppConfig>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    
     <dependencies>
         <dependency>
             <groupId>mysql</groupId>
@@ -32,8 +86,8 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-common</artifactId>
-            <version>${le.common.version}</version>
+            <artifactId>le-dataplatform</artifactId>
+            <version>${le.dataplatform.version}</version>
             <classifier>intf</classifier>
             <exclusions>
                 <exclusion>
@@ -80,15 +134,14 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-domain</artifactId>
-            <version>${le.domain.version}</version>
+            <artifactId>le-camille</artifactId>
+            <version>${le.camille.version}</version>
             <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-camille</artifactId>
-            <version>${le.camille.version}</version>
-            <classifier>intf</classifier>
+            <artifactId>le-propdata</artifactId>
+            <version>${le.propdata.version}</version>
         </dependency>
         <!-- use this instead of <artifactId>persistence-api</artifactId> 
             1.0 due to a problem with "NoSuchMethodError: javax.persistence.OneToMany.orphanRemoval()Z" -->
