@@ -46,7 +46,6 @@ import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
-import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.globalauth.authentication.impl.Constants;
 import com.latticeengines.pls.security.GrantedRight;
@@ -70,9 +69,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
-
-    @Autowired
-    private GlobalTenantManagementService globalTenantManagementService;
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
@@ -276,7 +272,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", doc.getResult().getTenants().get(0),
-                UserDocument.class, new Object[] {});
+            UserDocument.class, new Object[]{});
     }
 
     protected UserDocument loginAndAttach(String username, Tenant tenant) {
@@ -289,10 +285,10 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         creds.setPassword(DigestUtils.sha256Hex(password));
 
         LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds,
-            LoginDocument.class, new Object[] {});
+            LoginDocument.class, new Object[]{});
 
         addAuthHeader.setAuthValue(doc.getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", tenant,
             UserDocument.class, new Object[] {});
@@ -382,29 +378,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected void setupUsers() {
         Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
 
-        if (ticket.getTenants().size() == 1) {
-            Tenant newTenant = new Tenant();
-            newTenant.setId("NEW_TENANT");
-            newTenant.setName("NEW_TENANT");
-
-            globalTenantManagementService.registerTenant(newTenant);
-            grantRight(GrantedRight.VIEW_PLS_MODELS, "NEW_TENANT", "admin");
-
-            globalAuthenticationService.discard(ticket);
-            ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
-        }
-
-        String tenant1 = ticket.getTenants().get(0).getId();
-        String tenant2 = ticket.getTenants().get(1).getId();
-
-        // UI admin user
-        grantAdminRights(tenant1, "admin");
-        grantAdminRights(tenant2, "admin");
-
-        // UI general user
-        globalUserManagementService.deleteUser("ysong");
-        globalUserManagementService.deleteUser("ysong@lattice-engines.com");
-
         // testing admin user
         User user = globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com");
         if (user == null || !user.getUsername().equals(adminUsername)) {
@@ -412,8 +385,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             globalUserManagementService.deleteUser("bnguyen@lattice-engines.com");
             createUser(adminUsername, "bnguyen@lattice-engines.com", "Super", "User", adminPasswordHash);
         }
-        grantAdminRights(tenant1, adminUsername);
-        grantAdminRights(tenant2, adminUsername);
 
         // testing general user
         user = globalUserManagementService.getUserByEmail("lming@lattice-engines.com");
@@ -422,16 +393,19 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             globalUserManagementService.deleteUser("lming@lattice-engines.com");
             createUser(generalUsername, "lming@lattice-engines.com", "General", "User", generalPasswordHash);
         }
-        grantDefaultRights(tenant1, generalUsername);
-        grantDefaultRights(tenant2, generalUsername);
 
         // PM admin user
         if (globalUserManagementService.getUserByEmail("tsanghavi@lattice-engines.com") == null) {
             globalUserManagementService.deleteUser("tsanghavi@lattice-engines.com");
             createUser("tsanghavi@lattice-engines.com", "tsanghavi@lattice-engines.com", "Tejas", "Sanghavi");
         }
-        grantAdminRights(tenant1, "tsanghavi@lattice-engines.com");
-        grantAdminRights(tenant2, "tsanghavi@lattice-engines.com");
+
+        for (Tenant tenant: ticket.getTenants()) {
+            grantAdminRights(tenant.getId(), adminUsername);
+            grantDefaultRights(tenant.getId(), generalUsername);
+            grantAdminRights(tenant.getId(), "admin");
+            grantAdminRights(tenant.getId(), "tsanghavi@lattice-engines.com");
+        }
 
         // empty rights user
         if (globalUserManagementService.getUserByEmail("rgonzalez@lattice-engines.com") == null) {
@@ -439,6 +413,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             globalUserManagementService.deleteUser("rgonzalez@lattice-engines.com");
             createUser("rgonzalez", "rgonzalez@lattice-engines.com", "Ron", "Gonzalez");
         }
+        String tenant1 = ticket.getTenants().get(0).getId();
         revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
         grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
 
