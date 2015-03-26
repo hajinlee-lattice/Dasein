@@ -222,20 +222,23 @@ def runEndBulkScoring(tenant):
     load_groups = ["BulkScoring_PushToLeadDestination"];
     return runScoringGroups(tenant, load_groups);
 
-def runEndHourlyScoring(tenant):
-    load_groups = ["PushToLeadDestination","LoadScoreHistoryData", "PushToReportsDB", "InsightsAllSteps"];   
-    return runScoringGroups(tenant, load_groups);
+def runEndHourlyScoring(self):
+    load_groups = ["PushToLeadDestination"];   
+    return self.runScoringGroups(load_groups);
 
-def runBulkScoring(tenant):
-    runPushToBulkScoring();
-    waitForLeadInputQueue(cycle_times=100);
-    runEndBulkScoring(tenant);
+def runHourlyDanteProcess(self):
+    load_groups = ["LoadScoreHistoryData", "PushToReportsDB", "InsightsAllSteps"];   
+    return self.runScoringGroups(load_groups);
+
+def runBulkScoring(self):
+    assert self.runPushToBulkScoring();
+    assert self.waitForLeadInputQueue(cycle_times=100);
+    assert self.runEndBulkScoring();
     
-def runHourlyScoring(tenant):
-    runPushToHourlyScoring();
-    waitForLeadInputQueue(cycle_times=20);
-    runEndHourlyScoring(tenant);
-
+def runHourlyScoring(self):
+    assert self.runPushToHourlyScoring();
+    assert self.waitForLeadInputQueue(cycle_times=20);
+    assert self.runEndHourlyScoring();
     
 
 if __name__ == '__main__':
