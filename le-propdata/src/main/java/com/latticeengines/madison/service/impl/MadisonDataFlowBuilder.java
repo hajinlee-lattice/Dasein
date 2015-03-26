@@ -1,18 +1,13 @@
 package com.latticeengines.madison.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
 import org.apache.avro.Schema.Type;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.CascadingDataFlowBuilder;
-import com.latticeengines.dataflow.exposed.exception.DataFlowCode;
-import com.latticeengines.dataflow.exposed.exception.DataFlowException;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 
 @Component("madisonDataFlowAggregationBuilder")

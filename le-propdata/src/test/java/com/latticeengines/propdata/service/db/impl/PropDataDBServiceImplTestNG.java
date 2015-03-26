@@ -14,8 +14,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.propdata.service.db.PropDataContext;
 import com.latticeengines.propdata.service.db.PropDataDBService;
-import com.latticeengines.propdata.service.db.PropDataKey.*;
-import com.latticeengines.propdata.service.db.impl.PropDataDBServiceImpl;
+import com.latticeengines.propdata.service.db.PropDataKey.CommandIdsKey;
+import com.latticeengines.propdata.service.db.PropDataKey.CommandsKey;
+import com.latticeengines.propdata.service.db.PropDataKey.ImportExportKey;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:propdata-db-context.xml", "classpath:propdata-properties-context.xml" })

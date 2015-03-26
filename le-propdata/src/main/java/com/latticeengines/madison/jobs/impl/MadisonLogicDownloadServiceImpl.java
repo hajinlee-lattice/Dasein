@@ -22,6 +22,7 @@ public class MadisonLogicDownloadServiceImpl extends QuartzJobBean implements Ma
     private PropDataMadisonService propDataMadisonService;
     private boolean propdataJobsEnabled = false;
     
+    @SuppressWarnings("unused")
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
 

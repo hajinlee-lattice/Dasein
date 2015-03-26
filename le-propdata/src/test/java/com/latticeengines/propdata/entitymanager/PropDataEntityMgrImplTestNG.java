@@ -6,10 +6,8 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.propdata.entitymanager.PropDataTestUtils;
 import com.latticeengines.domain.exposed.propdata.CommandIds;
 import com.latticeengines.domain.exposed.propdata.Commands;
-import com.latticeengines.propdata.entitymanager.PropDataEntityMgr;
 
 @ContextConfiguration(locations = { "classpath:propdata-db-context.xml", "classpath:propdata-properties-context.xml" })
 public class PropDataEntityMgrImplTestNG extends AbstractTestNGSpringContextTests {

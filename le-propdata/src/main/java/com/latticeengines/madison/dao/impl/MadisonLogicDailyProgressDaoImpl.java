@@ -18,6 +18,7 @@ public class MadisonLogicDailyProgressDaoImpl extends BaseDaoImpl<MadisonLogicDa
         return MadisonLogicDailyProgress.class;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public MadisonLogicDailyProgress getNextAvailableDailyProgress() {
         Session session = getSessionFactory().getCurrentSession();

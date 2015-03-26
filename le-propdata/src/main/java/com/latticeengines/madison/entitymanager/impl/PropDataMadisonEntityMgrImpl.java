@@ -13,6 +13,7 @@ import com.latticeengines.madison.entitymanager.PropDataMadisonEntityMgr;
 @Component("propDataEntityMgr")
 public class PropDataMadisonEntityMgrImpl implements PropDataMadisonEntityMgr {
 
+    @SuppressWarnings("unused")
     private final Log log = LogFactory.getLog(this.getClass());
 
     @Autowired
