@@ -92,6 +92,7 @@ describe('TopPredictorServiceSpec Tests', function () {
         };
 
         var expected = {
+            totalAttributeValues: 188,
             total: 58,
             categories: [{
                 name: "Technologies",
@@ -229,14 +230,13 @@ describe('TopPredictorServiceSpec Tests', function () {
             var topCategories = topPredictorService.GetTopCategories(sampleModelSummary);
             var externalAttributes = topPredictorService.GetNumberOfAttributesByCategory(topCategories, true, sampleModelSummary);
             var internalAttributes = topPredictorService.GetNumberOfAttributesByCategory(topCategories, false, sampleModelSummary);
-            var uiTotal = externalAttributes.total + internalAttributes.total;
+            var uiTotal = externalAttributes.totalAttributeValues + internalAttributes.totalAttributeValues;
 
             var csvAttributes = topPredictorService.GetTopPredictorExport(sampleModelSummary);
             // Subtracting 1 because of the column headers
             var csvTotal = csvAttributes.length - 1;
 
-            //expect(uiTotal).toEqual(csvTotal);
-            //TODO:song this has been changed to total number of attributes instead of attribute values
+            expect(uiTotal).toEqual(csvTotal);
         });
     });
 

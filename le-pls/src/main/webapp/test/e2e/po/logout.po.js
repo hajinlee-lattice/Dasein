@@ -12,7 +12,7 @@ var Logout = function() {
         userDropdown.signout.click();
         browser.driver.sleep(3000);
         //browser.driver.wait(function(){
-        //    return element(by.model('username')).isPresent();
+        //    return element(by.css('div.login-wrap')).isPresent();
         //}, 20000, 'login page should appear with in 20 sec.');
     };
 

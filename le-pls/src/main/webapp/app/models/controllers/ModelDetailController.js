@@ -44,6 +44,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
             model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
             model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
             model.BottomSample = ModelService.FormatLeadSampleData(model.BottomSample);
+            model.TotalAttributeValues = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
 
             thresholdData = ThresholdExplorerService.PrepareData(model);
             model.ThresholdChartData = thresholdData.ChartData;

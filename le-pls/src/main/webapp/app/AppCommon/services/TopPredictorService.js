@@ -22,6 +22,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
     
     this.GetNumberOfAttributesByCategory = function (categoryList, isExternal, modelSummary) {
         var toReturn = {
+            totalAttributeValues: 0,
             total: 0,
             categories: []
         };
@@ -43,6 +44,15 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                     this.ShowBasedOnTags(predictor, isExternal) &&
                     AnalyticAttributeUtility.IsAllowedForInsights(predictor) &&
                     this.PredictorHasValidBuckets(predictor, modelSummary.ModelDetails.TotalLeads)) {
+                    for (var y = 0; y < predictor.Elements.length; y++) {
+                        var element = predictor.Elements[y];
+                        var percentTotal = (element.Count / modelSummary.ModelDetails.TotalLeads) * 100;
+                        var isCategorical = this.IsPredictorElementCategorical(element);
+                        if (isCategorical && percentTotal < 1) {
+                            continue;
+                        }
+                        toReturn.totalAttributeValues++;
+                    }
                         displayCategory.count++;
                     }
             }
