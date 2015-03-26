@@ -6,12 +6,12 @@
     <artifactId>le-parent</artifactId>
     <packaging>pom</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.27/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.27/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.27/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
 	</scm>
 
-    <version>1.0.27</version>
+    <version>1.0.28-SNAPSHOT</version>
     <name>le-parent</name>
     <description>Parent of all lattice engine maven projects.</description>
 
