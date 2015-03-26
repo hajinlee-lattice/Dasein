@@ -67,6 +67,8 @@ public class GroupAndExpandFieldsBuffer extends BaseOperation implements Buffer 
             Integer loc = namePositionMap.get(fieldName.toLowerCase());
             if (loc != null && loc >= 0) {
                 result.set(loc, group.getObject(fieldName));
+            } else {
+                System.out.println("Warning: can not find field name=" + fieldName);
             }
         }
     }
@@ -88,6 +90,8 @@ public class GroupAndExpandFieldsBuffer extends BaseOperation implements Buffer 
             Integer loc = namePositionMap.get(formatedFieldName.toLowerCase());
             if (loc != null && loc >= 0) {
                 result.set(loc, tupleEntry.getObject(fieldName));
+            } else {
+                System.out.println("Warning: can not find field name=" + fieldName);
             }
         }
     }
