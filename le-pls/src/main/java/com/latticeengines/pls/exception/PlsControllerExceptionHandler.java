@@ -17,9 +17,9 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJacksonJsonView;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.pls.service.AlertService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.pls.service.AlertService;
 
 @ControllerAdvice
 public class PlsControllerExceptionHandler {
@@ -57,14 +57,8 @@ public class PlsControllerExceptionHandler {
         MappingJacksonJsonView jsonView = new MappingJacksonJsonView();
         String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils.getStackTrace(e);
         log.error(e.getCode() + "\n" + stackTrace);
-
-        List<BasicNameValuePair> details = new ArrayList<>();
-        details.add(new BasicNameValuePair("stackTrace", stackTrace));
-        alertService.triggerCriticalEvent(e.getMessage(), details);
-
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", e.getCode().name(), //
                 "errorMsg", e.getMessage()));
-
     }
 
     @ExceptionHandler
