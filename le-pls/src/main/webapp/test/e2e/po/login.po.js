@@ -6,7 +6,7 @@ var Login = function() {
     this.loginButton = element(by.id('loginButton'));
  
 	this.get = function() {
-	    var width = 1024;
+	    var width = 1100;
         var height = 768;
         browser.driver.manage().window().setSize(width, height);
         browser.get('/');
