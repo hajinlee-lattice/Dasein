@@ -6,6 +6,12 @@
   <artifactId>scoringharness</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
+	<scm>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+	</scm>
+
 
   <name>scoringharness</name>
   <url>http://maven.apache.org</url>
@@ -17,7 +23,7 @@
   <parent>
     <groupId>com.latticeengines</groupId>
     <artifactId>le-parent</artifactId>
-    <version>1.0.28-SNAPSHOT</version>
+    <version>1.0.27-SNAPSHOT</version>
     <relativePath>../le-parent</relativePath>
   </parent>
   
