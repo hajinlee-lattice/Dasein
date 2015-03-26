@@ -120,6 +120,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
             dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
             propDataMadisonEntityMgr.executeUpdate(dailyProgress);
+            HdfsUtils.writeToFile(yarnConfiguration, getTableNameFromFile(targetDir), dailyProgress.getDestinationTable());
 
             response.setProperty(RESULT_KEY, dailyProgress);
             response.setProperty(STATUS_KEY, STATUS_OK);
@@ -133,6 +134,10 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
         }
 
         return response;
+    }
+
+    private String getTableNameFromFile(String targetDir) {
+        return targetDir + "/_TABLENAME";
     }
 
     @Override
@@ -298,22 +303,40 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     private void uploadTodayRawData(Date today) throws Exception {
         String todayIncrementalPath = getHdfsDataflowIncrementalRawPathWithDate(today);
-        if (!HdfsUtils.fileExists(yarnConfiguration, todayIncrementalPath)) {
+        if (!HdfsUtils.fileExists(yarnConfiguration, getTableNameFromFile(todayIncrementalPath))) {
             log.error("There's no incremental data for today.");
             return;
         }
         log.info("Uploading today's raw data=" + todayIncrementalPath);
+        String tableName = HdfsUtils.getHdfsFileContents(yarnConfiguration, getTableNameFromFile(todayIncrementalPath));
+
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        propDataJobService.exportData(targetRawTable, todayIncrementalPath, assignedQueue, getJobName()
-                + "-uploadRawData", numMappers, getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+        String connectionString = getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword);
+//        propDataJobService.eval("DROP TABLE" + tableName, assignedQueue,
+//                getJobName() + "-uploadRawData0", 1,
+//                connectionString);
+        propDataJobService.eval("SELECT TOP 0 * INTO " + tableName + " FROM " + targetRawTable, assignedQueue,
+                getJobName() + "-uploadRawData1", 1,
+                connectionString);
+        log.info("Uploading today's data, targetTable="+  tableName + " connectionUrl=" + connectionString);
+        propDataJobService.exportData(tableName, todayIncrementalPath, assignedQueue, getJobName() + "-uploadRawData2",
+                numMappers, connectionString);
         log.info("Finished uploading today's raw data=" + todayIncrementalPath);
 
     }
 
-    void cleanupTargetRawData() throws Exception {
+    void cleanupTargetRawData(Date date) throws Exception {
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        propDataJobService.eval("TRUNCATE TABLE " + targetRawTable, assignedQueue, getJobName() + "-cleanRawTable", 1,
+        String tableName = getTableName(date);
+
+        propDataJobService.eval("DROP TABLE " + tableName, assignedQueue, getJobName() + "-dropRawTable", 1,
                 getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+    }
+
+    String getTableName(Date date) throws Exception {
+        String targetDir = getHdfsDataflowIncrementalRawPathWithDate(date);
+        String tableName = HdfsUtils.getHdfsFileContents(yarnConfiguration, getTableNameFromFile(targetDir));
+        return tableName;
     }
 
     void swapTargetTables(String assignedQueue) {

@@ -63,16 +63,16 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         importOutputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_test1");
         importOutputDir2 = setupProgress(today, dailyProgress2, "MadisonLogicDepivoted_test2");
 
-//        importOutputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_20150311");
-//        importOutputDir2 = setupProgress(today, dailyProgress2, "MadisonLogicDepivoted_20150323");
+        // importOutputDir1 = setupProgress(yesterday, dailyProgress1,
+        // "MadisonLogicDepivoted_20150311");
+        // importOutputDir2 = setupProgress(today, dailyProgress2,
+        // "MadisonLogicDepivoted_20150323");
 
         transformOutput1 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(yesterday);
         transformOutput2 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(today);
 
         removeImportHdfsDirs();
         removeTransformHdfsDirs();
-
-        // ((PropDataMadisonServiceImpl)propDataService).cleanupTargetRawData();
     }
 
     @AfterClass
@@ -84,8 +84,11 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
             propDataMadisonEntityMgr.delete(dailyProgress2);
         }
 
-        // removeImportHdfsDirs();
-        // removeTransformHdfsDirs();
+        ((PropDataMadisonServiceImpl) propDataService).cleanupTargetRawData(today);
+
+        removeImportHdfsDirs();
+        removeTransformHdfsDirs();
+        
     }
 
     private void removeTransformHdfsDirs() throws Exception {
@@ -211,7 +214,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
             String importOutputDir = ((PropDataMadisonServiceImpl) propDataService)
                     .getHdfsDataflowIncrementalRawPathWithDate(progress.getFileDate());
             HdfsUtils.rmdir(yarnConfiguration, importOutputDir);
-            ((PropDataMadisonServiceImpl) propDataService).cleanupTargetRawData();
+            ((PropDataMadisonServiceImpl) propDataService).cleanupTargetRawData(progress.getFileDate());
             String transformOutput = ((PropDataMadisonServiceImpl) propDataService)
                     .getHdfsWorkflowTotalRawPath(progress.getFileDate());
             HdfsUtils.rmdir(yarnConfiguration, transformOutput);
