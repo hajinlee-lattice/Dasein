@@ -35,7 +35,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
 
         $http({
             method: 'GET', 
-            url: '/pls/users'
+            url: '/pls/users?' + new Date().getTime()
         })
         .success(function(data, status, headers, config) {
             var result = {
