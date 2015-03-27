@@ -1,33 +1,28 @@
 package com.latticeengines.baton;
 
-import java.io.File;
-
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
-import org.apache.zookeeper.ZooDefs;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.LoggerContext;
 
-import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
-import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
-import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
-import com.latticeengines.domain.exposed.camille.DocumentDirectory;
-import com.latticeengines.domain.exposed.camille.Path;
 
 public class BatonTool {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
+    
+    private static BatonService batonService = new BatonServiceImpl();
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -91,12 +86,12 @@ public class BatonTool {
             }
 
             else {
-                loadDirectory(source, destination);
+                batonService.loadDirectory(source, destination);
             }
         }
 
         else if (namespace.get("createPod")) {
-            log.info(String.format("Sucesfully created pod %s", podId));
+            log.info(String.format("Sucessfully created pod %s", podId));
         }
 
         else if (namespace.get("createTenant")) {
@@ -108,7 +103,7 @@ public class BatonTool {
                 log.error("createTenant requires contractId, tenantId and spaceId");
                 System.exit(1);
             } else {
-                createTenant(contractId, tenantId, spaceId);
+                batonService.createTenant(contractId, tenantId, spaceId);
             }
         }
     }
@@ -122,22 +117,7 @@ public class BatonTool {
      * @param spaceId
      */
     static void createTenant(String contractId, String tenantId, String spaceId) {
-        try {
-            if (!ContractLifecycleManager.exists(contractId)) {
-                log.info(String.format("Creating contract %s", contractId));
-                ContractLifecycleManager.create(contractId);
-            }
-            if (TenantLifecycleManager.exists(contractId, tenantId)) {
-                log.error(String.format("Tenant %s already exists", tenantId));
-                System.exit(1);
-            }
-            TenantLifecycleManager.create(contractId, tenantId, spaceId);
-        } catch (Exception e) {
-            log.error("Error creating tenant", e);
-            System.exit(1);
-        }
-
-        log.info(String.format("Sucesfully created tenant %s", tenantId));
+        batonService.createTenant(contractId, tenantId, spaceId);
     }
 
     /**
@@ -149,29 +129,6 @@ public class BatonTool {
      *            Path in ZooKeeper to store files
      */
     static void loadDirectory(String source, String destination) {
-        String rawPath = "";
-        try {
-            Camille c = CamilleEnvironment.getCamille();
-            String podId = CamilleEnvironment.getPodId();
-
-            // handle case where we want root pod directory
-            if (destination.equals("")) {
-                rawPath = String.format("/Pods/%s", podId.substring(0, podId.length()));
-            } else {
-                rawPath = String.format("/Pods/%s/%s", podId, destination);
-            }
-
-            File f = new File(source);
-            DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(f));
-            Path parent = new Path(rawPath);
-
-            c.upsertDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-
-        } catch (Exception e) {
-            log.error("Error loading directory", e);
-            System.exit(1);
-        }
-
-        log.info(String.format("Sucesfully loaded files into directory %s", rawPath));
+        batonService.loadDirectory(source, destination);
     }
 }
