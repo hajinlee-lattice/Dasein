@@ -23,7 +23,7 @@ public class MadisonLogicDailyProgressDaoImpl extends BaseDaoImpl<MadisonLogicDa
     public MadisonLogicDailyProgress getNextAvailableDailyProgress() {
         Session session = getSessionFactory().getCurrentSession();
         Class<MadisonLogicDailyProgress> entityClz = getEntityClass();
-        String queryStr = String.format("from %s where status = :status", entityClz.getSimpleName());
+        String queryStr = String.format("from %s where status = :status order by ID", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
         query.setString("status", MadisonLogicDailyProgressStatus.DEPIVOTED.getStatus());
         query.setMaxResults(1);
