@@ -26,6 +26,9 @@
         <module>le-api</module>
         <module>le-perf</module>
         <module>le-web</module>
+        <module>le-dataflow</module>
+        <module>le-propdata</module>
+        <module>le-job</module>
         <module>le-pls</module>
     </modules>
 </project>
