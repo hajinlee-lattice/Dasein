@@ -46,8 +46,8 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         ctx.setProperty("QUEUE", "Priority0.MapReduce.0");
         ctx.setProperty("FLOWNAME", flowName + "-Aggregation");
         ctx.setProperty("CHECKPOINT", false);
-        ctx.setProperty("HADOOPCONF", new Configuration());
-        // ctx.setProperty("HADOOPCONF", yarnConfiguration);
+//        ctx.setProperty("HADOOPCONF", new Configuration());
+         ctx.setProperty("HADOOPCONF", yarnConfiguration);
         dataTransformationService.executeNamedTransformation(ctx, "madisonDataFlowAggregationBuilder");
     }
 
