@@ -131,17 +131,19 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
 
         taps.put(sourceName, tap);
 
+        Configuration config = getConfig();
+        Schema sourceSchema = null;
         if (regex) {
-            DataFlowContext ctx = getDataFlowCtx();
-            Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
             try {
                 sourcePath = getSchemaPath(config, sourcePath);
+                sourceSchema = AvroUtils.getSchema(config, new Path(sourcePath));
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_00002, e);
             }
+        } else {
+            sourceSchema = AvroUtils.getSchema(config, new Path(sourcePath));
         }
 
-        Schema sourceSchema = AvroUtils.getSchema(new Configuration(), new Path(sourcePath));
         List<FieldMetadata> fields = new ArrayList<>(sourceSchema.getFields().size());
 
         for (Field field : sourceSchema.getFields()) {
@@ -151,6 +153,15 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         pipesAndOutputSchemas.put(sourceName, new AbstractMap.SimpleEntry<>(new Pipe(sourceName), fields));
         schemas.put(sourceName, sourceSchema);
+    }
+
+    private Configuration getConfig() {
+        DataFlowContext ctx = getDataFlowCtx();
+        Configuration config = ctx.getProperty("HADOOPCONF", Configuration.class);
+        if (config == null) {
+            config = new Configuration();
+        }
+        return config;
     }
 
     private String getSchemaPath(Configuration config, String sourcePath) throws Exception {
@@ -335,7 +346,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
     protected Schema getSchemaFromFile(DataFlowContext dataFlowCtx) {
         String taregetSchemaPath = dataFlowCtx.getProperty("TARGETSCHEMAPATH", String.class);
         if (taregetSchemaPath != null) {
-            Configuration config = new Configuration();
+            Configuration config = getConfig();
             try {
                 return AvroUtils.getSchema(config, new Path(getSchemaPath(config, taregetSchemaPath)));
             } catch (Exception ex) {
@@ -635,7 +646,9 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
 
         Flow<?> flow = flowConnector.connect(flowDef);
-        flow.writeDOT("dot/wcr.dot");
+        if (isLocal()) {
+            flow.writeDOT("dot/wcr.dot");
+        }
         flow.complete();
     }
 
