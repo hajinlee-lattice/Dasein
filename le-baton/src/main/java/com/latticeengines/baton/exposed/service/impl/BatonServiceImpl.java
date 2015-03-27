@@ -37,7 +37,7 @@ public class BatonServiceImpl implements BatonService {
             System.exit(1);
         }
 
-        log.info(String.format("Sucesfully created tenant %s", tenantId));
+        log.info(String.format("Succesfully created tenant %s", tenantId));
     }
 
     @Override
@@ -65,7 +65,7 @@ public class BatonServiceImpl implements BatonService {
             System.exit(1);
         }
 
-        log.info(String.format("Sucesfully loaded files into directory %s", rawPath));
+        log.info(String.format("Succesfully loaded files into directory %s", rawPath));
     }
 
 }
