@@ -10,7 +10,7 @@ import time;
 import TestHelpers;
 from TestHelpers import DLCRunner;
 from TestHelpers import BardAdminRunner;
-from plsEnd2EndTests.Properties import PLSEnvironments;
+from Properties import PLSEnvironments;
 from TestHelpers import PLSConfigRunner;
 from TestRunner import SessionRunner;
 from TestHelpers import DLConfigRunner;
@@ -26,8 +26,6 @@ dlc_path=PLSEnvironments.dl_dlc_path
 dl_server=PLSEnvironments.dl_server
 dl_user=PLSEnvironments.dl_server_user
 dl_pwd=PLSEnvironments.dl_server_pwd
-
-
 
 
 
@@ -222,23 +220,20 @@ def runEndBulkScoring(tenant):
     load_groups = ["BulkScoring_PushToLeadDestination"];
     return runScoringGroups(tenant, load_groups);
 
-def runEndHourlyScoring(self):
-    load_groups = ["PushToLeadDestination"];   
-    return self.runScoringGroups(load_groups);
+def runEndHourlyScoring(tenant):
+    load_groups = ["PushToLeadDestination","LoadScoreHistoryData", "PushToReportsDB", "InsightsAllSteps"];   
+    return runScoringGroups(tenant, load_groups);
 
-def runHourlyDanteProcess(self):
-    load_groups = ["LoadScoreHistoryData", "PushToReportsDB", "InsightsAllSteps"];   
-    return self.runScoringGroups(load_groups);
-
-def runBulkScoring(self):
-    assert self.runPushToBulkScoring();
-    assert self.waitForLeadInputQueue(cycle_times=100);
-    assert self.runEndBulkScoring();
+def runBulkScoring(tenant):
+    runPushToBulkScoring();
+    waitForLeadInputQueue(cycle_times=100);
+    runEndBulkScoring(tenant);
     
-def runHourlyScoring(self):
-    assert self.runPushToHourlyScoring();
-    assert self.waitForLeadInputQueue(cycle_times=20);
-    assert self.runEndHourlyScoring();
+def runHourlyScoring(tenant):
+    runPushToHourlyScoring();
+    waitForLeadInputQueue(cycle_times=20);
+    runEndHourlyScoring(tenant);
+
     
 
 if __name__ == '__main__':

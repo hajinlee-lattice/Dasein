@@ -6,7 +6,7 @@ Created on Mar 18, 2015
 import unittest
 
 from Properties import PLSEnvironments
-from ServiceRunner.TestHelpers import JamsRunner
+from operations.TestHelpers import JamsRunner
 
 class Test(unittest.TestCase):
 
@@ -25,6 +25,7 @@ class Test(unittest.TestCase):
         print PLSEnvironments.pls_db_server;
         print PLSEnvironments.pls_db_ScoringDaemon;        
     
+    @unittest.skip("")
     def testJamsCFG(self):
         print "for jams configurations"
         jams = JamsRunner();

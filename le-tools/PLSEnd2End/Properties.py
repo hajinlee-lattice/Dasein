@@ -5,18 +5,16 @@ Created on Mar 12, 2015
 '''
 
 from ConfigParser import SafeConfigParser
-import sys
-
 
 class PLSEnvironments(object):
     
     # parser that read configuration properties from config.ini file
     parser = SafeConfigParser()
-    parser.read('plsEnd2EndTests/config.ini')
+    parser.read('config.ini')
     
     
     #properties definition
-    pls_server=parser.get('BuildInfo', 'pls_Server');    
+    pls_server=parser.get('BuildInfo', 'pls_server');    
     pls_server_folder=parser.get('BuildInfo', 'install_dir');
     pls_bard_1=parser.get('BuildInfo', 'tenant');
     pls_bard_2=parser.get('BuildInfo', 'tenant_2');
@@ -40,6 +38,7 @@ class PLSEnvironments(object):
     pls_install_dir = "%s\\%s" % (pls_server_folder, pls_bard_1[3:]);
     pls_db_server = "%s\\SQL2012STD" % pls_server;
     pls_db_ScoringDaemon= "SD_%s" % pls_bard_1[3:];
+    pls_db_Dante= "DT_%s" % pls_bard_1[3:];
     
     dl_server_user="richard.liu@lattice-engines.com";
     dl_server_pwd="1";
@@ -146,17 +145,7 @@ class PLSEnvironments(object):
 
 
 def main():
-    print "------\nSetting up properties in config.ini file...\n------"
-    
-    
-    parser = SafeConfigParser()
-    parser.read('plsEnd2EndTests/config.ini')
-    print parser.get('BuildInfo', 'pls_Server')
-
-'''    parser.set('Debug', 'fruit', 'apple')
-    parser.set('Debug', 'pet', 'dog')
-    with open('config.ini', 'wb') as configfile:
-        parser.write(configfile)'''
+    pass
     
     
 

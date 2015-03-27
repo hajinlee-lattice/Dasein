@@ -20,13 +20,13 @@ import json
 import time
 from copy import deepcopy
 from datetime import datetime
-from ServiceRunner.TestHelpers import BardAdminRunner
-from ServiceRunner.TestHelpers import DLCRunner
-from ServiceRunner.TestHelpers import EtlRunner
-from ServiceRunner.TestHelpers import PretzelRunner
-from ServiceRunner.TestHelpers import UtilsRunner
-from ServiceRunner.TestHelpers import SessionRunner
-from plsEnd2EndTests.Properties import PLSEnvironments
+from operations.TestHelpers import BardAdminRunner
+from operations.TestHelpers import DLCRunner
+from operations.TestHelpers import EtlRunner
+from operations.TestHelpers import PretzelRunner
+from operations.TestHelpers import UtilsRunner
+from operations.TestHelpers import SessionRunner
+from Properties import PLSEnvironments
 
 #### PLS End-to-End pieces ####
 def runLoadGroups(dlc, params, load_groups, max_run_time_in_sec=7200, sleep_time=300):
