@@ -307,6 +307,11 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             log.error("There's no incremental data for today.");
             return;
         }
+        if (StringUtils.isEmpty(targetRawTable)) {
+            log.info("targetRawTable was not set, it won't be loaded");
+            return;
+        }
+
         log.info("Uploading today's raw data=" + todayIncrementalPath);
         String tableName = HdfsUtils.getHdfsFileContents(yarnConfiguration, getTableNameFromFile(todayIncrementalPath));
 
