@@ -68,4 +68,10 @@ public class BatonServiceImpl implements BatonService {
         log.info(String.format("Succesfully loaded files into directory %s", rawPath));
     }
 
+    @Override
+    public void bootstrap(String contractId, String tenantId, String spaceId) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }
