@@ -350,4 +350,15 @@ describe('TopPredictorServiceSpec Tests', function () {
             expect(chartData.elementList[chartData.elementList.length - 2].name).toEqual('Bucket 2');
         });
     });
+    
+    //DP-932
+    describe('For a continuous attribute', function () {
+    	
+        it('should return chart data with first element named "Available" when it has two attribute values, one of which is an "NA" bucket', function () {
+        	var chartData = topPredictorService.FormatDataForAttributeValueChart("ContinuousAttribute", "#FFFFFF", hoverTestModelSummary);
+            expect(chartData.elementList[0].name).toEqual("Available");
+            expect(chartData.elementList[1].name).toEqual('N/A');
+        });
+    });
+    
 });

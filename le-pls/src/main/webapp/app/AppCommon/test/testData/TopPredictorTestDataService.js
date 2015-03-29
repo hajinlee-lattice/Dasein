@@ -10740,6 +10740,34 @@ angular.module('test.testData.TopPredictorTestDataService', [])
                     "Name": "CategoricalAttribute4",
                     "FundamentalType": "unknown"
                 },
+                {
+                    "Elements": [
+                        {
+                            "CorrelationSign": 1,
+                            "Count": 15000,
+                            "LowerInclusive": 0,
+                            "UpperExclusive": null,
+                            "Lift": 0.2,
+                            "Values": [
+                                "Bucket 1"
+                            ],
+                            "IsVisible": true
+                        },
+                        {
+                            "CorrelationSign": 1,
+                            "Count": 5000,
+                            "Lift": 3.4,
+                            "LowerInclusive": null,
+                            "UpperExclusive": null,
+                            "Values": [
+                                "null"
+                            ],
+                            "IsVisible": true
+                        }
+                    ],
+                    "Name": "ContinuousAttribute",
+                    "FundamentalType": "year"
+                },
             ]
         };
     };
