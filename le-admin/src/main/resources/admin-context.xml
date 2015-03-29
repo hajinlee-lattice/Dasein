@@ -14,10 +14,9 @@
              since the servlet container instances are not available when running tests. -->
         <context:exclude-filter type="assignable" expression="com.latticeengines.admin.swagger.SwaggerConfig" />
     </context:component-scan>
-    <mvc:annotation-driven/>
+
+    <mvc:annotation-driven />
 
     <import resource="classpath:admin-camille-context.xml"/>
-    <import resource="classpath:common-jmx-component-context.xml"/>
-
 
 </beans>

@@ -10,7 +10,7 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 
-@Api(value = "admin", description = "REST resource for managing Lattice tenants across all products")
+@Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController
 @RequestMapping(value = "/tenants")
 public class TenantResource {
