@@ -10,6 +10,7 @@ public class UserUpdateData {
     private String oldPassword;
     private String newPassword;
     private Map<String, EntityAccessRightsData> rights;
+    private String accessLevel;
 
     @JsonProperty("OldPassword")
     public String getOldPassword() {
@@ -39,6 +40,16 @@ public class UserUpdateData {
     @JsonProperty("Rights")
     public void setRights(Map<String, EntityAccessRightsData> rights) {
         this.rights = rights;
+    }
+
+    @JsonProperty("AccessLevel")
+    public String getAccessLevel() {
+        return accessLevel;
+    }
+
+    @JsonProperty("AccessLevel")
+    public void setAccessLevel(String accessLevel) {
+        this.accessLevel = accessLevel;
     }
 
     @Override
