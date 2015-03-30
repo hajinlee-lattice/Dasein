@@ -52,7 +52,7 @@ public class UserServiceImplTestNG extends PlsFunctionalTestNGBase {
         );
     }
 
-    @AfterClass(groups = { "functional"})
+    @AfterClass(groups = {"functional"})
     public void tearDown() {
         globalUserManagementService.deleteUser(uReg.getCredentials().getUsername());
         globalTenantManagementService.discardTenant(tenant);
@@ -62,12 +62,12 @@ public class UserServiceImplTestNG extends PlsFunctionalTestNGBase {
     public void testGrantAndRevokeAccessLevel() {
         AccessLevel level = userService.getAccessLevel(tenant.getId(), uReg.getCredentials().getUsername());
         assertNull(level);
-        for (AccessLevel accessLevel: AccessLevel.values()) {
-            userService.grantAccessLevel(accessLevel, tenant.getId(), uReg.getCredentials().getUsername());
+        for (AccessLevel accessLevel : AccessLevel.values()) {
+            userService.assignAccessLevel(accessLevel, tenant.getId(), uReg.getCredentials().getUsername());
             level = userService.getAccessLevel(tenant.getId(), uReg.getCredentials().getUsername());
             assertEquals(level, accessLevel);
         }
-        userService.revokeAccessLevel(tenant.getId(), uReg.getCredentials().getUsername());
+        userService.resignAccessLevel(tenant.getId(), uReg.getCredentials().getUsername());
         level = userService.getAccessLevel(tenant.getId(), uReg.getCredentials().getUsername());
         assertNull(level);
     }

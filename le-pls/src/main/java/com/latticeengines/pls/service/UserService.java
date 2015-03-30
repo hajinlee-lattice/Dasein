@@ -7,9 +7,9 @@ public interface UserService {
 
     boolean addAdminUser(UserRegistrationWithTenant userRegistrationWithTenant);
 
-    boolean grantAccessLevel(AccessLevel accessLevel, String tenantId, String username);
+    boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username);
 
-    boolean revokeAccessLevel(String tenantId, String username);
+    boolean resignAccessLevel(String tenantId, String username);
 
     AccessLevel getAccessLevel(String tenantId, String username);
 

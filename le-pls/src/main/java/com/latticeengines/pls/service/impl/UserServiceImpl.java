@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
-        
+
         if (userByEmail != null) {
             log.error(String.format("A user with the same email address %s already exists.", userByEmail));
             return false;
@@ -71,8 +71,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean grantAccessLevel(AccessLevel accessLevel, String tenantId, String username) {
-        if (revokeAccessLevel(tenantId, username)) {
+    public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username) {
+        if (resignAccessLevel(tenantId, username)) {
             try {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
             } catch (Exception e) {
@@ -83,9 +83,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean revokeAccessLevel(String tenantId, String username) {
+    public boolean resignAccessLevel(String tenantId, String username) {
         boolean success = true;
-        for (AccessLevel accessLevel: AccessLevel.values()) {
+        for (AccessLevel accessLevel : AccessLevel.values()) {
             try {
                 success = success && globalUserManagementService.revokeRight(accessLevel.name(), tenantId, username);
             } catch (Exception e) {
@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
     public AccessLevel getAccessLevel(String tenantId, String username) {
         List<String> rights = globalUserManagementService.getRights(username, tenantId);
         AccessLevel toReturn = null;
-        for (String right: rights) {
+        for (String right : rights) {
             try {
                 AccessLevel accessLevel = AccessLevel.valueOf(right);
                 if (toReturn == null || accessLevel.compareTo(toReturn) > 0) {
