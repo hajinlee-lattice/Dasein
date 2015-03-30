@@ -1,14 +1,12 @@
 package com.latticeengines.pls.controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -87,7 +85,7 @@ public class LoginResource {
 
         try {
             Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
-            ticket.setTenants(Arrays.asList(tenant));
+            ticket.setTenants(Collections.singletonList(tenant));
             doc.setTicket(ticket);
 
             Session session = globalSessionManagementService.attach(ticket);
@@ -116,11 +114,11 @@ public class LoginResource {
     @RequestMapping(value = "/forgotpassword", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Reset password and send an email")
-    public Boolean forgotPassword(@RequestBody AttributeMap attrMap) {
+    public boolean forgotPassword(@RequestBody AttributeMap attrMap) {
         return globalUserManagementService.forgotLatticeCredentials(attrMap.get("Username"));
     }
 
-    class TenantNameSorter implements Comparator<Tenant>{
+    class TenantNameSorter implements Comparator<Tenant> {
 
         public int compare(Tenant aTenant, Tenant anotherTenant) {
             return aTenant.getName().compareTo(anotherTenant.getName());
