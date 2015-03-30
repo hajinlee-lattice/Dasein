@@ -20,8 +20,8 @@ import base64
 import random
 import string
 
-from Properties import PLSEnvironments
-from TestRunner import SessionRunner
+from Env.Properties import PLSEnvironments
+from BasicOperations.TestRunner import SessionRunner
 
 def getMetaData(table_name,leads_number=3,conn=PLSEnvironments.SQL_BasicDataForIntegrationTest):
     dlc = SessionRunner()
@@ -32,6 +32,12 @@ def recordNewAdded(sequence,marketting_app,sobjects, lead_id,email):
     dlc = SessionRunner()
     connection_string = PLSEnvironments.SQL_BasicDataForIntegrationTest;    
     query = "INSERT INTO [Results]([sequence],[maps],[s_objects],[id],[email]) VALUES(%d,'%s','%s','%s','%s')" % (sequence,marketting_app,sobjects,lead_id,email);        
+    return dlc.execQuery(connection_string, query);
+def recordResultSet(id,email,operation,modified_date,scored,result):
+    dlc = SessionRunner()
+    connection_string = PLSEnvironments.SQL_BasicDataForIntegrationTest;    
+    query = "update results set operation='%s', executed_date=getdate(),modifiedDate='%s',scored=%s,result=%d where id='%s' and email='%s'" % (operation,modified_date,scored,result,id,email);        
+    
     return dlc.execQuery(connection_string, query);
 def getSequence():
     dlc = SessionRunner()
@@ -65,7 +71,27 @@ def getTitles(leads_number=3,conn=PLSEnvironments.SQL_BasicDataForIntegrationTes
     return getMetaData("meta_title", leads_number, conn);
 def getActivityTypes(leads_number=3,conn=PLSEnvironments.SQL_BasicDataForIntegrationTest):
     return getMetaData("meta_activityType", leads_number, conn);
-    
+
+def verifyResult(operation,records):
+    results = [{}]
+    for r in records[1:]:
+        print r;
+        passed = True;
+        if r["latticeforleads__Last_Score_Date__c"]==None:
+            r["latticeforleads__Last_Score_Date__c"]="1900-01-01";
+            passed=False;
+        if r["latticeforleads__Score__c"] == None:
+            r["latticeforleads__Score__c"]=0;
+            passed=False;
+        if float(r["latticeforleads__Score__c"])-10<0 or float(r["latticeforleads__Score__c"])-100>0:
+            passed=False; 
+        if not passed:
+            results.append(r);
+            
+        recordResultSet(r["id"], r["email"], operation, r["latticeforleads__Last_Score_Date__c"], r["latticeforleads__Score__c"], passed);           
+        
+    return results;
+        
 class EloquaRequest():
     
     def __init__(self,base_url=PLSEnvironments.pls_ELQ_url, company=PLSEnvironments.pls_ELQ_company, user=PLSEnvironments.pls_ELQ_user, password=PLSEnvironments.pls_ELQ_pwd):
@@ -152,6 +178,44 @@ class EloquaRequest():
                 if failed>3:
                     break;
         return contact_lists
+    
+    def addEloquaContactForDante(self,leads_number=3):
+        domains = getDomains(PLSEnvironments.pls_marketing_app_ELQ, leads_number);
+        
+        contact_lists={};
+        sfdc = SFDCRequest();
+        sfdc_contacts={};
+        sfdc_leads={};
+        
+        failed = 0;
+        seq = getSequence();
+        
+        for domain in domains:
+            emailAddress = getRandomMail(domain[0]);
+            response = self.createNewContact(emailAddress, 
+                                                random_str(), 
+                                                random_str())
+            if response:
+                if response.status_code == 201:
+                    created_id=json.loads(response.text)["id"];
+                    print "==>    " + created_id + "    " + emailAddress;
+                    contact_lists[created_id] = emailAddress;
+                    recordNewAdded(seq, PLSEnvironments.pls_marketing_app_ELQ,"Contact", created_id, emailAddress);
+                    contact_id=sfdc.addContactToSFDC(email=emailAddress);
+                    if(contact_id!=None):
+                        sfdc_contacts[emailAddress]=contact_id;
+                        recordNewAdded(seq, PLSEnvironments.pls_marketing_app_SFDC,"Contact", contact_id, emailAddress);
+                    lead_id=sfdc.addLeadToSFDC(email=emailAddress);
+                    if(lead_id!=None):
+                        sfdc_leads[emailAddress]=lead_id;
+                        recordNewAdded(seq, PLSEnvironments.pls_marketing_app_SFDC,"Lead", lead_id, emailAddress);    
+                if response.status_code == 409:
+                    print "Contact already exists - pick another one:    " + emailAddress;  
+            else:
+                failed += 1;
+                if failed>3:
+                    break;
+        return [contact_lists,sfdc_contacts,sfdc_leads];
     
     def getEloquaContact(self,contact_ids={}):
         contacts = [{}]
@@ -258,6 +322,43 @@ class MarketoRequest():
                 if failed>3:
                     break;
         return lead_lists
+    def addLeadToMarketoForDante(self,leads_number=3):        
+        domains = getDomains(PLSEnvironments.pls_marketing_app_MKTO, leads_number);
+        lead_lists={};
+        sfdc = SFDCRequest();
+        sfdc_contacts={};
+        sfdc_leads={};
+        
+        failed = 0;
+        seq = getSequence();
+        
+        for domain in domains:
+            emailAddress = getRandomMail(domain[0]);
+            response = self.createOrUpdate(emailAddress, random_str());
+            if response:
+                if response.status_code == 200:
+                    print response.text;
+                    created_id=json.loads(response.text)["result"][0]["id"];
+                    print "==>    %d    %s" % (created_id, emailAddress);
+                    lead_lists[created_id] = emailAddress;
+                    recordNewAdded(seq, PLSEnvironments.pls_marketing_app_MKTO,"Lead", created_id, emailAddress);
+                    
+                    contact_id=sfdc.addContactToSFDC(email=emailAddress);
+                    if(contact_id!=None):
+                        sfdc_contacts[emailAddress]=contact_id;
+                        recordNewAdded(seq, PLSEnvironments.pls_marketing_app_SFDC,"Contact", contact_id, emailAddress);
+                    lead_id=sfdc.addLeadToSFDC(email=emailAddress);
+                    if(lead_id!=None):
+                        sfdc_leads[emailAddress]=lead_id;
+                        recordNewAdded(seq, PLSEnvironments.pls_marketing_app_SFDC,"Lead", lead_id, emailAddress);    
+                        
+                if response.status_code == 409:
+                    print "Leads already exists - pick another one:    " + emailAddress;  
+            else:
+                failed += 1;
+                if failed>3:
+                    break;
+        return [lead_lists,sfdc_contacts,sfdc_leads]
     
     def getLeadFromMarketo(self,lead_ids={}):
         leads = [{}]
@@ -278,7 +379,11 @@ class MarketoRequest():
         request_url = marketo_instance + "&client_id=" + self.clinet_id + "&client_secret=" + self.client_secret;
         
         #Make request
-        response = requests.get(request_url);
+        try:
+            response = requests.get(request_url);
+        except:
+            time.sleep(5);
+            response = requests.get(request_url);
         
         if response:                
             results = json.loads(response.text);
@@ -323,7 +428,21 @@ class SFDCRequest():
         request_url = "%s/sobjects/%s/%s?%s"  % (self.base_url, sobjects,record_id,fields);
 
         response = requests.get(request_url,headers = self.headers);
-        print response;
+        return response;
+    def getRecords(self,sobjects,record_ids={}):
+        records = [{}]
+        for k in record_ids.keys():
+            response=self.getRecord(sobjects,k);            
+            if response.status_code == 200:
+                result = json.loads(response.text);
+                print "==>    %s    %s    %s    %s" % (k, result["Email"], result["latticeforleads__Score__c"], result["latticeforleads__Last_Score_Date__c"]);
+                result["id"]=result["Id"];
+                del result["Id"];
+                result["email"]=result["Email"];
+                del result["Email"];                 
+                records.append(result);
+            
+        return records;
     
     def addAccountsToSFDC(self, account_num=3):
         addresses = getAddresses(account_num);        
@@ -373,71 +492,84 @@ class SFDCRequest():
         return self.deleteRecord(sobjects, record_id);
 
     def addContactsToSFDC(self,account_id=None, contact_num=3):
-        addresses = getAddresses(contact_num); 
-        domains = getDomains(marketting_app=PLSEnvironments.pls_marketing_app_MKTO, leads_number=contact_num); 
-        titles = getTitles(leads_number=contact_num);  
-        
+        domains = getDomains(marketting_app=PLSEnvironments.pls_marketing_app_MKTO, leads_number=contact_num);                
         contact_lists={};
         failed = 0;
-        sequence = getSequence();
+        seq = getSequence();
         
         for i in range(contact_num):
-            contact = {}
-            if account_id != None:
-                contact["AccountId"] = account_id;
-            contact["LastName"] = random_str(6);
-            contact["FirstName"] = random_str(6);
-#             contact["Name"] = "%s %s" % (contact["FirstName"],contact["LastName"])
-            contact["MailingCity"] = addresses[i]["c_city"];
-            contact["MailingState"] = addresses[i]["c_state_Prov"];
-            contact["MailingCountry"] = addresses[i]["c_country"];
-#             contact["Phone"] = ;
-            contact["Email"]=getRandomMail(domains[i][0]);
-            contact["Title"]=titles[i][0];
-#             contact["LeadSource"] = ; 
-
-            contact_id = self.createRecord("Contact",contact);
+            emailAddress =  getRandomMail(domains[i][0]);
+            contact_id = self.addContactToSFDC(email=emailAddress);
             if contact_id != None:
-                contact_lists[contact_id] = contact["Email"];
-                recordNewAdded(sequence, PLSEnvironments.pls_marketing_app_SFDC, "Contact", contact_id, contact_lists[contact_id]); 
+                contact_lists[contact_id] = emailAddress;
+                recordNewAdded(seq, PLSEnvironments.pls_marketing_app_SFDC, "Contact", contact_id, contact_lists[contact_id]); 
             else:
                 failed += 1;
                 if failed>3:
                     break;
         return contact_lists;
+    def addContactToSFDC(self,account_id=None,email=None):
+        addresses = getAddresses(1);
+        titles = getTitles(leads_number=1);  
+        
+        contact = {}
+        if account_id != None:
+            contact["AccountId"] = account_id;
+        contact["LastName"] = random_str(6);
+        contact["FirstName"] = random_str(6);
+#             contact["Name"] = "%s %s" % (contact["FirstName"],contact["LastName"])
+        contact["MailingCity"] = addresses[0]["c_city"];
+        contact["MailingState"] = addresses[0]["c_state_Prov"];
+        contact["MailingCountry"] = addresses[0]["c_country"];
+#             contact["Phone"] = ;
+        contact["Email"]=email;
+        contact["Title"]=titles[0][0];
+#             contact["LeadSource"] = ; 
+        return self.createRecord("Contact",contact);
+    
+    def getContactsFromSFDC(self,contact_ids={}):
+        return  self.getRecords("Contact",contact_ids);
 
-    def addLeadsToSFDC(self, lead_num=3):
-        addresses = getAddresses(lead_num); 
+    def addLeadsToSFDC(self, lead_num=3): 
         domains = getDomains(marketting_app=PLSEnvironments.pls_marketing_app_MKTO, leads_number=lead_num); 
-        titles = getTitles(leads_number=lead_num);  
         
         lead_lists={};
         failed = 0;
-        sequence = getSequence();
+        seq = getSequence();
         
         for i in range(lead_num):
-            lead = {}
-            lead["LastName"] = random_str(6);
-            lead["FirstName"] = random_str(6);
-            lead["City"] = addresses[i]["c_city"];
-            lead["State"] = addresses[i]["c_state_Prov"];
-            lead["Country"] = addresses[i]["c_country"];
-#             lead["Phone"] = ;
-            lead["Email"]=getRandomMail(domains[i][0]);
-            lead["Title"]=titles[i][0];
-            lead["AnnualRevenue"]=random.randint(1000,100000000);
-            lead["NumberOfEmployees"]=random.randint(1,3000);
-            lead["Company"]=domains[i][0].split('.')[0];
-            
-            lead_id = self.createRecord("Lead",lead);
+            emailAddress =  getRandomMail(domains[i][0]);
+            lead_id = self.addLeadsToSFDC(email=emailAddress);
             if lead_id != None:
-                lead_lists[lead_id] = lead["Email"];
-                recordNewAdded(sequence, PLSEnvironments.pls_marketing_app_SFDC, "Lead", lead_id, lead_lists[lead_id]); 
+                lead_lists[lead_id] = emailAddress;
+                recordNewAdded(seq, PLSEnvironments.pls_marketing_app_SFDC, "Lead", lead_id, lead_lists[lead_id]); 
             else:
                 failed += 1;
                 if failed>3:
                     break;
         return lead_lists;
+    def addLeadToSFDC(self, email=None):
+        addresses = getAddresses(1);
+        titles = getTitles(leads_number=1);  
+        
+        lead = {}
+        lead["LastName"] = random_str(6);
+        lead["FirstName"] = random_str(6);
+        lead["City"] = addresses[0]["c_city"];
+        lead["State"] = addresses[0]["c_state_Prov"];
+        lead["Country"] = addresses[0]["c_country"];
+#             lead["Phone"] = ;
+        lead["Email"]=email;
+        lead["Title"]=titles[0][0];
+        lead["AnnualRevenue"]=random.randint(1000,100000000);
+        lead["NumberOfEmployees"]=random.randint(1,3000);
+        mail=email[string.find(email,'@')+1:];
+        lead["Company"]=mail[0:string.find(mail,'.')];
+        
+        return self.createRecord("Lead",lead);
+        
+    def getLeadsFromSFDC(self,lead_ids={}):
+        return  self.getRecords("Lead",lead_ids);
     
     def addOpportunityToSFDC(self,account_id=None, opportunity_num=3):        
         opportunity_lists={};
@@ -495,8 +627,13 @@ class SFDCRequest():
                      client_secret=PLSEnvironments.pls_SFDC_client_secret):  
         
         request_url = "%s?grant_type=password&client_id=%s&client_secret=%s&username=%s&password=%s" % (OAuth2_url,client_id,client_secret,user,pwd);
-        
-        response = requests.post(request_url);
+                
+        try:
+            response = requests.post(request_url);
+        except:
+            time.sleep(5);
+            response = requests.post(request_url);
+          
         if response:                
             results = json.loads(response.text);
             access_token = results["access_token"]
