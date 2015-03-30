@@ -12,6 +12,7 @@ public class User {
     private String phoneNumber;
     private boolean active;
     private String title;
+    private String accessLevel;
 
     @JsonProperty("Email")
     public String getEmail() {
@@ -81,6 +82,16 @@ public class User {
     @JsonProperty("Title")
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    @JsonProperty("AccessLevel")
+    public String getAccessLevel() {
+        return accessLevel;
+    }
+
+    @JsonProperty("AccessLevel")
+    public void setAccessLevel(String accessLevel) {
+        this.accessLevel = accessLevel;
     }
 
     @Override
