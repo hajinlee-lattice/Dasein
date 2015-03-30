@@ -331,6 +331,8 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                         if (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") {
                             attributeValue = "N/A";
                         }
+                        //DP-352 
+                        attributeValue = "'"+ attributeValue + "'";
                         var predictivePower = predictor.UncertaintyCoefficient * 100;
                         var attributeRow = [predictor.Category, predictor.DisplayName, attributeValue, description, percentTotal, lift, predictivePower];
                         toReturn.push(attributeRow);
