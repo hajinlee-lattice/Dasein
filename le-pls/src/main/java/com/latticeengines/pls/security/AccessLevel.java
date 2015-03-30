@@ -54,7 +54,7 @@ public enum AccessLevel {
         this.grantedRights = grantedRights;
     }
 
-    private List<GrantedRight> getGrantedRights() {
+    public List<GrantedRight> getGrantedRights() {
         return this.grantedRights;
     }
 
