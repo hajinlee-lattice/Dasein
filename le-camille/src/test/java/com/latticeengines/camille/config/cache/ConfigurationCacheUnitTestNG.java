@@ -7,13 +7,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.config.cache.ConfigurationCache;
-import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.PodLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -41,7 +36,6 @@ public class ConfigurationCacheUnitTestNG {
     @Test(groups = "unit")
     public void testPodScope() throws Exception {
         PodScope scope = new PodScope();
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
         Path path = new Path("/foo");
 
         ConfigurationController<PodScope> controller = ConfigurationController.construct(scope);
@@ -54,9 +48,7 @@ public class ConfigurationCacheUnitTestNG {
 
     @Test(groups = "unit")
     public void testContractScope() throws Exception {
-        ContractScope scope = new ContractScope("MyContract");
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractId());
+        ContractScope scope = new ContractScope(CamilleTestEnvironment.getContractId());
         Path path = new Path("/foo");
 
         ConfigurationController<ContractScope> controller = ConfigurationController.construct(scope);
@@ -69,10 +61,8 @@ public class ConfigurationCacheUnitTestNG {
 
     @Test(groups = "unit")
     public void testTenantScope() throws Exception {
-        TenantScope scope = new TenantScope("MyContract", "MyTenant");
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractId());
-        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
+        TenantScope scope = new TenantScope(CamilleTestEnvironment.getContractId(),
+                CamilleTestEnvironment.getTenantId());
         Path path = new Path("/foo");
 
         ConfigurationController<TenantScope> controller = ConfigurationController.construct(scope);
@@ -85,11 +75,7 @@ public class ConfigurationCacheUnitTestNG {
 
     @Test(groups = "unit")
     public void testSpaceScope() throws Exception {
-        CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant", "MySpace");
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractId());
-        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "DefaultSpace");
-        SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), scope.getSpaceId());
+        CustomerSpaceScope scope = new CustomerSpaceScope(CamilleTestEnvironment.getCustomerSpace());
         Path path = new Path("/foo");
 
         ConfigurationController<CustomerSpaceScope> controller = ConfigurationController.construct(scope);

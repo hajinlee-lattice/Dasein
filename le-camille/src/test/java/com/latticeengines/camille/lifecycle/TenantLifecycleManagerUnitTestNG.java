@@ -1,10 +1,13 @@
 package com.latticeengines.camille.lifecycle;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Assert;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -12,25 +15,25 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
-import com.latticeengines.camille.exposed.lifecycle.PodLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 public class TenantLifecycleManagerUnitTestNG {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    private static final String contractId = "testContractId";
+    private static final String contractId = CamilleTestEnvironment.getContractId();
+    private static final CustomerSpaceInfo customerSpaceInfo = CamilleTestEnvironment.getCustomerSpaceInfo();
+    private static final TenantInfo tenantInfo = CamilleTestEnvironment.getTenantInfo();
 
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
         CamilleTestEnvironment.start();
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(contractId);
     }
 
     @AfterMethod(groups = "unit")
@@ -43,7 +46,7 @@ public class TenantLifecycleManagerUnitTestNG {
         String tenantId = "testTenant";
         String defaultSpaceId1 = "testDefaultSpaceId1";
 
-        TenantLifecycleManager.create(contractId, tenantId, defaultSpaceId1);
+        TenantLifecycleManager.create(contractId, tenantId, tenantInfo, defaultSpaceId1, customerSpaceInfo);
 
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)));
@@ -56,7 +59,7 @@ public class TenantLifecycleManagerUnitTestNG {
                     defaultSpaceId2));
         } catch (RuntimeException e) {
         }
-        SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId2);
+        SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId2, customerSpaceInfo);
         TenantLifecycleManager.setDefaultSpaceId(contractId, tenantId, defaultSpaceId2);
         Assert.assertEquals(TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId), defaultSpaceId2);
     }
@@ -66,7 +69,7 @@ public class TenantLifecycleManagerUnitTestNG {
         String tenantId = "testTenant";
         String spaceId = "spaceId";
         TenantLifecycleManager.delete(contractId, tenantId);
-        TenantLifecycleManager.create(contractId, tenantId, spaceId);
+        TenantLifecycleManager.create(contractId, tenantId, tenantInfo, spaceId, customerSpaceInfo);
         Assert.assertTrue(CamilleEnvironment.getCamille().exists(
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId)));
         TenantLifecycleManager.delete(contractId, tenantId);
@@ -79,7 +82,7 @@ public class TenantLifecycleManagerUnitTestNG {
         String tenantId = "testTenant";
         String spaceId = "spaceId";
         Assert.assertFalse(TenantLifecycleManager.exists(contractId, tenantId));
-        TenantLifecycleManager.create(contractId, tenantId, spaceId);
+        TenantLifecycleManager.create(contractId, tenantId, tenantInfo, spaceId, customerSpaceInfo);
         Assert.assertTrue(TenantLifecycleManager.exists(contractId, tenantId));
         TenantLifecycleManager.delete(contractId, tenantId);
         Assert.assertFalse(TenantLifecycleManager.exists(contractId, tenantId));
@@ -91,8 +94,14 @@ public class TenantLifecycleManagerUnitTestNG {
         for (int i = 0; i < 10; ++i) {
             String tenantId = Integer.toString(i);
             in.add(tenantId);
-            TenantLifecycleManager.create(contractId, tenantId, "defaultSpaceId");
+            TenantLifecycleManager.create(contractId, tenantId, tenantInfo, "defaultSpaceId", customerSpaceInfo);
         }
-        Assert.assertTrue(in.containsAll(TenantLifecycleManager.getAll(contractId)));
+
+        List<Pair<String, TenantInfo>> all = TenantLifecycleManager.getAll(contractId);
+        List<String> allTenants = new ArrayList<String>();
+        for (Pair<String, TenantInfo> pair : all) {
+            allTenants.add(pair.getKey());
+        }
+        Assert.assertTrue(allTenants.containsAll(in));
     }
 }

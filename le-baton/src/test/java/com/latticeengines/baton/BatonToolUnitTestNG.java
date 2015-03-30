@@ -17,10 +17,13 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 
 public class BatonToolUnitTestNG {
     @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(new Object() {}.getClass().getEnclosingClass());
+    private static final Logger log = LoggerFactory.getLogger(new Object() {
+    }.getClass().getEnclosingClass());
 
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
@@ -38,7 +41,7 @@ public class BatonToolUnitTestNG {
         String tenantId = "testTenantId";
         String spaceId = "testSpaceId";
 
-        BatonTool.createTenant(contractId, tenantId, spaceId);
+        BatonTool.createTenant(contractId, tenantId, spaceId, new CustomerSpaceInfo(new CustomerSpaceProperties(), ""));
         Assert.assertTrue(TenantLifecycleManager.exists(contractId, tenantId));
     }
 

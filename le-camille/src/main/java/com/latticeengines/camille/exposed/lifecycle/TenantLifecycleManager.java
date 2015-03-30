@@ -1,10 +1,9 @@
 package com.latticeengines.camille.exposed.lifecycle;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
@@ -15,32 +14,21 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
+import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 
 public class TenantLifecycleManager {
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    public static void create(String contractId, String tenantId, String defaultSpaceId) throws Exception {
+    public static void create(String contractId, String tenantId, TenantInfo tenantInfo, String defaultSpaceId,
+            CustomerSpaceInfo defaultSpaceInfo) throws Exception {
         LifecycleUtils.validateIds(contractId, tenantId, defaultSpaceId);
-
-        if (contractId == null) {
-            IllegalArgumentException e = new IllegalArgumentException("contractId cannot be null");
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-        if (tenantId == null) {
-            IllegalArgumentException e = new IllegalArgumentException("tenantId cannot be null");
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-        if (defaultSpaceId == null) {
-            IllegalArgumentException e = new IllegalArgumentException("defaultSpaceId cannot be null");
-            log.error(e.getMessage(), e);
-            throw e;
-        }
 
         Camille camille = CamilleEnvironment.getCamille();
 
@@ -56,7 +44,7 @@ public class TenantLifecycleManager {
             camille.create(tenantPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Tenant @ {}", tenantPath);
 
-            SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId);
+            SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId, defaultSpaceInfo);
 
             // create default space file
             Path defaultSpacePath = tenantPath.append(PathConstants.DEFAULT_SPACE_FILE);
@@ -73,24 +61,21 @@ public class TenantLifecycleManager {
 
             if (defaultSpaceId != null) {
                 log.debug("updating default space Id to {}", defaultSpaceId);
-                SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId);
-                if (SpaceLifecycleManager.exists(contractId, tenantId, defaultSpaceId)) {
-                    setDefaultSpaceId(contractId, tenantId, defaultSpaceId);
-                } else {
-                    log.debug("No Space Exists with Id={}, ignoring.", defaultSpaceId);
-                }
+                SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId, defaultSpaceInfo);
+                setDefaultSpaceId(contractId, tenantId, defaultSpaceId);
             }
         }
+
+        Document properties = DocumentUtils.toDocument(tenantInfo.properties);
+        Path propertiesPath = tenantPath.append(PathConstants.PROPERTIES_FILE);
+        camille.upsert(propertiesPath, properties, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        log.debug("created properties @ {}", propertiesPath);
+
     }
 
     public static void setDefaultSpaceId(String contractId, String tenantId, String defaultSpaceId) throws Exception {
         LifecycleUtils.validateIds(contractId, tenantId, defaultSpaceId);
 
-        if (defaultSpaceId == null) {
-            IllegalArgumentException e = new IllegalArgumentException("defaultSpaceId cannot be null");
-            log.error(e.getMessage(), e);
-            throw e;
-        }
         if (SpaceLifecycleManager.exists(contractId, tenantId, defaultSpaceId)) {
             CamilleEnvironment.getCamille().set(
                     PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId).append(
@@ -130,24 +115,22 @@ public class TenantLifecycleManager {
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId));
     }
 
-    /**
-     * @return A list of tenantIds
-     */
-    public static List<String> getAll(String contractId) throws IllegalArgumentException, Exception {
+    public static List<Pair<String, TenantInfo>> getAll(String contractId) throws IllegalArgumentException, Exception {
         LifecycleUtils.validateIds(contractId);
+        List<Pair<String, TenantInfo>> toReturn = new ArrayList<Pair<String, TenantInfo>>();
 
-        List<Pair<Document, Path>> childPairs = CamilleEnvironment.getCamille().getChildren(
-                PathBuilder.buildTenantsPath(CamilleEnvironment.getPodId(), contractId));
-        Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {
-            @Override
-            public int compare(Pair<Document, Path> o1, Pair<Document, Path> o2) {
-                return o1.getRight().getSuffix().compareTo(o2.getRight().getSuffix());
-            }
-        });
-        List<String> out = new ArrayList<String>(childPairs.size());
+        Camille c = CamilleEnvironment.getCamille();
+        List<Pair<Document, Path>> childPairs = c.getChildren(PathBuilder.buildTenantsPath(
+                CamilleEnvironment.getPodId(), contractId));
+
         for (Pair<Document, Path> childPair : childPairs) {
-            out.add(childPair.getRight().getSuffix());
+            Document tenantPropertiesDocument = c.get(childPair.getRight().append(PathConstants.PROPERTIES_FILE));
+            TenantProperties properties = DocumentUtils.toObject(tenantPropertiesDocument, TenantProperties.class);
+
+            TenantInfo tenantInfo = new TenantInfo(properties);
+            toReturn.add(new MutablePair<String, TenantInfo>(childPair.getRight().getSuffix(), tenantInfo));
         }
-        return out;
+
+        return toReturn;
     }
 }

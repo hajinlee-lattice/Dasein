@@ -1,10 +1,9 @@
 package com.latticeengines.camille.exposed.lifecycle;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
@@ -14,15 +13,19 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.paths.PathConstants;
+import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 
 public class ContractLifecycleManager {
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    public static void create(String contractId) throws Exception {
+    public static void create(String contractId, ContractInfo contractInfo) throws Exception {
         LifecycleUtils.validateIds(contractId);
 
         Camille camille = CamilleEnvironment.getCamille();
@@ -41,6 +44,11 @@ public class ContractLifecycleManager {
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Contract already existed @ {}, ignoring create", contractPath);
         }
+
+        Document properties = DocumentUtils.toDocument(contractInfo.properties);
+        Path propertiesPath = contractPath.append(PathConstants.PROPERTIES_FILE);
+        camille.upsert(propertiesPath, properties, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        log.debug("created properties @ {}", propertiesPath);
     }
 
     public static void delete(String contractId) throws Exception {
@@ -62,22 +70,31 @@ public class ContractLifecycleManager {
                 PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId));
     }
 
-    /**
-     * @return A list of contractIds
-     */
-    public static List<String> getAll() throws IllegalArgumentException, Exception {
-        List<Pair<Document, Path>> childPairs = CamilleEnvironment.getCamille().getChildren(
-                PathBuilder.buildContractsPath(CamilleEnvironment.getPodId()));
-        Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {
-            @Override
-            public int compare(Pair<Document, Path> o1, Pair<Document, Path> o2) {
-                return o1.getRight().getSuffix().compareTo(o2.getRight().getSuffix());
-            }
-        });
-        List<String> out = new ArrayList<String>(childPairs.size());
-        for (Pair<Document, Path> childPair : childPairs) {
-            out.add(childPair.getRight().getSuffix());
-        }
-        return out;
+    public static ContractInfo getInfo(String contractId) throws Exception {
+        LifecycleUtils.validateIds(contractId);
+        Camille c = CamilleEnvironment.getCamille();
+
+        Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
+        Document contractPropertiesDocument = c.get(contractPath.append(PathConstants.PROPERTIES_FILE));
+        ContractProperties properties = DocumentUtils.toObject(contractPropertiesDocument, ContractProperties.class);
+
+        ContractInfo contractInfo = new ContractInfo(properties);
+        return contractInfo;
     }
+
+    public static List<Pair<String, ContractInfo>> getAll() throws IllegalArgumentException, Exception {
+        List<Pair<String, ContractInfo>> toReturn = new ArrayList<Pair<String, ContractInfo>>();
+
+        Camille c = CamilleEnvironment.getCamille();
+        List<Pair<Document, Path>> childPairs = c.getChildren(PathBuilder.buildContractsPath(CamilleEnvironment
+                .getPodId()));
+
+        for (Pair<Document, Path> childPair : childPairs) {
+            toReturn.add(new MutablePair<String, ContractInfo>(childPair.getRight().getSuffix(), getInfo(childPair
+                    .getRight().getSuffix())));
+        }
+
+        return toReturn;
+    }
+
 }

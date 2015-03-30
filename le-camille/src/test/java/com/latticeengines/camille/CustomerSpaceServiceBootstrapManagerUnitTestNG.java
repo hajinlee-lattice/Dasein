@@ -16,10 +16,7 @@ import com.latticeengines.camille.exposed.config.ConfigurationTransaction;
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
 import com.latticeengines.camille.exposed.config.bootstrap.VersionMismatchException;
 import com.latticeengines.camille.exposed.config.cache.ConfigurationCache;
-import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
@@ -28,15 +25,12 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
         BaseBootstrapManagerUnitTestNG<CustomerSpaceServiceScope> {
     @Override
     public CustomerSpaceServiceScope getTestScope() {
-        return new CustomerSpaceServiceScope(new CustomerSpace("ContractID", "TenantID", "SpaceID"), "MyService", 1);
+        return new CustomerSpaceServiceScope(CamilleTestEnvironment.getCustomerSpace(), "MyService", 1);
     }
 
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
         CamilleTestEnvironment.start();
-        CustomerSpace space = getTestScope().getCustomerSpace();
-        ContractLifecycleManager.create(space.getContractId());
-        TenantLifecycleManager.create(space.getContractId(), space.getTenantId(), space.getSpaceId());
         lock();
     }
 

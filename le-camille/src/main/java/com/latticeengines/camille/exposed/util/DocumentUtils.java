@@ -7,8 +7,11 @@ public class DocumentUtils {
     public static <T> Document toDocument(T object) {
         return new Document(JsonUtils.serialize(object));
     }
-    
+
     public static <T> T toObject(Document document, Class<T> clazz) {
+        if (document == null) {
+            return null;
+        }
         return JsonUtils.deserialize(document.getData(), clazz);
     }
 }

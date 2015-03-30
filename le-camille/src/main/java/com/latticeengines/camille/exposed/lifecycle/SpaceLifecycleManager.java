@@ -1,10 +1,9 @@
 package com.latticeengines.camille.exposed.lifecycle;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
@@ -14,36 +13,29 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.paths.PathConstants;
+import com.latticeengines.camille.exposed.util.DocumentUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 
 public class SpaceLifecycleManager {
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
-    private static final String defaultSpaceId = "default";
+    public static void create(String contractId, String tenantId, String spaceId, CustomerSpaceInfo info)
+            throws Exception {
 
-    /**
-     * @return defaultSpaceId
-     */
-    public static String createDefault(String contractId, String tenantId) throws Exception {
-        LifecycleUtils.validateIds(contractId, tenantId);
-
-        create(contractId, tenantId, defaultSpaceId);
-        return defaultSpaceId;
-    }
-
-    public static void create(String contractId, String tenantId, String spaceId) throws Exception {
         LifecycleUtils.validateIds(contractId, tenantId, spaceId);
 
-        if (spaceId == null) {
-            IllegalArgumentException e = new IllegalArgumentException("spaceId cannot be null");
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-
         Camille camille = CamilleEnvironment.getCamille();
+
+        if (info == null || info.properties == null || info.featureFlags == null) {
+            throw new NullPointerException("properties and feature flags cannot be null");
+        }
 
         try {
             Path spacesPath = PathBuilder.buildCustomerSpacesPath(CamilleEnvironment.getPodId(), contractId, tenantId);
@@ -60,6 +52,16 @@ public class SpaceLifecycleManager {
         } catch (KeeperException.NodeExistsException e) {
             log.debug("Space already existed @ {}, ignoring create", spacePath);
         }
+
+        Document properties = DocumentUtils.toDocument(info.properties);
+        Path propertiesPath = spacePath.append(PathConstants.PROPERTIES_FILE);
+        camille.upsert(propertiesPath, properties, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        log.debug("created properties @ {}", propertiesPath);
+
+        Document flags = DocumentUtils.toDocument(info.featureFlags);
+        Path flagsPath = spacePath.append(PathConstants.FEATURE_FLAGS_FILE);
+        camille.upsert(flagsPath, flags, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        log.debug("created feature flags @ {}", flagsPath);
     }
 
     public static void delete(String contractId, String tenantId, String spaceId) throws Exception {
@@ -82,24 +84,63 @@ public class SpaceLifecycleManager {
                 PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId));
     }
 
-    /**
-     * @return A list of spaceIds
-     */
-    public static List<String> getAll(String contractId, String tenantId) throws IllegalArgumentException, Exception {
+    public static CustomerSpaceInfo getInfo(String contractId, String tenantId, String spaceId) throws Exception {
+        LifecycleUtils.validateIds(contractId, tenantId, spaceId);
+        Camille c = CamilleEnvironment.getCamille();
+
+        Path spacePath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
+                spaceId);
+        Document spacePropertiesDocument = c.get(spacePath.append(PathConstants.PROPERTIES_FILE));
+        CustomerSpaceProperties properties = DocumentUtils.toObject(spacePropertiesDocument,
+                CustomerSpaceProperties.class);
+
+        Document spaceFlagsDocument = c.get(spacePath.append(PathConstants.FEATURE_FLAGS_FILE));
+        String flags = spaceFlagsDocument.getData();
+
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, flags);
+        return spaceInfo;
+    }
+
+    public static List<Pair<String, CustomerSpaceInfo>> getAll(String contractId, String tenantId) throws Exception {
         LifecycleUtils.validateIds(contractId, tenantId);
 
-        List<Pair<Document, Path>> childPairs = CamilleEnvironment.getCamille().getChildren(
-                PathBuilder.buildCustomerSpacesPath(CamilleEnvironment.getPodId(), contractId, tenantId));
-        Collections.sort(childPairs, new Comparator<Pair<Document, Path>>() {
-            @Override
-            public int compare(Pair<Document, Path> o1, Pair<Document, Path> o2) {
-                return o1.getRight().getSuffix().compareTo(o2.getRight().getSuffix());
-            }
-        });
-        List<String> out = new ArrayList<String>(childPairs.size());
+        List<Pair<String, CustomerSpaceInfo>> toReturn = new ArrayList<Pair<String, CustomerSpaceInfo>>();
+
+        Camille c = CamilleEnvironment.getCamille();
+        List<Pair<Document, Path>> childPairs = c.getChildren(PathBuilder.buildCustomerSpacesPath(
+                CamilleEnvironment.getPodId(), contractId, tenantId));
+
         for (Pair<Document, Path> childPair : childPairs) {
-            out.add(childPair.getRight().getSuffix());
+            String spaceId = childPair.getRight().getSuffix();
+            toReturn.add(new MutablePair<String, CustomerSpaceInfo>(spaceId, getInfo(contractId, tenantId, spaceId)));
         }
-        return out;
+
+        return toReturn;
+    }
+
+    public static List<Pair<CustomerSpace, CustomerSpaceInfo>> getAll() throws Exception {
+        List<Pair<CustomerSpace, CustomerSpaceInfo>> toReturn = new ArrayList<Pair<CustomerSpace, CustomerSpaceInfo>>();
+
+        Camille c = CamilleEnvironment.getCamille();
+        List<Pair<Document, Path>> contracts = c.getChildren(PathBuilder.buildContractsPath(CamilleEnvironment
+                .getPodId()));
+        for (Pair<Document, Path> contract : contracts) {
+            String contractId = contract.getRight().getSuffix();
+            List<Pair<Document, Path>> tenants = c.getChildren(PathBuilder.buildTenantsPath(
+                    CamilleEnvironment.getPodId(), contractId));
+            for (Pair<Document, Path> tenant : tenants) {
+                String tenantId = tenant.getRight().getSuffix();
+                List<Pair<Document, Path>> spaces = c.getChildren(PathBuilder.buildCustomerSpacesPath(
+                        CamilleEnvironment.getPodId(), contractId, tenantId));
+
+                for (Pair<Document, Path> space : spaces) {
+                    String spaceId = space.getRight().getSuffix();
+                    toReturn.add(new MutablePair<CustomerSpace, CustomerSpaceInfo>(new CustomerSpace(contractId,
+                            tenantId, spaceId), getInfo(contractId, tenantId, spaceId)));
+                }
+            }
+        }
+
+        return toReturn;
     }
 }

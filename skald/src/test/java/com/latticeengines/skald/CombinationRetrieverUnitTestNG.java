@@ -11,8 +11,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
 import com.latticeengines.camille.exposed.interfaces.data.DataInterfacePublisher;
-import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -31,7 +29,7 @@ public class CombinationRetrieverUnitTestNG {
         public static final String TestModel1_name = "TestModel1";
         public static final String TestModel2_name = "TestModel2";
 
-        public static final CustomerSpace Space = new CustomerSpace("This", "IsA", "Test");
+        public static final CustomerSpace Space = CamilleTestEnvironment.getCustomerSpace();
 
         public static final ModelTags Tags;
         public static final ModelCombination TestCombination;
@@ -121,12 +119,7 @@ public class CombinationRetrieverUnitTestNG {
 
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
-        // TODO It'd be nice to have a less error-prone mechanism for managing
-        // the ZooKeeper test environment.
         CamilleTestEnvironment.start();
-        ContractLifecycleManager.create(Documents.Space.getContractId());
-        TenantLifecycleManager.create(Documents.Space.getContractId(), Documents.Space.getTenantId(),
-                Documents.Space.getSpaceId());
 
         SkaldBootstrapper.register();
         CustomerSpaceServiceBootstrapManager.reset(DocumentConstants.SERVICE_NAME, Documents.Space);

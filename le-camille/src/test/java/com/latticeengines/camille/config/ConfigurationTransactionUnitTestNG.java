@@ -7,18 +7,12 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.config.ConfigurationTransaction;
-import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.PodLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.scopes.ContractScope;
-import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.camille.scopes.PodScope;
 import com.latticeengines.domain.exposed.camille.scopes.TenantScope;
 
@@ -41,7 +35,6 @@ public class ConfigurationTransactionUnitTestNG {
     @Test(groups = "unit")
     public void testPodTransaction() throws Exception {
         PodScope scope = new PodScope();
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
         Path path = new Path("/foo");
         ConfigurationTransaction<PodScope> transaction = ConfigurationTransaction.construct(scope);
         transaction.create(path, new Document("foo"));
@@ -53,9 +46,7 @@ public class ConfigurationTransactionUnitTestNG {
 
     @Test(groups = "unit")
     public void testContractTransaction() throws Exception {
-        ContractScope scope = new ContractScope("MyContract");
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractId());
+        ContractScope scope = new ContractScope(CamilleTestEnvironment.getContractId());
         Path path = new Path("/foo");
 
         ConfigurationTransaction<ContractScope> transaction = ConfigurationTransaction.construct(scope);
@@ -68,10 +59,8 @@ public class ConfigurationTransactionUnitTestNG {
 
     @Test(groups = "unit")
     public void testTenantTransaction() throws Exception {
-        TenantScope scope = new TenantScope("MyContract", "MyTenant");
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractId());
-        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
+        TenantScope scope = new TenantScope(CamilleTestEnvironment.getContractId(),
+                CamilleTestEnvironment.getTenantId());
         Path path = new Path("/foo");
 
         ConfigurationTransaction<TenantScope> transaction = ConfigurationTransaction.construct(scope);
@@ -79,27 +68,6 @@ public class ConfigurationTransactionUnitTestNG {
         transaction.commit();
 
         ConfigurationController<TenantScope> controller = ConfigurationController.construct(scope);
-        Assert.assertTrue(controller.exists(path));
-    }
-
-    /**
-     * Test when specifying an explicit space that's different from the default
-     * space
-     */
-    @Test(groups = "unit")
-    public void testSpaceTransaction() throws Exception {
-        CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant", "MySpace");
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractId());
-        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "DefaultSpace");
-        SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), scope.getSpaceId());
-        Path path = new Path("/foo");
-
-        ConfigurationTransaction<CustomerSpaceScope> transaction = ConfigurationTransaction.construct(scope);
-        transaction.create(path, new Document("foo"));
-        transaction.commit();
-
-        ConfigurationController<CustomerSpaceScope> controller = ConfigurationController.construct(scope);
         Assert.assertTrue(controller.exists(path));
     }
 }

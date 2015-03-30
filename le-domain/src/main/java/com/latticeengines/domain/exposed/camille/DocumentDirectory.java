@@ -23,7 +23,7 @@ public class DocumentDirectory implements Serializable {
 
     private Path root;
     private List<Node> children;
-    
+
     public DocumentDirectory() {
         this(new Path("/"));
     }
@@ -313,6 +313,15 @@ public class DocumentDirectory implements Serializable {
             return children;
         }
 
+        public Node getChild(String pathSuffix) {
+            for (Node child : children) {
+                if (child.getPath().getSuffix().equals(pathSuffix)) {
+                    return child;
+                }
+            }
+            return null;
+        }
+
         @Override
         public int compareTo(Node other) {
             return ObjectUtils.compare(path != null ? path.toString() : null,
@@ -343,5 +352,14 @@ public class DocumentDirectory implements Serializable {
                 return false;
             return true;
         }
+    }
+
+    public Node getChild(String pathSuffix) {
+        for (Node child : children) {
+            if (child.getPath().getSuffix().equals(pathSuffix)) {
+                return child;
+            }
+        }
+        return null;
     }
 }

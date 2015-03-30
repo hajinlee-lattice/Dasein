@@ -3,9 +3,18 @@ package com.latticeengines.camille.exposed.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
-import com.latticeengines.camille.exposed.CamilleConfiguration;
+import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.netflix.curator.test.TestingServer;
 
 public class CamilleTestEnvironment {
@@ -30,13 +39,49 @@ public class CamilleTestEnvironment {
 
             CamilleConfiguration config = new CamilleConfiguration();
             config.setConnectionString(server.getConnectString());
-            config.setPodId("Development");
+            config.setPodId(getPodId());
 
             CamilleEnvironment.start(Mode.BOOTSTRAP, config);
+
+            ContractLifecycleManager.create(getContractId(), getContractInfo());
+            TenantLifecycleManager.create(getContractId(), getTenantId(), getTenantInfo(), getSpaceId(),
+                    getCustomerSpaceInfo());
         } catch (Exception e) {
             log.error("Error starting Camille environment", e);
             throw e;
         }
+    }
+
+    public static String getPodId() {
+        return "Development";
+    }
+
+    public static String getContractId() {
+        return "Widgettech";
+    }
+
+    public static String getTenantId() {
+        return "Widgettech";
+    }
+
+    public static String getSpaceId() {
+        return "Development";
+    }
+
+    public static CustomerSpace getCustomerSpace() {
+        return new CustomerSpace(getContractId(), getTenantId(), getSpaceId());
+    }
+
+    public static ContractInfo getContractInfo() {
+        return new ContractInfo(new ContractProperties());
+    }
+
+    public static TenantInfo getTenantInfo() {
+        return new TenantInfo(new TenantProperties());
+    }
+
+    public static CustomerSpaceInfo getCustomerSpaceInfo() {
+        return new CustomerSpaceInfo(new CustomerSpaceProperties(), "");
     }
 
     /**

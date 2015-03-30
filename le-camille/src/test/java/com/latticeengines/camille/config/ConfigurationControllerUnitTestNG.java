@@ -1,6 +1,5 @@
 package com.latticeengines.camille.config;
 
-import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -10,10 +9,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.ConfigurationController;
-import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.PodLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
-import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -42,7 +37,6 @@ public class ConfigurationControllerUnitTestNG {
     @Test(groups = "unit")
     public void testPodCreateDeleteDocument() throws Exception {
         PodScope scope = new PodScope();
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
         Path path = new Path("/foo");
         ConfigurationController<PodScope> controller = ConfigurationController.construct(scope);
         controller.create(path, new Document("foo"));
@@ -55,9 +49,7 @@ public class ConfigurationControllerUnitTestNG {
 
     @Test(groups = "unit")
     public void testContractCreateDeleteDocument() throws Exception {
-        ContractScope scope = new ContractScope("MyContract");
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractId());
+        ContractScope scope = new ContractScope(CamilleTestEnvironment.getContractId());
         Path path = new Path("/foo");
         ConfigurationController<ContractScope> controller = ConfigurationController.construct(scope);
         controller.create(path, new Document("foo"));
@@ -70,10 +62,8 @@ public class ConfigurationControllerUnitTestNG {
 
     @Test(groups = "unit")
     public void testTenantCreateDeleteDocument() throws Exception {
-        TenantScope scope = new TenantScope("MyContract", "MyTenant");
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractId());
-        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "MySpace");
+        TenantScope scope = new TenantScope(CamilleTestEnvironment.getContractId(),
+                CamilleTestEnvironment.getTenantId());
         Path path = new Path("/foo");
         ConfigurationController<TenantScope> controller = ConfigurationController.construct(scope);
         controller.create(path, new Document("foo"));
@@ -91,25 +81,7 @@ public class ConfigurationControllerUnitTestNG {
      */
     @Test(groups = "unit")
     public void testSpaceCreateDeleteDocument() throws Exception {
-        CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant", "MySpace");
-        PodLifecycleManager.create(CamilleEnvironment.getPodId());
-        ContractLifecycleManager.create(scope.getContractId());
-        TenantLifecycleManager.create(scope.getContractId(), scope.getTenantId(), "DefaultSpace");
-        SpaceLifecycleManager.create(scope.getContractId(), scope.getTenantId(), scope.getSpaceId());
-        Path path = new Path("/foo");
-        ConfigurationController<CustomerSpaceScope> controller = ConfigurationController.construct(scope);
-        controller.create(path, new Document("foo"));
-        Assert.assertTrue(controller.exists(path));
-        Assert.assertTrue(CamilleEnvironment.getCamille().exists(
-                PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), scope.getContractId(),
-                        scope.getTenantId(), scope.getSpaceId()).append(path)));
-        controller.delete(path);
-        Assert.assertFalse(controller.exists(path));
-    }
-
-    @Test(groups = "unit", expectedExceptions = KeeperException.NoNodeException.class)
-    public void testCreateFailsToCreateScopeDirectory() throws Exception {
-        CustomerSpaceScope scope = new CustomerSpaceScope("MyContract", "MyTenant", "MySpace");
+        CustomerSpaceScope scope = new CustomerSpaceScope(CamilleTestEnvironment.getCustomerSpace());
         Path path = new Path("/foo");
         ConfigurationController<CustomerSpaceScope> controller = ConfigurationController.construct(scope);
         controller.create(path, new Document("foo"));

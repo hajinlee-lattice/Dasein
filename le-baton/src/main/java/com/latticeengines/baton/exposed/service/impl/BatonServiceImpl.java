@@ -14,6 +14,11 @@ import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 
 public class BatonServiceImpl implements BatonService {
 
@@ -21,20 +26,22 @@ public class BatonServiceImpl implements BatonService {
     }.getClass().getEnclosingClass());
 
     @Override
-    public void createTenant(String contractId, String tenantId, String spaceId) {
+    public void createTenant(String contractId, String tenantId, String spaceId, CustomerSpaceInfo spaceInfo) {
         try {
             if (!ContractLifecycleManager.exists(contractId)) {
                 log.info(String.format("Creating contract %s", contractId));
-                ContractLifecycleManager.create(contractId);
+                // XXX For now
+                ContractLifecycleManager.create(contractId, new ContractInfo(new ContractProperties()));
             }
             if (TenantLifecycleManager.exists(contractId, tenantId)) {
-                log.error(String.format("Tenant %s already exists", tenantId));
-                System.exit(1);
+                throw new RuntimeException(String.format("Tenant %s already exists", tenantId));
             }
-            TenantLifecycleManager.create(contractId, tenantId, spaceId);
+            // XXX For now
+            TenantLifecycleManager.create(contractId, tenantId, new TenantInfo(new TenantProperties()), spaceId,
+                    spaceInfo);
         } catch (Exception e) {
             log.error("Error creating tenant", e);
-            System.exit(1);
+            throw new RuntimeException("Error creating tenant", e);
         }
 
         log.info(String.format("Succesfully created tenant %s", tenantId));
@@ -62,7 +69,7 @@ public class BatonServiceImpl implements BatonService {
 
         } catch (Exception e) {
             log.error("Error loading directory", e);
-            System.exit(1);
+            throw new RuntimeException("Error creating tenant", e);
         }
 
         log.info(String.format("Succesfully loaded files into directory %s", rawPath));
@@ -71,7 +78,7 @@ public class BatonServiceImpl implements BatonService {
     @Override
     public void bootstrap(String contractId, String tenantId, String spaceId) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }
