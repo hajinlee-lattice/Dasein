@@ -300,6 +300,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             ResourceUtility.getString('TOP_PREDICTOR_EXPORT_ATTRIBUTE_DESCRIPTION_LABEL'), 
             ResourceUtility.getString('TOP_PREDICTOR_EXPORT_PERCENT_LEADS_LABEL'), 
             ResourceUtility.getString('TOP_PREDICTOR_EXPORT_LIFT_LABEL'), 
+            ResourceUtility.getString('TOP_PREDICTOR_EXPORT_CONVERSION_RATE_LABEL'), 
             ResourceUtility.getString('TOP_PREDICTOR_EXPORT_PREDICTIVE_POWER_LABEL')
         ];
         var toReturn = []; 
@@ -307,6 +308,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         var topCategories = this.GetTopCategories(modelSummary);
         
         var totalPredictors = modelSummary.Predictors.sort(this.SortByPredictivePower);
+        var averageConversionRate = modelSummary.ModelDetails.TotalConversions/modelSummary.ModelDetails.TotalLeads;
         for (var i = 0; i < topCategories.length; i++) {
             category = topCategories[i];
             
@@ -326,15 +328,16 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
                         }
                         percentTotal = percentTotal.toFixed(1);
                         var lift = element.Lift.toPrecision(2);
+                        var conversionRate = lift * averageConversionRate;
                         var description = cleanupForExcel(predictor.Description ? predictor.Description : "");
                         var attributeValue = AnalyticAttributeUtility.GetAttributeBucketName(element, predictor);
                         if (attributeValue.toUpperCase() == "NULL" || attributeValue.toUpperCase() == "NOT AVAILABLE") {
                             attributeValue = "N/A";
                         }
-                        //DP-352 
+                        //PLS-352 
                         attributeValue = "'"+ attributeValue + "'";
                         var predictivePower = predictor.UncertaintyCoefficient * 100;
-                        var attributeRow = [predictor.Category, predictor.DisplayName, attributeValue, description, percentTotal, lift, predictivePower];
+                        var attributeRow = [predictor.Category, predictor.DisplayName, attributeValue, description, percentTotal, lift, conversionRate, predictivePower];
                         toReturn.push(attributeRow);
                     }
                 }
