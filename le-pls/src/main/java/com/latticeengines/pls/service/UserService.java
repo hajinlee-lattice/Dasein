@@ -13,4 +13,6 @@ public interface UserService {
 
     AccessLevel getAccessLevel(String tenantId, String username);
 
+    boolean softDelete(String tenantId, String username);
+
 }

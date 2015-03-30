@@ -111,4 +111,22 @@ public class UserServiceImpl implements UserService {
         }
         return toReturn;
     }
+
+    @Override
+    public boolean softDelete(String tenantId, String username) {
+        if (resignAccessLevel(tenantId, username)) {
+            //TODO:song this is temporary until the concept of GrantedRight no longer exists in GA
+            boolean success = true;
+            for (GrantedRight right : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
+                try {
+                    success = success && globalUserManagementService.revokeRight(right.getAuthority(), tenantId, username);
+                } catch (Exception e) {
+                    //ignore
+                }
+            }
+            return success;
+        } else {
+            return false;
+        }
+    }
 }
