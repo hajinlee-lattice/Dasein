@@ -8,6 +8,7 @@ public class UserRegistration {
     private User user;
     private Credentials credentials;
     private boolean validation = false;
+    private String accessLevel;
     
     @JsonProperty("User")
     public User getUser() {
@@ -38,7 +39,13 @@ public class UserRegistration {
     public void setValidation(boolean validation) {
         this.validation = validation;
     }
-    
+
+    @JsonProperty("AccessLevel")
+    public String getAccessLevel() { return accessLevel; }
+
+    @JsonProperty("AccessLevel")
+    public void setAccessLevel(String accessLevel) { this.accessLevel = accessLevel; }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
