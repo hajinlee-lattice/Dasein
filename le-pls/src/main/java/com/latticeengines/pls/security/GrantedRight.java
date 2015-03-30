@@ -1,13 +1,12 @@
 package com.latticeengines.pls.security;
 
 
-
-import org.springframework.security.core.GrantedAuthority;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.security.core.GrantedAuthority;
 
 public enum GrantedRight implements GrantedAuthority {
 
