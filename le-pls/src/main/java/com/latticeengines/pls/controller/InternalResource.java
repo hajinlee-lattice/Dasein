@@ -1,7 +1,9 @@
 package com.latticeengines.pls.controller;
 
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -21,21 +23,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.api.Status;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RightsUtilities;
-import com.latticeengines.pls.service.TenantService;
+import com.latticeengines.pls.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -53,7 +54,7 @@ public class InternalResource extends InternalResourceBase {
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
-    private TenantService tenantService;
+    private UserService userService;
 
     @RequestMapping(value = "/modelsummaries/{modelId}",
         method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -100,31 +101,34 @@ public class InternalResource extends InternalResourceBase {
     @ApiOperation(value = "Delete users. Mainly for cleaning up testing users.")
     public SimpleBooleanResponse deleteUsers(
         @RequestParam(value = "namepattern", required = false) String namePattern,
-        @RequestParam(value = "tenant", required = false) String tenantId,
+        @RequestParam(value = "tenants") String tenantIds,
         HttpServletRequest request
     ) throws URIException {
         checkHeader(request);
         String decodedNamePattern = namePattern;
         if (decodedNamePattern != null) {
             decodedNamePattern = URIUtil.decode(namePattern);
+
             List<String> tenants = new ArrayList<>();
-            if (tenantId == null) {
-                LOGGER.info(String.format(
-                    "Deleting users matching %s from all tenants using internal API",
-                    decodedNamePattern
-                ));
-                for (Tenant t: tenantService.getAllTenants()) {
-                    tenants.add(t.getId());
-                }
-            } else {
-                tenants.add(tenantId);
-                LOGGER.info(String.format(
-                    "Deleting users matching %s from the tenant %s using internal API",
-                    decodedNamePattern, tenantId
-                ));
+
+            JsonNode tenantNodes;
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                tenantNodes = mapper.readTree(tenantIds);
+            } catch (IOException e) {
+                return SimpleBooleanResponse.getFailResponse(
+                    Collections.singletonList("Could not parse the tenant id array.")
+                );
+            }
+            for (JsonNode node : tenantNodes) {
+                tenants.add(node.asText());
             }
 
             for (String tid: tenants) {
+                LOGGER.info(String.format(
+                    "Deleting users matching %s from the tenant %s using internal API",
+                    decodedNamePattern, tid
+                ));
                 List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList
                     = globalUserManagementService.getAllUsersOfTenant(tid);
                 for (Map.Entry<User, List<String>> userRight: userRightsList) {
@@ -133,7 +137,7 @@ public class InternalResource extends InternalResourceBase {
                         RightsUtilities.translateRights(userRight.getValue())
                     );
                     if ((!isAdmin) && user.getUsername().matches(decodedNamePattern)) {
-                        softDelete(tid, user.getUsername());
+                        userService.softDelete(tid, user.getUsername());
                         LOGGER.info(String.format(
                             "User %s has been soft deleted from the tenant %s through internal API",
                             user.getUsername(), tid
@@ -186,22 +190,22 @@ public class InternalResource extends InternalResourceBase {
         return c;
     }
 
-    private void softDelete(String tenantId, String username) {
-        revokeRightWithoutException(GrantedRight.VIEW_PLS_MODELS.getAuthority(), tenantId, username);
-        revokeRightWithoutException(GrantedRight.VIEW_PLS_CONFIGURATION.getAuthority(), tenantId, username);
-        revokeRightWithoutException(GrantedRight.VIEW_PLS_USERS.getAuthority(), tenantId, username);
-        revokeRightWithoutException(GrantedRight.VIEW_PLS_REPORTING.getAuthority(), tenantId, username);
-        revokeRightWithoutException(GrantedRight.EDIT_PLS_MODELS.getAuthority(), tenantId, username);
-        revokeRightWithoutException(GrantedRight.EDIT_PLS_CONFIGURATION.getAuthority(), tenantId, username);
-        revokeRightWithoutException(GrantedRight.EDIT_PLS_USERS.getAuthority(), tenantId, username);
-        revokeRightWithoutException(GrantedRight.CREATE_PLS_MODELS.getAuthority(), tenantId, username);
-    }
-
-    private void revokeRightWithoutException(String right, String tenant, String username) {
-        try {
-            globalUserManagementService.revokeRight(right, tenant, username);
-        } catch (LedpException e) {
-            // ignore
-        }
-    }
+//    private void softDelete(String tenantId, String username) {
+//        revokeRightWithoutException(GrantedRight.VIEW_PLS_MODELS.getAuthority(), tenantId, username);
+//        revokeRightWithoutException(GrantedRight.VIEW_PLS_CONFIGURATION.getAuthority(), tenantId, username);
+//        revokeRightWithoutException(GrantedRight.VIEW_PLS_USERS.getAuthority(), tenantId, username);
+//        revokeRightWithoutException(GrantedRight.VIEW_PLS_REPORTING.getAuthority(), tenantId, username);
+//        revokeRightWithoutException(GrantedRight.EDIT_PLS_MODELS.getAuthority(), tenantId, username);
+//        revokeRightWithoutException(GrantedRight.EDIT_PLS_CONFIGURATION.getAuthority(), tenantId, username);
+//        revokeRightWithoutException(GrantedRight.EDIT_PLS_USERS.getAuthority(), tenantId, username);
+//        revokeRightWithoutException(GrantedRight.CREATE_PLS_MODELS.getAuthority(), tenantId, username);
+//    }
+//
+//    private void revokeRightWithoutException(String right, String tenant, String username) {
+//        try {
+//            globalUserManagementService.revokeRight(right, tenant, username);
+//        } catch (LedpException e) {
+//            // ignore
+//        }
+//    }
 }

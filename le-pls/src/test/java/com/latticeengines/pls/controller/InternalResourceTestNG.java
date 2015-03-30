@@ -53,7 +53,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
-    @BeforeClass(groups = { "functional", "deployment" })
+    @BeforeClass(groups = {"functional", "deployment"})
     public void setup() throws Exception {
         Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         String tenant1 = ticket.getTenants().get(0).getId();
@@ -61,11 +61,11 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         setupDb(tenant1, tenant2);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test(groups = "functional")
     public void update() throws Exception {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
         List<ModelSummary> modelSummaries = modelSummaryEntityMgr.getAll();
         AttributeMap attrMap = new AttributeMap();
@@ -76,7 +76,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
             String url = String.format("%s/pls/internal/modelsummaries/%s", restAPIHostPort, modelSummary.getId());
             HttpEntity<AttributeMap> requestEntity = new HttpEntity<AttributeMap>(attrMap);
             ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
-                    ResponseDocument.class);
+                ResponseDocument.class);
             ResponseDocument responseDoc = response.getBody();
             assertTrue(responseDoc.isSuccess());
             Map<String, Object> result = (Map) ((ResponseDocument) response.getBody()).getResult();
@@ -91,11 +91,11 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test(groups = "functional")
     public void updateNotExists() throws Exception {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
         AttributeMap attrMap = new AttributeMap();
         attrMap.put("Status", "UpdateAsActive");
@@ -103,7 +103,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         String url = String.format("%s/pls/internal/modelsummaries/%s", restAPIHostPort, "xyz");
         HttpEntity<AttributeMap> requestEntity = new HttpEntity<AttributeMap>(attrMap);
         ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
-                ResponseDocument.class);
+            ResponseDocument.class);
         ResponseDocument responseDoc = response.getBody();
         assertFalse(responseDoc.isSuccess());
         Map<String, Object> result = (Map) ((ResponseDocument) response.getBody()).getResult();
@@ -127,7 +127,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         globalTenantManagementService.registerTenant(tenant);
 
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
         for (int i = 0; i < 3; i++) {
             String username = "tester_" + UUID.randomUUID().toString() + "@test.com";
@@ -143,7 +143,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         headers.add("Accept", "application/json");
         HttpEntity<JsonNode> requestEntity = new HttpEntity<>(null, headers);
         ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(
-            getRestAPIHostPort() + "/pls/internal/users?namepattern=" + pattern,
+            getRestAPIHostPort() + "/pls/internal/users?tenants=[\"" + tenant.getId() + "\"]&namepattern=" + pattern,
             HttpMethod.DELETE,
             requestEntity,
             ResponseDocument.class
@@ -153,7 +153,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
         List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenant.getId());
         boolean cleaned = true;
-        for (AbstractMap.SimpleEntry<User, List<String>> userRight: userRightsList) {
+        for (AbstractMap.SimpleEntry<User, List<String>> userRight : userRightsList) {
             User user = userRight.getKey();
             if (user.getUsername().matches(pattern)) {
                 cleaned = false;
