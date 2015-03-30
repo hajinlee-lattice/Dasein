@@ -41,6 +41,7 @@ import com.latticeengines.pls.exception.LoginException;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
+import com.latticeengines.pls.security.AccessLevel;
 import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.security.RightsUtilities;
@@ -190,7 +191,7 @@ public class UserResource {
                 }
             }
         }
-        return SimpleBooleanResponse.getFailResponse(Arrays.asList("Could not change password."));
+        return SimpleBooleanResponse.getFailResponse(Collections.singletonList("Could not change password."));
     }
 
     @RequestMapping(value = "/{username:.+}", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -211,13 +212,23 @@ public class UserResource {
         }
 
         // update rights
-        List<String> rights = RightsUtilities.translateRights(data.getRights());
+        List<String> rights = new ArrayList<>();
+        if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
+            // using access level if it is provided
+            for (GrantedRight grantedRight: AccessLevel.valueOf(data.getAccessLevel()).getGrantedRights()) {
+                rights.add(grantedRight.getAuthority());
+            }
+        } else {
+            rights = RightsUtilities.translateRights(data.getRights());
+        }
+
+        softDelete(tenantId, username);
         for (String right : rights) {
             globalUserManagementService.grantRight(right, tenantId, username);
         }
 
         if (!inTenant(tenantId, username)) {
-            return SimpleBooleanResponse.getFailResponse(Arrays.asList("Cannot update users in another tenant."));
+            return SimpleBooleanResponse.getFailResponse(Collections.singletonList("Cannot update users in another tenant."));
         }
 
         return SimpleBooleanResponse.getSuccessResponse();
@@ -249,7 +260,7 @@ public class UserResource {
         try {
             userNodes = mapper.readTree(usernames);
         } catch (IOException e) {
-            response.setErrors(Arrays.asList("Could not parse the input name array."));
+            response.setErrors(Collections.singletonList("Could not parse the input name array."));
             return response;
         }
 
@@ -313,14 +324,9 @@ public class UserResource {
 
     private boolean softDelete(String tenantId, String username) {
         try {
-            revokeRightWithoutException(GrantedRight.VIEW_PLS_MODELS.getAuthority(), tenantId, username);
-            revokeRightWithoutException(GrantedRight.VIEW_PLS_CONFIGURATION.getAuthority(), tenantId, username);
-            revokeRightWithoutException(GrantedRight.VIEW_PLS_USERS.getAuthority(), tenantId, username);
-            revokeRightWithoutException(GrantedRight.VIEW_PLS_REPORTING.getAuthority(), tenantId, username);
-            revokeRightWithoutException(GrantedRight.EDIT_PLS_MODELS.getAuthority(), tenantId, username);
-            revokeRightWithoutException(GrantedRight.EDIT_PLS_CONFIGURATION.getAuthority(), tenantId, username);
-            revokeRightWithoutException(GrantedRight.EDIT_PLS_USERS.getAuthority(), tenantId, username);
-            revokeRightWithoutException(GrantedRight.CREATE_PLS_MODELS.getAuthority(), tenantId, username);
+            for (GrantedRight grantedRight: AccessLevel.SUPER_ADMIN.getGrantedRights()) {
+                revokeRightWithoutException(grantedRight.getAuthority(), tenantId, username);
+            }
             return true;
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {

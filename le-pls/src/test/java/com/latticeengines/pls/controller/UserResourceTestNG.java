@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,8 @@ import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationServ
 import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
+import com.latticeengines.pls.security.AccessLevel;
+import com.latticeengines.pls.security.GrantedRight;
 
 
 public class UserResourceTestNG extends PlsFunctionalTestNGBase {
@@ -305,6 +308,32 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
     }
 
     @Test(groups = { "functional", "deployment" })
+    public void updateAccessLevel() {
+        testUpdateAccessLevel(AccessLevel.SUPER_ADMIN);
+        testUpdateAccessLevel(AccessLevel.INTERNAL_ADMIN);
+        testUpdateAccessLevel(AccessLevel.INTERNAL_USER);
+        testUpdateAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+        testUpdateAccessLevel(AccessLevel.EXTERNAL_USER);
+
+        // Test updating without sufficient access level
+        UserUpdateData data = new UserUpdateData();
+        data.setAccessLevel(AccessLevel.EXTERNAL_USER.name());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+
+        String url = getRestAPIHostPort() + "/pls/users/" + testCreds.getUsername();
+        addAuthHeader.setAuthValue(generalDoc.getTicket().getData());
+        try {
+            restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+        } catch (HttpClientErrorException e) {
+            assertEquals(e.getStatusCode().value(), 403);
+        }
+    }
+
+    @Test(groups = { "functional", "deployment" })
     public void delete() {
         Tenant tenant = new Tenant();
         tenant.setName("Test Tenant");
@@ -415,5 +444,34 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         userReg.setCredentials(creds);
 
         return userReg;
+    }
+
+    private void testUpdateAccessLevel(AccessLevel accessLevel) {
+        UserUpdateData data = new UserUpdateData();
+        data.setAccessLevel(accessLevel.name());
+        Map<String, EntityAccessRightsData> rightsDataMap = new HashMap<>();
+        EntityAccessRightsData rightsData = new EntityAccessRightsData();
+        rightsData.setMayView(true);
+        rightsDataMap.put("PLS_Models", rightsData);
+        rightsDataMap.put("PLS_Configuration", rightsData);
+        rightsDataMap.put("PLS_Reporting", rightsData);
+        rightsDataMap.put("PLS_Users", rightsData);
+        data.setRights(rightsDataMap);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+
+        String url = getRestAPIHostPort() + "/pls/users/" + testCreds.getUsername();
+        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+        assertTrue(response.getBody().isSuccess());
+
+        List<String> rights = globalUserManagementService.getRights(testCreds.getUsername(), testTenant.getId());
+        List<GrantedRight> expectedRights = accessLevel.getGrantedRights();
+        assertEquals(rights.size(), expectedRights.size());
+        for (GrantedRight grantedRight: expectedRights) {
+            assertTrue(rights.contains(grantedRight.getAuthority()));
+        }
     }
 }
