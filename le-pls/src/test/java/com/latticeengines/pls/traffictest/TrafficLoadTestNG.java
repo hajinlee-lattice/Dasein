@@ -154,10 +154,10 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
             tenant.setName("T" + i);
             try {
                 globalTenantManagementService.discardTenant(tenant);
+                globalTenantManagementService.registerTenant(tenant);
+                tenantEntityMgr.create(tenant);
             } catch (Exception e) {
             }
-            globalTenantManagementService.registerTenant(tenant);
-            tenantEntityMgr.createOrUpdate(tenant);
             tenantList.add(tenant);
             createModel(tenant);
         }
