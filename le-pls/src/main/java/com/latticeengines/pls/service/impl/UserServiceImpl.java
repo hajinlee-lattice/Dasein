@@ -1,5 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
+import com.latticeengines.pls.security.AccessLevel;
 import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.service.UserService;
 
@@ -20,7 +23,7 @@ public class UserServiceImpl implements UserService {
     private GlobalUserManagementService globalUserManagementService;
 
     @Override
-    public Boolean addAdminUser(UserRegistrationWithTenant userRegistrationWithTenant) {
+    public boolean addAdminUser(UserRegistrationWithTenant userRegistrationWithTenant) {
         UserRegistration userRegistration = userRegistrationWithTenant.getUserRegistration();
         String tenant = userRegistrationWithTenant.getTenant();
 
@@ -67,4 +70,45 @@ public class UserServiceImpl implements UserService {
         return globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail()) != null;
     }
 
+    @Override
+    public boolean grantAccessLevel(AccessLevel accessLevel, String tenantId, String username) {
+        if (revokeAccessLevel(tenantId, username)) {
+            try {
+                return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
+            } catch (Exception e) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean revokeAccessLevel(String tenantId, String username) {
+        boolean success = true;
+        for (AccessLevel accessLevel: AccessLevel.values()) {
+            try {
+                success = success && globalUserManagementService.revokeRight(accessLevel.name(), tenantId, username);
+            } catch (Exception e) {
+                //ignore
+            }
+        }
+        return success;
+    }
+
+    @Override
+    public AccessLevel getAccessLevel(String tenantId, String username) {
+        List<String> rights = globalUserManagementService.getRights(username, tenantId);
+        AccessLevel toReturn = null;
+        for (String right: rights) {
+            try {
+                AccessLevel accessLevel = AccessLevel.valueOf(right);
+                if (toReturn == null || accessLevel.compareTo(toReturn) > 0) {
+                    toReturn = accessLevel;
+                }
+            } catch (IllegalArgumentException e) {
+                //ignore
+            }
+        }
+        return toReturn;
+    }
 }

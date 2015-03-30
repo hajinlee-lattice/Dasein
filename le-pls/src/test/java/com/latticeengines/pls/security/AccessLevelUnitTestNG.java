@@ -1,6 +1,7 @@
 package com.latticeengines.pls.security;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +12,27 @@ import org.testng.annotations.Test;
 
 public class AccessLevelUnitTestNG {
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)
+    public void parseString() {
+        AccessLevel.valueOf(GrantedRight.VIEW_PLS_MODELS.getAuthority());
+    }
+
+    @Test(groups = { "unit", "functional", "deployment" })
+    public void cardinalityOfAccessLevels() {
+        AccessLevel[] levelsInOrder = new AccessLevel[]{
+            AccessLevel.SUPER_ADMIN,
+            AccessLevel.INTERNAL_ADMIN,
+            AccessLevel.INTERNAL_USER,
+            AccessLevel.EXTERNAL_ADMIN,
+            AccessLevel.EXTERNAL_USER
+        };
+        for (int i = 0; i < levelsInOrder.length - 1; i++) {
+            assertTrue(levelsInOrder[i].compareTo(levelsInOrder[i + 1]) > 0);
+            assertTrue(levelsInOrder[i + 1].compareTo(levelsInOrder[i]) < 0);
+        }
+    }
+
+    @Test(groups = { "unit", "functional", "deployment" })
     public void maxAccessLevel() {
         List<GrantedRight> rights = new ArrayList<>();
         testMaxAccessLevel(rights, null);
