@@ -3,7 +3,6 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -228,7 +227,9 @@ public class UserResource {
         }
 
         if (!inTenant(tenantId, username)) {
-            return SimpleBooleanResponse.getFailResponse(Collections.singletonList("Cannot update users in another tenant."));
+            return SimpleBooleanResponse.getFailResponse(
+                Collections.singletonList("Cannot update users in another tenant.")
+            );
         }
 
         return SimpleBooleanResponse.getSuccessResponse();
