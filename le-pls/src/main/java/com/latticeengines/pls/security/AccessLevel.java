@@ -2,12 +2,15 @@ package com.latticeengines.pls.security;
 
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public enum AccessLevel {
 
     EXTERNAL_USER(
-        Arrays.asList(
+        Collections.singletonList(
             GrantedRight.VIEW_PLS_MODELS
         )
     ),
@@ -58,4 +61,13 @@ public enum AccessLevel {
         return this.grantedRights;
     }
 
+    public static AccessLevel maxAccessLevel(List<GrantedRight> hadRights) {
+        AccessLevel maxLevel = null;
+        for (AccessLevel accessLevel: AccessLevel.values()) {
+            if (hadRights.containsAll(accessLevel.getGrantedRights())) {
+                maxLevel = accessLevel;
+            }
+        }
+        return maxLevel;
+    }
 }
