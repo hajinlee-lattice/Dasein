@@ -2,7 +2,7 @@
 {
 	"customerKey": "test",
 	"customerSpace": {"contractId": "Lattice_Relaunch", "tenantId": "Lattice_Relaunch", "spaceId": "Production"},
-	"destination": "Skald",
+	"destination": "Console",
 	"databaseServer": "jdbc:jtds:sqlserver://localhost;DatabaseName=BardDB;useNTLMv2=true;domain=Lattice"
 }
 ]
