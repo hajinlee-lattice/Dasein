@@ -19,3 +19,4 @@ export SQOOP_HOME=/usr/lib/sqoop
 export JAVA_HOME=/usr/java/default
 export DPQUARTZ_ENABLED=enabled
 export DPDL_QUARTZ_ENABLED=enabled
+export PROPDATA_MADISON_QUARTZ_ENABLED=enabled
