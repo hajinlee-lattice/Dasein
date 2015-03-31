@@ -2,8 +2,6 @@ package com.latticeengines.marketoadapter;
 
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,11 +23,10 @@ public class MarketoReceiver {
         }
 
         // Marketo will pass default values rather than null for missing
-        // information.
-        // Explicitly set those defaults to a sentinel value, and replace them
-        // with null.
+        // information. Explicitly set those defaults to a sentinel value,
+        // and replace them with null.
         for (String field : data.keySet()) {
-            if (nullField.equals(data.get(field))) {
+            if (nullSentinel.equals(data.get(field))) {
                 data.put(field, null);
             }
         }
@@ -45,7 +42,5 @@ public class MarketoReceiver {
     private RecordDispatcher dispatcher;
 
     private static final String keyField = "LatticeKey";
-    private static final String nullField = "_null";
-
-    private static final Log log = LogFactory.getLog(MarketoReceiver.class);
+    private static final String nullSentinel = "_null";
 }
