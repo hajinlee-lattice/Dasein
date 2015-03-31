@@ -193,6 +193,7 @@ describe('user management', function() {
 
         expect(element(by.css('div.centered h1')).isDisplayed()).toBe(true);
         browser.driver.sleep(1000);
+        newUserPassword = "Admin123";
 
         element(by.buttonText("RETURN TO LOGIN")).click();
         browser.driver.sleep(2000);
@@ -237,18 +238,20 @@ describe('user management', function() {
         expect(element.all(by.xpath('//div[@data-ng-show="showExistingUser"]')).first().isDisplayed()).toBe(true);
         element(by.id('add-user-btn-ok-2')).click();
         browser.waitForAngular();
-        browser.driver.sleep(3000);
-
-        element(by.buttonText('OK')).click();
-        browser.waitForAngular();
-        browser.driver.sleep(3000);
-
-        logoutPage.logoutAsAdmin();
+        //browser.driver.sleep(3000);
+        browser.driver.wait(function(){
+            return element(by.buttonText('OK')).isPresent();
+        }, 10000, 'OK button should appear with in 10 sec.').then(function(){
+            element(by.buttonText('OK')).click();
+        });
     }, 60000);
 
+    it('should log out admin', function(){
+        logoutPage.logoutAsAdmin();
+    });
 
     it('should be able to login the new user to the second tenant', function () {
-        loginPage.loginUser(newUserEmail, "Admin123");
+        loginPage.loginUser(newUserEmail, newUserPassword);
         tenants.selectTenantByIndex(params.alternativeTenantIndex);
 
         expect(element(by.css('h1')).getText()).toEqual('All Models');
@@ -290,7 +293,7 @@ describe('user management', function() {
     }, 60000);
 
     it('should verify that the new user will be automatically attached the second tenant', function () {
-        loginPage.loginUser(newUserEmail, "Admin123");
+        loginPage.loginUser(newUserEmail, newUserPassword);
         browser.waitForAngular();
         browser.driver.sleep(1000);
 

@@ -11,9 +11,6 @@ var Logout = function() {
         }, 10000, 'dropdown menu should appear with in 10 sec.');
         userDropdown.signout.click();
         browser.driver.sleep(3000);
-        //browser.driver.wait(function(){
-        //    return element(by.css('div.login-wrap')).isPresent();
-        //}, 20000, 'login page should appear with in 20 sec.');
     };
 
   	this.logoutAsAdmin = function() {
