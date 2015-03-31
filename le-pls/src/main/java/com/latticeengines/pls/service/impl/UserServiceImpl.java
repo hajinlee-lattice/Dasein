@@ -58,8 +58,12 @@ public class UserServiceImpl implements UserService {
             log.warn("Error creating admin user.", e);
         }
 
+
+        String username = userRegistration.getUser().getUsername();
+        assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username);
+
+        //TODO:song this way of grand admin rights should be deprecated later
         for (GrantedRight right : GrantedRight.getAdminRights()) {
-            String username = userRegistration.getUser().getUsername();
             try {
                 globalUserManagementService.grantRight(right.getAuthority(), tenant, username);
             } catch (Exception e) {
@@ -76,6 +80,7 @@ public class UserServiceImpl implements UserService {
             try {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
             } catch (Exception e) {
+                log.warn(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username), e);
                 return true;
             }
         }
@@ -89,6 +94,7 @@ public class UserServiceImpl implements UserService {
             try {
                 success = success && globalUserManagementService.revokeRight(accessLevel.name(), tenantId, username);
             } catch (Exception e) {
+                log.warn(String.format("Error resigning access level %s from user %s.", accessLevel.name(), username), e);
                 //ignore
             }
         }
@@ -129,5 +135,13 @@ public class UserServiceImpl implements UserService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public boolean deleteUser(String tenantId, String username) {
+        if (softDelete(tenantId, username) && globalUserManagementService.isRedundant(username)) {
+            return globalUserManagementService.deleteUser(username);
+        }
+        return false;
     }
 }

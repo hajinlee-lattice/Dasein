@@ -41,7 +41,6 @@ import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationServ
 import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.AccessLevel;
-import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.security.RightsUtilities;
 import com.latticeengines.pls.service.UserService;
@@ -77,7 +76,7 @@ public class UserResource {
             Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
             String tenantId = globalSessionManagementService.retrieve(ticket).getTenant().getId();
             List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList
-                = globalUserManagementService.getAllUsersOfTenant(tenantId);
+                    = globalUserManagementService.getAllUsersOfTenant(tenantId);
             List<User> users = new ArrayList<>();
             for (Map.Entry<User, List<String>> userRights : userRightsList) {
                 User user = userRights.getKey();
@@ -126,7 +125,7 @@ public class UserResource {
         if (oldUser != null) {
             result.setValid(false);
             response.setErrors(Collections.singletonList(
-                "The requested email conflicts with that of an existing user."
+                    "The requested email conflicts with that of an existing user."
             ));
             if (!inTenant(tenantId, oldUser.getUsername())) {
                 result.setConflictingUser(oldUser);
@@ -172,10 +171,10 @@ public class UserResource {
         try {
             ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
             user = globalUserManagementService.getUserByEmail(
-                globalSessionManagementService.retrieve(ticket).getEmailAddress()
+                    globalSessionManagementService.retrieve(ticket).getEmailAddress()
             );
             if (!user.getUsername().equals(username)) {
-                throw new LedpException(LedpCode.LEDP_18001, new String[] { username });
+                throw new LedpException(LedpCode.LEDP_18001, new String[]{username});
             }
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
@@ -185,8 +184,8 @@ public class UserResource {
         }
 
         // change password
-        String oldPassword  = data.getOldPassword();
-        String newPassword  = data.getNewPassword();
+        String oldPassword = data.getOldPassword();
+        String newPassword = data.getNewPassword();
         if (oldPassword != null && newPassword != null) {
             Credentials oldCreds = new Credentials();
             oldCreds.setUsername(user.getUsername());
@@ -231,17 +230,16 @@ public class UserResource {
             // using access level if it is provided
             userService.assignAccessLevel(AccessLevel.valueOf(data.getAccessLevel()), tenantId, username);
         } else {
-            softDelete(tenantId, username);
+            userService.softDelete(tenantId, username);
             for (String right : RightsUtilities.translateRights(data.getRights())) {
                 globalUserManagementService.grantRight(right, tenantId, username);
             }
         }
 
 
-
         if (!inTenant(tenantId, username)) {
             return SimpleBooleanResponse.getFailResponse(
-                Collections.singletonList("Cannot update users in another tenant.")
+                    Collections.singletonList("Cannot update users in another tenant.")
             );
         }
 
@@ -251,11 +249,10 @@ public class UserResource {
     @RequestMapping(value = "", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete users (?usernames=) from current tenant. "
-        + "Request parameter should be a stringified JSON array.")
+            + "Request parameter should be a stringified JSON array.")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
     public ResponseDocument<DeleteUsersResult> delete(@RequestParam(value = "usernames") String usernames,
-                                                      HttpServletRequest request)
-    {
+                                                      HttpServletRequest request) {
         String tenantId;
         try {
             Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
@@ -281,11 +278,11 @@ public class UserResource {
         List<String> successUsers = new ArrayList<>();
         List<String> failUsers = new ArrayList<>();
 
-        for (JsonNode node: userNodes) {
+        for (JsonNode node : userNodes) {
             String username = node.asText();
             if (!isAdmin(tenantId, username)) {
                 try {
-                    if (softDelete(tenantId, username)) {
+                    if (userService.softDelete(tenantId, username)) {
                         if (globalUserManagementService.isRedundant(username)) {
                             globalUserManagementService.deleteUser(username);
                         }
@@ -297,8 +294,8 @@ public class UserResource {
                 } catch (LedpException e) {
                     // ignore
                     LOGGER.warn(String.format(
-                        "Exception encountered when deleting the user %s in the tenant %s",
-                        username, tenantId
+                            "Exception encountered when deleting the user %s in the tenant %s",
+                            username, tenantId
                     ));
                 }
             } else {
@@ -328,23 +325,16 @@ public class UserResource {
         return doc;
     }
 
-    private boolean softDelete(String tenantId, String username) {
-        try {
-            return userService.softDelete(tenantId, username);
-        } catch (LedpException e) {
-            if (e.getCode() == LedpCode.LEDP_18001) {
-                throw new LoginException(e);
-            }
-            throw e;
-        }
-    }
-
     private boolean isAdmin(String tenantId, String username) {
-        return RightsUtilities.isAdmin(
-            RightsUtilities.translateRights(
-                globalUserManagementService.getRights(username, tenantId)
-            )
+        boolean oldCriterion = RightsUtilities.isAdmin(
+                RightsUtilities.translateRights(
+                        globalUserManagementService.getRights(username, tenantId)
+                )
         );
+
+        boolean newCriterion = userService.getAccessLevel(tenantId, username).equals(AccessLevel.SUPER_ADMIN);
+
+        return oldCriterion || newCriterion;
     }
 
     private boolean inTenant(String tenantId, String username) {

@@ -23,6 +23,7 @@ describe('top predictors', function () {
     var checkHover = function (expected) {
         sleep(1000);
         if (expected) {
+            sleep(3000);
             expect(element(by.css("div.attribute-hover")).isDisplayed()).toBe(true);
         } else {
             expect(element(by.css("div.attribute-hover")).isPresent()).toBe(false);

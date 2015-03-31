@@ -15,4 +15,6 @@ public interface UserService {
 
     boolean softDelete(String tenantId, String username);
 
+    boolean deleteUser(String tenantId, String username);
+
 }

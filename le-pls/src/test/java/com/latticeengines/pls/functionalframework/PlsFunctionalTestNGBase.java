@@ -273,7 +273,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", doc.getResult().getTenants().get(0),
-            UserDocument.class);
+                UserDocument.class);
     }
 
     protected UserDocument loginAndAttach(String username, Tenant tenant) {
@@ -291,8 +291,20 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         addAuthHeader.setAuthValue(doc.getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
 
-        return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", tenant,
-            UserDocument.class);
+        return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", tenant, UserDocument.class);
+    }
+
+    protected Ticket loginCreds(String username, String password){
+        return globalAuthenticationService.authenticateUser(username, DigestUtils.sha256Hex(password));
+    }
+
+    protected void logoutUserDoc(UserDocument doc) { logoutTicket(doc.getTicket()); }
+
+    protected void logoutTicket(Ticket ticket) { globalAuthenticationService.discard(ticket); }
+
+    protected void useSessionDoc(UserDocument doc) {
+        addAuthHeader.setAuthValue(doc.getTicket().getData());
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
     }
 
     private ModelSummary getDetails(Tenant tenant, String suffix) throws Exception {
@@ -402,15 +414,11 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
 
         for (Tenant tenant: ticket.getTenants()) {
-            grantAdminRights(tenant.getId(), adminUsername);
-            grantDefaultRights(tenant.getId(), generalUsername);
-            grantAdminRights(tenant.getId(), "admin");
-            grantAdminRights(tenant.getId(), "tsanghavi@lattice-engines.com");
-
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
             userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), generalUsername);
-            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), "admin");
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), "tsanghavi@lattice-engines.com");
+
+            userService.resignAccessLevel(tenant.getId(), "admin");
         }
 
         // empty rights user
