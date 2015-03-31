@@ -44,6 +44,7 @@ import com.latticeengines.pls.security.AccessLevel;
 import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.security.RightsUtilities;
+import com.latticeengines.pls.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -63,6 +64,9 @@ public class UserResource {
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
 
+    @Autowired
+    private UserService userService;
+
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all users that have at least one access right to the current tenant")
@@ -77,7 +81,12 @@ public class UserResource {
             List<User> users = new ArrayList<>();
             for (Map.Entry<User, List<String>> userRights : userRightsList) {
                 if (!RightsUtilities.isAdmin(RightsUtilities.translateRights(userRights.getValue()))) {
-                    users.add(userRights.getKey());
+                    User user = userRights.getKey();
+                    AccessLevel accessLevel = userService.getAccessLevel(tenantId, user.getUsername());
+                    if (accessLevel != null) {
+                        user.setAccessLevel(accessLevel.name());
+                    }
+                    users.add(user);
                 }
             }
             response.setSuccess(true);
@@ -217,6 +226,7 @@ public class UserResource {
             for (GrantedRight grantedRight: AccessLevel.valueOf(data.getAccessLevel()).getGrantedRights()) {
                 rights.add(grantedRight.getAuthority());
             }
+            userService.assignAccessLevel(AccessLevel.valueOf(data.getAccessLevel()), tenantId, username);
         } else {
             rights = RightsUtilities.translateRights(data.getRights());
         }
@@ -315,20 +325,9 @@ public class UserResource {
         return doc;
     }
 
-    private void revokeRightWithoutException(String right, String tenant, String username) {
-        try {
-            globalUserManagementService.revokeRight(right, tenant, username);
-        } catch (LedpException e) {
-            // ignore
-        }
-    }
-
     private boolean softDelete(String tenantId, String username) {
         try {
-            for (GrantedRight grantedRight: AccessLevel.SUPER_ADMIN.getGrantedRights()) {
-                revokeRightWithoutException(grantedRight.getAuthority(), tenantId, username);
-            }
-            return true;
+            return userService.softDelete(tenantId, username);
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001) {
                 throw new LoginException(e);
@@ -346,6 +345,7 @@ public class UserResource {
                 // ignore
             }
         }
+        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenantId, username);
     }
 
     private boolean isAdmin(String tenantId, String username) {

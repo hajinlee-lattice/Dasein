@@ -119,12 +119,13 @@ public class UserServiceImpl implements UserService {
             boolean success = true;
             for (GrantedRight right : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
                 try {
-                    success = success && globalUserManagementService.revokeRight(right.getAuthority(), tenantId, username);
+                    success = success
+                        && globalUserManagementService.revokeRight(right.getAuthority(), tenantId, username);
                 } catch (Exception e) {
                     //ignore
                 }
             }
-            return success;
+            return success && resignAccessLevel(tenantId, username);
         } else {
             return false;
         }

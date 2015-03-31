@@ -1,6 +1,14 @@
 angular.module('mainApp.core.utilities.RightsUtility', [])
 .service('RightsUtility', function () {
 
+    this.AccessLevel = {
+        SUPER_ADMIN: "SUPER_ADMIN",
+        INTERNAL_ADMIN: "INTERNAL_ADMIN",
+        INTERNAL_USER: "INTERNAL_USER",
+        EXTERNAL_ADMIN: "EXTERNAL_ADMIN",
+        EXTERNAL_USER: "EXTERNAL_USER"
+    };
+
     this.mayViewUsers = function(rightsDict) {
         if (rightsDict.hasOwnProperty("PLS_Users")) {
             var userRights = rightsDict.PLS_Users;

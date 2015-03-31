@@ -14,25 +14,27 @@ public class RightsUtilities {
 
         for (String right : accessRights) {
             String[] rightPair = right.split("_", 2);
-            EntityAccessRightsData rightsDocument = availableRights.get(rightPair[1]);
-            if (rightsDocument == null) {
-                rightsDocument = new EntityAccessRightsData();
-                availableRights.put(rightPair[1], rightsDocument);
-            }
+            if (rightPair[1].toUpperCase().contains("PLS")) { // if it is a GrantedRight related string
+                EntityAccessRightsData rightsDocument = availableRights.get(rightPair[1]);
+                if (rightsDocument == null) {
+                    rightsDocument = new EntityAccessRightsData();
+                    availableRights.put(rightPair[1], rightsDocument);
+                }
 
-            switch (rightPair[0].toLowerCase()) {
-                case "view":
-                    rightsDocument.setMayView(true);
-                    break;
-                case "edit":
-                    rightsDocument.setMayEdit(true);
-                    break;
-                case "execute":
-                    rightsDocument.setMayExecute(true);
-                    break;
-                case "create":
-                    rightsDocument.setMayCreate(true);
-                    break;
+                switch (rightPair[0].toLowerCase()) {
+                    case "view":
+                        rightsDocument.setMayView(true);
+                        break;
+                    case "edit":
+                        rightsDocument.setMayEdit(true);
+                        break;
+                    case "execute":
+                        rightsDocument.setMayExecute(true);
+                        break;
+                    case "create":
+                        rightsDocument.setMayCreate(true);
+                        break;
+                }
             }
         }
 

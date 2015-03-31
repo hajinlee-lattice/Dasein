@@ -17,7 +17,9 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
         $http({
             method: 'PUT',
             url: '/pls/users/' + username,
-            data: { Rights: RightsUtility.getDefaultRights() },
+            data: {
+                AccessLevel: ResourceUtility.AccessLevel.EXTERNAL_USER
+            },
             headers: {"Content-Type": "application/json"}
         }).success(function(data){
             result.Success = data.Success;
