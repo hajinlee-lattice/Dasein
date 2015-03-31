@@ -22,7 +22,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = { "com.latticeengines.skald" })
+@ComponentScan(basePackages = { "com.latticeengines.skald", "com.latticeengines.common.exposed.rest" })
 public class SkaldConfiguration extends WebMvcConfigurerAdapter {
     @PostConstruct
     public void initialize() throws Exception {

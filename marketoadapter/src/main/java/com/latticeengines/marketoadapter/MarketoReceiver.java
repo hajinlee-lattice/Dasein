@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.rest.DetailedErrors;
+
 @RestController
+@DetailedErrors
 public class MarketoReceiver {
     @RequestMapping(value = "MarketoReceiver", method = RequestMethod.POST)
     public String receiveRecord(@RequestBody Map<String, Object> data) {

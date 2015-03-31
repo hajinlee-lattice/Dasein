@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.util.DocumentUtils;
+import com.latticeengines.common.exposed.rest.DetailedErrors;
 import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -18,6 +19,7 @@ import com.latticeengines.skald.exposed.SetModelTagsRequest;
 import com.latticeengines.skald.exposed.SetScoreDerivationRequest;
 
 @RestController
+@DetailedErrors
 public class ActivationService {
     // There are no corresponding get methods because these structures will be
     // exposed by Skald in ZooKeeper through a Camille data interface.

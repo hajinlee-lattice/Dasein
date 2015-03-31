@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.latticeengines.common.exposed.rest.DetailedErrors;
 import com.latticeengines.common.exposed.util.LogContext;
 import com.latticeengines.domain.exposed.skald.model.FieldInterpretation;
 import com.latticeengines.domain.exposed.skald.model.FieldSchema;
@@ -29,6 +30,7 @@ import com.latticeengines.skald.exposed.ScoreRequest;
 import com.latticeengines.skald.exposed.ScoreType;
 
 @RestController
+@DetailedErrors
 public class ScoreService {
     @RequestMapping(value = "ScoreRecord", method = RequestMethod.POST)
     public Map<ScoreType, Object> scoreRecord(@RequestBody ScoreRequest request) {

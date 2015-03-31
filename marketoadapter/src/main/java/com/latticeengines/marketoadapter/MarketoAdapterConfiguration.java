@@ -22,7 +22,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = { "com.latticeengines.marketoadapter" })
+@ComponentScan(basePackages = { "com.latticeengines.marketoadapter", "com.latticeengines.common.exposed.rest" })
 public class MarketoAdapterConfiguration extends WebMvcConfigurerAdapter {
     @PostConstruct
     public void initialize() throws Exception {

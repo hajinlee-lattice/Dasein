@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.common.exposed.rest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-// TODO Generalize this slightly, and then standardize on it.
-@ControllerAdvice
-public class SkaldExceptionHandler extends ResponseEntityExceptionHandler {
+// TODO Find a more descriptive name for this class.
+@ControllerAdvice(annotations = { DetailedErrors.class })
+public class DetailedExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
@@ -64,5 +64,5 @@ public class SkaldExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, handleException(ex), headers, status, request);
     }
 
-    private static final Log log = LogFactory.getLog(SkaldExceptionHandler.class);
+    private static final Log log = LogFactory.getLog(DetailedExceptionHandler.class);
 }
