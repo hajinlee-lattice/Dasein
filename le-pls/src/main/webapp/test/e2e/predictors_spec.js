@@ -11,6 +11,7 @@ describe('top predictors', function () {
 
     var tab = element(by.id("modelDetailsAttributesTab"));
     var chart = tab.element(by.id("chart"));
+    var hover = element(by.id("topPredictorAttributeHover"));
 
     var checkBackButton = function (expected) {
         if (expected) {
@@ -22,12 +23,9 @@ describe('top predictors', function () {
 
     var checkHover = function (expected) {
         sleep(1000);
-        if (expected) {
-            sleep(3000);
-            expect(element(by.css("div.attribute-hover")).isDisplayed()).toBe(true);
-        } else {
-            expect(element(by.css("div.attribute-hover")).isPresent()).toBe(false);
-        }
+        hover.getAttribute('style').then(function (value) {
+            return expect(expected === (value.indexOf("display: block;") != -1)).toBe(true);
+        });
     };
 
     var checkBackButtonHover = function (buttonExpected, hoverExpected) {
