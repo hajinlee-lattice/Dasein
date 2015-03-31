@@ -18,7 +18,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
             method: 'PUT',
             url: '/pls/users/' + username,
             data: {
-                AccessLevel: ResourceUtility.AccessLevel.EXTERNAL_USER
+                AccessLevel: RightsUtility.AccessLevel.EXTERNAL_USER
             },
             headers: {"Content-Type": "application/json"}
         }).success(function(data){
