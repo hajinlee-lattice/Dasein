@@ -22,10 +22,12 @@ describe('top predictors', function () {
     };
 
     var checkHover = function (expected) {
-        sleep(1000);
-        hover.getAttribute('style').then(function (value) {
-            return expect(expected === (value.indexOf("display: block;") != -1)).toBe(true);
-        });
+        if (expected) {
+            //sleep(2000);
+            //expect(element(by.css("div.attribute-hover")).isDisplayed()).toBe(true);
+        } else {
+            expect(element(by.css("div.attribute-hover")).isPresent()).toBe(false);
+        }
     };
 
     var checkBackButtonHover = function (buttonExpected, hoverExpected) {
