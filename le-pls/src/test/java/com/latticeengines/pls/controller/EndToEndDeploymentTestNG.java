@@ -57,12 +57,6 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
-    private GlobalSessionManagementService globalSessionManagementService;
-
-    @Autowired
-    private GlobalUserManagementService globalUserManagementService;
-
     private static String tenant;
     private static Tenant tenantToAttach;
 

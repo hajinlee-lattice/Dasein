@@ -174,20 +174,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
     }
 
-    protected void grantDefaultRights(String tenant, String username) {
-        List<GrantedRight> rights = GrantedRight.getDefaultRights();
-        for (GrantedRight right: rights) {
-            grantRight(right, tenant, username);
-        }
-    }
-
-    protected void grantAdminRights(String tenant, String username) {
-        List<GrantedRight> rights = GrantedRight.getAdminRights();
-        for (GrantedRight right: rights) {
-            grantRight(right, tenant, username);
-        }
-    }
-
     protected static class GetHttpStatusErrorHandler implements ResponseErrorHandler {
 
         public GetHttpStatusErrorHandler() {

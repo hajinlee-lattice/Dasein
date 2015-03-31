@@ -38,6 +38,8 @@ import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationServ
 import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.globalauth.authentication.impl.Constants;
+import com.latticeengines.pls.security.AccessLevel;
+import com.latticeengines.pls.service.UserService;
 
 public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
@@ -52,6 +54,9 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Autowired
+    private UserService userService;
 
     @BeforeClass(groups = {"functional", "deployment"})
     public void setup() throws Exception {
@@ -133,7 +138,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
             String username = "tester_" + UUID.randomUUID().toString() + "@test.com";
             assertTrue(globalUserManagementService.deleteUser(username));
             createUser(username, username, "Test", "Tester");
-            grantDefaultRights(tenant.getId(), username);
+            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
         }
 
         String pattern = URIUtil.encodeQuery("tester_[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}@test.com");
