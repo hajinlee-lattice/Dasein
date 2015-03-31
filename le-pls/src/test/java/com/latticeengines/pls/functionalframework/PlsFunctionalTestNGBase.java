@@ -407,16 +407,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             userService.resignAccessLevel(tenant.getId(), "admin");
         }
 
-        // empty rights user
-        if (globalUserManagementService.getUserByEmail("rgonzalez@lattice-engines.com") == null) {
-            globalUserManagementService.deleteUser("rgonzalez");
-            globalUserManagementService.deleteUser("rgonzalez@lattice-engines.com");
-            createUser("rgonzalez", "rgonzalez@lattice-engines.com", "Ron", "Gonzalez");
-        }
-        String tenant1 = ticket.getTenants().get(0).getId();
-        revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant1, "rgonzalez");
-
         usersInitialized = true;
     }
 

@@ -55,6 +55,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     private static final Log log = LogFactory.getLog(ModelSummaryResourceTestNG.class);
 
     private UserDocument adminDoc;
+    private UserDocument generalDoc;
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
@@ -74,39 +75,25 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         setupDb(tenant1, tenant2);
 
         adminDoc = loginAndAttachAdmin();
+        generalDoc = loginAndAttachGeneral();
     }
 
     @AfterClass(groups = { "functional", "deployment" })
     public void tearDown() {
-        globalAuthenticationService.discard(adminDoc.getTicket());
+        logoutUserDoc(adminDoc);
+        logoutUserDoc(generalDoc);
     }
 
     @BeforeMethod(groups = { "functional", "deployment" })
     public void beforeMethod() {
         // using admin session by default
-        addAuthHeader.setAuthValue(adminDoc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        useSessionDoc(adminDoc);
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
     }
 
     @Test(groups = { "functional", "deployment" })
-    public void getModelSummariesNoViewPlsModelsRight() {
-        UserDocument doc = loginAndAttach("rgonzalez");
-        addAuthHeader.setAuthValue(doc.getTicket().getData());
-
-        try {
-            restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
-        } catch (Exception e) {
-            String code = e.getMessage();
-            assertEquals(code, "403");
-        }
-    }
-
-    @Test(groups = { "functional", "deployment" })
     public void deleteModelSummaryNoEditPlsModelsRight() {
-        UserDocument doc = loginAndAttach("rgonzalez");
-        addAuthHeader.setAuthValue(doc.getTicket().getData());
-
+        useSessionDoc(generalDoc);
         try {
             restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/123");
         } catch (Exception e) {
