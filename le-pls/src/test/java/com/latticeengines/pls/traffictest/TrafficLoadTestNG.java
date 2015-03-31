@@ -126,6 +126,18 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
                 globalUserManagementService.deleteUser(user.getUsername());
             }
             try {
+                String tenantId = tenant.getId();
+                Tenant existingTenant = tenantEntityMgr.findByTenantId(tenantId);
+                if (existingTenant != null) {
+                    for (KeyValue keyValue : keyValueEntityMgr.findByTenantId(existingTenant.getPid())) {
+                        keyValueEntityMgr.delete(keyValue);
+                    }
+                    ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(tenantId);
+                    if (modelSummary != null) {
+                        modelSummaryEntityMgr.delete(modelSummary);
+                    }
+                    tenantEntityMgr.delete(existingTenant);
+                }
                 globalTenantManagementService.discardTenant(tenant);
             } catch (Exception e) {
             }
@@ -139,7 +151,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
             tenant.setId(tenantId);
             tenant.setName("T" + i);
             Tenant existingTenant = tenantEntityMgr.findByTenantId(tenantId);
-            if(existingTenant != null){
+            if (existingTenant != null) {
                 for (KeyValue keyValue : keyValueEntityMgr.findByTenantId(existingTenant.getPid())) {
                     keyValueEntityMgr.delete(keyValue);
                 }
