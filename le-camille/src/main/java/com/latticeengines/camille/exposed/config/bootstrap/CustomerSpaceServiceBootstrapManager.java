@@ -8,10 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.CustomerSpaceServiceInstallerAdaptor;
+import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.InstallerAdaptor;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
 public class CustomerSpaceServiceBootstrapManager {
@@ -20,7 +24,8 @@ public class CustomerSpaceServiceBootstrapManager {
 
     private static Map<String, Bootstrapper> bootstrappers = new ConcurrentHashMap<String, Bootstrapper>();
 
-    public static void register(String serviceName, Installer installer, Upgrader upgrader) {
+    public static void register(String serviceName, CustomerSpaceServiceInstaller installer,
+            CustomerSpaceServiceUpgrader upgrader) {
         if (installer == null) {
             throw new IllegalArgumentException("Installer cannot be null");
         }
@@ -54,19 +59,26 @@ public class CustomerSpaceServiceBootstrapManager {
         }
     }
 
+    // XXX BootstrapState getBootstrapState(String serviceName, CustomerSpace
+    // space)
+    // XXX List<Pair<String,BootstrapState>> getBootstrapStates(CustomerSpace
+    // space)
+
     public static class Bootstrapper {
         private final String serviceName;
-        private Installer installer;
-        private Upgrader upgrader;
+        private CustomerSpaceServiceInstaller installer;
+        private CustomerSpaceServiceUpgrader upgrader;
         private final ConcurrentMap<CustomerSpace, CustomerBootstrapper> customerBootstrappers = new ConcurrentHashMap<CustomerSpace, CustomerBootstrapper>();
 
-        public Bootstrapper(String serviceName, Installer installer, Upgrader upgrader) {
+        public Bootstrapper(String serviceName, CustomerSpaceServiceInstaller installer,
+                CustomerSpaceServiceUpgrader upgrader) {
             this.serviceName = serviceName;
             this.installer = installer;
             this.upgrader = upgrader;
         }
 
-        public void setInstallerAndUpgrader(Installer installer, Upgrader upgrader) {
+        public void setInstallerAndUpgrader(CustomerSpaceServiceInstaller installer,
+                CustomerSpaceServiceUpgrader upgrader) {
             this.installer = installer;
             this.upgrader = upgrader;
         }
@@ -88,13 +100,14 @@ public class CustomerSpaceServiceBootstrapManager {
     public static class CustomerBootstrapper {
         private final CustomerSpace space;
         private final String serviceName;
-        private final Installer installer;
-        private final Upgrader upgrader;
+        private final CustomerSpaceServiceInstaller installer;
+        private final CustomerSpaceServiceUpgrader upgrader;
         private final Path serviceDirectoryPath;
         private boolean bootstrapped;
         private final String logPrefix;
 
-        public CustomerBootstrapper(CustomerSpace space, String serviceName, Installer installer, Upgrader upgrader) {
+        public CustomerBootstrapper(CustomerSpace space, String serviceName, CustomerSpaceServiceInstaller installer,
+                CustomerSpaceServiceUpgrader upgrader) {
             this.space = space;
             this.serviceName = serviceName;
             this.installer = installer;
@@ -121,7 +134,8 @@ public class CustomerSpaceServiceBootstrapManager {
         }
 
         private void install(int executableVersion) throws Exception {
-            BootstrapUtil.install(installer, executableVersion, serviceDirectoryPath, false, logPrefix);
+            InstallerAdaptor adaptor = new CustomerSpaceServiceInstallerAdaptor(installer, space, serviceName);
+            BootstrapUtil.install(adaptor, executableVersion, serviceDirectoryPath, false, logPrefix);
         }
 
         private void upgrade(int executableVersion) throws Exception {

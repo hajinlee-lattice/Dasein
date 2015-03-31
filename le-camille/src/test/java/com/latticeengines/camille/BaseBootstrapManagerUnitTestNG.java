@@ -2,12 +2,14 @@ package com.latticeengines.camille;
 
 import java.util.concurrent.Semaphore;
 
-import com.latticeengines.camille.exposed.config.bootstrap.Installer;
-import com.latticeengines.camille.exposed.config.bootstrap.Upgrader;
 import com.latticeengines.camille.exposed.paths.PathConstants;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
+import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
 public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScope> {
@@ -24,10 +26,12 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
 
     public abstract T getTestScope();
 
-    public static class Bootstrapper implements Installer, Upgrader {
+    public static class Bootstrapper implements CustomerSpaceServiceInstaller, CustomerSpaceServiceUpgrader,
+            ServiceInstaller {
 
         @Override
-        public DocumentDirectory upgradeConfiguration(int sourceVersion, int targetVersion, DocumentDirectory source) {
+        public DocumentDirectory upgrade(CustomerSpace space, String service, int sourceVersion, int targetVersion,
+                DocumentDirectory source) {
             if (sourceVersion == 1 && targetVersion == 2) {
                 return BaseBootstrapManagerUnitTestNG.getUpgradedConfiguration();
             } else {
@@ -36,7 +40,17 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         }
 
         @Override
-        public DocumentDirectory getInitialConfiguration(int dataVersion) {
+        public DocumentDirectory install(CustomerSpace space, String service, int dataVersion) {
+            if (dataVersion == 1) {
+                return BaseBootstrapManagerUnitTestNG.getInitialConfiguration();
+            } else if (dataVersion == 2) {
+                return getUpgradedConfiguration();
+            } else {
+                throw new IllegalStateException();
+            }
+        }
+
+        public DocumentDirectory install(String service, int dataVersion) {
             if (dataVersion == 1) {
                 return BaseBootstrapManagerUnitTestNG.getInitialConfiguration();
             } else if (dataVersion == 2) {

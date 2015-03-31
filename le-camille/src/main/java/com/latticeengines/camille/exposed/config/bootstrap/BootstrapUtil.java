@@ -15,11 +15,11 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
+import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 
 public class BootstrapUtil {
-    private static final Logger log = LoggerFactory.getLogger(new Object() {
-    }.getClass().getEnclosingClass());
-
     /**
      * 
      * @param force
@@ -31,8 +31,8 @@ public class BootstrapUtil {
      * @param logPrefix
      * @throws Exception
      */
-    public static void install(Installer installer, int executableVersion, Path serviceDirectoryPath, boolean force,
-            String logPrefix) throws Exception {
+    public static void install(InstallerAdaptor installer, int executableVersion, Path serviceDirectoryPath,
+            boolean force, String logPrefix) throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
 
         log.info("{}Running install of version {}", new Object[] { logPrefix, executableVersion });
@@ -57,7 +57,7 @@ public class BootstrapUtil {
             try {
                 Path dataVersionFilePath = serviceDirectoryPath.append(PathConstants.SERVICE_DATA_VERSION_FILE);
 
-                DocumentDirectory configurationDirectory = installer.getInitialConfiguration(executableVersion);
+                DocumentDirectory configurationDirectory = installer.install(executableVersion);
                 if (configurationDirectory == null) {
                     throw new NullPointerException("Installer returned a null document directory");
                 }
@@ -93,7 +93,44 @@ public class BootstrapUtil {
         }
     }
 
-    public static void upgrade(Upgrader upgrader, int executableVersion, Path serviceDirectoryPath,
+    public static interface InstallerAdaptor {
+        public DocumentDirectory install(int dataVersion);
+    }
+
+    public static class CustomerSpaceServiceInstallerAdaptor implements InstallerAdaptor {
+        private final CustomerSpace space;
+        private final String service;
+        private final CustomerSpaceServiceInstaller installer;
+
+        public CustomerSpaceServiceInstallerAdaptor(CustomerSpaceServiceInstaller installer, CustomerSpace space,
+                String service) {
+            this.space = space;
+            this.service = service;
+            this.installer = installer;
+        }
+
+        @Override
+        public DocumentDirectory install(int dataVersion) {
+            return installer.install(space, service, dataVersion);
+        }
+    }
+
+    public static class ServiceInstallerAdaptor implements InstallerAdaptor {
+        private final String service;
+        private final ServiceInstaller installer;
+
+        public ServiceInstallerAdaptor(ServiceInstaller installer, String service) {
+            this.service = service;
+            this.installer = installer;
+        }
+
+        @Override
+        public DocumentDirectory install(int dataVersion) {
+            return installer.install(service, dataVersion);
+        }
+    }
+
+    public static void upgrade(CustomerSpaceServiceUpgrader upgrader, int executableVersion, Path serviceDirectoryPath,
             CustomerSpace space, String serviceName, String logPrefix) throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         Path dataVersionFilePath = serviceDirectoryPath.append(PathConstants.SERVICE_DATA_VERSION_FILE);
@@ -124,7 +161,8 @@ public class BootstrapUtil {
                 // TODO filter out invisible documents
 
                 // Upgrade
-                DocumentDirectory upgraded = upgrader.upgradeConfiguration(dataVersion, executableVersion, source);
+                DocumentDirectory upgraded = upgrader.upgrade(space, serviceName, dataVersion, executableVersion,
+                        source);
                 if (upgraded == null) {
                     throw new NullPointerException("Upgrader returned a null document directory");
                 }
@@ -137,7 +175,7 @@ public class BootstrapUtil {
                 Iterator<DocumentDirectory.Node> iter = source.leafFirstIterator();
                 while (iter.hasNext()) {
                     DocumentDirectory.Node node = iter.next();
-                    if (!node.getPath().equals(dataVersionFilePath.local(serviceDirectoryPath))) {
+                    if (!node.getPath().getSuffix().startsWith(PathConstants.INVISIBLE_FILE_PREFIX)) {
                         transaction.delete(node.getPath().prefix(serviceDirectoryPath));
                     }
                 }
@@ -176,4 +214,6 @@ public class BootstrapUtil {
         }
     }
 
+    private static final Logger log = LoggerFactory.getLogger(new Object() {
+    }.getClass().getEnclosingClass());
 }

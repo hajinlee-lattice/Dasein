@@ -7,8 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.InstallerAdaptor;
+import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.ServiceInstallerAdaptor;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 
 public class ServiceBootstrapManager {
@@ -17,7 +20,7 @@ public class ServiceBootstrapManager {
 
     private static Map<String, Bootstrapper> bootstrappers = new ConcurrentHashMap<String, Bootstrapper>();
 
-    public static void register(String serviceName, Installer installer) {
+    public static void register(String serviceName, ServiceInstaller installer) {
         if (installer == null) {
             throw new IllegalArgumentException("Installer cannot be null");
         }
@@ -45,17 +48,17 @@ public class ServiceBootstrapManager {
 
     public static class Bootstrapper {
         private boolean bootstrapped;
-        private Installer installer;
+        private ServiceInstaller installer;
         private final String logPrefix;
         private final String serviceName;
 
-        public Bootstrapper(String serviceName, Installer installer) {
+        public Bootstrapper(String serviceName, ServiceInstaller installer) {
             this.installer = installer;
             this.logPrefix = String.format("[Service=%s] ", serviceName);
             this.serviceName = serviceName;
         }
 
-        public void setInstaller(Installer installer) {
+        public void setInstaller(ServiceInstaller installer) {
             this.installer = installer;
         }
 
@@ -73,7 +76,8 @@ public class ServiceBootstrapManager {
 
         private void install(int executableVersion) throws Exception {
             Path serviceDirectoryPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), this.serviceName);
-            BootstrapUtil.install(installer, executableVersion, serviceDirectoryPath, true, logPrefix);
+            InstallerAdaptor adaptor = new ServiceInstallerAdaptor(installer, serviceName);
+            BootstrapUtil.install(adaptor, executableVersion, serviceDirectoryPath, true, logPrefix);
         }
     }
 }
