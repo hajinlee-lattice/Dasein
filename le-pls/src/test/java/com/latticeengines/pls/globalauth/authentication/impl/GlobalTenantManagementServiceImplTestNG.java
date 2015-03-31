@@ -17,8 +17,8 @@ public class GlobalTenantManagementServiceImplTestNG extends PlsFunctionalTestNG
     @Test(groups = "functional")
     public void registerThenDiscardTenant() {
         Tenant newTenant = new Tenant();
-        newTenant.setId("NEW_TENANT");
-        newTenant.setName("NEW_TENANT");
+        newTenant.setId("TEST_TENANT");
+        newTenant.setName("TEST_TENANT");
         
         assertTrue(globalTenantManagementService.registerTenant(newTenant));
         assertTrue(globalTenantManagementService.discardTenant(newTenant));

@@ -1,6 +1,8 @@
 package com.latticeengines.pls.globalauth.authentication.impl;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
@@ -18,18 +20,22 @@ import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementS
 import com.latticeengines.pls.globalauth.generated.sessionmgr.ISessionManagementService;
 import com.latticeengines.pls.globalauth.generated.sessionmgr.ObjectFactory;
 import com.latticeengines.pls.globalauth.generated.sessionmgr.SessionManagementService;
+import com.latticeengines.pls.security.AccessLevel;
+import com.latticeengines.pls.security.GrantedRight;
 
 @Component("globalSessionManagementService")
-public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl implements GlobalSessionManagementService {
+public class GlobalSessionManagementServiceImpl
+        extends GlobalAuthenticationServiceBaseImpl
+        implements GlobalSessionManagementService {
 
-    private static final Log log = LogFactory.getLog(GlobalSessionManagementServiceImpl.class);
+    private static final Log LOGGER = LogFactory.getLog(GlobalSessionManagementServiceImpl.class);
 
     private ISessionManagementService getService() {
         SessionManagementService service;
         try {
             service = new SessionManagementService(new URL(globalAuthUrl + "/GlobalAuthSessionManager?wsdl"));
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18000, e, new String[] { globalAuthUrl });
+            throw new LedpException(LedpCode.LEDP_18000, e, new String[]{globalAuthUrl});
         }
         return service.getBasicHttpBindingISessionManagementService();
     }
@@ -48,12 +54,12 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         ISessionManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info(String.format("Retrieving session from ticket %s against Global Auth.", ticket.toString()));
+            LOGGER.info(String.format("Retrieving session from ticket %s against Global Auth.", ticket.toString()));
             Session s = new SessionBuilder(service.retrieve(new SoapTicketBuilder(ticket).build())).build();
             s.setTicket(ticket);
             return s;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18002, e, new String[] { ticket.getData() });
+            throw new LedpException(LedpCode.LEDP_18002, e, new String[]{ticket.getData()});
         }
     }
 
@@ -74,15 +80,15 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         ISessionManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info(String.format("Attaching ticket %s against Global Auth.", ticket.toString()));
+            LOGGER.info(String.format("Attaching ticket %s against Global Auth.", ticket.toString()));
 
-            Session s = new SessionBuilder(service.attach( //
-                            new SoapTicketBuilder(ticket).build(), //
-                            new SoapTenantBuilder(ticket.getTenants().get(0)).build())).build();
+            Session s = new SessionBuilder(service.attach(
+                    new SoapTicketBuilder(ticket).build(),
+                    new SoapTenantBuilder(ticket.getTenants().get(0)).build())).build();
             s.setTicket(ticket);
             return s;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18001, e, new String[] { ticket.toString() });
+            throw new LedpException(LedpCode.LEDP_18001, e, new String[]{ticket.toString()});
         }
     }
 
@@ -96,7 +102,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         public com.latticeengines.pls.globalauth.generated.sessionmgr.Ticket build() {
             com.latticeengines.pls.globalauth.generated.sessionmgr.Ticket t = new ObjectFactory().createTicket();
             t.setUniquness(ticket.getUniqueness());
-            t.setRandomness(new JAXBElement<String>( //
+            t.setRandomness(new JAXBElement<String>(
                     new QName("http://schemas.lattice-engines.com/2008/Poet", "Randomness"), //
                     String.class, ticket.getRandomness()));
             return t;
@@ -112,10 +118,10 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
         public com.latticeengines.pls.globalauth.generated.sessionmgr.Tenant build() {
             com.latticeengines.pls.globalauth.generated.sessionmgr.Tenant t = new ObjectFactory().createTenant();
-            t.setIdentifier(new JAXBElement<String>( //
+            t.setIdentifier(new JAXBElement<String>(
                     new QName("http://schemas.lattice-engines.com/2008/Poet", "Identifier"), //
                     String.class, tenant.getId()));
-            t.setDisplayName(new JAXBElement<String>( //
+            t.setDisplayName(new JAXBElement<String>(
                     new QName("http://schemas.lattice-engines.com/2008/Poet", "DisplayName"), //
                     String.class, tenant.getName()));
             return t;
@@ -132,7 +138,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         public Session build() {
             Session s = new Session();
             s.setTenant(new TenantBuilder(session.getTenant()).build());
-            s.setRights(session.getRights().getValue().getString());
+            s.setRights(decodeGlobalAuthRights(session.getRights().getValue().getString()));
             s.setDisplayName(session.getDisplayName().getValue());
             s.setEmailAddress(session.getEmailAddress().getValue());
             s.setIdentifier(session.getIdentifier().getValue());
@@ -157,4 +163,32 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         }
     }
 
+    private static List<String> decodeGlobalAuthRights(List<String> globalAuthRights) {
+        AccessLevel maxAccessLevel = null;
+        List<String> decodedRights = new ArrayList<>();
+
+        for (String right : globalAuthRights) {
+            if (GrantedRight.getGrantedRight(right) != null) {
+                decodedRights.add(right);
+            } else {
+                try {
+                    AccessLevel accessLevel = AccessLevel.valueOf(right);
+                    if (maxAccessLevel == null || accessLevel.compareTo(maxAccessLevel) > 0) {
+                        maxAccessLevel = accessLevel;
+                    }
+                } catch (IllegalArgumentException e) {
+                    //ignore
+                }
+            }
+        }
+
+        if (maxAccessLevel != null) {
+            decodedRights = new ArrayList<>();
+            for (GrantedRight right : maxAccessLevel.getGrantedRights()) {
+                decodedRights.add(right.getAuthority());
+            }
+        }
+
+        return decodedRights;
+    }
 }

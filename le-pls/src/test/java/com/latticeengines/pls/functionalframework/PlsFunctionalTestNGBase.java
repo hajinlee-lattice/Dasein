@@ -195,10 +195,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
         @Override
         public boolean hasError(ClientHttpResponse response) throws IOException {
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return false;
-            }
-            return true;
+            return response.getStatusCode() != HttpStatus.OK;
         }
 
         @Override
@@ -262,7 +259,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected UserDocument loginAndAttach(String username) {
-        return loginAndAttach(username, "admin");
+        return loginAndAttach(username, generalPassword);
     }
 
     protected UserDocument loginAndAttach(String username, String password) {
@@ -270,18 +267,17 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         creds.setUsername(username);
         creds.setPassword(DigestUtils.sha256Hex(password));
 
-        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds,
-                LoginDocument.class, new Object[] {});
+        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds, LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", doc.getResult().getTenants().get(0),
-            UserDocument.class, new Object[]{});
+            UserDocument.class);
     }
 
     protected UserDocument loginAndAttach(String username, Tenant tenant) {
-        return loginAndAttach(username, "admin", tenant);
+        return loginAndAttach(username, generalPassword, tenant);
     }
 
     protected UserDocument loginAndAttach(String username, String password, Tenant tenant) {
@@ -290,13 +286,13 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         creds.setPassword(DigestUtils.sha256Hex(password));
 
         LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds,
-            LoginDocument.class, new Object[]{});
+            LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", tenant,
-            UserDocument.class, new Object[] {});
+            UserDocument.class);
     }
 
     private ModelSummary getDetails(Tenant tenant, String suffix) throws Exception {

@@ -6,7 +6,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +49,7 @@ import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementSe
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.AccessLevel;
 import com.latticeengines.pls.security.GrantedRight;
+import com.latticeengines.pls.security.RightsUtilities;
 
 
 public class UserResourceTestNG extends PlsFunctionalTestNGBase {
@@ -82,6 +82,8 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         adminDoc = loginAndAttachAdmin();
         generalDoc = loginAndAttachGeneral();
         testTenant = globalSessionManagementService.retrieve(adminDoc.getTicket()).getTenant();
+
+        System.out.println(RightsUtilities.translateRights(adminDoc.getResult().getUser().getAvailableRights()));
 
         UserRegistration testReg = createUserRegistration();
         testUser = testReg.getUser();

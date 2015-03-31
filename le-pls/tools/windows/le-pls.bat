@@ -25,7 +25,7 @@ if "%cmd%"=="compile" (
     echo running clean verify using shared GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
-        -Djava.util.logging.config.file=conf\env\dev-windows\logging-test.properties ^
+        -Djava.util.logging.config.file=src\test\resources\logging.properties ^
         -Djavax.net.ssl.trustStore=certificates\%certificate% ^
         -DPLS_PROPDIR=conf\env\dev-windows ^
         -DargLine="" ^
@@ -36,7 +36,7 @@ if "%cmd%"=="compile" (
     echo populate testing data using shared GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
-        -Djava.util.logging.config.file=conf\env\dev-windows\logging-test.properties ^
+        -Djava.util.logging.config.file=src\test\resources\logging.properties ^
         -Djavax.net.ssl.trustStore=certificates\%certificate% ^
         -DPLS_PROPDIR=conf\env\dev-windows ^
         -DargLine="" ^
@@ -47,7 +47,7 @@ if "%cmd%"=="compile" (
     echo run a test using shared GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
-        -Djava.util.logging.config.file=conf\env\dev-windows\logging-test.properties ^
+        -Djava.util.logging.config.file=src\test\resources\logging.properties ^
         -Djavax.net.ssl.trustStore=certificates\%certificate% ^
         -DPLS_PROPDIR=conf\env\dev-windows ^
         -DargLine="" ^
@@ -58,7 +58,7 @@ if "%cmd%"=="compile" (
     echo running clean verify using shared GlobalAuth ...
 
     mvn -Pfunctional ^
-        -Djava.util.logging.config.file=conf\env\dev-windows\logging-test.properties ^
+        -Djava.util.logging.config.file=src\test\resources\logging.properties ^
         -Djavax.net.ssl.trustStore=certificates\%certificate% ^
         -DPLS_PROPDIR=conf\env\dev-windows ^
         jetty:run
@@ -79,7 +79,7 @@ if "%cmd%"=="compile" (
     echo running clean verify using localhost GlobalAuth ...
 
      mvn -Pfunctional -Pgenerate ^
-        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
+        -Djava.util.logging.config.file=src\test\resources\logging.properties ^
         -Djavax.net.ssl.trustStore=certificates\localhost.jks ^
         -DPLS_PROPDIR=conf\env\dev-windows-localGA ^
         -Dcertificate.name=localhost.jks ^
@@ -92,7 +92,7 @@ if "%cmd%"=="compile" (
     echo populate testing data using localhost GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
-        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
+        -Djava.util.logging.config.file=src\test\resources\logging.properties ^
         -Djavax.net.ssl.trustStore=certificates\localhost.jks ^
         -DPLS_PROPDIR=conf\env\dev-windows-localGA ^
         -Dcertificate.name=localhost.jks ^
@@ -105,7 +105,6 @@ if "%cmd%"=="compile" (
     echo run a test using localhost GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
-        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
         -Djavax.net.ssl.trustStore=certificates\localhost.jks ^
         -DPLS_PROPDIR=conf\env\dev-windows-localGA ^
         -Dcertificate.name=localhost.jks ^
@@ -118,71 +117,10 @@ if "%cmd%"=="compile" (
     echo running clean verify using localhost GlobalAuth ...
 
     mvn -Pfunctional ^
-        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
+        -Djava.util.logging.config.file=src\test\resources\logging.properties ^
         -Djavax.net.ssl.trustStore=certificates\localhost.jks ^
         -DargLine="" ^
         -DPLS_PROPDIR=conf\env\dev-windows-localGA ^
-        jetty:run
-
-) else if "%cmd%"=="compile-tynamo" (
-
-    echo compiling using tynamo GlobalAuth ...
-
-    mvn -Pfunctional -Pgenerate ^
-        -Djavax.net.ssl.trustStore=certificates\tynamo.lattice.local.jks ^
-        -DPLS_PROPDIR=conf\env\dev-windows-tynamo ^
-        -Dcertificate.name=tynamo.lattice.local.jks ^
-        -Dglobalauth.base.url=https://tynamo.lattice.local/Bard ^
-        clean compile
-
-) else if "%cmd%"=="verify-tynamo" (
-
-    echo running clean verify using tynamo GlobalAuth ...
-
-     mvn -Pfunctional -Pgenerate ^
-        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
-        -Djavax.net.ssl.trustStore=certificates\tynamo.lattice.local.jks ^
-        -DPLS_PROPDIR=conf\env\dev-windows-tynamo ^
-        -Dcertificate.name=localhost.jks ^
-        -Dglobalauth.base.url=https://tynamo.lattice.local/Bard ^
-        -DargLine="" ^
-        clean verify
-
-) else if "%cmd%"=="popdata-tynamo" (
-
-    echo populate testing data using tynamo GlobalAuth ...
-
-    mvn -Pfunctional -Pgenerate ^
-        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
-        -Djavax.net.ssl.trustStore=certificates\tynamo.lattice.local.jks ^
-        -DPLS_PROPDIR=conf\env\dev-windows-tynamo ^
-        -Dcertificate.name=tynamo.lattice.local.jks ^
-        -Dglobalauth.base.url=https://tynamo.lattice.local/Bard ^
-        -DargLine="" ^
-        -Dtest=*ModelSummaryResourceTestNG
-
-) else if "%cmd%"=="test-tynamo" (
-
-    echo run a test using tynamo GlobalAuth ...
-
-    mvn -Pfunctional -Pgenerate ^
-        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
-        -Djavax.net.ssl.trustStore=certificates\tynamo.lattice.local.jks ^
-        -DPLS_PROPDIR=conf\env\dev-windows-tynamo ^
-        -Dcertificate.name=tynamo.lattice.local.jks ^
-        -Dglobalauth.base.url=https://tynamo.lattice.local/Bard ^
-        -DargLine="" ^
-        -Dtest=*%2
-
-) else if "%cmd%"=="run-tynamo" (
-
-    echo running clean verify using tynamo GlobalAuth ...
-
-    mvn -Pfunctional ^
-        -Djava.util.logging.config.file=src\test\resources\logging-test.properties ^
-        -Djavax.net.ssl.trustStore=certificates\tynamo.lattice.local.jks ^
-        -DargLine="" ^
-        -DPLS_PROPDIR=conf\env\dev-windows-tynamo ^
         jetty:run
 
 ) else (
