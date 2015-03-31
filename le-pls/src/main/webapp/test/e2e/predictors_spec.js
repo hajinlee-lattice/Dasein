@@ -10,6 +10,48 @@ describe('top predictors', function() {
     var modelTabs = require('./po/modeltabs.po');
     var logoutPage = require('./po/logout.po');
 
+    var tab = element(by.id("modelDetailsAttributesTab"));
+    var chart = tab.element(by.id("chart"));
+
+   var checkBackButton = function(expected) {
+        expect(element(by.id("donutChartBackButton")).isPresent()).toBe(expected);
+    };
+
+    var checkHover = function(expected) {
+        expect(element(by.id("attributeChart")).isPresent()).toBe(expected);
+    };
+
+    var checkBackButtonHover = function(buttonExpected, hoverExpected) {
+        checkBackButton(buttonExpected);
+        checkHover(hoverExpected);
+    };
+
+    var checkBackButtonHoverAndGoBack = function() {
+        checkBackButtonHover(true, false);
+        element(by.id("donutChartBackButton")).click();
+        sleep();
+        checkBackButtonHover(false, false);
+    };
+
+    var clickAttributeValue = function() {
+        element(by.id("attributes")).all(by.tagName("li")).get(0).click();
+        sleep();
+    };
+
+    var clickChartWedge = function() {
+        chart.all(by.tagName("path")).get(3).click();
+        sleep();
+    };
+
+    var moveToChartWedge = function() {
+        browser.actions().mouseMove(chart.all(by.tagName("path")).get(3)).perform(); sleep();
+    };
+
+    var moveOffChartWedge = function() {
+        browser.actions().mouseMove(chart).perform(); sleep();
+    };
+
+
     it('should validate top predictors donut', function () {
         //==================================================
         // Login
@@ -34,88 +76,33 @@ describe('top predictors', function() {
         modelTabs.getTabByIndex(0).click();
         browser.waitForAngular();
 
-        //==================================================
-        // Perform Actions
-        //==================================================
-        PerformActions();
-
-        //==================================================
-        // Logout
-        //==================================================
-        logoutPage.logoutAsNonAdmin();
+        expect(element(by.id('chart')).isDisplayed()).toBe(true);
     });
-    
-    //==================================================
-    // Perform Actions
-    //==================================================
-    function PerformActions() {
 
-        function sleep() {
-            browser.driver.sleep(3000);
-        }
-
-        sleep();
-
-        var tab = element(by.id("modelDetailsAttributesTab"));
-        var chart = tab.element(by.id("chart"));
-        var backButton = chart.element(by.id("donutChartBackButton"));
-        var hover = tab.element(by.id("topPredictorAttributeHover"));
-
-        function checkBackButton(expected) {
-            backButton.isPresent().then(function (value) {
-                return expect(expected === value).toBe(true);
-            });
-        }
-
-        function checkHover(expected) {
-            hover.getAttribute('style').then(function (value) {
-                return expect(expected === (value.indexOf("display: block;") != -1)).toBe(true);
-            });
-        }
-
-        function checkBackButtonHover(buttonExpected, hoverExpected) {
-            checkBackButton(buttonExpected);
-            checkHover(hoverExpected);
-        }
-
-        function checkBackButtonHoverAndGoBack() {
-            checkBackButtonHover(true, false);
-            backButton.click(); sleep();
-            checkBackButtonHover(false, false);
-        }
-
-        function clickAttributeValue() {
-            var attributes = element(by.id("attributes"));
-            var attributeValues = attributes.all(by.tagName("li"));
-            attributeValues.get(0).click(); sleep();
-        }
-
-        function clickChartWedge() {
-            chart.all(by.tagName("path")).get(3).click(); sleep();
-        }
-
-        function moveToChartWedge() {
-            browser.actions().mouseMove(chart.all(by.tagName("path")).get(3)).perform(); sleep();
-        }
-
-        function moveOffChartWedge() {
-            browser.actions().mouseMove(chart).perform(); sleep();
-        }
-
+    it('should not see back button or hover', function () {
         checkBackButtonHover(false, false);
+    });
 
+    it('should see back button when click on an attribute', function () {
         clickAttributeValue();
         checkBackButtonHoverAndGoBack();
+    });
 
+    it('should see back button when click on a wedge', function () {
         clickChartWedge();
         checkBackButtonHoverAndGoBack();
+    });
 
+
+    it('show see hover on and off by move to and off a wedge', function () {
         moveToChartWedge();
         checkBackButtonHover(false, true);
 
         moveOffChartWedge();
         checkBackButtonHover(false, false);
+    });
 
+    it('show verify the same behavior after go into an attribute', function () {
         clickChartWedge();
         checkBackButtonHover(true, false);
 
@@ -123,6 +110,14 @@ describe('top predictors', function() {
         checkBackButtonHover(true, true);
 
         moveOffChartWedge();
-        checkBackButtonHoverAndGoBack();
+        checkBackButtonHover(true, false);
+    });
+
+    it('show logout non admin', function(){
+        logoutPage.logoutAsNonAdmin();
+    });
+
+    function sleep() {
+        browser.driver.sleep(3000);
     }
 });
