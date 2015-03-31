@@ -412,7 +412,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             grantAdminRights(tenant.getId(), "tsanghavi@lattice-engines.com");
 
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
-            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), adminUsername);
+            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), generalUsername);
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), "admin");
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), "tsanghavi@lattice-engines.com");
         }
