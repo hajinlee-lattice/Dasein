@@ -20,7 +20,6 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.net.ntp.TimeStamp;
@@ -128,20 +127,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
             }
             try {
                 globalTenantManagementService.discardTenant(tenant);
-                String tenantId = tenant.getId();
-                Tenant existingTenant = tenantEntityMgr.findByTenantId(tenantId);
-                if (existingTenant != null) {
-                    for (KeyValue keyValue : keyValueEntityMgr.findByTenantId(existingTenant.getPid())) {
-                        keyValueEntityMgr.delete(keyValue);
-                    }
-                    ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(tenantId);
-                    if (modelSummary != null) {
-                        modelSummaryEntityMgr.delete(modelSummary);
-                    }
-                    tenantEntityMgr.delete(existingTenant);
-                }
             } catch (Exception e) {
-                log.error(ExceptionUtils.getStackTrace(e));
             }
         }
     }
@@ -152,24 +138,23 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
             Tenant tenant = new Tenant();
             tenant.setId(tenantId);
             tenant.setName("T" + i);
-            
+            Tenant existingTenant = tenantEntityMgr.findByTenantId(tenantId);
+            if(existingTenant != null){
+                for (KeyValue keyValue : keyValueEntityMgr.findByTenantId(existingTenant.getPid())) {
+                    keyValueEntityMgr.delete(keyValue);
+                }
+                ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(tenantId);
+                if (modelSummary != null) {
+                    modelSummaryEntityMgr.delete(modelSummary);
+                }
+                tenantEntityMgr.delete(existingTenant);
+            }
             try {
                 globalTenantManagementService.discardTenant(tenant);
-                Tenant existingTenant = tenantEntityMgr.findByTenantId(tenantId);
-                if (existingTenant != null) {
-                    for (KeyValue keyValue : keyValueEntityMgr.findByTenantId(existingTenant.getPid())) {
-                        keyValueEntityMgr.delete(keyValue);
-                    }
-                    ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(tenantId);
-                    if (modelSummary != null) {
-                        modelSummaryEntityMgr.delete(modelSummary);
-                    }
-                    tenantEntityMgr.delete(existingTenant);
-                }
-                globalTenantManagementService.registerTenant(tenant);
-                tenantEntityMgr.create(tenant);
             } catch (Exception e) {
             }
+            globalTenantManagementService.registerTenant(tenant);
+            tenantEntityMgr.create(tenant);
             tenantList.add(tenant);
             createModel(tenant);
         }
