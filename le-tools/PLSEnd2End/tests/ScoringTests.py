@@ -4,11 +4,64 @@ Created on Mar 18, 2015
 @author: smeng
 '''
 import unittest
+from Properties import PLSEnvironments;
+from operations import LeadCreator
+from operations import PlsOperations
+from operations.LeadCreator import EloquaRequest;
+from operations.LeadCreator import MarketoRequest;
 
 
 class Test(unittest.TestCase):
 
 
+    def TestBulkScoringELQ(self): 
+        elq = EloquaRequest();
+        contact_lists = elq.addEloquaContact(15);
+
+        PlsOperations.runBulkScoring(PLSEnvironments.pls_bard_1)
+
+        contact_lists = elq.getEloquaContact(contact_lists);
+
+        contact_faileds = LeadCreator.verifyResult("TestBulkScoringELQ",contact_lists);
+        assert len(contact_faileds)==1, contact_faileds;
+      
+    def TestBulkScoringMKTO(self): 
+        mkto = MarketoRequest();
+        leads_list = mkto.addLeadToMarketo(15);
+        
+        PlsOperations.runBulkScoring(PLSEnvironments.pls_bard_2);
+        
+        lead_lists = mkto.getLeadFromMarketo(leads_list); 
+        
+        lead_faileds = LeadCreator.verifyResult("TestBulkScoringMKTO",lead_lists);
+        assert len(lead_faileds)==1, lead_faileds;
+    
+    def TestHourlyScoringELQ(self):
+        elq = EloquaRequest();
+        contact_lists = elq.addEloquaContact(3);
+        
+        PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_1);
+               
+        contact_lists = elq.getEloquaContact(contact_lists);
+        
+        contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",contact_lists);
+        assert len(contact_faileds)==1, contact_faileds;
+        
+        PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_1);
+       
+    def TestHourlyScoringMKTO(self):
+        mkto = MarketoRequest();
+        leads_list = mkto.addLeadToMarketo(3);
+        
+        PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_2);
+        
+        lead_lists = mkto.getLeadFromMarketo(leads_list); 
+        
+        lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
+        assert len(lead_faileds)==1, lead_faileds;
+        
+        PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_2);
+        
     def testName(self):
         pass
 

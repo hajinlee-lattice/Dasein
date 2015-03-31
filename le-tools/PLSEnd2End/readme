@@ -1,0 +1,20 @@
+'''''''''''''''
+
+************** Steps to run the PLS End-to-End Tests ************ 	
+
+1. Setup properties(write the properties in config.ini file). Two options to achieve this:
+	Option 1:
+		1) cd to ../le-tools/PLSEnd2End/
+		2) run the script setUpProperties.py with the properties
+	Option 2: change the config.ini file manually
+ 
+2. Setup PLS, including drop templates, configure DL/VDB and set up Load Groups. To do this:
+	1) cd to ../le-tools/PLSEnd2End/
+	2) python setUpPLS.py
+
+3. Run Tests:
+	1) cd to ../le-tools/PLSEnd2End/
+	2) python -m unittest tests.{testModuleName}
+
+
+'''''''''''''''

@@ -208,7 +208,7 @@ def runScoringGroups(tenant,load_groups):
     #load_groups = ["LoadCRMData", "LoadMapData", "PropDataMatch", "BulkScoring_PushToScoringDB"];
     return TestHelpers.runLoadGroups(dlc, params, load_groups);
     
-def runPushToBulkScoring(tenant): 
+def runPushToBulkScoring(tenant):
     load_groups = ["LoadCRMData", "LoadMapData", "PropDataMatch", "BulkScoring_PushToScoringDB"];   
     return runScoringGroups(tenant, load_groups);
     
@@ -221,19 +221,22 @@ def runEndBulkScoring(tenant):
     return runScoringGroups(tenant, load_groups);
 
 def runEndHourlyScoring(tenant):
-    load_groups = ["PushToLeadDestination","LoadScoreHistoryData", "PushToReportsDB", "InsightsAllSteps"];   
+    load_groups = ["PushToLeadDestination"];
+    return runScoringGroups(tenant, load_groups);
+
+def runHourlyDanteProcess(tenant):
+    load_groups = ["LoadScoreHistoryData", "PushToReportsDB", "InsightsAllSteps"];   
     return runScoringGroups(tenant, load_groups);
 
 def runBulkScoring(tenant):
-    runPushToBulkScoring();
-    waitForLeadInputQueue(cycle_times=100);
-    runEndBulkScoring(tenant);
+    assert runPushToBulkScoring();
+    assert waitForLeadInputQueue(cycle_times=100);
+    assert runEndBulkScoring(tenant);
     
 def runHourlyScoring(tenant):
-    runPushToHourlyScoring();
-    waitForLeadInputQueue(cycle_times=20);
-    runEndHourlyScoring(tenant);
-
+    assert runPushToHourlyScoring(tenant);
+    assert waitForLeadInputQueue(tenant, cycle_times=20);
+    assert runEndHourlyScoring(tenant);
     
 
 if __name__ == '__main__':
