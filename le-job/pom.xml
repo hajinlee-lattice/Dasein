@@ -9,7 +9,7 @@
     <properties>
         <component-name>job</component-name>
         <le.dataplatform.version>1.0.29-SNAPSHOT</le.dataplatform.version>
-        <le.db.version>1.0.28-SNAPSHOT</le.db.version>
+        <le.db.version>1.0.29-SNAPSHOT</le.db.version>
         <le.camille.version>1.0.29-SNAPSHOT</le.camille.version>
         <le.propdata.version>1.0.29-SNAPSHOT</le.propdata.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
