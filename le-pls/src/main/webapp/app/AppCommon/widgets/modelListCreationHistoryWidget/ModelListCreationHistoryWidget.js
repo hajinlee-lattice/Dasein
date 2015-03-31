@@ -1,13 +1,18 @@
-angular.module('mainApp.appCommon.widgets.ModelListCreationHistoryWidget', [
+var app = angular.module('mainApp.appCommon.widgets.ModelListCreationHistoryWidget', [
+    'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.models.services.ModelService',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.RightsUtility',
     'mainApp.models.modals.ImportModelModal'
-])
-.controller('ModelListCreationHistoryWidgetController', function ($scope, $rootScope, ModelService, ResourceUtility, GriotNavUtility, ImportModelModal) {
+]);
+
+app.controller('ModelListCreationHistoryWidgetController', function ($scope, $rootScope, ModelService, ResourceUtility, BrowserStorageUtility,
+                                                                     RightsUtility, GriotNavUtility, ImportModelModal) {
     
     $scope.ResourceUtility = ResourceUtility;
     $scope.models = $scope.data;
+    $scope.showUploadModel = RightsUtility.mayUploadModelJson(BrowserStorageUtility.getClientSession().availableRights);
 
     $scope.undoDeleteModel = function (modelId) {
         if (modelId == null) {

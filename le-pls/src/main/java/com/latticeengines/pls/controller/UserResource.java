@@ -80,12 +80,14 @@ public class UserResource {
                 = globalUserManagementService.getAllUsersOfTenant(tenantId);
             List<User> users = new ArrayList<>();
             for (Map.Entry<User, List<String>> userRights : userRightsList) {
-                if (!RightsUtilities.isAdmin(RightsUtilities.translateRights(userRights.getValue()))) {
-                    User user = userRights.getKey();
-                    AccessLevel accessLevel = userService.getAccessLevel(tenantId, user.getUsername());
-                    if (accessLevel != null) {
-                        user.setAccessLevel(accessLevel.name());
+                User user = userRights.getKey();
+                AccessLevel accessLevel = userService.getAccessLevel(tenantId, user.getUsername());
+                if (accessLevel == null) {
+                    if (!RightsUtilities.isAdmin(RightsUtilities.translateRights(userRights.getValue()))) {
+                        users.add(user);
                     }
+                } else if (!accessLevel.equals(AccessLevel.SUPER_ADMIN)) {
+                    user.setAccessLevel(accessLevel.name());
                     users.add(user);
                 }
             }
@@ -146,7 +148,12 @@ public class UserResource {
                 globalUserManagementService.deleteUser(user.getUsername());
                 throw new LedpException(LedpCode.LEDP_18004, new String[]{creds.getUsername()});
             }
-            grantDefaultRights(tenantId, user.getUsername());
+            if (userReg.getUser().getAccessLevel() != null) {
+                userService.assignAccessLevel(AccessLevel.valueOf(userReg.getUser().getAccessLevel()),
+                        tenantId, user.getUsername());
+            } else {
+                userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenantId, user.getUsername());
+            }
             response.setSuccess(true);
             String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());
             result.setPassword(tempPass);
@@ -220,21 +227,17 @@ public class UserResource {
         }
 
         // update rights
-        List<String> rights = new ArrayList<>();
         if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
             // using access level if it is provided
-            for (GrantedRight grantedRight: AccessLevel.valueOf(data.getAccessLevel()).getGrantedRights()) {
-                rights.add(grantedRight.getAuthority());
-            }
             userService.assignAccessLevel(AccessLevel.valueOf(data.getAccessLevel()), tenantId, username);
         } else {
-            rights = RightsUtilities.translateRights(data.getRights());
+            softDelete(tenantId, username);
+            for (String right : RightsUtilities.translateRights(data.getRights())) {
+                globalUserManagementService.grantRight(right, tenantId, username);
+            }
         }
 
-        softDelete(tenantId, username);
-        for (String right : rights) {
-            globalUserManagementService.grantRight(right, tenantId, username);
-        }
+
 
         if (!inTenant(tenantId, username)) {
             return SimpleBooleanResponse.getFailResponse(
@@ -334,18 +337,6 @@ public class UserResource {
             }
             throw e;
         }
-    }
-
-    private void grantDefaultRights(String tenantId, String username) {
-        List<GrantedRight> rights = GrantedRight.getDefaultRights();
-        for (GrantedRight right: rights) {
-            try {
-                globalUserManagementService.grantRight(right.getAuthority(), tenantId, username);
-            } catch (LedpException e) {
-                // ignore
-            }
-        }
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenantId, username);
     }
 
     private boolean isAdmin(String tenantId, String username) {

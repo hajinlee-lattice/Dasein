@@ -1,15 +1,10 @@
-angular.module('mainApp.core.utilities.RightsUtility', [])
-.service('RightsUtility', function () {
+var app = angular.module('mainApp.core.utilities.RightsUtility', []);
 
-    this.AccessLevel = {
-        SUPER_ADMIN: "SUPER_ADMIN",
-        INTERNAL_ADMIN: "INTERNAL_ADMIN",
-        INTERNAL_USER: "INTERNAL_USER",
-        EXTERNAL_ADMIN: "EXTERNAL_ADMIN",
-        EXTERNAL_USER: "EXTERNAL_USER"
-    };
+app.service('RightsUtility', function () {
 
-    this.mayViewUsers = function(rightsDict) {
+    this.AccessLevel = ["EXTERNAL_USER", "EXTERNAL_ADMIN", "INTERNAL_USER", "INTERNAL_ADMIN", "SUPER_ADMIN"];
+
+    this.mayViewUsers = function (rightsDict) {
         if (rightsDict.hasOwnProperty("PLS_Users")) {
             var userRights = rightsDict.PLS_Users;
             return (userRights.MayView);
@@ -17,7 +12,7 @@ angular.module('mainApp.core.utilities.RightsUtility', [])
         return false;
     };
 
-    this.mayEditUsers = function(rightsDict) {
+    this.mayEditUsers = function (rightsDict) {
         if (rightsDict.hasOwnProperty("PLS_Users")) {
             var userRights = rightsDict.PLS_Users;
             return userRights.MayEdit;
@@ -25,68 +20,71 @@ angular.module('mainApp.core.utilities.RightsUtility', [])
         return false;
     };
 
-    this.mayViewModels = function(rightsDict) {
+    this.mayViewModels = function (rightsDict) {
         if (rightsDict.hasOwnProperty("PLS_Models")) {
             return rightsDict.PLS_Models.MayView;
         }
         return false;
     };
 
-    this.mayEditModels = function(rightsDict) {
+    this.mayEditModels = function (rightsDict) {
         if (rightsDict.hasOwnProperty("PLS_Models")) {
             return rightsDict.PLS_Models.MayEdit;
         }
         return false;
     };
 
-    this.mayViewConfiguration = function(rightsDict) {
-        try{
+    this.mayCreateModels = function (rightsDict) {
+        if (rightsDict.hasOwnProperty("PLS_Models")) {
+            return rightsDict.PLS_Models.MayCreate;
+        }
+        return false;
+    };
+
+    this.mayViewConfiguration = function (rightsDict) {
+        try {
             return rightsDict.PLS_Configuration.MayView;
-        } catch(err) {
+        } catch (err) {
             return false;
         }
     };
 
-    this.mayEditConfiguration = function(rightsDict) {
-        try{
+    this.mayEditConfiguration = function (rightsDict) {
+        try {
             return rightsDict.PLS_Configuration.MayEdit;
-        } catch(err) {
+        } catch (err) {
             return false;
         }
     };
 
-    this.mayViewReporting = function(rightsDict) {
-        try{
+    this.mayViewReporting = function (rightsDict) {
+        try {
             return rightsDict.PLS_Reporting.MayView;
-        } catch(err) {
+        } catch (err) {
             return false;
         }
     };
 
-    this.canSeeUserManagement = function(rightsDict) {
+    this.canSeeUserManagement = function (rightsDict) {
         return this.mayViewUsers(rightsDict);
     };
 
-    this.mayAddUser = function(rightsDict) {
+    this.mayAddUser = function (rightsDict) {
         return this.mayEditUsers(rightsDict);
     };
 
-    this.maySeeHiddenAdminTab = function(rightsDict) {
+    this.maySeeHiddenAdminTab = function (rightsDict) {
         return (
-            this.mayViewModels(rightsDict) &&
-            this.mayViewConfiguration(rightsDict) &&
-            this.mayViewReporting(rightsDict) &&
-            this.mayEditModels(rightsDict) &&
-            this.mayEditConfiguration(rightsDict)
+        this.mayViewModels(rightsDict) &&
+        this.mayViewConfiguration(rightsDict) &&
+        this.mayViewReporting(rightsDict) &&
+        this.mayEditModels(rightsDict) &&
+        this.mayEditConfiguration(rightsDict)
         );
     };
 
-    this.getDefaultRights = function () {
-        return {
-            PLS_Models: {MayView: true},
-            PLS_Reporting: {MayView: true},
-            PLS_Configuration: {MayView: true}
-        };
+    this.mayUploadModelJson = function(rightsDict) {
+        return this.mayCreateModels(rightsDict);
     };
 
 });

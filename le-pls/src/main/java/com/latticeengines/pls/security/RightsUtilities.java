@@ -74,6 +74,8 @@ public class RightsUtilities {
         if (!availableRights.get("PLS_Models").isMayEdit()) { return false; }
         if (!availableRights.get("PLS_Configuration").isMayEdit()) { return false; }
 
+        if (!availableRights.get("PLS_Models").isMayCreate()) { return false; }
+
         return true;
     }
 }

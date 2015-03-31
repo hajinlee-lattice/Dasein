@@ -470,10 +470,6 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(response.getBody().isSuccess());
 
         List<String> rights = globalUserManagementService.getRights(testCreds.getUsername(), testTenant.getId());
-        List<GrantedRight> expectedRights = accessLevel.getGrantedRights();
-        assertEquals(rights.size(), expectedRights.size());
-        for (GrantedRight grantedRight: expectedRights) {
-            assertTrue(rights.contains(grantedRight.getAuthority()));
-        }
+        assertTrue(rights.contains(accessLevel.name()));
     }
 }

@@ -1,12 +1,14 @@
-angular.module('mainApp.userManagement.modals.AddUserModal', [
+var app = angular.module('mainApp.userManagement.modals.AddUserModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.core.utilities.PasswordUtility',
+    'mainApp.core.utilities.RightsUtility',
     'mainApp.core.utilities.GriotNavUtility',
     'mainApp.userManagement.services.UserManagementService'
-])
-.service('AddUserModal', function ($compile, $rootScope, $http) {
+]);
+
+app.service('AddUserModal', function ($compile, $rootScope, $http) {
     this.show = function (emails) {
         $http.get('./app/userManagement/views/AddUserView.html').success(function (html) {
             
@@ -28,10 +30,12 @@ angular.module('mainApp.userManagement.modals.AddUserModal', [
             });
         });
     };
-})
-.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility, StringUtility, PasswordUtility, GriotNavUtility, UserManagementService) {
+});
+
+app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility, StringUtility, PasswordUtility, GriotNavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
-    
+    $scope.levelsToSelect = RightsUtility.AccessLevel;
+
     $scope.saveInProgress = false;
     $scope.addUserErrorMessage = "";
     $scope.showAddUserError = false;
@@ -56,7 +60,7 @@ angular.module('mainApp.userManagement.modals.AddUserModal', [
 
         return true;
     }
-    
+
     $scope.addUserClick = function ($event) {
         if ($event != null) {
             $event.preventDefault();
@@ -117,7 +121,7 @@ angular.module('mainApp.userManagement.modals.AddUserModal', [
         $scope.user.Email = $scope.existingUser.Email;
         $scope.user.Username = $scope.existingUser.Username;
 
-        UserManagementService.GrantDefaultRights($scope.user.Username).then(function(result){
+        UserManagementService.AssignAccessLevel($scope.user.Username, $scope.user.AccessLevel).then(function(result){
             if (result.Success) {
                 $scope.showAddUserSuccess = true;
                 $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_EXSITING_USER_SUCCESS", [$scope.user.Username]);

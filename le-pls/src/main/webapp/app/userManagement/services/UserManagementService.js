@@ -7,7 +7,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
 ])
 .service('UserManagementService', function ($http, $q, _, BrowserStorageUtility, ResourceUtility, RightsUtility, SessionService) {
 
-    this.GrantDefaultRights = function(username){
+    this.AssignAccessLevel = function(username, accessLevel){
         var deferred = $q.defer();
         var result = {
             Success: false,
@@ -18,7 +18,7 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
             method: 'PUT',
             url: '/pls/users/' + username,
             data: {
-                AccessLevel: RightsUtility.AccessLevel.EXTERNAL_USER
+                AccessLevel: accessLevel
             },
             headers: {"Content-Type": "application/json"}
         }).success(function(data){
@@ -69,10 +69,11 @@ angular.module('mainApp.userManagement.services.UserManagementService', [
         var deferred = $q.defer();
 
         var user = {
-            Username:  newUser.Email,
-            FirstName: newUser.FirstName,
-            LastName:  newUser.LastName,
-            Email:     newUser.Email
+            Username:    newUser.Email,
+            FirstName:   newUser.FirstName,
+            LastName:    newUser.LastName,
+            Email:       newUser.Email,
+            AccessLevel: newUser.AccessLevel
         };
 
         var creds = {
