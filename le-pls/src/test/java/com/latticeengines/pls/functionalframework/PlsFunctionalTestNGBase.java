@@ -48,9 +48,11 @@ import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.globalauth.authentication.impl.Constants;
+import com.latticeengines.pls.security.AccessLevel;
 import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.security.TicketAuthenticationToken;
+import com.latticeengines.pls.service.UserService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -84,6 +86,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;
+
+    @Autowired
+    private UserService userService;
 
     @Value("${pls.api.hostport}")
     private String hostPort;
@@ -405,6 +410,11 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             grantDefaultRights(tenant.getId(), generalUsername);
             grantAdminRights(tenant.getId(), "admin");
             grantAdminRights(tenant.getId(), "tsanghavi@lattice-engines.com");
+
+            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
+            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), adminUsername);
+            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), "admin");
+            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), "tsanghavi@lattice-engines.com");
         }
 
         // empty rights user
