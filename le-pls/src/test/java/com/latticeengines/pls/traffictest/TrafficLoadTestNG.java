@@ -152,8 +152,20 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
             Tenant tenant = new Tenant();
             tenant.setId(tenantId);
             tenant.setName("T" + i);
+            
             try {
                 globalTenantManagementService.discardTenant(tenant);
+                Tenant existingTenant = tenantEntityMgr.findByTenantId(tenantId);
+                if (existingTenant != null) {
+                    for (KeyValue keyValue : keyValueEntityMgr.findByTenantId(existingTenant.getPid())) {
+                        keyValueEntityMgr.delete(keyValue);
+                    }
+                    ModelSummary modelSummary = modelSummaryEntityMgr.getByModelId(tenantId);
+                    if (modelSummary != null) {
+                        modelSummaryEntityMgr.delete(modelSummary);
+                    }
+                    tenantEntityMgr.delete(existingTenant);
+                }
                 globalTenantManagementService.registerTenant(tenant);
                 tenantEntityMgr.create(tenant);
             } catch (Exception e) {
