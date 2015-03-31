@@ -4,6 +4,8 @@ import javax.servlet.Filter;
 
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import com.latticeengines.common.exposed.rest.BodyBufferFilter;
+
 public class MarketoAdapterInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Override
     protected Class<?>[] getRootConfigClasses() {
@@ -22,6 +24,6 @@ public class MarketoAdapterInitializer extends AbstractAnnotationConfigDispatche
 
     @Override
     protected Filter[] getServletFilters() {
-        return new Filter[] {};
+        return new Filter[] { new BodyBufferFilter() };
     }
 }

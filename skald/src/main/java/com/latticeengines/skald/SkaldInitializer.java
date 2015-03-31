@@ -9,6 +9,8 @@ import javax.servlet.ServletException;
 import org.python.util.PythonInterpreter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import com.latticeengines.common.exposed.rest.BodyBufferFilter;
+
 public class SkaldInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Override
     public void onStartup(ServletContext container) throws ServletException {

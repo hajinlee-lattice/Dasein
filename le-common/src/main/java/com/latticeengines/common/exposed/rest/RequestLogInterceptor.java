@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.common.exposed.rest;
 
 import java.security.SecureRandom;
 
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 @Service
-public class SkaldInterceptor extends HandlerInterceptorAdapter {
+public class RequestLogInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         // TODO Generate a better request identifier.
@@ -56,5 +56,5 @@ public class SkaldInterceptor extends HandlerInterceptorAdapter {
 
     private static final SecureRandom generator = new SecureRandom();
 
-    private static final Log log = LogFactory.getLog(SkaldInterceptor.class);
+    private static final Log log = LogFactory.getLog(RequestLogInterceptor.class);
 }

@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
+import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 
 @Configuration
 @EnableWebMvc
@@ -34,6 +35,7 @@ public class MarketoAdapterConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(interceptor);
     }
 
     @Override
@@ -50,6 +52,9 @@ public class MarketoAdapterConfiguration extends WebMvcConfigurerAdapter {
 
         return converter;
     }
+
+    @Autowired
+    private RequestLogInterceptor interceptor;
 
     @Autowired
     private MarketoAdapterProperties properties;

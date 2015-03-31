@@ -12,8 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import com.latticeengines.skald.BodyBufferFilter.BufferedServletRequest;
-import com.latticeengines.skald.BodyBufferFilter.BufferedServletResponse;
+import com.latticeengines.common.exposed.rest.BodyBufferFilter.BufferedServletRequest;
+import com.latticeengines.common.exposed.rest.BodyBufferFilter.BufferedServletResponse;
+import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 
 @Service
 public class ScoreHistorian extends HandlerInterceptorAdapter {
@@ -34,8 +35,8 @@ public class ScoreHistorian extends HandlerInterceptorAdapter {
 
             ScoreHistoryEntry entry = (ScoreHistoryEntry) request.getAttribute(ENTRY_KEY);
 
-            String identifier = (String) request.getAttribute(SkaldInterceptor.IDENTIFIER_KEY);
-            long start = (long) request.getAttribute(SkaldInterceptor.START_TIME_KEY);
+            String identifier = (String) request.getAttribute(RequestLogInterceptor.IDENTIFIER_KEY);
+            long start = (long) request.getAttribute(RequestLogInterceptor.START_TIME_KEY);
 
             entry.requestID = identifier;
             entry.received = start;

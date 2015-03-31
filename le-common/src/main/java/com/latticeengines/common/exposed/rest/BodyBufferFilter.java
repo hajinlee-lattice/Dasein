@@ -1,4 +1,4 @@
-package com.latticeengines.skald;
+package com.latticeengines.common.exposed.rest;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.apache.commons.io.IOUtils;
 
-// TODO Move this to a common library.
+// Filter that overloads servlet requests and responses to allow the raw body to be read multiple times.
 public class BodyBufferFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -41,7 +41,7 @@ public class BodyBufferFilter implements Filter {
         // Pass
     }
 
-    static class BufferedServletInputStream extends ServletInputStream {
+    public static class BufferedServletInputStream extends ServletInputStream {
         public BufferedServletInputStream(byte[] body) {
             inner = new ByteArrayInputStream(body);
         }
@@ -71,7 +71,7 @@ public class BodyBufferFilter implements Filter {
         private final ByteArrayInputStream inner;
     }
 
-    static class BufferedServletRequest extends HttpServletRequestWrapper {
+    public static class BufferedServletRequest extends HttpServletRequestWrapper {
         public BufferedServletRequest(HttpServletRequest request) {
             super(request);
 
@@ -94,7 +94,7 @@ public class BodyBufferFilter implements Filter {
         private byte[] body;
     }
 
-    static class BufferedServletOutputStream extends ServletOutputStream {
+    public static class BufferedServletOutputStream extends ServletOutputStream {
         public BufferedServletOutputStream(ServletOutputStream output) {
             inner = output;
             buffer = new ByteArrayOutputStream();
@@ -126,7 +126,7 @@ public class BodyBufferFilter implements Filter {
         private final ByteArrayOutputStream buffer;
     }
 
-    static class BufferedServletResponse extends HttpServletResponseWrapper {
+    public static class BufferedServletResponse extends HttpServletResponseWrapper {
         public BufferedServletResponse(HttpServletResponse response) {
             super(response);
 

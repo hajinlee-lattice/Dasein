@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
+import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 
 @Configuration
 @EnableWebMvc
@@ -54,7 +55,7 @@ public class SkaldConfiguration extends WebMvcConfigurerAdapter {
     }
 
     @Autowired
-    private SkaldInterceptor interceptor;
+    private RequestLogInterceptor interceptor;
 
     @Autowired
     private ScoreHistorian historian;
