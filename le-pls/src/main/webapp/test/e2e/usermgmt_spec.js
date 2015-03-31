@@ -22,40 +22,28 @@ describe('user management', function() {
         return text;
     }
 
-    it('log in as a non-admin users', function () {
-        loginPage.loginAsNonAdmin();
-        tenants.selectTenantByIndex(params.tenantIndex);
-    }, 60000);
-
     it('should verify user management is invisible to non-admin users', function () {
-        // check existence of Manage Users link
-        userDropdown.getUserLink(params.nonAdminDisplayName).click().then(function(){
-            expect(element(by.linkText('Manage Users')).isPresent()).toBe(false);
-        });
-        userDropdown.getUserLink(params.nonAdminDisplayName).click();
-    });
+        loginPage.loginAsNonAdminToTenant(params.tenantIndex);
 
-    it('log out the non-admin users', function () {
+        userDropdown.toggleDropdown(params.nonAdminDisplayName);
+        expect(userDropdown.ManageUsersLink.isPresent()).toBe(false);
+        userDropdown.toggleDropdown(params.nonAdminDisplayName);
+
         logoutPage.logoutAsNonAdmin();
     }, 60000);
 
-    it('should login as an admin users', function () {
-        loginPage.loginAsAdmin();
-        tenants.selectTenantByIndex(params.tenantIndex);
+
+    it('should verify user management is visible to admin users', function () {
+        loginPage.loginAsAdminToTenant(params.tenantIndex);
+        userDropdown.toggleDropdown(params.adminDisplayName);
+        expect(userDropdown.ManageUsersLink.isDisplayed()).toBe(true);
     }, 60000);
 
-    it('should see user management link', function () {
-        // check existence of Manage Users link
-        userDropdown.getUserLink(params.adminDisplayName).click();
-        expect(element(by.linkText('Manage Users')).isDisplayed()).toBe(true);
-    });
 
     it('should see user management page', function () {
         // check existence of users table
-        element(by.linkText('Manage Users')).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
-        expect(element(by.xpath(userManagement.xpath.PanelBody)).isDisplayed()).toBe(true);
+        userDropdown.ManageUsersLink.click();
+        expect(userManagement.UsersPanel.isDisplayed()).toBe(true);
         element.all(by.repeater('user in data')).then(function(elements){
             numOfUsers = elements.length;
         });
@@ -65,7 +53,7 @@ describe('user management', function() {
         // popup add user
         userManagement.getAddNewUserButton().click();
         browser.driver.sleep(1000);
-        expect(userManagement.getAddNewUserModal().isDisplayed()).toBe(true);
+        expect(userManagement.NewUserModal.isDisplayed()).toBe(true);
     });
 
     it('should be able to canceling by clicking cancel button', function () {
@@ -264,29 +252,23 @@ describe('user management', function() {
         tenants.selectTenantByIndex(params.tenantIndex);
 
         userDropdown.getUserLink(params.adminDisplayName).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
+        sleep();
 
         element(by.linkText('Manage Users')).click();
-        browser.waitForAngular();
-        browser.driver.sleep(2000);
+        sleep();
 
         userManagement.selectUser(newUserEmail);
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
+        sleep();
 
         userManagement.getDeleteUsersButton().click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
+        sleep();
 
         element(by.id('delete-user-btn-ok')).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
+        sleep();
 
         expect(element(by.xpath('//div[@data-ng-show="successUsers.length > 0"]')).isDisplayed()).toBe(true);
         element(by.id('delete-user-btn-ok')).click();
-        browser.waitForAngular();
-        browser.driver.sleep(3000);
+        sleep(3000);
         expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
 
         logoutPage.logoutAsAdmin();
@@ -307,32 +289,32 @@ describe('user management', function() {
         tenants.selectTenantByIndex(params.alternativeTenantIndex);
 
         userDropdown.getUserLink(params.adminDisplayName).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
+        sleep();
 
         element(by.linkText('Manage Users')).click();
-        browser.waitForAngular();
-        browser.driver.sleep(2000);
+        sleep();
 
         userManagement.selectUser(newUserEmail);
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
+        sleep();
 
         userManagement.getDeleteUsersButton().click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
+        sleep();
 
         element(by.id('delete-user-btn-ok')).click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
+        sleep();
 
         expect(element(by.xpath('//div[@data-ng-show="successUsers.length > 0"]')).isDisplayed()).toBe(true);
         element(by.id('delete-user-btn-ok')).click();
-        browser.waitForAngular();
-        browser.driver.sleep(3000);
+        sleep();
 
         logoutPage.logoutAsAdmin();
     }, 60000);
 
+
+    function sleep(time) {
+        if (time == null) { time = 2000; }
+        browser.waitForAngular();
+        browser.driver.sleep(time);
+    }
 });
 

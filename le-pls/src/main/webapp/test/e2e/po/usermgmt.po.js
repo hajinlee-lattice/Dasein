@@ -1,10 +1,6 @@
 'use strict';
 
 var UserManagement = function() {
-    this.getPanelBody = function() {
-        return browser.driver.findElement(By.xpath("//div[@class='panel-body']"));
-    };
-
     this.selectUser = function(username) {
         function clickCheckbox(row) {
             row.all(by.css('td')).getText().then(function (text) {
@@ -22,8 +18,12 @@ var UserManagement = function() {
     };
 
     this.xpath = {
-        PanelBody: "//div[@class='panel-body']"
+        PanelBody: "//div[@class='panel-body']",
+        NewUserModal: "//div[@data-ng-controller='AddUserController']"
     };
+
+    this.UsersPanel = element(by.xpath(this.xpath.PanelBody));
+    this.NewUserModal = element(by.xpath(this.xpath.NewUserModal));
 
     this.getAddNewUserModal = function(){
         return element(by.xpath("//div[@data-ng-controller='AddUserController']"));
@@ -60,7 +60,6 @@ var UserManagement = function() {
     this.getDeleteUserModal = function() {
         return element(by.xpath('//div[@data-ng-controller="DeleteUsersController"]'));
     };
-
 };
 
 module.exports = new UserManagement();

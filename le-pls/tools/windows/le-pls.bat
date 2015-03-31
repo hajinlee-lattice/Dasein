@@ -16,6 +16,7 @@ if "%cmd%"=="compile" (
     echo compiling using shared GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
+        -Djava.util.logging.config.file=src\test\resources\logging.properties ^
         -Djavax.net.ssl.trustStore=certificates\%certificate% ^
         -DPLS_PROPDIR=conf\env\dev-windows ^
         clean compile
@@ -68,6 +69,7 @@ if "%cmd%"=="compile" (
     echo compiling using localhost GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
+        -Djava.util.logging.config.file=src\test\resources\logging.properties ^
         -Djavax.net.ssl.trustStore=certificates\localhost.jks ^
         -DPLS_PROPDIR=conf\env\dev-windows-localGA ^
         -Dcertificate.name=localhost.jks ^
@@ -105,6 +107,7 @@ if "%cmd%"=="compile" (
     echo run a test using localhost GlobalAuth ...
 
     mvn -Pfunctional -Pgenerate ^
+        -Djava.util.logging.config.file=src\test\resources\logging.properties ^
         -Djavax.net.ssl.trustStore=certificates\localhost.jks ^
         -DPLS_PROPDIR=conf\env\dev-windows-localGA ^
         -Dcertificate.name=localhost.jks ^

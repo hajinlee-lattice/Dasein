@@ -1,11 +1,10 @@
 'use strict';
 
-describe('top predictors', function() {
+describe('top predictors', function () {
 
     var params = browser.params;
 
     var loginPage = require('./po/login.po');
-    var tenants = require('./po/tenantselection.po');
     var modelList = require('./po/modellist.po');
     var modelTabs = require('./po/modeltabs.po');
     var logoutPage = require('./po/logout.po');
@@ -13,42 +12,53 @@ describe('top predictors', function() {
     var tab = element(by.id("modelDetailsAttributesTab"));
     var chart = tab.element(by.id("chart"));
 
-   var checkBackButton = function(expected) {
-        expect(element(by.id("donutChartBackButton")).isPresent()).toBe(expected);
+    var checkBackButton = function (expected) {
+        if (expected) {
+            expect(element(by.id("donutChartBackButton")).isDisplayed()).toBe(true);
+        } else {
+            expect(element(by.id("donutChartBackButton")).isPresent()).toBe(false);
+        }
     };
 
-    var checkHover = function(expected) {
-        expect(element(by.id("attributeChart")).isPresent()).toBe(expected);
+    var checkHover = function (expected) {
+        sleep(1000);
+        if (expected) {
+            expect(element(by.css("div.attribute-hover")).isDisplayed()).toBe(true);
+        } else {
+            expect(element(by.css("div.attribute-hover")).isPresent()).toBe(false);
+        }
     };
 
-    var checkBackButtonHover = function(buttonExpected, hoverExpected) {
+    var checkBackButtonHover = function (buttonExpected, hoverExpected) {
         checkBackButton(buttonExpected);
         checkHover(hoverExpected);
     };
 
-    var checkBackButtonHoverAndGoBack = function() {
+    var checkBackButtonHoverAndGoBack = function () {
         checkBackButtonHover(true, false);
         element(by.id("donutChartBackButton")).click();
         sleep();
         checkBackButtonHover(false, false);
     };
 
-    var clickAttributeValue = function() {
+    var clickAttributeValue = function () {
         element(by.id("attributes")).all(by.tagName("li")).get(0).click();
         sleep();
     };
 
-    var clickChartWedge = function() {
+    var clickChartWedge = function () {
         chart.all(by.tagName("path")).get(3).click();
         sleep();
     };
 
-    var moveToChartWedge = function() {
-        browser.actions().mouseMove(chart.all(by.tagName("path")).get(3)).perform(); sleep();
+    var moveToChartWedge = function () {
+        browser.actions().mouseMove(chart.all(by.tagName("path")).get(3)).perform();
+        sleep();
     };
 
-    var moveOffChartWedge = function() {
-        browser.actions().mouseMove(chart).perform(); sleep();
+    var moveOffChartWedge = function () {
+        browser.actions().mouseMove(chart).perform();
+        sleep();
     };
 
 
@@ -56,13 +66,7 @@ describe('top predictors', function() {
         //==================================================
         // Login
         //==================================================
-        loginPage.loginAsNonAdmin();
-
-        //==================================================
-        // Select Tenant
-        //==================================================
-        tenants.selectTenantByIndex(params.tenantIndex);
-        browser.waitForAngular();
+        loginPage.loginAsNonAdminToTenant(params.tenantIndex);
 
         //==================================================
         // Select Model
@@ -94,7 +98,7 @@ describe('top predictors', function() {
     });
 
 
-    it('show see hover on and off by move to and off a wedge', function () {
+    it('should see hover on and off by move to and off a wedge', function () {
         moveToChartWedge();
         checkBackButtonHover(false, true);
 
@@ -102,7 +106,7 @@ describe('top predictors', function() {
         checkBackButtonHover(false, false);
     });
 
-    it('show verify the same behavior after go into an attribute', function () {
+    it('should verify the same behavior after go into an attribute', function () {
         clickChartWedge();
         checkBackButtonHover(true, false);
 
@@ -113,11 +117,13 @@ describe('top predictors', function() {
         checkBackButtonHover(true, false);
     });
 
-    it('show logout non admin', function(){
+    it('show logout non admin', function () {
         logoutPage.logoutAsNonAdmin();
     });
 
-    function sleep() {
-        browser.driver.sleep(3000);
+    function sleep(time) {
+        if (time == null) { time = 2000; }
+        browser.waitForAngular();
+        browser.driver.sleep(time);
     }
 });

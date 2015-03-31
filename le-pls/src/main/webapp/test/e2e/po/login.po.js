@@ -1,5 +1,7 @@
 'use strict';
 
+var tenants = require('./tenantselection.po');
+
 var Login = function() {
 	this.email = element(by.model('username'));
 	this.password = element(by.model('password'));
@@ -33,6 +35,15 @@ var Login = function() {
   		this.loginUser(browser.params.nonAdminUsername, browser.params.nonAdminPassword);
     };
 
+    this.loginAsAdminToTenant = function(i) {
+        this.loginAsAdmin();
+        tenants.selectTenantByIndex(i);
+    };
+
+    this.loginAsNonAdminToTenant = function(i) {
+        this.loginAsNonAdmin();
+        tenants.selectTenantByIndex(i);
+    };
 };
 
 module.exports = new Login();
