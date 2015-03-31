@@ -38,7 +38,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() {
-        deleteUser("ron@lattice-engines.com");
+        makeSureUserNoExists("ron@lattice-engines.com");
         tenantEntityMgr.deleteAll();
         tenant = new Tenant();
         tenant.setId("T1");

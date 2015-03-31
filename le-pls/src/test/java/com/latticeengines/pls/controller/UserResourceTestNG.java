@@ -432,10 +432,6 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(accessLevel, resultLevel);
     }
 
-    private void makeSureUserNoExists(String username) {
-        assertTrue(globalUserManagementService.deleteUser(username));
-    }
-
     private void logoutAdmin() { logoutUserDoc(adminDoc); }
 
     private void logoutGeneral() { logoutUserDoc(generalDoc); }

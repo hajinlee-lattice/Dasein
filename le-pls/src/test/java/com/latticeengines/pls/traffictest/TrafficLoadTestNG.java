@@ -52,7 +52,8 @@ import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.security.GrantedRight;
+import com.latticeengines.pls.security.AccessLevel;
+import com.latticeengines.pls.service.UserService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 
 public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
@@ -82,6 +83,9 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;
+
+    @Autowired
+    private UserService userService;
 
     private int numOfThreads;
 
@@ -120,10 +124,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
     public void destroy() {
         for (Tenant tenant : tenantList) {
             for (User user : users.get(tenant)) {
-                revokeRight(GrantedRight.VIEW_PLS_MODELS, tenant.getId(), user.getUsername());
-                revokeRight(GrantedRight.VIEW_PLS_REPORTING, tenant.getId(), user.getUsername());
-                revokeRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant.getId(), user.getUsername());
-                globalUserManagementService.deleteUser(user.getUsername());
+                makeSureUserNoExists(user.getUsername());
             }
             try {
                 String tenantId = tenant.getId();
@@ -207,9 +208,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
     }
 
     private void grantRights(Tenant tenant, User user) {
-        grantRight(GrantedRight.VIEW_PLS_MODELS, tenant.getId(), user.getUsername());
-        grantRight(GrantedRight.VIEW_PLS_REPORTING, tenant.getId(), user.getUsername());
-        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant.getId(), user.getUsername());
+        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), user.getUsername());
     }
 
     @Test(groups = "load", enabled = true)

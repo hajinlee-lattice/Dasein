@@ -68,15 +68,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
-        assertEquals(ticket.getTenants().size(), 2);
-        assertNotNull(ticket);
-        String tenant1 = ticket.getTenants().get(0).getId();
-        String tenant2 = ticket.getTenants().get(1).getId();
-        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant1, "admin");
-        grantRight(GrantedRight.VIEW_PLS_CONFIGURATION, tenant2, "admin");
 
-        setupDb(tenant1, tenant2);
+        if (!usersInitialized) { setupUsers(); }
 
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
         String dir = modelingServiceHdfsBaseDir
@@ -97,9 +90,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dataProvider = "dataFileProvider")
     public void dataFileResource(String fileType, final String mimeType) {
-        UserDocument doc = loginAndAttach("admin");
-        addAuthHeader.setAuthValue(doc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+        UserDocument adminDoc = loginAndAttachAdmin();
+        useSessionDoc(adminDoc);
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
@@ -125,6 +117,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
                         return Collections.emptyMap();
                     }
                 });
+        logoutUserDoc(adminDoc);
     }
 
     @DataProvider(name = "dataFileProvider")

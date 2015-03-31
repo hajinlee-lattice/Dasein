@@ -1,5 +1,6 @@
 package com.latticeengines.pls.functionalframework;
 
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
@@ -156,22 +157,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected String getRestAPIHostPort() {
         return hostPort;
-    }
-
-    protected void grantRight(GrantedRight right, String tenant, String username) {
-        try {
-            globalUserManagementService.grantRight(right.getAuthority(), tenant, username);
-        } catch (Exception e) {
-            log.info("Right " + right + " cannot be granted.");
-        }
-    }
-
-    protected void revokeRight(GrantedRight right, String tenant, String username) {
-        try {
-            globalUserManagementService.revokeRight(right.getAuthority(), tenant, username);
-        } catch (Exception e) {
-            log.info("Right " + right + " cannot be revoked.");
-        }
     }
 
     protected static class GetHttpStatusErrorHandler implements ResponseErrorHandler {
@@ -366,12 +351,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
     }
 
-    protected void deleteUser(String username) {
-        try {
-            globalUserManagementService.deleteUser(username);
-        } catch (Exception e) {
-            log.warn(e);
-        }
+    protected void makeSureUserNoExists(String username) {
+        assertTrue(globalUserManagementService.deleteUser(username));
+        assertNull(globalUserManagementService.getUserByUsername(username));
     }
 
     protected void setupUsers() {
