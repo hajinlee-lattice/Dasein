@@ -29,7 +29,7 @@ ConfigCSV["Marketo"] = {"Cfg_ColumnsForQA.csv":"Cfg_ColumnsForQA",
 ConfigCSV["Eloqua"] = {"Cfg_ColumnsForQA_ELQ.csv":"Cfg_ColumnsForQA",
                        "Cfg_LinksToMostRecentSamples_ELQ.csv":"Cfg_LinksToMostRecentSamples",
                        "Cfg_PLS_Event.csv":"Cfg_PLS_Event",
-                       "Cfg_Custom_Attributes.csv":"DataScience_StandardAttributes",
+                       "Cfg_Custom_Attributes.csv":"Cfg_Custom_Attributes",
                        "Cfg_PLS_EventTableQueries.csv":"Cfg_PLS_EventTableQueries"}
 
 EtlConfig = OrderedDict()

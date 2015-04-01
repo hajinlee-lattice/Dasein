@@ -184,7 +184,7 @@ class DLCRunner(SessionRunner):
         return self.runCommand(cmd, local)
 
     def testRun(self):
-        print "Starting plsEnd2EndTests. All should be True"
+        print "Starting tests. All should be True"
         command = ""
         params = {}
         self.verify(self.validateInput(command, params), False, "1")
@@ -795,7 +795,7 @@ class EtlRunner(PretzelRunner):
     def __init__(self, svn_location, etl_dir,
                  host=PLSEnvironments.pls_test_server,
                  logfile=None, exception=False):
-        super(EtlRunner, self).__init__()
+        super(EtlRunner, self).__init__(svn_location, ".", ".", host, logfile, exception)
         self.exception = exception
         self.svn_location = os.path.expanduser(svn_location)
         self.etl_dir = os.path.expanduser(etl_dir)
@@ -935,7 +935,7 @@ class JamsRunner(SessionRunner):
         query="exec AlterJAMSDanteCfg '%s', '%s'" % (bard_name,queue);
 #         print self.connection_string;
 #         print query;
-        results = dlc.execQuery(self.connection_string, query);
+        results = dlc.execProc(self.connection_string, query);
         return results[0][0];
     def setJamsTenantCycles(self,bard_name,queue_name=None,cycle_times=3):
         wait_cycle = 0

@@ -11,6 +11,7 @@ import traceback
 
 import pypyodbc
 import requests
+from Properties import PLSEnvironments
 
 
 # Base test framework
@@ -28,7 +29,7 @@ __status__ = "Alpha"
 
 class SessionRunner(object):
     
-    def __init__(self, host="http://localhost:5000", logfile=None):
+    def __init__(self, host=PLSEnvironments.pls_test_server, logfile=None):
         self.host = host
         self.activity_log = {}
         self.request_text = []
@@ -63,12 +64,29 @@ class SessionRunner(object):
             e = traceback.format_exc()
             print "\nFAILED:Could not fetch query results", e, "\n"
             return None
+    
     def execQuery(self, connection_string, query):
         
         try:
             conn = pypyodbc.connect(connection_string)
             cur = conn.cursor()
             results = cur.execute(query)            
+#             results = cur.fetchall()
+            cur.commit();
+            cur.close()
+            conn.close()
+            return results
+        except Exception:
+            e = traceback.format_exc()
+            print "\nFAILED:Could not fetch query results", e, "\n"
+            return None
+    
+    def execProc(self, connection_string, procQuery):
+        
+        try:
+            conn = pypyodbc.connect(connection_string)
+            cur = conn.cursor()
+            results = cur.execute(procQuery)            
             results = cur.fetchall()
             cur.commit();
             cur.close()
@@ -377,7 +395,7 @@ class SessionRunner(object):
         return status
  
     def testRun(self, os_type="Linux"):
-        print "Starting plsEnd2EndTests. All should be True"
+        print "Starting tests. All should be True"
         cmd_list = ["pwd", "ls -lah"]
         cmd_dict = {"pwd": "~"}
         cmd_str = "ls -lah ~"
