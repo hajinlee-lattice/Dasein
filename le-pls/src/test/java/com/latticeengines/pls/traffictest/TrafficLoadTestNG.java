@@ -208,7 +208,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
     }
 
     private void grantRights(Tenant tenant, User user) {
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), user.getUsername());
+        userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), user.getUsername());
     }
 
     @Test(groups = "load", enabled = true)
