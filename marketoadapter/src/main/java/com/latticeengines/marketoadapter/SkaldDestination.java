@@ -32,8 +32,8 @@ public class SkaldDestination implements RecordDestination {
 
         try {
             return HttpWithRetryUtils.executePostRequest(skaldConnectionString, dataToSend, null);
-        } catch (Exception e) {
-            throw new RuntimeException("Error connecting to Skald:" + e.getMessage());
+        } catch (Exception ex) {
+            throw new RuntimeException("Error connecting to Skald", ex);
         }
     }
 

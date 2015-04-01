@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 public class ConsoleDestination implements RecordDestination {
     @Override
     public String receiveRecord(CustomerSpace customerSpace, Map<String, Object> record) {
+        System.out.println("");
         System.out.println("Received record for customer: " + customerSpace.toString());
 
         for (String key : record.keySet()) {

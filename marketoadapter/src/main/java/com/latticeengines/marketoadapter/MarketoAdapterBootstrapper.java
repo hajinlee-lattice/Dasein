@@ -1,29 +1,30 @@
 package com.latticeengines.marketoadapter;
 
-import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.camille.exposed.config.bootstrap.ServiceBootstrapManager;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
-import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
-import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 
-public class MarketoAdapterBootstrapper implements CustomerSpaceServiceInstaller, CustomerSpaceServiceUpgrader {
+public class MarketoAdapterBootstrapper implements ServiceInstaller {
     // TODO Consider the best place for these constants to be declared.
     public static final String SERVICE_NAME = "MarketoAdapter";
     public static final int DATA_VERSION = 1;
 
     public static void register() {
         MarketoAdapterBootstrapper bootstrapper = new MarketoAdapterBootstrapper();
-        CustomerSpaceServiceBootstrapManager.register(SERVICE_NAME, bootstrapper, bootstrapper);
+        ServiceBootstrapManager.register(SERVICE_NAME, bootstrapper);
     }
 
     @Override
-    public DocumentDirectory upgrade(CustomerSpace space, String service, int sourceVersion, int targetVersion,
-            DocumentDirectory source) {
-        return source;
-    }
+    public DocumentDirectory install(String service, int dataVersion) {
+        Path path = new Path("/KeyDefinitions.json");
+        Document definitions = new Document(JsonUtils.serialize(new KeyDefinitions()));
 
-    @Override
-    public DocumentDirectory install(CustomerSpace space, String service, int dataVersion) {
-        return new DocumentDirectory();
+        DocumentDirectory directory = new DocumentDirectory();
+        directory.add(path, definitions);
+
+        return directory;
     }
 }

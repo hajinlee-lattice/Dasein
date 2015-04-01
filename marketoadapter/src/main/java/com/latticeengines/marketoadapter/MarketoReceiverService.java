@@ -12,7 +12,7 @@ import com.latticeengines.common.exposed.rest.DetailedErrors;
 
 @RestController
 @DetailedErrors
-public class MarketoReceiver {
+public class MarketoReceiverService {
     @RequestMapping(value = "MarketoReceiver", method = RequestMethod.POST)
     public String receiveRecord(@RequestBody Map<String, Object> data) {
         if (!data.containsKey(keyField)) {

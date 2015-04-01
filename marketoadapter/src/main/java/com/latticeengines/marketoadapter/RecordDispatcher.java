@@ -5,10 +5,13 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.latticeengines.camille.exposed.config.ConfigurationController;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 
 @Service
 public class RecordDispatcher {
@@ -20,31 +23,36 @@ public class RecordDispatcher {
     }
 
     public String receiveRecord(String key, Map<String, Object> record) {
-        // TODO: Add rate limiting.
+        // TODO: Add a caching layer for the key definitions file.
+        KeyDefinitions definitions;
+        try {
+            ServiceScope scope = new ServiceScope(MarketoAdapterBootstrapper.SERVICE_NAME,
+                    MarketoAdapterBootstrapper.DATA_VERSION);
+            ConfigurationController<ServiceScope> controller = ConfigurationController.construct(scope);
 
-        CustomerSettings settings = manager.getCustomerSettingsByKey(key);
+            Path path = new Path("/KeyDefinitions.json");
+            definitions = JsonUtils.deserialize(controller.get(path).getData(), KeyDefinitions.class);
+        } catch (Exception ex) {
+            throw new RuntimeException("Unable to retrieve key definitions", ex);
+        }
+
+        KeyDefinitions.Value settings = definitions.get(key);
         if (settings == null) {
-            log.warn("Received a request with unknown key: " + key);
             throw new RuntimeException("Lattice Key does not match a known customer");
         }
 
         RecordDestination destination = destinations.get(settings.destination);
         if (destination == null) {
-            log.warn("Received a request with unknown destination: " + settings.destination);
-            throw new RuntimeException("Encountered an internal configuration error");
+            throw new RuntimeException("Received a request with an unknown destination");
         }
 
-        return destination.receiveRecord(settings.customerSpace, record);
+        return destination.receiveRecord(settings.space, record);
     }
 
-    @Autowired
-    private SettingsManager manager;
     @Autowired
     private ConsoleDestination consoleDestination;
     @Autowired
     private SkaldDestination skaldDestination;
 
     private Map<String, RecordDestination> destinations;
-
-    private static final Log log = LogFactory.getLog(RecordDispatcher.class);
 }

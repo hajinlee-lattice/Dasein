@@ -27,6 +27,7 @@ import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 public class MarketoAdapterConfiguration extends WebMvcConfigurerAdapter {
     @PostConstruct
     public void initialize() throws Exception {
+        // Initialize Camille.
         CamilleConfiguration config = new CamilleConfiguration(properties.getPod(), properties.getZooKeeperAddress());
 
         CamilleEnvironment.start(Mode.RUNTIME, config);
