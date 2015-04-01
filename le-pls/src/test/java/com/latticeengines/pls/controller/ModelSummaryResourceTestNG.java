@@ -66,15 +66,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         setupUsers();
-
-        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
-        assertTrue(ticket.getTenants().size() >= 2);
-        assertNotNull(ticket);
-        String tenant1 = ticket.getTenants().get(0).getId();
-        String tenant2 = ticket.getTenants().get(1).getId();
-        setupDb(tenant1, tenant2);
-
-
+        setupDbUsingAdminTenantIds(true, true);
         adminDoc = loginAndAttachAdmin();
         generalDoc = loginAndAttachGeneral();
     }

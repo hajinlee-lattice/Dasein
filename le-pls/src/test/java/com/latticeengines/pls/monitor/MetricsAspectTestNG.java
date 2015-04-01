@@ -86,8 +86,8 @@ public class MetricsAspectTestNG extends PlsFunctionalTestNGBase {
         modelSummaryResource.getModelSummaryEntityMgr();
         verify(newLog, times(2)).info(anyString());
 
-        String passwd = DigestUtils.sha256Hex("admin");
-        Ticket ticket = globalAuthenticationService.authenticateUser("admin", passwd);
+        String passwd = DigestUtils.sha256Hex(adminPassword);
+        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
         assertNotNull(ticket);
         assertEquals(ticket.getTenants().size(), 2);
         boolean result = globalAuthenticationService.discard(ticket);

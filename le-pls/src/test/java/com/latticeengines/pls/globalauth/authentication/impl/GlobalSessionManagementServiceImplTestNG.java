@@ -31,8 +31,8 @@ public class GlobalSessionManagementServiceImplTestNG extends PlsFunctionalTestN
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        String passwd = DigestUtils.sha256Hex("admin");
-        ticket = globalAuthenticationService.authenticateUser("admin", passwd);
+        String passwd = DigestUtils.sha256Hex(adminPassword);
+        ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
         assertNotNull(ticket);
     }
     

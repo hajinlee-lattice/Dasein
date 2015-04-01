@@ -110,10 +110,8 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
         AddUserModal.show(data.map(function(u){ return u.Email; }));
     };
 })
-.directive('userManagementWidget', function ($compile) {
-    var directiveDefinitionObject = {
+.directive('userManagementWidget', function () {
+    return {
         templateUrl: 'app/AppCommon/widgets/userManagementWidget/UserManagementWidgetTemplate.html'
     };
-
-    return directiveDefinitionObject;
 });

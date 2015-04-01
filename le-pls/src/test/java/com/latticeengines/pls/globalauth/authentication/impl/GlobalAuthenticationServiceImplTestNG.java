@@ -21,8 +21,8 @@ public class GlobalAuthenticationServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @Test(groups = "functional")
     public void authenticateThenDiscardUser() {
-        String passwd = DigestUtils.sha256Hex("admin");
-        Ticket ticket = globalAuthenticationService.authenticateUser("admin", passwd);
+        String passwd = DigestUtils.sha256Hex(adminPassword);
+        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
         assertNotNull(ticket);
         assertEquals(ticket.getTenants().size(), 2);
 
@@ -32,9 +32,9 @@ public class GlobalAuthenticationServiceImplTestNG extends PlsFunctionalTestNGBa
 
     @Test(groups = "functional")
     public void authenticateUserWrongPassword() {
-        String passwd = DigestUtils.sha256Hex("admin1");
+        String passwd = DigestUtils.sha256Hex("wrong");
         try {
-            globalAuthenticationService.authenticateUser("admin", passwd);
+            globalAuthenticationService.authenticateUser(adminUsername, passwd);
         } catch (Exception e) {
             assertTrue(e instanceof LedpException);
             assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18001);

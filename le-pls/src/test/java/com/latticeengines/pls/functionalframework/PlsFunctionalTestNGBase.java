@@ -288,6 +288,25 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         return summary;
     }
 
+    protected void setupDbUsingAdminTenantIds(boolean useTenant1, boolean useTenant2) throws Exception {
+        setupDbUsingAdminTenantIds(useTenant1, useTenant2, true);
+    }
+
+    /**
+     *
+     * @param useTenant1 use the first tenant of testing admin user?
+     * @param useTenant2 use the second tenant of testing admin user?
+     * @param createSummaries create model summaries?
+     * @throws Exception
+     */
+    protected void setupDbUsingAdminTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries) throws Exception {
+        Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
+        String tenant1Name = useTenant1 ? ticket.getTenants().get(0).getId() : null;
+        String tenant2Name = useTenant2 ? ticket.getTenants().get(1).getId() : null;
+        setupDb(tenant1Name, tenant2Name, createSummaries);
+        globalAuthenticationService.discard(ticket);
+    }
+
     protected void setupDb(String tenant1Name, String tenant2Name) throws Exception {
         setupDb(tenant1Name, tenant2Name, true);
     }
@@ -357,7 +376,15 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected void setupUsers() {
-        Ticket ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
+        Ticket ticket;
+        int numOfTestingTenants = 2;
+        if (globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com") != null) {
+            ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
+            // all tenants of bnguyen are testing tenants
+            numOfTestingTenants = ticket.getTenants().size();
+        } else {
+            ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
+        }
 
         // testing admin user
         User user = globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com");
@@ -381,7 +408,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             createUser("tsanghavi@lattice-engines.com", "tsanghavi@lattice-engines.com", "Tejas", "Sanghavi");
         }
 
-        for (Tenant tenant: ticket.getTenants()) {
+        for (Tenant tenant: ticket.getTenants().subList(0, numOfTestingTenants)) {
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
             userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), generalUsername);
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), "tsanghavi@lattice-engines.com");
