@@ -1,9 +1,11 @@
 package com.latticeengines.skald;
 
 import java.util.List;
+import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 
+import org.python.util.PythonInterpreter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -27,8 +29,13 @@ import com.latticeengines.common.exposed.rest.RequestLogInterceptor;
 public class SkaldConfiguration extends WebMvcConfigurerAdapter {
     @PostConstruct
     public void initialize() throws Exception {
-        CamilleConfiguration config = new CamilleConfiguration(properties.getPod(), properties.getZooKeeperAddress());
+        // Initialize the python interpreter.
+        Properties overrides = new Properties(System.getProperties());
+        overrides.setProperty("python.cachedir.skip", "true");
+        PythonInterpreter.initialize(System.getProperties(), overrides, new String[0]);
 
+        // Initialize Camille.
+        CamilleConfiguration config = new CamilleConfiguration(properties.getPod(), properties.getZooKeeperAddress());
         CamilleEnvironment.start(Mode.RUNTIME, config);
         SkaldBootstrapper.register();
     }
