@@ -70,6 +70,12 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     public void setup() throws Exception {
 
         if (!usersInitialized) { setupUsers(); }
+        ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
+        assertEquals(ticket.getTenants().size(), 2);
+        assertNotNull(ticket);
+        String tenant1 = ticket.getTenants().get(0).getId();
+        String tenant2 = ticket.getTenants().get(1).getId();
+        setupDb(tenant1, tenant2);
 
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
         String dir = modelingServiceHdfsBaseDir
