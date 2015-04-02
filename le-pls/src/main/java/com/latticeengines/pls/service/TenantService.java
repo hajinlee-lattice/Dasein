@@ -7,6 +7,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public interface TenantService {
 
     void registerTenant(Tenant tenant);
+
+    void discardTenant(Tenant tenant);
     
     List<Tenant> getAllTenants();
 }

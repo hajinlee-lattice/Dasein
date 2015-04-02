@@ -141,7 +141,7 @@ public class GlobalUserManagementServiceImplTestNG extends PlsFunctionalTestNGBa
 
         } finally {
             for (int i = 0; i < 10; i++) {
-                globalUserManagementService.deleteUser(prefix + String.valueOf(i + 1));
+                makeSureUserNoExists(prefix + String.valueOf(i + 1));
             }
         }
     }

@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.functionalframework.UserResourceTestNGBase;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
@@ -47,7 +47,7 @@ import com.latticeengines.pls.security.AccessLevel;
 import com.latticeengines.pls.service.UserService;
 
 
-public class UserResourceTestNG extends PlsFunctionalTestNGBase {
+public class UserResourceTestNG extends UserResourceTestNGBase {
     @SuppressWarnings("unused")
     private static Log log = LogFactory.getLog(UserResourceTestNG.class);
 
@@ -66,379 +66,350 @@ public class UserResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private UserService userService;
 
-    private Tenant testTenant;
-    private User testUser;
-    private Credentials testCreds;
-
-    private UserDocument adminDoc;
-    private UserDocument generalDoc;
-
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
-        if (!usersInitialized) { setupUsers(); }
-
-        adminDoc = loginAndAttachAdmin();
-        generalDoc = loginAndAttachGeneral();
-
-        testTenant = globalSessionManagementService.retrieve(adminDoc.getTicket()).getTenant();
-
-        UserRegistration testReg = createUserRegistration();
-        testUser = testReg.getUser();
-        testCreds = testReg.getCredentials();
-
-        makeSureUserNoExists(testCreds.getUsername());
-
-        createUser(testUser.getUsername(), testUser.getEmail(), testUser.getFirstName(), testUser.getLastName());
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), testUser.getUsername());
-
-        setupDb(testTenant.getId(), null);
+        createTestTenant();
+        for(AccessLevel accessLevel : AccessLevel.values()) {
+            createTestUser(accessLevel);
+        }
     }
 
     @AfterClass(groups = { "functional", "deployment" })
     public void tearDown() {
-        makeSureUserNoExists(testCreds.getUsername());
-        logoutAdmin();
+        destroyTestUsers();
     }
 
     @BeforeMethod(groups = { "functional", "deployment" })
     public void beforeMethod() {
-        useAdminSession();
+        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
     }
 
-    @Test(groups = { "functional", "deployment" })
-    public void registerUser() {
-        UserRegistration userReg = createUserRegistration();
-        makeSureUserNoExists(userReg.getCredentials().getUsername());
-
-        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
-        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
-        assertTrue(response.isSuccess());
-        assertNotNull(response.getResult().getPassword());
-
-        User newUser = globalUserManagementService.getUserByEmail(userReg.getUser().getEmail());
-        assertEquals(newUser.getFirstName(), userReg.getUser().getFirstName());
-        assertEquals(newUser.getLastName(), userReg.getUser().getLastName());
-        assertEquals(newUser.getPhoneNumber(), userReg.getUser().getPhoneNumber());
-        assertEquals(newUser.getTitle(), userReg.getUser().getTitle());
-
-        // try log in new user
-        String password = response.getResult().getPassword();
-        Ticket ticket = globalAuthenticationService.authenticateUser(userReg.getUser().getUsername(), DigestUtils.sha256Hex(password));
-        assertEquals(ticket.getTenants().size(), 1);
-        globalAuthenticationService.discard(ticket);
-
-        makeSureUserNoExists(userReg.getCredentials().getUsername());
-    }
-
-
-    @Test(groups = { "functional", "deployment" })
-    public void validateUser() throws JsonProcessingException {
-        // conflict with the email of a user outside the current tenant
-        UserRegistration conflictingUserReg = createUserRegistration();
-        createUser(
-            conflictingUserReg.getCredentials().getUsername(),
-            conflictingUserReg.getUser().getEmail(),
-            conflictingUserReg.getUser().getFirstName(),
-            conflictingUserReg.getUser().getLastName()
-        );
-
-        ObjectMapper mapper = new ObjectMapper();
-        UserRegistration uReg = mapper.treeToValue(mapper.valueToTree(conflictingUserReg), UserRegistration.class);
-        uReg.getUser().setFirstName("John");
-        uReg.getUser().setLastName("Dodge");
-
-        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
-        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
-
-        assertFalse(response.getResult().isValid());
-        User conflictingUser = response.getResult().getConflictingUser();
-        assertEquals(conflictingUser.getFirstName(), conflictingUserReg.getUser().getFirstName());
-        assertEquals(conflictingUser.getLastName(), conflictingUserReg.getUser().getLastName());
-        assertEquals(conflictingUser.getEmail(), conflictingUserReg.getUser().getEmail());
-
-        // conflict with the email of a user in the current tenant
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), conflictingUserReg.getCredentials().getUsername());
-        json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
-        response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
-        assertFalse(response.getResult().isValid());
-        assertNull(response.getResult().getConflictingUser());
-
-        // valid email
-        uReg.getUser().setEmail("jdodge@dodge.com");
-        uReg.getCredentials().setUsername("jdodge@dodge.com");
-
-        makeSureUserNoExists(uReg.getCredentials().getUsername());
-
-        json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
-        response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
-        assertTrue(response.getResult().isValid());
-
-        makeSureUserNoExists(uReg.getCredentials().getUsername());
-        makeSureUserNoExists(conflictingUserReg.getCredentials().getUsername());
-    }
-
-    @Test(groups = { "functional", "deployment" })
-    public void getAllUsers() {
-        Tenant tenant = new Tenant();
-        tenant.setName("Test Tenant");
-        tenant.setId("Test_" + UUID.randomUUID().toString());
-        try {
-            globalTenantManagementService.registerTenant(tenant);
-            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), testUser.getUsername());
-            UserDocument doc = loginAndAttach(testUser.getUsername(), tenant);
-            useSessionDoc(doc);
-
-            String json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-            ResponseDocument<ArrayNode> response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
-            ArrayNode users = response.getResult();
-            assertEquals(users.size(), 0);
-
-            for (int i = 0; i < 10; i++) {
-                String username = "tester" + String.valueOf(i) + "@test.com";
-                makeSureUserNoExists(username);
-
-                createUser(username, username, "Test", "Tester");
-                userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
-            }
-
-            json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-            response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
-            users = response.getResult();
-            assertEquals(users.size(), 10);
-
-            for (JsonNode user: users) {
-                assertEquals(user.get("FirstName").asText(), "Test");
-                assertEquals(user.get("LastName").asText(), "Tester");
-            }
-
-            logoutUserDoc(doc);
-        } finally {
-            for (int i = 0; i < 10; i++) {
-                makeSureUserNoExists("tester" + String.valueOf(i) + "@test.com");
-            }
-            globalTenantManagementService.discardTenant(tenant);
-        }
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Test(groups = { "functional", "deployment" })
-    public void changePassword() {
-        UserRegistration userReg = createUserRegistration();
-        makeSureUserNoExists(userReg.getCredentials().getUsername());
-
-        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
-        ResponseDocument<RegistrationResult> response1 = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
-        assertTrue(response1.isSuccess());
-        assertNotNull(response1.getResult().getPassword());
-
-        User newUser = globalUserManagementService.getUserByEmail(userReg.getUser().getEmail());
-        assertEquals(newUser.getFirstName(), userReg.getUser().getFirstName());
-        assertEquals(newUser.getLastName(), userReg.getUser().getLastName());
-        assertEquals(newUser.getPhoneNumber(), userReg.getUser().getPhoneNumber());
-        assertEquals(newUser.getTitle(), userReg.getUser().getTitle());
-
-        // try log in new user
-        String password = response1.getResult().getPassword();
-        Ticket ticket = loginCreds(userReg.getUser().getUsername(), password);
-        assertEquals(ticket.getTenants().size(), 1);
-        logoutTicket(ticket);
-
-        UserUpdateData data = new UserUpdateData();
-        data.setOldPassword(DigestUtils.sha256Hex("wrong"));
-        data.setNewPassword(DigestUtils.sha256Hex("newpass"));
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        headers.add("Accept", "application/json");
-        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
-
-        UserDocument doc = loginAndAttach(userReg.getCredentials().getUsername(), password);
-        useSessionDoc(doc);
-        String url = getRestAPIHostPort() + "/pls/users/" + userReg.getCredentials().getUsername() + "/creds";
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
-        assertFalse(response.getBody().isSuccess());
-
-        data.setOldPassword(DigestUtils.sha256Hex(password));
-        requestEntity = new HttpEntity<>(data.toString(), headers);
-        response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
-        assertEquals(response.getStatusCode().value(), 200);
-        assertTrue(response.getBody().isSuccess());
-
-        logoutUserDoc(doc);
-
-        ticket = loginCreds(userReg.getCredentials().getUsername(), "newpass");
-        logoutTicket(ticket);
-
-        makeSureUserNoExists(userReg.getCredentials().getUsername());
-    }
-
-    @Test(groups = { "functional", "deployment" })
-    public void updateAccessLevelWithSuperAdmin() {
-        testUpdateAccessLevel(AccessLevel.SUPER_ADMIN);
-        testUpdateAccessLevel(AccessLevel.INTERNAL_ADMIN);
-        testUpdateAccessLevel(AccessLevel.INTERNAL_USER);
-        testUpdateAccessLevel(AccessLevel.EXTERNAL_ADMIN);
-        testUpdateAccessLevel(AccessLevel.EXTERNAL_USER);
-    }
-
-    @Test(groups = { "functional", "deployment" })
-    public void updateAccessLevelWithExternalUser() {
-        addAuthHeader.setAuthValue(generalDoc.getTicket().getData());
-
-        UserUpdateData data = new UserUpdateData();
-        data.setAccessLevel(AccessLevel.EXTERNAL_USER.name());
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        headers.add("Accept", "application/json");
-        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
-
-        String url = getRestAPIHostPort() + "/pls/users/" + testCreds.getUsername();
-
-        try {
-            restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
-        } catch (HttpClientErrorException e) {
-            assertEquals(e.getStatusCode().value(), 403);
-        }
-    }
-
-    @Test(groups = { "functional", "deployment" })
-    public void delete() {
-        Tenant tenant = new Tenant();
-        tenant.setName("Test Tenant");
-        tenant.setId("Test_" + UUID.randomUUID().toString());
-        try {
-            globalTenantManagementService.registerTenant(tenant);
-            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), testUser.getUsername());
-            UserDocument doc = loginAndAttach(testUser.getUsername(), tenant);
-            useSessionDoc(doc);
-
-            String json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-            ResponseDocument<ArrayNode> response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
-            ArrayNode users = response.getResult();
-            assertEquals(users.size(), 0);
-
-            for (int i = 0; i < 10; i++) {
-                String username = "tester" + String.valueOf(i) + "@test.com";
-                makeSureUserNoExists(username);
-                createUser(username, username, "Test", "Tester");
-                userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
-            }
-
-            json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-            response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
-            users = response.getResult();
-            assertEquals(users.size(), 10);
-
-            List<String> usersToBeDeleted = Arrays.asList("tester0@test.com", "tester1@test.com", "tester2@test.com");
-
-            ObjectMapper mapper = new ObjectMapper();
-            String param = mapper.valueToTree(usersToBeDeleted).toString();
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Type", "application/json");
-            headers.add("Accept", "application/json");
-            HttpEntity<JsonNode> requestEntity = new HttpEntity<>(null, headers);
-            ResponseEntity<String> responseEntity = restTemplate.exchange(
-                getRestAPIHostPort() + "/pls/users?usernames=" + param,
-                HttpMethod.DELETE,
-                requestEntity,
-                String.class
-            );
-
-            ResponseDocument<DeleteUsersResult> response2 = ResponseDocument.generateFromJSON(responseEntity.getBody(), DeleteUsersResult.class);
-            assertEquals(response2.getResult().getSuccessUsers().size(), 3);
-            assertEquals(response2.getResult().getFailUsers().size(), 0);
-
-            json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-            response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
-            users = response.getResult();
-            assertEquals(users.size(), 7);
-
-            // delete admin user
-            usersToBeDeleted = Arrays.asList("tester3@test.com", "tester4@test.com", testCreds.getUsername());
-            param = mapper.valueToTree(usersToBeDeleted).toString();
-
-            responseEntity = restTemplate.exchange(
-                    getRestAPIHostPort() + "/pls/users?usernames=" + param,
-                    HttpMethod.DELETE,
-                    requestEntity,
-                    String.class
-            );
-
-            response2 = ResponseDocument.generateFromJSON(responseEntity.getBody(), DeleteUsersResult.class);
-            assertEquals(response2.getResult().getSuccessUsers().size(), 2);
-            assertEquals(response2.getResult().getFailUsers().size(), 1);
-
-            json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-            response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
-            users = response.getResult();
-            assertEquals(users.size(), 5);
-
-            responseEntity = restTemplate.exchange(
-                    getRestAPIHostPort() + "/pls/users?usernames=malformedstring",
-                    HttpMethod.DELETE,
-                    requestEntity,
-                    String.class
-            );
-            response2 = ResponseDocument.generateFromJSON(responseEntity.getBody(), DeleteUsersResult.class);
-            assertFalse(response2.isSuccess());
-
-            logoutUserDoc(doc);
-        } finally {
-            for (int i = 0; i < 10; i++) {
-                makeSureUserNoExists("tester" + String.valueOf(i) + "@test.com");
-            }
-            globalTenantManagementService.discardTenant(tenant);
-        }
-    }
-
-    private UserRegistration createUserRegistration() {
-        UserRegistration userReg = new UserRegistration();
-
-        User user = new User();
-        user.setEmail("test" + UUID.randomUUID().toString() + "@test.com");
-        user.setFirstName("Test");
-        user.setLastName("Tester");
-        user.setPhoneNumber("650-555-5555");
-        user.setTitle("CEO");
-
-        Credentials creds = new Credentials();
-        creds.setUsername(user.getEmail());
-        creds.setPassword("WillBeModifiedImmediately");
-
-        user.setUsername(creds.getUsername());
-
-        userReg.setUser(user);
-        userReg.setCredentials(creds);
-
-        return userReg;
-    }
-
-    private void testUpdateAccessLevel(AccessLevel accessLevel) {
-        UserUpdateData data = new UserUpdateData();
-        data.setAccessLevel(accessLevel.name());
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        headers.add("Accept", "application/json");
-        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
-
-        String url = getRestAPIHostPort() + "/pls/users/" + testCreds.getUsername();
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
-        assertTrue(response.getBody().isSuccess());
-
-        AccessLevel resultLevel = userService.getAccessLevel(testTenant.getId(), testCreds.getUsername());
-        assertEquals(accessLevel, resultLevel);
-    }
-
-    private void logoutAdmin() { logoutUserDoc(adminDoc); }
-
-    private void logoutGeneral() { logoutUserDoc(generalDoc); }
-
-    private void useAdminSession() { useSessionDoc(adminDoc); }
-
-    private void useGeneralSession() { useSessionDoc(generalDoc); }
+//    @Test(groups = { "functional", "deployment" })
+//    public void registerUser() {
+//        UserRegistration userReg = createUserRegistration();
+//        makeSureUserNoExists(userReg.getCredentials().getUsername());
+//
+//        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
+//        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+//        assertTrue(response.isSuccess());
+//        assertNotNull(response.getResult().getPassword());
+//
+//        User newUser = globalUserManagementService.getUserByEmail(userReg.getUser().getEmail());
+//        assertEquals(newUser.getFirstName(), userReg.getUser().getFirstName());
+//        assertEquals(newUser.getLastName(), userReg.getUser().getLastName());
+//        assertEquals(newUser.getPhoneNumber(), userReg.getUser().getPhoneNumber());
+//        assertEquals(newUser.getTitle(), userReg.getUser().getTitle());
+//
+//        // try log in new user
+//        String password = response.getResult().getPassword();
+//        Ticket ticket = globalAuthenticationService.authenticateUser(userReg.getUser().getUsername(), DigestUtils.sha256Hex(password));
+//        assertEquals(ticket.getTenants().size(), 1);
+//        globalAuthenticationService.discard(ticket);
+//
+//        makeSureUserNoExists(userReg.getCredentials().getUsername());
+//    }
+//
+//
+//    @Test(groups = { "functional", "deployment" })
+//    public void validateUser() throws JsonProcessingException {
+//        // conflict with the email of a user outside the current tenant
+//        UserRegistration conflictingUserReg = createUserRegistration();
+//        createUser(
+//            conflictingUserReg.getCredentials().getUsername(),
+//            conflictingUserReg.getUser().getEmail(),
+//            conflictingUserReg.getUser().getFirstName(),
+//            conflictingUserReg.getUser().getLastName()
+//        );
+//
+//        ObjectMapper mapper = new ObjectMapper();
+//        UserRegistration uReg = mapper.treeToValue(mapper.valueToTree(conflictingUserReg), UserRegistration.class);
+//        uReg.getUser().setFirstName("John");
+//        uReg.getUser().setLastName("Dodge");
+//
+//        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
+//        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+//
+//        assertFalse(response.getResult().isValid());
+//        User conflictingUser = response.getResult().getConflictingUser();
+//        assertEquals(conflictingUser.getFirstName(), conflictingUserReg.getUser().getFirstName());
+//        assertEquals(conflictingUser.getLastName(), conflictingUserReg.getUser().getLastName());
+//        assertEquals(conflictingUser.getEmail(), conflictingUserReg.getUser().getEmail());
+//
+//        // conflict with the email of a user in the current tenant
+//        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), conflictingUserReg.getCredentials().getUsername());
+//        json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
+//        response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+//        assertFalse(response.getResult().isValid());
+//        assertNull(response.getResult().getConflictingUser());
+//
+//        // valid email
+//        uReg.getUser().setEmail("jdodge@dodge.com");
+//        uReg.getCredentials().setUsername("jdodge@dodge.com");
+//
+//        makeSureUserNoExists(uReg.getCredentials().getUsername());
+//
+//        json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", uReg, String.class);
+//        response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+//        assertTrue(response.getResult().isValid());
+//
+//        makeSureUserNoExists(uReg.getCredentials().getUsername());
+//        makeSureUserNoExists(conflictingUserReg.getCredentials().getUsername());
+//    }
+//
+//    @Test(groups = { "functional", "deployment" })
+//    public void getAllUsers() {
+//        Tenant tenant = new Tenant();
+//        tenant.setName("Test Tenant");
+//        tenant.setId("Test_" + UUID.randomUUID().toString());
+//        try {
+//            globalTenantManagementService.registerTenant(tenant);
+//            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), testUser.getUsername());
+//            UserDocument doc = loginAndAttach(testUser.getUsername(), tenant);
+//            useSessionDoc(doc);
+//
+//            String json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
+//            ResponseDocument<ArrayNode> response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
+//            ArrayNode users = response.getResult();
+//            assertEquals(users.size(), 0);
+//
+//            for (int i = 0; i < 10; i++) {
+//                String username = "tester" + String.valueOf(i) + "@test.com";
+//                makeSureUserNoExists(username);
+//
+//                createUser(username, username, "Test", "Tester");
+//                userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
+//            }
+//
+//            json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
+//            response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
+//            users = response.getResult();
+//            assertEquals(users.size(), 10);
+//
+//            for (JsonNode user: users) {
+//                assertEquals(user.get("FirstName").asText(), "Test");
+//                assertEquals(user.get("LastName").asText(), "Tester");
+//            }
+//
+//            logoutUserDoc(doc);
+//        } finally {
+//            for (int i = 0; i < 10; i++) {
+//                makeSureUserNoExists("tester" + String.valueOf(i) + "@test.com");
+//            }
+//            globalTenantManagementService.discardTenant(tenant);
+//        }
+//    }
+//
+//    @SuppressWarnings("rawtypes")
+//    @Test(groups = { "functional", "deployment" })
+//    public void changePassword() {
+//        UserRegistration userReg = createUserRegistration();
+//        makeSureUserNoExists(userReg.getCredentials().getUsername());
+//
+//        String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
+//        ResponseDocument<RegistrationResult> response1 = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
+//        assertTrue(response1.isSuccess());
+//        assertNotNull(response1.getResult().getPassword());
+//
+//        User newUser = globalUserManagementService.getUserByEmail(userReg.getUser().getEmail());
+//        assertEquals(newUser.getFirstName(), userReg.getUser().getFirstName());
+//        assertEquals(newUser.getLastName(), userReg.getUser().getLastName());
+//        assertEquals(newUser.getPhoneNumber(), userReg.getUser().getPhoneNumber());
+//        assertEquals(newUser.getTitle(), userReg.getUser().getTitle());
+//
+//        // try log in new user
+//        String password = response1.getResult().getPassword();
+//        Ticket ticket = loginCreds(userReg.getUser().getUsername(), password);
+//        assertEquals(ticket.getTenants().size(), 1);
+//        logoutTicket(ticket);
+//
+//        UserUpdateData data = new UserUpdateData();
+//        data.setOldPassword(DigestUtils.sha256Hex("wrong"));
+//        data.setNewPassword(DigestUtils.sha256Hex("newpass"));
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.add("Content-Type", "application/json");
+//        headers.add("Accept", "application/json");
+//        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+//
+//        UserDocument doc = loginAndAttach(userReg.getCredentials().getUsername(), password);
+//        useSessionDoc(doc);
+//        String url = getRestAPIHostPort() + "/pls/users/" + userReg.getCredentials().getUsername() + "/creds";
+//        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+//        assertFalse(response.getBody().isSuccess());
+//
+//        data.setOldPassword(DigestUtils.sha256Hex(password));
+//        requestEntity = new HttpEntity<>(data.toString(), headers);
+//        response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+//        assertEquals(response.getStatusCode().value(), 200);
+//        assertTrue(response.getBody().isSuccess());
+//
+//        logoutUserDoc(doc);
+//
+//        ticket = loginCreds(userReg.getCredentials().getUsername(), "newpass");
+//        logoutTicket(ticket);
+//
+//        makeSureUserNoExists(userReg.getCredentials().getUsername());
+//    }
+//
+//    @Test(groups = { "functional", "deployment" })
+//    public void updateAccessLevelWithSuperAdmin() {
+//        testUpdateAccessLevel(AccessLevel.SUPER_ADMIN);
+//        testUpdateAccessLevel(AccessLevel.INTERNAL_ADMIN);
+//        testUpdateAccessLevel(AccessLevel.INTERNAL_USER);
+//        testUpdateAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+//        testUpdateAccessLevel(AccessLevel.EXTERNAL_USER);
+//    }
+//
+//    @Test(groups = { "functional", "deployment" })
+//    public void updateAccessLevelWithExternalUser() {
+//        addAuthHeader.setAuthValue(generalDoc.getTicket().getData());
+//
+//        UserUpdateData data = new UserUpdateData();
+//        data.setAccessLevel(AccessLevel.EXTERNAL_USER.name());
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.add("Content-Type", "application/json");
+//        headers.add("Accept", "application/json");
+//        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+//
+//        String url = getRestAPIHostPort() + "/pls/users/" + testCreds.getUsername();
+//
+//        try {
+//            restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+//        } catch (HttpClientErrorException e) {
+//            assertEquals(e.getStatusCode().value(), 403);
+//        }
+//    }
+//
+//    @Test(groups = { "functional", "deployment" })
+//    public void delete() {
+//        Tenant tenant = new Tenant();
+//        tenant.setName("Test Tenant");
+//        tenant.setId("Test_" + UUID.randomUUID().toString());
+//        try {
+//            globalTenantManagementService.registerTenant(tenant);
+//            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), testUser.getUsername());
+//            UserDocument doc = loginAndAttach(testUser.getUsername(), tenant);
+//            useSessionDoc(doc);
+//
+//            String json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
+//            ResponseDocument<ArrayNode> response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
+//            ArrayNode users = response.getResult();
+//            assertEquals(users.size(), 0);
+//
+//            for (int i = 0; i < 10; i++) {
+//                String username = "tester" + String.valueOf(i) + "@test.com";
+//                makeSureUserNoExists(username);
+//                createUser(username, username, "Test", "Tester");
+//                userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
+//            }
+//
+//            json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
+//            response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
+//            users = response.getResult();
+//            assertEquals(users.size(), 10);
+//
+//            List<String> usersToBeDeleted = Arrays.asList("tester0@test.com", "tester1@test.com", "tester2@test.com");
+//
+//            ObjectMapper mapper = new ObjectMapper();
+//            String param = mapper.valueToTree(usersToBeDeleted).toString();
+//
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.add("Content-Type", "application/json");
+//            headers.add("Accept", "application/json");
+//            HttpEntity<JsonNode> requestEntity = new HttpEntity<>(null, headers);
+//            ResponseEntity<String> responseEntity = restTemplate.exchange(
+//                getRestAPIHostPort() + "/pls/users?usernames=" + param,
+//                HttpMethod.DELETE,
+//                requestEntity,
+//                String.class
+//            );
+//
+//            ResponseDocument<DeleteUsersResult> response2 = ResponseDocument.generateFromJSON(responseEntity.getBody(), DeleteUsersResult.class);
+//            assertEquals(response2.getResult().getSuccessUsers().size(), 3);
+//            assertEquals(response2.getResult().getFailUsers().size(), 0);
+//
+//            json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
+//            response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
+//            users = response.getResult();
+//            assertEquals(users.size(), 7);
+//
+//            // delete admin user
+//            usersToBeDeleted = Arrays.asList("tester3@test.com", "tester4@test.com", testCreds.getUsername());
+//            param = mapper.valueToTree(usersToBeDeleted).toString();
+//
+//            responseEntity = restTemplate.exchange(
+//                    getRestAPIHostPort() + "/pls/users?usernames=" + param,
+//                    HttpMethod.DELETE,
+//                    requestEntity,
+//                    String.class
+//            );
+//
+//            response2 = ResponseDocument.generateFromJSON(responseEntity.getBody(), DeleteUsersResult.class);
+//            assertEquals(response2.getResult().getSuccessUsers().size(), 2);
+//            assertEquals(response2.getResult().getFailUsers().size(), 1);
+//
+//            json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
+//            response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
+//            users = response.getResult();
+//            assertEquals(users.size(), 5);
+//
+//            responseEntity = restTemplate.exchange(
+//                    getRestAPIHostPort() + "/pls/users?usernames=malformedstring",
+//                    HttpMethod.DELETE,
+//                    requestEntity,
+//                    String.class
+//            );
+//            response2 = ResponseDocument.generateFromJSON(responseEntity.getBody(), DeleteUsersResult.class);
+//            assertFalse(response2.isSuccess());
+//
+//            logoutUserDoc(doc);
+//        } finally {
+//            for (int i = 0; i < 10; i++) {
+//                makeSureUserNoExists("tester" + String.valueOf(i) + "@test.com");
+//            }
+//            globalTenantManagementService.discardTenant(tenant);
+//        }
+//    }
+//
+//    private UserRegistration createUserRegistration() {
+//        UserRegistration userReg = new UserRegistration();
+//
+//        User user = new User();
+//        user.setEmail("test" + UUID.randomUUID().toString() + "@test.com");
+//        user.setFirstName("Test");
+//        user.setLastName("Tester");
+//        user.setPhoneNumber("650-555-5555");
+//        user.setTitle("CEO");
+//
+//        Credentials creds = new Credentials();
+//        creds.setUsername(user.getEmail());
+//        creds.setPassword("WillBeModifiedImmediately");
+//
+//        user.setUsername(creds.getUsername());
+//
+//        userReg.setUser(user);
+//        userReg.setCredentials(creds);
+//
+//        return userReg;
+//    }
+
+//    private void testUpdateAccessLevel(AccessLevel accessLevel, boolean expectedToSuccess) {
+//        UserUpdateData data = new UserUpdateData();
+//        data.setAccessLevel(accessLevel.name());
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.add("Content-Type", "application/json");
+//        headers.add("Accept", "application/json");
+//        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+//
+//        String url = getRestAPIHostPort() + "/pls/users/" + testCreds.getUsername();
+//        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+//        assertTrue(response.getBody().isSuccess());
+//
+//        AccessLevel resultLevel = userService.getAccessLevel(testTenant.getId(), testCreds.getUsername());
+//        assertEquals(accessLevel, resultLevel);
+//    }
 
 
 }

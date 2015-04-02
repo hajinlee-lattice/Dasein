@@ -34,6 +34,17 @@ public class TenantServiceImpl implements TenantService {
         
     }
 
+    @Override
+    public void discardTenant(Tenant tenant) {
+        tenantEntityMgr.delete(tenant);
+        try {
+            globalTenantManagementService.discardTenant(tenant);
+        } catch (Exception e) {
+            log.warn("Error discarding tenant with GA.", e);
+        }
+
+    }
+
 
     @Override
     public List<Tenant> getAllTenants() {

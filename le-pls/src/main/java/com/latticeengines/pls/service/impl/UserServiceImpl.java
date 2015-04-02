@@ -17,7 +17,7 @@ import com.latticeengines.pls.service.UserService;
 
 @Component("userService")
 public class UserServiceImpl implements UserService {
-    private static final Log log = LogFactory.getLog(UserServiceImpl.class);
+    private static final Log LOGGER = LogFactory.getLog(UserServiceImpl.class);
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
@@ -28,48 +28,39 @@ public class UserServiceImpl implements UserService {
         String tenant = userRegistrationWithTenant.getTenant();
 
         if (userRegistration == null) {
-            log.error("User registration cannot be null.");
+            LOGGER.error("User registration cannot be null.");
             return false;
         }
 
         if (userRegistration.getUser() == null) {
-            log.error("User cannot be null.");
+            LOGGER.error("User cannot be null.");
             return false;
         }
         if (userRegistration.getCredentials() == null) {
-            log.error("Credentials cannot be null.");
+            LOGGER.error("Credentials cannot be null.");
             return false;
         }
         if (tenant == null) {
-            log.error("Tenant cannot be null.");
+            LOGGER.error("Tenant cannot be null.");
             return false;
         }
 
         User userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
 
         if (userByEmail != null) {
-            log.error(String.format("A user with the same email address %s already exists.", userByEmail));
+            LOGGER.error(String.format("A user with the same email address %s already exists.", userByEmail));
             return false;
         }
 
         try {
             globalUserManagementService.registerUser(userRegistration.getUser(), userRegistration.getCredentials());
         } catch (Exception e) {
-            log.warn("Error creating admin user.", e);
+            LOGGER.warn("Error creating admin user.", e);
         }
 
 
         String username = userRegistration.getUser().getUsername();
         assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username);
-
-        //TODO:song this way of grand admin rights should be deprecated later
-        for (GrantedRight right : GrantedRight.getAdminRights()) {
-            try {
-                globalUserManagementService.grantRight(right.getAuthority(), tenant, username);
-            } catch (Exception e) {
-                log.warn(String.format("Error granting right %s to user %s.", right.getAuthority(), username), e);
-            }
-        }
 
         return globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail()) != null;
     }
@@ -80,7 +71,8 @@ public class UserServiceImpl implements UserService {
             try {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
             } catch (Exception e) {
-                log.warn(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username), e);
+                LOGGER.warn(
+                        String.format("Error assigning access level %s to user %s.", accessLevel.name(), username), e);
                 return true;
             }
         }
@@ -89,13 +81,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean resignAccessLevel(String tenantId, String username) {
+        List<String> rights = globalUserManagementService.getRights(username, tenantId);
         boolean success = true;
         for (AccessLevel accessLevel : AccessLevel.values()) {
             try {
-                success = success && globalUserManagementService.revokeRight(accessLevel.name(), tenantId, username);
+                if (rights.contains(accessLevel.name())) {
+                    success = success
+                            && globalUserManagementService.revokeRight(accessLevel.name(), tenantId, username);
+                }
             } catch (Exception e) {
-                log.warn(String.format("Error resigning access level %s from user %s.", accessLevel.name(), username), e);
-                //ignore
+                LOGGER.warn(
+                        String.format("Error resigning access level %s from user %s.", accessLevel.name(), username),
+                        e);
             }
         }
         return success;
@@ -121,17 +118,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean softDelete(String tenantId, String username) {
         if (resignAccessLevel(tenantId, username)) {
-            //TODO:song this is temporary until the concept of GrantedRight no longer exists in GA
             boolean success = true;
-            for (GrantedRight right : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
-                try {
-                    success = success
-                        && globalUserManagementService.revokeRight(right.getAuthority(), tenantId, username);
-                } catch (Exception e) {
-                    //ignore
+            //TODO:song this is temporary until the concept of GrantedRight no longer exists in GA
+            List<String> rights = globalUserManagementService.getRights(username, tenantId);
+            if (!rights.isEmpty()) {
+                for (GrantedRight right : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
+                    try {
+                        if (rights.contains(right.getAuthority())) {
+                            success = success
+                                    && globalUserManagementService.revokeRight(
+                                    right.getAuthority(), tenantId, username);
+                        }
+                    } catch (Exception e) {
+                        //ignore
+                    }
                 }
             }
-            return success && resignAccessLevel(tenantId, username);
+            return success;
         } else {
             return false;
         }
