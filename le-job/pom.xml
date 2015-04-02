@@ -5,19 +5,19 @@
     <artifactId>le-job</artifactId>
     <packaging>war</packaging>
 	<scm>
-		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</connection>
-		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</developerConnection>
-		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/branches/develop</url>
+		<connection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.29/develop</connection>
+		<developerConnection>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.29/develop</developerConnection>
+		<url>scm:svn:http://lesvn.lattice.local/svn/lattice/LEDP/tags/release_1.0.29/develop</url>
 	</scm>
 
     <name>le-${component-name}</name>
 
     <properties>
         <component-name>job</component-name>
-        <le.dataplatform.version>1.0.29-SNAPSHOT</le.dataplatform.version>
+        <le.dataplatform.version>1.0.29</le.dataplatform.version>
         <le.db.version>1.0.29-SNAPSHOT</le.db.version>
-        <le.camille.version>1.0.29-SNAPSHOT</le.camille.version>
-        <le.propdata.version>1.0.29-SNAPSHOT</le.propdata.version>
+        <le.camille.version>1.0.29</le.camille.version>
+        <le.propdata.version>1.0.29</le.propdata.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
     </properties>
@@ -25,7 +25,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.29-SNAPSHOT</version>
+        <version>1.0.29</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 
