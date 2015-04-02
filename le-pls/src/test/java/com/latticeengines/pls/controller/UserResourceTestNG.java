@@ -66,12 +66,20 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @Test(groups = { "functional", "deployment" })
     public void registerUser() {
-        testResigterUser(AccessLevel.SUPER_ADMIN, true);
-        testResigterUser(AccessLevel.INTERNAL_ADMIN, true);
-        testResigterUser(AccessLevel.EXTERNAL_ADMIN, true);
+        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
+        testRegisterUserSuccess();
 
-        testResigterUser(AccessLevel.INTERNAL_USER, false);
-        testResigterUser(AccessLevel.EXTERNAL_USER, false);
+        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
+        testRegisterUserSuccess();
+
+        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+        testRegisterUserSuccess();
+
+        switchToAccessLevel(AccessLevel.INTERNAL_USER);
+        testRegisterUserFail();
+
+        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
+        testRegisterUserFail();
     }
 
     @Test(groups = { "functional", "deployment" })
@@ -83,15 +91,19 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @Test(groups = { "functional", "deployment" })
     public void getAllUsers() {
-        testGetAllUsers(AccessLevel.EXTERNAL_USER, false);
-        testGetAllUsers(AccessLevel.INTERNAL_USER, false);
+        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
+        testGetAllUsersFail();
+
+        switchToAccessLevel(AccessLevel.INTERNAL_USER);
+        testGetAllUsersFail();
 
 //        testGetAllUsers(AccessLevel.EXTERNAL_ADMIN, true, 1);
 //        testGetAllUsers(AccessLevel.INTERNAL_ADMIN, true, 4);
 //        testGetAllUsers(AccessLevel.SUPER_ADMIN, true, 5);
 
         //TODO:song this will be a wrong assertion after Access Level feature is completed
-        testGetAllUsers(AccessLevel.SUPER_ADMIN, true, 4);
+        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
+        testGetAllUsersSuccess(4);
     }
 
     @Test(groups = { "functional", "deployment" })
@@ -133,15 +145,6 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         userReg.setCredentials(creds);
 
         return userReg;
-    }
-
-    private void testResigterUser(AccessLevel accessLevel, boolean expectedSuccess) {
-        switchToAccessLevel(accessLevel);
-
-        if (expectedSuccess)
-            testRegisterUserSuccess();
-        else
-            testRegisterUserFail();
     }
 
     private void testRegisterUserSuccess() {
@@ -286,20 +289,6 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         ResponseDocument<ArrayNode> response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
         ArrayNode users = response.getResult();
         assertEquals(users.size(), expectedNumOfVisibleUsers);
-    }
-
-    private void testGetAllUsers(AccessLevel accessLevel, boolean expectSuccess) {
-        switchToAccessLevel(accessLevel);
-        if (!expectSuccess) testGetAllUsersFail();
-    }
-
-    private void testGetAllUsers(AccessLevel accessLevel, boolean expectSuccess, int expectNumOfVisibleUsers) {
-        switchToAccessLevel(accessLevel);
-        if (expectSuccess) {
-            testGetAllUsersSuccess(expectNumOfVisibleUsers);
-        } else {
-            testGetAllUsersFail();
-        }
     }
 
     protected void testChangePassword(AccessLevel accessLevel) {
