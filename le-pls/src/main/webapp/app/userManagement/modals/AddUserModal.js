@@ -40,7 +40,7 @@ app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUti
     $scope.addUserErrorMessage = "";
     $scope.showAddUserError = false;
 
-    $scope.user = {};
+    $scope.user = {AccessLevel: $scope.levelsToSelect[0]};
 
     function validateNewUser() {
         if ($scope.form.$error.required) {
