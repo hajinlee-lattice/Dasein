@@ -22,6 +22,9 @@
                         <br/>
                         {{ResourceUtility.getString('MODEL_ADMIN_TOP_PREDICTORS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
                         <data-file-downloader url="/pls/datafiles/predictorcsv/{{ModelId}}" filename="predictors.csv" filetype="text/csv"></data-file-downloader>
+                        <br/>
+                        {{ResourceUtility.getString('MODEL_ADMIN_DIAGNOSTICS_LINK')}}:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <data-file-downloader url="/pls/datafiles/diagnosticsjson/{{ModelId}}" filename="diagnostics.json" filetype="application/json"></data-file-downloader>
                     </td>
                 </tr>
                 <tr>

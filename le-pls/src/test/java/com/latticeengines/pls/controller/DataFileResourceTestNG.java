@@ -5,7 +5,6 @@ import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
@@ -39,7 +37,6 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.security.GrantedRight;
 
 public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
@@ -79,12 +76,15 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/TENANT1");
         String dir = modelingServiceHdfsBaseDir
-                + "/TENANT1/models/Q_PLS_Modeling_TENANT1/8195dcf1-0898-4ad3-b94d-0d0f806e979e/1423547416066_0001/";
+                + "/TENANT1" + "/models/Q_PLS_Modeling_TENANT1/8195dcf1-0898-4ad3-b94d-0d0f806e979e/1423547416066_0001/";
+        String diagnosticsFileDir = modelingServiceHdfsBaseDir + "/TENANT1" + "/data/EventMetadata";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
 
+        HdfsUtils.mkdir(yarnConfiguration, diagnosticsFileDir);
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), diagnosticsFileDir + "/diagnostics.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_readoutsample.csv");
@@ -129,6 +129,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     @DataProvider(name = "dataFileProvider")
     public static Object[][] getDataFileProvider() {
         return new Object[][] { { "modeljson", "application/json" }, //
+                { "diagnosticsjson", "application/json" }, //
                 { "predictorcsv", "application/csv" }, //
                 { "readoutcsv", "application/csv" }, //
                 { "scorecsv", "text/plain" }, //

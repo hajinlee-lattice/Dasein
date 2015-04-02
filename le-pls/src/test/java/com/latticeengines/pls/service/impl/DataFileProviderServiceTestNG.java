@@ -75,14 +75,16 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         ModelSummary summary = summaries.get(0);
 
         String tokens[] = summary.getLookupId().split("\\|");
+        String diagnosticsFileDir = modelingServiceHdfsBaseDir + "/" + tokens[0] + "/data/EventMetadata";
         String dir = modelingServiceHdfsBaseDir + "/" + tokens[0] + "/models/" + tokens[1] + "/" + tokens[2] + "/container_01/";
         URL modelSummaryUrl = ClassLoader
                 .getSystemResource("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
 
         modelId = summary.getId();
-
+        HdfsUtils.mkdir(yarnConfiguration, diagnosticsFileDir);
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), diagnosticsFileDir + "/diagnostics.json");
         HdfsUtils
                 .copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
@@ -133,12 +135,12 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
     @DataProvider(name = "dataFileProvider")
     public static Object[][] getDataFileProvier() {
         return new Object[][] { { "application/json", "modelsummary.json" }, //
+                { "application/json", "diagnostics.json" }, //
                 { "application/csv", ".*_model.csv" }, //
                 { "application/csv", ".*_readoutsample.csv" }, //
                 { "text/plain", ".*_scored.txt" }, //
                 { "application/csv", ".*_explorer.csv" }, //
                 { "text/plain", "rf_model.txt" }
-
         };
     }
 

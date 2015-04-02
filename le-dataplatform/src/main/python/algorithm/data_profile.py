@@ -181,6 +181,11 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
 
     index = 1
     dataDiagnostics = []
+    attributeStats = {}
+    attributeStats["ApprovedUsageModel"] = []
+    attributeStats["NULLCategory"] = []
+    attributeStats["HighNullValueRate"] = []
+    attributeStats["GT200_DiscreteValue"] = []
     for colName in colNames:
         # Update progress
         progressReporter.nextState()
@@ -190,10 +195,9 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
             if (otherMetadata[colName][1].upper() == "NONE"):
                 continue
             index, columnDiagnostics = profileColumn(data[colName], colName, otherMetadata[colName], 
-                                                     categoricalCols, eventVector, bucketDispatcher, dataWriter, index, colnameBucketMetadata.get(colName))
+                                                     categoricalCols, eventVector, bucketDispatcher, dataWriter, index, attributeStats, colnameBucketMetadata.get(colName))
             dataDiagnostics.append(columnDiagnostics)
-
-    writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir, params)
+    writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir, params, attributeStats)
     dataWriter.close()
     return None
 
@@ -302,7 +306,7 @@ def getPopulatedRowCount(columnData, continuous):
         return columnData.count()
     return sum(map(lambda x: 1 if not isnull(x) else 0, columnData))
 
-def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, bucketDispatcher, dataWriter, index, bucketingParams = None):
+def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, bucketDispatcher, dataWriter, index, attributeStats, bucketingParams = None):
     '''
     Performs profiling on given column 
     Args:
@@ -325,7 +329,18 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
     diagnostics = OrderedDict()
     diagnostics["Colname"] = colName
     diagnostics["DisplayName"] = otherMetadata[0]
+    filtered = False
+    if(otherMetadata[1] == "Model"): 
+        attributeStats["ApprovedUsageModel"].append(colName)
+        filtered = True
+    if(isnull((otherMetadata[2]) or otherMetadata[2] == "") and not filtered): 
+        attributeStats["NULLCategory"].append(colName)
+        filtered = True
     diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colName not in stringcols)/float(len(columnData))
+    if (diagnostics["PopulationRate"] < 0.005 and not filtered): 
+        attributeStats["HighNullValueRate"].append(colName)
+        filtered = True
+
     if diagnostics["PopulationRate"] == 0.0:
         return (index, diagnostics)
 
@@ -338,6 +353,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
         mode = columnData.value_counts().idxmax()
         diagnostics["UniqueValues"] = uniqueValues
         if uniqueValues > 200:
+            if not filtered: attributeStats["GT200_DiscreteValue"].append(colName)
             logger.warn("String column name: " + colName + " is discarded due to more than 200 unique values.")
             return (index, diagnostics)
         index, diagnostics["UncertaintyCoefficient"] = writeCategoricalValuesToAvro(dataWriter, columnData, eventVector, mode, colName, otherMetadata, index)
@@ -513,7 +529,7 @@ def writeNullBucket(index, colName, otherMetadata, columnVector, eventVector, av
     dataWriter.append(datum)
     return index
 
-def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir, params):
+def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir, params, attributeStats):
     '''
     Writes all diagnostics to a json file   
     Args:
@@ -525,7 +541,7 @@ def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features
     Returns:
         None 
     '''
-    summary = getSummaryDiagnostics(dataDiagnostics, eventVector, features, params)
+    summary = getSummaryDiagnostics(dataDiagnostics, eventVector, features, params, attributeStats)
 
     diagnostics = OrderedDict()
     diagnostics["Summary"] = summary
@@ -535,11 +551,12 @@ def writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features
     with open(modelDir + "diagnostics.json", "wb") as fp:
         json.dump(diagnostics, fp)
 
-def getSummaryDiagnostics(dataDiagnostics, eventVector, features, params):
+def getSummaryDiagnostics(dataDiagnostics, eventVector, features, params, attributeStats):
     summary = OrderedDict()
     summary["SampleSize"] = len(eventVector)
     summary["ColumnSize"] = len(features)
     summary["PositiveEventRate"] = sum(eventVector) / float(len(eventVector))
+    summary.update(attributeStats)
     highUCThreshold = 0.2
     if params is not None:
         parser = params["parser"]

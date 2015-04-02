@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -26,6 +28,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
     private String modelingServiceHdfsBaseDir;
 
     private String filePath;
+    private static final Log log = LogFactory.getLog(HdfsFileHttpDownloader.class);
 
     public HdfsFileHttpDownloader(DownloadRequestBuilder requestBuilder) {
         super(requestBuilder.mimeType);
@@ -58,6 +61,10 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         // HDFS file path: <baseDir>/<tenantName>/models/<tableName>/<uuid>
         StringBuilder pathBuilder = new StringBuilder(modelingServiceHdfsBaseDir).append(tokens[0]).append("/models/");
         pathBuilder.append(tokens[1]).append("/").append(tokens[2]);
+        if (filter.equals("diagnostics.json")) {
+            // HDFS file path: <baseDir>/<tenantName>/data/EventMetadata
+            pathBuilder = new StringBuilder(modelingServiceHdfsBaseDir).append(tokens[0]).append("/data");
+        }
 
         HdfsUtils.HdfsFileFilter fileFilter = new HdfsUtils.HdfsFileFilter() {
             @Override
