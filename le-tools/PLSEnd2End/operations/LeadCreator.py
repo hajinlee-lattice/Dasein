@@ -20,8 +20,8 @@ import base64
 import random
 import string
 
-from Env.Properties import PLSEnvironments
-from BasicOperations.TestRunner import SessionRunner
+from Properties import PLSEnvironments
+from operations.TestRunner import SessionRunner
 
 def getMetaData(table_name,leads_number=3,conn=PLSEnvironments.SQL_BasicDataForIntegrationTest):
     dlc = SessionRunner()
