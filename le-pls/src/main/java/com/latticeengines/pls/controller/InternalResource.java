@@ -189,23 +189,4 @@ public class InternalResource extends InternalResourceBase {
         }
         return c;
     }
-
-//    private void softDelete(String tenantId, String username) {
-//        revokeRightWithoutException(GrantedRight.VIEW_PLS_MODELS.getAuthority(), tenantId, username);
-//        revokeRightWithoutException(GrantedRight.VIEW_PLS_CONFIGURATION.getAuthority(), tenantId, username);
-//        revokeRightWithoutException(GrantedRight.VIEW_PLS_USERS.getAuthority(), tenantId, username);
-//        revokeRightWithoutException(GrantedRight.VIEW_PLS_REPORTING.getAuthority(), tenantId, username);
-//        revokeRightWithoutException(GrantedRight.EDIT_PLS_MODELS.getAuthority(), tenantId, username);
-//        revokeRightWithoutException(GrantedRight.EDIT_PLS_CONFIGURATION.getAuthority(), tenantId, username);
-//        revokeRightWithoutException(GrantedRight.EDIT_PLS_USERS.getAuthority(), tenantId, username);
-//        revokeRightWithoutException(GrantedRight.CREATE_PLS_MODELS.getAuthority(), tenantId, username);
-//    }
-//
-//    private void revokeRightWithoutException(String right, String tenant, String username) {
-//        try {
-//            globalUserManagementService.revokeRight(right, tenant, username);
-//        } catch (LedpException e) {
-//            // ignore
-//        }
-//    }
 }
