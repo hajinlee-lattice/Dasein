@@ -86,7 +86,7 @@ public class GroupAndExpandFieldsBuffer extends BaseOperation implements Buffer 
             }
             String format = expandFormas.get(i++);
             String formatedFieldName = String.format(format, expandFieldValue);
-            formatedFieldName = formatedFieldName.replaceAll("[ ,&/()]+", "");
+            formatedFieldName = formatedFieldName.replaceAll("[ ,&/()]+\"", "");
             Integer loc = namePositionMap.get(formatedFieldName.toLowerCase());
             if (loc != null && loc >= 0) {
                 result.set(loc, tupleEntry.getObject(fieldName));
