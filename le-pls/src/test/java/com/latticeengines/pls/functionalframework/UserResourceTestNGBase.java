@@ -23,13 +23,14 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
     private UserService userService;
 
     protected Tenant testTenant;
-    protected HashMap<AccessLevel, User> testUsers;
-    protected HashMap<AccessLevel, UserDocument> testUserDocs;
+    protected HashMap<AccessLevel, User> testUsers = new HashMap<>();
+    protected HashMap<AccessLevel, UserDocument> testUserDocs = new HashMap<>();
 
     protected void createTestTenant() {
         testTenant = new Tenant();
-        testTenant.setName("Test Tenant");
-        testTenant.setId("Test_" + UUID.randomUUID().toString());
+        testTenant.setName("User Resource Test Tenant");
+        testTenant.setId("USER_RESOURCE_TEST_TENANT");
+        tenantService.discardTenant(testTenant);
         tenantService.registerTenant(testTenant);
     }
 
@@ -37,15 +38,11 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
         tenantService.discardTenant(testTenant);
     }
 
-    protected void createTestUser(AccessLevel accessLevel) {
-        if (testTenant == null) { createTestTenant(); }
-
+    protected User createTestUser(AccessLevel accessLevel) {
         User user = new User();
         user.setEmail("test" + UUID.randomUUID().toString() + "@test.lattice.local");
         user.setFirstName("Test");
         user.setLastName("Tester");
-        user.setPhoneNumber("650-555-5555");
-        user.setTitle("Silly Tester");
 
         Credentials credentials = new Credentials();
         credentials.setUsername(user.getEmail());
@@ -57,10 +54,16 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
 
         userService.assignAccessLevel(accessLevel, testTenant.getId(), credentials.getUsername());
 
+        return user;
+    }
 
-        UserDocument doc = loginAndAttach(credentials.getUsername(), testTenant);
-        testUserDocs.put(accessLevel, doc);
-        testUsers.put(accessLevel, user);
+    protected void createTestUsers() {
+        for (AccessLevel accessLevel : AccessLevel.values()) {
+            User user = createTestUser(accessLevel);
+            UserDocument doc = loginAndAttach(user.getUsername(), testTenant);
+            testUserDocs.put(accessLevel, doc);
+            testUsers.put(accessLevel, user);
+        }
     }
 
     protected void switchToAccessLevel(AccessLevel accessLevel) {
@@ -70,9 +73,6 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
     protected void destroyTestUsers() {
         for (AccessLevel accessLevel : AccessLevel.values()) {
             destroyTestUser(accessLevel);
-        }
-        if (testTenant != null) {
-            tenantService.discardTenant(testTenant);
         }
     }
 
