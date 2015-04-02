@@ -1,19 +1,26 @@
 package com.latticeengines.camille.exposed.config.bootstrap;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.CustomerSpaceServiceInstallerAdaptor;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.InstallerAdaptor;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
@@ -59,10 +66,36 @@ public class CustomerSpaceServiceBootstrapManager {
         }
     }
 
-    // XXX BootstrapState getBootstrapState(String serviceName, CustomerSpace
-    // space)
-    // XXX List<Pair<String,BootstrapState>> getBootstrapStates(CustomerSpace
-    // space)
+    public static BootstrapState getBootstrapState(String serviceName, CustomerSpace space) throws Exception {
+        Path serviceDirectoryPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), space,
+                serviceName);
+        try {
+            return BootstrapStateUtil.getState(serviceDirectoryPath);
+        } catch (Exception e) {
+            throw new Exception(String.format(
+                    "Error encountered retrieving bootstrap state for space %s and service %s", space, serviceName), e);
+        }
+
+    }
+
+    public static List<Pair<String, BootstrapState>> getBootstrapStates(CustomerSpace space) throws Exception {
+        Path servicesDirectoryPath = PathBuilder.buildCustomerSpaceServicesPath(CamilleEnvironment.getPodId(), space);
+        Camille camille = CamilleEnvironment.getCamille();
+
+        List<Pair<String, BootstrapState>> toReturn = new ArrayList<Pair<String, BootstrapState>>();
+        try {
+            List<Pair<Document, Path>> children = camille.getChildren(servicesDirectoryPath);
+            for (Pair<Document, Path> child : children) {
+                String serviceName = child.getRight().getSuffix();
+                BootstrapState state = getBootstrapState(serviceName, space);
+                toReturn.add(new MutablePair<String, BootstrapState>(serviceName, state));
+            }
+        } catch (Exception e) {
+            throw new Exception(String.format("Error encountered retrieving bootstrap states for space %s", space), e);
+        }
+
+        return toReturn;
+    }
 
     public static class Bootstrapper {
         private final String serviceName;

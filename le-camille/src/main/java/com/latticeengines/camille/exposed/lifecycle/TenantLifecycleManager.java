@@ -66,7 +66,7 @@ public class TenantLifecycleManager {
             }
         }
 
-        Document properties = DocumentUtils.toDocument(tenantInfo.properties);
+        Document properties = DocumentUtils.toRawDocument(tenantInfo.properties);
         Path propertiesPath = tenantPath.append(PathConstants.PROPERTIES_FILE);
         camille.upsert(propertiesPath, properties, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         log.debug("created properties @ {}", propertiesPath);
@@ -125,7 +125,7 @@ public class TenantLifecycleManager {
 
         for (Pair<Document, Path> childPair : childPairs) {
             Document tenantPropertiesDocument = c.get(childPair.getRight().append(PathConstants.PROPERTIES_FILE));
-            TenantProperties properties = DocumentUtils.toObject(tenantPropertiesDocument, TenantProperties.class);
+            TenantProperties properties = DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
 
             TenantInfo tenantInfo = new TenantInfo(properties);
             toReturn.add(new MutablePair<String, TenantInfo>(childPair.getRight().getSuffix(), tenantInfo));

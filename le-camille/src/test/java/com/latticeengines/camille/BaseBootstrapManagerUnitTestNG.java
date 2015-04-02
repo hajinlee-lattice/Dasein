@@ -2,17 +2,22 @@ package com.latticeengines.camille;
 
 import java.util.concurrent.Semaphore;
 
+import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState.State;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
 public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScope> {
+    public static final int INITIAL_VERSION = 1;
+    public static final int UPGRADED_VERSION = 2;
 
     public void lock() throws Exception {
         // Force synchronous execution of all unit tests because of the nature
@@ -26,13 +31,15 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
 
     public abstract T getTestScope();
 
+    public abstract BootstrapState getState() throws Exception;
+
     public static class Bootstrapper implements CustomerSpaceServiceInstaller, CustomerSpaceServiceUpgrader,
             ServiceInstaller {
 
         @Override
         public DocumentDirectory upgrade(CustomerSpace space, String service, int sourceVersion, int targetVersion,
                 DocumentDirectory source) {
-            if (sourceVersion == 1 && targetVersion == 2) {
+            if (sourceVersion == INITIAL_VERSION && targetVersion == UPGRADED_VERSION) {
                 return BaseBootstrapManagerUnitTestNG.getUpgradedConfiguration();
             } else {
                 throw new IllegalStateException();
@@ -41,9 +48,9 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
 
         @Override
         public DocumentDirectory install(CustomerSpace space, String service, int dataVersion) {
-            if (dataVersion == 1) {
+            if (dataVersion == INITIAL_VERSION) {
                 return BaseBootstrapManagerUnitTestNG.getInitialConfiguration();
-            } else if (dataVersion == 2) {
+            } else if (dataVersion == UPGRADED_VERSION) {
                 return getUpgradedConfiguration();
             } else {
                 throw new IllegalStateException();
@@ -51,9 +58,9 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         }
 
         public DocumentDirectory install(String service, int dataVersion) {
-            if (dataVersion == 1) {
+            if (dataVersion == INITIAL_VERSION) {
                 return BaseBootstrapManagerUnitTestNG.getInitialConfiguration();
-            } else if (dataVersion == 2) {
+            } else if (dataVersion == UPGRADED_VERSION) {
                 return getUpgradedConfiguration();
             } else {
                 throw new IllegalStateException();
@@ -61,31 +68,81 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         }
     }
 
+    public static class EvilBootstrapper implements CustomerSpaceServiceInstaller, CustomerSpaceServiceUpgrader,
+            ServiceInstaller {
+        @Override
+        public DocumentDirectory install(String serviceName, int dataVersion) {
+            throw new RuntimeException("Death!");
+        }
+
+        @Override
+        public DocumentDirectory upgrade(CustomerSpace space, String serviceName, int sourceVersion, int targetVersion,
+                DocumentDirectory source) {
+            throw new RuntimeException("Famine!");
+        }
+
+        @Override
+        public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion) {
+            throw new RuntimeException("VisiDB!");
+        }
+    }
+
     public static DocumentDirectory getInitialConfiguration() {
-        final Integer version = 1;
         DocumentDirectory directory = new DocumentDirectory(new Path("/"));
         directory.add(new Path("/a"));
-        directory.add(new Path("/a/b"), new Document(version.toString()));
+        directory.add(new Path("/a/b"), new Document(new Integer(INITIAL_VERSION).toString()));
         directory.add(new Path("/a/c"));
-        directory.add(new Path("/a/c/d"), new Document(version.toString()));
+        directory.add(new Path("/a/c/d"), new Document(new Integer(INITIAL_VERSION).toString()));
         return directory;
     }
 
     public static DocumentDirectory getUpgradedConfiguration() {
-        final Integer version = 2;
         DocumentDirectory directory = new DocumentDirectory(new Path("/"));
         directory.add(new Path("/a"));
-        directory.add(new Path("/a/b"), new Document(version.toString()));
-        directory.add(new Path("/a/d"), new Document(version.toString()));
-        directory.add(new Path("/a/e"), new Document(version.toString()));
+        directory.add(new Path("/a/b"), new Document(new Integer(UPGRADED_VERSION).toString()));
+        directory.add(new Path("/a/d"), new Document(new Integer(UPGRADED_VERSION).toString()));
+        directory.add(new Path("/a/e"), new Document(new Integer(UPGRADED_VERSION).toString()));
         return directory;
     }
 
-    protected boolean configurationEquals(DocumentDirectory configurationFromZK, DocumentDirectory sourceConfiguration) {
+    public static DocumentDirectory getConfiguration(int version) {
+        switch (version) {
+        case INITIAL_VERSION:
+            return getInitialConfiguration();
+        case UPGRADED_VERSION:
+            return getUpgradedConfiguration();
+        default:
+            throw new RuntimeException(String.format("Invalid version specified to getConfiguration: %d", version));
+        }
+    }
+
+    protected boolean serviceIsInState(State state, int desiredAndInstalledVersion) throws Exception {
+        return serviceIsInState(state, desiredAndInstalledVersion, desiredAndInstalledVersion);
+    }
+
+    protected boolean serviceIsInState(State state, int desiredVersion, int installedVersion) throws Exception {
+        T scope = getTestScope();
+        // Retrieve state
+        BootstrapState retrieved = getState();
+
+        boolean equivalentState = retrieved.state == state && retrieved.installedVersion == installedVersion
+                && retrieved.desiredVersion == desiredVersion;
+
+        // If in error or initial state, just compare states
+        if (state == State.ERROR || state == State.INITIAL) {
+            return equivalentState;
+        }
+
+        // Otherwise compare both state and the configuration files
+        ConfigurationController<T> controller = ConfigurationController.construct(scope);
+        DocumentDirectory configuration = controller.getDirectory(new Path("/"));
+
         // TODO Eventually will not be necessary once ConfigurationControllers
         // omit hidden files
-        configurationFromZK.delete(new Path("/").append(PathConstants.SERVICE_DATA_VERSION_FILE));
-        return configurationFromZK.equals(sourceConfiguration);
+        configuration.delete(new Path("/").append(PathConstants.BOOTSTRAP_STATE_FILE));
+
+        DocumentDirectory sourceConfiguration = getConfiguration(retrieved.installedVersion);
+        return equivalentState && configuration.equals(sourceConfiguration);
     }
 
     private final static Semaphore semaphore = new Semaphore(1);

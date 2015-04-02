@@ -24,14 +24,16 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.io.Files;
-import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
-import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
+import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
+import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.VersionedDocument;
 
 public class CamilleUnitTestNG {
 
@@ -363,7 +365,7 @@ public class CamilleUnitTestNG {
         c.upsert(path, new Document("foo"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertTrue(c.exists(path));
     }
-    
+
     @Test(groups = "unit")
     public void testCreateDirectory() throws IllegalArgumentException, Exception {
         File tempDir = Files.createTempDir();
@@ -431,36 +433,38 @@ public class CamilleUnitTestNG {
 
         FileUtils.deleteDirectory(tempDir);
     }
-    
+
     @Test(groups = "unit")
     public void testUpsertDirectory() throws IllegalArgumentException, Exception {
-    	Camille c = CamilleEnvironment.getCamille();
-    	
-    	File tempDir = Files.createTempDir();
-    	Path parent = new Path("/parent");
+        Camille c = CamilleEnvironment.getCamille();
+
+        File tempDir = Files.createTempDir();
+        Path parent = new Path("/parent");
         c.create(parent, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-        
-        //create directory + files. Make sure they exist.
+
+        // create directory + files. Make sure they exist.
         createDirectory(tempDir + "/0");
         createDirectory(tempDir + "/0/1");
-    	createTextFile(tempDir + "/0/0.txt", "zero");
+        createTextFile(tempDir + "/0/0.txt", "zero");
         createTextFile(tempDir + "/0/1/1.txt", "one");
 
         DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(tempDir));
         c.upsertDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertTrue(c.get(new Path("/parent/0/0.txt")).getData().equals("zero"));
         Assert.assertTrue(c.get(new Path("/parent/0/1/1.txt")).getData().equals("one"));
-        
-        //re-create one of the files with a new value. Make sure only the changed file was affected.
+
+        // re-create one of the files with a new value. Make sure only the
+        // changed file was affected.
         createTextFile(tempDir + "/0/1/1.txt", "two");
         docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(tempDir));
         c.upsertDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertTrue(c.get(new Path("/parent/0/0.txt")).getData().equals("zero"));
         Assert.assertTrue(c.get(new Path("/parent/0/1/1.txt")).getData().equals("two"));
         FileUtils.deleteDirectory(tempDir);
-        
-        //delete the temp dir and create a new one with the same structure but missing a file. 
-        //make sure the missing file is still in Camille.
+
+        // delete the temp dir and create a new one with the same structure but
+        // missing a file.
+        // make sure the missing file is still in Camille.
         tempDir = Files.createTempDir();
         createDirectory(tempDir + "/0");
         createDirectory(tempDir + "/0/1");
@@ -470,6 +474,27 @@ public class CamilleUnitTestNG {
         Assert.assertTrue(c.get(new Path("/parent/0/0.txt")).getData().equals("zero"));
         Assert.assertTrue(c.get(new Path("/parent/0/1/1.txt")).getData().equals("three"));
         FileUtils.deleteDirectory(tempDir);
+    }
+
+    public static class MyDocument extends VersionedDocument {
+        public String foo;
+    }
+
+    @Test(groups = "unit")
+    public void testVersionedDocument() throws Exception {
+        Camille c = CamilleEnvironment.getCamille();
+
+        MyDocument typesafe = new MyDocument();
+        typesafe.foo = "Foo";
+        Document raw = DocumentUtils.toRawDocument(typesafe);
+        // We should not be serializing out the document version
+        Assert.assertFalse(raw.getData().contains("version"));
+        Assert.assertFalse(raw.getData().contains("documentVersion"));
+        c.create(new Path("/test"), raw, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        Document rawRetrieved = c.get(new Path("/test"));
+        MyDocument typesafeRetrieved = DocumentUtils.toTypesafeDocument(rawRetrieved, MyDocument.class);
+        Assert.assertTrue(typesafeRetrieved.documentVersionSpecified());
+        Assert.assertEquals(typesafeRetrieved.getDocumentVersion(), 0);
     }
 
     private static void createDirectory(String path) {

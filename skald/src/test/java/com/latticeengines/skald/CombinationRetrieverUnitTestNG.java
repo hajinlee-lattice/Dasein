@@ -89,31 +89,31 @@ public class CombinationRetrieverUnitTestNG {
 
             // Publish TestModel1
             modelPublisher.publish(new Path(String.format(DocumentConstants.SCORE_DERIVATION, TestModel1_name, 1)),
-                    DocumentUtils.toDocument(TestModel1_ScoreDerivation));
+                    DocumentUtils.toRawDocument(TestModel1_ScoreDerivation));
             modelPublisher.publish(new Path(String.format(DocumentConstants.DATA_COMPOSITION, TestModel1_name, 1)),
-                    DocumentUtils.toDocument(TestModel1_DataComposition));
+                    DocumentUtils.toRawDocument(TestModel1_DataComposition));
 
             // Publish TestModel2
             modelPublisher.publish(new Path(String.format(DocumentConstants.SCORE_DERIVATION, TestModel2_name, 1)),
-                    DocumentUtils.toDocument(TestModel2_ScoreDerivation));
+                    DocumentUtils.toRawDocument(TestModel2_ScoreDerivation));
             modelPublisher.publish(new Path(String.format(DocumentConstants.DATA_COMPOSITION, TestModel2_name, 1)),
-                    DocumentUtils.toDocument(TestModel2_DataComposition));
+                    DocumentUtils.toRawDocument(TestModel2_DataComposition));
 
             // Publish TestCombination
             // TODO Camille should provide a mechanism to automatically create
             // parents through this interface.
             dataController.create(new Path("/Combinations"), new Document());
             dataController.create(new Path(String.format(DocumentConstants.COMBINATION, TestCombination_name)),
-                    DocumentUtils.toDocument(TestCombination));
+                    DocumentUtils.toRawDocument(TestCombination));
 
             // Publish ModelTags
-            dataController.create(new Path(DocumentConstants.MODEL_TAGS), DocumentUtils.toDocument(Tags));
+            dataController.create(new Path(DocumentConstants.MODEL_TAGS), DocumentUtils.toRawDocument(Tags));
         }
 
         public static void publishScoreOverride() throws Exception {
             dataController.create(
                     new Path(String.format(DocumentConstants.SCORE_DERIVATION_OVERRIDE, TestModel1_name, 1)),
-                    DocumentUtils.toDocument(TestModel1_ScoreDerivationOverride));
+                    DocumentUtils.toRawDocument(TestModel1_ScoreDerivationOverride));
         }
     }
 

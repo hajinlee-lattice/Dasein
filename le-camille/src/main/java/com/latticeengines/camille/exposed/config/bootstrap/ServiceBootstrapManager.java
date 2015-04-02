@@ -1,16 +1,23 @@
 package com.latticeengines.camille.exposed.config.bootstrap;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.InstallerAdaptor;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.ServiceInstallerAdaptor;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 
@@ -44,6 +51,35 @@ public class ServiceBootstrapManager {
 
     public static void reset(String serviceName) {
         bootstrappers.remove(serviceName);
+    }
+
+    public static BootstrapState getBootstrapState(String serviceName) throws Exception {
+        Path serviceDirectoryPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), serviceName);
+        try {
+            return BootstrapStateUtil.getState(serviceDirectoryPath);
+        } catch (Exception e) {
+            throw new Exception(String.format("Error encountered retrieving bootstrap state for service %s",
+                    serviceName), e);
+        }
+    }
+
+    public static List<Pair<String, BootstrapState>> getBootstrapStates() throws Exception {
+        Path servicesDirectoryPath = PathBuilder.buildServicesPath(CamilleEnvironment.getPodId());
+        Camille camille = CamilleEnvironment.getCamille();
+
+        List<Pair<String, BootstrapState>> toReturn = new ArrayList<Pair<String, BootstrapState>>();
+        try {
+            List<Pair<Document, Path>> children = camille.getChildren(servicesDirectoryPath);
+            for (Pair<Document, Path> child : children) {
+                String serviceName = child.getRight().getSuffix();
+                BootstrapState state = getBootstrapState(serviceName);
+                toReturn.add(new MutablePair<String, BootstrapState>(serviceName, state));
+            }
+        } catch (Exception e) {
+            throw new Exception(String.format("Error encountered retrieving bootstrap states for all services"), e);
+        }
+
+        return toReturn;
     }
 
     public static class Bootstrapper {

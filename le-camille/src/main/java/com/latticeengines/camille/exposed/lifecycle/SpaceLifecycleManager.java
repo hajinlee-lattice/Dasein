@@ -53,12 +53,12 @@ public class SpaceLifecycleManager {
             log.debug("Space already existed @ {}, ignoring create", spacePath);
         }
 
-        Document properties = DocumentUtils.toDocument(info.properties);
+        Document properties = DocumentUtils.toRawDocument(info.properties);
         Path propertiesPath = spacePath.append(PathConstants.PROPERTIES_FILE);
         camille.upsert(propertiesPath, properties, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         log.debug("created properties @ {}", propertiesPath);
 
-        Document flags = DocumentUtils.toDocument(info.featureFlags);
+        Document flags = DocumentUtils.toRawDocument(info.featureFlags);
         Path flagsPath = spacePath.append(PathConstants.FEATURE_FLAGS_FILE);
         camille.upsert(flagsPath, flags, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         log.debug("created feature flags @ {}", flagsPath);
@@ -91,7 +91,7 @@ public class SpaceLifecycleManager {
         Path spacePath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
                 spaceId);
         Document spacePropertiesDocument = c.get(spacePath.append(PathConstants.PROPERTIES_FILE));
-        CustomerSpaceProperties properties = DocumentUtils.toObject(spacePropertiesDocument,
+        CustomerSpaceProperties properties = DocumentUtils.toTypesafeDocument(spacePropertiesDocument,
                 CustomerSpaceProperties.class);
 
         Document spaceFlagsDocument = c.get(spacePath.append(PathConstants.FEATURE_FLAGS_FILE));

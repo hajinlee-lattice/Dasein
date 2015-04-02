@@ -2,6 +2,7 @@ package com.latticeengines.camille.exposed.paths;
 
 import java.util.Arrays;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public final class PathBuilder {
@@ -47,9 +48,18 @@ public final class PathBuilder {
                 tenantId, PathConstants.SPACES, spaceId);
     }
 
+    public static Path buildCustomerSpaceServicesPath(String podId, CustomerSpace space) {
+        return buildCustomerSpaceServicesPath(podId, space.getContractId(), space.getTenantId(), space.getSpaceId());
+    }
+
     public static Path buildCustomerSpaceServicesPath(String podId, String contractId, String tenantId, String spaceId) {
         return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, contractId, PathConstants.TENANTS,
                 tenantId, PathConstants.SPACES, spaceId, PathConstants.SERVICES);
+    }
+
+    public static Path buildCustomerSpaceServicePath(String podId, CustomerSpace space, String serviceName) {
+        return buildCustomerSpaceServicePath(podId, space.getContractId(), space.getTenantId(), space.getSpaceId(),
+                serviceName);
     }
 
     public static Path buildCustomerSpaceServicePath(String podId, String contractId, String tenantId, String spaceId,

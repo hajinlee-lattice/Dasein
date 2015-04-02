@@ -12,7 +12,7 @@ public final class PathConstants {
     public static final String INVISIBLE_FILE_PREFIX = ".";
     public static final String PROPERTIES_FILE = ".properties.json";
     public static final String FEATURE_FLAGS_FILE = ".feature-flags.json";
+    public static final String BOOTSTRAP_STATE_FILE = ".state.json";
 
     public static final String DEFAULT_SPACE_FILE = ".default-space";
-    public static final String SERVICE_DATA_VERSION_FILE = ".data-version";
 }

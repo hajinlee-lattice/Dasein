@@ -45,7 +45,7 @@ public class PodLifecycleManager {
             log.debug("Pod already existed @ {}, ignoring create", podPath);
         }
 
-        Document properties = DocumentUtils.toDocument(podInfo.properties);
+        Document properties = DocumentUtils.toRawDocument(podInfo.properties);
         Path propertiesPath = podPath.append(PathConstants.PROPERTIES_FILE);
         camille.upsert(propertiesPath, properties, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         log.debug("created properties @ {}", propertiesPath);
@@ -74,7 +74,7 @@ public class PodLifecycleManager {
 
         Path podPath = PathBuilder.buildPodPath(podId);
         Document podPropertiesDocument = c.get(podPath.append(PathConstants.PROPERTIES_FILE));
-        PodProperties properties = DocumentUtils.toObject(podPropertiesDocument, PodProperties.class);
+        PodProperties properties = DocumentUtils.toTypesafeDocument(podPropertiesDocument, PodProperties.class);
 
         PodInfo podInfo = new PodInfo(properties);
         return podInfo;

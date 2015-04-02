@@ -12,9 +12,10 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleTransaction;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState.State;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
@@ -55,8 +56,6 @@ public class BootstrapUtil {
 
         if (!camille.exists(serviceDirectoryPath)) {
             try {
-                Path dataVersionFilePath = serviceDirectoryPath.append(PathConstants.SERVICE_DATA_VERSION_FILE);
-
                 DocumentDirectory configurationDirectory = installer.install(executableVersion);
                 if (configurationDirectory == null) {
                     throw new NullPointerException("Installer returned a null document directory");
@@ -70,9 +69,9 @@ public class BootstrapUtil {
                 // Create the service directory
                 transaction.create(serviceDirectoryPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
-                // Create the version file
-                String version = new Integer(executableVersion).toString();
-                transaction.create(dataVersionFilePath, new Document(version), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                // Initialize bootstrap state
+                BootstrapStateUtil.initializeState(serviceDirectoryPath, transaction,
+                        BootstrapState.constructOKState(executableVersion));
 
                 // Create everything under it
                 Iterator<DocumentDirectory.Node> iter = configurationDirectory.breadthFirstIterator();
@@ -88,6 +87,10 @@ public class BootstrapUtil {
                 log.warn("{}Another process already installed the initial configuration", logPrefix, e);
             } catch (Exception e) {
                 log.error("{}Unexpected failure occurred attempting to install initial configuration", logPrefix, e);
+                BootstrapStateUtil.setState(
+                        serviceDirectoryPath,
+                        BootstrapState.constructErrorState(executableVersion, -1,
+                                e.getMessage() + ": " + e.getStackTrace()));
                 throw e;
             }
         }
@@ -133,84 +136,92 @@ public class BootstrapUtil {
     public static void upgrade(CustomerSpaceServiceUpgrader upgrader, int executableVersion, Path serviceDirectoryPath,
             CustomerSpace space, String serviceName, String logPrefix) throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
-        Path dataVersionFilePath = serviceDirectoryPath.append(PathConstants.SERVICE_DATA_VERSION_FILE);
+        BootstrapState state = BootstrapStateUtil.getState(serviceDirectoryPath);
 
-        Document versionDocument = camille.get(dataVersionFilePath);
-        int dataVersion = Integer.parseInt(versionDocument.getData());
-
-        if (dataVersion > executableVersion) {
-            Exception vme = new VersionMismatchException(space, serviceName, dataVersion, executableVersion);
-            log.error("{}{}", logPrefix, vme.getMessage());
-            throw vme;
-        }
-
-        if (dataVersion == executableVersion) {
-            log.info("{}No need to upgrade - both executable and data are on version {}", logPrefix, dataVersion);
-            return;
-        }
-
-        if (dataVersion < executableVersion) {
-            log.info("{}Running upgrade from version {} to version {}", new Object[] { logPrefix, dataVersion,
-                    executableVersion });
-            try {
-                DocumentDirectory source = camille.getDirectory(serviceDirectoryPath);
-
-                // Remove leading /etc/etc/Services/ServiceName/ from each
-                // path
-                source.makePathsLocal();
-                // TODO filter out invisible documents
-
-                // Upgrade
-                DocumentDirectory upgraded = upgrader.upgrade(space, serviceName, dataVersion, executableVersion,
-                        source);
-                if (upgraded == null) {
-                    throw new NullPointerException("Upgrader returned a null document directory");
-                }
-
-                // Perform a transaction
-                CamilleTransaction transaction = new CamilleTransaction();
-
-                // - Delete all existing items in the hierarchy, leaf nodes
-                // -> root nodes
-                Iterator<DocumentDirectory.Node> iter = source.leafFirstIterator();
-                while (iter.hasNext()) {
-                    DocumentDirectory.Node node = iter.next();
-                    if (!node.getPath().getSuffix().startsWith(PathConstants.INVISIBLE_FILE_PREFIX)) {
-                        transaction.delete(node.getPath().prefix(serviceDirectoryPath));
-                    }
-                }
-
-                // - Create the new items in the hierarchy, root nodes ->
-                // leaf nodes
-                iter = upgraded.breadthFirstIterator();
-                while (iter.hasNext()) {
-                    DocumentDirectory.Node node = iter.next();
-                    transaction.create(node.getPath().prefix(serviceDirectoryPath), node.getDocument(),
-                            ZooDefs.Ids.OPEN_ACL_UNSAFE);
-                }
-
-                // Write the .version file. This will fail if the version
-                // document has already been
-                // written to by another thread
-                versionDocument.setData(new Integer(executableVersion).toString());
-                transaction.set(dataVersionFilePath, versionDocument);
-
-                transaction.commit();
-            } catch (KeeperException.BadVersionException e) {
-                log.warn("{}Another process already attempted to upgrade the configuration", logPrefix);
-
-                versionDocument = camille.get(dataVersionFilePath);
-                dataVersion = Integer.parseInt(versionDocument.getData());
-
-                if (dataVersion != executableVersion) {
-                    Exception vme = new VersionMismatchException(space, serviceName, dataVersion, executableVersion);
-                    log.error("{}{}", logPrefix, vme.getMessage());
-                    throw vme;
-                }
-            } catch (Exception e) {
-                log.error("{}Unexpected failure occurred attempting to upgrade configuration", logPrefix, e);
-                throw e;
+        try {
+            if (state.installedVersion > executableVersion) {
+                Exception vme = new VersionMismatchException(space, serviceName, state.installedVersion,
+                        executableVersion);
+                log.error("{}{}", logPrefix, vme.getMessage());
+                throw vme;
             }
+
+            if (state.installedVersion == executableVersion) {
+                log.info("{}No need to upgrade - both executable and data are on version {}", logPrefix,
+                        state.installedVersion);
+                return;
+            }
+
+            if (state.installedVersion < executableVersion) {
+                log.info("{}Running upgrade from version {} to version {}", new Object[] { logPrefix,
+                        state.installedVersion, executableVersion });
+                try {
+                    DocumentDirectory source = camille.getDirectory(serviceDirectoryPath);
+
+                    // Remove leading /etc/etc/Services/ServiceName/ from each
+                    // path
+                    source.makePathsLocal();
+                    // TODO filter out invisible documents
+
+                    // Upgrade
+                    DocumentDirectory upgraded = upgrader.upgrade(space, serviceName, state.installedVersion,
+                            executableVersion, source);
+                    if (upgraded == null) {
+                        throw new NullPointerException("Upgrader returned a null document directory");
+                    }
+
+                    // Perform a transaction
+                    CamilleTransaction transaction = new CamilleTransaction();
+
+                    // - Delete all existing items in the hierarchy, leaf nodes
+                    // -> root nodes
+                    Iterator<DocumentDirectory.Node> iter = source.leafFirstIterator();
+                    while (iter.hasNext()) {
+                        DocumentDirectory.Node node = iter.next();
+                        if (!node.getPath().getSuffix().startsWith(PathConstants.INVISIBLE_FILE_PREFIX)) {
+                            transaction.delete(node.getPath().prefix(serviceDirectoryPath));
+                        }
+                    }
+
+                    // - Create the new items in the hierarchy, root nodes ->
+                    // leaf nodes
+                    iter = upgraded.breadthFirstIterator();
+                    while (iter.hasNext()) {
+                        DocumentDirectory.Node node = iter.next();
+                        transaction.create(node.getPath().prefix(serviceDirectoryPath), node.getDocument(),
+                                ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                    }
+
+                    // Update state
+                    state.installedVersion = executableVersion;
+                    state.desiredVersion = executableVersion;
+                    state.state = State.OK;
+                    state.errorMessage = null;
+                    BootstrapStateUtil.setState(serviceDirectoryPath, transaction, state);
+
+                    transaction.commit();
+                } catch (KeeperException.BadVersionException e) {
+                    log.warn("{}Another process already attempted to upgrade the configuration", logPrefix);
+
+                    state = BootstrapStateUtil.getState(serviceDirectoryPath);
+                    if (state.installedVersion != executableVersion) {
+                        Exception vme = new VersionMismatchException(space, serviceName, state.installedVersion,
+                                executableVersion);
+                        log.error("{}{}", logPrefix, vme.getMessage());
+                        throw vme;
+                    }
+                } catch (Exception e) {
+                    log.error("{}Unexpected failure occurred attempting to upgrade configuration", logPrefix, e);
+                    throw e;
+                }
+            }
+        } catch (Exception e) {
+            log.error("{}Unexpected failure occurred attempting to upgrade configuration", logPrefix, e);
+            BootstrapStateUtil.setState(
+                    serviceDirectoryPath,
+                    BootstrapState.constructErrorState(executableVersion, state.installedVersion, e.getMessage() + ": "
+                            + e.getStackTrace()));
+            throw e;
         }
     }
 

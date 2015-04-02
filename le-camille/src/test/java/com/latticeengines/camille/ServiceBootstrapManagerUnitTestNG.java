@@ -16,14 +16,20 @@ import com.latticeengines.camille.exposed.config.ConfigurationTransaction;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceBootstrapManager;
 import com.latticeengines.camille.exposed.config.cache.ConfigurationCache;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
-import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState.State;
 import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 
 public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitTestNG<ServiceScope> {
     @Override
     public ServiceScope getTestScope() {
         return new ServiceScope("MyService", 1);
+    }
+
+    @Override
+    public BootstrapState getState() throws Exception {
+        return ServiceBootstrapManager.getBootstrapState(getTestScope().getServiceName());
     }
 
     @BeforeMethod(groups = "unit")
@@ -47,11 +53,7 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
         // Bootstrap the initial configuration
         ServiceBootstrapManager.bootstrap(scope);
 
-        // Assert configuration is correct
-        ConfigurationController<ServiceScope> controller = ConfigurationController.construct(scope);
-        DocumentDirectory configuration = controller.getDirectory(new Path("/"));
-
-        Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
+        Assert.assertTrue(serviceIsInState(State.OK, INITIAL_VERSION));
     }
 
     /**
@@ -64,13 +66,17 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
         ServiceScope scope = getTestScope();
         ServiceBootstrapManager.reset(scope.getServiceName());
         ServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper());
-        scope.setDataVersion(1);
+        scope.setDataVersion(INITIAL_VERSION);
         ServiceBootstrapManager.bootstrap(scope);
+
+        Assert.assertTrue(serviceIsInState(State.OK, INITIAL_VERSION));
 
         ServiceBootstrapManager.reset(scope.getServiceName());
         ServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper());
-        scope.setDataVersion(2);
+        scope.setDataVersion(UPGRADED_VERSION);
         ServiceBootstrapManager.bootstrap(scope);
+
+        Assert.assertTrue(serviceIsInState(State.OK, UPGRADED_VERSION));
     }
 
     @Test(groups = "unit", invocationCount = 10)
@@ -99,11 +105,7 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
             exec.awaitTermination(10, TimeUnit.SECONDS);
         }
 
-        // Assert configuration is in the correct structure
-        ConfigurationController<ServiceScope> controller = ConfigurationController.construct(scope);
-        DocumentDirectory configuration = controller.getDirectory(new Path("/"));
-
-        Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
+        Assert.assertTrue(serviceIsInState(State.OK, INITIAL_VERSION));
     }
 
     @Test(groups = "unit")
@@ -112,10 +114,10 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
         ServiceBootstrapManager.reset(scope.getServiceName());
         ServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper());
 
+        @SuppressWarnings("unused")
         ConfigurationController<ServiceScope> controller = ConfigurationController.construct(getTestScope());
-        DocumentDirectory configuration = controller.getDirectory(new Path("/"));
 
-        Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
+        Assert.assertTrue(serviceIsInState(State.OK, INITIAL_VERSION));
     }
 
     @Test(groups = "unit")
@@ -126,10 +128,8 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
 
         @SuppressWarnings("unused")
         ConfigurationTransaction<ServiceScope> transaction = ConfigurationTransaction.construct(getTestScope());
-        ConfigurationController<ServiceScope> controller = ConfigurationController.construct(getTestScope());
-        DocumentDirectory configuration = controller.getDirectory(new Path("/"));
 
-        Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
+        Assert.assertTrue(serviceIsInState(State.OK, INITIAL_VERSION));
     }
 
     @Test(groups = "unit")
@@ -140,10 +140,25 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
 
         @SuppressWarnings("unused")
         ConfigurationCache<ServiceScope> cache = ConfigurationCache.construct(getTestScope(), new Path("/a"));
-        ConfigurationController<ServiceScope> controller = ConfigurationController.construct(getTestScope());
-        DocumentDirectory configuration = controller.getDirectory(new Path("/"));
 
-        Assert.assertTrue(configurationEquals(configuration, getInitialConfiguration()));
+        Assert.assertTrue(serviceIsInState(State.OK, INITIAL_VERSION));
+    }
+
+    @Test(groups = "unit")
+    public void testInstallFailure() throws Exception {
+        ServiceScope scope = getTestScope();
+        ServiceBootstrapManager.reset(scope.getServiceName());
+        ServiceBootstrapManager.register(scope.getServiceName(), new EvilBootstrapper());
+
+        // Bootstrap the initial configuration
+        boolean thrown = false;
+        try {
+            ServiceBootstrapManager.bootstrap(scope);
+        } catch (Exception e) {
+            thrown = true;
+        }
+        Assert.assertTrue(thrown, "Expected ServiceBootstrapManager to throw an exception");
+        Assert.assertTrue(serviceIsInState(State.ERROR, INITIAL_VERSION, -1));
     }
 
     @SuppressWarnings("unused")

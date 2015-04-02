@@ -45,7 +45,7 @@ public class ContractLifecycleManager {
             log.debug("Contract already existed @ {}, ignoring create", contractPath);
         }
 
-        Document properties = DocumentUtils.toDocument(contractInfo.properties);
+        Document properties = DocumentUtils.toRawDocument(contractInfo.properties);
         Path propertiesPath = contractPath.append(PathConstants.PROPERTIES_FILE);
         camille.upsert(propertiesPath, properties, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         log.debug("created properties @ {}", propertiesPath);
@@ -76,7 +76,7 @@ public class ContractLifecycleManager {
 
         Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
         Document contractPropertiesDocument = c.get(contractPath.append(PathConstants.PROPERTIES_FILE));
-        ContractProperties properties = DocumentUtils.toObject(contractPropertiesDocument, ContractProperties.class);
+        ContractProperties properties = DocumentUtils.toTypesafeDocument(contractPropertiesDocument, ContractProperties.class);
 
         ContractInfo contractInfo = new ContractInfo(properties);
         return contractInfo;

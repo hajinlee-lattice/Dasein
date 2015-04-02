@@ -62,7 +62,7 @@ public class ActivationService {
                     DocumentConstants.DATA_VERSION);
             ConfigurationController<CustomerSpaceServiceScope> controller = ConfigurationController.construct(scope);
 
-            controller.upsert(path, DocumentUtils.toDocument(value));
+            controller.upsert(path, DocumentUtils.toRawDocument(value));
 
         } catch (Exception ex) {
             throw new RuntimeException("Failed to set configuration document", ex);
