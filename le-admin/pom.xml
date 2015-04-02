@@ -8,10 +8,10 @@
 
     <properties>
         <component-name>admin</component-name>
-        <le.baton.version>1.0.29-SNAPSHOT</le.baton.version>
-        <le.common.version>1.0.29-SNAPSHOT</le.common.version>
-        <le.domain.version>1.0.29-SNAPSHOT</le.domain.version>
-        <le.camille.version>1.0.29-SNAPSHOT</le.camille.version>
+        <le.baton.version>1.0.30-SNAPSHOT</le.baton.version>
+        <le.common.version>1.0.30-SNAPSHOT</le.common.version>
+        <le.domain.version>1.0.30-SNAPSHOT</le.domain.version>
+        <le.camille.version>1.0.30-SNAPSHOT</le.camille.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
@@ -19,7 +19,7 @@
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
-        <version>1.0.29-SNAPSHOT</version>
+        <version>1.0.30-SNAPSHOT</version>
         <relativePath>../le-parent</relativePath>
     </parent>
 

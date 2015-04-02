@@ -18,7 +18,7 @@
         <le.common.version>1.0.30-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.30-SNAPSHOT</le.domain.version>
         <le.scheduler.version>1.0.30-SNAPSHOT</le.scheduler.version>
-        <le.eai.version>1.0.29-SNAPSHOT</le.eai.version>
+        <le.eai.version>1.0.30-SNAPSHOT</le.eai.version>
         <le.camille.version>1.0.30-SNAPSHOT</le.camille.version>
     </properties>
 
