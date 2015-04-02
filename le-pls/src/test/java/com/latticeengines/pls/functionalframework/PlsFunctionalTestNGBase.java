@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -50,7 +49,6 @@ import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationServ
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.globalauth.authentication.impl.Constants;
 import com.latticeengines.pls.security.AccessLevel;
-import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.security.TicketAuthenticationToken;
 import com.latticeengines.pls.service.UserService;

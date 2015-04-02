@@ -6,13 +6,9 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -25,43 +21,28 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.latticeengines.domain.exposed.pls.DeleteUsersResult;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.UserResourceTestNGBase;
 import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
-import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
-import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.AccessLevel;
 import com.latticeengines.pls.service.UserService;
 
 
 public class UserResourceTestNG extends UserResourceTestNGBase {
-    @SuppressWarnings("unused")
-    private static Log log = LogFactory.getLog(UserResourceTestNG.class);
-
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
-
-    @Autowired
-    private GlobalTenantManagementService globalTenantManagementService;
-
-    @Autowired
-    private GlobalSessionManagementService globalSessionManagementService;
 
     @Autowired
     private UserService userService;
@@ -131,99 +112,6 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         testUpdateAccessLevel(AccessLevel.INTERNAL_ADMIN, true);
         testUpdateAccessLevel(AccessLevel.SUPER_ADMIN, true);
     }
-
-
-//
-//    @Test(groups = { "functional", "deployment" })
-//    public void delete() {
-//        Tenant tenant = new Tenant();
-//        tenant.setName("Test Tenant");
-//        tenant.setId("Test_" + UUID.randomUUID().toString());
-//        try {
-//            globalTenantManagementService.registerTenant(tenant);
-//            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), testUser.getUsername());
-//            UserDocument doc = loginAndAttach(testUser.getUsername(), tenant);
-//            useSessionDoc(doc);
-//
-//            String json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-//            ResponseDocument<ArrayNode> response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
-//            ArrayNode users = response.getResult();
-//            assertEquals(users.size(), 0);
-//
-//            for (int i = 0; i < 10; i++) {
-//                String username = "tester" + String.valueOf(i) + "@test.com";
-//                makeSureUserNoExists(username);
-//                createUser(username, username, "Test", "Tester");
-//                userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
-//            }
-//
-//            json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-//            response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
-//            users = response.getResult();
-//            assertEquals(users.size(), 10);
-//
-//            List<String> usersToBeDeleted = Arrays.asList("tester0@test.com", "tester1@test.com", "tester2@test.com");
-//
-//            ObjectMapper mapper = new ObjectMapper();
-//            String param = mapper.valueToTree(usersToBeDeleted).toString();
-//
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.add("Content-Type", "application/json");
-//            headers.add("Accept", "application/json");
-//            HttpEntity<JsonNode> requestEntity = new HttpEntity<>(null, headers);
-//            ResponseEntity<String> responseEntity = restTemplate.exchange(
-//                getRestAPIHostPort() + "/pls/users?usernames=" + param,
-//                HttpMethod.DELETE,
-//                requestEntity,
-//                String.class
-//            );
-//
-//            ResponseDocument<DeleteUsersResult> response2 = ResponseDocument.generateFromJSON(responseEntity.getBody(), DeleteUsersResult.class);
-//            assertEquals(response2.getResult().getSuccessUsers().size(), 3);
-//            assertEquals(response2.getResult().getFailUsers().size(), 0);
-//
-//            json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-//            response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
-//            users = response.getResult();
-//            assertEquals(users.size(), 7);
-//
-//            // delete admin user
-//            usersToBeDeleted = Arrays.asList("tester3@test.com", "tester4@test.com", testCreds.getUsername());
-//            param = mapper.valueToTree(usersToBeDeleted).toString();
-//
-//            responseEntity = restTemplate.exchange(
-//                    getRestAPIHostPort() + "/pls/users?usernames=" + param,
-//                    HttpMethod.DELETE,
-//                    requestEntity,
-//                    String.class
-//            );
-//
-//            response2 = ResponseDocument.generateFromJSON(responseEntity.getBody(), DeleteUsersResult.class);
-//            assertEquals(response2.getResult().getSuccessUsers().size(), 2);
-//            assertEquals(response2.getResult().getFailUsers().size(), 1);
-//
-//            json = restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-//            response =  ResponseDocument.generateFromJSON(json, ArrayNode.class);
-//            users = response.getResult();
-//            assertEquals(users.size(), 5);
-//
-//            responseEntity = restTemplate.exchange(
-//                    getRestAPIHostPort() + "/pls/users?usernames=malformedstring",
-//                    HttpMethod.DELETE,
-//                    requestEntity,
-//                    String.class
-//            );
-//            response2 = ResponseDocument.generateFromJSON(responseEntity.getBody(), DeleteUsersResult.class);
-//            assertFalse(response2.isSuccess());
-//
-//            logoutUserDoc(doc);
-//        } finally {
-//            for (int i = 0; i < 10; i++) {
-//                makeSureUserNoExists("tester" + String.valueOf(i) + "@test.com");
-//            }
-//            globalTenantManagementService.discardTenant(tenant);
-//        }
-//    }
 
     private UserRegistration createUserRegistration() {
         UserRegistration userReg = new UserRegistration();
@@ -402,7 +290,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     private void testGetAllUsers(AccessLevel accessLevel, boolean expectSuccess) {
         switchToAccessLevel(accessLevel);
-        testGetAllUsersFail();
+        if (!expectSuccess) testGetAllUsersFail();
     }
 
     private void testGetAllUsers(AccessLevel accessLevel, boolean expectSuccess, int expectNumOfVisibleUsers) {
