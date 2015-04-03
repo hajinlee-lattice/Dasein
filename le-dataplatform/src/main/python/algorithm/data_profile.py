@@ -140,7 +140,7 @@ def getSchema():
     }"""
     return schema.parse(metadataSchema)
 
-def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties = None, params = None):
+def train(trainingData, testData, schema, modelDir, algorithmProperties, runtimeProperties=None, params=None):
     '''
     Profiles each feature column in the entire data set and performs bucketing on band columns
     Args:
@@ -167,25 +167,26 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     avroSchema = getSchema()
     recordWriter = io.DatumWriter(avroSchema)
     dataWriter = datafile.DataFileWriter(codecs.open(modelDir + '/profile.avro', 'wb'),
-                                         recordWriter, writers_schema = avroSchema, codec = 'deflate')
+                                         recordWriter, writers_schema=avroSchema, codec='deflate')
 
     colNames = list(data.columns.values)
     categoricalCols = set(schema["stringColumns"])
     features = set(schema["features"])
     eventVector = data[schema["target"]]
     configMetadata = schema["config_metadata"]
-    otherMetadata = retrieveOtherMetadata(configMetadata)
+
+    
+    attributeStats = {"ApprovedUsage_Model":[], "ApprovedUsage_EmptyOrUnrecorgnized":[], "NULLDisplayName":[], 
+                      "NULLCategory":[], "HighNullValueRate":[], "GT200_DiscreteValue":[]}
+
+    otherMetadata = retrieveOtherMetadata(configMetadata, attributeStats)
     categoricalCols = retrieveCategoricalColumns(configMetadata, features, categoricalCols)
     colnameBucketMetadata, metadataDiagnostics = retrieveColumnBucketMetadata(configMetadata)
     progressReporter.setTotalState(len(colNames))
 
     index = 1
     dataDiagnostics = []
-    attributeStats = {}
-    attributeStats["ApprovedUsageModel"] = []
-    attributeStats["NULLCategory"] = []
-    attributeStats["HighNullValueRate"] = []
-    attributeStats["GT200_DiscreteValue"] = []
+    
     for colName in colNames:
         # Update progress
         progressReporter.nextState()
@@ -194,14 +195,16 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
                 otherMetadata[colName] = (colName, "", "", "")
             if (otherMetadata[colName][1].upper() == "NONE"):
                 continue
-            index, columnDiagnostics = profileColumn(data[colName], colName, otherMetadata[colName], 
+            index, columnDiagnostics = profileColumn(data[colName], colName, otherMetadata[colName],
                                                      categoricalCols, eventVector, bucketDispatcher, dataWriter, index, attributeStats, colnameBucketMetadata.get(colName))
             dataDiagnostics.append(columnDiagnostics)
     writeDiagnostics(dataDiagnostics, metadataDiagnostics, eventVector, features, modelDir, params, attributeStats)
     dataWriter.close()
     return None
 
-def retrieveOtherMetadata(columnsMetadata):
+def retrieveOtherMetadata(columnsMetadata, attributeStats):
+    qualifiedApprovedUsage = ["None," "Model", "ModelAndModelInsights", "ModelAndAllInsights"]
+
     otherMetadata = dict()
     if columnsMetadata is None or not columnsMetadata.has_key("Metadata"):
         return otherMetadata
@@ -223,10 +226,14 @@ def retrieveOtherMetadata(columnsMetadata):
                     category = extension["Value"]
 
             if displayName is None:
+                attributeStats["NULLDisplayName"].append(colName)
                 displayName = colName
             if approvedUsage is None:
                 approvedUsage = ""
+                attributeStats["ApprovedUsage_EmptyOrUnrecorgnized"].append(colName)
             if isinstance(approvedUsage, list):
+                for value in approvedUsage:
+                    if value not in qualifiedApprovedUsage: attributeStats["ApprovedUsage_EmptyOrUnrecorgnized"].append(colName)
                 approvedUsage = ",".join(approvedUsage)
             otherMetadata[colName] = (displayName, approvedUsage, category, fundamentalType)
         except:
@@ -306,7 +313,7 @@ def getPopulatedRowCount(columnData, continuous):
         return columnData.count()
     return sum(map(lambda x: 1 if not isnull(x) else 0, columnData))
 
-def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, bucketDispatcher, dataWriter, index, attributeStats, bucketingParams = None):
+def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, bucketDispatcher, dataWriter, index, attributeStats, bucketingParams=None):
     '''
     Performs profiling on given column 
     Args:
@@ -329,15 +336,15 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
     diagnostics = OrderedDict()
     diagnostics["Colname"] = colName
     diagnostics["DisplayName"] = otherMetadata[0]
-    filtered = False
-    if(otherMetadata[1] == "Model"): 
+    filtered = True if colName in attributeStats["ApprovedUsage_EmptyOrUnrecorgnized"] else False
+    if otherMetadata[1] == "Model" and not filtered: 
         attributeStats["ApprovedUsageModel"].append(colName)
         filtered = True
-    if(isnull((otherMetadata[2]) or otherMetadata[2] == "") and not filtered): 
+    if (isnull(otherMetadata[2]) or otherMetadata[2] == "") and not filtered: 
         attributeStats["NULLCategory"].append(colName)
         filtered = True
-    diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colName not in stringcols)/float(len(columnData))
-    if (diagnostics["PopulationRate"] < 0.005 and not filtered): 
+    diagnostics["PopulationRate"] = getPopulatedRowCount(columnData, colName not in stringcols) / float(len(columnData))
+    if diagnostics["PopulationRate"] < 0.005 and not filtered: 
         attributeStats["HighNullValueRate"].append(colName)
         filtered = True
 
@@ -396,7 +403,7 @@ def writeCategoricalValuesToAvro(dataWriter, columnVector, eventVector, mode, co
     '''
     mi, componentMi = calculateMutualInfo(columnVector, eventVector)
     entropyValue = entropy(eventVector)
-    
+
     avgProbability = sum(eventVector) / float(len(eventVector))
     for value in columnVector.unique():
         if (value is None):
@@ -451,7 +458,7 @@ def writeBandsToAvro(dataWriter, columnVector, eventVector, bands, mean, median,
         bandVector = map(lambda x: 1 if x >= bands[i] and x < bands[i + 1] else 0, columnVector)
         bandCount = sum(bandVector)
         if bandCount == 0:
-            logger.critical("No samples found in band [" + str(bands[i]) + ", " + str(bands[i+1]) + "] for column: " + colName)
+            logger.critical("No samples found in band [" + str(bands[i]) + ", " + str(bands[i + 1]) + "] for column: " + colName)
             continue
 
         # Replace np.inf with None value
@@ -603,7 +610,7 @@ def getLift(avgProbability, valueCount, valueVector, eventVector):
 def uncertaintyCoefficient(mi, entropy):
     if mi == None or entropy == 0:
         return None
-    return mi/entropy
+    return mi / entropy
 
 # correct MI calculation (http://en.wikipedia.org/wiki/Mutual_information)
 def calculateMutualInfo(values, truth):
@@ -612,13 +619,13 @@ def calculateMutualInfo(values, truth):
     for x_val in set(values):
         mi_components[x_val] = 0
         x_binary = [1 if x == x_val else 0 for x in values]
-        p_x = float(sum(x_binary))/len(truth)
+        p_x = float(sum(x_binary)) / len(truth)
         for y_val in set(truth):
             y_binary = [1 if y == y_val else 0 for y in truth]
-            p_y = float(sum(y_binary))/len(truth)
+            p_y = float(sum(y_binary)) / len(truth)
 
-            joint_prob = float(sum((n for n in itertools.imap(lambda x, y: x*y, x_binary, y_binary))))/len(truth)
-            relative_dependence = joint_prob * math.log(joint_prob / (p_x*p_y)) if joint_prob != 0 else 0
+            joint_prob = float(sum((n for n in itertools.imap(lambda x, y: x * y, x_binary, y_binary)))) / len(truth)
+            relative_dependence = joint_prob * math.log(joint_prob / (p_x * p_y)) if joint_prob != 0 else 0
 
             total_mi += relative_dependence
             mi_components[x_val] += relative_dependence
