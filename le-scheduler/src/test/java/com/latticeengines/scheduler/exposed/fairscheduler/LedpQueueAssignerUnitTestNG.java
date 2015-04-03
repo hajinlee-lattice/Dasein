@@ -14,7 +14,7 @@ import java.util.Map;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.server.resourcemanager.rmapp.RMApp;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.AppSchedulable;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FSAppAttempt;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FSLeafQueue;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FSQueue;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.QueueManager;
@@ -81,7 +81,7 @@ public class LedpQueueAssignerUnitTestNG {
         Collection<FSQueue> p0childQueues = new ArrayList<FSQueue>();
         p0childQueues.add(p0MRQ);
 
-        Collection<AppSchedulable> apps;
+        Collection<FSAppAttempt> apps;
 
         FSLeafQueue p0_0 = mock(FSLeafQueue.class);
         apps = generateAppSchedCollectionOfSize(10);
@@ -123,7 +123,7 @@ public class LedpQueueAssignerUnitTestNG {
         Collection<FSQueue> p0MRchildQueues = new ArrayList<FSQueue>();
         when(p0MRQ.getChildQueues()).thenReturn((List<FSQueue>) p0MRchildQueues);
 
-        Collection<AppSchedulable> apps;
+        Collection<FSAppAttempt> apps;
 
         FSLeafQueue p0MR_0 = mock(FSLeafQueue.class);
         apps = generateAppSchedCollectionOfSize(30, DELL_APPLICATION_ID);
@@ -161,7 +161,7 @@ public class LedpQueueAssignerUnitTestNG {
         FSQueue p1Q = mock(FSQueue.class);
         Collection<FSQueue> p1childQueues = new ArrayList<FSQueue>();
 
-        Collection<AppSchedulable> apps;
+        Collection<FSAppAttempt> apps;
 
         FSLeafQueue p1_0 = mock(FSLeafQueue.class);
         apps = generateAppSchedCollectionOfSize(10);
@@ -196,14 +196,14 @@ public class LedpQueueAssignerUnitTestNG {
         return emptyQ;
     }
 
-    private Collection<AppSchedulable> generateAppSchedCollectionOfSize(int size) {
+    private Collection<FSAppAttempt> generateAppSchedCollectionOfSize(int size) {
         return generateAppSchedCollectionOfSize(size, null);
     }
 
-    private Collection<AppSchedulable> generateAppSchedCollectionOfSize(int size, String applicationIdString) {
-        Collection<AppSchedulable> collection = new ArrayList<AppSchedulable>();
+    private Collection<FSAppAttempt> generateAppSchedCollectionOfSize(int size, String applicationIdString) {
+        Collection<FSAppAttempt> collection = new ArrayList<FSAppAttempt>();
         while (size > 0) {
-            AppSchedulable appSched = mock(AppSchedulable.class);
+            FSAppAttempt appSched = mock(FSAppAttempt.class);
             when(appSched.getName()).thenReturn(applicationIdString);
             collection.add(appSched);
             size--;

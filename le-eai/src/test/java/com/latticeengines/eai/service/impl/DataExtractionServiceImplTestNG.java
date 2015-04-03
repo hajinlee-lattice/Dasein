@@ -16,11 +16,12 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.eai.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.routes.ImportProperty;
+import com.latticeengines.eai.service.DataExtractionService;
 
 public class DataExtractionServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     @Autowired
-    private DataExtractionServiceImpl dataExtractionService;
+    private DataExtractionService dataExtractionService;
 
     @Test(groups = "functional")
     public void importData() throws Exception {

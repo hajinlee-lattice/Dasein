@@ -58,8 +58,8 @@ public class LedpFairScheduler extends FairScheduler {
             if (isP0(sched)) {
                 continue;
             }
-            for (AppSchedulable as : sched.getRunnableAppSchedulables()) {
-                for (RMContainer c : as.getApp().getLiveContainers()) {
+            for (FSAppAttempt as : sched.getRunnableAppSchedulables()) {
+                for (RMContainer c : as.getLiveContainers()) {
                     runningContainers.add(c);
                 }
             }
@@ -88,31 +88,31 @@ public class LedpFairScheduler extends FairScheduler {
         return true;
     }
 
-    @Override
-    protected void preemptResources(Collection<FSLeafQueue> scheds, Resource toPreempt) {
-        Resource resToPreempt = Resource.newInstance(toPreempt.getMemory(), toPreempt.getVirtualCores());
-        Collection<FSLeafQueue> mrScheds = new ArrayList<FSLeafQueue>();
-
-        for (FSLeafQueue sched : scheds) {
-            if (!isMapReduce(sched)) {
-                mrScheds.add(sched);
-            }
-        }
-
-        if (canPreemptUsingNonP0Resources(mrScheds, resToPreempt)) {
-            Collection<FSLeafQueue> noP0Scheds = new ArrayList<FSLeafQueue>();
-
-            for (FSLeafQueue sched : mrScheds) {
-                if (!isP0(sched)) {
-                    noP0Scheds.add(sched);
-                }
-            }
-
-            super.preemptResources(noP0Scheds, toPreempt);
-        } else {
-            super.preemptResources(mrScheds, toPreempt);
-        }
-    }
+//    @Override
+//    protected void preemptResources(Collection<FSLeafQueue> scheds, Resource toPreempt) {
+//        Resource resToPreempt = Resource.newInstance(toPreempt.getMemory(), toPreempt.getVirtualCores());
+//        Collection<FSLeafQueue> mrScheds = new ArrayList<FSLeafQueue>();
+//
+//        for (FSLeafQueue sched : scheds) {
+//            if (!isMapReduce(sched)) {
+//                mrScheds.add(sched);
+//            }
+//        }
+//
+//        if (canPreemptUsingNonP0Resources(mrScheds, resToPreempt)) {
+//            Collection<FSLeafQueue> noP0Scheds = new ArrayList<FSLeafQueue>();
+//
+//            for (FSLeafQueue sched : mrScheds) {
+//                if (!isP0(sched)) {
+//                    noP0Scheds.add(sched);
+//                }
+//            }
+//
+//            super.preemptResources(noP0Scheds, toPreempt);
+//        } else {
+//            super.preemptResources(mrScheds, toPreempt);
+//        }
+//    }
 
     private boolean isP0(FSLeafQueue queue) {
         return queue.getQueueName().contains("Priority0");

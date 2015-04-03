@@ -6,11 +6,11 @@
     <artifactId>le-api-rpm</artifactId>
     <packaging>rpm</packaging>
     <description>LE API RPM</description>
-	
-	<properties>
-		<le.rpm.version>1.0.30-SNAPSHOT</le.rpm.version>
-	</properties>
-	
+
+    <properties>
+        <le.rpm.version>1.0.30-SNAPSHOT</le.rpm.version>
+    </properties>
+
     <parent>
         <groupId>com.latticeengines</groupId>
         <artifactId>le-parent</artifactId>
@@ -41,30 +41,30 @@
                 </propdata.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
-	    </profile>
-		<profile>
-			<id>integration</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-				<property>
-					<name>environment.type</name>
-					<value>intcluster</value>
-				</property>
-			</activation>
-			<properties>
-				<api.properties.path>conf/env/intcluster</api.properties.path>
-				<dataplatform.properties.path>
-					../le-dataplatform/conf/env/intcluster
-				</dataplatform.properties.path>
+        </profile>
+        <profile>
+            <id>integration</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>intcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <api.properties.path>conf/env/intcluster</api.properties.path>
+                <dataplatform.properties.path>
+                    ../le-dataplatform/conf/env/intcluster
+                </dataplatform.properties.path>
                 <dataflow.properties.path>
                     ../le-dataflow/conf/env/intcluster
                 </dataflow.properties.path>
                 <propdata.properties.path>
                     ../le-propdata/conf/env/intcluster
                 </propdata.properties.path>
-				<bin.env.path>bin/env/intcluster</bin.env.path>
-			</properties>
-		</profile>
+                <bin.env.path>bin/env/intcluster</bin.env.path>
+            </properties>
+        </profile>
         <profile>
             <id>qa</id>
             <activation>

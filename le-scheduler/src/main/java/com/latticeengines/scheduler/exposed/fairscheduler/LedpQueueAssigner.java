@@ -7,7 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.server.resourcemanager.rmapp.RMApp;
-import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.AppSchedulable;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FSAppAttempt;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FSLeafQueue;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.FSQueue;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fair.QueueManager;
@@ -98,14 +98,14 @@ public class LedpQueueAssigner {
             }
             FSLeafQueue leafQueue = (FSLeafQueue) childQueue;
 
-            for (AppSchedulable appSched : leafQueue.getRunnableAppSchedulables()) {
+            for (FSAppAttempt appSched : leafQueue.getRunnableAppSchedulables()) {
                 // appSched.getName() returns applicationId.toString()
                 if (customerName.equals(appIdToCustomer.get(appSched.getName()))) {
                     stickyQueue = leafQueue.getQueueName();
                     break outer;
                 }
             }
-            for (AppSchedulable appSched : leafQueue.getNonRunnableAppSchedulables()) {
+            for (FSAppAttempt appSched : leafQueue.getNonRunnableAppSchedulables()) {
                 // appSched.getName() returns applicationId.toString()
                 if (customerName.equals(appIdToCustomer.get(appSched.getName()))) {
                     stickyQueue = leafQueue.getQueueName();

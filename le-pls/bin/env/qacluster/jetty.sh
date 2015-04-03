@@ -85,10 +85,10 @@ JETTY_USER=yarn
 JETTY_HOST=0.0.0.0
 JETTY_LOGS=logs
 JETTY_ARGS=jetty.host=0.0.0.0
-HADOOP_HOME=/usr/lib/hadoop
-HADOOP_MAPRED_HOME=/usr/lib/hadoop
-HADOOP_CONF=--lib=/etc/hadoop/conf.empty
-SQOOP_HOME=/usr/lib/sqoop
+HADOOP_HOME=/usr/hdp/current/hadoop-client
+HADOOP_MAPRED_HOME=/usr/current/hadoop-mapreduce-client
+HADOOP_CONF=--lib=/etc/hadoop/conf
+SQOOP_HOME=/usr/hdp/current/sqoop-server
 JAVA_HOME=/usr/java/default
 
 

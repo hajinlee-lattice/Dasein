@@ -98,7 +98,7 @@
 					<changelogFile>src/main/resources/rpm/changelog</changelogFile>
 					<mappings>
 						<mapping>
-							<directory>/tmp/usr/lib/hadoop-yarn</directory>
+							<directory>/tmp/usr/hdp/current/hadoop-yarn-resourcemanager</directory>
 							<filemode>644</filemode>
 							<username>root</username>
 							<groupname>root</groupname>

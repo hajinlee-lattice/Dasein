@@ -12,9 +12,9 @@ export JETTY_USER=yarn
 export JETTY_HOST=0.0.0.0
 export JETTY_LOGS=logs
 export JETTY_ARGS=jetty.host=0.0.0.0
-export HADOOP_HOME=/usr/lib/hadoop
-export HADOOP_MAPRED_HOME=/usr/lib/hadoop
-export HADOOP_CONF=/etc/hadoop/conf.empty
-export SQOOP_HOME=/usr/lib/sqoop
+HADOOP_HOME=/usr/hdp/current/hadoop-client
+HADOOP_MAPRED_HOME=/usr/current/hadoop-mapreduce-client
+HADOOP_CONF=--lib=/etc/hadoop/conf
+SQOOP_HOME=/usr/hdp/current/sqoop-server
 export JAVA_HOME=/usr/java/default
 export MODEL_DL_QUARTZ_ENABLED=enabled

@@ -2,4 +2,4 @@
 rm -rf /tmp/usr/lib/hadoop-yarn
 rm -rf /tmp/etc/hadoop/conf
 rm -f /etc/hadoop/conf/fair-scheduler.xml
-rm -f /usr/lib/hadoop-yarn/le*.jar
+rm -f /usr/hdp/current/hadoop-yarn-resourcemanager/le*.jar
