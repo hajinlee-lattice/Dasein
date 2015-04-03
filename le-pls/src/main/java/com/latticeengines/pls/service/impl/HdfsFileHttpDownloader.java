@@ -61,10 +61,6 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
         // HDFS file path: <baseDir>/<tenantName>/models/<tableName>/<uuid>
         StringBuilder pathBuilder = new StringBuilder(modelingServiceHdfsBaseDir).append(tokens[0]).append("/models/");
         pathBuilder.append(tokens[1]).append("/").append(tokens[2]);
-        if (filter.equals("diagnostics.json")) {
-            // HDFS file path: <baseDir>/<tenantName>/data/EventMetadata
-            pathBuilder = new StringBuilder(modelingServiceHdfsBaseDir).append(tokens[0]).append("/data");
-        }
 
         HdfsUtils.HdfsFileFilter fileFilter = new HdfsUtils.HdfsFileFilter() {
             @Override
