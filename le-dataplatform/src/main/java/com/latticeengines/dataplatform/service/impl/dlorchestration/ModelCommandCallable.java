@@ -410,10 +410,6 @@ public class ModelCommandCallable implements Callable<Long> {
             modelCommandLogService.log(modelCommand, "Data diagnostics:\n" + warnings);
         }
 
-        // Provide link to full diagnostics file
-        modelCommandLogService.log(modelCommand, "Data diagnostics json file download link: " + httpFsPrefix
-                + diagnosticsPath + HTTPFS_SUFFIX);
-
     }
 
 }

@@ -156,18 +156,12 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
 
         callable.generateDataDiagnostics(commandState, jobStatus);
         List<ModelCommandLog> logs = modelCommandLogService.findByModelCommand(command);
-        Assert.assertEquals(logs.size(), 2);
+        Assert.assertEquals(logs.size(), 1);
         int warnIndex = logs.get(0).getMessage().contains("The number of skipped rows") ? 0 : 1;
         String warnLog = logs.get(warnIndex).getMessage();
         Assert.assertTrue(warnLog.contains("IsPublicDomain")
                 && warnLog.contains("Detected abnormal positive event rate"));
         Assert.assertTrue(warnLog.contains("Uncertainty Coefficient"));
-
-        int linkIndex = warnIndex == 0 ? 1 : 0;
-        String linkLog = logs.get(linkIndex).getMessage();
-        Assert.assertTrue(linkLog.contains("http"));
-        HdfsUtils.rmdir(yarnConfiguration, outputDir);
-
     }
 
     private String getContent() {

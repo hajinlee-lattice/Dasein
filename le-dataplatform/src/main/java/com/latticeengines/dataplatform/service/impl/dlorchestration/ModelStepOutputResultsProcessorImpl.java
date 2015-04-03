@@ -103,7 +103,9 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                     });
 
             if (jsonFiles.size() == 1) {
-                return jsonFiles.get(0);
+                String modelFilePath = jsonFiles.get(0);
+                HdfsUtils.moveFile(yarnConfiguration, jobStatus.getDataDiagnosticsPath(), jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "diagnostics.json"));
+                return modelFilePath;
             } else if (jsonFiles.size() == 0) {
                 throw new Exception("Model file does not exist.");
             } else {
@@ -231,6 +233,12 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                 + StringTokenUtils.stripPath(modelFilePath).replace(JSON_SUFFIX, CSV_SUFFIX);
         modelCommandLogService.log(modelCommand, "Top Predictors csv file download link: " + httpFsPrefix
                 + modelCSVFileHdfsPath + HTTPFS_SUFFIX);
+
+        // Provide link to full diagnostics file
+        String diagnosticsHdfsPath = jobStatus.getResultDirectory() + "/"
+                + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "diagnostics.json");
+        modelCommandLogService.log(modelCommand, "Data diagnostics json file download link: " + httpFsPrefix
+                + diagnosticsHdfsPath + HTTPFS_SUFFIX);
 
         String scoreFileHdfsPath = jobStatus.getResultDirectory() + "/"
                 + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "scored.txt");
