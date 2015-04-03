@@ -23,7 +23,7 @@ class AlgorithmTestBase(TrainingTestBase):
         algorithmJsonFileName = algorithmFileName + ".json"
         with open(algorithmJsonFileName, "w") as outfile:
             json.dump(model, outfile)
-        os.environ["CONTAINER_ID"] = "xyz"
+        os.environ["CONTAINER_ID"] = "container_1425511391553_3644_01_000001"
         os.environ["SHDP_HD_FSWEB"] = "localhost:50070"
 
         self.algorithmJsonFileName = algorithmJsonFileName 
