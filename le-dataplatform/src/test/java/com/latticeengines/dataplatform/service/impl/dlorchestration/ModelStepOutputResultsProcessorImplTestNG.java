@@ -72,7 +72,7 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         initMocks(this);
         JobStatus jobStatus = new JobStatus();
         jobStatus.setResultDirectory(resultDirectory);
-        jobStatus.setDataDiagnosticsPath(diagnosticsDirectory + "diagnostics.json");
+        jobStatus.setDataDiagnosticsPath(diagnosticsDirectory + "testdiagnostics.json");
 
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testmodel.json", linkContents.get(0));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testmodel.csv", linkContents.get(1));
