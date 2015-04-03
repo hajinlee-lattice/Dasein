@@ -239,7 +239,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
 
                     @Override
                     public boolean accept(String filename) {
-                        return filename.contains(".");
+                        return filename.contains(".txt");
                     }
 
                 }).get(0);

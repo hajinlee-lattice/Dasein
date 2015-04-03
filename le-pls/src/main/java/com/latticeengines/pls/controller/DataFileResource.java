@@ -41,7 +41,7 @@ public class DataFileResource {
     public void getDiagnosticsJsonFile(@PathVariable String modelId, HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        dataFileProviderService.downloadFile(request, response, modelId, "application/json", ".*_diagnostics.json");
+        dataFileProviderService.downloadFile(request, response, modelId, "application/json", "diagnostics.json");
     }
 
     @RequestMapping(value = "/predictorcsv/{modelId}", method = RequestMethod.GET, headers = "Accept=application/json")

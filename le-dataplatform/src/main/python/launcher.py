@@ -147,6 +147,8 @@ class Launcher(object):
 
             # Copy the model data files from local to hdfs
             hdfs.mkdir(modelHdfsDir)
+            if not os.path.exists(modelLocalDir + "diagnostics.json"): 
+                hdfs.copyToLocal(params["schema"]["diagnostics_path"] + "diagnostics.json", modelLocalDir + "diagnostics.json")
             (_, _, filenames) = os.walk(modelLocalDir).next()
             for filename in filter(lambda e: executor.accept(e), filenames):
                 hdfs.copyFromLocal(modelLocalDir + filename, "%s%s" % (modelHdfsDir, filename))

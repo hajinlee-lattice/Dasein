@@ -215,7 +215,8 @@ class ArgumentParser(object):
         schema["features"] = self.metadataSchema["features"]
         schema["keys"] = parser.getKeys()
         if "data_profile" in self.metadataSchema:
-            schema["data_profile"] = self.stripPath(self.metadataSchema["data_profile"]) 
+            if schema["data_profile"].rfind('/') > 0 : schema["diagnostics_path"] = schema["data_profile"][0:schema["data_profile"].rfind('/')+1]
+            schema["data_profile"] = self.stripPath(self.metadataSchema["data_profile"])
         schema["config_metadata"] = parser.getConfigMetadata()
         schema["target"] = self.target
         schema["reserved"] = self.reserved

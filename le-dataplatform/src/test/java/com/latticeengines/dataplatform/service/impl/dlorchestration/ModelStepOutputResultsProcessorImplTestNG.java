@@ -61,7 +61,6 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
     private String scoreDerivationContents = "Deciles!";
     private String dataCompositionContents = "Transforms!";
 
-    private String diagnosticsDirectory = "/user/s-analytics/customers/Nutanix/data/EventMetadata/";
     private String resultDirectory = "/user/s-analytics/customers/Nutanix/models/Q_EventTable_Nutanix/58e6de15-5448-4009-a512-bd27d59abcde/";
     private String consumerDirectory = "/user/s-analytics/customers/Nutanix/BARD/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/";
     private String hdfsArtifactsDirectory = "/user/s-analytics/customers/Nutanix.Nutanix.Production/models/58e6de15-5448-4009-a512-bd27d59abcde-Model_Su/1/";
@@ -72,11 +71,10 @@ public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunct
         initMocks(this);
         JobStatus jobStatus = new JobStatus();
         jobStatus.setResultDirectory(resultDirectory);
-        jobStatus.setDataDiagnosticsPath(diagnosticsDirectory + "testdiagnostics.json");
 
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testmodel.json", linkContents.get(0));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testmodel.csv", linkContents.get(1));
-        HdfsUtils.writeToFile(yarnConfiguration, diagnosticsDirectory + "testdiagnostics.json", linkContents.get(2));
+        HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "diagnostics.json", linkContents.get(2));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testscored.txt", linkContents.get(3));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "testreadoutsample.csv", linkContents.get(4));
         HdfsUtils.writeToFile(yarnConfiguration, resultDirectory + "rfpmml.xml", pmmlContents);

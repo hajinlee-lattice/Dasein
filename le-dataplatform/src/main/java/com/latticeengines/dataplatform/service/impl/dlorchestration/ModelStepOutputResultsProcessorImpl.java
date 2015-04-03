@@ -103,9 +103,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
                     });
 
             if (jsonFiles.size() == 1) {
-                String modelFilePath = jsonFiles.get(0);
-                HdfsUtils.moveFile(yarnConfiguration, jobStatus.getDataDiagnosticsPath(), jobStatus.getResultDirectory() + "/" + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "diagnostics.json"));
-                return modelFilePath;
+                return jsonFiles.get(0);
             } else if (jsonFiles.size() == 0) {
                 throw new Exception("Model file does not exist.");
             } else {
@@ -236,7 +234,7 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
 
         // Provide link to full diagnostics file
         String diagnosticsHdfsPath = jobStatus.getResultDirectory() + "/"
-                + StringTokenUtils.stripPath(modelFilePath).replace("model.json", "diagnostics.json");
+                + StringTokenUtils.stripPath(modelFilePath).replaceFirst(".*model.json", "diagnostics.json");
         modelCommandLogService.log(modelCommand, "Data diagnostics json file download link: " + httpFsPrefix
                 + diagnosticsHdfsPath + HTTPFS_SUFFIX);
 

@@ -82,7 +82,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
         modelId = summary.getId();
         HdfsUtils.mkdir(yarnConfiguration, dir);
         HdfsUtils.mkdir(yarnConfiguration, dir + "/enhancements");
-        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_diagnostics.json");
+        HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/diagnostics.json");
         HdfsUtils
                 .copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/enhancements/modelsummary.json");
         HdfsUtils.copyLocalToHdfs(yarnConfiguration, modelSummaryUrl.getFile(), dir + "/test_model.csv");
@@ -133,7 +133,7 @@ public class DataFileProviderServiceTestNG extends PlsFunctionalTestNGBase {
     @DataProvider(name = "dataFileProvider")
     public static Object[][] getDataFileProvier() {
         return new Object[][] { { "application/json", "modelsummary.json" }, //
-                { "application/json", ".*_diagnostics.json" }, //
+                { "application/json", "diagnostics.json" }, //
                 { "application/csv", ".*_model.csv" }, //
                 { "application/csv", ".*_readoutsample.csv" }, //
                 { "text/plain", ".*_scored.txt" }, //
