@@ -204,4 +204,9 @@ public class HdfsUtils {
         return filePaths;
 
     }
+    
+    public static boolean moveFile(Configuration configuration, String src, String dst) throws IOException{
+        FileSystem fs = FileSystem.get(configuration);
+        return fs.rename(new Path(src), new Path(dst));
+    }
 }
