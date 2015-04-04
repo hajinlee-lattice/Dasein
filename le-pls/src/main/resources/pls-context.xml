@@ -15,7 +15,7 @@
         <context:exclude-filter type="assignable" expression="com.latticeengines.pls.swagger.SwaggerConfig" />
     </context:component-scan>
     <mvc:annotation-driven/>
-
+    <!-- Need to remove this quartz job later when we have le-job ready -->
     <import resource="classpath:pls-modeldownload-quartz-${MODEL_DL_QUARTZ_ENABLED:disabled}-context.xml"/>
     <import resource="classpath:pls-persistence-context.xml"/>
     <import resource="classpath:pls-aspects-context.xml"/>

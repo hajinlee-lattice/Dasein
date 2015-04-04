@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -33,7 +32,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.security.TicketAuthenticationToken;
 
 @Component("modelSummaryEntityMgr")
-public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
+public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
 
     private static final Log log = LogFactory.getLog(ModelSummaryEntityMgrImpl.class);
     
@@ -61,7 +60,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRED)
     public void create(ModelSummary summary) {
         Tenant tenant = summary.getTenant();
         tenantDao.createOrUpdate(tenant);
@@ -86,19 +85,19 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
     
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> getAll() {
         return super.findAll();
     }
     
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> findAll() {
         return super.findAll();
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> findAllValid() {
         return modelSummaryDao.findAllValid();
     }
@@ -133,7 +132,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRED)
     public void deleteByModelId(String modelId) {
         ModelSummary summary = findValidByModelId(modelId);
         
@@ -162,7 +161,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRED)
     public void updateModelSummary(ModelSummary modelSummary, AttributeMap attrMap) {
         String modelId = modelSummary.getId();
         
@@ -187,7 +186,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
     
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRED)
     public void updateStatusByModelId(String modelId, ModelSummaryStatus status) {
         ModelSummary summary = findByModelId(modelId, false, true, false);
         
@@ -240,7 +239,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
     
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findByModelId(String modelId, boolean returnRelational, boolean returnDocument, boolean validOnly) {
         ModelSummary summary = null;
         if (validOnly) {
@@ -271,13 +270,13 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary findValidByModelId(String modelId) {
         return findByModelId(modelId, false, true, true);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ModelSummary getByModelId(String modelId) {
         return modelSummaryDao.findByModelId(modelId);
     }

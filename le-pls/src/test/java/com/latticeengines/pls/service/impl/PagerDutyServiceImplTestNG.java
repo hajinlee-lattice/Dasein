@@ -16,29 +16,29 @@ import com.latticeengines.pls.service.impl.PagerDutyServiceImpl;
 public class PagerDutyServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
-    private PagerDutyServiceImpl pagerDutyService;
+    private PagerDutyServiceImpl pagerDutyService2;
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        pagerDutyService.useTestServiceApiKey();
+        pagerDutyService2.useTestServiceApiKey();
     }
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerOneDetail() throws ClientProtocolException, IOException, ParseException {
-        String result = pagerDutyService.triggerEvent("PagerDutyServiceTestNG",
+        String result = pagerDutyService2.triggerEvent("PagerDutyServiceTestNG",
                 new BasicNameValuePair("testmetric", "testvalue"));
         PagerDutyImplTestUtils.confirmPagerDutyIncident(result);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerNoDetail() throws ClientProtocolException, IOException, ParseException {
-        String result = pagerDutyService.triggerEvent("PagerDutyServiceTestNG");
+        String result = pagerDutyService2.triggerEvent("PagerDutyServiceTestNG");
         PagerDutyImplTestUtils.confirmPagerDutyIncident(result);
     }
 
     @Test(groups = "functional", enabled = true)
     public void testTriggerMultipleDetail() throws ClientProtocolException, IOException, ParseException {
-        String result = pagerDutyService.triggerEvent("PagerDutyServiceTestNG",
+        String result = pagerDutyService2.triggerEvent("PagerDutyServiceTestNG",
                 new BasicNameValuePair("testmetric", "testvalue"), new BasicNameValuePair("anothertestmetric",
                         "anothertestvalue"));
         PagerDutyImplTestUtils.confirmPagerDutyIncident(result);
@@ -47,7 +47,7 @@ public class PagerDutyServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional", enabled = true)
     public void testTriggerDetailWithUnescapedJsonConflicts() throws ClientProtocolException, IOException,
             ParseException {
-        String result = pagerDutyService.triggerEvent("PagerDutyServiceTestNG",
+        String result = pagerDutyService2.triggerEvent("PagerDutyServiceTestNG",
                 new BasicNameValuePair("commandLogId91", "errorCode:LEDP_00002 errorMessage:Generic system error.\n"
                         + "com.latticeengines.domain.exposed.exception.LedpException: Generic system error.\n"),
                 new BasicNameValuePair("anothertestmetric", "anothertestvalue"));

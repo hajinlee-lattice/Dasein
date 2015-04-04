@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.pls.service.AlertService;
 
-@Component("alertService")
+@Component("alertService2")
 public class AlertServiceImpl implements AlertService {
 
     private static final Log log = LogFactory.getLog(AlertServiceImpl.class);

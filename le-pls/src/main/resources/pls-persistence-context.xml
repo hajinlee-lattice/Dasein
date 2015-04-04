@@ -25,7 +25,7 @@
     </bean>
 
     <!-- Hibernate session factory -->
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+    <bean id="sessionFactoryPLS" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
         <property name="dataSource" ref="readOnlyDataSource" />
         <property name="packagesToScan" value="com.latticeengines.domain.exposed.pls, 
             com.latticeengines.domain.exposed.security" />
@@ -40,28 +40,30 @@
         </property>
     </bean>
 
-    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
-        p:sessionFactory-ref="sessionFactory" />
+    <bean id="transactionManagerPLS" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+        p:sessionFactory-ref="sessionFactoryPLS">
+        <qualifier value="pls" />
+    </bean>
 
-    <tx:annotation-driven transaction-manager="transactionManager" />
+    <tx:annotation-driven transaction-manager="transactionManagerPLS" />
 
     <bean id="modelSummaryDao" class="com.latticeengines.pls.dao.impl.ModelSummaryDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="sessionFactory" ref="sessionFactoryPLS" />
     </bean>
     
     <bean id="predictorDao" class="com.latticeengines.pls.dao.impl.PredictorDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="sessionFactory" ref="sessionFactoryPLS" />
     </bean>
     
     <bean id="predictorElementDao" class="com.latticeengines.pls.dao.impl.PredictorElementDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="sessionFactory" ref="sessionFactoryPLS" />
     </bean>
 
     <bean id="tenantDao" class="com.latticeengines.pls.dao.impl.TenantDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="sessionFactory" ref="sessionFactoryPLS" />
     </bean>
 
     <bean id="keyValueDao" class="com.latticeengines.pls.dao.impl.KeyValueDaoImpl">
-        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="sessionFactory" ref="sessionFactoryPLS" />
     </bean>
 </beans>

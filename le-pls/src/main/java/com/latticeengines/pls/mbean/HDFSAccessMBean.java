@@ -9,8 +9,8 @@ import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
 
-@Component("hdfsAcMBean")
-@ManagedResource(objectName = "Diagnostics:name=HDFSAccessCheck")
+@Component("plsHdfsAcMBean")
+@ManagedResource(objectName = "Diagnostics:name=HDFSAccessCheck2")
 public class HDFSAccessMBean {
 
     @Autowired

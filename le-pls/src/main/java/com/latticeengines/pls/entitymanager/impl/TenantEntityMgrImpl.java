@@ -8,13 +8,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.dao.TenantDao;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 
 @Component("tenantEntityMgr")
-public class TenantEntityMgrImpl extends BaseEntityMgrImpl<Tenant> implements TenantEntityMgr {
+public class TenantEntityMgrImpl extends BasePLSEntityMgrImpl<Tenant> implements TenantEntityMgr {
 
     @Autowired
     private TenantDao tenantDao;
@@ -25,13 +24,13 @@ public class TenantEntityMgrImpl extends BaseEntityMgrImpl<Tenant> implements Te
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Tenant findByTenantId(String tenantId) {
         return tenantDao.findByTenantId(tenantId);
     }
     
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(value = "pls", propagation = Propagation.REQUIRED)
     public void create(Tenant tenant) {
         if (tenant.getRegisteredTime() == null) {
             tenant.setRegisteredTime(new Date().getTime());

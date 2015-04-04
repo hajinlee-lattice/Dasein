@@ -25,7 +25,7 @@ import com.latticeengines.pls.service.AlertService;
 public class PlsControllerExceptionHandler {
     private static final Log log = LogFactory.getLog(PlsControllerExceptionHandler.class);
     @Autowired
-    private AlertService alertService;
+    private AlertService alertService2;
 
     public PlsControllerExceptionHandler() {
     }
@@ -70,7 +70,7 @@ public class PlsControllerExceptionHandler {
 
         List<BasicNameValuePair> details = new ArrayList<>();
         details.add(new BasicNameValuePair("stackTrace", stackTrace));
-        alertService.triggerCriticalEvent(e.getMessage(), details);
+        alertService2.triggerCriticalEvent(e.getMessage(), details);
 
         return new ModelAndView(jsonView, ImmutableMap.of("errorCode", LedpCode.LEDP_00002.name(), //
                 "errorMsg", stackTrace));

@@ -10,10 +10,10 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 public class HDFSAccessMBeanTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
-    private HDFSAccessMBean hdfsAcMBean;
+    private HDFSAccessMBean plsHdfsAcMBean;
 
     @Test(groups = {"functional", "functional.production"})
     public void testCheckHDFSStatus() {
-        assertTrue(hdfsAcMBean.checkHDFSAccess().contains("SUCCESS"));
+        assertTrue(plsHdfsAcMBean.checkHDFSAccess().contains("SUCCESS"));
     }
 }

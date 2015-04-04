@@ -16,7 +16,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.pls.service.PagerDutyService;
 
-@Component("pagerDutyService")
+@Component("pagerDutyService2")
 public class PagerDutyServiceImpl implements PagerDutyService {
 
     private static final String PLS_SERVICEAPI_KEY = "d3eb9c2d98b34f12a5a4915525a2e3ed";
