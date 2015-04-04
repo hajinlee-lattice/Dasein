@@ -76,7 +76,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         model.setModelDefinition(modelDef);
         model.setName("Model Submission for Demo");
         model.setTable("iris");
-        model.setMetadataTable("iris_metadata");
+        model.setMetadataTable("EventMetadata");
         model.setFeaturesList(Arrays.<String> asList(new String[] { "SEPAL_LENGTH", //
                 "SEPAL_WIDTH", //
                 "PETAL_LENGTH", //
@@ -122,7 +122,7 @@ public class ModelResourceDeploymentTestNG extends ApiFunctionalTestNGBase {
         config.setCustomer("INTERNAL_ModelResourceDeploymentTestNG");
         config.setTable("iris");
         config.setKeyCols(Arrays.<String> asList(new String[] { "ID" }));
-        config.setMetadataTable("iris_metadata");
+        config.setMetadataTable("EventMetadata");
         return config;
     }
 
