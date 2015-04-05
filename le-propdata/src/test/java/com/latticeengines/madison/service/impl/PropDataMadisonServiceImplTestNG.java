@@ -54,6 +54,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     @BeforeClass(groups = "functional")
     public void beforeClass() throws Exception {
         today = new Date();
+        today = DateUtils.addDays(today, -3);
         yesterday = DateUtils.addDays(today, -1);
         ReflectionTestUtils.setField(propDataService, "numOfPastDays", 1);
 
@@ -152,7 +153,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
                 ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput1 + "/output")));
 
         requestContext = new PropDataContext();
-        requestContext.setProperty(PropDataMadisonService.TODAY_KEY, today);
+//        requestContext.setProperty(PropDataMadisonService.TODAY_KEY, today);
         propDataService.transform(requestContext);
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
                 ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput2 + "/output")));

@@ -160,15 +160,17 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 }
             }
 
-            List<String> pastDaysPaths = new ArrayList<>();
             List<Date> pastDays = new ArrayList<>();
-            getPastIncrementalPaths(today, pastDays, pastDaysPaths);
-            if (pastDaysPaths.size() == 0) {
-                log.warn("There's not incremental data found.");
-                return response;
+            getPastIncrementalDays(today, pastDays);
+            if (pastDays.size() == 0) {
+                log.warn("There's no incremental data found for today.");
+                today = findPreviousAvailableDays(today, pastDays);
+                if (pastDays.size() == 0) {
+                    return response;
+                }
             }
-            log.info("The batch size of incremental data = " + pastDaysPaths.size());
-            log.info("The incremental timestamps of incremental data = " + pastDaysPaths);
+            log.info("The batch size of incremental data = " + pastDays.size());
+            log.info("The incremental timestamps of incremental data = " + pastDays);
 
             transformData(today, pastDays);
             response.setProperty(TODAY_KEY, today);
@@ -179,6 +181,21 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             throw new LedpException(LedpCode.LEDP_00002, ex);
         }
         return response;
+    }
+
+    private Date findPreviousAvailableDays(Date today, List<Date> pastDays) throws Exception {
+        Date newDay = today;
+        for (int i = 0; i < 5; i++) {
+            newDay = DateUtils.addDays(newDay, -1);
+            String targetDir = getHdfsWorkflowTotalRawPath(newDay);
+            if (!HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(getOutputDir(targetDir)))) {
+                getPastIncrementalDays(newDay, pastDays);
+                if (pastDays.size() > 0) {
+                    return newDay;
+                }
+            }
+        }
+        return today;
     }
 
     private void transformData(Date today, List<Date> pastDays) throws Exception {
@@ -232,24 +249,22 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     }
 
-    private void getPastIncrementalPaths(Date today, List<Date> pastDays, List<String> pastDaysPaths) throws Exception {
+    private void getPastIncrementalDays(Date today, List<Date> pastDays) throws Exception {
         try {
             String todayIncrementalPath = getHdfsDataflowIncrementalRawPathWithDate(today);
             if (!HdfsUtils.fileExists(yarnConfiguration, todayIncrementalPath)) {
-                log.info("There's no incremental data for today.");
+                log.info("There's no incremental data for date=" + today);
                 return;
             }
 
             String path = todayIncrementalPath;
             Date date = today;
             pastDays.add(date);
-            pastDaysPaths.add(path);
             for (int i = 0; i < numOfPastDays - 1; i++) {
                 date = DateUtils.addDays(date, -1);
                 path = getHdfsDataflowIncrementalRawPathWithDate(date);
                 if (HdfsUtils.fileExists(yarnConfiguration, getSuccessFile(path))) {
                     pastDays.add(date);
-                    pastDaysPaths.add(path);
                 }
             }
 
