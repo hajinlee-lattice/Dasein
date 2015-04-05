@@ -92,6 +92,7 @@ class WebHDFS(object):
             raise Exception("Only absolute paths supported: %s"%(source_path))
         url_path = WEBHDFS_CONTEXT_ROOT + source_path+'?op=OPEN&overwrite=true&user.name='+self.username
         logger.debug("GET URL: %s"%url_path)
+        logger.debug("Namenode: %s"%self.namenode_host)
         httpClient = self.__getNameNodeHTTPClient()
         httpClient.request('GET', url_path , headers={})
         response = httpClient.getresponse()
