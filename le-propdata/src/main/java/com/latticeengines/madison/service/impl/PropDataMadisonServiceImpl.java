@@ -120,7 +120,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
             dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
             propDataMadisonEntityMgr.executeUpdate(dailyProgress);
-            HdfsUtils.writeToFile(yarnConfiguration, getTableNameFromFile(targetDir), dailyProgress.getDestinationTable());
+            HdfsUtils.writeToFile(yarnConfiguration, getTableNameFromFile(targetDir),
+                    dailyProgress.getDestinationTable());
 
             response.setProperty(RESULT_KEY, dailyProgress);
             response.setProperty(STATUS_KEY, STATUS_OK);
@@ -317,15 +318,16 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         String connectionString = getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword);
-//        propDataJobService.eval("DROP TABLE" + tableName, assignedQueue,
-//                getJobName() + "-uploadRawData0", 1,
-//                connectionString);
+        // propDataJobService.eval("DROP TABLE" + tableName, assignedQueue,
+        // getJobName() + "-uploadRawData0", 1,
+        // connectionString);
         propDataJobService.eval("SELECT TOP 0 * INTO " + tableName + " FROM " + targetRawTable, assignedQueue,
-                getJobName() + "-uploadRawData1", 1,
-                connectionString);
-        log.info("Uploading today's data, targetTable="+  tableName + " connectionUrl=" + connectionString);
-        propDataJobService.exportData(tableName, todayIncrementalPath, assignedQueue, getJobName() + "-uploadRawData2",
-                numMappers, connectionString);
+                getJobName() + "-uploadRawDataCreateTable", 1, connectionString);
+        log.info("Uploading today's data, targetTable=" + tableName + " connectionUrl=" + connectionString);
+        propDataJobService.exportData(tableName, todayIncrementalPath, assignedQueue, getJobName()
+                + "-uploadRawDataExportData", numMappers, connectionString);
+        propDataJobService.eval("EXEC MadisonLogic_MergeDailyDepivoted " + tableName, assignedQueue, getJobName()
+                + "-uploadRawDataMergeTable", 1, connectionString);
         log.info("Finished uploading today's raw data=" + todayIncrementalPath);
 
     }

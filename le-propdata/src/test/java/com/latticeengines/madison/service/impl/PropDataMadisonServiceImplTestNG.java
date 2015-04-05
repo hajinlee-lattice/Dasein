@@ -51,7 +51,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     private String transformOutput1;
     private String transformOutput2;
 
-    @BeforeClass
+    @BeforeClass(groups = "functional")
     public void beforeClass() throws Exception {
         today = new Date();
         yesterday = DateUtils.addDays(today, -1);
@@ -75,7 +75,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         removeTransformHdfsDirs();
     }
 
-    @AfterClass
+    @AfterClass(groups = "functional")
     public void afterClass() throws Exception {
         if (dailyProgress1 != null) {
             propDataMadisonEntityMgr.delete(dailyProgress1);
@@ -88,7 +88,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
         removeImportHdfsDirs();
         removeTransformHdfsDirs();
-        
+
     }
 
     private void removeTransformHdfsDirs() throws Exception {
