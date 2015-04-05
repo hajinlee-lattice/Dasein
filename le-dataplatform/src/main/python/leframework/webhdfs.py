@@ -5,11 +5,11 @@ import os
 import urlparse
 
 
-logging.basicConfig(level = logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
-                    format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(name='webhdfs')
 
-WEBHDFS_CONTEXT_ROOT="/webhdfs/v1"
+WEBHDFS_CONTEXT_ROOT = "/webhdfs/v1"
 
 class WebHDFS(object):       
     """ Class for accessing HDFS via WebHDFS 
@@ -33,7 +33,7 @@ class WebHDFS(object):
     
     def mkdir(self, path):
         if os.path.isabs(path) == False:
-            raise Exception("Only absolute paths supported: %s"%(path))
+            raise Exception("Only absolute paths supported: %s" % (path))
         
         url_path = WEBHDFS_CONTEXT_ROOT + path + '?op=MKDIRS&user.name=' + self.username
         logger.debug("Create directory: " + url_path)
@@ -61,7 +61,7 @@ class WebHDFS(object):
         if os.path.isabs(target_path) == False:
             raise Exception("Only absolute paths supported: %s" % (target_path))
         
-        url_path = WEBHDFS_CONTEXT_ROOT +  target_path + '?op=CREATE&overwrite=true&user.name=' + self.username
+        url_path = WEBHDFS_CONTEXT_ROOT + target_path + '?op=CREATE&overwrite=true&user.name=' + self.username
         
         httpClient = self.__getNameNodeHTTPClient()
         httpClient.request('PUT', url_path , headers={})
@@ -72,7 +72,7 @@ class WebHDFS(object):
         logger.debug("HTTP Location: %s" % (redirect_location))
         result = urlparse.urlparse(redirect_location)
         redirect_host = result.netloc[:result.netloc.index(":")]
-        redirect_port = result.netloc[(result.netloc.index(":")+1):]
+        redirect_port = result.netloc[(result.netloc.index(":") + 1):]
         # Bug in WebHDFS 0.20.205 => requires param otherwise a NullPointerException is thrown
         redirect_path = result.path + "?" + result.query + "&replication=" + str(replication) 
             
@@ -89,30 +89,34 @@ class WebHDFS(object):
         
     def copyToLocal(self, source_path, target_path):
         if os.path.isabs(source_path) == False:
-            raise Exception("Only absolute paths supported: %s"%(source_path))
-        url_path = WEBHDFS_CONTEXT_ROOT + source_path+'?op=OPEN&overwrite=true&user.name='+self.username
-        logger.debug("GET URL: %s"%url_path)
-        logger.debug("Namenode: %s"%self.namenode_host)
+            raise Exception("Only absolute paths supported: %s" % (source_path))
+        url_path = WEBHDFS_CONTEXT_ROOT + source_path + '?op=OPEN&overwrite=true&user.name=' + self.username
+        logger.debug("GET URL: %s" % url_path)
+        logger.debug("Namenode: %s" % self.namenode_host)
         httpClient = self.__getNameNodeHTTPClient()
         httpClient.request('GET', url_path , headers={})
         response = httpClient.getresponse()
         logger.debug("HTTP Response: %d, %s" % (response.status, response.reason))
         # if file is empty GET returns a response with length == NONE and
         # no msg["location"]
-        if response.length != None:
+        if response.status == 200 and self.__isNameNodeHA():
+            target_file = open(target_path, "w")
+            target_file.write(response.read())
+            target_file.close()
+        elif response.length != None:
             msg = response.msg
             logger.debug("HTTP Response: %s" % (response.msg))
             redirect_location = msg["location"]
             logger.debug("HTTP Location: %s" % (redirect_location))
             result = urlparse.urlparse(redirect_location)
             redirect_host = result.netloc[:result.netloc.index(":")]
-            redirect_port = result.netloc[(result.netloc.index(":")+1):]
+            redirect_port = result.netloc[(result.netloc.index(":") + 1):]
             
             redirect_path = result.path + "?" + result.query  
                 
             logger.debug("Send redirect to: host: %s, port: %s, path: %s " % (redirect_host, redirect_port, redirect_path))
             fileDownloadClient = httplib.HTTPConnection(redirect_host, redirect_port, timeout=600)
-            fileDownloadClient.request('GET', redirect_path, headers={})
+            fileDownloadClient.request('GET', redirect_path, headers={"Content-Type":"application/octet-stream"})
             response = fileDownloadClient.getresponse()
             logger.debug("HTTP Response: %d, %s" % (response.status, response.reason))
             
@@ -133,16 +137,16 @@ class WebHDFS(object):
         if os.path.isabs(path) == False:
             raise Exception("Only absolute paths supported: %s" % (path))
         
-        url_path = WEBHDFS_CONTEXT_ROOT + path+'?op=LISTSTATUS&user.name='+self.username
+        url_path = WEBHDFS_CONTEXT_ROOT + path + '?op=LISTSTATUS&user.name=' + self.username
         logger.debug("List directory: " + url_path)
         httpClient = self.__getNameNodeHTTPClient()
         httpClient.request('GET', url_path , headers={})
         response = httpClient.getresponse()
-        logger.debug("HTTP Response: %d, %s"%(response.status, response.reason))
+        logger.debug("HTTP Response: %d, %s" % (response.status, response.reason))
         if response.status == 404: return []
         data_dict = json.loads(response.read())
         logger.debug("Data: " + str(data_dict))
-        files=[]        
+        files = []        
         for i in data_dict["FileStatuses"]["FileStatus"]:
             logger.debug(i["type"] + ": " + i["pathSuffix"]) 
             files.append(i["pathSuffix"])        
@@ -150,9 +154,10 @@ class WebHDFS(object):
         return files
     
     def __getNameNodeHTTPClient(self):
-        httpClient = httplib.HTTPConnection(self.namenode_host, 
-                                            self.namenode_port, 
+        httpClient = httplib.HTTPConnection(self.namenode_host,
+                                            self.namenode_port,
                                             timeout=600)
         return httpClient
     
-    
+    def __isNameNodeHA(self):
+        return self.namenode_port == 14000
