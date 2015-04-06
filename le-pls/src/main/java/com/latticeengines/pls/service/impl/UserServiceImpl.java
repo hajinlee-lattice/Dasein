@@ -101,6 +101,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public AccessLevel getAccessLevel(String tenantId, String username) {
         List<String> rights = globalUserManagementService.getRights(username, tenantId);
+        return getAccessLevel(rights);
+    }
+
+    @Override
+    public AccessLevel getAccessLevel(List<String> rights) {
         AccessLevel toReturn = null;
         for (String right : rights) {
             try {

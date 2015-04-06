@@ -139,6 +139,7 @@ public class GlobalSessionManagementServiceImpl
             Session s = new Session();
             s.setTenant(new TenantBuilder(session.getTenant()).build());
             s.setRights(decodeGlobalAuthRights(session.getRights().getValue().getString()));
+            s.setAccessLevel(decodeGlobalAuthAccessLevel(session.getRights().getValue().getString()));
             s.setDisplayName(session.getDisplayName().getValue());
             s.setEmailAddress(session.getEmailAddress().getValue());
             s.setIdentifier(session.getIdentifier().getValue());
@@ -190,5 +191,22 @@ public class GlobalSessionManagementServiceImpl
         }
 
         return decodedRights;
+    }
+
+    private static String decodeGlobalAuthAccessLevel(List<String> globalAuthRights) {
+        AccessLevel maxAccessLevel = null;
+
+        for (String right : globalAuthRights) {
+            try {
+                AccessLevel accessLevel = AccessLevel.valueOf(right);
+                if (maxAccessLevel == null || accessLevel.compareTo(maxAccessLevel) > 0) {
+                    maxAccessLevel = accessLevel;
+                }
+            } catch (IllegalArgumentException e) {
+                //ignore
+            }
+        }
+
+        return maxAccessLevel == null ? null : maxAccessLevel.name();
     }
 }

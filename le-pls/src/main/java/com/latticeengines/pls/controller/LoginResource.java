@@ -99,6 +99,7 @@ public class LoginResource {
             user.setLocale(session.getLocale());
             user.setTitle(session.getTitle());
             user.setAvailableRights(RightsUtilities.translateRights(session.getRights()));
+            user.setAccessLevel(session.getAccessLevel());
             result.setUser(user);
 
             doc.setResult(result);
