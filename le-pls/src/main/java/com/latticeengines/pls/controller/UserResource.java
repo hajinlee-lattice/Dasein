@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
@@ -310,6 +311,61 @@ public class UserResource {
         response.setResult(result);
         response.setSuccess(true);
         return response;
+    }
+
+    @RequestMapping(value = "/{username:.+}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete a user. The user must be in the tenant")
+    @PreAuthorize("hasRole('Edit_PLS_Users')")
+    public SimpleBooleanResponse deleteUser(@PathVariable String username, HttpServletRequest request) {
+        String tenantId;
+        AccessLevel loginLevel;
+        try {
+            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            Session session = globalSessionManagementService.retrieve(ticket);
+            Tenant tenant = session.getTenant();
+            tenantId = tenant.getId();
+            try {
+                loginLevel = AccessLevel.valueOf(session.getAccessLevel());
+            } catch (IllegalArgumentException e) {
+                loginLevel = null;
+            }
+        } catch (LedpException e) {
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
+            throw e;
+        }
+
+        if (inTenant(tenantId, username)) {
+            AccessLevel targetLevel = userService.getAccessLevel(tenantId, username);
+            if (loginLevel == null || targetLevel == null) {
+                return SimpleBooleanResponse.getFailResponse(
+                        Collections.singletonList(
+                                "Could not get the AccessLevel of both login user and the user to be deleted."));
+            }
+
+            if (loginLevel.compareTo(targetLevel) < 0) {
+                return SimpleBooleanResponse.getFailResponse(
+                        Collections.singletonList(
+                                String.format("Could not delete a %s user using a %s user.",
+                                        targetLevel.name(), loginLevel.name())));
+            }
+
+            if (userService.deleteUser(tenantId, username)) {
+                return SimpleBooleanResponse.getSuccessResponse();
+            } else {
+                return SimpleBooleanResponse.getFailResponse(
+                        Collections.singletonList(
+                                String.format("Could not delete the user %s from the non-related tenant %s",
+                                        username, tenantId)));
+            }
+        } else {
+            LOGGER.error(
+                    String.format("Trying to delete the user %s from the non-related tenant %s", username, tenantId));
+            return SimpleBooleanResponse.getFailResponse(
+                    Collections.singletonList("Could not delete a user that is not in the current tenant"));
+        }
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET, headers = "Accept=application/json")
