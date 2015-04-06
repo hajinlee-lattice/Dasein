@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.service.AlertService;
 
 @ControllerAdvice
+@SuppressWarnings("deprecation")
 public class PlsControllerExceptionHandler {
     private static final Log log = LogFactory.getLog(PlsControllerExceptionHandler.class);
     @Autowired

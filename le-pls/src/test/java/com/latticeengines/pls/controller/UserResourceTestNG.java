@@ -195,6 +195,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
             updateAccessLevelWithoutSufficientPrivilege(targetLevel);
     }
 
+    @SuppressWarnings("rawtypes")
     private void updateAccessLevelWithSufficientPrivilege(AccessLevel accessLevel) {
         User user = createTestUser(AccessLevel.EXTERNAL_USER);
 
@@ -291,6 +292,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         assertEquals(users.size(), expectedNumOfVisibleUsers);
     }
 
+    @SuppressWarnings("rawtypes")
     protected void testChangePassword(AccessLevel accessLevel) {
         User user = createTestUser(accessLevel);
         UserDocument doc = loginAndAttach(user.getUsername());
