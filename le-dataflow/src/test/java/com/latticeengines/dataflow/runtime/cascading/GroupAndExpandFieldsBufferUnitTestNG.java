@@ -28,7 +28,7 @@ public class GroupAndExpandFieldsBufferUnitTestNG {
         GroupAndExpandFieldsBuffer buffer = new GroupAndExpandFieldsBuffer(3, "Category", Arrays.asList(new String[] {
                 "ML_%s_Topic", "ML_%s_User" }), new Fields("DomainID", "ML_Category1_Topic",
                 "ML_Category1_User", "ML_Category2_Topic", "ML_Category2_User"));
-        BufferCall bufferCall = mock(BufferCall.class);
+        BufferCall<?> bufferCall = mock(BufferCall.class);
 
         Fields fields = new Fields("DomainID");
         Tuple tuple = new Tuple();

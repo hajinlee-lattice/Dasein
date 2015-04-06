@@ -40,6 +40,7 @@ public class GroupAndExpandFieldsBuffer extends BaseOperation implements Buffer 
         return positionMap;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void operate(FlowProcess flowProcess, BufferCall bufferCall) {
 
