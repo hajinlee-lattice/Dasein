@@ -15,6 +15,7 @@ public class Session {
     private String emailAddress;
     private String locale;
     private String title;
+    private String accessLevel;
 
     @JsonProperty("Tenant")
     public Tenant getTenant() {
@@ -94,6 +95,16 @@ public class Session {
     @JsonProperty("Title")
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    @JsonProperty("AccessLevel")
+    public String getAccessLevel() {
+        return accessLevel;
+    }
+
+    @JsonProperty("AccessLevel")
+    public void setAccessLevel(String accessLevel) {
+        this.accessLevel = accessLevel;
     }
 
     @Override

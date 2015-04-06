@@ -89,6 +89,7 @@ public class UserDocument {
             private String locale;
             private String title;
             private Map<String, EntityAccessRightsData> availableRights;
+            private String accessLevel;
 
             public User() {
 
@@ -142,6 +143,16 @@ public class UserDocument {
             @JsonProperty("Title")
             public void setTitle(String title) {
                 this.title = title;
+            }
+
+            @JsonProperty("AccessLevel")
+            public String getAccessLevel() {
+                return accessLevel;
+            }
+
+            @JsonProperty("AccessLevel")
+            public void setAccessLevel(String accessLevel) {
+                this.accessLevel = accessLevel;
             }
 
             public Map<String, EntityAccessRightsData> getAvailableRights() {
