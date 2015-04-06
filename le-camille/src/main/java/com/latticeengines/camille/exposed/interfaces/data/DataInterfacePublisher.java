@@ -1,8 +1,6 @@
 package com.latticeengines.camille.exposed.interfaces.data;
 
 import org.apache.zookeeper.ZooDefs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -11,9 +9,6 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
 public class DataInterfacePublisher extends DataInterfaceBase {
-    private static final Logger log = LoggerFactory.getLogger(new Object() {
-    }.getClass().getEnclosingClass());
-
     public DataInterfacePublisher(String interfaceName, CustomerSpace space) throws Exception {
         super(interfaceName, space);
     }
