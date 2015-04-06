@@ -5,6 +5,7 @@ if [ -f /etc/bashrc ]; then
         . /etc/bashrc
 fi
 
+ulimit -n 4096
 
 # User specific aliases and functions
 export JETTY_HOME=/opt/jetty
