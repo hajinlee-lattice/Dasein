@@ -3,14 +3,14 @@ package com.latticeengines.admin.tenant.batonadapter.globalauth;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.camille.exposed.config.bootstrap.Installer;
-import com.latticeengines.camille.exposed.config.bootstrap.Upgrader;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
 @Component("globalAuthComponent")
 public class GlobalAuthComponent extends LatticeComponent {
     
-    private Installer installer = new GlobalAuthInstaller();
-    private Upgrader upgrader = new GlobalAuthUpgrader();
+    private CustomerSpaceServiceInstaller installer = new GlobalAuthInstaller();
+    private CustomerSpaceServiceUpgrader upgrader = new GlobalAuthUpgrader();
 
     @Override
     public String getName() {
@@ -23,12 +23,12 @@ public class GlobalAuthComponent extends LatticeComponent {
     }
 
     @Override
-    public Installer getInstaller() {
+    public CustomerSpaceServiceInstaller getInstaller() {
         return installer;
     }
 
     @Override
-    public Upgrader getUpgrader() {
+    public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
     }
 

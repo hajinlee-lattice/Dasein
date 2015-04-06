@@ -1,14 +1,13 @@
 package com.latticeengines.admin.tenant.batonadapter.globalauth;
 
-import com.latticeengines.camille.exposed.config.bootstrap.Installer;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 
-public class GlobalAuthInstaller implements Installer {
+public class GlobalAuthInstaller implements CustomerSpaceServiceInstaller {
 
     @Override
-    public DocumentDirectory getInitialConfiguration(int arg0) {
-        // TODO Auto-generated method stub
+    public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion) {
         return null;
     }
-
 }

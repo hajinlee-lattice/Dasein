@@ -1,13 +1,14 @@
 package com.latticeengines.admin.tenant.batonadapter.dataloader;
 
-import com.latticeengines.camille.exposed.config.bootstrap.Installer;
-import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
-public class DataLoaderInstaller implements Installer {
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
+
+public class DataLoaderInstaller implements CustomerSpaceServiceInstaller {
 
     @Override
-    public DocumentDirectory getInitialConfiguration(int arg0) {
-        // TODO Auto-generated method stub
+    public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion) {
         return null;
     }
 

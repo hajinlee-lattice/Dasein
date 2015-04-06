@@ -1,12 +1,14 @@
 package com.latticeengines.admin.tenant.batonadapter.vdb;
 
-import com.latticeengines.camille.exposed.config.bootstrap.Upgrader;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
-public class VisiDBUpgrader implements Upgrader {
+public class VisiDBUpgrader implements CustomerSpaceServiceUpgrader {
 
     @Override
-    public DocumentDirectory upgradeConfiguration(int arg0, int arg1, DocumentDirectory arg2) {
+    public DocumentDirectory upgrade(CustomerSpace space, String serviceName, int sourceVersion, int targetVersion,
+            DocumentDirectory source) {
         return null;
     }
 

@@ -3,14 +3,14 @@ package com.latticeengines.admin.tenant.batonadapter.dataloader;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.camille.exposed.config.bootstrap.Installer;
-import com.latticeengines.camille.exposed.config.bootstrap.Upgrader;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
 @Component("dataLoaderComponent")
 public class DataLoaderComponent extends LatticeComponent {
     
-    private Installer installer = new DataLoaderInstaller();
-    private Upgrader upgrader = new DataLoaderUpgrader();
+    private CustomerSpaceServiceInstaller installer = new DataLoaderInstaller();
+    private CustomerSpaceServiceUpgrader upgrader = new DataLoaderUpgrader();
 
     @Override
     public String getName() {
@@ -23,12 +23,12 @@ public class DataLoaderComponent extends LatticeComponent {
     }
 
     @Override
-    public Installer getInstaller() {
+    public CustomerSpaceServiceInstaller getInstaller() {
         return installer;
     }
 
     @Override
-    public Upgrader getUpgrader() {
+    public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
     }
 

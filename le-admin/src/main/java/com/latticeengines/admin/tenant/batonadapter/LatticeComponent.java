@@ -3,8 +3,8 @@ package com.latticeengines.admin.tenant.batonadapter;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.camille.exposed.config.bootstrap.Installer;
-import com.latticeengines.camille.exposed.config.bootstrap.Upgrader;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
 public abstract class LatticeComponent implements HasName {
@@ -19,7 +19,7 @@ public abstract class LatticeComponent implements HasName {
         register(this);
     }
     
-    public abstract Installer getInstaller();
+    public abstract CustomerSpaceServiceInstaller getInstaller();
     
-    public abstract Upgrader getUpgrader();
+    public abstract CustomerSpaceServiceUpgrader getUpgrader();
 }
