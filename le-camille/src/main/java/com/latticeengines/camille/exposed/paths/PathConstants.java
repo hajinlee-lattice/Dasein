@@ -8,6 +8,7 @@ public final class PathConstants {
     public static final String TENANTS = "Tenants";
     public static final String SPACES = "Spaces";
     public static final String SERVICES = "Services";
+    public static final String QUEUES = "Queues";
 
     public static final String INVISIBLE_FILE_PREFIX = ".";
     public static final String PROPERTIES_FILE = ".properties.json";

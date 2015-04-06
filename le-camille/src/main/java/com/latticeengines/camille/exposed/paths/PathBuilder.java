@@ -73,4 +73,8 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId, PathConstants.INTERFACES, PathConstants.DATA, interfaceName,
                 contractId, tenantId, spaceId);
     }
+
+    public static Path buildMessageQueuePath(String podId, String queueName) {
+        return new Path(PathConstants.PODS, podId, PathConstants.INTERFACES, PathConstants.QUEUES, queueName);
+    }
 }
