@@ -40,7 +40,7 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
 
     protected User createTestUser(AccessLevel accessLevel) {
         User user = new User();
-        user.setEmail("test" + UUID.randomUUID().toString() + "@test.lattice.local");
+        user.setEmail("tester_" + accessLevel.name().toLowerCase() + "@test.lattice.local");
         user.setFirstName("Test");
         user.setLastName("Tester");
 
@@ -49,6 +49,8 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
         credentials.setPassword("WillBeModifiedImmediately");
 
         user.setUsername(credentials.getUsername());
+
+        userService.deleteUser(testTenant.getId(), credentials.getUsername());
 
         createUser(credentials.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName());
 
