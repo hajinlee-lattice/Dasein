@@ -1,6 +1,10 @@
 package com.latticeengines.baton.exposed.service;
 
+import java.util.AbstractMap;
+import java.util.List;
+
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 public interface BatonService {
 
@@ -9,4 +13,6 @@ public interface BatonService {
     void loadDirectory(String source, String destination);
 
     void bootstrap(String contractId, String tenantId, String spaceId);
+    
+    List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId);
 }

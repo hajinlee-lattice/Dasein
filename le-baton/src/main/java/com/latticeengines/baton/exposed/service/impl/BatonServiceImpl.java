@@ -1,6 +1,9 @@
 package com.latticeengines.baton.exposed.service.impl;
 
 import java.io.File;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -79,6 +82,19 @@ public class BatonServiceImpl implements BatonService {
     public void bootstrap(String contractId, String tenantId, String spaceId) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId) {
+        List<AbstractMap.SimpleEntry<String, TenantInfo>> tenants = new ArrayList<>();
+        try {
+            CamilleEnvironment.getCamille();
+            return TenantLifecycleManager.getAll(contractId);
+            
+        } catch (Exception e) {
+            log.error("Error retrieving tenants", e);
+        }
+        return tenants;
     }
 
 }
