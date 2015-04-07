@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.camille.lifecycle;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class TenantProperties {
     public TenantProperties(String displayName, String description) {
         this.displayName = displayName;
@@ -10,6 +12,9 @@ public class TenantProperties {
     public TenantProperties() {
     }
 
+    @JsonProperty("DisplayName")
     public String displayName;
+    
+    @JsonProperty("Description")
     public String description;
 }
