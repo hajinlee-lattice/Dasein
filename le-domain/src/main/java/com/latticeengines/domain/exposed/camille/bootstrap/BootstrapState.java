@@ -2,8 +2,8 @@ package com.latticeengines.domain.exposed.camille.bootstrap;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.VersionedDocument;
 
 /**
@@ -72,8 +72,7 @@ public class BootstrapState extends VersionedDocument {
 
     @Override
     public String toString() {
-        // Don't include base class version field - no nice way to do this.
-        return ToStringBuilder.reflectionToString(this, null, false, getClass());
+        return JsonUtils.serialize(this);
     }
 
     /**
