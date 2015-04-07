@@ -133,22 +133,12 @@ public class InternalResource extends InternalResourceBase {
                     = globalUserManagementService.getAllUsersOfTenant(tid);
                 for (Map.Entry<User, List<String>> userRight: userRightsList) {
                     User user = userRight.getKey();
-                    boolean isAdmin = RightsUtilities.isAdmin(
-                        RightsUtilities.translateRights(userRight.getValue())
-                    );
-                    if ((!isAdmin) && user.getUsername().matches(decodedNamePattern)) {
-                        userService.softDelete(tid, user.getUsername());
+                    if (user.getUsername().matches(decodedNamePattern)) {
+                        userService.deleteUser(tid, user.getUsername());
                         LOGGER.info(String.format(
-                            "User %s has been soft deleted from the tenant %s through internal API",
+                            "User %s has been deleted from the tenant %s through internal API",
                             user.getUsername(), tid
                         ));
-                        if (globalUserManagementService.isRedundant(user.getUsername())) {
-                            globalUserManagementService.deleteUser(user.getUsername());
-                            LOGGER.info(String.format(
-                                "User %s has been hard deleted through internal API",
-                                user.getUsername()
-                            ));
-                        }
                     }
                 }
             }
