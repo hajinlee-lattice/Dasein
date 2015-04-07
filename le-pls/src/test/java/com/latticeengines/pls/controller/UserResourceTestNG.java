@@ -204,7 +204,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     private void testRegisterUserSuccess(AccessLevel accessLevel) {
         UserRegistration userReg = createUserRegistration();
-        userReg.setAccessLevel(accessLevel.name());
+        userReg.getUser().setAccessLevel(accessLevel.name());
         makeSureUserNoExists(userReg.getCredentials().getUsername());
 
         String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
@@ -229,7 +229,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     private void testRegisterUserFail(AccessLevel accessLevel) {
         UserRegistration userReg = createUserRegistration();
-        userReg.setAccessLevel(accessLevel.name());
+        userReg.getUser().setAccessLevel(accessLevel.name());
         makeSureUserNoExists(userReg.getCredentials().getUsername());
 
         boolean exception = false;
@@ -358,12 +358,19 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
 
         String url = getRestAPIHostPort() + "/pls/users/" + user.getUsername() + "/creds";
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
-        assertFalse(response.getBody().isSuccess());
+
+        boolean exception = false;
+        try {
+            restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+        } catch (HttpClientErrorException e) {
+            exception = true;
+            assertEquals(e.getStatusCode().value(), 401);
+        }
+        assertTrue(exception);
 
         data.setOldPassword(DigestUtils.sha256Hex(generalPassword));
         requestEntity = new HttpEntity<>(data.toString(), headers);
-        response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
+        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
         assertEquals(response.getStatusCode().value(), 200);
         assertTrue(response.getBody().isSuccess());
 

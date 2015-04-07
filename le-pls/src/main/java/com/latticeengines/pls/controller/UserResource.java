@@ -136,8 +136,8 @@ public class UserResource {
         if (tenantId != null) {
             Credentials creds = userReg.getCredentials();
             AccessLevel targetLevel = AccessLevel.EXTERNAL_USER;
-            if (userReg.getAccessLevel() != null) {
-                targetLevel = AccessLevel.valueOf(userReg.getAccessLevel());
+            if (userReg.getUser().getAccessLevel() != null) {
+                targetLevel = AccessLevel.valueOf(userReg.getUser().getAccessLevel());
             }
 
             if (!userService.isVisible(loginLevel, targetLevel)) {
