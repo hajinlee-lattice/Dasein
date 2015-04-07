@@ -1,17 +1,17 @@
-package com.latticeengines.admin.tenant.batonadapter.dataloader;
+package com.latticeengines.admin.tenant.batonadapter.pls;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
-public class DataLoaderComponent extends LatticeComponent {
+public class PLSComponent extends LatticeComponent {
     
-    private CustomerSpaceServiceInstaller installer = new DataLoaderInstaller();
-    private CustomerSpaceServiceUpgrader upgrader = new DataLoaderUpgrader();
-    
+    private CustomerSpaceServiceInstaller installer = new PLSInstaller();
+    private CustomerSpaceServiceUpgrader upgrader = new PLSUpgrader();
+
     @Override
     public String getName() {
-        return "DataLoader";
+        return "PLS";
     }
 
     @Override

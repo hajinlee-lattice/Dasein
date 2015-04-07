@@ -2,19 +2,33 @@ package com.latticeengines.admin.service.impl;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 @Component("tenantService")
 public class TenantServiceImpl implements TenantService {
-    
+
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
+
+    public TenantServiceImpl() {
+        Map<String, LatticeComponent> components = LatticeComponent.getRegisteredServices();
+
+        for (Map.Entry<String, LatticeComponent> entry : components.entrySet()) {
+            CustomerSpaceServiceBootstrapManager.register(entry.getKey(), //
+                    entry.getValue().getInstaller(), //
+                    entry.getValue().getUpgrader());
+        }
+    }
 
     @Override
     public List<SimpleEntry<String, TenantInfo>> getTenants(String contractId) {
@@ -24,6 +38,11 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public Boolean deleteTenant(String contractId, String tenantId) {
         return tenantEntityMgr.deleteTenant(contractId, tenantId);
+    }
+
+    @Override
+    public Set<String> getRegisteredServices() {
+        return LatticeComponent.getRegisteredServices().keySet();
     }
 
 }

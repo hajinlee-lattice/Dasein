@@ -6,22 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
-import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 
 public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
     
-    @BeforeClass(groups = "functional")
-    public void setup() throws Exception {
-        if (ContractLifecycleManager.exists("CONTRACT1")) {
-            ContractLifecycleManager.delete("CONTRACT1");
-        }
-        super.createTenant();
-    }
-
     @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void getTenantsWithContractId() {

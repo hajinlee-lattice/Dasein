@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -50,4 +52,19 @@ public class TenantResource {
         return tenantService.deleteTenant(contractId, tenantId);
     }
     
+    @RequestMapping(value = "/{tenantId}/services/{serviceId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get config for currently provisioned tenant service")
+    public DocumentDirectory getServiceConfig(@RequestParam(value = "contractId") String contractId, //
+            @PathVariable String tenantId, @PathVariable String serviceId) {
+        return null;
+    }
+    
+    @RequestMapping(value = "/{tenantId}/services/{serviceId}/state", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get state for tenant service")
+    public JsonNode getServiceState(@RequestParam(value = "contractId") String contractId, //
+            @PathVariable String tenantId, @PathVariable String serviceId) {
+        return null;
+    }
 }
