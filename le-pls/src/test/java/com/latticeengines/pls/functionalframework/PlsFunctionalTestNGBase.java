@@ -298,6 +298,8 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
      * @throws Exception
      */
     protected void setupDbUsingAdminTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries) throws Exception {
+        setupUsers();
+
         Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
         String tenant1Name = useTenant1 ? ticket.getTenants().get(0).getId() : null;
         String tenant2Name = useTenant2 ? ticket.getTenants().get(1).getId() : null;
