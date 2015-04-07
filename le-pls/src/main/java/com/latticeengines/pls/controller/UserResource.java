@@ -196,14 +196,16 @@ public class UserResource {
             newCreds.setPassword(newPassword);
 
             try {
-                if (globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds)) {
-                    LOGGER.info(String.format("%s changed his/her password", user.getUsername()));
-                    return SimpleBooleanResponse.getSuccessResponse();
-                }
+                globalAuthenticationService.authenticateUser(user.getUsername(), oldPassword);
             } catch (LedpException e) {
                 if (e.getCode() == LedpCode.LEDP_18001) {
                     throw new LoginException(e);
                 }
+            }
+
+            if (globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds)) {
+                LOGGER.info(String.format("%s changed his/her password", user.getUsername()));
+                return SimpleBooleanResponse.getSuccessResponse();
             }
         }
         return SimpleBooleanResponse.getFailResponse(Collections.singletonList("Could not change password."));

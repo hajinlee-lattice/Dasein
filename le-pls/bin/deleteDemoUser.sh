@@ -27,4 +27,4 @@ if __name__ == "__main__":
  
     params = options.__dict__
     ud = UserDeployer(params["hostPortWithProtocol"], params["tenant"], params["user"])
-    ud.createUser()
+    ud.deleteUser()

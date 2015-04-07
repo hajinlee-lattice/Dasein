@@ -98,7 +98,6 @@ angular.module('mainApp.login.services.LoginService', [
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
-            SessionService.HandleResponseErrors(data, status);
             var result = { Success: false, Error: data };
             deferred.resolve(result);
         });
@@ -164,13 +163,11 @@ angular.module('mainApp.login.services.LoginService', [
 
             if (!data.Success) {
                 result.Success = false;
-                SessionService.HandleResponseErrors(data, status);
             }
 
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
-            SessionService.HandleResponseErrors(data, status);
             var result = {
                     Success:    false,
                     Status:     status
