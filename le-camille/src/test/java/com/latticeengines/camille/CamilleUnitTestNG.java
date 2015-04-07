@@ -120,7 +120,6 @@ public class CamilleUnitTestNG {
         Assert.assertFalse(c.exists(path));
     }
 
-    @SuppressWarnings("unchecked")
     @Test(groups = "unit")
     public void testGetChildren() throws Exception {
         Camille c = CamilleEnvironment.getCamille();
