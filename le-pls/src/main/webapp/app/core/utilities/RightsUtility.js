@@ -29,11 +29,6 @@ app.service('RightsUtility', function (_, BrowserStorageUtility) {
         return this.may(clientSession.availableRights, operation, category);
     };
 
-    this.getClientAccessLevel = function() {
-        var level = BrowserStorageUtility.getClientSession().AccessLevel;
-        return this.getAccessLevel(level);
-    };
-
     this.mayChangeModelNames = function() { return this.currentUserMay("Edit", "Models"); };
     this.mayDeleteModels = function() { return this.currentUserMay("Edit", "Models"); };
     this.mayUploadModelJson = function() { return this.currentUserMay("Create", "Models"); };

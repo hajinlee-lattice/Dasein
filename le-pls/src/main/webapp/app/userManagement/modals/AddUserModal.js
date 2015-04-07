@@ -33,19 +33,17 @@ app.service('AddUserModal', function ($compile, $rootScope, $http) {
     };
 });
 
-app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility,
-                                              BrowserStorageUtility, StringUtility, PasswordUtility,
-                                              GriotNavUtility, RightsUtility, UserManagementService) {
+app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, GriotNavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.showAccessLevelSelection = false;
 
-    var currentLevel = RightsUtility.getClientAccessLevel();
+    var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
     if (currentLevel && currentLevel.ordinal > 1) {
         $scope.levelsToSelect = [
-            RightsUtility.accessLevel.EXTERNAL_USER.name,
-            RightsUtility.accessLevel.EXTERNAL_ADMIN.name,
-            RightsUtility.accessLevel.INTERNAL_ADMIN.name,
-            RightsUtility.accessLevel.SUPER_ADMIN.name
+            ResourceUtility.getString(RightsUtility.accessLevel.EXTERNAL_USER.name),
+            ResourceUtility.getString(RightsUtility.accessLevel.EXTERNAL_ADMIN.name),
+            ResourceUtility.getString(RightsUtility.accessLevel.INTERNAL_ADMIN.name),
+            ResourceUtility.getString(RightsUtility.accessLevel.SUPER_ADMIN.name)
         ];
         $scope.showAccessLevelSelection = true;
     }
