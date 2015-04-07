@@ -1,5 +1,6 @@
 package com.latticeengines.camille.lifecycle;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -7,7 +8,6 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -76,9 +76,9 @@ public class PodLifecycleManagerUnitTestNG {
             PodLifecycleManager.create(podId, podInfo);
         }
 
-        List<Pair<String, PodInfo>> all = PodLifecycleManager.getAll();
+        List<AbstractMap.SimpleEntry<String, PodInfo>> all = PodLifecycleManager.getAll();
         List<String> allPods = new ArrayList<String>();
-        for (Pair<String, PodInfo> pair : all) {
+        for (AbstractMap.SimpleEntry<String, PodInfo> pair : all) {
             allPods.add(pair.getKey());
         }
         Assert.assertTrue(allPods.containsAll(in));

@@ -4,8 +4,6 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -81,14 +79,14 @@ public class PodLifecycleManager {
         return podInfo;
     }
 
-    public static List<Pair<String, PodInfo>> getAll() throws IllegalArgumentException, Exception {
-        List<Pair<String, PodInfo>> toReturn = new ArrayList<Pair<String, PodInfo>>();
+    public static List<AbstractMap.SimpleEntry<String, PodInfo>> getAll() throws IllegalArgumentException, Exception {
+        List<AbstractMap.SimpleEntry<String, PodInfo>> toReturn = new ArrayList<>();
 
         Camille c = CamilleEnvironment.getCamille();
         List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder.buildPodsPath());
 
         for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
-            toReturn.add(new MutablePair<String, PodInfo>(childPair.getValue().getSuffix(), getInfo(childPair
+            toReturn.add(new AbstractMap.SimpleEntry<String, PodInfo>(childPair.getValue().getSuffix(), getInfo(childPair
                     .getValue().getSuffix())));
         }
 

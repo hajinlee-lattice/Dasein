@@ -10,9 +10,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang.StringUtils;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -122,6 +120,7 @@ public class CamilleUnitTestNG {
         Assert.assertFalse(c.exists(path));
     }
 
+    @SuppressWarnings("unchecked")
     @Test(groups = "unit")
     public void testGetChildren() throws Exception {
         Camille c = CamilleEnvironment.getCamille();
@@ -141,13 +140,13 @@ public class CamilleUnitTestNG {
         c.create(childPath1, childDoc1, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         Assert.assertTrue(c.exists(childPath1));
 
-        Set<Pair<String, String>> actualChildren = new HashSet<Pair<String, String>>();
+        Set<AbstractMap.SimpleEntry<String, String>> actualChildren = new HashSet<>();
         for (AbstractMap.SimpleEntry<Document, Path> childPair : c.getChildren(parentPath)) {
-            actualChildren.add(MutablePair.of(childPair.getKey().getData(), childPair.getValue().toString()));
+            actualChildren.add(new AbstractMap.SimpleEntry<String, String>(childPair.getKey().getData(), childPair.getValue().toString()));
         }
 
-        Assert.assertTrue(actualChildren.contains(MutablePair.of(childDoc0.getData(), childPath0.toString())));
-        Assert.assertTrue(actualChildren.contains(MutablePair.of(childDoc1.getData(), childPath1.toString())));
+        Assert.assertTrue(actualChildren.contains(new AbstractMap.SimpleEntry<String, String>(childDoc0.getData(), childPath0.toString())));
+        Assert.assertTrue(actualChildren.contains(new AbstractMap.SimpleEntry<String, String>(childDoc1.getData(), childPath1.toString())));
     }
 
     @Test(groups = "unit")

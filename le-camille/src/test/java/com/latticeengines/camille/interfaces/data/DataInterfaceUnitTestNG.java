@@ -1,8 +1,8 @@
 package com.latticeengines.camille.interfaces.data;
 
+import java.util.AbstractMap;
 import java.util.Arrays;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -68,7 +68,8 @@ public class DataInterfaceUnitTestNG {
         pub.publish(relativePath2, doc2);
 
         Assert.assertTrue(sub.getChildren(new Path("/" + relativePath)).containsAll(
-                Arrays.asList(Pair.of(doc1, relativePath1), Pair.of(doc2, relativePath2))));
+                Arrays.asList(new AbstractMap.SimpleEntry<Document, Path>(doc1, relativePath1), //
+                        new AbstractMap.SimpleEntry<Document, Path>(doc2, relativePath2))));
     }
 
     @Test(groups = "unit")
@@ -87,7 +88,8 @@ public class DataInterfaceUnitTestNG {
         pub.publish(doc2path, doc2);
 
         Assert.assertTrue(sub.getChildren(new Path("/")).containsAll(
-                Arrays.asList(Pair.of(doc1, doc1path), Pair.of(doc2, doc2path))));
+                Arrays.asList(new AbstractMap.SimpleEntry<Document, Path>(doc1, doc1path), //
+                        new AbstractMap.SimpleEntry<Document, Path>(doc2, doc2path))));
     }
 
 }

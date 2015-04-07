@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
@@ -44,7 +44,7 @@ public class FileSystemGetChildrenFunction implements Function<Path, List<Map.En
                 throw e;
             }
             fileSystemDirectoryOfRootPathStr = fileSystemDirectoryOfRootPath.getAbsolutePath().toString();
-            while (StringUtils.endsWithAny(this.fileSystemDirectoryOfRootPathStr, "\\", "/"))
+            while (StringUtils.endsWithAny(this.fileSystemDirectoryOfRootPathStr, new String[] { "\\", "/" }))
                 fileSystemDirectoryOfRootPathStr = StringUtils.chop(fileSystemDirectoryOfRootPathStr);
             break;
         }
@@ -85,7 +85,7 @@ public class FileSystemGetChildrenFunction implements Function<Path, List<Map.En
                     continue;
                 }
             }
-            out.add(Pair.of(doc, childPath));
+            out.add(new AbstractMap.SimpleEntry<Document, Path>(doc, childPath));
         }
         return out;
     }
