@@ -386,6 +386,11 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
         }
 
+        if (numOfTestingTenants < 2) {
+            ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
+            numOfTestingTenants = 2;
+        }
+
         // testing admin user
         User user = globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com");
         if (user == null || !user.getUsername().equals(adminUsername)) {
