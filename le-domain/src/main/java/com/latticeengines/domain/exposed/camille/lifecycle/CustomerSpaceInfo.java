@@ -5,6 +5,9 @@ public class CustomerSpaceInfo {
         this.properties = properties;
         this.featureFlags = featureFlags;
     }
+    
+    public CustomerSpaceInfo() {
+    }
 
     public CustomerSpaceProperties properties;
     public String featureFlags;
