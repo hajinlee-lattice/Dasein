@@ -20,6 +20,8 @@ public class SkaldBootstrapper implements CustomerSpaceServiceInstaller, Custome
 
     @Override
     public DocumentDirectory install(CustomerSpace space, String service, int dataVersion) {
+        // TODO Probably worth installing empty defaults for necessary files.
+
         return new DocumentDirectory();
     }
 }

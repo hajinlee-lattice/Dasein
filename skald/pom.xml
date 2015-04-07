@@ -76,6 +76,7 @@
 									<goal>upload-source-bundle</goal>
 									<goal>create-application-version</goal>
 									<goal>update-environment</goal>
+									<goal>wait-for-environment</goal>
 								</goals>
 								<configuration>
 									<beanstalk.versionLabel>${maven.build.timestamp}</beanstalk.versionLabel>
