@@ -4,7 +4,6 @@ import java.util.AbstractMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,10 +31,10 @@ public class TenantResource {
        
     }
     
-    @RequestMapping(value = "/{contractId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenants for a particular contract id")
-    public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(@PathVariable String contractId) {
+    public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(@RequestParam(value = "contractId") String contractId) {
         return tenantEntityMgr.getTenants(contractId);
     }
 }

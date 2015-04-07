@@ -28,7 +28,7 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         // Deserialization of List<AbstractMap.Entry> is strange from the testing perspective
         // In practice, only JS will be accessing this REST endpoint, so will let JS figure out how to best
         // handle this deserialization
-        String url = getRestHostPort() + "/admin/tenants/CONTRACT1";
+        String url = getRestHostPort() + "/admin/tenants?contractId=CONTRACT1";
         List<Map<String, Object>> tenants = restTemplate.getForObject(url, List.class, new HashMap<>());
         
         assertEquals(tenants.size(), 1);
