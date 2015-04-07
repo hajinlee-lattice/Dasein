@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 @Component("tenantEntityMgr")
@@ -16,6 +19,14 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
     @Autowired
     private BatonService batonService;
     
+    @Override
+    public Boolean createTenant(String contractId, String tenantId, CustomerSpaceInfo customerSpaceInfo) {
+        return batonService.createTenant(contractId, //
+                tenantId, //
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, //
+                customerSpaceInfo);
+    }
+
     public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId) {
         return batonService.getTenants(contractId);
     }
@@ -24,4 +35,10 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
     public Boolean deleteTenant(String contractId, String tenantId) {
         return batonService.deleteTenant(contractId, tenantId);
     }
+
+    @Override
+    public BootstrapState getTenantServiceState(String contractId, String tenantId, String serviceName) {
+        return batonService.getTenantServiceBootstrapState(contractId, tenantId, serviceName);
+    }
+
 }

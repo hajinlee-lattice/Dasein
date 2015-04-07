@@ -12,6 +12,8 @@ import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 @Component("tenantService")
@@ -31,6 +33,11 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    public Boolean createTenant(String contractId, String tenantId, CustomerSpaceInfo customerSpaceInfo) {
+        return tenantEntityMgr.createTenant(contractId, tenantId, customerSpaceInfo);
+    }
+
+    @Override
     public List<SimpleEntry<String, TenantInfo>> getTenants(String contractId) {
         return tenantEntityMgr.getTenants(contractId);
     }
@@ -43,6 +50,11 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public Set<String> getRegisteredServices() {
         return LatticeComponent.getRegisteredServices().keySet();
+    }
+
+    @Override
+    public BootstrapState getTenantServiceState(String contractId, String tenantId, String serviceName) {
+        return tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
     }
 
 }

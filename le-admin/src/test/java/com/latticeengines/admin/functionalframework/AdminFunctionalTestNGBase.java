@@ -1,5 +1,7 @@
 package com.latticeengines.admin.functionalframework;
 
+import static org.testng.Assert.assertTrue;
+
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
@@ -22,6 +24,7 @@ import org.testng.annotations.BeforeClass;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
@@ -71,9 +74,11 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         props.description = "Test tenant";
         props.displayName = "Tenant for testing";
         CustomerSpaceInfo info = new CustomerSpaceInfo(props, "");
-        
+        System.out.println(JsonUtils.serialize(info));
         log.info(String.format("Creating tenant %s.%s in %s.", "CONTRACT1", "TENANT1", CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID));
-        batonService.createTenant("CONTRACT1", "TENANT1", CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, info);
+        String url = getRestHostPort() + "/admin/tenants/TENANT1?contractId=CONTRACT1";
+        Boolean created = restTemplate.postForObject(url, info, Boolean.class);
+        assertTrue(created);
     }
     
     public static class MagicAuthenticationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {

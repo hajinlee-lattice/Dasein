@@ -6,15 +6,17 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -30,9 +32,11 @@ public class TenantResource {
     
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Bootstrap a Lattice tenant")
-    public void bootstrap(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
-       
+    @ApiOperation(value = "Create a Lattice tenant")
+    public Boolean createTenant(@PathVariable String tenantId, //
+            @RequestParam(value = "contractId") String contractId, //
+            @RequestBody CustomerSpaceInfo info) {
+        return tenantService.createTenant(contractId, tenantId, info);
     }
     
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -60,11 +64,11 @@ public class TenantResource {
         return null;
     }
     
-    @RequestMapping(value = "/{tenantId}/services/{serviceId}/state", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantId}/services/{serviceName}/state", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get state for tenant service")
-    public JsonNode getServiceState(@RequestParam(value = "contractId") String contractId, //
-            @PathVariable String tenantId, @PathVariable String serviceId) {
-        return null;
+    public BootstrapState getServiceState(@RequestParam(value = "contractId") String contractId, //
+            @PathVariable String tenantId, @PathVariable String serviceName) {
+        return tenantService.getTenantServiceState(contractId, tenantId, serviceName);
     }
 }

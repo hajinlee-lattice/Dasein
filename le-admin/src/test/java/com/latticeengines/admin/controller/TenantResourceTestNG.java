@@ -1,6 +1,7 @@
 package com.latticeengines.admin.controller;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Map;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
     
@@ -34,4 +36,13 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         Map<String, Object> map = tenants.get(0);
         assertEquals((String) map.get("key"), "TENANT1");
     }
+    
+    @Test(groups = "functional")
+    public void getServiceState() {
+        String url = getRestHostPort() + "/admin/tenants/TENANT1/services/TestComponent/state?contractId=CONTRACT1";
+        BootstrapState state = restTemplate.getForObject(url, BootstrapState.class, new HashMap<>());
+        assertNotNull(state);
+        assertEquals(state.state, BootstrapState.State.OK);
+    }
+    
 }
