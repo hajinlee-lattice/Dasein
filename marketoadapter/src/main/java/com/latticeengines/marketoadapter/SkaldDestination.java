@@ -15,8 +15,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 public class SkaldDestination implements RecordDestination {
     @Override
     public String receiveRecord(CustomerSpace customerSpace, Map<String, Object> record) {
-        String skaldConnectionString = properties.getSkaldAddress() + "/ScoreRecord";
-        Map<String, Object> dataToSend = new HashMap<String, Object>();
+        String target = "http://" + properties.getSkaldAddress() + "/ScoreRecord";
+        Map<String, Object> data = new HashMap<String, Object>();
 
         if (!record.containsKey(combinationKeyField)) {
             log.error(combinationKeyField + " field was not present in the request for customer : "
@@ -26,12 +26,12 @@ public class SkaldDestination implements RecordDestination {
         String combinationName = (String) record.get(combinationKeyField);
         record.remove(combinationKeyField);
 
-        dataToSend.put("record", record);
-        dataToSend.put("space", customerSpace);
-        dataToSend.put("combination", combinationName);
+        data.put("record", record);
+        data.put("space", customerSpace);
+        data.put("combination", combinationName);
 
         try {
-            return HttpWithRetryUtils.executePostRequest(skaldConnectionString, dataToSend, null);
+            return HttpWithRetryUtils.executePostRequest(target, data, null);
         } catch (Exception ex) {
             throw new RuntimeException("Error connecting to Skald", ex);
         }
