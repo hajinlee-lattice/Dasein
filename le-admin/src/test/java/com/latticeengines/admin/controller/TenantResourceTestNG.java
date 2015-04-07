@@ -10,14 +10,14 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
-import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
+import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 
 public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        if (TenantLifecycleManager.exists("CONTRACT1", "TENANT1")) {
-            TenantLifecycleManager.delete("CONTRACT1", "TENANT1");
+        if (ContractLifecycleManager.exists("CONTRACT1")) {
+            ContractLifecycleManager.delete("CONTRACT1");
         }
         super.createTenant();
     }
@@ -42,7 +42,6 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         // handle this deserialization
         assertEquals(tenants.size(), 1);
         Map<String, Object> map = tenants.get(0);
-        
         assertEquals((String) map.get("key"), "TENANT1");
     }
 }

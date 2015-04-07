@@ -19,4 +19,9 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
     public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId) {
         return batonService.getTenants(contractId);
     }
+
+    @Override
+    public Boolean deleteTenant(String contractId, String tenantId) {
+        return batonService.deleteTenant(contractId, tenantId);
+    }
 }
