@@ -8,13 +8,15 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HttpWithRetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 @Service
 public class SkaldDestination implements RecordDestination {
     @Override
-    public String receiveRecord(CustomerSpace customerSpace, Map<String, Object> record) {
+    public Map<String, Object> receiveRecord(CustomerSpace customerSpace, Map<String, Object> record) {
         String target = "http://" + properties.getSkaldAddress() + "/ScoreRecord";
         Map<String, Object> data = new HashMap<String, Object>();
 
@@ -31,7 +33,12 @@ public class SkaldDestination implements RecordDestination {
         data.put("combination", combinationName);
 
         try {
-            return HttpWithRetryUtils.executePostRequest(target, data, null);
+            String response = HttpWithRetryUtils.executePostRequest(target, data, null);
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> result = mapper.readValue(response, new TypeReference<Map<String, Object>>() {
+            });
+
+            return result;
         } catch (Exception ex) {
             throw new RuntimeException("Error connecting to Skald", ex);
         }

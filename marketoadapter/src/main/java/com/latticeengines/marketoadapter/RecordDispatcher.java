@@ -22,7 +22,7 @@ public class RecordDispatcher {
         destinations.put("Skald", skaldDestination);
     }
 
-    public String receiveRecord(String key, Map<String, Object> record) {
+    public Map<String, Object> receiveRecord(String key, Map<String, Object> record) {
         // TODO: Add a caching layer for the key definitions file.
         KeyDefinitions definitions;
         try {

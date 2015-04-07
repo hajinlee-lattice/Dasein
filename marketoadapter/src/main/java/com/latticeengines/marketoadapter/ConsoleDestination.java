@@ -1,5 +1,6 @@
 package com.latticeengines.marketoadapter;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -9,7 +10,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 @Service
 public class ConsoleDestination implements RecordDestination {
     @Override
-    public String receiveRecord(CustomerSpace customerSpace, Map<String, Object> record) {
+    public Map<String, Object> receiveRecord(CustomerSpace customerSpace, Map<String, Object> record) {
         System.out.println("");
         System.out.println("Received record for customer: " + customerSpace.toString());
 
@@ -19,6 +20,8 @@ public class ConsoleDestination implements RecordDestination {
 
         System.out.println("");
 
-        return "Victory!";
+        Map<String, Object> result = new HashMap<String, Object>();
+        result.put("Test", "Victory!");
+        return result;
     }
 }

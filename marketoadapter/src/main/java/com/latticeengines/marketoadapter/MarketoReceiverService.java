@@ -14,7 +14,7 @@ import com.latticeengines.common.exposed.rest.DetailedErrors;
 @DetailedErrors
 public class MarketoReceiverService {
     @RequestMapping(value = "MarketoReceiver", method = RequestMethod.POST)
-    public String receiveRecord(@RequestBody Map<String, Object> data) {
+    public Map<String, Object> receiveRecord(@RequestBody Map<String, Object> data) {
         if (!data.containsKey(keyField)) {
             throw new RuntimeException(keyField + " field was not present in the request");
         }
@@ -33,7 +33,7 @@ public class MarketoReceiverService {
 
         String key = (String) data.get(keyField);
         data.remove(keyField);
-        String result = dispatcher.receiveRecord(key, data);
+        Map<String, Object> result = dispatcher.receiveRecord(key, data);
 
         return result;
     }
