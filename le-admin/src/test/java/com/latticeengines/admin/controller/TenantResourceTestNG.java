@@ -24,13 +24,22 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
 
     @SuppressWarnings("unchecked")
     @Test(groups = "functional")
-    public void getTenants() {
+    public void getTenantsWithContractId() {
+        String url = getRestHostPort() + "/admin/tenants?contractId=CONTRACT1";
+        assertSingleTenant(restTemplate.getForObject(url, List.class, new HashMap<>()));
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Test(groups = "functional")
+    public void getTenantsWithNoContractId() {
+        String url = getRestHostPort() + "/admin/tenants?contractId=";
+        assertSingleTenant(restTemplate.getForObject(url, List.class, new HashMap<>()));
+    }
+    
+    private void assertSingleTenant(List<Map<String, Object>> tenants) {
         // Deserialization of List<AbstractMap.Entry> is strange from the testing perspective
         // In practice, only JS will be accessing this REST endpoint, so will let JS figure out how to best
         // handle this deserialization
-        String url = getRestHostPort() + "/admin/tenants?contractId=CONTRACT1";
-        List<Map<String, Object>> tenants = restTemplate.getForObject(url, List.class, new HashMap<>());
-        
         assertEquals(tenants.size(), 1);
         Map<String, Object> map = tenants.get(0);
         

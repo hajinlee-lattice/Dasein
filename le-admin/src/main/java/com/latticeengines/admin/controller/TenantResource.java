@@ -3,6 +3,7 @@ package com.latticeengines.admin.controller;
 import java.util.AbstractMap;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -35,6 +36,9 @@ public class TenantResource {
     @ResponseBody
     @ApiOperation(value = "Get tenants for a particular contract id")
     public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(@RequestParam(value = "contractId") String contractId) {
+        if (StringUtils.isEmpty(contractId)) {
+            contractId = null;
+        }
         return tenantEntityMgr.getTenants(contractId);
     }
 }
