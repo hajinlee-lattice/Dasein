@@ -45,7 +45,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
             $event.stopPropagation();
         }
         
-        if ($scope.mayEditModels) {
+        if ($scope.mayChangeModelNames) {
             //Changing the name of the model
             $scope.nameStatus.editing = true;
         }
