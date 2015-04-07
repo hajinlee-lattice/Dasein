@@ -8,6 +8,10 @@
 // END: Base styles from UX
 
 //START: Style overrides (NOTE: This should only be done in extreme cases because it will make maintaining the css more difficult going forward)
+.text-danger {
+  color: #BD210F;
+}
+
 .model-details .tab-widget {
     margin-top: 15px;
 }
@@ -375,7 +379,27 @@ User-list
   color: red;
 }
 
+.delete-user-link {
+  background: transparent;
+  color: #bfbfbf;
+  font-size: large;
+}
+.delete-user-link:hover {
+  color: #477cba;
+}
 
+table.delete-warning {
+  margin-left: auto;
+  margin-right: auto;
+  td {
+    vertical-align: middle;
+
+    i.fa-exclamation-triangle {
+      padding: 5px 10px;
+    }
+
+  }
+}
 /*
 Add user
 */

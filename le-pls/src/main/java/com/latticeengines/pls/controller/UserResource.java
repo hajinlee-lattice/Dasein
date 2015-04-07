@@ -84,7 +84,10 @@ public class UserResource {
             for (Map.Entry<User, List<String>> userRights : userRightsList) {
                 User user = userRights.getKey();
                 AccessLevel accessLevel = userService.getAccessLevel(userRights.getValue());
-                if (userService.isVisible(currentLevel, accessLevel)) { users.add(user); }
+                if (userService.isVisible(currentLevel, accessLevel)) {
+                    user.setAccessLevel(accessLevel.name());
+                    users.add(user);
+                }
             }
             response.setSuccess(true);
             response.setResult(users);

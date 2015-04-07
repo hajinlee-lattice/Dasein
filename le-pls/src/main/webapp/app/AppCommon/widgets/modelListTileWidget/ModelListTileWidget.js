@@ -16,11 +16,12 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     $scope.nameStatus = {
         editing: false
     };
-    var clientSession = BrowserStorageUtility.getClientSession();
     var widgetConfig = $scope.widgetConfig;
-    var metadata = $scope.metadata;
     var data = $scope.data;
-    $scope.mayEditModels = RightsUtility.mayEditModels(clientSession.availableRights);
+
+    $scope.mayChangeModelNames = RightsUtility.mayChangeModelNames();
+    $scope.mayDeleteModels = RightsUtility.mayDeleteModels();
+
     $scope.mayEditModelsClass = $scope.mayEditModels ? "model-name-editable" : "";
     if (widgetConfig == null || data == null) {
         return;

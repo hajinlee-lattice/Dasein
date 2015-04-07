@@ -9,7 +9,7 @@ angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
     $scope.ResourceUtility = ResourceUtility;
 
     var clientSession = BrowserStorageUtility.getClientSession();
-    $scope.showAdminLink = RightsUtility.maySeeHiddenAdminTab(clientSession.availableRights);
+    $scope.showAdminLink = RightsUtility.maySeeAdminInfo();
     $scope.data.TenantId = clientSession.Tenant.Identifier;
 
     $scope.adminLinkClick = function() {

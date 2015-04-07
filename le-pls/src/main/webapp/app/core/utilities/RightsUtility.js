@@ -1,90 +1,44 @@
-var app = angular.module('mainApp.core.utilities.RightsUtility', []);
+var app = angular.module('mainApp.core.utilities.RightsUtility',
+    ['mainApp.appCommon.utilities.UnderscoreUtility',
+    'mainApp.core.utilities.BrowserStorageUtility']);
 
-app.service('RightsUtility', function () {
+app.service('RightsUtility', function (_, BrowserStorageUtility) {
 
-    this.AccessLevel = ["EXTERNAL_USER", "EXTERNAL_ADMIN", "INTERNAL_USER", "INTERNAL_ADMIN", "SUPER_ADMIN"];
+    this.accessLevel = {
+        EXTERNAL_USER: {name: 'EXTERNAL_USER', ordinal: 0},
+        EXTERNAL_ADMIN: {name: 'EXTERNAL_ADMIN', ordinal: 1},
+        INTERNAL_USER: {name: 'INTERNAL_USER', ordinal: 2},
+        INTERNAL_ADMIN: {name: 'INTERNAL_ADMIN', ordinal: 3},
+        SUPER_ADMIN: {name: 'SUPER_ADMIN', ordinal: 4}
+    };
 
-    this.mayViewUsers = function (rightsDict) {
-        if (rightsDict.hasOwnProperty("PLS_Users")) {
-            var userRights = rightsDict.PLS_Users;
-            return (userRights.MayView);
+    this.getAccessLevel = function(s) {
+        return _.findWhere(this.accessLevel, {name : s});
+    };
+
+    this.may = function(rightsDict, operation, category) {
+        if (rightsDict.hasOwnProperty("PLS_" + category)) {
+            var rights = rightsDict["PLS_" + category];
+            return (rights['May' + operation]);
         }
         return false;
     };
 
-    this.mayEditUsers = function (rightsDict) {
-        if (rightsDict.hasOwnProperty("PLS_Users")) {
-            var userRights = rightsDict.PLS_Users;
-            return userRights.MayEdit;
-        }
-        return false;
+    this.currentUserMay = function(operation, category) {
+        var clientSession = BrowserStorageUtility.getClientSession();
+        return this.may(clientSession.availableRights, operation, category);
     };
 
-    this.mayViewModels = function (rightsDict) {
-        if (rightsDict.hasOwnProperty("PLS_Models")) {
-            return rightsDict.PLS_Models.MayView;
-        }
-        return false;
-    };
+    this.mayChangeModelNames = function() { return this.currentUserMay("Edit", "Models"); };
+    this.mayDeleteModels = function() { return this.currentUserMay("Edit", "Models"); };
+    this.mayUploadModelJson = function() { return this.currentUserMay("Create", "Models"); };
 
-    this.mayEditModels = function (rightsDict) {
-        if (rightsDict.hasOwnProperty("PLS_Models")) {
-            return rightsDict.PLS_Models.MayEdit;
-        }
-        return false;
-    };
+    this.mayAddUsers = function() { return this.currentUserMay("Edit", "Users"); };
+    this.mayChangeUserAccessLevels = function() { return this.currentUserMay("Edit", "Users"); };
+    this.mayDeleteUsers = function() { return this.currentUserMay("Edit", "Users"); };
+    this.maySeeUserManagement = function() { return this.currentUserMay("View", "Users"); };
 
-    this.mayCreateModels = function (rightsDict) {
-        if (rightsDict.hasOwnProperty("PLS_Models")) {
-            return rightsDict.PLS_Models.MayCreate;
-        }
-        return false;
-    };
-
-    this.mayViewConfiguration = function (rightsDict) {
-        try {
-            return rightsDict.PLS_Configuration.MayView;
-        } catch (err) {
-            return false;
-        }
-    };
-
-    this.mayEditConfiguration = function (rightsDict) {
-        try {
-            return rightsDict.PLS_Configuration.MayEdit;
-        } catch (err) {
-            return false;
-        }
-    };
-
-    this.mayViewReporting = function (rightsDict) {
-        try {
-            return rightsDict.PLS_Reporting.MayView;
-        } catch (err) {
-            return false;
-        }
-    };
-
-    this.canSeeUserManagement = function (rightsDict) {
-        return this.mayViewUsers(rightsDict);
-    };
-
-    this.mayAddUser = function (rightsDict) {
-        return this.mayEditUsers(rightsDict);
-    };
-
-    this.maySeeHiddenAdminTab = function (rightsDict) {
-        return (
-        this.mayViewModels(rightsDict) &&
-        this.mayViewConfiguration(rightsDict) &&
-        this.mayViewReporting(rightsDict) &&
-        this.mayEditModels(rightsDict) &&
-        this.mayEditConfiguration(rightsDict)
-        );
-    };
-
-    this.mayUploadModelJson = function(rightsDict) {
-        return this.mayCreateModels(rightsDict);
-    };
+    this.maySeeAdminInfo = function() { return this.currentUserMay("View", "Reporting"); };
+    this.maySeeModelCreationHistory = function() { return this.currentUserMay("View", "Reporting"); };
 
 });

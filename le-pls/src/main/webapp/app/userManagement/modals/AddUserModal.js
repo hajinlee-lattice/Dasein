@@ -2,6 +2,7 @@ var app = angular.module('mainApp.userManagement.modals.AddUserModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.appCommon.utilities.UnderscoreUtility',
+    'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.PasswordUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.core.utilities.GriotNavUtility',
@@ -32,15 +33,26 @@ app.service('AddUserModal', function ($compile, $rootScope, $http) {
     };
 });
 
-app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility, StringUtility, PasswordUtility, GriotNavUtility, RightsUtility, UserManagementService) {
+app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, GriotNavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
-    $scope.levelsToSelect = RightsUtility.AccessLevel;
+    $scope.showAccessLevelSelection = false;
+
+    var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
+    if (currentLevel && currentLevel.ordinal > 1) {
+        $scope.levelsToSelect = [
+            ResourceUtility.getString(RightsUtility.accessLevel.EXTERNAL_USER.name),
+            ResourceUtility.getString(RightsUtility.accessLevel.EXTERNAL_ADMIN.name),
+            ResourceUtility.getString(RightsUtility.accessLevel.INTERNAL_ADMIN.name),
+            ResourceUtility.getString(RightsUtility.accessLevel.SUPER_ADMIN.name)
+        ];
+        $scope.showAccessLevelSelection = true;
+    }
 
     $scope.saveInProgress = false;
     $scope.addUserErrorMessage = "";
     $scope.showAddUserError = false;
 
-    $scope.user = {AccessLevel: $scope.levelsToSelect[0]};
+    $scope.user = {AccessLevel: RightsUtility.accessLevel.EXTERNAL_USER.name};
 
     function validateNewUser() {
         if ($scope.form.$error.required) {

@@ -16,10 +16,10 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     }
 
     $scope.userDisplayName = clientSession.DisplayName;
-    $scope.showUserManagement = RightsUtility.canSeeUserManagement(clientSession.availableRights);
+    $scope.showUserManagement = RightsUtility.maySeeUserManagement();
 
     $scope.isShowModelCreationHistory = false;
-    if (RightsUtility.maySeeHiddenAdminTab(clientSession.availableRights))  {
+    if (RightsUtility.maySeeModelCreationHistory())  {
         $scope.isShowModelCreationHistory = true;
     }
     

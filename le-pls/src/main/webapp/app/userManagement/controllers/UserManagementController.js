@@ -12,10 +12,7 @@ angular.module('mainApp.userManagement.controllers.UserManagementController', [
     $scope.ResourceUtility = ResourceUtility;
     $scope.loading = true;
 
-    var clientSession = BrowserStorageUtility.getClientSession();
-    if (clientSession == null) { return; }
-
-    var metadata = {mayAddUser: RightsUtility.mayAddUser(clientSession.availableRights)};
+    if (BrowserStorageUtility.getClientSession() == null) { return; }
 
     $("#userManagementError").hide();
     $scope.errorMessage = ResourceUtility.getString("USER_MANAGEMENT_GET_USERS_ERROR");
@@ -41,7 +38,7 @@ angular.module('mainApp.userManagement.controllers.UserManagementController', [
             WidgetFrameworkService.CreateWidget({
                 element:      contentContainer,
                 widgetConfig: screenWidgetConfig,
-                metadata:     metadata,
+                metadata:     null,
                 data:         result.ResultObj,
                 parentData:   null
             });
