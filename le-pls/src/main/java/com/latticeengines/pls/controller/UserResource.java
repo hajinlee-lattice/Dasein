@@ -1,11 +1,9 @@
 package com.latticeengines.pls.controller;
 
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -78,14 +76,10 @@ public class UserResource {
             Session session = globalSessionManagementService.retrieve(ticket);
             String tenantId = session.getTenant().getId();
             AccessLevel currentLevel = AccessLevel.valueOf(session.getAccessLevel());
-            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList
-                    = globalUserManagementService.getAllUsersOfTenant(tenantId);
+
             List<User> users = new ArrayList<>();
-            for (Map.Entry<User, List<String>> userRights : userRightsList) {
-                User user = userRights.getKey();
-                AccessLevel accessLevel = userService.getAccessLevel(userRights.getValue());
-                if (userService.isVisible(currentLevel, accessLevel)) {
-                    user.setAccessLevel(accessLevel.name());
+            for (User user : userService.getUsers(tenantId)) {
+                if (userService.isVisible(currentLevel, AccessLevel.valueOf(user.getAccessLevel()))) {
                     users.add(user);
                 }
             }

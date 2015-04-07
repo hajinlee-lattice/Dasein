@@ -5,11 +5,14 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.AccessLevel;
+import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.pls.service.UserService;
 
@@ -22,6 +25,9 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private GlobalUserManagementService globalUserManagementService;
+
     protected Tenant testTenant;
     protected HashMap<AccessLevel, User> testUsers = new HashMap<>();
     protected HashMap<AccessLevel, UserDocument> testUserDocs = new HashMap<>();
@@ -30,17 +36,24 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
         testTenant = new Tenant();
         testTenant.setName("User Resource Test Tenant");
         testTenant.setId("USER_RESOURCE_TEST_TENANT");
-        tenantService.discardTenant(testTenant);
+        destroyTestTenant();
         tenantService.registerTenant(testTenant);
     }
 
     protected void destroyTestTenant() {
+        try {
+            for (User user: userService.getUsers(testTenant.getId())) {
+                makeSureUserNoExists(user.getUsername());
+            }
+        } catch (LedpException e ) {
+            //ignore
+        }
         tenantService.discardTenant(testTenant);
     }
 
     protected User createTestUser(AccessLevel accessLevel) {
         User user = new User();
-        user.setEmail("tester_" + accessLevel.name().toLowerCase() + "@test.lattice.local");
+        user.setEmail("tester-" + UUID.randomUUID() + "@test.lattice.com");
         user.setFirstName("Test");
         user.setLastName("Tester");
 
@@ -50,13 +63,19 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
 
         user.setUsername(credentials.getUsername());
 
-        userService.deleteUser(testTenant.getId(), credentials.getUsername());
+        makeSureUserNoExists(credentials.getUsername());
 
         createUser(credentials.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName());
 
         userService.assignAccessLevel(accessLevel, testTenant.getId(), credentials.getUsername());
 
         return user;
+    }
+
+    private void addOldFashionAdminUser() {
+        for (GrantedRight grantedRight : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
+            globalUserManagementService.grantRight(grantedRight.getAuthority(), testTenant.getId(), "admin");
+        }
     }
 
     protected void createTestUsers() {
@@ -66,6 +85,8 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
             testUserDocs.put(accessLevel, doc);
             testUsers.put(accessLevel, user);
         }
+
+        addOldFashionAdminUser();
     }
 
     protected void switchToAccessLevel(AccessLevel accessLevel) {

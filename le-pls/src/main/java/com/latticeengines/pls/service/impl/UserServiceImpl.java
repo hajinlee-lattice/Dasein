@@ -1,13 +1,16 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
@@ -164,6 +167,32 @@ public class UserServiceImpl implements UserService {
             return globalUserManagementService.deleteUser(username);
         }
         return false;
+    }
+
+    /**
+     *
+     * @param tenantId
+     * @return all users in the tenant except admin:admin
+     */
+    @Override
+    public List<User> getUsers(String tenantId) {
+        List<User> users = new ArrayList<>();
+        try {
+            List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList
+                    = globalUserManagementService.getAllUsersOfTenant(tenantId);
+            for (Map.Entry<User, List<String>> userRights : userRightsList) {
+                User user = userRights.getKey();
+                if (!user.getUsername().equals("admin")) {
+                    AccessLevel accessLevel = getAccessLevel(userRights.getValue());
+                    user.setAccessLevel(accessLevel.name());
+                    users.add(user);
+                }
+            }
+        } catch (LedpException e) {
+            LOGGER.warn(String.format("Trying to get all users from a non-existing tenant %s", tenantId), e);
+        }
+
+        return users;
     }
 
     @Override

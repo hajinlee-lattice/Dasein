@@ -2,6 +2,7 @@ package com.latticeengines.pls.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.security.AccessLevel;
 
@@ -20,6 +21,8 @@ public interface UserService {
     boolean softDelete(String tenantId, String username);
 
     boolean deleteUser(String tenantId, String username);
+
+    List<User> getUsers(String tenantId);
 
     boolean isVisible(AccessLevel loginLevel, AccessLevel targetLevel);
 }
