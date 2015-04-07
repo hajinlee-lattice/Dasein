@@ -33,17 +33,19 @@ app.service('AddUserModal', function ($compile, $rootScope, $http) {
     };
 });
 
-app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, GriotNavUtility, RightsUtility, UserManagementService) {
+app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility,
+                                              BrowserStorageUtility, StringUtility, PasswordUtility,
+                                              GriotNavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.showAccessLevelSelection = false;
 
-    var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
+    var currentLevel = RightsUtility.getClientAccessLevel();
     if (currentLevel && currentLevel.ordinal > 1) {
         $scope.levelsToSelect = [
-            ResourceUtility.getString(RightsUtility.accessLevel.EXTERNAL_USER.name),
-            ResourceUtility.getString(RightsUtility.accessLevel.EXTERNAL_ADMIN.name),
-            ResourceUtility.getString(RightsUtility.accessLevel.INTERNAL_ADMIN.name),
-            ResourceUtility.getString(RightsUtility.accessLevel.SUPER_ADMIN.name)
+            RightsUtility.accessLevel.EXTERNAL_USER.name,
+            RightsUtility.accessLevel.EXTERNAL_ADMIN.name,
+            RightsUtility.accessLevel.INTERNAL_ADMIN.name,
+            RightsUtility.accessLevel.SUPER_ADMIN.name
         ];
         $scope.showAccessLevelSelection = true;
     }
@@ -53,6 +55,11 @@ app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUti
     $scope.showAddUserError = false;
 
     $scope.user = {AccessLevel: RightsUtility.accessLevel.EXTERNAL_USER.name};
+
+    function isLatticeEmail(email) {
+        var domain = 'lattice-engines.com';
+        return email.substring(email.length - domain.length) === domain;
+    }
 
     function validateNewUser() {
         if ($scope.form.$error.required) {
@@ -67,6 +74,19 @@ app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUti
 
         if (_.contains($scope.emails, $scope.user.Email)) {
             $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_CONFLICT_EMAIL");
+            return false;
+        }
+
+        var targetLevel = RightsUtility.getAccessLevel($scope.user.AccessLevel);
+
+        // only lattice email can be assigned to levels higher than INTERNAL_USER
+        if (targetLevel.ordinal === 0 && isLatticeEmail($scope.user.Email)) {
+            targetLevel = RightsUtility.accessLevel.INTERNAL_USER;
+            $scope.user.AccessLevel = targetLevel.name;
+        }
+
+        if (targetLevel.ordinal >= 2 && !isLatticeEmail($scope.user.Email)) {
+            $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_EXTERNAL_EMAIL_INTERNAL_ROLE");
             return false;
         }
 

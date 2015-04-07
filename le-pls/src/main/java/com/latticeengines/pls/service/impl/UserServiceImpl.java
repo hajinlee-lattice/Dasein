@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username) {
-        if (!getAccessLevel(tenantId, username).equals(accessLevel) && resignAccessLevel(tenantId, username)) {
+        if (!accessLevel.equals(getAccessLevel(tenantId, username)) && resignAccessLevel(tenantId, username)) {
             try {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
             } catch (Exception e) {

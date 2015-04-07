@@ -50,14 +50,14 @@ app.controller('DeleteUserController', function ($scope, $rootScope, _, Resource
         $scope.deleteInProgress = true;
 
         UserManagementService.DeleteUser($scope.user).then(function(result){
-            $scope.deleteInProgress = false;
             if(result.Success) {
                 $("#modalContainer").modal('hide');
                 $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
             } else {
                 //TODO:song handle error
-                alert(result.Errors);
+                alert(result.Errors[0]);
             }
+            $scope.deleteInProgress = false;
         });
     };
 

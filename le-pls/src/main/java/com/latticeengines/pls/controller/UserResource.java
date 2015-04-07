@@ -235,7 +235,6 @@ public class UserResource {
             }
         }
 
-
         if (!inTenant(tenantId, username)) {
             return SimpleBooleanResponse.getFailResponse(
                     Collections.singletonList("Cannot update users in another tenant.")
