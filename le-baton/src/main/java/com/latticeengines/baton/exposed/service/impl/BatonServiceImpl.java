@@ -40,8 +40,9 @@ public class BatonServiceImpl implements BatonService {
                 throw new RuntimeException(String.format("Tenant %s already exists", tenantId));
             }
             // XXX For now
-            TenantLifecycleManager.create(contractId, tenantId, new TenantInfo(new TenantProperties()), spaceId,
-                    spaceInfo);
+            TenantLifecycleManager.create(contractId, tenantId, //
+                    new TenantInfo(new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description)), //
+                    spaceId, spaceInfo);
         } catch (Exception e) {
             log.error("Error creating tenant", e);
             throw new RuntimeException("Error creating tenant", e);
@@ -89,7 +90,17 @@ public class BatonServiceImpl implements BatonService {
         List<AbstractMap.SimpleEntry<String, TenantInfo>> tenants = new ArrayList<>();
         try {
             CamilleEnvironment.getCamille();
-            return TenantLifecycleManager.getAll(contractId);
+            
+            if (contractId != null) {
+                return TenantLifecycleManager.getAll(contractId);
+            }
+            
+            List<AbstractMap.SimpleEntry<String, ContractInfo>> contracts = ContractLifecycleManager.getAll();
+            
+            for (AbstractMap.SimpleEntry<String, ContractInfo> contract : contracts) {
+                tenants.addAll(TenantLifecycleManager.getAll(contract.getKey()));
+            }
+            
             
         } catch (Exception e) {
             log.error("Error retrieving tenants", e);
