@@ -57,9 +57,10 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
     }
 
     /**
-     * Service scope doesn't support upgrades. Instead, the files will be
-     * deleted and reinstalled with the latest version if there is a version
-     * mismatch.
+     * Service scope doesn't support upgrades. Instead, services are responsible
+     * for upgrading the data outside of the Camille framework, generally
+     * through backwards compatibility. Breaking changes to the data break
+     * rolling upgrades.
      */
     @Test(groups = "unit")
     public void testInstallNewVersion() throws Exception {
@@ -76,7 +77,7 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
         scope.setDataVersion(UPGRADED_VERSION);
         ServiceBootstrapManager.bootstrap(scope);
 
-        Assert.assertTrue(serviceIsInState(State.OK, UPGRADED_VERSION));
+        Assert.assertTrue(serviceIsInState(State.OK, INITIAL_VERSION));
     }
 
     @Test(groups = "unit", invocationCount = 10)
