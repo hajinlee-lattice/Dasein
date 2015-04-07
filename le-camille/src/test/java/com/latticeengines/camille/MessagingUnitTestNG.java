@@ -1,8 +1,8 @@
 package com.latticeengines.camille;
 
+import java.util.AbstractMap;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.queue.DistributedQueue;
 import org.apache.curator.framework.recipes.queue.QueueBuilder;
@@ -92,7 +92,7 @@ public class MessagingUnitTestNG {
         Thread.sleep(10000000);
         queue.close();
 
-        List<Pair<Document, Path>> children = CamilleEnvironment.getCamille().getChildren(
+        List<AbstractMap.SimpleEntry<Document, Path>> children = CamilleEnvironment.getCamille().getChildren(
                 new Path("/Pods/Foo" + CamilleEnvironment.getPodId()));
     }
 }
