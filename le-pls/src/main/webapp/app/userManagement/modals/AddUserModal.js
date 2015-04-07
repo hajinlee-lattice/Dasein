@@ -35,17 +35,14 @@ app.service('AddUserModal', function ($compile, $rootScope, $http) {
 
 app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, GriotNavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
-    $scope.showAccessLevelSelection = false;
+    $scope.levelsToSelect = [RightsUtility.accessLevel.EXTERNAL_USER.name, RightsUtility.accessLevel.EXTERNAL_ADMIN.name];
 
     var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
     if (currentLevel && currentLevel.ordinal > 1) {
-        $scope.levelsToSelect = [
-            ResourceUtility.getString(RightsUtility.accessLevel.EXTERNAL_USER.name),
-            ResourceUtility.getString(RightsUtility.accessLevel.EXTERNAL_ADMIN.name),
-            ResourceUtility.getString(RightsUtility.accessLevel.INTERNAL_ADMIN.name),
-            ResourceUtility.getString(RightsUtility.accessLevel.SUPER_ADMIN.name)
-        ];
-        $scope.showAccessLevelSelection = true;
+        $scope.levelsToSelect = _.union($scope.levelsToSelect, [
+            RightsUtility.accessLevel.INTERNAL_ADMIN.name,
+            RightsUtility.accessLevel.SUPER_ADMIN.name
+        ]);
     }
 
     $scope.saveInProgress = false;
@@ -85,6 +82,9 @@ app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUti
 
         if (targetLevel.ordinal >= 2 && !isLatticeEmail($scope.user.Email)) {
             $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_EXTERNAL_EMAIL_INTERNAL_ROLE");
+            return false;
+        } else if (targetLevel.ordinal < 2 && isLatticeEmail($scope.user.Email)) {
+            $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_INTERNAL_EMAIL_EXTERNAL_ROLE");
             return false;
         }
 

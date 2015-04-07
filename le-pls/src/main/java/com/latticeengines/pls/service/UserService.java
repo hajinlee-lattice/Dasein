@@ -25,4 +25,6 @@ public interface UserService {
     List<User> getUsers(String tenantId);
 
     boolean isVisible(AccessLevel loginLevel, AccessLevel targetLevel);
+
+    boolean inTenant(String tenantId, String username);
 }

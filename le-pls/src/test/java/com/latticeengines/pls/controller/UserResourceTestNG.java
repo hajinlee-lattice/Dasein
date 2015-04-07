@@ -67,26 +67,46 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     @Test(groups = { "functional", "deployment" })
     public void registerUser() {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
-        testRegisterUserSuccess();
+        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
+        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
+        testRegisterUserSuccess(AccessLevel.INTERNAL_USER);
+        testRegisterUserSuccess(AccessLevel.INTERNAL_ADMIN);
+        testRegisterUserSuccess(AccessLevel.SUPER_ADMIN);
 
         switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserSuccess();
-
-        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserSuccess();
+        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
+        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
+        testRegisterUserSuccess(AccessLevel.INTERNAL_USER);
+        testRegisterUserSuccess(AccessLevel.INTERNAL_ADMIN);
+        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
 
         switchToAccessLevel(AccessLevel.INTERNAL_USER);
-        testRegisterUserFail();
+        testRegisterUserFail(AccessLevel.EXTERNAL_USER);
+        testRegisterUserFail(AccessLevel.EXTERNAL_ADMIN);
+        testRegisterUserFail(AccessLevel.INTERNAL_USER);
+        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
+        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
+
+        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
+        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
+        testRegisterUserFail(AccessLevel.INTERNAL_USER);
+        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
+        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
 
         switchToAccessLevel(AccessLevel.EXTERNAL_USER);
-        testRegisterUserFail();
+        testRegisterUserFail(AccessLevel.EXTERNAL_USER);
+        testRegisterUserFail(AccessLevel.EXTERNAL_ADMIN);
+        testRegisterUserFail(AccessLevel.INTERNAL_USER);
+        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
+        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
     }
 
     @Test(groups = { "functional", "deployment" })
     public void validateNewUser() throws JsonProcessingException {
         // Conflict with a user in the same tenant
         testConflictingUserInTenant();
-        testConflictingUserOutsideTenant(AccessLevel.EXTERNAL_USER, AccessLevel.SUPER_ADMIN);
+        testConflictingUserOutsideTenant();
     }
 
     @Test(groups = { "functional", "deployment" })
@@ -98,7 +118,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         testGetAllUsersFail();
 
         switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
-        testGetAllUsersSuccess(1);
+        testGetAllUsersSuccess(2);
 
         switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
         testGetAllUsersSuccess(4);
@@ -117,12 +137,47 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     }
 
     @Test(groups = { "functional", "deployment" })
-    public void updateAccessLevelWithSuperAdmin() {
-        testUpdateAccessLevel(AccessLevel.EXTERNAL_USER, true);
-        testUpdateAccessLevel(AccessLevel.EXTERNAL_ADMIN, true);
-        testUpdateAccessLevel(AccessLevel.INTERNAL_USER, true);
-        testUpdateAccessLevel(AccessLevel.INTERNAL_ADMIN, true);
-        testUpdateAccessLevel(AccessLevel.SUPER_ADMIN, true);
+    public void updateAccessLevel() {
+        User user = createTestUser(AccessLevel.EXTERNAL_USER);
+        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
+        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
+        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, true);
+        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, true);
+        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, true);
+
+        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
+        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
+        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
+        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
+        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, true);
+        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, true);
+        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+
+        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
+        switchToAccessLevel(AccessLevel.INTERNAL_USER);
+        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, false);
+        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, false);
+        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
+        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
+        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+
+        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
+        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
+        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
+        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
+        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
+        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+
+        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
+        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
+        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, false);
+        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, false);
+        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
+        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
+        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+
+        makeSureUserNoExists(user.getUsername());
     }
 
     private UserRegistration createUserRegistration() {
@@ -147,8 +202,9 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         return userReg;
     }
 
-    private void testRegisterUserSuccess() {
+    private void testRegisterUserSuccess(AccessLevel accessLevel) {
         UserRegistration userReg = createUserRegistration();
+        userReg.setAccessLevel(accessLevel.name());
         makeSureUserNoExists(userReg.getCredentials().getUsername());
 
         String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
@@ -171,8 +227,9 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         makeSureUserNoExists(userReg.getCredentials().getUsername());
     }
 
-    private void testRegisterUserFail() {
+    private void testRegisterUserFail(AccessLevel accessLevel) {
         UserRegistration userReg = createUserRegistration();
+        userReg.setAccessLevel(accessLevel.name());
         makeSureUserNoExists(userReg.getCredentials().getUsername());
 
         boolean exception = false;
@@ -188,17 +245,15 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         makeSureUserNoExists(userReg.getCredentials().getUsername());
     }
 
-    private void testUpdateAccessLevel(AccessLevel targetLevel, boolean expectSuccess) {
+    private void testUpdateAccessLevel(User user, AccessLevel targetLevel, boolean expectSuccess) {
         if (expectSuccess)
-            updateAccessLevelWithSufficientPrivilege(targetLevel);
+            updateAccessLevelWithSufficientPrivilege(user, targetLevel);
         else
-            updateAccessLevelWithoutSufficientPrivilege(targetLevel);
+            updateAccessLevelWithoutSufficientPrivilege(user, targetLevel);
     }
 
     @SuppressWarnings("rawtypes")
-    private void updateAccessLevelWithSufficientPrivilege(AccessLevel accessLevel) {
-        User user = createTestUser(AccessLevel.EXTERNAL_USER);
-
+    private void updateAccessLevelWithSufficientPrivilege(User user, AccessLevel accessLevel) {
         UserUpdateData data = new UserUpdateData();
         data.setAccessLevel(accessLevel.name());
 
@@ -213,13 +268,9 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
         AccessLevel resultLevel = userService.getAccessLevel(testTenant.getId(), user.getUsername());
         assertEquals(accessLevel, resultLevel);
-
-        makeSureUserNoExists(user.getUsername());
     }
 
-    private void updateAccessLevelWithoutSufficientPrivilege(AccessLevel accessLevel) {
-        User user = createTestUser(AccessLevel.EXTERNAL_USER);
-
+    private void updateAccessLevelWithoutSufficientPrivilege(User user, AccessLevel accessLevel) {
         UserUpdateData data = new UserUpdateData();
         data.setAccessLevel(accessLevel.name());
 
@@ -248,11 +299,12 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         assertFalse(response.getResult().isValid());
         // when conflict with another use in the same tenant, do not show the conflicting user
         assertNull(response.getResult().getConflictingUser());
+
+        makeSureUserNoExists(existingUser.getUsername());
     }
 
-    private void testConflictingUserOutsideTenant(
-            AccessLevel existingUserAccessLevel, AccessLevel testUserAccessLevel) {
-        User existingUser = createTestUser(existingUserAccessLevel);
+    private void testConflictingUserOutsideTenant() {
+        User existingUser = createTestUser(AccessLevel.EXTERNAL_USER);
         userService.resignAccessLevel(testTenant.getId(), existingUser.getUsername());
 
         UserRegistration uReg = createUserRegistration();
@@ -264,14 +316,12 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         // when conflict with another use outside the same tenant,
         // show the conflicting user if its access level is lower than the current logged in user
         User user =  response.getResult().getConflictingUser();
-        if (testUserAccessLevel.compareTo(existingUserAccessLevel) >= 0) {
-            assertEquals(user.getFirstName(), existingUser.getFirstName());
-            assertEquals(user.getLastName(), existingUser.getLastName());
-            assertEquals(user.getEmail(), existingUser.getEmail());
-            assertEquals(user.getUsername(), existingUser.getUsername());
-        } else {
-            assertNull(user);
-        }
+        assertEquals(user.getFirstName(), existingUser.getFirstName());
+        assertEquals(user.getLastName(), existingUser.getLastName());
+        assertEquals(user.getEmail(), existingUser.getEmail());
+        assertEquals(user.getUsername(), existingUser.getUsername());
+
+        makeSureUserNoExists(existingUser.getUsername());
     }
 
     private void testGetAllUsersFail() {

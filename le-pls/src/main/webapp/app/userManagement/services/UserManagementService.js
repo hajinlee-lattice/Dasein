@@ -95,35 +95,35 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
             },
             data: registration
         })
-            .success(function (data, status, headers, config) {
-                var result = {
-                    Success: false,
-                    ResultObj: {},
-                    ResultErrors: null
-                };
-                if (data.Success) {
-                    result.Success = true;
-                    result.ResultObj = {Username: user.Username, Password: data.Result.Password};
-                    deferred.resolve(result);
-                } else {
-                    result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
-                    if (_.some(data.Errors, function (err) {
-                            return err.indexOf("email conflicts") > -1;
-                        })) {
-                        result.ResultObj.ConflictingUser = data.Result.ConflictingUser;
-                        result.ResultErrors = ResourceUtility.getString('ADD_USER_CONFLICT_EMAIL');
-                    }
-                    deferred.resolve(result);
-                }
-            })
-            .error(function (data, status, headers, config) {
-                SessionService.HandleResponseErrors(data, status);
-                var result = {
-                    Success: false,
-                    ReportErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
-                };
+        .success(function (data, status, headers, config) {
+            var result = {
+                Success: false,
+                ResultObj: {},
+                ResultErrors: null
+            };
+            if (data.Success) {
+                result.Success = true;
+                result.ResultObj = {Username: user.Username, Password: data.Result.Password};
                 deferred.resolve(result);
-            });
+            } else {
+                result.ResultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+                if (_.some(data.Errors, function (err) {
+                        return err.indexOf("email conflicts") > -1;
+                    })) {
+                    result.ResultObj.ConflictingUser = data.Result.ConflictingUser;
+                    result.ResultErrors = ResourceUtility.getString('ADD_USER_CONFLICT_EMAIL');
+                }
+                deferred.resolve(result);
+            }
+        })
+        .error(function (data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            var result = {
+                Success: false,
+                ReportErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+            };
+            deferred.resolve(result);
+        });
 
         return deferred.promise;
     };
@@ -171,47 +171,4 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
 
         return deferred.promise;
     };
-
-
-    this.DeleteUsers = function (users) {
-        var deferred = $q.defer();
-        var result = {
-            Success: false,
-            SuccessUsers: [],
-            FailUsers: []
-        };
-
-        var usernames = _.map(users, function (user) {
-            return user.Username;
-        });
-
-        $http({
-            method: 'DELETE',
-            url: '/pls/users?usernames=' + JSON.stringify(usernames)
-        })
-            .success(function (data) {
-                if (data.Success) {
-                    result.Success = true;
-                    _.each(data.Result.SuccessUsers, function (name) {
-                        var user = _.find(users, {Username: name});
-                        if (user) {
-                            result.SuccessUsers.push(user);
-                        }
-                    });
-                    _.each(data.Result.FailUsers, function (name) {
-                        var user = _.find(users, {Username: name});
-                        if (user) {
-                            result.FailUsers.push(user);
-                        }
-                    });
-                }
-                deferred.resolve(result);
-            })
-            .error(function (data, status) {
-                SessionService.HandleResponseErrors(data, status);
-                deferred.resolve(result);
-            });
-        return deferred.promise;
-    };
-
 });

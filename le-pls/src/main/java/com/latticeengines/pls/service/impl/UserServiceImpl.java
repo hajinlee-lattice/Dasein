@@ -197,8 +197,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isVisible(AccessLevel loginLevel, AccessLevel targetLevel) {
-        if (targetLevel == null) { return false; }
-        if (loginLevel == AccessLevel.EXTERNAL_ADMIN) { return targetLevel.equals(AccessLevel.EXTERNAL_USER); }
-        return targetLevel.compareTo(loginLevel) <= 0;
+        return loginLevel != null && targetLevel != null && targetLevel.compareTo(loginLevel) <= 0;
+    }
+
+    @Override
+    public boolean inTenant(String tenantId, String username) {
+        return !globalUserManagementService.getRights(username, tenantId).isEmpty();
     }
 }
