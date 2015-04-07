@@ -15,4 +15,6 @@ public interface BatonService {
     void bootstrap(String contractId, String tenantId, String spaceId);
     
     List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId);
+    
+    Boolean deleteTenant(String contractId, String tenantId);
 }

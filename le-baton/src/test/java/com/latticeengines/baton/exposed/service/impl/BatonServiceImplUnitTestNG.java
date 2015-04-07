@@ -1,10 +1,12 @@
 package com.latticeengines.baton.exposed.service.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 import java.util.AbstractMap;
 import java.util.List;
 
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -41,6 +43,13 @@ public class BatonServiceImplUnitTestNG {
         
         batonService.createTenant("CONTRACT1", "TENANT1", CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, info);
     }
+    
+    @AfterClass(groups = "unit")
+    public void tearDown() throws Exception {
+        batonService.deleteTenant("CONTRACT1", "TENANT1");
+        List<AbstractMap.SimpleEntry<String, TenantInfo>> tenants = batonService.getTenants(null);
+        assertEquals(tenants.size(), 0);
+    }
 
     @Test(groups = "unit")
     public void getTenantsWithContractId() {
@@ -50,6 +59,11 @@ public class BatonServiceImplUnitTestNG {
     @Test(groups = "unit")
     public void getTenantsWithNoContractId() {
         assertSingleTenantProperties(batonService.getTenants(null));
+    }
+    
+    @Test(groups = "unit")
+    public void deleteNonExistingTenant() {
+        assertFalse(batonService.deleteTenant("CONTRACT1", "xyz"));
     }
     
     private void assertSingleTenantProperties(List<AbstractMap.SimpleEntry<String, TenantInfo>> tenants) {
