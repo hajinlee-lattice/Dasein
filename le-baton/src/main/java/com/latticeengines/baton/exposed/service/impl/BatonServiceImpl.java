@@ -29,7 +29,7 @@ public class BatonServiceImpl implements BatonService {
     }.getClass().getEnclosingClass());
 
     @Override
-    public void createTenant(String contractId, String tenantId, String spaceId, CustomerSpaceInfo spaceInfo) {
+    public void createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo) {
         try {
             if (!ContractLifecycleManager.exists(contractId)) {
                 log.info(String.format("Creating contract %s", contractId));
@@ -41,8 +41,9 @@ public class BatonServiceImpl implements BatonService {
             }
             // XXX For now
             TenantLifecycleManager.create(contractId, tenantId, //
-                    new TenantInfo(new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description)), //
-                    spaceId, spaceInfo);
+                    new TenantInfo(new TenantProperties(spaceInfo.properties.displayName,
+                            spaceInfo.properties.description)), //
+                    defaultSpaceId, spaceInfo);
         } catch (Exception e) {
             log.error("Error creating tenant", e);
             throw new RuntimeException("Error creating tenant", e);
@@ -80,7 +81,7 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
-    public void bootstrap(String contractId, String tenantId, String spaceId) {
+    public void bootstrap(String contractId, String tenantId, String spaceId, String serviceName) {
         // TODO Auto-generated method stub
 
     }
@@ -90,18 +91,17 @@ public class BatonServiceImpl implements BatonService {
         List<AbstractMap.SimpleEntry<String, TenantInfo>> tenants = new ArrayList<>();
         try {
             CamilleEnvironment.getCamille();
-            
+
             if (contractId != null) {
                 return TenantLifecycleManager.getAll(contractId);
             }
-            
+
             List<AbstractMap.SimpleEntry<String, ContractInfo>> contracts = ContractLifecycleManager.getAll();
-            
+
             for (AbstractMap.SimpleEntry<String, ContractInfo> contract : contracts) {
                 tenants.addAll(TenantLifecycleManager.getAll(contract.getKey()));
             }
-            
-            
+
         } catch (Exception e) {
             log.error("Error retrieving tenants", e);
         }
@@ -118,7 +118,7 @@ public class BatonServiceImpl implements BatonService {
             } else {
                 return false;
             }
-            
+
         } catch (Exception e) {
             log.error("Error retrieving tenants", e);
             return false;
