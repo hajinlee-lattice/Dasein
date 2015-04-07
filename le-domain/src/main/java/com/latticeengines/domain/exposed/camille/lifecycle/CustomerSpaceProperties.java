@@ -1,9 +1,8 @@
 package com.latticeengines.domain.exposed.camille.lifecycle;
 
-public class CustomerSpaceProperties {
+public class CustomerSpaceProperties extends BaseProperties {
     public CustomerSpaceProperties(String displayName, String description, String sfdcOrgId) {
-        this.displayName = displayName;
-        this.description = description;
+        super(displayName, description);
         this.sfdcOrgId = sfdcOrgId;
     }
 
@@ -11,7 +10,5 @@ public class CustomerSpaceProperties {
     public CustomerSpaceProperties() {
     }
 
-    public String displayName;
-    public String description;
     public String sfdcOrgId;
 }

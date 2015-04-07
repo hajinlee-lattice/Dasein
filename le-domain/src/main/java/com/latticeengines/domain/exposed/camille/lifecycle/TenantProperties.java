@@ -1,9 +1,9 @@
 package com.latticeengines.domain.exposed.camille.lifecycle;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class TenantProperties {
+public class TenantProperties extends BaseProperties {
     public TenantProperties(String displayName, String description) {
+        super(displayName, description);
         this.displayName = displayName;
         this.description = description;
     }
@@ -12,9 +12,4 @@ public class TenantProperties {
     public TenantProperties() {
     }
 
-    @JsonProperty("DisplayName")
-    public String displayName;
-    
-    @JsonProperty("Description")
-    public String description;
 }

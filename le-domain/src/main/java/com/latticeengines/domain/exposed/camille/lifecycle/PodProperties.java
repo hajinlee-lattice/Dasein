@@ -1,15 +1,12 @@
 package com.latticeengines.domain.exposed.camille.lifecycle;
 
-public class PodProperties {
+public class PodProperties extends BaseProperties {
     public PodProperties(String displayName, String description) {
-        this.displayName = displayName;
-        this.description = description;
+        super(displayName, description);
     }
 
     // Serialization constructor
     public PodProperties() {
     }
 
-    public String displayName;
-    public String description;
 }
