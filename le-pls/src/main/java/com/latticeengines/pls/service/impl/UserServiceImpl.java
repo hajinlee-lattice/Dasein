@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -67,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username) {
-        if (resignAccessLevel(tenantId, username)) {
+        if (!getAccessLevel(tenantId, username).equals(accessLevel) && resignAccessLevel(tenantId, username)) {
             try {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
             } catch (Exception e) {
@@ -101,7 +102,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public AccessLevel getAccessLevel(String tenantId, String username) {
         List<String> rights = globalUserManagementService.getRights(username, tenantId);
-        return getAccessLevel(rights);
+        AccessLevel toReturn = getAccessLevel(rights);
+        if (rights.size() > 1 && !username.equals("admin")) {
+            if (toReturn == null) {
+                List<GrantedRight> grantedRights = new ArrayList<>();
+                for (String right: rights) {
+                    GrantedRight grantedRight = GrantedRight.getGrantedRight(right);
+                    if (grantedRight != null) { grantedRights.add(grantedRight); }
+                }
+                toReturn = AccessLevel.maxAccessLevel(grantedRights);
+            }
+            softDelete(tenantId, username);
+            assignAccessLevel(toReturn, tenantId, username);
+        }
+        return toReturn;
     }
 
     @Override
@@ -124,7 +138,6 @@ public class UserServiceImpl implements UserService {
     public boolean softDelete(String tenantId, String username) {
         if (resignAccessLevel(tenantId, username)) {
             boolean success = true;
-            //TODO:song this is temporary until the concept of GrantedRight no longer exists in GA
             List<String> rights = globalUserManagementService.getRights(username, tenantId);
             if (!rights.isEmpty()) {
                 for (GrantedRight right : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
@@ -151,5 +164,12 @@ public class UserServiceImpl implements UserService {
             return globalUserManagementService.deleteUser(username);
         }
         return false;
+    }
+
+    @Override
+    public boolean isVisible(AccessLevel loginLevel, AccessLevel targetLevel) {
+        if (targetLevel == null) { return false; }
+        if (loginLevel == AccessLevel.EXTERNAL_ADMIN) { return targetLevel.equals(AccessLevel.EXTERNAL_USER); }
+        return targetLevel.compareTo(loginLevel) <= 0;
     }
 }

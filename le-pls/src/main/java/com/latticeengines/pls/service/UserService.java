@@ -21,4 +21,5 @@ public interface UserService {
 
     boolean deleteUser(String tenantId, String username);
 
+    boolean isVisible(AccessLevel loginLevel, AccessLevel targetLevel);
 }

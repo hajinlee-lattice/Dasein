@@ -97,13 +97,14 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         switchToAccessLevel(AccessLevel.INTERNAL_USER);
         testGetAllUsersFail();
 
-//        testGetAllUsers(AccessLevel.EXTERNAL_ADMIN, true, 1);
-//        testGetAllUsers(AccessLevel.INTERNAL_ADMIN, true, 4);
-//        testGetAllUsers(AccessLevel.SUPER_ADMIN, true, 5);
+        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+        testGetAllUsersSuccess(1);
 
-        //TODO:song this will be a wrong assertion after Access Level feature is completed
-        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
+        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
         testGetAllUsersSuccess(4);
+
+        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
+        testGetAllUsersSuccess(5);
     }
 
     @Test(groups = { "functional", "deployment" })
@@ -117,7 +118,6 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @Test(groups = { "functional", "deployment" })
     public void updateAccessLevelWithSuperAdmin() {
-        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testUpdateAccessLevel(AccessLevel.EXTERNAL_USER, true);
         testUpdateAccessLevel(AccessLevel.EXTERNAL_ADMIN, true);
         testUpdateAccessLevel(AccessLevel.INTERNAL_USER, true);

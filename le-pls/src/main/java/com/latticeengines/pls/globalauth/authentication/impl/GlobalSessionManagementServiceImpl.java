@@ -207,6 +207,10 @@ public class GlobalSessionManagementServiceImpl
             }
         }
 
-        return maxAccessLevel == null ? null : maxAccessLevel.name();
+        if (maxAccessLevel == null) {
+            return null;
+        } else {
+            return maxAccessLevel.name();
+        }
     }
 }

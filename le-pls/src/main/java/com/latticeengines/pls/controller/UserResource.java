@@ -75,21 +75,16 @@ public class UserResource {
         ResponseDocument<List<User>> response = new ResponseDocument<>();
         try {
             Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
-            String tenantId = globalSessionManagementService.retrieve(ticket).getTenant().getId();
+            Session session = globalSessionManagementService.retrieve(ticket);
+            String tenantId = session.getTenant().getId();
+            AccessLevel currentLevel = AccessLevel.valueOf(session.getAccessLevel());
             List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList
                     = globalUserManagementService.getAllUsersOfTenant(tenantId);
             List<User> users = new ArrayList<>();
             for (Map.Entry<User, List<String>> userRights : userRightsList) {
                 User user = userRights.getKey();
-                AccessLevel accessLevel = userService.getAccessLevel(tenantId, user.getUsername());
-                if (accessLevel == null) {
-                    if (!RightsUtilities.isAdmin(RightsUtilities.translateRights(userRights.getValue()))) {
-                        users.add(user);
-                    }
-                } else if (!accessLevel.equals(AccessLevel.SUPER_ADMIN)) {
-                    user.setAccessLevel(accessLevel.name());
-                    users.add(user);
-                }
+                AccessLevel accessLevel = userService.getAccessLevel(userRights.getValue());
+                if (userService.isVisible(currentLevel, accessLevel)) { users.add(user); }
             }
             response.setSuccess(true);
             response.setResult(users);
@@ -352,14 +347,8 @@ public class UserResource {
                                         targetLevel.name(), loginLevel.name())));
             }
 
-            if (userService.deleteUser(tenantId, username)) {
-                return SimpleBooleanResponse.getSuccessResponse();
-            } else {
-                return SimpleBooleanResponse.getFailResponse(
-                        Collections.singletonList(
-                                String.format("Could not delete the user %s from the non-related tenant %s",
-                                        username, tenantId)));
-            }
+            userService.deleteUser(tenantId, username);
+            return SimpleBooleanResponse.getSuccessResponse();
         } else {
             LOGGER.error(
                     String.format("Trying to delete the user %s from the non-related tenant %s", username, tenantId));
