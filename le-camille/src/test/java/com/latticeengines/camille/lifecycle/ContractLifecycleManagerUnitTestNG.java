@@ -1,5 +1,6 @@
 package com.latticeengines.camille.lifecycle;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -7,7 +8,6 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -77,9 +77,9 @@ public class ContractLifecycleManagerUnitTestNG {
             ContractLifecycleManager.create(contractId, contractInfo);
         }
 
-        List<Pair<String, ContractInfo>> all = ContractLifecycleManager.getAll();
+        List<AbstractMap.SimpleEntry<String, ContractInfo>> all = ContractLifecycleManager.getAll();
         List<String> allContracts = new ArrayList<String>();
-        for (Pair<String, ContractInfo> pair : all) {
+        for (AbstractMap.SimpleEntry<String, ContractInfo> pair : all) {
             allContracts.add(pair.getKey());
         }
         Assert.assertTrue(allContracts.containsAll(in));

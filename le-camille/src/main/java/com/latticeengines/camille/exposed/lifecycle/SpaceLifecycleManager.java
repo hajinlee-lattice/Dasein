@@ -1,10 +1,9 @@
 package com.latticeengines.camille.exposed.lifecycle;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -101,41 +100,41 @@ public class SpaceLifecycleManager {
         return spaceInfo;
     }
 
-    public static List<Pair<String, CustomerSpaceInfo>> getAll(String contractId, String tenantId) throws Exception {
+    public static List<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>> getAll(String contractId, String tenantId) throws Exception {
         LifecycleUtils.validateIds(contractId, tenantId);
 
-        List<Pair<String, CustomerSpaceInfo>> toReturn = new ArrayList<Pair<String, CustomerSpaceInfo>>();
+        List<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>>();
 
         Camille c = CamilleEnvironment.getCamille();
-        List<Pair<Document, Path>> childPairs = c.getChildren(PathBuilder.buildCustomerSpacesPath(
+        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder.buildCustomerSpacesPath(
                 CamilleEnvironment.getPodId(), contractId, tenantId));
 
-        for (Pair<Document, Path> childPair : childPairs) {
-            String spaceId = childPair.getRight().getSuffix();
-            toReturn.add(new MutablePair<String, CustomerSpaceInfo>(spaceId, getInfo(contractId, tenantId, spaceId)));
+        for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
+            String spaceId = childPair.getValue().getSuffix();
+            toReturn.add(new AbstractMap.SimpleEntry<String, CustomerSpaceInfo>(spaceId, getInfo(contractId, tenantId, spaceId)));
         }
 
         return toReturn;
     }
 
-    public static List<Pair<CustomerSpace, CustomerSpaceInfo>> getAll() throws Exception {
-        List<Pair<CustomerSpace, CustomerSpaceInfo>> toReturn = new ArrayList<Pair<CustomerSpace, CustomerSpaceInfo>>();
+    public static List<AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>> getAll() throws Exception {
+        List<AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>>();
 
         Camille c = CamilleEnvironment.getCamille();
-        List<Pair<Document, Path>> contracts = c.getChildren(PathBuilder.buildContractsPath(CamilleEnvironment
+        List<AbstractMap.SimpleEntry<Document, Path>> contracts = c.getChildren(PathBuilder.buildContractsPath(CamilleEnvironment
                 .getPodId()));
-        for (Pair<Document, Path> contract : contracts) {
-            String contractId = contract.getRight().getSuffix();
-            List<Pair<Document, Path>> tenants = c.getChildren(PathBuilder.buildTenantsPath(
+        for (AbstractMap.SimpleEntry<Document, Path> contract : contracts) {
+            String contractId = contract.getValue().getSuffix();
+            List<AbstractMap.SimpleEntry<Document, Path>> tenants = c.getChildren(PathBuilder.buildTenantsPath(
                     CamilleEnvironment.getPodId(), contractId));
-            for (Pair<Document, Path> tenant : tenants) {
-                String tenantId = tenant.getRight().getSuffix();
-                List<Pair<Document, Path>> spaces = c.getChildren(PathBuilder.buildCustomerSpacesPath(
+            for (AbstractMap.SimpleEntry<Document, Path> tenant : tenants) {
+                String tenantId = tenant.getValue().getSuffix();
+                List<AbstractMap.SimpleEntry<Document, Path>> spaces = c.getChildren(PathBuilder.buildCustomerSpacesPath(
                         CamilleEnvironment.getPodId(), contractId, tenantId));
 
-                for (Pair<Document, Path> space : spaces) {
-                    String spaceId = space.getRight().getSuffix();
-                    toReturn.add(new MutablePair<CustomerSpace, CustomerSpaceInfo>(new CustomerSpace(contractId,
+                for (AbstractMap.SimpleEntry<Document, Path> space : spaces) {
+                    String spaceId = space.getValue().getSuffix();
+                    toReturn.add(new AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>(new CustomerSpace(contractId,
                             tenantId, spaceId), getInfo(contractId, tenantId, spaceId)));
                 }
             }

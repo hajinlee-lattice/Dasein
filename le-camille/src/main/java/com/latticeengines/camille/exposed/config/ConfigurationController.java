@@ -1,8 +1,8 @@
 package com.latticeengines.camille.exposed.config;
 
+import java.util.AbstractMap;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
 
 import com.latticeengines.domain.exposed.camille.Document;
@@ -61,7 +61,7 @@ public class ConfigurationController<T extends ConfigurationScope> implements Co
     }
 
     @Override
-    public List<Pair<Document, Path>> getChildren(Path path) throws Exception {
+    public List<AbstractMap.SimpleEntry<Document, Path>> getChildren(Path path) throws Exception {
         return impl.getChildren(path);
     }
 

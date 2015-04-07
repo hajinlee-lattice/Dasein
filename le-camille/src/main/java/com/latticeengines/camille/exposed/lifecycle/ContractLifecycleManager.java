@@ -1,10 +1,9 @@
 package com.latticeengines.camille.exposed.lifecycle;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -82,16 +81,16 @@ public class ContractLifecycleManager {
         return contractInfo;
     }
 
-    public static List<Pair<String, ContractInfo>> getAll() throws IllegalArgumentException, Exception {
-        List<Pair<String, ContractInfo>> toReturn = new ArrayList<Pair<String, ContractInfo>>();
+    public static List<AbstractMap.SimpleEntry<String, ContractInfo>> getAll() throws IllegalArgumentException, Exception {
+        List<AbstractMap.SimpleEntry<String, ContractInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, ContractInfo>>();
 
         Camille c = CamilleEnvironment.getCamille();
-        List<Pair<Document, Path>> childPairs = c.getChildren(PathBuilder.buildContractsPath(CamilleEnvironment
+        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder.buildContractsPath(CamilleEnvironment
                 .getPodId()));
 
-        for (Pair<Document, Path> childPair : childPairs) {
-            toReturn.add(new MutablePair<String, ContractInfo>(childPair.getRight().getSuffix(), getInfo(childPair
-                    .getRight().getSuffix())));
+        for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
+            toReturn.add(new AbstractMap.SimpleEntry<String, ContractInfo>(childPair.getValue().getSuffix(), getInfo(childPair
+                    .getValue().getSuffix())));
         }
 
         return toReturn;

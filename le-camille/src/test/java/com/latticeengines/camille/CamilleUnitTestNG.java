@@ -3,6 +3,7 @@ package com.latticeengines.camille;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.AbstractMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -141,8 +142,8 @@ public class CamilleUnitTestNG {
         Assert.assertTrue(c.exists(childPath1));
 
         Set<Pair<String, String>> actualChildren = new HashSet<Pair<String, String>>();
-        for (Pair<Document, Path> childPair : c.getChildren(parentPath)) {
-            actualChildren.add(MutablePair.of(childPair.getLeft().getData(), childPair.getRight().toString()));
+        for (AbstractMap.SimpleEntry<Document, Path> childPair : c.getChildren(parentPath)) {
+            actualChildren.add(MutablePair.of(childPair.getKey().getData(), childPair.getValue().toString()));
         }
 
         Assert.assertTrue(actualChildren.contains(MutablePair.of(childDoc0.getData(), childPath0.toString())));

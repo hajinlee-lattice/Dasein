@@ -1,5 +1,6 @@
 package com.latticeengines.camille.lifecycle;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -7,7 +8,6 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -81,9 +81,9 @@ public class SpaceLifecycleManagerUnitTestNG {
             SpaceLifecycleManager.create(contractId, tenantId, spaceId, customerSpaceInfo);
         }
 
-        List<Pair<String, CustomerSpaceInfo>> all = SpaceLifecycleManager.getAll(contractId, tenantId);
+        List<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>> all = SpaceLifecycleManager.getAll(contractId, tenantId);
         List<String> allSpaces = new ArrayList<String>();
-        for (Pair<String, CustomerSpaceInfo> pair : all) {
+        for (AbstractMap.SimpleEntry<String, CustomerSpaceInfo> pair : all) {
             allSpaces.add(pair.getKey());
         }
         Assert.assertTrue(allSpaces.containsAll(in));
@@ -109,9 +109,9 @@ public class SpaceLifecycleManagerUnitTestNG {
             SpaceLifecycleManager.create(contractId, secondTenantId, spaceId, customerSpaceInfo);
         }
 
-        List<Pair<CustomerSpace, CustomerSpaceInfo>> all = SpaceLifecycleManager.getAll();
+        List<AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>> all = SpaceLifecycleManager.getAll();
         List<String> allSpaces = new ArrayList<String>();
-        for (Pair<CustomerSpace, CustomerSpaceInfo> pair : all) {
+        for (AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo> pair : all) {
             allSpaces.add(pair.getKey().getSpaceId());
         }
         Assert.assertTrue(allSpaces.containsAll(in));

@@ -1,13 +1,13 @@
 package com.latticeengines.camille.exposed;
 
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.framework.api.SetDataBuilder;
@@ -111,15 +111,15 @@ public class Camille {
      * 
      * @throws Exception
      */
-    public List<Pair<Document, Path>> getChildren(Path path) throws Exception {
+    public List<AbstractMap.SimpleEntry<Document, Path>> getChildren(Path path) throws Exception {
         List<String> relativeChildPaths = client.getChildren().forPath(path.toString());
         log.info(String.format("Camille getting children at %s", path));
 
-        List<Pair<Document, Path>> out = new ArrayList<Pair<Document, Path>>(relativeChildPaths.size());
+        List<AbstractMap.SimpleEntry<Document, Path>> out = new ArrayList<>(relativeChildPaths.size());
 
         for (String relativePath : relativeChildPaths) {
             Path childPath = path.append(relativePath);
-            out.add(MutablePair.of(get(childPath), childPath));
+            out.add(new SimpleEntry<Document, Path>(get(childPath), childPath));
         }
 
         return out;
@@ -139,7 +139,7 @@ public class Camille {
                     }
 
                     @SuppressWarnings("unchecked")
-                    private <E extends Map.Entry<Document, Path>> List<E> asMapEntry(List<Pair<Document, Path>> pairs) {
+                    private <E extends Map.Entry<Document, Path>> List<E> asMapEntry(List<AbstractMap.SimpleEntry<Document, Path>> pairs) {
                         return (List<E>) pairs;
                     }
                 });

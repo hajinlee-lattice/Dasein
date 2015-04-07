@@ -1,11 +1,10 @@
 package com.latticeengines.camille.exposed.interfaces.data;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.zookeeper.KeeperException;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -29,17 +28,18 @@ public class DataInterfaceSubscriber extends DataInterfaceBase {
         }
     }
 
-    public List<Pair<Document, Path>> getChildren(Path localPath) throws Exception {
-        List<Pair<Document, Path>> children = CamilleEnvironment.getCamille().getChildren(
+    public List<AbstractMap.SimpleEntry<Document, Path>> getChildren(Path localPath) throws Exception {
+        List<AbstractMap.SimpleEntry<Document, Path>> children = CamilleEnvironment.getCamille().getChildren(
                 getBasePath().append(localPath));
 
-        if (children == null)
+        if (children == null) {
             return Collections.emptyList();
+        }
 
-        List<Pair<Document, Path>> out = new ArrayList<>(children.size());
+        List<AbstractMap.SimpleEntry<Document, Path>> out = new ArrayList<>(children.size());
 
-        for (Pair<Document, Path> child : children) {
-            out.add(MutablePair.of(child.getLeft(), child.getRight().local(getBasePath())));
+        for (AbstractMap.SimpleEntry<Document, Path> child : children) {
+            out.add(new AbstractMap.SimpleEntry<>(child.getKey(), child.getValue().local(getBasePath())));
         }
 
         return out;

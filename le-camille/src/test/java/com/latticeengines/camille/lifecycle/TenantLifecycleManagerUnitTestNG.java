@@ -1,5 +1,6 @@
 package com.latticeengines.camille.lifecycle;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -7,7 +8,6 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -97,9 +97,9 @@ public class TenantLifecycleManagerUnitTestNG {
             TenantLifecycleManager.create(contractId, tenantId, tenantInfo, "defaultSpaceId", customerSpaceInfo);
         }
 
-        List<Pair<String, TenantInfo>> all = TenantLifecycleManager.getAll(contractId);
+        List<AbstractMap.SimpleEntry<String, TenantInfo>> all = TenantLifecycleManager.getAll(contractId);
         List<String> allTenants = new ArrayList<String>();
-        for (Pair<String, TenantInfo> pair : all) {
+        for (AbstractMap.SimpleEntry<String, TenantInfo> pair : all) {
             allTenants.add(pair.getKey());
         }
         Assert.assertTrue(allTenants.containsAll(in));

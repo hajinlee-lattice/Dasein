@@ -1,5 +1,6 @@
 package com.latticeengines.camille.exposed.lifecycle;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,11 +85,11 @@ public class PodLifecycleManager {
         List<Pair<String, PodInfo>> toReturn = new ArrayList<Pair<String, PodInfo>>();
 
         Camille c = CamilleEnvironment.getCamille();
-        List<Pair<Document, Path>> childPairs = c.getChildren(PathBuilder.buildPodsPath());
+        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder.buildPodsPath());
 
-        for (Pair<Document, Path> childPair : childPairs) {
-            toReturn.add(new MutablePair<String, PodInfo>(childPair.getRight().getSuffix(), getInfo(childPair
-                    .getRight().getSuffix())));
+        for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
+            toReturn.add(new MutablePair<String, PodInfo>(childPair.getValue().getSuffix(), getInfo(childPair
+                    .getValue().getSuffix())));
         }
 
         return toReturn;

@@ -1,12 +1,11 @@
 package com.latticeengines.camille.exposed.config.bootstrap;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,17 +62,17 @@ public class ServiceBootstrapManager {
         }
     }
 
-    public static List<Pair<String, BootstrapState>> getBootstrapStates() throws Exception {
+    public static List<AbstractMap.SimpleEntry<String, BootstrapState>> getBootstrapStates() throws Exception {
         Path servicesDirectoryPath = PathBuilder.buildServicesPath(CamilleEnvironment.getPodId());
         Camille camille = CamilleEnvironment.getCamille();
 
-        List<Pair<String, BootstrapState>> toReturn = new ArrayList<Pair<String, BootstrapState>>();
+        List<AbstractMap.SimpleEntry<String, BootstrapState>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, BootstrapState>>();
         try {
-            List<Pair<Document, Path>> children = camille.getChildren(servicesDirectoryPath);
-            for (Pair<Document, Path> child : children) {
-                String serviceName = child.getRight().getSuffix();
+            List<AbstractMap.SimpleEntry<Document, Path>> children = camille.getChildren(servicesDirectoryPath);
+            for (AbstractMap.SimpleEntry<Document, Path> child : children) {
+                String serviceName = child.getValue().getSuffix();
                 BootstrapState state = getBootstrapState(serviceName);
-                toReturn.add(new MutablePair<String, BootstrapState>(serviceName, state));
+                toReturn.add(new AbstractMap.SimpleEntry<String, BootstrapState>(serviceName, state));
             }
         } catch (Exception e) {
             throw new Exception(String.format("Error encountered retrieving bootstrap states for all services"), e);

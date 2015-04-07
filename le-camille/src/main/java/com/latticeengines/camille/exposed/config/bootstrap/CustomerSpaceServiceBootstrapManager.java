@@ -1,13 +1,12 @@
 package com.latticeengines.camille.exposed.config.bootstrap;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,17 +77,17 @@ public class CustomerSpaceServiceBootstrapManager {
 
     }
 
-    public static List<Pair<String, BootstrapState>> getBootstrapStates(CustomerSpace space) throws Exception {
+    public static List<AbstractMap.SimpleEntry<String, BootstrapState>> getBootstrapStates(CustomerSpace space) throws Exception {
         Path servicesDirectoryPath = PathBuilder.buildCustomerSpaceServicesPath(CamilleEnvironment.getPodId(), space);
         Camille camille = CamilleEnvironment.getCamille();
 
-        List<Pair<String, BootstrapState>> toReturn = new ArrayList<Pair<String, BootstrapState>>();
+        List<AbstractMap.SimpleEntry<String, BootstrapState>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, BootstrapState>>();
         try {
-            List<Pair<Document, Path>> children = camille.getChildren(servicesDirectoryPath);
-            for (Pair<Document, Path> child : children) {
-                String serviceName = child.getRight().getSuffix();
+            List<AbstractMap.SimpleEntry<Document, Path>> children = camille.getChildren(servicesDirectoryPath);
+            for (AbstractMap.SimpleEntry<Document, Path> child : children) {
+                String serviceName = child.getValue().getSuffix();
                 BootstrapState state = getBootstrapState(serviceName, space);
-                toReturn.add(new MutablePair<String, BootstrapState>(serviceName, state));
+                toReturn.add(new AbstractMap.SimpleEntry<String, BootstrapState>(serviceName, state));
             }
         } catch (Exception e) {
             throw new Exception(String.format("Error encountered retrieving bootstrap states for space %s", space), e);

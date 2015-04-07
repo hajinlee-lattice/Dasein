@@ -1,8 +1,8 @@
 package com.latticeengines.camille.exposed.config;
 
+import java.util.AbstractMap;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
 
 import com.latticeengines.domain.exposed.camille.Document;
@@ -23,7 +23,7 @@ public interface ConfigurationControllerInterface<T extends ConfigurationScope> 
 
     Document get(Path path, CuratorWatcher watcher) throws Exception;
 
-    List<Pair<Document, Path>> getChildren(Path path) throws Exception;
+    List<AbstractMap.SimpleEntry<Document, Path>> getChildren(Path path) throws Exception;
 
     DocumentDirectory getDirectory(Path path) throws Exception;
 

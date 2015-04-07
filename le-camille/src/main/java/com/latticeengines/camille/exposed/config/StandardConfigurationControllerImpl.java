@@ -1,9 +1,9 @@
 package com.latticeengines.camille.exposed.config;
 
+import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
@@ -70,15 +70,15 @@ public class StandardConfigurationControllerImpl<T extends ConfigurationScope> i
     }
 
     @Override
-    public List<Pair<Document, Path>> getChildren(Path path) throws Exception {
+    public List<AbstractMap.SimpleEntry<Document, Path>> getChildren(Path path) throws Exception {
         // TODO all of this should really be handled in the controller itself
         Path absolute = translator.getAbsolutePath(path);
-        List<Pair<Document, Path>> children = camille.getChildren(absolute);
+        List<AbstractMap.SimpleEntry<Document, Path>> children = camille.getChildren(absolute);
 
         // Make paths local
-        Iterator<Pair<Document, Path>> iter = children.iterator();
+        Iterator<AbstractMap.SimpleEntry<Document, Path>> iter = children.iterator();
         while (iter.hasNext()) {
-            Pair<Document, Path> pair = iter.next();
+            AbstractMap.SimpleEntry<Document, Path> pair = iter.next();
             pair.setValue(pair.getValue().local(path));
         }
         return children;

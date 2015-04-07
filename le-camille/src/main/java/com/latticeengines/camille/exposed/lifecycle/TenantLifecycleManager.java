@@ -1,10 +1,9 @@
 package com.latticeengines.camille.exposed.lifecycle;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -115,20 +114,20 @@ public class TenantLifecycleManager {
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId));
     }
 
-    public static List<Pair<String, TenantInfo>> getAll(String contractId) throws IllegalArgumentException, Exception {
+    public static List<AbstractMap.SimpleEntry<String, TenantInfo>> getAll(String contractId) throws IllegalArgumentException, Exception {
         LifecycleUtils.validateIds(contractId);
-        List<Pair<String, TenantInfo>> toReturn = new ArrayList<Pair<String, TenantInfo>>();
+        List<AbstractMap.SimpleEntry<String, TenantInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, TenantInfo>>();
 
         Camille c = CamilleEnvironment.getCamille();
-        List<Pair<Document, Path>> childPairs = c.getChildren(PathBuilder.buildTenantsPath(
+        List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder.buildTenantsPath(
                 CamilleEnvironment.getPodId(), contractId));
 
-        for (Pair<Document, Path> childPair : childPairs) {
-            Document tenantPropertiesDocument = c.get(childPair.getRight().append(PathConstants.PROPERTIES_FILE));
+        for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
+            Document tenantPropertiesDocument = c.get(childPair.getValue().append(PathConstants.PROPERTIES_FILE));
             TenantProperties properties = DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
 
             TenantInfo tenantInfo = new TenantInfo(properties);
-            toReturn.add(new MutablePair<String, TenantInfo>(childPair.getRight().getSuffix(), tenantInfo));
+            toReturn.add(new AbstractMap.SimpleEntry<String, TenantInfo>(childPair.getValue().getSuffix(), tenantInfo));
         }
 
         return toReturn;
