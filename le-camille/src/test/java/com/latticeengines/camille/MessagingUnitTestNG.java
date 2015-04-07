@@ -89,7 +89,7 @@ public class MessagingUnitTestNG {
 
         queue.start();
 
-        Thread.sleep(10000000);
+        Thread.sleep(10000L);
         queue.close();
 
         List<AbstractMap.SimpleEntry<Document, Path>> children = CamilleEnvironment.getCamille().getChildren(
