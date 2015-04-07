@@ -12,11 +12,14 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
@@ -122,6 +125,17 @@ public class BatonServiceImpl implements BatonService {
         } catch (Exception e) {
             log.error("Error retrieving tenants", e);
             return false;
+        }
+    }
+
+    @Override
+    public BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String serviceName) {
+        CustomerSpace customerSpace = new CustomerSpace(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        try {
+            return CustomerSpaceServiceBootstrapManager.getBootstrapState(serviceName, customerSpace);
+        } catch (Exception e) {
+            log.error("Error retrieving tenant service state", e);
+            return null;
         }
     }
 
