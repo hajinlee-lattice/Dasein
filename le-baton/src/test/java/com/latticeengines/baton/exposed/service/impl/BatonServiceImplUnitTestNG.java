@@ -14,7 +14,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
-import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
+import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
@@ -33,8 +33,8 @@ public class BatonServiceImplUnitTestNG {
 
         CamilleEnvironment.start(Mode.BOOTSTRAP, config);
 
-        if (TenantLifecycleManager.exists("CONTRACT1", "TENANT1")) {
-            TenantLifecycleManager.delete("CONTRACT1", "TENANT1");
+        if (ContractLifecycleManager.exists("CONTRACT1")) {
+            ContractLifecycleManager.delete("CONTRACT1");
         }
         CustomerSpaceProperties props = new CustomerSpaceProperties();
         props.description = "Test tenant";
