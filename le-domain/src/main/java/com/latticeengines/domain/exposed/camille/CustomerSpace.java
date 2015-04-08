@@ -16,7 +16,7 @@ public class CustomerSpace {
     // Serialization constructor.
     public CustomerSpace() {
     }
-
+    
     public CustomerSpace(String contractId, String tenantId, String spaceId) {
         this.contractId = contractId;
         this.tenantId = tenantId;

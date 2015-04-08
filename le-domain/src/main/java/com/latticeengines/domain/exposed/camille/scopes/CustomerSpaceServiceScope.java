@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.camille.scopes;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public class CustomerSpaceServiceScope extends ConfigurationScope {
@@ -8,22 +11,25 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
     private String spaceId;
     private String serviceName;
     private int dataVersion;
-
+    private Map<String, String> properties;
+    
     public CustomerSpaceServiceScope(String contractId, String tenantId, String spaceId, String serviceName,
             int dataVersion) {
+        this(contractId, tenantId, spaceId, serviceName, dataVersion, new HashMap<String, String>());
+    }
+
+    public CustomerSpaceServiceScope(String contractId, String tenantId, String spaceId, String serviceName,
+            int dataVersion, Map<String, String> properties) {
         this.contractId = contractId;
         this.tenantId = tenantId;
         this.spaceId = spaceId;
         this.serviceName = serviceName;
         this.dataVersion = dataVersion;
+        this.properties = properties;
     }
 
     public CustomerSpaceServiceScope(CustomerSpace space, String serviceName, int dataVersion) {
-        this.contractId = space.getContractId();
-        this.tenantId = space.getTenantId();
-        this.spaceId = space.getSpaceId();
-        this.serviceName = serviceName;
-        this.dataVersion = dataVersion;
+        this(space.getContractId(), space.getTenantId(), space.getSpaceId(), serviceName, dataVersion);
     }
 
     @Override
@@ -126,5 +132,13 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
     @Override
     public Type getType() {
         return Type.CUSTOMER_SPACE_SERVICE;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 }

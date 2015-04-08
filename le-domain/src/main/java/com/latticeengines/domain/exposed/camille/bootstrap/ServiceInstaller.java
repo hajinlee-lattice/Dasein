@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.camille.bootstrap;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 public interface ServiceInstaller {
-    DocumentDirectory install(String serviceName, int dataVersion);
+    DocumentDirectory install(String serviceName, int dataVersion, Map<String, String> properties);
 }

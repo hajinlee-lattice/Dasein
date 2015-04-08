@@ -1,12 +1,21 @@
 package com.latticeengines.domain.exposed.camille.scopes;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ServiceScope extends ConfigurationScope {
     private String serviceName;
     private int dataVersion;
+    private Map<String, String> properties;
     
     public ServiceScope(String serviceName, int dataVersion) {
+        this(serviceName, dataVersion, new HashMap<String, String>());
+    }
+    
+    public ServiceScope(String serviceName, int dataVersion, Map<String, String> properties) {
         this.serviceName = serviceName;
         this.dataVersion = dataVersion;
+        this.setProperties(properties);
     }
 
     public String getServiceName() {
@@ -57,5 +66,13 @@ public class ServiceScope extends ConfigurationScope {
     @Override
     public Type getType() {
         return Type.SERVICE;
+    }
+
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
 }
