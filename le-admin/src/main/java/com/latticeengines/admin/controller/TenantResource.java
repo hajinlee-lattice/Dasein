@@ -1,7 +1,9 @@
 package com.latticeengines.admin.controller;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,16 @@ public class TenantResource {
         return tenantService.createTenant(contractId, tenantId, info);
     }
     
+    @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Bootstrap a Lattice tenant service")
+    public Boolean bootstrapTenant(@PathVariable String tenantId, //
+            @PathVariable String serviceName,
+            @RequestParam(value = "contractId") String contractId, //
+            @RequestBody Map<String, String> overrideProperties) {
+        return tenantService.bootstrap(contractId, tenantId, serviceName, overrideProperties);
+    }
+    
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenants for a particular contract id, or all tenants if contractId is null")
@@ -62,6 +74,13 @@ public class TenantResource {
     public SerializableDocumentDirectory getServiceConfig(@RequestParam(value = "contractId") String contractId, //
             @PathVariable String tenantId, @PathVariable String serviceName) {
         return null;
+    }
+
+    @RequestMapping(value = "/services/", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get list of tenant services")
+    public List<String> getServices() {
+        return new ArrayList<String>(tenantService.getRegisteredServices());
     }
     
     @RequestMapping(value = "/services/{serviceName}/default", method = RequestMethod.GET, headers = "Accept=application/json")

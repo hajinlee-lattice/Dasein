@@ -2,6 +2,7 @@ package com.latticeengines.admin.service;
 
 import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -19,4 +20,6 @@ public interface TenantService {
     Set<String> getRegisteredServices();
 
     BootstrapState getTenantServiceState(String contractId, String tenantId, String serviceName);
+    
+    Boolean bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties);
 }

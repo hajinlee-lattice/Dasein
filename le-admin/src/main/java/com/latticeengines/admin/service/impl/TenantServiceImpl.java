@@ -11,13 +11,18 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 @Component("tenantService")
 public class TenantServiceImpl implements TenantService {
+
+    @Autowired
+    private BatonService batonService;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -55,6 +60,12 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public BootstrapState getTenantServiceState(String contractId, String tenantId, String serviceName) {
         return tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
+    }
+
+    @Override
+    public Boolean bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties) {
+        return batonService.bootstrap(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName,
+                properties);
     }
 
 }
