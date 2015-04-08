@@ -26,4 +26,9 @@ public class SkaldBootstrapper implements CustomerSpaceServiceInstaller, Custome
 
         return new DocumentDirectory();
     }
+
+    @Override
+    public DocumentDirectory getDefaultConfiguration(String serviceName) {
+        return null;
+    }
 }
