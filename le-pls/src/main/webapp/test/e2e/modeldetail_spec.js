@@ -56,18 +56,18 @@ describe('model detail', function() {
         clickToggleButton(container);
 
         checkMoreDisplayed(container, false);
-    };
+    }
 
     //==================================================
     // Helpers
     //==================================================
     function sleep() {
         browser.driver.sleep(1000);
-    };
+    }
 
     function clickToggleButton(container) {
         container.element(by.id("detail-toggle")).click(); sleep();
-    };
+    }
 
     function checkHeader(container) {
         checkText(container.element(by.id("detail-display-name")));
@@ -84,7 +84,7 @@ describe('model detail', function() {
         checkDisplayed(container.element(by.id("detail-conversion-rate")), expected);
         checkDisplayed(container.element(by.id("detail-internal-attributes")), expected);
         checkDisplayed(container.element(by.id("detail-external-attributes")), expected);
-    };
+    }
 
     function checkMoreValues(container) {
         checkInt(container.element(by.id("detail-total-leads")));
@@ -94,7 +94,7 @@ describe('model detail', function() {
         checkFloat(container.element(by.id("detail-conversion-rate")), 1);
         checkInt(container.element(by.id("detail-internal-attributes")));
         checkInt(container.element(by.id("detail-external-attributes")));
-    };
+    }
 
     function checkText(elem) {
         elem.isPresent().then(function (present) {
@@ -106,7 +106,7 @@ describe('model detail', function() {
                 });
             });
         });
-    };
+    }
 
     function checkTextValue(elem, expectedText) {
         elem.isPresent().then(function (present) {
@@ -125,7 +125,7 @@ describe('model detail', function() {
                 });
             });
         });
-    };
+    }
 
     function checkDate(elem) {
         elem.isPresent().then(function (present) {
@@ -149,7 +149,7 @@ describe('model detail', function() {
                 });
             });
         });
-    };
+    }
 
     function checkDisplayed(elem, expected) {
         elem.isPresent().then(function (present) {
@@ -158,7 +158,7 @@ describe('model detail', function() {
                 expect(displayed).toBe(expected);
             });
         });
-    };
+    }
 
     function checkInt(elem) {
         elem.isPresent().then(function (present) {
@@ -172,7 +172,7 @@ describe('model detail', function() {
                 });
             });
         });
-    };
+    }
 
     function checkFloat(elem, trim) {
         elem.isPresent().then(function (present) {
@@ -186,5 +186,5 @@ describe('model detail', function() {
                 });
             });
         });
-    };
+    }
 });

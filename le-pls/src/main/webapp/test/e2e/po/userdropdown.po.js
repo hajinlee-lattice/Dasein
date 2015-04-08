@@ -8,8 +8,8 @@ var UserDropdown = function() {
         return element(by.linkText(name));
     };
 
-    this.toggleDropdown = function(name) {
-        this.getUserLink(name).click();
+    this.toggleDropdown = function() {
+        element(by.css('a.dropdown-toggle')).click();
     };
 };
 

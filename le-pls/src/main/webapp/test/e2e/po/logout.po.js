@@ -1,8 +1,7 @@
 'use strict';
 
 var Logout = function() {
-    var loginPage = require('./login.po');
-    var userDropdown = require('./userdropdown.po');    
+    var userDropdown = require('./userdropdown.po');
  
     this.logout = function(name) {
         userDropdown.getUserLink(name).click();

@@ -1,91 +1,75 @@
 describe('user management', function() {
 
-    var params = browser.params;
+    var ExternalUser = require('./po/externaluser.po');
+    var ExternalAdmin = require('./po/externaladmin.po');
+    var InternalUser = require('./po/internaluser.po');
+    var InternalAdmin = require('./po/internaladmin.po');
+    var SuperAdmin = require('./po/superadmin.po');
 
-    var loginPage = require('./po/login.po');
-    var logoutPage = require('./po/logout.po');
-    var tenants = require('./po/tenantselection.po');
-    var userDropdown = require('./po/userdropdown.po');
-    var userManagement = require('./po/usermgmt.po');
-    var numOfUsers = 0;
-    var newUserEmail;
-    var newUserPassword;
+    ExternalUser.testUserManagement();
 
-    function randomName()
-    {
-        var text = "";
-        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    ExternalAdmin.testUserManagement();
 
-        for( var i=0; i < 5; i++ )
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
+    InternalUser.testUserManagement();
 
-        return text;
-    }
+    InternalAdmin.testUserManagement();
 
-    it('should verify user management is invisible to non-admin users', function () {
-        loginPage.loginAsNonAdminToTenant(params.tenantIndex);
-
-        userDropdown.toggleDropdown(params.nonAdminDisplayName);
-        expect(userDropdown.ManageUsersLink.isPresent()).toBe(false);
-        userDropdown.toggleDropdown(params.nonAdminDisplayName);
-
-        logoutPage.logoutAsNonAdmin();
-    }, 60000);
+    SuperAdmin.testUserManagement();
 
 
-    it('should verify user management is visible to admin users', function () {
-        loginPage.loginAsAdminToTenant(params.tenantIndex);
-        userDropdown.toggleDropdown(params.adminDisplayName);
-        expect(userDropdown.ManageUsersLink.isDisplayed()).toBe(true);
-    }, 60000);
-
-
-    it('should see user management page', function () {
-        // check existence of users table
-        userDropdown.ManageUsersLink.click();
-        expect(userManagement.UsersPanel.isDisplayed()).toBe(true);
-        element.all(by.repeater('user in data')).then(function(elements){
-            numOfUsers = elements.length;
-        });
-    });
-
-    it('should see add new user model', function () {
-        // popup add user
-        userManagement.getAddNewUserButton().click();
-        browser.driver.sleep(1000);
-        expect(userManagement.NewUserModal.isDisplayed()).toBe(true);
-    });
-
-    it('should be able to canceling by clicking cancel button', function () {
-        var email = 'LE_' + randomName() + '@e2e.test.com';
-        element(by.model('user.FirstName')).sendKeys('E2E');
-        element(by.model('user.LastName')).sendKeys('Tester');
-        element(by.model('user.Email')).sendKeys(email);
-        userManagement.getAddNewUserCancelButton().click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
-        expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
-    });
-
-    it('should be able to canceling by clicking cross symbol', function () {
-        var email = 'LE_' + randomName() + '@e2e.test.com';
-        userManagement.getAddNewUserButton().click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
-        element(by.model('user.FirstName')).sendKeys('E2E');
-        element(by.model('user.LastName')).sendKeys('Tester');
-        element(by.model('user.Email')).sendKeys(email);
-        browser.waitForAngular();
-
-        userManagement.getAddNewUserCrossSymbol().click();
-        browser.waitForAngular();
-        browser.driver.sleep(1000);
-
-        // check cancel by cross symbol
-        expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
-
-        logoutPage.logoutAsAdmin();
-    });
+    //it('should verify user management is visible to admin users', function () {
+    //    loginPage.loginAsAdminToTenant(params.tenantIndex);
+    //    userDropdown.toggleDropdown(params.adminDisplayName);
+    //    expect(userDropdown.ManageUsersLink.isDisplayed()).toBe(true);
+    //}, 60000);
+    //
+    //
+    //it('should see user management page', function () {
+    //    // check existence of users table
+    //    userDropdown.ManageUsersLink.click();
+    //    expect(userManagement.UsersPanel.isDisplayed()).toBe(true);
+    //    element.all(by.repeater('user in data')).then(function(elements){
+    //        numOfUsers = elements.length;
+    //    });
+    //});
+    //
+    //it('should see add new user model', function () {
+    //    // popup add user
+    //    userManagement.getAddNewUserButton().click();
+    //    browser.driver.sleep(1000);
+    //    expect(userManagement.NewUserModal.isDisplayed()).toBe(true);
+    //});
+    //
+    //it('should be able to canceling by clicking cancel button', function () {
+    //    var email = 'LE_' + randomName() + '@e2e.test.com';
+    //    element(by.model('user.FirstName')).sendKeys('E2E');
+    //    element(by.model('user.LastName')).sendKeys('Tester');
+    //    element(by.model('user.Email')).sendKeys(email);
+    //    userManagement.getAddNewUserCancelButton().click();
+    //    browser.waitForAngular();
+    //    browser.driver.sleep(1000);
+    //    expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
+    //});
+    //
+    //it('should be able to canceling by clicking cross symbol', function () {
+    //    var email = 'LE_' + randomName() + '@e2e.test.com';
+    //    userManagement.getAddNewUserButton().click();
+    //    browser.waitForAngular();
+    //    browser.driver.sleep(1000);
+    //    element(by.model('user.FirstName')).sendKeys('E2E');
+    //    element(by.model('user.LastName')).sendKeys('Tester');
+    //    element(by.model('user.Email')).sendKeys(email);
+    //    browser.waitForAngular();
+    //
+    //    userManagement.getAddNewUserCrossSymbol().click();
+    //    browser.waitForAngular();
+    //    browser.driver.sleep(1000);
+    //
+    //    // check cancel by cross symbol
+    //    expect(element.all(by.repeater('user in data')).count()).toEqual(numOfUsers);
+    //
+    //    logoutPage.logoutAsAdmin();
+    //});
 
     //it('should verify create user', function () {
     //    // popup add user
@@ -313,10 +297,10 @@ describe('user management', function() {
     //}, 60000);
 
 
-    function sleep(time) {
-        if (time == null) { time = 2000; }
-        browser.waitForAngular();
-        browser.driver.sleep(time);
-    }
+    //function sleep(time) {
+    //    if (time == null) { time = 2000; }
+    //    browser.waitForAngular();
+    //    browser.driver.sleep(time);
+    //}
 });
 

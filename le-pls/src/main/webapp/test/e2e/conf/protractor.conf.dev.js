@@ -3,9 +3,16 @@ exports.config = {
     // protractor is called.
     // Spec patterns are relative to the current working directly when
     // protractor is called.
-    specs: ['../**/*_spec.js'],
-    //specs: ['../**/mainflow_spec.js'],
-    //specs: ['../**/usermgmt_spec.js'],
+    //specs: ['../**/*_spec.js'],
+    specs: [
+        '../**/mainflow_spec.js',
+        '../**/modellist_spec.js',
+        '../**/modeldetail_spec.js',
+        '../**/predictors_spec.js',
+        '../**/thresholdexplorer_spec.js',
+        '../**/leadsample_spec.js',
+        '../**/usermgmt_spec.js'
+    ],
 
 	params: {
 		tenantIndex: 1,
