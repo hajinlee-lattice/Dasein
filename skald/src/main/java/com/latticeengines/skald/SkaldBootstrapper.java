@@ -1,5 +1,7 @@
 package com.latticeengines.skald;
 
+import java.util.Map;
+
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -14,12 +16,12 @@ public class SkaldBootstrapper implements CustomerSpaceServiceInstaller, Custome
 
     @Override
     public DocumentDirectory upgrade(CustomerSpace space, String service, int sourceVersion, int targetVersion,
-            DocumentDirectory source) {
+            DocumentDirectory source, Map<String, String> properties) {
         return source;
     }
 
     @Override
-    public DocumentDirectory install(CustomerSpace space, String service, int dataVersion) {
+    public DocumentDirectory install(CustomerSpace space, String service, int dataVersion, Map<String, String> properties) {
         // TODO Probably worth installing empty defaults for necessary files.
 
         return new DocumentDirectory();
