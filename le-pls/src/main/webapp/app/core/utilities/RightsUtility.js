@@ -41,4 +41,6 @@ app.service('RightsUtility', function (_, BrowserStorageUtility) {
     this.maySeeAdminInfo = function() { return this.currentUserMay("View", "Reporting"); };
     this.maySeeModelCreationHistory = function() { return this.currentUserMay("View", "Reporting"); };
 
+    this.maySeeSystemSetup = function() { return this.currentUserMay("Edit", "Configuration"); };
+
 });

@@ -17,11 +17,8 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
 
     $scope.userDisplayName = clientSession.DisplayName;
     $scope.showUserManagement = RightsUtility.maySeeUserManagement();
-
-    $scope.isShowModelCreationHistory = false;
-    if (RightsUtility.maySeeModelCreationHistory())  {
-        $scope.isShowModelCreationHistory = true;
-    }
+    $scope.showSystemSetup =  RightsUtility.maySeeSystemSetup();
+    $scope.showModelCreationHistory = RightsUtility.maySeeModelCreationHistory();
     
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {
@@ -44,7 +41,15 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         
         $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
     };
-    
+
+    $scope.systemSetupClicked = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        //TODO:song to be finished
+        //$rootScope.$broadcast(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
+    };
+
     $scope.showModelCreationHistory = function ($event) {
         if ($event != null) {
             $event.preventDefault();

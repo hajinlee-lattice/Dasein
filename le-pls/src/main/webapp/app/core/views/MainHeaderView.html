@@ -11,9 +11,8 @@
                 <ul class="dropdown-menu dropdown-menu-2">
                     <li><a href="#" data-ng-click="updatePasswordClicked($event)">{{ResourceUtility.getString('HEADER_UPDATE_PASSWORD')}}</a></li>
                     <li data-ng-if="showUserManagement"><a href="#" data-ng-click="userManagementClicked($event)">{{ResourceUtility.getString('HEADER_MANAGE_USERS')}}</a></li>
-                    <li data-ng-if="isShowModelCreationHistory">
-                        <a href="#" data-ng-click="showModelCreationHistory($event)">{{ResourceUtility.getString('MODEL_LIST_CREATION_HISTORY')}}</a>
-                    </li>
+                    <li data-ng-if="showSystemSetup"><a href="#" data-ng-click="systemSetupClicked($event)">{{ResourceUtility.getString('HEADER_SYSTEM_SETUP')}}</a></li>
+                    <li data-ng-if="showModelCreationHistory"><a href="#" data-ng-click="showModelCreationHistory($event)">{{ResourceUtility.getString('MODEL_LIST_CREATION_HISTORY')}}</a></li>
                     <li><a href="#" data-ng-click="logoutClicked($event)">{{ResourceUtility.getString('HEADER_LOGOUT')}}</a></li>
                 </ul>
             </li>
