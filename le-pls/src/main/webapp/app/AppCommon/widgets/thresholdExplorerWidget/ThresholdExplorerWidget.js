@@ -12,7 +12,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
     }
 
     var data = modelSummary.ThresholdChartData;
-
+    var targetSet = false;
     //==================================================
     // Specify Dimensions
     //==================================================
@@ -82,6 +82,7 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
+        .style("cursor", "pointer")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     //==================================================
@@ -482,31 +483,46 @@ angular.module('mainApp.appCommon.widgets.ThresholdExplorerWidget', [
         .attr("height", height + 20)
         .style("fill", "none")
         .style("pointer-events", "all")
-        .on("mouseout", captureMouseOut)
-        .on("mousemove", captureMouseMove);
+        .on("mousemove", captureMouseMove)
+        .on("mousedown", captureMouseDown);
 
     //==================================================
     // Capture Area: MouseMove
     //==================================================
     var bisectLeads = d3.bisector(function(d) { return d.leads; }).left;
     function captureMouseMove() {
+        if (targetSet) {
+            return;
+        }
         var x0 = x.invert(d3.mouse(this)[0]),
             i = bisectLeads(data, x0, 1),
             d0 = data[i - 1],
             d1 = data[i],
             d = x0 - d0.leads > d1.leads - x0 ? d1 : d0;
 
-        if (d.leads === 0)
+        if (d.leads === 0) {
             updateInfoElements(data[1]);
-        else
+        } else {
             updateInfoElements(d);
+        }
     }
+    
+    //==================================================
+    // Capture Area: MouseDown
+    //==================================================
+    function captureMouseDown() {
+        targetSet = !targetSet;
+        var x0 = x.invert(d3.mouse(this)[0]),
+            i = bisectLeads(data, x0, 1),
+            d0 = data[i - 1],
+            d1 = data[i],
+            d = x0 - d0.leads > d1.leads - x0 ? d1 : d0;
 
-    //==================================================
-    // Capture Area: MouseOut
-    //==================================================
-    function captureMouseOut() {
-        setDefaultInfoElements();
+        if (d.leads === 0) {
+            updateInfoElements(data[1]);
+        } else {
+            updateInfoElements(d);
+        }
     }
 })
 
