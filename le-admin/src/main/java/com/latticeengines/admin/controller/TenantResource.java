@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
@@ -56,14 +56,21 @@ public class TenantResource {
         return tenantService.deleteTenant(contractId, tenantId);
     }
     
-    @RequestMapping(value = "/{tenantId}/services/{serviceId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get config for currently provisioned tenant service")
-    public DocumentDirectory getServiceConfig(@RequestParam(value = "contractId") String contractId, //
-            @PathVariable String tenantId, @PathVariable String serviceId) {
+    public SerializableDocumentDirectory getServiceConfig(@RequestParam(value = "contractId") String contractId, //
+            @PathVariable String tenantId, @PathVariable String serviceName) {
         return null;
     }
     
+    @RequestMapping(value = "/services/{serviceName}/default", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get default config for tenant service")
+    public SerializableDocumentDirectory getServiceDefaultConfig(@PathVariable String serviceName) {
+        return null;
+    }
+
     @RequestMapping(value = "/{tenantId}/services/{serviceName}/state", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get state for tenant service")

@@ -1,6 +1,7 @@
 package com.latticeengines.admin.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
@@ -8,6 +9,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
@@ -25,5 +27,11 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
         BootstrapState state = tenantEntityMgr.getTenantServiceState(scope.getContractId(), scope.getTenantId(), scope.getServiceName());
         assertEquals(state.state, BootstrapState.State.OK);
         assertEquals(state.installedVersion, 1);
+    }
+    
+    @Test(groups = "functional")
+    public void getDefaultTenantServiceConfig() {
+        SerializableDocumentDirectory dir = tenantEntityMgr.getDefaultTenantServiceConfig(testLatticeComponent.getScope().getServiceName());
+        assertNotNull(dir.getDocumentDirectory());
     }
 }

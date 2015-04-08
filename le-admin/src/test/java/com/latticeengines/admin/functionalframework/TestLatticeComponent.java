@@ -1,9 +1,13 @@
 package com.latticeengines.admin.functionalframework;
 
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Component;
@@ -20,28 +24,32 @@ import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScop
 
 @Component("testLatticeComponent")
 public class TestLatticeComponent extends LatticeComponent {
-    
+
     private CustomerSpaceServiceInstaller installer = new TestInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new TestUpgrader();
-    
+
     private static File componentConfigSourceDir;
-    
-    private CustomerSpaceServiceScope scope = new CustomerSpaceServiceScope("CONTRACT1", //
-            "TENANT1", //
-            CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, //
-            getName(), //
-            1);
- 
-    
+
+    private CustomerSpaceServiceScope scope = null;
+
     public TestLatticeComponent() throws Exception {
         componentConfigSourceDir = Files.createTempDir();
-        
+
         createTextFile(componentConfigSourceDir + "/fc.json", "{ \"PROP1\": \"value1\" }");
         createDirectory(componentConfigSourceDir + "/1");
         createTextFile(componentConfigSourceDir + "/1/fc_1.json", "{ \"PROP2\": \"value2\" }");
-        
+
+        Map<String, String> overrideProps = new HashMap<>();
+        overrideProps.put("PROP1", "abc");
+
+        scope = new CustomerSpaceServiceScope("CONTRACT1", //
+                "TENANT1", //
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, //
+                getName(), //
+                1, //
+                overrideProps);
     }
-    
+
     public CustomerSpaceServiceScope getScope() {
         return scope;
     }
@@ -81,27 +89,38 @@ public class TestLatticeComponent extends LatticeComponent {
     public CustomerSpaceServiceUpgrader getUpgrader() {
         return upgrader;
     }
-    
-    public static class TestInstaller implements CustomerSpaceServiceInstaller {
 
-        @Override
-        public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion) {
+    public static class TestInstaller implements CustomerSpaceServiceInstaller {
+        
+        private DocumentDirectory getConvertedLocalDir(File localDir) {
             FileSystemGetChildrenFunction func;
             try {
                 func = new FileSystemGetChildrenFunction(componentConfigSourceDir);
                 return new DocumentDirectory(new Path("/"), func);
             } catch (IOException e) {
                 e.printStackTrace();
+                return null;
             }
-            return null;
+        }
+
+        @Override
+        public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion,
+                Map<String, String> properties) {
+            assertTrue(properties.containsKey("PROP1"));
+            return getConvertedLocalDir(componentConfigSourceDir);
+        }
+
+        @Override
+        public DocumentDirectory getDefaultConfiguration(String serviceName) {
+            return getConvertedLocalDir(componentConfigSourceDir);
         }
     }
-    
+
     public static class TestUpgrader implements CustomerSpaceServiceUpgrader {
 
         @Override
         public DocumentDirectory upgrade(CustomerSpace space, String serviceName, int sourceVersion, int targetVersion,
-                DocumentDirectory source) {
+                DocumentDirectory source, Map<String, String> properties) {
             return null;
         }
     }
