@@ -18,7 +18,7 @@ def updateUser(params):
     print 'Updating the user ...'
     headers = {"MagicAuthentication": "Security through obscurity!", "Content-Type": "application/json"}
     qpars = 'tenants=["' + params["tenant"] + '"]&namepattern=' + urllib.quote_plus(params["username"])
-    data = {"AccessLevel": params["accesslevel"]}
+    data = {"AccessLevel": params["accesslevel"], "OldPassword": params["oldpassword"], "NewPassword": params["newpassword"]}
     conn.request('PUT', "/pls/internal/users?" + qpars, json.dumps(data), headers=headers)
     response = conn.getresponse()
     print response.status, response.reason
@@ -33,6 +33,8 @@ if __name__ == "__main__":
     parser.add_option("-t", "--tenant", dest="tenant")
     parser.add_option("-u", "--username", dest="username")
     parser.add_option("-l", "--accesslevel", dest="accesslevel", default="EXTERNAL_USER", help="default = EXTERNAL_USER")
+    parser.add_option("--oldpswd", dest="oldpassword")
+    parser.add_option("--newpswd", dest="newpassword")
     (options, _) = parser.parse_args()
  
     updateUser(options.__dict__)
