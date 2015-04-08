@@ -184,7 +184,12 @@ public class UserServiceImpl implements UserService {
                 User user = userRights.getKey();
                 if (!user.getUsername().equals("admin")) {
                     AccessLevel accessLevel = getAccessLevel(userRights.getValue());
-                    user.setAccessLevel(accessLevel.name());
+                    if (accessLevel == null) {
+                        accessLevel = getAccessLevel(tenantId, user.getUsername());
+                    }
+                    if (accessLevel != null) {
+                        user.setAccessLevel(accessLevel.name());
+                    }
                     users.add(user);
                 }
             }

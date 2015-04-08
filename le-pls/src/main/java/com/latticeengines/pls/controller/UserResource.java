@@ -74,7 +74,12 @@ public class UserResource {
 
             List<User> users = new ArrayList<>();
             for (User user : userService.getUsers(tenantId)) {
-                if (userService.isVisible(currentLevel, AccessLevel.valueOf(user.getAccessLevel()))) {
+                String targetLevelString = user.getAccessLevel();
+                AccessLevel targetLevel = null;
+                if (targetLevelString != null) {
+                    targetLevel = AccessLevel.valueOf(targetLevelString);
+                }
+                if (userService.isVisible(currentLevel, targetLevel)) {
                     users.add(user);
                 }
             }
