@@ -2,6 +2,7 @@ package com.latticeengines.baton.exposed.service;
 
 import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -14,7 +15,7 @@ public interface BatonService {
 
     void loadDirectory(String source, String destination);
 
-    void bootstrap(String contractId, String tenantId, String spaceId, String serviceName);
+    Boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName, Map<String, String> properties);
 
     List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId);
 

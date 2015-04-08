@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
+import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
 public class BatonServiceImpl implements BatonService {
 
@@ -85,9 +87,22 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
-    public void bootstrap(String contractId, String tenantId, String spaceId, String serviceName) {
-        // TODO Auto-generated method stub
+    public Boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName,
+            Map<String, String> properties) {
+        CustomerSpaceServiceScope scope = new CustomerSpaceServiceScope(contractId, //
+                tenantId, //
+                spaceId, //
+                serviceName, //
+                1, //
+                properties);
 
+        try {
+            CustomerSpaceServiceBootstrapManager.bootstrap(scope);
+            return true;
+        } catch (Exception e) {
+            log.error("Error bootstrapping " + scope.toString(), e);
+            return false;
+        }
     }
 
     @Override
@@ -131,7 +146,8 @@ public class BatonServiceImpl implements BatonService {
 
     @Override
     public BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String serviceName) {
-        CustomerSpace customerSpace = new CustomerSpace(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        CustomerSpace customerSpace = new CustomerSpace(contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         try {
             return CustomerSpaceServiceBootstrapManager.getBootstrapState(serviceName, customerSpace);
         } catch (Exception e) {
