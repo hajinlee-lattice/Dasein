@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
@@ -22,4 +23,6 @@ public interface TenantService {
     BootstrapState getTenantServiceState(String contractId, String tenantId, String serviceName);
     
     Boolean bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties);
+    
+    SerializableDocumentDirectory  getDefaultTenantServiceConfig(String serviceName);
 }

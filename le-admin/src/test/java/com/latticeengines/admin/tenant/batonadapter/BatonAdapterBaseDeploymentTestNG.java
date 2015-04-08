@@ -7,8 +7,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 
 public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTestNGBase {
     
@@ -32,6 +34,17 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
             log.error("No component to tear down.");
         }
         deleteTenant(component);
+    }
+    
+    @Test(groups = "deployment")
+    public void getDefaultConfig() throws Exception {
+        LatticeComponent component = getLatticeComponent();
+        if (component == null) {
+            throw new Exception(String.format("Component with name %s is not registered."));
+        }
+        String url = String.format("%s/admin/tenants/services/%s/default", getRestHostPort(), component.getName());
+        SerializableDocumentDirectory dir = restTemplate.getForObject(url, SerializableDocumentDirectory.class);
+        testGetDefaultConfig(dir);
     }
     
     private LatticeComponent getLatticeComponent() throws Exception {
@@ -72,4 +85,6 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
     public abstract Class<? extends LatticeComponent> getLatticeComponentClassToTest();
     
     public abstract Map<String, String> getOverrideProperties();
+    
+    public abstract void testGetDefaultConfig(SerializableDocumentDirectory dir);
 }

@@ -87,7 +87,7 @@ public class TenantResource {
     @ResponseBody
     @ApiOperation(value = "Get default config for tenant service")
     public SerializableDocumentDirectory getServiceDefaultConfig(@PathVariable String serviceName) {
-        return null;
+        return tenantService.getDefaultTenantServiceConfig(serviceName);
     }
 
     @RequestMapping(value = "/{tenantId}/services/{serviceName}/state", method = RequestMethod.GET, headers = "Accept=application/json")

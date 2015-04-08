@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 
 public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
     
@@ -22,5 +23,11 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
     @Override
     public Class<? extends LatticeComponent> getLatticeComponentClassToTest() {
         return PLSComponent.class;
+    }
+
+    @Override
+    public void testGetDefaultConfig(SerializableDocumentDirectory dir) {
+        // TODO Auto-generated method stub
+        
     }
 }
