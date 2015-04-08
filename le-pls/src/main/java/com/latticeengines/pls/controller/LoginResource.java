@@ -55,7 +55,7 @@ public class LoginResource {
         LoginDocument doc = new LoginDocument();
 
         try {
-            Ticket ticket = globalAuthenticationService.authenticateUser(creds.getUsername(), creds.getPassword());
+            Ticket ticket = globalAuthenticationService.authenticateUser(creds.getUsername().toLowerCase(), creds.getPassword());
 
             doc.setRandomness(ticket.getRandomness());
             doc.setUniqueness(ticket.getUniqueness());

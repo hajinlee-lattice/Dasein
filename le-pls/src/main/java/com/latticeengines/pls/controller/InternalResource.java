@@ -1,14 +1,13 @@
 package com.latticeengines.pls.controller;
 
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.logging.Log;
@@ -32,12 +31,14 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
+import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
+import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.security.AccessLevel;
-import com.latticeengines.pls.security.RightsUtilities;
 import com.latticeengines.pls.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -48,6 +49,9 @@ import com.wordnik.swagger.annotations.ApiOperation;
 public class InternalResource extends InternalResourceBase {
 
     private static final Log LOGGER = LogFactory.getLog(InternalResource.class);
+
+    @Autowired
+    private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
@@ -156,9 +160,17 @@ public class InternalResource extends InternalResourceBase {
     ) throws URIException {
         checkHeader(request);
         String decodedNamePattern = URIUtil.decode(namePattern);
-        AccessLevel accessLevel = AccessLevel.EXTERNAL_USER;
+        AccessLevel accessLevel = null;
         if (userUpdateData.getAccessLevel() != null) {
             accessLevel = AccessLevel.valueOf(userUpdateData.getAccessLevel());
+        }
+        String oldPassword = null;
+        if (userUpdateData.getOldPassword() != null) {
+            oldPassword = DigestUtils.sha256Hex(userUpdateData.getOldPassword());
+        }
+        String newPassword = null;
+        if (userUpdateData.getNewPassword() != null) {
+            newPassword = DigestUtils.sha256Hex(userUpdateData.getNewPassword());
         }
 
         List<String> tenants = new ArrayList<>();
@@ -184,11 +196,31 @@ public class InternalResource extends InternalResourceBase {
 
             for (User user : userService.getUsers(tid)) {
                 if (user.getUsername().matches(decodedNamePattern)) {
-                    userService.assignAccessLevel(accessLevel, tid, user.getUsername());
-                    LOGGER.info(String.format(
-                            "User %s has been updated to %s for the tenant %s through the internal API",
-                            user.getUsername(), accessLevel.name(), tid
-                    ));
+                    if (accessLevel != null) {
+                        userService.assignAccessLevel(accessLevel, tid, user.getUsername());
+                        LOGGER.info(String.format(
+                                "User %s has been updated to %s for the tenant %s through the internal API",
+                                user.getUsername(), accessLevel.name(), tid
+                        ));
+                    }
+                    if (oldPassword != null && newPassword != null) {
+                        Ticket ticket = globalAuthenticationService.authenticateUser(user.getUsername(), oldPassword);
+
+                        Credentials oldCreds = new Credentials();
+                        oldCreds.setUsername(user.getUsername());
+                        oldCreds.setPassword(oldPassword);
+
+                        Credentials newCreds = new Credentials();
+                        newCreds.setUsername(user.getUsername());
+                        newCreds.setPassword(newPassword);
+                        globalUserManagementService.modifyLatticeCredentials(ticket, oldCreds, newCreds);
+
+                        LOGGER.info(String.format(
+                                "The password of user %s has been updated through the internal API", user.getUsername()
+                        ));
+
+                        globalAuthenticationService.discard(ticket);
+                    }
                 }
             }
         }
