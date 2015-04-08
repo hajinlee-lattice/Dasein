@@ -32,7 +32,7 @@ public class BatonServiceImpl implements BatonService {
     }.getClass().getEnclosingClass());
 
     @Override
-    public void createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo) {
+    public Boolean createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo) {
         try {
             if (!ContractLifecycleManager.exists(contractId)) {
                 log.info(String.format("Creating contract %s", contractId));
@@ -49,10 +49,11 @@ public class BatonServiceImpl implements BatonService {
                     defaultSpaceId, spaceInfo);
         } catch (Exception e) {
             log.error("Error creating tenant", e);
-            throw new RuntimeException("Error creating tenant", e);
+            return false;
         }
 
         log.info(String.format("Succesfully created tenant %s", tenantId));
+        return true;
     }
 
     @Override
@@ -135,6 +136,16 @@ public class BatonServiceImpl implements BatonService {
             return CustomerSpaceServiceBootstrapManager.getBootstrapState(serviceName, customerSpace);
         } catch (Exception e) {
             log.error("Error retrieving tenant service state", e);
+            return null;
+        }
+    }
+
+    @Override
+    public DocumentDirectory getDefaultConfiguration(String serviceName) {
+        try {
+            return CustomerSpaceServiceBootstrapManager.getDefaultConfiguration(serviceName);
+        } catch (Exception e) {
+            log.error("Error retrieving default config for service " + serviceName, e);
             return null;
         }
     }
