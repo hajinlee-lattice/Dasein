@@ -3,6 +3,8 @@ package com.latticeengines.admin.functionalframework;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,7 +59,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        createTenant();
+        createTenant("CONTRACT1", "TENANT1");
         CustomerSpaceServiceBootstrapManager.bootstrap(testLatticeComponent.getScope());
     }
     
@@ -66,17 +68,27 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         testLatticeComponent.tearDown();
     }
     
-    protected void createTenant() throws Exception {
-        if (ContractLifecycleManager.exists("CONTRACT1")) {
-            ContractLifecycleManager.delete("CONTRACT1");
+    protected void bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties) {
+        String url = String.format("%s/admin/tenants/%s/services/%s?contractId=%s", getRestHostPort(), tenantId, serviceName, contractId);
+        restTemplate.put(url, properties, new HashMap<>());
+    }
+    
+    protected void deleteTenant(String contractId, String tenantId) throws Exception {
+        String url = String.format("%s/admin/tenants/%s?contractId=%s",getRestHostPort(), tenantId, contractId);
+        restTemplate.delete(url, new HashMap<>());
+    }
+    
+    protected void createTenant(String contractId, String tenantId) throws Exception {
+        if (ContractLifecycleManager.exists(contractId)) {
+            ContractLifecycleManager.delete(contractId);
         }
         CustomerSpaceProperties props = new CustomerSpaceProperties();
-        props.description = "Test tenant";
+        props.description = String.format("Test tenant for contract id %s and tenant id %s", contractId, tenantId);
         props.displayName = "Tenant for testing";
         CustomerSpaceInfo info = new CustomerSpaceInfo(props, "");
         System.out.println(JsonUtils.serialize(info));
-        log.info(String.format("Creating tenant %s.%s in %s.", "CONTRACT1", "TENANT1", CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID));
-        String url = getRestHostPort() + "/admin/tenants/TENANT1?contractId=CONTRACT1";
+        log.info(String.format("Creating tenant %s.%s in %s.", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID));
+        String url = String.format("%s/admin/tenants/%s?contractId=%s",getRestHostPort(), tenantId, contractId);
         Boolean created = restTemplate.postForObject(url, info, Boolean.class);
         assertTrue(created);
     }
