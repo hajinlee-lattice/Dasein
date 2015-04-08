@@ -31,10 +31,12 @@ import com.latticeengines.domain.exposed.pls.ModelActivationResult;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
+import com.latticeengines.pls.security.AccessLevel;
 import com.latticeengines.pls.security.RightsUtilities;
 import com.latticeengines.pls.service.UserService;
 import com.wordnik.swagger.annotations.Api;
@@ -100,54 +102,100 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Delete users. Mainly for cleaning up testing users.")
     public SimpleBooleanResponse deleteUsers(
-        @RequestParam(value = "namepattern", required = false) String namePattern,
+        @RequestParam(value = "namepattern") String namePattern,
         @RequestParam(value = "tenants") String tenantIds,
         HttpServletRequest request
     ) throws URIException {
         checkHeader(request);
-        String decodedNamePattern = namePattern;
-        if (decodedNamePattern != null) {
-            decodedNamePattern = URIUtil.decode(namePattern);
+        String decodedNamePattern = URIUtil.decode(namePattern);
 
-            List<String> tenants = new ArrayList<>();
+        List<String> tenants = new ArrayList<>();
 
-            JsonNode tenantNodes;
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                tenantNodes = mapper.readTree(tenantIds);
-            } catch (IOException e) {
-                return SimpleBooleanResponse.getFailResponse(
+        JsonNode tenantNodes;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            tenantNodes = mapper.readTree(tenantIds);
+        } catch (IOException e) {
+            return SimpleBooleanResponse.getFailResponse(
                     Collections.singletonList("Could not parse the tenant id array.")
-                );
-            }
-            for (JsonNode node : tenantNodes) {
-                tenants.add(node.asText());
-            }
+            );
+        }
+        for (JsonNode node : tenantNodes) {
+            tenants.add(node.asText());
+        }
 
-            for (String tid: tenants) {
-                LOGGER.info(String.format(
-                    "Deleting users matching %s from the tenant %s using internal API",
+        for (String tid: tenants) {
+            LOGGER.info(String.format(
+                    "Deleting users matching %s from the tenant %s using the internal API",
                     decodedNamePattern, tid
-                ));
-                List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList
-                    = globalUserManagementService.getAllUsersOfTenant(tid);
-                for (Map.Entry<User, List<String>> userRight: userRightsList) {
-                    User user = userRight.getKey();
-                    if (user.getUsername().matches(decodedNamePattern)) {
-                        userService.deleteUser(tid, user.getUsername());
-                        LOGGER.info(String.format(
-                            "User %s has been deleted from the tenant %s through internal API",
+            ));
+            for (User user : userService.getUsers(tid)) {
+                if (user.getUsername().matches(decodedNamePattern)) {
+                    userService.deleteUser(tid, user.getUsername());
+                    LOGGER.info(String.format(
+                            "User %s has been deleted from the tenant %s through the internal API",
                             user.getUsername(), tid
-                        ));
-                    }
+                    ));
                 }
             }
-        } else {
-            LOGGER.info("Username pattern not found");
         }
 
         return SimpleBooleanResponse.getSuccessResponse();
     }
+
+
+    @RequestMapping(value = "/users",
+            method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update users. Mainly for upgrade from old GrantedRights to new AccessLevel.")
+    public SimpleBooleanResponse updateUsers(
+            @RequestParam(value = "namepattern") String namePattern,
+            @RequestParam(value = "tenants") String tenantIds,
+            @RequestBody UserUpdateData userUpdateData,
+            HttpServletRequest request
+    ) throws URIException {
+        checkHeader(request);
+        String decodedNamePattern = URIUtil.decode(namePattern);
+        AccessLevel accessLevel = AccessLevel.EXTERNAL_USER;
+        if (userUpdateData.getAccessLevel() != null) {
+            accessLevel = AccessLevel.valueOf(userUpdateData.getAccessLevel());
+        }
+
+        List<String> tenants = new ArrayList<>();
+
+        JsonNode tenantNodes;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            tenantNodes = mapper.readTree(tenantIds);
+        } catch (IOException e) {
+            return SimpleBooleanResponse.getFailResponse(
+                    Collections.singletonList("Could not parse the tenant id array.")
+            );
+        }
+        for (JsonNode node : tenantNodes) {
+            tenants.add(node.asText());
+        }
+
+        for (String tid: tenants) {
+            LOGGER.info(String.format(
+                    "Updating users matching %s in the tenant %s using the internal API",
+                    decodedNamePattern, tid
+            ));
+
+            for (User user : userService.getUsers(tid)) {
+                if (user.getUsername().matches(decodedNamePattern)) {
+                    userService.assignAccessLevel(accessLevel, tid, user.getUsername());
+                    LOGGER.info(String.format(
+                            "User %s has been updated to %s for the tenant %s through the internal API",
+                            user.getUsername(), accessLevel.name(), tid
+                    ));
+                }
+            }
+        }
+
+        return SimpleBooleanResponse.getSuccessResponse();
+    }
+
 
     @RequestMapping(value = "/{op}/{left}/{right}", method = RequestMethod.GET)
     @ResponseBody

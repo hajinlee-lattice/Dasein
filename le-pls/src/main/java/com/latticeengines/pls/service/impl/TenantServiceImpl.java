@@ -25,13 +25,12 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public void registerTenant(Tenant tenant) {
-        tenantEntityMgr.create(tenant);
         try {
             globalTenantManagementService.registerTenant(tenant);
         } catch (Exception e) {
             log.warn("Error registering tenant with GA.", e);
         }
-        
+        tenantEntityMgr.create(tenant);
     }
 
     @Override
@@ -42,7 +41,6 @@ public class TenantServiceImpl implements TenantService {
         } catch (Exception e) {
             log.warn("Error discarding tenant with GA.", e);
         }
-
     }
 
 

@@ -19,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -28,6 +29,7 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
+import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
@@ -37,6 +39,7 @@ import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementSe
 import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
 import com.latticeengines.pls.globalauth.authentication.impl.Constants;
 import com.latticeengines.pls.security.AccessLevel;
+import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.pls.service.UserService;
 
 public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
@@ -56,9 +59,25 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TenantService tenantService;
+
+    private Tenant tenant;
+
     @BeforeClass(groups = {"functional", "deployment"})
     public void setup() throws Exception {
         setupDbUsingAdminTenantIds(true, true);
+
+        tenant = new Tenant();
+        tenant.setName("Internal Resource Test Tenant");
+        tenant.setId("INTERNAL_RESOURCE_TEST_TENANT");
+        tenantService.discardTenant(tenant);
+        tenantService.registerTenant(tenant);
+    }
+
+    @AfterClass(groups = {"functional", "deployment"})
+    public void teardown() throws Exception {
+        tenantService.discardTenant(tenant);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -121,17 +140,12 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings("rawtypes")
     @Test(groups = "functional")
     public void deleteTestingUsers() throws URIException {
-        Tenant tenant = new Tenant();
-        tenant.setName("Test Tenant");
-        tenant.setId("Test_" + UUID.randomUUID().toString());
-        globalTenantManagementService.registerTenant(tenant);
-
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
 
         for (int i = 0; i < 3; i++) {
-            String username = "tester_" + UUID.randomUUID().toString() + "@test.com";
-            assertTrue(globalUserManagementService.deleteUser(username));
+            String username = "tester_" + UUID.randomUUID().toString() + "@test.lattice.local";
+            makeSureUserNoExists(username);
             createUser(username, username, "Test", "Tester");
             userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
         }
@@ -143,25 +157,64 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
         headers.add("Accept", "application/json");
         HttpEntity<JsonNode> requestEntity = new HttpEntity<>(null, headers);
         ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(
-            getRestAPIHostPort() + "/pls/internal/users?tenants=[\"" + tenant.getId() + "\"]&namepattern=" + pattern,
-            HttpMethod.DELETE,
-            requestEntity,
-            ResponseDocument.class
+                getRestAPIHostPort() + "/pls/internal/users?tenants=[\"" + tenant.getId() + "\"]&namepattern=" + pattern,
+                HttpMethod.DELETE,
+                requestEntity,
+                ResponseDocument.class
         );
         ResponseDocument response = responseEntity.getBody();
         assertTrue(response.isSuccess());
 
-        List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService.getAllUsersOfTenant(tenant.getId());
         boolean cleaned = true;
-        for (AbstractMap.SimpleEntry<User, List<String>> userRight : userRightsList) {
-            User user = userRight.getKey();
+        for (User user: userService.getUsers(tenant.getId())) {
             if (user.getUsername().matches(pattern)) {
                 cleaned = false;
-                break;
             }
+            makeSureUserNoExists(user.getUsername());
         }
-        assertTrue(cleaned);
 
-        globalTenantManagementService.discardTenant(tenant);
+        assertTrue(cleaned);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Test(groups = "functional")
+    public void updateUserAccessLevels() throws URIException {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+
+        for (int i = 0; i < 3; i++) {
+            String username = "tester_" + UUID.randomUUID().toString() + "@test.lattice.local";
+            makeSureUserNoExists(username);
+            createUser(username, username, "Test", "Tester");
+            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
+        }
+
+        String pattern = URIUtil.encodeQuery("tester_[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}@test.com");
+
+        UserUpdateData data = new UserUpdateData();
+        data.setAccessLevel(AccessLevel.INTERNAL_ADMIN.name());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+
+        ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(
+                getRestAPIHostPort() + "/pls/internal/users?tenants=[\"" + tenant.getId() + "\"]&namepattern=" + pattern,
+                HttpMethod.PUT,
+                requestEntity,
+                ResponseDocument.class
+        );
+        ResponseDocument response = responseEntity.getBody();
+        assertTrue(response.isSuccess());
+
+        boolean allUpdated = true;
+        for (User user: userService.getUsers(tenant.getId())) {
+            if (user.getUsername().matches(pattern)) {
+                allUpdated = allUpdated && user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name());
+            }
+            makeSureUserNoExists(user.getUsername());
+        }
+        assertTrue(allUpdated);
     }
 }
