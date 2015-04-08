@@ -8,4 +8,6 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 public interface CustomerSpaceServiceInstaller {
     
     DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties);
+    
+    DocumentDirectory getDefaultConfiguration(String serviceName);
 }
