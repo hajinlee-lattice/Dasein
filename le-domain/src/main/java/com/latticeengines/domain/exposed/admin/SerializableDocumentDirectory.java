@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.admin;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 public class SerializableDocumentDirectory {
@@ -13,10 +14,12 @@ public class SerializableDocumentDirectory {
         this.setDocumentDirectory(documentDirectory);
     }
 
+    @JsonIgnore
     public DocumentDirectory getDocumentDirectory() {
         return documentDirectory;
     }
 
+    @JsonIgnore
     public void setDocumentDirectory(DocumentDirectory documentDirectory) {
         this.documentDirectory = documentDirectory;
     }
