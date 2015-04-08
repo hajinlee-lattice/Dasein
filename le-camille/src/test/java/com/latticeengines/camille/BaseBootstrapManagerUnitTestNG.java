@@ -67,6 +67,11 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
                 throw new IllegalStateException();
             }
         }
+
+        @Override
+        public DocumentDirectory getDefaultConfiguration(String serviceName) {
+            return null;
+        }
     }
 
     public static class EvilBootstrapper implements CustomerSpaceServiceInstaller, CustomerSpaceServiceUpgrader,
@@ -85,6 +90,11 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         @Override
         public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
             throw new RuntimeException("VisiDB!");
+        }
+
+        @Override
+        public DocumentDirectory getDefaultConfiguration(String serviceName) {
+            return null;
         }
     }
 
