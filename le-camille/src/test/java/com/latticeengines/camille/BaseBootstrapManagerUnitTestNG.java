@@ -1,5 +1,6 @@
 package com.latticeengines.camille;
 
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 import com.latticeengines.camille.exposed.config.ConfigurationController;
@@ -38,7 +39,7 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
 
         @Override
         public DocumentDirectory upgrade(CustomerSpace space, String service, int sourceVersion, int targetVersion,
-                DocumentDirectory source) {
+                DocumentDirectory source, Map<String, String> properties) {
             if (sourceVersion == INITIAL_VERSION && targetVersion == UPGRADED_VERSION) {
                 return BaseBootstrapManagerUnitTestNG.getUpgradedConfiguration();
             } else {
@@ -47,7 +48,7 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         }
 
         @Override
-        public DocumentDirectory install(CustomerSpace space, String service, int dataVersion) {
+        public DocumentDirectory install(CustomerSpace space, String service, int dataVersion, Map<String, String> properties) {
             if (dataVersion == INITIAL_VERSION) {
                 return BaseBootstrapManagerUnitTestNG.getInitialConfiguration();
             } else if (dataVersion == UPGRADED_VERSION) {
@@ -57,7 +58,7 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
             }
         }
 
-        public DocumentDirectory install(String service, int dataVersion) {
+        public DocumentDirectory install(String service, int dataVersion, Map<String, String> properties) {
             if (dataVersion == INITIAL_VERSION) {
                 return BaseBootstrapManagerUnitTestNG.getInitialConfiguration();
             } else if (dataVersion == UPGRADED_VERSION) {
@@ -71,18 +72,18 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
     public static class EvilBootstrapper implements CustomerSpaceServiceInstaller, CustomerSpaceServiceUpgrader,
             ServiceInstaller {
         @Override
-        public DocumentDirectory install(String serviceName, int dataVersion) {
+        public DocumentDirectory install(String serviceName, int dataVersion, Map<String, String> properties) {
             throw new RuntimeException("Death!");
         }
 
         @Override
         public DocumentDirectory upgrade(CustomerSpace space, String serviceName, int sourceVersion, int targetVersion,
-                DocumentDirectory source) {
+                DocumentDirectory source, Map<String, String> properties) {
             throw new RuntimeException("Famine!");
         }
 
         @Override
-        public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion) {
+        public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
             throw new RuntimeException("VisiDB!");
         }
     }

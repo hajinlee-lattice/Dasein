@@ -55,7 +55,7 @@ public class CustomerSpaceServiceBootstrapManager {
             throw new IllegalArgumentException("Must register an upgrader and an installer for service "
                     + scope.getServiceName());
         }
-        bootstrapper.bootstrap(scope.getCustomerSpace(), scope.getDataVersion());
+        bootstrapper.bootstrap(scope.getCustomerSpace(), scope.getDataVersion(), scope.getProperties());
     }
 
     public static void reset(String serviceName, CustomerSpace space) {
@@ -77,7 +77,8 @@ public class CustomerSpaceServiceBootstrapManager {
 
     }
 
-    public static List<AbstractMap.SimpleEntry<String, BootstrapState>> getBootstrapStates(CustomerSpace space) throws Exception {
+    public static List<AbstractMap.SimpleEntry<String, BootstrapState>> getBootstrapStates(CustomerSpace space)
+            throws Exception {
         Path servicesDirectoryPath = PathBuilder.buildCustomerSpaceServicesPath(CamilleEnvironment.getPodId(), space);
         Camille camille = CamilleEnvironment.getCamille();
 
@@ -115,8 +116,9 @@ public class CustomerSpaceServiceBootstrapManager {
             this.upgrader = upgrader;
         }
 
-        public void bootstrap(CustomerSpace space, int executableVersion) throws Exception {
-            customerBootstrappers.putIfAbsent(space, new CustomerBootstrapper(space, serviceName, installer, upgrader));
+        public void bootstrap(CustomerSpace space, int executableVersion, Map<String, String> properties) throws Exception {
+            customerBootstrappers.putIfAbsent(space, new CustomerBootstrapper(space, serviceName, installer, upgrader,
+                    properties));
             CustomerBootstrapper bootstrapper = customerBootstrappers.get(space);
             bootstrapper.bootstrap(executableVersion);
         }
@@ -137,15 +139,17 @@ public class CustomerSpaceServiceBootstrapManager {
         private final Path serviceDirectoryPath;
         private boolean bootstrapped;
         private final String logPrefix;
+        private final Map<String, String> properties;
 
         public CustomerBootstrapper(CustomerSpace space, String serviceName, CustomerSpaceServiceInstaller installer,
-                CustomerSpaceServiceUpgrader upgrader) {
+                CustomerSpaceServiceUpgrader upgrader, Map<String, String> properties) {
             this.space = space;
             this.serviceName = serviceName;
             this.installer = installer;
             this.upgrader = upgrader;
             this.serviceDirectoryPath = getServiceDirectoryPath(space, serviceName);
             this.logPrefix = String.format("[Customer=%s, Service=%s] ", space, serviceName);
+            this.properties = properties;
         }
 
         public void bootstrap(int executableVersion) throws Exception {
@@ -166,7 +170,8 @@ public class CustomerSpaceServiceBootstrapManager {
         }
 
         private void install(int executableVersion) throws Exception {
-            InstallerAdaptor adaptor = new CustomerSpaceServiceInstallerAdaptor(installer, space, serviceName);
+            InstallerAdaptor adaptor = new CustomerSpaceServiceInstallerAdaptor(installer, space, serviceName,
+                    properties);
             BootstrapUtil.install(adaptor, executableVersion, serviceDirectoryPath, false, logPrefix);
         }
 

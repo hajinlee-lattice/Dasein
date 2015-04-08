@@ -1,6 +1,8 @@
 package com.latticeengines.camille.exposed.config.bootstrap;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
@@ -104,32 +106,36 @@ public class BootstrapUtil {
         private final CustomerSpace space;
         private final String service;
         private final CustomerSpaceServiceInstaller installer;
+        private final Map<String, String> properties;
 
         public CustomerSpaceServiceInstallerAdaptor(CustomerSpaceServiceInstaller installer, CustomerSpace space,
-                String service) {
+                String service, Map<String, String> properties) {
             this.space = space;
             this.service = service;
             this.installer = installer;
+            this.properties = properties;
         }
 
         @Override
         public DocumentDirectory install(int dataVersion) {
-            return installer.install(space, service, dataVersion);
+            return installer.install(space, service, dataVersion, properties);
         }
     }
 
     public static class ServiceInstallerAdaptor implements InstallerAdaptor {
         private final String service;
         private final ServiceInstaller installer;
+        private final Map<String, String> properties;
 
-        public ServiceInstallerAdaptor(ServiceInstaller installer, String service) {
+        public ServiceInstallerAdaptor(ServiceInstaller installer, String service, Map<String, String> properties) {
             this.service = service;
             this.installer = installer;
+            this.properties = properties;
         }
 
         @Override
         public DocumentDirectory install(int dataVersion) {
-            return installer.install(service, dataVersion);
+            return installer.install(service, dataVersion, properties);
         }
     }
 
@@ -165,7 +171,7 @@ public class BootstrapUtil {
 
                     // Upgrade
                     DocumentDirectory upgraded = upgrader.upgrade(space, serviceName, state.installedVersion,
-                            executableVersion, source);
+                            executableVersion, source, new HashMap<String, String>());
                     if (upgraded == null) {
                         throw new NullPointerException("Upgrader returned a null document directory");
                     }

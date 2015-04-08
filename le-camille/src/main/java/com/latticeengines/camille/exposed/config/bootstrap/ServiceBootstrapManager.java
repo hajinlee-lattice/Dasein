@@ -45,7 +45,7 @@ public class ServiceBootstrapManager {
         if (bootstrapper == null) {
             throw new IllegalArgumentException("Must register installer for service " + scope.getServiceName());
         }
-        bootstrapper.bootstrap(scope.getDataVersion());
+        bootstrapper.bootstrap(scope.getDataVersion(), scope.getProperties());
     }
 
     public static void reset(String serviceName) {
@@ -97,21 +97,21 @@ public class ServiceBootstrapManager {
             this.installer = installer;
         }
 
-        public void bootstrap(int executableVersion) throws Exception {
+        public void bootstrap(int executableVersion, Map<String, String> properties) throws Exception {
             if (!bootstrapped) {
                 synchronized (this) {
                     if (!bootstrapped) {
                         log.info("{}Running bootstrap", logPrefix);
-                        install(executableVersion);
+                        install(executableVersion, properties);
                         bootstrapped = true;
                     }
                 }
             }
         }
 
-        private void install(int executableVersion) throws Exception {
+        private void install(int executableVersion, Map<String, String> properties) throws Exception {
             Path serviceDirectoryPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), this.serviceName);
-            InstallerAdaptor adaptor = new ServiceInstallerAdaptor(installer, serviceName);
+            InstallerAdaptor adaptor = new ServiceInstallerAdaptor(installer, serviceName, properties);
             BootstrapUtil.install(adaptor, executableVersion, serviceDirectoryPath, false, logPrefix);
         }
     }
