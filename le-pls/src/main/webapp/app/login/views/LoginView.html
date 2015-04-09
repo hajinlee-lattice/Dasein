@@ -11,7 +11,7 @@
         </div>
 
         <!-- Login form -->
-        <form class="form-signin" data-ng-show="showLoginForm">
+        <div class="form-signin" data-ng-show="showLoginForm">
             <h2 class="form-signin-heading"><img src="assets/images/logo_login.png" alt="Lattice"></h2>
             <p class="error-message" data-ng-show="showLoginError">{{loginErrorMessage}}</p>
             <div class="login-wrap">
@@ -47,10 +47,10 @@
                     </div>
                 </div>
             </div>
-        </form>
+        </div>
         
         <!-- Forgot Password form -->
-        <form class="form-signin" data-ng-show="!showLoginForm && showForgotPassword">
+        <div class="form-signin" data-ng-show="!showLoginForm && showForgotPassword">
             <h2 class="form-signin-heading">
                 {{ResourceUtility.getString('FORGOT_PASSWORD_TITLE')}}
             </h2>
@@ -71,7 +71,7 @@
                     <button class="btn btn-primary" type="submit" data-ng-click="forgotPasswordOkClick()">{{ResourceUtility.getString('FORGOT_PASSWORD_SEND_EMAIL_BUTTON')}}</button>
                 </div>
             </div>
-        </form>
+        </div>
 
         <!-- Forgot Password success -->
         <div class="form-signin" data-ng-show="!showLoginForm && resetPasswordSuccess">
