@@ -52,16 +52,14 @@ public class UserServiceImpl implements UserService {
         User userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
 
         if (userByEmail != null) {
-            LOGGER.error(String.format("A user with the same email address %s already exists.", userByEmail));
-            return false;
+            LOGGER.warn(String.format("A user with the same email address %s already exists. Update instead of create user.", userByEmail));
+        } else {
+            try {
+                globalUserManagementService.registerUser(userRegistration.getUser(), userRegistration.getCredentials());
+            } catch (Exception e) {
+                LOGGER.warn("Error creating admin user.", e);
+            }
         }
-
-        try {
-            globalUserManagementService.registerUser(userRegistration.getUser(), userRegistration.getCredentials());
-        } catch (Exception e) {
-            LOGGER.warn("Error creating admin user.", e);
-        }
-
 
         String username = userRegistration.getUser().getUsername();
         assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant, username);

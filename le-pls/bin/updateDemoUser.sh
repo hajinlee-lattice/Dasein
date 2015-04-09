@@ -38,3 +38,4 @@ if __name__ == "__main__":
     (options, _) = parser.parse_args()
  
     updateUser(options.__dict__)
+
