@@ -28,16 +28,13 @@ public class ServiceBootstrapManager {
     private static Map<String, Bootstrapper> bootstrappers = new ConcurrentHashMap<String, Bootstrapper>();
 
     public static void register(String serviceName, ServiceProperties properties, ServiceInstaller installer) {
-        if (installer == null) {
-            throw new IllegalArgumentException("Installer cannot be null");
-        }
-
         Bootstrapper bootstrapper = bootstrappers.get(serviceName);
+        ServiceInstaller sandboxedInstaller = BootstrapUtil.sandbox(installer);
         if (bootstrapper == null) {
-            bootstrapper = new Bootstrapper(serviceName, properties, installer);
+            bootstrapper = new Bootstrapper(serviceName, properties, sandboxedInstaller);
             bootstrappers.put(serviceName, bootstrapper);
         } else {
-            bootstrapper.set(installer, properties);
+            bootstrapper.set(sandboxedInstaller, properties);
         }
     }
 

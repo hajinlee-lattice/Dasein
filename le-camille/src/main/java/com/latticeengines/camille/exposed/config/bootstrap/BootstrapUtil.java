@@ -1,5 +1,6 @@
 package com.latticeengines.camille.exposed.config.bootstrap;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -98,6 +99,13 @@ public class BootstrapUtil {
         }
     }
 
+    private static void removeStateFile(DocumentDirectory directory) {
+        Path stateFilePath = new Path(new String[]{PathConstants.BOOTSTRAP_STATE_FILE});
+        if (directory.get(stateFilePath) != null) {
+            directory.delete(stateFilePath);
+        }
+    }
+
     public static interface InstallerAdaptor {
         public DocumentDirectory install(int dataVersion);
     }
@@ -167,24 +175,22 @@ public class BootstrapUtil {
                     // Remove leading /etc/etc/Services/ServiceName/ from each
                     // path
                     source.makePathsLocal();
-                    // TODO filter out invisible documents
 
                     // Upgrade
                     DocumentDirectory upgraded = upgrader.upgrade(space, serviceName, state.installedVersion,
                             executableVersion, source, new HashMap<String, String>());
-                    if (upgraded == null) {
-                        throw new NullPointerException("Upgrader returned a null document directory");
-                    }
 
+                    
                     // Perform a transaction
                     CamilleTransaction transaction = new CamilleTransaction();
-
+                    
                     // - Delete all existing items in the hierarchy, leaf nodes
                     // -> root nodes
+                    Path stateFilePath = new Path(new String[]{PathConstants.BOOTSTRAP_STATE_FILE});
                     Iterator<DocumentDirectory.Node> iter = source.leafFirstIterator();
                     while (iter.hasNext()) {
                         DocumentDirectory.Node node = iter.next();
-                        if (!node.getPath().getSuffix().startsWith(PathConstants.INVISIBLE_FILE_PREFIX)) {
+                        if (!node.getPath().equals(stateFilePath)) {
                             transaction.delete(node.getPath().prefix(serviceDirectoryPath));
                         }
                     }
@@ -229,6 +235,74 @@ public class BootstrapUtil {
                             + e.getStackTrace()));
             throw e;
         }
+    }
+
+    public static CustomerSpaceServiceInstaller sandbox(final CustomerSpaceServiceInstaller installer) {
+        return new CustomerSpaceServiceInstaller() {
+
+            @Override
+            public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion,
+                    Map<String, String> properties) {
+                if (installer == null) {
+                    return new DocumentDirectory();
+                }
+
+                DocumentDirectory toReturn = installer.install(space, serviceName, dataVersion, properties);
+                if (toReturn == null) {
+                    return new DocumentDirectory();
+                }
+                BootstrapUtil.removeStateFile(toReturn);
+                return toReturn;
+            }
+
+            @Override
+            public DocumentDirectory getDefaultConfiguration(String serviceName) {
+                if (installer == null) {
+                    return new DocumentDirectory();
+                }
+                DocumentDirectory toReturn = installer.getDefaultConfiguration(serviceName);
+                BootstrapUtil.removeStateFile(toReturn);
+                return toReturn;
+            }
+        };
+    }
+
+    public static CustomerSpaceServiceUpgrader sandbox(final CustomerSpaceServiceUpgrader upgrader) {
+        return new CustomerSpaceServiceUpgrader() {
+
+            @Override
+            public DocumentDirectory upgrade(CustomerSpace space, String serviceName, int sourceVersion,
+                    int targetVersion, DocumentDirectory source, Map<String, String> properties) {
+                BootstrapUtil.removeStateFile(source);
+                if (upgrader == null) {
+                    return source;
+                }
+
+                DocumentDirectory toReturn = upgrader.upgrade(space, serviceName, sourceVersion, targetVersion, source, properties);
+                if (toReturn == null) {
+                    return new DocumentDirectory();
+                }
+                BootstrapUtil.removeStateFile(toReturn);
+                return toReturn;
+            }
+        };
+    }
+
+    public static ServiceInstaller sandbox(final ServiceInstaller installer) {
+        return new ServiceInstaller() {
+            @Override
+            public DocumentDirectory install(String serviceName, int dataVersion, Map<String, String> properties) {
+                if (installer == null) {
+                    return new DocumentDirectory();
+                }
+                DocumentDirectory toReturn = installer.install(serviceName, dataVersion, properties);
+                if (toReturn == null) {
+                    return new DocumentDirectory();
+                }
+                BootstrapUtil.removeStateFile(toReturn);
+                return toReturn;
+            }
+        };
     }
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {

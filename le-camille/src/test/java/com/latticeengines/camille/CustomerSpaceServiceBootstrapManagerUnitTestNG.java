@@ -84,6 +84,31 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
         Assert.assertTrue(serviceIsInState(State.OK, UPGRADED_VERSION));
     }
 
+    @Test(groups = "unit")
+    public void testNullSafe() throws Exception {
+        CustomerSpaceServiceScope scope = getTestScope();
+        CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES, null, null);
+
+        // Bootstrap the initial configuration
+        CustomerSpaceServiceBootstrapManager.bootstrap(scope);
+
+        BootstrapState retrieved = getState();
+
+        Assert.assertEquals(State.OK, retrieved.state);
+        Assert.assertEquals(INITIAL_VERSION, retrieved.installedVersion);
+
+        // Bootstrap again with an incremented data version to run the upgrade
+        CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), UPGRADED_VERSION_PROPERTIES, null, null);
+        CustomerSpaceServiceBootstrapManager.bootstrap(scope);
+
+        retrieved = getState();
+        
+        Assert.assertEquals(State.OK, retrieved.state);
+        Assert.assertEquals(UPGRADED_VERSION, retrieved.installedVersion);
+    }
+
     /**
      * Tests the scenario where the data is being run on an earlier version of
      * the software

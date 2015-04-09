@@ -22,13 +22,9 @@ public class ServiceWarden {
      */
     public static void registerService(String serviceName, ServiceInfo info) {
         log.info("Registering service {} with properties {}", serviceName, info.properties);
-        if (info.cssInstaller != null || info.cssUpgrader != null) {
-            CustomerSpaceServiceBootstrapManager.register(serviceName, info.properties, info.cssInstaller,
-                    info.cssUpgrader);
-        }
-        if (info.installer != null) {
-            ServiceBootstrapManager.register(serviceName, info.properties, info.installer);
-        }
+        CustomerSpaceServiceBootstrapManager
+                .register(serviceName, info.properties, info.cssInstaller, info.cssUpgrader);
+        ServiceBootstrapManager.register(serviceName, info.properties, info.installer);
 
         BootstrapMessageConsumer consumer = new BootstrapMessageConsumer();
         MessageQueueFactory factory = MessageQueueFactory.instance();

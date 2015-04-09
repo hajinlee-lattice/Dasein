@@ -34,20 +34,16 @@ public class CustomerSpaceServiceBootstrapManager {
 
     public static void register(String serviceName, ServiceProperties properties,
             CustomerSpaceServiceInstaller installer, CustomerSpaceServiceUpgrader upgrader) {
-        if (installer == null) {
-            throw new IllegalArgumentException("Installer cannot be null");
-        }
-        if (upgrader == null) {
-            throw new IllegalArgumentException("Upgrader cannot be null");
-        }
+        CustomerSpaceServiceInstaller sandboxedInstaller = BootstrapUtil.sandbox(installer);
+        CustomerSpaceServiceUpgrader sandboxedUpgrader = BootstrapUtil.sandbox(upgrader);
 
         // Retrieve/Set the bootstrapper for the provided service
         Bootstrapper bootstrapper = bootstrappers.get(serviceName);
         if (bootstrapper == null) {
-            bootstrapper = new Bootstrapper(serviceName, properties, installer, upgrader);
+            bootstrapper = new Bootstrapper(serviceName, properties, sandboxedInstaller, sandboxedUpgrader);
             bootstrappers.put(serviceName, bootstrapper);
         } else {
-            bootstrapper.set(properties, installer, upgrader);
+            bootstrapper.set(properties, sandboxedInstaller, sandboxedUpgrader);
         }
     }
 
