@@ -104,7 +104,7 @@
                     ../le-dataflow/conf/env/prodcluster
                 </dataflow.properties.path>
                 <propdata.properties.path>
-                    ../le-propdata/conf/env/propdcluster
+                    ../le-propdata/conf/env/prodcluster
                 </propdata.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
