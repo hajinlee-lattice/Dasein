@@ -21,4 +21,6 @@ public interface TenantEntityMgr {
     SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName);
     
     SerializableDocumentDirectory  getDefaultTenantServiceConfig(String serviceName);
+    
+    String getTenantServiceMetadata(String serviceName);
 }

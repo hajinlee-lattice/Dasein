@@ -73,7 +73,7 @@ public class TenantResource {
     @ApiOperation(value = "Get config for currently provisioned tenant service")
     public SerializableDocumentDirectory getServiceConfig(@RequestParam(value = "contractId") String contractId, //
             @PathVariable String tenantId, @PathVariable String serviceName) {
-        return null;
+        return tenantService.getTenantServiceConfig(contractId, tenantId, serviceName);
     }
 
     @RequestMapping(value = "/services/", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -83,6 +83,13 @@ public class TenantResource {
         return new ArrayList<String>(tenantService.getRegisteredServices());
     }
     
+    @RequestMapping(value = "/services/{serviceName}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get metadata of particular metadata service")
+    public String getServiceMetadata(@PathVariable String serviceName) {
+        return tenantService.getTenantServiceMetadata(serviceName);
+    }
+
     @RequestMapping(value = "/services/{serviceName}/default", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get default config for tenant service")

@@ -10,6 +10,7 @@ import java.util.Map;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
@@ -43,6 +44,13 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         BootstrapState state = restTemplate.getForObject(url, BootstrapState.class, new HashMap<>());
         assertNotNull(state);
         assertEquals(state.state, BootstrapState.State.OK);
+    }
+    
+    @Test(groups = "functional")
+    public void getServiceConfig() {
+        String url = getRestHostPort() + "/admin/tenants/TENANT1/services/TestComponent?contractId=CONTRACT1";
+        SerializableDocumentDirectory dir = restTemplate.getForObject(url, SerializableDocumentDirectory.class, new HashMap<>());
+        assertNotNull(dir);
     }
     
 }

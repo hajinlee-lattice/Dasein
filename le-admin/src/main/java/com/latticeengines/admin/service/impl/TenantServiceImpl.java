@@ -74,4 +74,14 @@ public class TenantServiceImpl implements TenantService {
         return tenantEntityMgr.getDefaultTenantServiceConfig(serviceName);
     }
 
+    @Override
+    public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName) {
+        return tenantEntityMgr.getTenantServiceConfig(contractId, tenantId, serviceName);
+    }
+
+    @Override
+    public String getTenantServiceMetadata(String serviceName) {
+        return tenantEntityMgr.getTenantServiceMetadata(serviceName);
+    }
+
 }

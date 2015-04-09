@@ -38,6 +38,7 @@ public class TestLatticeComponent extends LatticeComponent {
         createTextFile(componentConfigSourceDir + "/fc.json", "{ \"PROP1\": \"value1\" }");
         createDirectory(componentConfigSourceDir + "/1");
         createTextFile(componentConfigSourceDir + "/1/fc_1.json", "{ \"PROP2\": \"value2\" }");
+        createTextFile(componentConfigSourceDir + "/metadata.xml", "<metadata><property name=\"PROP1\" type=\"String\"/></metadata>");
 
         Map<String, String> overrideProps = new HashMap<>();
         overrideProps.put("PROP1", "abc");
