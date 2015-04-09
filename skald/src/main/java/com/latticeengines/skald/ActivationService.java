@@ -58,8 +58,7 @@ public class ActivationService {
 
     private static <T> void setDocument(CustomerSpace space, Path path, T value) {
         try {
-            CustomerSpaceServiceScope scope = new CustomerSpaceServiceScope(space, DocumentConstants.SERVICE_NAME,
-                    DocumentConstants.DATA_VERSION);
+            CustomerSpaceServiceScope scope = new CustomerSpaceServiceScope(space, DocumentConstants.SERVICE_NAME);
             ConfigurationController<CustomerSpaceServiceScope> controller = ConfigurationController.construct(scope);
 
             controller.upsert(path, DocumentUtils.toRawDocument(value));
