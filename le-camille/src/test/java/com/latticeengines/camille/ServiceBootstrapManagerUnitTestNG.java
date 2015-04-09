@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitTestNG<ServiceScope> {
     @Override
     public ServiceScope getTestScope() {
-        return new ServiceScope("MyService", 1);
+        return new ServiceScope("MyService");
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
     public void testInstall() throws Exception {
         ServiceScope scope = getTestScope();
         ServiceBootstrapManager.reset(scope.getServiceName());
-        ServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper());
+        ServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES, new Bootstrapper());
 
         // Bootstrap the initial configuration
         ServiceBootstrapManager.bootstrap(scope);
@@ -66,15 +66,13 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
     public void testInstallNewVersion() throws Exception {
         ServiceScope scope = getTestScope();
         ServiceBootstrapManager.reset(scope.getServiceName());
-        ServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper());
-        scope.setDataVersion(INITIAL_VERSION);
+        ServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES, new Bootstrapper());
         ServiceBootstrapManager.bootstrap(scope);
 
         Assert.assertTrue(serviceIsInState(State.OK, INITIAL_VERSION));
 
         ServiceBootstrapManager.reset(scope.getServiceName());
-        ServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper());
-        scope.setDataVersion(UPGRADED_VERSION);
+        ServiceBootstrapManager.register(scope.getServiceName(), UPGRADED_VERSION_PROPERTIES, new Bootstrapper());
         ServiceBootstrapManager.bootstrap(scope);
 
         Assert.assertTrue(serviceIsInState(State.OK, INITIAL_VERSION));
@@ -85,7 +83,7 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
         // Using multiple threads, bootstrap the initial configuration
         final ServiceScope scope = getTestScope();
         ServiceBootstrapManager.reset(scope.getServiceName());
-        ServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper());
+        ServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES, new Bootstrapper());
 
         ExecutorService exec = Executors.newFixedThreadPool(4);
         try {
@@ -113,7 +111,7 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
     public void testConfigurationControllerBootstraps() throws Exception {
         ServiceScope scope = getTestScope();
         ServiceBootstrapManager.reset(scope.getServiceName());
-        ServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper());
+        ServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES, new Bootstrapper());
 
         @SuppressWarnings("unused")
         ConfigurationController<ServiceScope> controller = ConfigurationController.construct(getTestScope());
@@ -125,7 +123,7 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
     public void testConfigurationTransactionBootstraps() throws Exception {
         ServiceScope scope = getTestScope();
         ServiceBootstrapManager.reset(scope.getServiceName());
-        ServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper());
+        ServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES, new Bootstrapper());
 
         @SuppressWarnings("unused")
         ConfigurationTransaction<ServiceScope> transaction = ConfigurationTransaction.construct(getTestScope());
@@ -137,7 +135,7 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
     public void testConfigurationCacheBootstraps() throws Exception {
         ServiceScope scope = getTestScope();
         ServiceBootstrapManager.reset(scope.getServiceName());
-        ServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper());
+        ServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES, new Bootstrapper());
 
         @SuppressWarnings("unused")
         ConfigurationCache<ServiceScope> cache = ConfigurationCache.construct(getTestScope(), new Path("/a"));
@@ -149,7 +147,7 @@ public class ServiceBootstrapManagerUnitTestNG extends BaseBootstrapManagerUnitT
     public void testInstallFailure() throws Exception {
         ServiceScope scope = getTestScope();
         ServiceBootstrapManager.reset(scope.getServiceName());
-        ServiceBootstrapManager.register(scope.getServiceName(), new EvilBootstrapper());
+        ServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES, new EvilBootstrapper());
 
         // Bootstrap the initial configuration
         boolean thrown = false;

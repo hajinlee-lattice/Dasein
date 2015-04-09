@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
+import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
 public class CustomerSpaceServiceBootstrapManager {
@@ -31,8 +32,8 @@ public class CustomerSpaceServiceBootstrapManager {
 
     private static Map<String, Bootstrapper> bootstrappers = new ConcurrentHashMap<String, Bootstrapper>();
 
-    public static void register(String serviceName, CustomerSpaceServiceInstaller installer,
-            CustomerSpaceServiceUpgrader upgrader) {
+    public static void register(String serviceName, ServiceProperties properties,
+            CustomerSpaceServiceInstaller installer, CustomerSpaceServiceUpgrader upgrader) {
         if (installer == null) {
             throw new IllegalArgumentException("Installer cannot be null");
         }
@@ -43,10 +44,10 @@ public class CustomerSpaceServiceBootstrapManager {
         // Retrieve/Set the bootstrapper for the provided service
         Bootstrapper bootstrapper = bootstrappers.get(serviceName);
         if (bootstrapper == null) {
-            bootstrapper = new Bootstrapper(serviceName, installer, upgrader);
+            bootstrapper = new Bootstrapper(serviceName, properties, installer, upgrader);
             bootstrappers.put(serviceName, bootstrapper);
         } else {
-            bootstrapper.setInstallerAndUpgrader(installer, upgrader);
+            bootstrapper.set(properties, installer, upgrader);
         }
     }
 
@@ -56,14 +57,13 @@ public class CustomerSpaceServiceBootstrapManager {
             throw new IllegalArgumentException("Must register an upgrader and an installer for service "
                     + scope.getServiceName());
         }
-        bootstrapper.bootstrap(scope.getCustomerSpace(), scope.getDataVersion(), scope.getProperties());
+        bootstrapper.bootstrap(scope.getCustomerSpace(), scope.getProperties());
     }
-    
+
     public static DocumentDirectory getDefaultConfiguration(String serviceName) throws Exception {
         Bootstrapper bootstrapper = bootstrappers.get(serviceName);
         if (bootstrapper == null) {
-            throw new IllegalArgumentException("Must register an upgrader and an installer for service " + 
-                    serviceName);
+            throw new IllegalArgumentException("Must register an upgrader and an installer for service " + serviceName);
         }
         return bootstrapper.getInstaller().getDefaultConfiguration(serviceName);
     }
@@ -111,32 +111,35 @@ public class CustomerSpaceServiceBootstrapManager {
         private final String serviceName;
         private CustomerSpaceServiceInstaller installer;
         private CustomerSpaceServiceUpgrader upgrader;
+        private ServiceProperties properties;
         private final ConcurrentMap<CustomerSpace, CustomerBootstrapper> customerBootstrappers = new ConcurrentHashMap<CustomerSpace, CustomerBootstrapper>();
 
-        public Bootstrapper(String serviceName, CustomerSpaceServiceInstaller installer,
+        public Bootstrapper(String serviceName, ServiceProperties properties, CustomerSpaceServiceInstaller installer,
                 CustomerSpaceServiceUpgrader upgrader) {
             this.serviceName = serviceName;
+            this.properties = properties;
             this.installer = installer;
             this.upgrader = upgrader;
         }
 
-        public void setInstallerAndUpgrader(CustomerSpaceServiceInstaller installer,
+        public void set(ServiceProperties properties, CustomerSpaceServiceInstaller installer,
                 CustomerSpaceServiceUpgrader upgrader) {
+            this.properties = properties;
             this.installer = installer;
             this.upgrader = upgrader;
         }
 
-        public void bootstrap(CustomerSpace space, int executableVersion, Map<String, String> properties) throws Exception {
+        public void bootstrap(CustomerSpace space, Map<String, String> bootstrapProperties) throws Exception {
             customerBootstrappers.putIfAbsent(space, new CustomerBootstrapper(space, serviceName, installer, upgrader,
-                    properties));
+                    bootstrapProperties));
             CustomerBootstrapper bootstrapper = customerBootstrappers.get(space);
-            bootstrapper.bootstrap(executableVersion);
+            bootstrapper.bootstrap(this.properties.dataVersion);
         }
 
         public synchronized void reset(CustomerSpace space) {
             customerBootstrappers.remove(space);
         }
-        
+
         public CustomerSpaceServiceInstaller getInstaller() {
             return installer;
         }
@@ -153,17 +156,17 @@ public class CustomerSpaceServiceBootstrapManager {
         private final Path serviceDirectoryPath;
         private boolean bootstrapped;
         private final String logPrefix;
-        private final Map<String, String> properties;
+        private final Map<String, String> bootstrapProperties;
 
         public CustomerBootstrapper(CustomerSpace space, String serviceName, CustomerSpaceServiceInstaller installer,
-                CustomerSpaceServiceUpgrader upgrader, Map<String, String> properties) {
+                CustomerSpaceServiceUpgrader upgrader, Map<String, String> bootstrapProperties) {
             this.space = space;
             this.serviceName = serviceName;
             this.installer = installer;
             this.upgrader = upgrader;
             this.serviceDirectoryPath = getServiceDirectoryPath(space, serviceName);
             this.logPrefix = String.format("[Customer=%s, Service=%s] ", space, serviceName);
-            this.properties = properties;
+            this.bootstrapProperties = bootstrapProperties;
         }
 
         public void bootstrap(int executableVersion) throws Exception {
@@ -185,7 +188,7 @@ public class CustomerSpaceServiceBootstrapManager {
 
         private void install(int executableVersion) throws Exception {
             InstallerAdaptor adaptor = new CustomerSpaceServiceInstallerAdaptor(installer, space, serviceName,
-                    properties);
+                    bootstrapProperties);
             BootstrapUtil.install(adaptor, executableVersion, serviceDirectoryPath, false, logPrefix);
         }
 

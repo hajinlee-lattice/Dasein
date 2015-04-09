@@ -14,19 +14,22 @@ import org.testng.annotations.Test;
 import com.latticeengines.camille.exposed.config.ConfigurationController;
 import com.latticeengines.camille.exposed.config.ConfigurationTransaction;
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
+import com.latticeengines.camille.exposed.config.bootstrap.ServiceBootstrapManager;
+import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.config.bootstrap.VersionMismatchException;
 import com.latticeengines.camille.exposed.config.cache.ConfigurationCache;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState.State;
+import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
 public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
         BaseBootstrapManagerUnitTestNG<CustomerSpaceServiceScope> {
     @Override
     public CustomerSpaceServiceScope getTestScope() {
-        return new CustomerSpaceServiceScope(CamilleTestEnvironment.getCustomerSpace(), "MyService", 1);
+        return new CustomerSpaceServiceScope(CamilleTestEnvironment.getCustomerSpace(), "MyService");
     }
 
     @Override
@@ -51,7 +54,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
     public void testInstall() throws Exception {
         CustomerSpaceServiceScope scope = getTestScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES,
+                new Bootstrapper(), new Bootstrapper());
 
         // Bootstrap the initial configuration
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
@@ -63,7 +67,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
     public void testUpgrade() throws Exception {
         CustomerSpaceServiceScope scope = getTestScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES,
+                new Bootstrapper(), new Bootstrapper());
 
         // Bootstrap the initial configuration
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
@@ -72,9 +77,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
 
         // Bootstrap again with an incremented data version to run the upgrade
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
-
-        scope.setDataVersion(UPGRADED_VERSION);
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), UPGRADED_VERSION_PROPERTIES,
+                new Bootstrapper(), new Bootstrapper());
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
 
         Assert.assertTrue(serviceIsInState(State.OK, UPGRADED_VERSION));
@@ -91,15 +95,15 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
         // Install a particular version
         CustomerSpaceServiceScope scope = getTestScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
-        scope.setDataVersion(UPGRADED_VERSION);
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), UPGRADED_VERSION_PROPERTIES,
+                new Bootstrapper(), new Bootstrapper());
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
         Assert.assertTrue(serviceIsInState(State.OK, UPGRADED_VERSION));
 
         // Claim to be INITIAL_VERSION
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
-        scope.setDataVersion(INITIAL_VERSION);
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES,
+                new Bootstrapper(), new Bootstrapper());
 
         boolean thrown = false;
         try {
@@ -117,7 +121,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
         // Using multiple threads, bootstrap the initial configuration
         final CustomerSpaceServiceScope scope = getTestScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES,
+                new Bootstrapper(), new Bootstrapper());
 
         ExecutorService exec = Executors.newFixedThreadPool(4);
         try {
@@ -145,7 +150,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
     public void testConfigurationControllerBootstraps() throws Exception {
         CustomerSpaceServiceScope scope = getTestScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES,
+                new Bootstrapper(), new Bootstrapper());
 
         @SuppressWarnings("unused")
         ConfigurationController<CustomerSpaceServiceScope> controller = ConfigurationController
@@ -158,7 +164,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
     public void testConfigurationTransactionBootstraps() throws Exception {
         CustomerSpaceServiceScope scope = getTestScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES,
+                new Bootstrapper(), new Bootstrapper());
 
         @SuppressWarnings("unused")
         ConfigurationTransaction<CustomerSpaceServiceScope> transaction = ConfigurationTransaction
@@ -171,7 +178,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
     public void testConfigurationCacheBootstraps() throws Exception {
         CustomerSpaceServiceScope scope = getTestScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES,
+                new Bootstrapper(), new Bootstrapper());
 
         @SuppressWarnings("unused")
         ConfigurationCache<CustomerSpaceServiceScope> cache = ConfigurationCache.construct(getTestScope(), new Path(
@@ -184,8 +192,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
     public void testInstallFailure() throws Exception {
         CustomerSpaceServiceScope scope = getTestScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new EvilBootstrapper(),
-                new EvilBootstrapper());
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES,
+                new EvilBootstrapper(), new EvilBootstrapper());
 
         // Bootstrap the initial configuration
         boolean thrown = false;
@@ -202,7 +210,8 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
     public void testUpgradeFailure() throws Exception {
         CustomerSpaceServiceScope scope = getTestScope();
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new Bootstrapper(), new Bootstrapper());
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), INITIAL_VERSION_PROPERTIES,
+                new Bootstrapper(), new Bootstrapper());
 
         // Bootstrap the initial configuration
         CustomerSpaceServiceBootstrapManager.bootstrap(scope);
@@ -211,10 +220,9 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
 
         // Bootstrap again with an incremented data version to run the upgrade
         CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
-        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), new EvilBootstrapper(),
-                new EvilBootstrapper());
+        CustomerSpaceServiceBootstrapManager.register(scope.getServiceName(), UPGRADED_VERSION_PROPERTIES,
+                new EvilBootstrapper(), new EvilBootstrapper());
 
-        scope.setDataVersion(UPGRADED_VERSION);
         boolean thrown = false;
         try {
             CustomerSpaceServiceBootstrapManager.bootstrap(scope);
@@ -223,6 +231,30 @@ public class CustomerSpaceServiceBootstrapManagerUnitTestNG extends
         }
         Assert.assertTrue(thrown, "Expected CustomerSpaceServiceBootstrapManager to throw an exception");
         Assert.assertTrue(serviceIsInState(State.ERROR, UPGRADED_VERSION, INITIAL_VERSION));
+    }
+
+    /**
+     * TODO Eventually move somewhere else...
+     */
+    @Test(groups = "unit", timeOut = 30000)
+    public void testServiceWarden() throws Exception {
+        CustomerSpaceServiceScope scope = getTestScope();
+        CustomerSpaceServiceBootstrapManager.reset(scope.getServiceName(), scope.getCustomerSpace());
+        ServiceBootstrapManager.reset(scope.getServiceName());
+
+        ServiceWarden.registerService(scope.getServiceName(), new ServiceInfo(INITIAL_VERSION_PROPERTIES,
+                new Bootstrapper(), new Bootstrapper(), new Bootstrapper()));
+        ServiceWarden.commandBootstrap(scope.getServiceName(), scope.getCustomerSpace(), null);
+
+        while (true) {
+            BootstrapState state = CustomerSpaceServiceBootstrapManager.getBootstrapState(scope.getServiceName(),
+                    scope.getCustomerSpace());
+            if (state.installedVersion == INITIAL_VERSION) {
+                break;
+            }
+            Assert.assertNotEquals(state.state, BootstrapState.State.ERROR);
+            Thread.sleep(500);
+        }
     }
 
     @SuppressWarnings("unused")

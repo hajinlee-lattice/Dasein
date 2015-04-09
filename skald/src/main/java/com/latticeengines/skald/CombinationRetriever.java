@@ -35,8 +35,7 @@ public class CombinationRetriever {
             }
 
             // Retrieve the ModelTags and the specified ModelCombination.
-            CustomerSpaceServiceScope scope = new CustomerSpaceServiceScope(space, DocumentConstants.SERVICE_NAME,
-                    DocumentConstants.DATA_VERSION);
+            CustomerSpaceServiceScope scope = new CustomerSpaceServiceScope(space, DocumentConstants.SERVICE_NAME);
             ConfigurationController<CustomerSpaceServiceScope> controller = ConfigurationController.construct(scope);
 
             Path tagsPath = new Path(DocumentConstants.MODEL_TAGS);

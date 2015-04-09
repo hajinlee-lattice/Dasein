@@ -14,6 +14,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
+import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
@@ -26,7 +27,6 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
-import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
 public class BatonServiceImpl implements BatonService {
 
@@ -59,7 +59,7 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
-    public void loadDirectory(String source, String destination) {
+    public Boolean loadDirectory(String source, String destination) {
         String rawPath = "";
         try {
             Camille c = CamilleEnvironment.getCamille();
@@ -80,29 +80,24 @@ public class BatonServiceImpl implements BatonService {
 
         } catch (Exception e) {
             log.error("Error loading directory", e);
-            throw new RuntimeException("Error creating tenant", e);
+            return false;
         }
 
         log.info(String.format("Succesfully loaded files into directory %s", rawPath));
+        return true;
     }
 
     @Override
     public Boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName,
             Map<String, String> properties) {
-        CustomerSpaceServiceScope scope = new CustomerSpaceServiceScope(contractId, //
-                tenantId, //
-                spaceId, //
-                serviceName, //
-                1, //
-                properties);
-
+        CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
         try {
-            CustomerSpaceServiceBootstrapManager.bootstrap(scope);
-            return true;
+            ServiceWarden.commandBootstrap(serviceName, space, properties);
         } catch (Exception e) {
-            log.error("Error bootstrapping " + scope.toString(), e);
+            log.error("Error commanding bootstrap for service " + serviceName + " and space " + space);
             return false;
         }
+        return true;
     }
 
     @Override

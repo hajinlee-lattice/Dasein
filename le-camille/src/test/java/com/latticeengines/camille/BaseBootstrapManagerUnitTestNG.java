@@ -14,11 +14,20 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState.State;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
+import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
 
 public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScope> {
     public static final int INITIAL_VERSION = 1;
     public static final int UPGRADED_VERSION = 2;
+
+    public static final String INITIAL_VERSION_STRING = "1.0";
+    public static final String UPGRADED_VERSION_STRING = "1.1";
+
+    public static final ServiceProperties INITIAL_VERSION_PROPERTIES = new ServiceProperties(INITIAL_VERSION,
+            INITIAL_VERSION_STRING);
+    public static final ServiceProperties UPGRADED_VERSION_PROPERTIES = new ServiceProperties(UPGRADED_VERSION,
+            UPGRADED_VERSION_STRING);
 
     public void lock() throws Exception {
         // Force synchronous execution of all unit tests because of the nature

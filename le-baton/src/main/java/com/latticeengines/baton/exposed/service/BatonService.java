@@ -13,15 +13,16 @@ public interface BatonService {
 
     Boolean createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo);
 
-    void loadDirectory(String source, String destination);
+    Boolean loadDirectory(String source, String destination);
 
-    Boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName, Map<String, String> properties);
+    Boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName,
+            Map<String, String> properties);
 
     List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId);
 
     Boolean deleteTenant(String contractId, String tenantId);
-    
+
     BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String serviceName);
-    
+
     DocumentDirectory getDefaultConfiguration(String serviceName);
 }

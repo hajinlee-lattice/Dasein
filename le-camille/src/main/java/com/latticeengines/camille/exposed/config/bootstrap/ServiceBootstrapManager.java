@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
+import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 
 public class ServiceBootstrapManager {
@@ -26,17 +27,17 @@ public class ServiceBootstrapManager {
 
     private static Map<String, Bootstrapper> bootstrappers = new ConcurrentHashMap<String, Bootstrapper>();
 
-    public static void register(String serviceName, ServiceInstaller installer) {
+    public static void register(String serviceName, ServiceProperties properties, ServiceInstaller installer) {
         if (installer == null) {
             throw new IllegalArgumentException("Installer cannot be null");
         }
 
         Bootstrapper bootstrapper = bootstrappers.get(serviceName);
         if (bootstrapper == null) {
-            bootstrapper = new Bootstrapper(serviceName, installer);
+            bootstrapper = new Bootstrapper(serviceName, properties, installer);
             bootstrappers.put(serviceName, bootstrapper);
         } else {
-            bootstrapper.setInstaller(installer);
+            bootstrapper.set(installer, properties);
         }
     }
 
@@ -45,7 +46,7 @@ public class ServiceBootstrapManager {
         if (bootstrapper == null) {
             throw new IllegalArgumentException("Must register installer for service " + scope.getServiceName());
         }
-        bootstrapper.bootstrap(scope.getDataVersion(), scope.getProperties());
+        bootstrapper.bootstrap(scope.getProperties());
     }
 
     public static void reset(String serviceName) {
@@ -83,35 +84,38 @@ public class ServiceBootstrapManager {
 
     public static class Bootstrapper {
         private boolean bootstrapped;
+        private ServiceProperties properties;
         private ServiceInstaller installer;
         private final String logPrefix;
         private final String serviceName;
 
-        public Bootstrapper(String serviceName, ServiceInstaller installer) {
+        public Bootstrapper(String serviceName, ServiceProperties properties, ServiceInstaller installer) {
+            this.properties = properties;
             this.installer = installer;
             this.logPrefix = String.format("[Service=%s] ", serviceName);
             this.serviceName = serviceName;
         }
 
-        public void setInstaller(ServiceInstaller installer) {
+        public void set(ServiceInstaller installer, ServiceProperties properties) {
             this.installer = installer;
+            this.properties = properties;
         }
 
-        public void bootstrap(int executableVersion, Map<String, String> properties) throws Exception {
+        public void bootstrap(Map<String, String> bootstrapProperties) throws Exception {
             if (!bootstrapped) {
                 synchronized (this) {
                     if (!bootstrapped) {
                         log.info("{}Running bootstrap", logPrefix);
-                        install(executableVersion, properties);
+                        install(this.properties.dataVersion, bootstrapProperties);
                         bootstrapped = true;
                     }
                 }
             }
         }
 
-        private void install(int executableVersion, Map<String, String> properties) throws Exception {
+        private void install(int executableVersion, Map<String, String> bootstrapProperties) throws Exception {
             Path serviceDirectoryPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), this.serviceName);
-            InstallerAdaptor adaptor = new ServiceInstallerAdaptor(installer, serviceName, properties);
+            InstallerAdaptor adaptor = new ServiceInstallerAdaptor(installer, serviceName, bootstrapProperties);
             BootstrapUtil.install(adaptor, executableVersion, serviceDirectoryPath, false, logPrefix);
         }
     }

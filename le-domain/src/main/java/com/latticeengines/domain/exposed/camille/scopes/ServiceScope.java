@@ -5,16 +5,14 @@ import java.util.Map;
 
 public class ServiceScope extends ConfigurationScope {
     private String serviceName;
-    private int dataVersion;
     private Map<String, String> properties;
-    
-    public ServiceScope(String serviceName, int dataVersion) {
-        this(serviceName, dataVersion, new HashMap<String, String>());
+
+    public ServiceScope(String serviceName) {
+        this(serviceName, new HashMap<String, String>());
     }
-    
-    public ServiceScope(String serviceName, int dataVersion, Map<String, String> properties) {
+
+    public ServiceScope(String serviceName, Map<String, String> properties) {
         this.serviceName = serviceName;
-        this.dataVersion = dataVersion;
         this.setProperties(properties);
     }
 
@@ -26,19 +24,10 @@ public class ServiceScope extends ConfigurationScope {
         this.serviceName = serviceName;
     }
 
-    public int getDataVersion() {
-        return dataVersion;
-    }
-
-    public void setDataVersion(int dataVersion) {
-        this.dataVersion = dataVersion;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + dataVersion;
         result = prime * result + ((serviceName == null) ? 0 : serviceName.hashCode());
         result = prime * result + getType().hashCode();
         return result;
@@ -53,8 +42,6 @@ public class ServiceScope extends ConfigurationScope {
         if (getClass() != obj.getClass())
             return false;
         ServiceScope other = (ServiceScope) obj;
-        if (dataVersion != other.dataVersion)
-            return false;
         if (serviceName == null) {
             if (other.serviceName != null)
                 return false;

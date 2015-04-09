@@ -10,26 +10,27 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
     private String tenantId;
     private String spaceId;
     private String serviceName;
-    private int dataVersion;
     private Map<String, String> properties;
-    
-    public CustomerSpaceServiceScope(String contractId, String tenantId, String spaceId, String serviceName,
-            int dataVersion) {
-        this(contractId, tenantId, spaceId, serviceName, dataVersion, new HashMap<String, String>());
+
+    public CustomerSpaceServiceScope(String contractId, String tenantId, String spaceId, String serviceName) {
+        this(contractId, tenantId, spaceId, serviceName, new HashMap<String, String>());
     }
 
     public CustomerSpaceServiceScope(String contractId, String tenantId, String spaceId, String serviceName,
-            int dataVersion, Map<String, String> properties) {
+            Map<String, String> properties) {
         this.contractId = contractId;
         this.tenantId = tenantId;
         this.spaceId = spaceId;
         this.serviceName = serviceName;
-        this.dataVersion = dataVersion;
         this.properties = properties;
     }
 
-    public CustomerSpaceServiceScope(CustomerSpace space, String serviceName, int dataVersion) {
-        this(space.getContractId(), space.getTenantId(), space.getSpaceId(), serviceName, dataVersion);
+    public CustomerSpaceServiceScope(CustomerSpace space, String serviceName) {
+        this(space.getContractId(), space.getTenantId(), space.getSpaceId(), serviceName);
+    }
+
+    public CustomerSpaceServiceScope(CustomerSpace space, String serviceName, Map<String, String> properties) {
+        this(space.getContractId(), space.getTenantId(), space.getSpaceId(), serviceName, properties);
     }
 
     @Override
@@ -37,7 +38,6 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((contractId == null) ? 0 : contractId.hashCode());
-        result = prime * result + dataVersion;
         result = prime * result + ((serviceName == null) ? 0 : serviceName.hashCode());
         result = prime * result + ((spaceId == null) ? 0 : spaceId.hashCode());
         result = prime * result + ((tenantId == null) ? 0 : tenantId.hashCode());
@@ -58,8 +58,6 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
             if (other.contractId != null)
                 return false;
         } else if (!contractId.equals(other.contractId))
-            return false;
-        if (dataVersion != other.dataVersion)
             return false;
         if (serviceName == null) {
             if (other.serviceName != null)
@@ -85,8 +83,7 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
 
     @Override
     public String toString() {
-        return String.format("[CustomerSpace=%s, Service=%s, DataVersion=%d]", getCustomerSpace(), serviceName,
-                dataVersion);
+        return String.format("[CustomerSpace=%s, Service=%s]", getCustomerSpace(), serviceName);
     }
 
     public String getContractId() {
@@ -119,14 +116,6 @@ public class CustomerSpaceServiceScope extends ConfigurationScope {
 
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
-    }
-
-    public int getDataVersion() {
-        return dataVersion;
-    }
-
-    public void setDataVersion(int dataVersion) {
-        this.dataVersion = dataVersion;
     }
 
     @Override
