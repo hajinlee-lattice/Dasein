@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
-import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -60,11 +59,11 @@ public class BatonTool {
         Subparsers subparsers = parser.addSubparsers().dest("command");
         Subparser createPod = subparsers.addParser("createPod").help("Creates a new Pod.");
         Subparser createTenant = subparsers.addParser("createTenant").help(
-                "Creates a new tenant. Requires contractId, tenantID, spaceId, featureFlags, and properties");
+                "Creates a new tenant. Requires contractId, tenantID, defaultSpaceId, featureFlags, and properties");
 
         createTenant.addArgument("--contractId").required(true);
         createTenant.addArgument("--tenantId").required(true);
-        createTenant.addArgument("--spaceId").required(true);
+        createTenant.addArgument("--defaultSpaceId").required(true);
         createTenant
                 .addArgument("--featureFlags")
                 .required(true)
@@ -74,8 +73,8 @@ public class BatonTool {
 
         // Don't let PLO know about this...
         Subparser loadDirectory = subparsers.addParser("loadDirectory").help("Only for development use!");
-        loadDirectory.addArgument("--source", "--S", "--s").required(true).help(Arguments.SUPPRESS);
-        loadDirectory.addArgument("--destination", "--D", "--d").required(true).help(Arguments.SUPPRESS);
+        loadDirectory.addArgument("--source", "--S", "--s").required(true);
+        loadDirectory.addArgument("--destination", "--D", "--d").required(true);
 
         Namespace namespace = null;
         try {
@@ -127,7 +126,7 @@ public class BatonTool {
         else if (namespace.get("command").equals("createTenant")) {
             String contractId = namespace.get("contractId");
             String tenantId = namespace.get("tenantId");
-            String spaceId = namespace.get("spaceId");
+            String defaultSpaceId = namespace.get("defaultSpaceId");
 
             String flagsFilename = namespace.get("featureFlags");
             String propertiesFilename = namespace.get("properties");
@@ -152,7 +151,7 @@ public class BatonTool {
                 System.exit(1);
             }
 
-            batonService.createTenant(contractId, tenantId, spaceId, new CustomerSpaceInfo(properties, flags));
+            batonService.createTenant(contractId, tenantId, defaultSpaceId, new CustomerSpaceInfo(properties, flags));
 
         }
     }
@@ -163,10 +162,10 @@ public class BatonTool {
      * 
      * @param contractId
      * @param tenantId
-     * @param spaceId
+     * @param defaultSpaceId
      */
-    static void createTenant(String contractId, String tenantId, String spaceId, CustomerSpaceInfo spaceInfo) {
-        batonService.createTenant(contractId, tenantId, spaceId, spaceInfo);
+    static void createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo) {
+        batonService.createTenant(contractId, tenantId, defaultSpaceId, spaceInfo);
     }
 
     /**
