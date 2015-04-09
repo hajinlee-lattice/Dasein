@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html ng-app="TenantConsoleApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=10"><!-- This is needed to prevent IE from rendering the site in Compatibility Mode -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="assets/img/favicon.ico" type="image/x-icon">
+    <title>Tenant Console</title>
+
+    <!-- build:template:dist
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/<%= version.bootstrap %>/simplex/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/<%= version["font-awesome"] %>/css/font-awesome.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/css/main_<%= versionString %>.min.css"/>
+    /build -->
+    <!-- build:remove:dist -->
+    <link rel="stylesheet" type="text/css" href="lib/css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="lib/css/font-awesome.css"/>
+    <link rel="stylesheet" type="text/css" href="assets/css/main_compiled.css"/>
+    <!-- /build -->
+</head>
+<body>
+<header>
+    <h1 class="text-center">Lattice Engines Tenant Console</h1>
+</header>
+<main-nav></main-nav>
+<section class="container" ui-view></section>
+
+<!-- build:remove:dist -->
+<script type="text/javascript">
+    WebFontConfig = {
+        google: { families: [ 'Open Sans', 'Squada One' ]
+        }
+    };
+    (function() {
+        var wf = document.createElement('script');
+        wf.src = 'lib/js/webfontloader.js';
+        wf.type = 'text/javascript';
+        wf.async = 'true';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wf, s);
+    })();
+</script>
+<script src="lib/js/jquery.js"></script>
+<script src="lib/js/angular.js"></script>
+<script src="lib/js/angular-sanitize.js"></script>
+<script src="lib/js/angular-local-storage.js"></script>
+<script src="lib/js/angular-ui-router.js"></script>
+<script src="lib/js/underscore.js"></script>
+<script src="lib/js/bootstrap.js"></script>
+
+<script src="app/core/directive/MainNavDirective.js"></script>
+<script src="app/tenants/controller/TenantInfoCtrl.js"></script>
+<script src="app/tenants/controller/TenantsCtrl.js"></script>
+<script src="app/app.js"></script>
+<!-- /build -->
+<!-- build:template:dist
+<script type="text/javascript">
+    WebFontConfig = {
+        google: { families: [ 'Open Sans', 'Squada One' ]
+        }
+    };
+    (function() {
+        var wf = document.createElement('script');
+        wf.src = '//cdnjs.cloudflare.com/ajax/libs/webfont/<%= version.webfont %>/webfontloader.js';
+        wf.type = 'text/javascript';
+        wf.async = 'true';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wf, s);
+    })();
+</script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/<%= version.jquery %>/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/<%= version.angular %>/angular-sanitize.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-local-storage/<%= version["angular-local-storage"] %>/angular-local-storage.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/<%= version["angular-ui-router"] %>/angular-ui-router.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/<%= version.underscore %>/underscore-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/<%= version.bootstrap %>/js/bootstrap.min.js"></script>
+<script src="/assets/js/app_<%= versionString %>.min.js"></script>
+/build -->
+
+</body>
+</html>
