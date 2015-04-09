@@ -12,11 +12,13 @@ import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
+import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 @Component("tenantService")
@@ -32,9 +34,18 @@ public class TenantServiceImpl implements TenantService {
         Map<String, LatticeComponent> components = LatticeComponent.getRegisteredServices();
 
         for (Map.Entry<String, LatticeComponent> entry : components.entrySet()) {
-            CustomerSpaceServiceBootstrapManager.register(entry.getKey(), //
-                    entry.getValue().getInstaller(), //
-                    entry.getValue().getUpgrader());
+            if (!entry.getValue().doRegistration()) {
+                continue;
+            }
+            LatticeComponent component = entry.getValue();
+            ServiceProperties serviceProps = new ServiceProperties();
+            serviceProps.dataVersion = 1;
+            serviceProps.versionString = component.getVersionString();
+            ServiceInfo serviceInfo = new ServiceInfo(serviceProps, //
+                    component.getInstaller(), //
+                    component.getUpgrader(), //
+                    null);
+            ServiceWarden.registerService(component.getName(), serviceInfo);
         }
     }
 

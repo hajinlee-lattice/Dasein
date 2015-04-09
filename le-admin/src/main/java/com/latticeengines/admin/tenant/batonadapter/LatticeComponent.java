@@ -44,7 +44,13 @@ public abstract class LatticeComponent implements HasName {
         register(this);
     }
     
+    public boolean doRegistration() {
+        return true;
+    }
+    
     public abstract CustomerSpaceServiceInstaller getInstaller();
     
     public abstract CustomerSpaceServiceUpgrader getUpgrader();
+    
+    public abstract String getVersionString();
 }

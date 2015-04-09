@@ -29,4 +29,16 @@ public class PLSComponent extends LatticeComponent {
         return upgrader;
     }
 
+    @Override
+    public String getVersionString() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    @Override
+    public boolean doRegistration() {
+        return false;
+    }
+
+
 }

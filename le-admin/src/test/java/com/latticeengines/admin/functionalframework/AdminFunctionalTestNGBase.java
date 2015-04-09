@@ -24,12 +24,13 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
+import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-admin-context.xml" })
@@ -60,7 +61,8 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         createTenant("CONTRACT1", "TENANT1");
-        CustomerSpaceServiceBootstrapManager.bootstrap(testLatticeComponent.getScope());
+        CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
+        ServiceWarden.commandBootstrap(scope.getServiceName(), scope.getCustomerSpace(), null);
     }
     
     @AfterClass(groups = "functional")

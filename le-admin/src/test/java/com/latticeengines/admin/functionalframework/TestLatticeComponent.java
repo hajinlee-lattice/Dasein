@@ -47,7 +47,6 @@ public class TestLatticeComponent extends LatticeComponent {
                 "TENANT1", //
                 CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, //
                 getName(), //
-                1, //
                 overrideProps);
     }
 
@@ -124,6 +123,11 @@ public class TestLatticeComponent extends LatticeComponent {
                 DocumentDirectory source, Map<String, String> properties) {
             return null;
         }
+    }
+
+    @Override
+    public String getVersionString() {
+        return "1.0";
     }
 
 }

@@ -21,11 +21,18 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
     @Autowired
     private TestLatticeComponent testLatticeComponent;
 
-    @Test(groups = "functional")
-    public void getTenantServiceState() {
+    @Test(groups = "functional", timeOut = 5000)
+    public void getTenantServiceState() throws Exception {
         CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
-        BootstrapState state = tenantEntityMgr.getTenantServiceState(scope.getContractId(), scope.getTenantId(), scope.getServiceName());
-        assertEquals(state.state, BootstrapState.State.OK);
+        
+        BootstrapState state = null;
+        int numTries = 0;
+        do {
+            state = tenantEntityMgr.getTenantServiceState(scope.getContractId(), scope.getTenantId(), scope.getServiceName());
+            Thread.sleep(1000L);
+            numTries++;
+        } while (state.state != BootstrapState.State.OK && numTries < 5);
+        
         assertEquals(state.installedVersion, 1);
     }
     

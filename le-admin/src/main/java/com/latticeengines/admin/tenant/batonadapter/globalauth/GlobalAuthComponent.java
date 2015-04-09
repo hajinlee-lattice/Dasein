@@ -29,4 +29,10 @@ public class GlobalAuthComponent extends LatticeComponent {
         return upgrader;
     }
 
+    @Override
+    public String getVersionString() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
