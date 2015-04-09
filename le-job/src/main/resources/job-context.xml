@@ -15,7 +15,7 @@
     <import resource="classpath:dataplatform-component-context.xml"/>
     <import resource="classpath:propdata-madison-context.xml"/>
     <import resource="classpath:dataflow-context.xml"/>
-    <import resource="classpath:pls-context.xml"/>
-    <import resource="classpath:pls-modeldownload-quartz-${MODEL_DL_QUARTZ_ENABLED:disabled}-context.xml"/>
+    <!-- import resource="classpath:pls-context.xml"/>
+    <import resource="classpath:pls-modeldownload-quartz-${MODEL_DL_QUARTZ_ENABLED:disabled}-context.xml"/-->
 
 </beans>
