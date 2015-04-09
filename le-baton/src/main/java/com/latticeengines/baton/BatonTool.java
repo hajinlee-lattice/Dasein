@@ -1,5 +1,6 @@
 package com.latticeengines.baton;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -10,6 +11,8 @@ import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
+import net.sourceforge.argparse4j.inf.Subparser;
+import net.sourceforge.argparse4j.inf.Subparsers;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.ILoggerFactory;
@@ -44,43 +47,58 @@ public class BatonTool {
         });
     }
 
+    // XXX This needs to be cleaned up to use subcommands and also to have a
+    // single try/catch block
     public static void main(String[] args) {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("Baton");
-        parser.addArgument("-createPod").action(Arguments.storeTrue()).help("Creates a new Pod.");
-        parser.addArgument("-createTenant").action(Arguments.storeTrue())
-                .help("Creates a new tenant. Requires contractId, tenantID, spaceId, featureFlags, and properties");
 
-        parser.addArgument("--podId").required(true).help("Camille PodId");
-        parser.addArgument("--connectionString", "--cs").required(true).help("Connection string for ZooKeeper");
+        parser.addArgument("--podId").help("Camille PodId");
+        parser.addArgument("--connectionString", "--cs").help("Connection string for ZooKeeper");
+        parser.addArgument("--camilleJson").help(
+                "Path to camille.json.  Specify instead of explicitly specifying podId and connectionString.");
 
-        parser.addArgument("--contractId");
-        parser.addArgument("--tenantId");
-        parser.addArgument("--spaceId");
-        parser.addArgument("--featureFlags").help(
-                "File containing the feature flags to use for the default customer space created for this tenant");
-        parser.addArgument("--properties").help(
-                "File containing the properties to use for the default customer space created for this tenant");
+        Subparsers subparsers = parser.addSubparsers().dest("command");
+        Subparser createPod = subparsers.addParser("createPod").help("Creates a new Pod.");
+        Subparser createTenant = subparsers.addParser("createTenant").help(
+                "Creates a new tenant. Requires contractId, tenantID, spaceId, featureFlags, and properties");
+
+        createTenant.addArgument("--contractId").required(true);
+        createTenant.addArgument("--tenantId").required(true);
+        createTenant.addArgument("--spaceId").required(true);
+        createTenant
+                .addArgument("--featureFlags")
+                .required(true)
+                .help("File containing the feature flags to use for the default customer space created for this tenant");
+        createTenant.addArgument("--properties").required(true)
+                .help("File containing the properties to use for the default customer space created for this tenant");
 
         // Don't let PLO know about this...
-        parser.addArgument("-loadDirectory").action(Arguments.storeTrue()).help(Arguments.SUPPRESS);
-        parser.addArgument("--source", "--S", "--s").help(Arguments.SUPPRESS);
-        parser.addArgument("--destination", "--D", "--d").help(Arguments.SUPPRESS);
+        Subparser loadDirectory = subparsers.addParser("loadDirectory").help("Only for development use!");
+        loadDirectory.addArgument("--source", "--S", "--s").required(true).help(Arguments.SUPPRESS);
+        loadDirectory.addArgument("--destination", "--D", "--d").required(true).help(Arguments.SUPPRESS);
 
         Namespace namespace = null;
         try {
             namespace = parser.parseArgs(args);
         } catch (ArgumentParserException e) {
-            log.error("Error parsing input arguments", e);
+            log.error("Error parsing input arguments", e.getMessage());
             System.exit(1);
         }
 
         String connectionString = (String) namespace.get("connectionString");
         String podId = (String) namespace.get("podId");
+        String camilleJsonPath = (String) namespace.get("camilleJson");
 
         try {
-            CamilleConfiguration config = new CamilleConfiguration();
-            config.setConnectionString(connectionString);
-            config.setPodId(podId);
+            CamilleConfiguration config;
+            if (camilleJsonPath != null) {
+                config = new ObjectMapper().readValue(new File(camilleJsonPath), CamilleConfiguration.class);
+            } else {
+                config = new CamilleConfiguration();
+                config.setConnectionString(connectionString);
+                config.setPodId(podId);
+            }
+
             CamilleEnvironment.start(Mode.BOOTSTRAP, config);
 
         } catch (Exception e) {
@@ -88,7 +106,7 @@ public class BatonTool {
             System.exit(1);
         }
 
-        if (namespace.get("loadDirectory")) {
+        if (namespace.get("command").equals("loadDirectory")) {
             String source = namespace.get("source");
             String destination = namespace.get("destination");
 
@@ -102,22 +120,17 @@ public class BatonTool {
             }
         }
 
-        else if (namespace.get("createPod")) {
+        else if (namespace.get("command").equals("createPod")) {
             log.info(String.format("Sucessfully created pod %s", podId));
         }
 
-        else if (namespace.get("createTenant")) {
+        else if (namespace.get("command").equals("createTenant")) {
             String contractId = namespace.get("contractId");
             String tenantId = namespace.get("tenantId");
             String spaceId = namespace.get("spaceId");
 
             String flagsFilename = namespace.get("featureFlags");
             String propertiesFilename = namespace.get("properties");
-
-            if (anyNull(contractId, tenantId, spaceId, flagsFilename, propertiesFilename)) {
-                log.error("createTenant requires contractId, tenantId, spaceId, featureFlags, and properties");
-                System.exit(1);
-            }
 
             String flags = null;
             try {
