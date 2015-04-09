@@ -96,4 +96,13 @@ public class MessageQueueUnitTestNG {
         });
 
     }
+
+    @Test(groups = "unit")
+    public void testSendOnly() throws InterruptedException {
+        MessageQueueFactory factory = MessageQueueFactory.instance();
+        MessageQueue<Message> queue = factory.construct(Message.class, "sendonly", null);
+        queue.put(new Message());
+        Thread.sleep(1000);
+        // Not sure how we'd test that no consumer was triggered internally.
+    }
 }
