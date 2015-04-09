@@ -5,8 +5,11 @@ module.exports = function(grunt) {
         dir:  sourceDir,
         dist: 'dist',
         distDir: 'dist/' + sourceDir,
+        leCommon: '../le-common/npm/release',
         versionString: new Date().getTime(),
-        vendor: {
+        version: {
+            "le-common": '0.0.1',
+
             jquery: '2.1.3',
             angular: '1.3.15',
             "angular-local-storage": '0.1.5',
@@ -34,14 +37,14 @@ module.exports = function(grunt) {
                     baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/'
                 },
                 src: [
-                    'jquery/<%= app.vendor.jquery %>/jquery.js',
-                    'angular.js/<%= app.vendor.angular %>/angular.js',
-                    'angular.js/<%= app.vendor.angular %>/angular-sanitize.js',
-                    'angular-local-storage/<%= app.vendor["angular-local-storage"] %>/angular-local-storage.js',
-                    'angular-ui-router/<%= app.vendor["angular-ui-router"] %>/angular-ui-router.js',
-                    'underscore.js/<%= app.vendor.underscore %>/underscore.js',
-                    'webfont/<%= app.vendor.webfont %>/webfontloader.js',
-                    'twitter-bootstrap/<%= app.vendor.bootstrap %>/js/bootstrap.js'
+                    'jquery/<%= app.version.jquery %>/jquery.js',
+                    'angular.js/<%= app.version.angular %>/angular.js',
+                    'angular.js/<%= app.version.angular %>/angular-sanitize.js',
+                    'angular-local-storage/<%= app.version["angular-local-storage"] %>/angular-local-storage.js',
+                    'angular-ui-router/<%= app.version["angular-ui-router"] %>/angular-ui-router.js',
+                    'underscore.js/<%= app.version.underscore %>/underscore.js',
+                    'webfont/<%= app.version.webfont %>/webfontloader.js',
+                    'twitter-bootstrap/<%= app.version.bootstrap %>/js/bootstrap.js'
                 ],
                 dest: '<%= app.dir %>/lib/js'
             },
@@ -51,9 +54,9 @@ module.exports = function(grunt) {
                     baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/'
                 },
                 src: [
-                    'bootswatch/<%= app.vendor.bootstrap %>/simplex/bootstrap.css',
-                    'font-awesome/<%= app.vendor["font-awesome"] %>/css/font-awesome.css',
-                    'font-awesome/<%= app.vendor["font-awesome"] %>/css/font-awesome.css.map'
+                    'bootswatch/<%= app.version.bootstrap %>/simplex/bootstrap.css',
+                    'font-awesome/<%= app.version["font-awesome"] %>/css/font-awesome.css',
+                    'font-awesome/<%= app.version["font-awesome"] %>/css/font-awesome.css.map'
                 ],
                 dest: '<%= app.dir %>/lib/css'
             },
@@ -63,12 +66,12 @@ module.exports = function(grunt) {
                     baseUrl: 'http://cdnjs.cloudflare.com/ajax/libs/'
                 },
                 src: [
-                    'font-awesome/<%= app.vendor["font-awesome"] %>/fonts/FontAwesome.otf',
-                    'font-awesome/<%= app.vendor["font-awesome"] %>/fonts/fontawesome-webfont.eot',
-                    'font-awesome/<%= app.vendor["font-awesome"] %>/fonts/fontawesome-webfont.svg',
-                    'font-awesome/<%= app.vendor["font-awesome"] %>/fonts/fontawesome-webfont.ttf',
-                    'font-awesome/<%= app.vendor["font-awesome"] %>/fonts/fontawesome-webfont.woff',
-                    'font-awesome/<%= app.vendor["font-awesome"] %>/fonts/fontawesome-webfont.woff2'
+                    'font-awesome/<%= app.version["font-awesome"] %>/fonts/FontAwesome.otf',
+                    'font-awesome/<%= app.version["font-awesome"] %>/fonts/fontawesome-webfont.eot',
+                    'font-awesome/<%= app.version["font-awesome"] %>/fonts/fontawesome-webfont.svg',
+                    'font-awesome/<%= app.version["font-awesome"] %>/fonts/fontawesome-webfont.ttf',
+                    'font-awesome/<%= app.version["font-awesome"] %>/fonts/fontawesome-webfont.woff',
+                    'font-awesome/<%= app.version["font-awesome"] %>/fonts/fontawesome-webfont.woff2'
                 ],
                 dest: '<%= app.dir %>/lib/fonts'
             }
@@ -82,7 +85,19 @@ module.exports = function(grunt) {
             default: {
                 files: {
                     '<%= app.dir %>/assets/js/app_<%= app.versionString %>.min.js': [
+                        '<%= app.dir %>/app/lib/le-common.js',
                         '<%= app.dir %>/app/core/directive/MainNavDirective.js',
+                        '<%= app.dir %>/app/tenants/controller/TenantsCtrl.js',
+                        '<%= app.dir %>/app/tenants/controller/TenantInfoCtrl.js',
+                        '<%= app.dir %>/app/app.js'
+                    ]
+                }
+            },
+            // it is temporary to compile le-common.js in this project. it will be moved to le-common later.
+            common: {
+                files: {
+                    '<%= app.dir %>/assets/js/app_<%= app.versionString %>.min.js': [
+                        '<%= app.dir %>/app/LECommon/util/MainNavDirective.js',
                         '<%= app.dir %>/app/tenants/controller/TenantsCtrl.js',
                         '<%= app.dir %>/app/tenants/controller/TenantInfoCtrl.js',
                         '<%= app.dir %>/app/app.js'
@@ -117,6 +132,12 @@ module.exports = function(grunt) {
         },
 
         copy: {
+            lecommon: {
+                expand: true,
+                cwd: '<%= app.leCommon %>/<%= app.version["le-common"] %>',
+                src: ['le-common.js'],
+                dest: '<%= app.dir %>/lib/js'
+            },
             backup: {
                 expand: true,
                 src: ['<%= app.dir %>/*.html'],
@@ -124,7 +145,7 @@ module.exports = function(grunt) {
             },
             restore: {
                 expand: true,
-                cwd: '<%= app.distDir %>',
+                cwd: '<%= app.dist %>/<%= app.dir %>',
                 src: '*.html',
                 dest: '<%= app.dir %>'
             }
@@ -134,7 +155,7 @@ module.exports = function(grunt) {
             // redirect vendor javascript/css to minimized version on CDN
             options: {
                 data: {
-                    version: appConfig.vendor,
+                    version: appConfig.version,
                     versionString: appConfig.versionString
                 }
             },
@@ -179,7 +200,7 @@ module.exports = function(grunt) {
     ]);
 
     // download vendor javascript and css
-    grunt.registerTask('init', ['clean:vendor', 'wget:js', 'wget:css', 'wget:fonts', 'less']);
+    grunt.registerTask('init', ['clean:vendor', 'copy:lecommon', 'wget:js', 'wget:css', 'wget:fonts', 'less']);
 
     grunt.registerTask('unit', ['jshint']);
 
