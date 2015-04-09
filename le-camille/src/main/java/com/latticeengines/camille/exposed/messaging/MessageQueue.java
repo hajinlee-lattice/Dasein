@@ -26,7 +26,8 @@ public class MessageQueue<T> {
         this.messageClazz = messageClazz;
         this.path = path;
         QueueBuilder<T> builder = QueueBuilder.builder(CamilleEnvironment.getCamille().getCuratorClient(),
-                new Consumer<T>(consumer, path), new Serializer<T>(messageClazz), path.toString());
+                consumer != null ? new Consumer<T>(consumer, path) : null, new Serializer<T>(messageClazz),
+                path.toString());
         this.inner = builder.buildQueue();
         try {
             this.inner.start();
