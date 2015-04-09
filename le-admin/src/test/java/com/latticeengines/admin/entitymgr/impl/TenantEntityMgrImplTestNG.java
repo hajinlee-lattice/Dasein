@@ -42,7 +42,7 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
         assertNotNull(dir.getDocumentDirectory());
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = { "getTenantServiceState" })
     public void getTenantServiceConfig() {
         CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
         SerializableDocumentDirectory dir = tenantEntityMgr.getTenantServiceConfig( //
