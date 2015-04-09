@@ -43,7 +43,7 @@ module.exports = function(grunt) {
                     'webfont/<%= app.vendor.webfont %>/webfontloader.js',
                     'twitter-bootstrap/<%= app.vendor.bootstrap %>/js/bootstrap.js'
                 ],
-                dest: '<%= app.dir %>/app/vendor'
+                dest: '<%= app.dir %>/lib/js'
             },
 
             css: {
@@ -55,7 +55,7 @@ module.exports = function(grunt) {
                     'font-awesome/<%= app.vendor["font-awesome"] %>/css/font-awesome.css',
                     'font-awesome/<%= app.vendor["font-awesome"] %>/css/font-awesome.css.map'
                 ],
-                dest: '<%= app.dir %>/assets/style/vendor'
+                dest: '<%= app.dir %>/lib/css'
             },
 
             fonts: {
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
                     'font-awesome/<%= app.vendor["font-awesome"] %>/fonts/fontawesome-webfont.woff',
                     'font-awesome/<%= app.vendor["font-awesome"] %>/fonts/fontawesome-webfont.woff2'
                 ],
-                dest: '<%= app.dir %>/assets/style/fonts'
+                dest: '<%= app.dir %>/lib/fonts'
             }
         },
 
@@ -179,7 +179,7 @@ module.exports = function(grunt) {
     ]);
 
     // download vendor javascript and css
-    grunt.registerTask('init', ['clean:vendor', 'wget:js', 'wget:css', 'wget:fonts', 'less:dev']);
+    grunt.registerTask('init', ['clean:vendor', 'wget:js', 'wget:css', 'wget:fonts', 'less']);
 
     grunt.registerTask('unit', ['jshint']);
 
