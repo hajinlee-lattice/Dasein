@@ -138,7 +138,8 @@ module.exports = function(grunt) {
         less: {
             default: {
                 files: {
-                    "<%= app.dir %>/assets/css/main_compiled.css": "<%= app.dir %>/assets/less/main.less"
+                    "<%= app.dir %>/assets/css/main.compiled.css": "<%= app.dir %>/assets/less/main.less",
+                    "<%= app.dir %>/assets/css/kendo.compiled.css": "<%= app.dir %>/assets/less/kendo.less"
                 }
             }
         },
@@ -146,7 +147,10 @@ module.exports = function(grunt) {
         cssmin: {
             default: {
                 files: {
-                    '<%= app.dir %>/assets/css/main_<%= app.versionString %>.min.css': ['<%= app.dir %>/assets/css/main_compiled.css']
+                    '<%= app.dir %>/assets/css/main_<%= app.versionString %>.min.css': [
+                        '<%= app.dir %>/assets/css/main.compiled.css',
+                        '<%= app.dir %>/assets/css/kendo.compiled.css'
+                    ]
                 }
             }
         },
