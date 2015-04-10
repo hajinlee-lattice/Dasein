@@ -1,5 +1,5 @@
-<div ng-controller="TenantsCtrl">
-    Show all tenants here. Use kendo grid and grid data
+<div ng-controller="TenantListCtrl">
+    Show all tenants here. {{ data | json }}
     <br>
     Go to tenant
     <a ui-sref="TENANT_INFO({tenantId: 'TENANT1'})">TENANT1</a>

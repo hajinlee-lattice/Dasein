@@ -124,10 +124,11 @@ module.exports = function(grunt) {
             // the order of source files matters!
             default: {
                 files: {
-                    '<%= app.dir %>/assets/js/app_<%= app.versionString %>.min.js': [
+                    '<%= app.dir %>/assets/js/app.min.js': [
                         '<%= app.dir %>/lib/js/le-common.js',
                         '<%= app.dir %>/app/core/directive/MainNavDirective.js',
-                        '<%= app.dir %>/app/tenants/controller/TenantsCtrl.js',
+                        '<%= app.dir %>/app/tenants/service/TenantService.js',
+                        '<%= app.dir %>/app/tenants/controller/TenantListCtrl.js',
                         '<%= app.dir %>/app/tenants/controller/TenantInfoCtrl.js',
                         '<%= app.dir %>/app/app.js'
                     ]
@@ -147,7 +148,7 @@ module.exports = function(grunt) {
         cssmin: {
             default: {
                 files: {
-                    '<%= app.dir %>/assets/css/main_<%= app.versionString %>.min.css': [
+                    '<%= app.dir %>/assets/css/main.min.css': [
                         '<%= app.dir %>/assets/css/main.compiled.css',
                         '<%= app.dir %>/assets/css/kendo.compiled.css'
                     ]
@@ -236,9 +237,7 @@ module.exports = function(grunt) {
     grunt.registerTask('init', [
         'clean:vendor',
         'copy:lecommon',
-        'wget:js',
-        'wget:css',
-        'wget:fonts',
+        'wget:js', 'wget:css', 'wget:fonts',
         'wget:kendojs', 'wget:kendocss', 'wget:kendofonts', 'wget:kendoimages',
         'less']);
 

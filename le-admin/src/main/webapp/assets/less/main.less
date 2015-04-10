@@ -1,6 +1,8 @@
 @default: #477CBA;
 @primary: #e96339;
 
+@master-width: 1024px;
+
 body {
   font-family: 'Open Sans', Verdana, Arial, sans-serif;
   color: black;
@@ -21,16 +23,22 @@ header {
   }
 }
 
-section.container {
-  max-width: 1024px;
+section.container, {
+  max-width: @master-width;
+}
+
+a.logo {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+
+  img {
+    height: 24px;
+  }
+
 }
 
 nav {
-
-  a.navbar-brand img {
-    height: 1.5em;
-  }
-
   .breadcrumb {
     float: left;
     margin: 0 7px;
@@ -39,7 +47,7 @@ nav {
 }
 
 .component-status {
-  margin-left: 2em;
+  margin-right: 1em;
 }
 
 .btn-primary {
