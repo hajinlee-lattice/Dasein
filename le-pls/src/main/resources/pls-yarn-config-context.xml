@@ -17,5 +17,14 @@
         dfs.namenode.rpc-address.${pls.dfs.nameservices}.nn2=${pls.dfs.namenode.rpc-address.nn2}
         fs.defaultFS=${pls.fs.defaultFS}
     </yarn:configuration>
-      
+
+    <bean id="taskScheduler"
+          class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler" />
+    <bean id="taskExecutor" class="org.springframework.core.task.SyncTaskExecutor" />
+    <bean id="yarnEventPublisher"
+          class="org.springframework.yarn.event.DefaultYarnEventPublisher" />
+    <bean class="org.springframework.yarn.event.LoggingListener">
+        <constructor-arg value="debug" />
+    </bean>
+
 </beans>
