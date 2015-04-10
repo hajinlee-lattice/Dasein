@@ -12,11 +12,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 
 public class RestGlobalAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-
-    public static final String AUTHORIZATION = "Authorization";
 
     public RestGlobalAuthenticationFilter() {
         super("/globalauth_security_check");
@@ -25,7 +24,7 @@ public class RestGlobalAuthenticationFilter extends AbstractAuthenticationProces
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException, ServletException {
-        String ticket = request.getHeader(AUTHORIZATION);
+        String ticket = request.getHeader(Constants.AUTHORIZATION);
         if (ticket == null) {
             throw new BadCredentialsException("Unauthorized.");
         }
@@ -37,7 +36,7 @@ public class RestGlobalAuthenticationFilter extends AbstractAuthenticationProces
     @Override
     protected boolean requiresAuthentication(HttpServletRequest request, HttpServletResponse response) {
         boolean retVal = false;
-        String ticket = request.getHeader(AUTHORIZATION);
+        String ticket = request.getHeader(Constants.AUTHORIZATION);
 
         if (ticket != null) {
             Authentication authResult = null;

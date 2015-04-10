@@ -26,12 +26,12 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.RightsUtilities;
 import com.latticeengines.security.exposed.exception.LoginException;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
-import com.latticeengines.security.provider.globalauth.RestGlobalAuthenticationFilter;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -84,7 +84,7 @@ public class LoginResource {
         UserDocument doc = new UserDocument();
 
         try {
-            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             ticket.setTenants(Collections.singletonList(tenant));
             doc.setTicket(ticket);
 
