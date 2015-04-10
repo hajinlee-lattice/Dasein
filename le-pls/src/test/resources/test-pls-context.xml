@@ -10,6 +10,5 @@
 
     <import resource="classpath:pls-context.xml"/>
     <import resource="classpath:pls-properties-context.xml"/>
-    
  
 </beans>

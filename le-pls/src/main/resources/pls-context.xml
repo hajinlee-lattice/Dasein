@@ -14,13 +14,17 @@
              since the servlet container instances are not available when running tests. -->
         <context:exclude-filter type="assignable" expression="com.latticeengines.pls.swagger.SwaggerConfig" />
     </context:component-scan>
+    
     <mvc:annotation-driven/>
     <!-- Need to remove this quartz job later when we have le-job ready -->
     <import resource="classpath:pls-modeldownload-quartz-${MODEL_DL_QUARTZ_ENABLED:disabled}-context.xml"/>
     <import resource="classpath:pls-persistence-context.xml"/>
     <import resource="classpath:pls-aspects-context.xml"/>
+    <import resource="classpath:pls-camille-context.xml"/>
     <import resource="classpath:pls-yarn-config-context.xml"/>
     <import resource="classpath:common-jmx-component-context.xml"/>
+    <import resource="classpath:security-context.xml"/>
+    
 
     <bean id="deleteModelThreadPool" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
         <property name="corePoolSize" value="${pls.modeldeletion.core.pool.size}" />
