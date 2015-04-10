@@ -87,34 +87,6 @@ app.controller('EditUserController', function ($scope, $rootScope, _, ResourceUt
 
     $scope.cancelClick = function () {
         $("#modalContainer").modal('hide');
-        $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
     };
 
-    $scope.yesClick = function ($event) {
-        if ($event != null) {
-            $event.preventDefault();
-        }
-
-        $scope.user.FirstName = $scope.existingUser.FirstName;
-        $scope.user.LastName = $scope.existingUser.LastName;
-        $scope.user.Email = $scope.existingUser.Email;
-        $scope.user.Username = $scope.existingUser.Username;
-
-        UserManagementService.AssignAccessLevel($scope.user.Username, $scope.user.AccessLevel).then(function(result){
-            if (result.Success) {
-                $scope.showEditUserSuccess = true;
-                $scope.editUserSuccessMessage=ResourceUtility.getString("EDIT_EXSITING_USER_SUCCESS", [$scope.user.Username]);
-            } else {
-                $scope.editUserErrorMessage = ResourceUtility.getString("EDIT_USER_GENERAL_ERROR");
-                $scope.showEditUserSuccess = false;
-                $scope.showEditUserError = true;
-            }
-            $scope.saveInProgress = false;
-            $event.target.blur();
-        });
-    };
-
-    $scope.noClick = function () {
-        $scope.saveInProgress = false;
-    };
 });

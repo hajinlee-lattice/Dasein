@@ -60,5 +60,9 @@ app.controller('DeleteUserController', function ($scope, $rootScope, _, Resource
             $scope.deleteInProgress = false;
         });
     };
+    
+    $scope.cancelClick = function () {
+        $("#modalContainer").modal('hide');
+    };
 
 });

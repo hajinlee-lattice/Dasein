@@ -137,7 +137,6 @@ app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUti
 
     $scope.cancelClick = function () {
         $("#modalContainer").modal('hide');
-        $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
     };
 
     $scope.yesClick = function ($event) {
