@@ -7,6 +7,7 @@ var app = angular.module("TenantConsoleApp", [
 
 app.config(function($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.when("", "/tenants/");
+    $urlRouterProvider.when("/tenants", "/tenants/");
 
     // For any unmatched url, redirect to
     $urlRouterProvider.otherwise("/");

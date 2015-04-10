@@ -125,22 +125,28 @@ module.exports = function(grunt) {
             default: {
                 files: {
                     '<%= app.dir %>/assets/js/app.min.js': [
-                        '<%= app.dir %>/lib/js/le-common.js',
-                        '<%= app.dir %>/app/core/directive/MainNavDirective.js',
-                        '<%= app.dir %>/app/tenants/service/TenantService.js',
-                        '<%= app.dir %>/app/tenants/controller/TenantListCtrl.js',
-                        '<%= app.dir %>/app/tenants/controller/TenantInfoCtrl.js',
-                        '<%= app.dir %>/app/app.js'
+                        '<%= app.distDir %>/lib/js/le-common.js',
+                        '<%= app.distDir %>/app/core/directive/MainNavDirective.js',
+                        '<%= app.distDir %>/app/tenants/service/TenantService.js',
+                        '<%= app.distDir %>/app/tenants/controller/TenantListCtrl.js',
+                        '<%= app.distDir %>/app/tenants/controller/TenantInfoCtrl.js',
+                        '<%= app.distDir %>/app/app.js'
                     ]
                 }
             }
         },
 
         less: {
-            default: {
+            dev: {
                 files: {
                     "<%= app.dir %>/assets/css/main.compiled.css": "<%= app.dir %>/assets/less/main.less",
                     "<%= app.dir %>/assets/css/kendo.compiled.css": "<%= app.dir %>/assets/less/kendo.less"
+                }
+            },
+            dist: {
+                files: {
+                    "<%= app.dir %>/assets/css/main.compiled.css": "<%= app.distDir %>/assets/less/main.less",
+                    "<%= app.dir %>/assets/css/kendo.compiled.css": "<%= app.distDir %>/assets/less/kendo.less"
                 }
             }
         },
@@ -158,6 +164,15 @@ module.exports = function(grunt) {
 
         clean: {
             vendor: ['<%= app.dir %>/lib'],
+            dist: [
+                '<%= app.dir %>/*.html',
+                '<%= app.dir %>/app/**/*.js',
+                '<%= app.dir %>/lib',
+                '<%= app.dir %>/assets/less'
+            ],
+            postDist: [
+                '<%= app.dir %>/assets/css/*.compiled.css'
+            ],
             restore: [
                 '<%= app.dir %>/assets/js',
                 '<%= app.dir %>/assets/css/main_*.min.css',
@@ -165,6 +180,11 @@ module.exports = function(grunt) {
             ]
         },
 
+        /**
+         * lecommon moves le-common.js from le-common project to here.
+         * backup moves files to dist folder to app folder
+         * restore moves files from dist folder back to app folder
+         * */
         copy: {
             lecommon: {
                 expand: true,
@@ -174,13 +194,19 @@ module.exports = function(grunt) {
             },
             backup: {
                 expand: true,
-                src: ['<%= app.dir %>/*.html'],
-                dest: '<%= app.dist %>'
+                src: [
+                    '<%= app.dir %>/*.html',
+                    '<%= app.dir %>/app/**/*.js',
+                    '<%= app.dir %>/lib/js/le-common.js',
+                    '<%= app.dir %>/assets/less/*'
+                ],
+                dest: '<%= app.dist %>',
+                filter: 'isFile'
             },
             restore: {
                 expand: true,
                 cwd: '<%= app.dist %>/<%= app.dir %>',
-                src: '*.html',
+                src: '**/*',
                 dest: '<%= app.dir %>'
             }
         },
@@ -227,11 +253,13 @@ module.exports = function(grunt) {
 
     // main task to run before deploy the dist war
     grunt.registerTask('default', [
-        'uglify',
-        'less',
-        'cssmin',
         'copy:backup',
-        'processhtml:dist'
+        'clean:dist',
+        'uglify',
+        'less:dist',
+        'cssmin',
+        'processhtml:dist',
+        'clean:postDist'
     ]);
 
     // download vendor javascript and css
@@ -240,11 +268,11 @@ module.exports = function(grunt) {
         'copy:lecommon',
         'wget:js', 'wget:css', 'wget:fonts',
         'wget:kendojs', 'wget:kendocss', 'wget:kendofonts', 'wget:kendoimages',
-        'less']);
+        'less:dev']);
 
     grunt.registerTask('unit', ['jshint']);
 
-    // restore dev setup after run a dist
-    grunt.registerTask('restore', ['copy:restore', 'clean:restore']);
+    // restore dev setup after run a default task
+    grunt.registerTask('restore', ['copy:restore', 'clean:restore', 'less:dev']);
 
 };
