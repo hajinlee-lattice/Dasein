@@ -1,14 +1,14 @@
-package com.latticeengines.admin.tenant.batonadapter.pls;
+package com.latticeengines.admin.tenant.batonadapter.dante;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
-public class PLSComponent extends LatticeComponent {
+public class DanteComponent extends LatticeComponent {
     
     @Override
     public String getName() {
-        return "PLS";
+        return "Dante";
     }
 
     @Override
