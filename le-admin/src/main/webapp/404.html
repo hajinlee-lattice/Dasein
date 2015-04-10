@@ -7,14 +7,30 @@
     <link rel="shortcut icon" href="/assets/img/favicon.ico" type="image/x-icon">
     <title>Tenant Console</title>
 
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.4/simplex/bootstrap.min.css"/>
-    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.css"/>
-    <link rel="stylesheet" href="http://cdn.kendostatic.com/2015.1.408/styles/kendo.common-bootstrap.min.css">
-    <link rel="stylesheet" href="http://cdn.kendostatic.com/2015.1.408/styles/kendo.bootstrap.min.css">
-    <link rel="stylesheet" href="http://cdn.kendostatic.com/2015.1.408/styles/kendo.dataviz.min.css">
-    <link rel="stylesheet" href="http://cdn.kendostatic.com/2015.1.408/styles/kendo.dataviz.bootstrap.min.css">
-    <link rel="stylesheet" href="http://cdn.kendostatic.com/2015.1.408/styles/kendo.mobile.all.min.css">
-    <link rel="stylesheet" type="text/css" href="assets/css/main.min.css?v1428646223388"/></head>
+    <!-- build:template:dist
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/<%= version.bootstrap %>/simplex/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/<%= version["font-awesome"] %>/css/font-awesome.css"/>
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.dataviz.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.mobile.all.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/main.min.css?v<%= versionString %>"/>
+    /build -->
+    <!-- build:remove:dist -->
+    <link rel="stylesheet" type="text/css" href="/lib/css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="/lib/css/font-awesome.css"/>
+
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.dataviz.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/lib/css/kendo.mobile.all.min.css">
+
+    <link rel="stylesheet" type="text/css" href="/assets/css/kendo.compiled.css"/>
+    <link rel="stylesheet" type="text/css" href="/assets/css/main.compiled.css"/>
+    <!-- /build -->
+</head>
 <body>
 <header>
     <h1 class="text-center">Lattice Engines Tenant Console</h1>
@@ -48,20 +64,39 @@
         <h3>404 Page Not Found</h3>
     </div>
 </section>
+
+<!-- build:remove:dist -->
 <script type="text/javascript">
-WebFontConfig = {
-google: { families: [ 'Open Sans', 'Squada One' ]
-}
-};
-(function() {
-var wf = document.createElement('script');
-wf.src = '//cdnjs.cloudflare.com/ajax/libs/webfont/1.5.16/webfontloader.js';
-wf.type = 'text/javascript';
-wf.async = 'true';
-var s = document.getElementsByTagName('script')[0];
-s.parentNode.insertBefore(wf, s);
-})();
+    WebFontConfig = {
+        google: { families: [ 'Open Sans', 'Squada One' ]
+        }
+    };
+    (function() {
+        var wf = document.createElement('script');
+        wf.src = '/lib/js/webfontloader.js';
+        wf.type = 'text/javascript';
+        wf.async = 'true';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wf, s);
+    })();
 </script>
+<!-- /build -->
+<!-- build:template:dist
+<script type="text/javascript">
+    WebFontConfig = {
+        google: { families: [ 'Open Sans', 'Squada One' ]
+        }
+    };
+    (function() {
+        var wf = document.createElement('script');
+        wf.src = '//cdnjs.cloudflare.com/ajax/libs/webfont/<%= version.webfont %>/webfontloader.js';
+        wf.type = 'text/javascript';
+        wf.async = 'true';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wf, s);
+    })();
+</script>
+/build -->
 
 </body>
 </html>
