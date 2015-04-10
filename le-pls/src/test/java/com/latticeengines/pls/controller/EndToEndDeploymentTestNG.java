@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.functionalframework.ModelingServiceExecutor;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 
 public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
 

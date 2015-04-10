@@ -28,7 +28,7 @@ import com.latticeengines.pls.controller.ModelSummaryResource;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 
 public class MetricsAspectTestNG extends PlsFunctionalTestNGBase {
 

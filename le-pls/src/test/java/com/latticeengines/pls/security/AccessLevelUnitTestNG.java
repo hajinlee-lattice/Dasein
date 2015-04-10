@@ -10,6 +10,9 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.GrantedRight;
+
 public class AccessLevelUnitTestNG {
 
     @Test(groups = "unit", expectedExceptions = IllegalArgumentException.class)

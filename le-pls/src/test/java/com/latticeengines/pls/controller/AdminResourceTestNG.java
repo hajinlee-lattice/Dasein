@@ -23,8 +23,8 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.globalauth.authentication.impl.Constants;
+import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 
 public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
 
@@ -38,7 +38,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
     
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() {
-        makeSureUserNoExists("ron@lattice-engines.com");
+        makeSureUserDoesNotExist("ron@lattice-engines.com");
         tenantEntityMgr.deleteAll();
         tenant = new Tenant();
         tenant.setId("T1");

@@ -10,6 +10,7 @@ import java.util.Map;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.security.EntityAccessRightsData;
+import com.latticeengines.security.exposed.RightsUtilities;
 
 public class RightsUtilityUnitTestNG {
 

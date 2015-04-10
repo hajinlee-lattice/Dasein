@@ -5,7 +5,6 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +33,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
-import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
-import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.globalauth.authentication.impl.Constants;
-import com.latticeengines.pls.security.AccessLevel;
 import com.latticeengines.pls.service.TenantService;
-import com.latticeengines.pls.service.UserService;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.UserService;
 
 public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
@@ -145,7 +144,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
         for (int i = 0; i < 3; i++) {
             String username = "tester_" + UUID.randomUUID().toString() + "@test.lattice.local";
-            makeSureUserNoExists(username);
+            makeSureUserDoesNotExist(username);
             createUser(username, username, "Test", "Tester");
             userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
         }
@@ -170,7 +169,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
             if (user.getUsername().matches(pattern)) {
                 cleaned = false;
             }
-            makeSureUserNoExists(user.getUsername());
+            makeSureUserDoesNotExist(user.getUsername());
         }
 
         assertTrue(cleaned);
@@ -184,7 +183,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
         for (int i = 0; i < 3; i++) {
             String username = "tester_" + UUID.randomUUID().toString() + "@test.lattice.local";
-            makeSureUserNoExists(username);
+            makeSureUserDoesNotExist(username);
             createUser(username, username, "Test", "Tester");
             userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), username);
         }
@@ -213,7 +212,7 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
             if (user.getUsername().matches(pattern)) {
                 allUpdated = allUpdated && user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name());
             }
-            makeSureUserNoExists(user.getUsername());
+            makeSureUserDoesNotExist(user.getUsername());
         }
         assertTrue(allUpdated);
     }

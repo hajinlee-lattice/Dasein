@@ -50,11 +50,11 @@ import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.GlobalTenantManagementService;
-import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.security.AccessLevel;
-import com.latticeengines.pls.service.UserService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.UserService;
 
 public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
 
@@ -124,7 +124,7 @@ public class TrafficLoadTestNG extends PlsFunctionalTestNGBase {
     public void destroy() {
         for (Tenant tenant : tenantList) {
             for (User user : users.get(tenant)) {
-                makeSureUserNoExists(user.getUsername());
+                makeSureUserDoesNotExist(user.getUsername());
             }
             try {
                 String tenantId = tenant.getId();

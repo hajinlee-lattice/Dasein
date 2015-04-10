@@ -24,8 +24,8 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 
 /**
  * This test has two users with particular privileges:

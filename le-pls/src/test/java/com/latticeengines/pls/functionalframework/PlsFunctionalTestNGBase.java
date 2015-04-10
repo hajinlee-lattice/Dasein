@@ -45,14 +45,13 @@ import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
-import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
-import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.globalauth.authentication.impl.Constants;
-import com.latticeengines.pls.security.AccessLevel;
-import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
-import com.latticeengines.pls.security.TicketAuthenticationToken;
-import com.latticeengines.pls.service.UserService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.TicketAuthenticationToken;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.UserService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
@@ -185,7 +184,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
                 throws IOException {
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
-            requestWrapper.getHeaders().add(RestGlobalAuthenticationFilter.AUTHORIZATION, headerValue);
+            requestWrapper.getHeaders().add(Constants.AUTHORIZATION, headerValue);
 
             return execution.execute(requestWrapper, body);
         }
@@ -370,7 +369,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
     }
 
-    protected void makeSureUserNoExists(String username) {
+    protected void makeSureUserDoesNotExist(String username) {
         assertTrue(globalUserManagementService.deleteUser(username));
         assertNull(globalUserManagementService.getUserByUsername(username));
     }

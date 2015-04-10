@@ -34,9 +34,9 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
-import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
-import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 
 public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 

@@ -31,10 +31,10 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.UserResourceTestNGBase;
-import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
-import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.security.AccessLevel;
-import com.latticeengines.pls.service.UserService;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.UserService;
 
 
 public class UserResourceTestNG extends UserResourceTestNGBase {
@@ -177,7 +177,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
         testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
 
-        makeSureUserNoExists(user.getUsername());
+        makeSureUserDoesNotExist(user.getUsername());
     }
 
     private UserRegistration createUserRegistration() {
@@ -205,7 +205,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     private void testRegisterUserSuccess(AccessLevel accessLevel) {
         UserRegistration userReg = createUserRegistration();
         userReg.getUser().setAccessLevel(accessLevel.name());
-        makeSureUserNoExists(userReg.getCredentials().getUsername());
+        makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
 
         String json = restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
         ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json, RegistrationResult.class);
@@ -224,13 +224,13 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         assertEquals(ticket.getTenants().size(), 1);
         globalAuthenticationService.discard(ticket);
 
-        makeSureUserNoExists(userReg.getCredentials().getUsername());
+        makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
     }
 
     private void testRegisterUserFail(AccessLevel accessLevel) {
         UserRegistration userReg = createUserRegistration();
         userReg.getUser().setAccessLevel(accessLevel.name());
-        makeSureUserNoExists(userReg.getCredentials().getUsername());
+        makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
 
         boolean exception = false;
         try {
@@ -242,7 +242,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         assertTrue(exception);
         assertNull(globalUserManagementService.getUserByEmail(userReg.getUser().getEmail()));
 
-        makeSureUserNoExists(userReg.getCredentials().getUsername());
+        makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
     }
 
     private void testUpdateAccessLevel(User user, AccessLevel targetLevel, boolean expectSuccess) {
@@ -300,7 +300,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         // when conflict with another use in the same tenant, do not show the conflicting user
         assertNull(response.getResult().getConflictingUser());
 
-        makeSureUserNoExists(existingUser.getUsername());
+        makeSureUserDoesNotExist(existingUser.getUsername());
     }
 
     private void testConflictingUserOutsideTenant() {
@@ -321,7 +321,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         assertEquals(user.getEmail(), existingUser.getEmail());
         assertEquals(user.getUsername(), existingUser.getUsername());
 
-        makeSureUserNoExists(existingUser.getUsername());
+        makeSureUserDoesNotExist(existingUser.getUsername());
     }
 
     private void testGetAllUsersFail() {
@@ -379,6 +379,6 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         Ticket ticket = loginCreds(user.getUsername(), "newpass");
         logoutTicket(ticket);
 
-        makeSureUserNoExists(user.getUsername());
+        makeSureUserDoesNotExist(user.getUsername());
     }
 }

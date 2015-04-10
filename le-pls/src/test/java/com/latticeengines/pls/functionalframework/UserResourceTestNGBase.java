@@ -1,6 +1,7 @@
 package com.latticeengines.pls.functionalframework;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +11,11 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.security.AccessLevel;
-import com.latticeengines.pls.security.GrantedRight;
 import com.latticeengines.pls.service.TenantService;
-import com.latticeengines.pls.service.UserService;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.GrantedRight;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.UserService;
 
 
 public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
@@ -29,8 +30,8 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
     private GlobalUserManagementService globalUserManagementService;
 
     protected Tenant testTenant;
-    protected HashMap<AccessLevel, User> testUsers = new HashMap<>();
-    protected HashMap<AccessLevel, UserDocument> testUserDocs = new HashMap<>();
+    protected Map<AccessLevel, User> testUsers = new HashMap<>();
+    protected Map<AccessLevel, UserDocument> testUserDocs = new HashMap<>();
 
     protected void createTestTenant() {
         testTenant = new Tenant();
@@ -43,10 +44,10 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
     protected void destroyTestTenant() {
         try {
             for (User user: userService.getUsers(testTenant.getId())) {
-                makeSureUserNoExists(user.getUsername());
+                makeSureUserDoesNotExist(user.getUsername());
             }
         } catch (LedpException e ) {
-            //ignore
+            // ignore
         }
         tenantService.discardTenant(testTenant);
     }
@@ -63,7 +64,7 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
 
         user.setUsername(credentials.getUsername());
 
-        makeSureUserNoExists(credentials.getUsername());
+        makeSureUserDoesNotExist(credentials.getUsername());
 
         createUser(credentials.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName());
 
@@ -106,7 +107,7 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
         }
         if (testUsers.containsKey(accessLevel)) {
             User user = testUsers.get(accessLevel);
-            makeSureUserNoExists(user.getUsername());
+            makeSureUserDoesNotExist(user.getUsername());
             testUsers.remove(accessLevel);
         }
     }
