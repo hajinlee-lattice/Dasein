@@ -12,6 +12,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.io.Files;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
@@ -25,6 +27,8 @@ public class BatonToolUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
+    private BatonService service = new BatonServiceImpl();
+    
     @BeforeMethod(groups = "unit")
     public void setUp() throws Exception {
         CamilleTestEnvironment.start();
@@ -41,7 +45,7 @@ public class BatonToolUnitTestNG {
         String tenantId = "testTenantId";
         String spaceId = "testSpaceId";
 
-        BatonTool.createTenant(contractId, tenantId, spaceId, new CustomerSpaceInfo(new CustomerSpaceProperties(), ""));
+        service.createTenant(contractId, tenantId, spaceId, new CustomerSpaceInfo(new CustomerSpaceProperties(), ""));
         Assert.assertTrue(TenantLifecycleManager.exists(contractId, tenantId));
     }
 
@@ -55,7 +59,7 @@ public class BatonToolUnitTestNG {
         createTextFile(tempDir + "/0/0.txt", "zero");
         createTextFile(tempDir + "/0/1/1.txt", "one");
 
-        BatonTool.loadDirectory(tempDir.toString(), "testDir");
+        service.loadDirectory(tempDir.toString(), "testDir");
         String podId = CamilleEnvironment.getPodId();
 
         Assert.assertTrue(c.get(new Path(String.format("/Pods/%s/testDir/0/0.txt", podId))).getData().equals("zero"));
@@ -72,7 +76,8 @@ public class BatonToolUnitTestNG {
         createTextFile(tempDir + "/0/0.txt", "zero");
         createTextFile(tempDir + "/0/1/1.txt", "one");
 
-        BatonTool.loadDirectory(tempDir.toString(), "");
+
+        service.loadDirectory(tempDir.toString(), "");
         String podId = CamilleEnvironment.getPodId();
 
         Assert.assertTrue(c.get(new Path(String.format("/Pods/%s/0/0.txt", podId))).getData().equals("zero"));

@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
-import net.sourceforge.argparse4j.inf.ArgumentGroup;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -26,6 +25,7 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
+import com.latticeengines.camille.exposed.lifecycle.PodLifecycleManager;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
@@ -49,7 +49,7 @@ public class BatonTool {
     }
 
     // XXX This needs to be cleaned up
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("Baton");
 
         parser.addArgument("--podId").help("Camille PodId");
@@ -61,15 +61,18 @@ public class BatonTool {
         Subparser createPod = subparsers.addParser("createPod").help("Creates a new Pod.");
         Subparser createTenant = subparsers.addParser("createTenant").help(
                 "Creates a new tenant. Requires contractId, tenantID, defaultSpaceId, featureFlags, and properties");
-
+        Subparser destroyPod = subparsers.addParser("destroyPod").help("Only for development use!");
+        
         createTenant.addArgument("--customerSpace");
         
         createTenant
                 .addArgument("--featureFlags")
                 .required(true)
                 .help("File containing the feature flags to use for the default customer space created for this tenant");
-        createTenant.addArgument("--properties").required(true)
+        createTenant.addArgument("--properties")
                 .help("File containing the properties to use for the default customer space created for this tenant");
+        createTenant.addArgument("--propertiesList")
+                .help("Comma-delimited properties to use instead of the properties file.  For example --propertiesList property1:value1,property2:value2");
 
         // Don't let PLO know about this...
         Subparser loadDirectory = subparsers.addParser("loadDirectory").help("Only for development use!");
@@ -92,6 +95,8 @@ public class BatonTool {
             CamilleConfiguration config;
             if (camilleJsonPath != null) {
                 config = new ObjectMapper().readValue(new File(camilleJsonPath), CamilleConfiguration.class);
+                podId = config.getPodId();
+                connectionString = config.getConnectionString();
             } else {
                 config = new CamilleConfiguration();
                 config.setConnectionString(connectionString);
@@ -156,29 +161,10 @@ public class BatonTool {
             batonService.createTenant(contractId, tenantId, defaultSpaceId, new CustomerSpaceInfo(properties, flags));
 
         }
-    }
-
-    /**
-     * Creates the contract if it does not exist, and then creates the tenant
-     * and space
-     * 
-     * @param contractId
-     * @param tenantId
-     * @param defaultSpaceId
-     */
-    static void createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo) {
-        batonService.createTenant(contractId, tenantId, defaultSpaceId, spaceInfo);
-    }
-
-    /**
-     * Loads directory into ZooKeeper
-     * 
-     * @param source
-     *            Path of files to load
-     * @param destination
-     *            Path in ZooKeeper to store files
-     */
-    static void loadDirectory(String source, String destination) {
-        batonService.loadDirectory(source, destination);
+        
+        else if (namespace.get("command").equals("destroyPod")) {
+        	log.info(String.format("Sucessfully destroyed pod %s", podId));
+        	PodLifecycleManager.delete(podId);
+        }
     }
 }
