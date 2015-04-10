@@ -23,12 +23,13 @@
         <module>le-dataplatform</module>
         <module>le-eai</module>
         <module>le-camille</module>
+        <module>le-baton</module>
         <module>le-api</module>
         <module>le-perf</module>
         <module>le-web</module>
         <module>le-dataflow</module>
         <module>le-propdata</module>
-        <module>le-job</module>
+        <module>le-security</module>
         <module>le-pls</module>
     </modules>
 </project>
