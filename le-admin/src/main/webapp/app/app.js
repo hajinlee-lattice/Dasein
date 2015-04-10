@@ -7,7 +7,7 @@ var app = angular.module("TenantConsoleApp", [
 
 app.config(function($stateProvider, $urlRouterProvider) {
     // For any unmatched url, redirect to
-    $urlRouterProvider.otherwise("/tenants");
+    $urlRouterProvider.otherwise("/");
 
     // define states of the app
     $stateProvider
@@ -18,5 +18,12 @@ app.config(function($stateProvider, $urlRouterProvider) {
         .state('TENANT_INFO', {
             url: "/tenants/{tenantId}",
             templateUrl: "app/tenants/view/TenantInfoView.html"
+        })
+        .state('NOWHERE', {
+            url: "/",
+            template: '<div class="text-center">' +
+            '<img class="error-image" src="/assets/img/404.jpg" />' +
+            '<h3>404 Page Not Found</h3>' +
+            '</div>'
         });
 });

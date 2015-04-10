@@ -196,7 +196,8 @@ module.exports = function(grunt) {
 
             dist: {
                 files: {
-                    '<%= app.dir %>/index.html': ['<%= app.distDir %>/index.html']
+                    '<%= app.dir %>/index.html': ['<%= app.distDir %>/index.html'],
+                    '<%= app.dir %>/404.html': ['<%= app.distDir %>/404.html']
                 }
             }
         },
