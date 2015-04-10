@@ -10,7 +10,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.latticeengines.pls.security.TicketAuthenticationToken;
+import com.latticeengines.security.exposed.TicketAuthenticationToken;
 
 @Aspect
 public class MetricsAspect {
@@ -35,7 +35,7 @@ public class MetricsAspect {
         }
     }
 
-    @Around("execution(public * com.latticeengines.pls.globalauth.authentication.impl.*.*(..))")
+    @Around("execution(public * com.latticeengines.security.exposed.globalauth.impl.*.*(..))")
     public Object logGlobalAuth(ProceedingJoinPoint joinPoint) throws Throwable {
         String trackId = tracker.get();
         return logMetrics(joinPoint, trackId);

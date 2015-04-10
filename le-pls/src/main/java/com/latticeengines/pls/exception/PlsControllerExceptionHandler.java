@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.service.AlertService;
+import com.latticeengines.security.exposed.exception.LoginException;
 
 @ControllerAdvice
 @SuppressWarnings("deprecation")

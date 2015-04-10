@@ -10,7 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
-import com.latticeengines.pls.security.TicketAuthenticationToken;
+import com.latticeengines.security.exposed.TicketAuthenticationToken;
 
 @Aspect
 public class MultiTenantEntityMgrAspect {

@@ -22,10 +22,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
-import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
-import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
+import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -90,7 +90,7 @@ public class ModelSummaryResource {
             modelSummary.setUploaded(true);
         }
 
-        Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+        Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
         Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
         if (tenant == null) { return null; }
 

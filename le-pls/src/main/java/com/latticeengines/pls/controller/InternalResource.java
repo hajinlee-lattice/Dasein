@@ -36,10 +36,10 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
-import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
-import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.security.AccessLevel;
-import com.latticeengines.pls.service.UserService;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 

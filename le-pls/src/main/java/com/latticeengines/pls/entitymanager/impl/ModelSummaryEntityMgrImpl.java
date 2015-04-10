@@ -29,7 +29,7 @@ import com.latticeengines.pls.dao.PredictorDao;
 import com.latticeengines.pls.dao.PredictorElementDao;
 import com.latticeengines.pls.dao.TenantDao;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.security.TicketAuthenticationToken;
+import com.latticeengines.security.exposed.TicketAuthenticationToken;
 
 @Component("modelSummaryEntityMgr")
 public class ModelSummaryEntityMgrImpl extends BasePLSEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {

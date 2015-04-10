@@ -4,8 +4,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.pls.exception.LoginException;
-import com.latticeengines.pls.globalauth.authentication.impl.Constants;
+import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.exception.LoginException;
 
 public class InternalResourceBase {
 

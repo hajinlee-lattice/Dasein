@@ -31,13 +31,13 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.pls.exception.LoginException;
-import com.latticeengines.pls.globalauth.authentication.GlobalAuthenticationService;
-import com.latticeengines.pls.globalauth.authentication.GlobalSessionManagementService;
-import com.latticeengines.pls.globalauth.authentication.GlobalUserManagementService;
-import com.latticeengines.pls.security.AccessLevel;
-import com.latticeengines.pls.security.RestGlobalAuthenticationFilter;
-import com.latticeengines.pls.service.UserService;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.exception.LoginException;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -67,7 +67,7 @@ public class UserResource {
     public ResponseDocument<List<User>> getAll(HttpServletRequest request) {
         ResponseDocument<List<User>> response = new ResponseDocument<>();
         try {
-            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             Session session = globalSessionManagementService.retrieve(ticket);
             String tenantId = session.getTenant().getId();
             AccessLevel currentLevel = AccessLevel.valueOf(session.getAccessLevel());
@@ -111,7 +111,7 @@ public class UserResource {
         String loginUsername;
         AccessLevel loginLevel;
         try {
-            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             Session session = globalSessionManagementService.retrieve(ticket);
             tenantId = session.getTenant().getId();
             loginUsername = session.getEmailAddress();
@@ -178,7 +178,7 @@ public class UserResource {
         Ticket ticket;
         username = username.toLowerCase();
         try {
-            ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             user = globalUserManagementService.getUserByEmail(
                     globalSessionManagementService.retrieve(ticket).getEmailAddress()
             );
@@ -233,7 +233,7 @@ public class UserResource {
         String loginUsername;
         username = username.toLowerCase();
         try {
-            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             Session session = globalSessionManagementService.retrieve(ticket);
             tenantId = session.getTenant().getId();
             currentLevel = AccessLevel.valueOf(session.getAccessLevel());
@@ -280,7 +280,7 @@ public class UserResource {
         String loginUsername;
         username = username.toLowerCase();
         try {
-            Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+            Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             Session session = globalSessionManagementService.retrieve(ticket);
             Tenant tenant = session.getTenant();
             tenantId = tenant.getId();
@@ -316,7 +316,7 @@ public class UserResource {
     public UserDocument logout(HttpServletRequest request) {
         UserDocument doc = new UserDocument();
 
-        Ticket ticket = new Ticket(request.getHeader(RestGlobalAuthenticationFilter.AUTHORIZATION));
+        Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
         globalAuthenticationService.discard(ticket);
         doc.setSuccess(true);
 
