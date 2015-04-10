@@ -24,6 +24,7 @@ app.service('UserManagementService', function ($http, $q, _, BrowserStorageUtili
             headers: {"Content-Type": "application/json"}
         }).success(function (data) {
             result.Success = data.Success;
+            result.ResultObj = {Username: username, AccessLevel: accessLevel};
             deferred.resolve(result);
         }).error(function (data, status) {
             SessionService.HandleResponseErrors(data, status);
