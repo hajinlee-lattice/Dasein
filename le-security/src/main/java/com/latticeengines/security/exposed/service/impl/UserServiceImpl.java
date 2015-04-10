@@ -104,19 +104,10 @@ public class UserServiceImpl implements UserService {
     public AccessLevel getAccessLevel(String tenantId, String username) {
         List<String> rights = globalUserManagementService.getRights(username, tenantId);
         AccessLevel toReturn = getAccessLevel(rights);
-        if (rights.size() > 1 && !username.equals("admin")) {
-            if (toReturn == null) {
-                List<GrantedRight> grantedRights = new ArrayList<>();
-                for (String right: rights) {
-                    GrantedRight grantedRight = GrantedRight.getGrantedRight(right);
-                    if (grantedRight != null) { grantedRights.add(grantedRight); }
-                }
-                toReturn = AccessLevel.maxAccessLevel(grantedRights);
-            }
-            softDelete(tenantId, username);
+        if (rights.size() > 1 && !rights.contains(toReturn.name()) && !username.equals("admin")) {
             assignAccessLevel(toReturn, tenantId, username);
         }
-        return toReturn;
+        return  toReturn;
     }
 
     @Override
@@ -200,6 +191,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isVisible(AccessLevel loginLevel, AccessLevel targetLevel) {
+        return (loginLevel != null && targetLevel != null)
+                && ( loginLevel.compareTo(AccessLevel.INTERNAL_USER) >= 0
+                || targetLevel.compareTo(AccessLevel.INTERNAL_USER) < 0 );
+    }
+
+    @Override
+    public boolean isSuperior(AccessLevel loginLevel, AccessLevel targetLevel) {
         return loginLevel != null && targetLevel != null && targetLevel.compareTo(loginLevel) <= 0;
     }
 

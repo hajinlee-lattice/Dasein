@@ -26,5 +26,7 @@ public interface UserService {
 
     boolean isVisible(AccessLevel loginLevel, AccessLevel targetLevel);
 
+    boolean isSuperior(AccessLevel loginLevel, AccessLevel targetLevel);
+
     boolean inTenant(String tenantId, String username);
 }
