@@ -7,40 +7,33 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
     'mainApp.core.utilities.RightsUtility',
     'mainApp.userManagement.modals.AddUserModal',
     'mainApp.userManagement.modals.DeleteUserModal',
-    'mainApp.userManagement.modals.EditUserModal',
-    'mainApp.userManagement.services.UserManagementService',
-    'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.userManagement.services.UserManagementService'
 ])
-.controller('UserManagementWidgetController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, RightsUtility, AddUserModal, DeleteUserModal, EditUserModal) {
+.controller('UserManagementWidgetController', function ($scope, $rootScope, _, ResourceUtility, RightsUtility, AddUserModal, DeleteUserModal) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.deleteInProgress = false;
 
     if( Object.prototype.toString.call( $scope.data ) !== '[object Array]' ) {
         $scope.data = [$scope.data];
     }
-    $scope.users = _.sortBy(_.sortBy($scope.data, 'Email'), function(u){
-        return RightsUtility.getAccessLevel(u.AccessLevel).ordinal;
-    });
+    var data = $scope.data;
 
     $scope.mayAddUsers = RightsUtility.mayAddUsers();
     $scope.mayDeleteUsers = RightsUtility.mayDeleteUsers();
     $scope.showEditUserButton = RightsUtility.mayChangeUserAccessLevels();
     $scope.showDeleteUserButton = RightsUtility.mayDeleteUsers();
-    var currentLevel = RightsUtility.getAccessLevel(BrowserStorageUtility.getClientSession().AccessLevel);
+
+    $scope.selected = _.range(data.length).map(function () { return false; });
 
     $scope.addUserClicked = function($event) {
         if ($event != null) {
             $event.preventDefault();
         }
-        AddUserModal.show($scope.users.map(function(u){ return u.Email; }));
+        AddUserModal.show(data.map(function(u){ return u.Email; }));
     };
 
     $scope.deleteUserClicked = function(user) {
         DeleteUserModal.show(user);
-    };
-    
-    $scope.editUserClicked = function(user) {
-        EditUserModal.show(user);
     };
     
     $scope.manipulateAccessLevel = function(accessLevel) {
@@ -52,14 +45,6 @@ angular.module('mainApp.appCommon.widgets.UserManagementWidget', [
                 toReturn = ResourceUtility.getString(prefix + accessLevel);
         }
         return toReturn;
-    };
-    
-    $scope.showEditButton = function(user, number) {
-    	var userLevel = RightsUtility.getAccessLevel(user.AccessLevel);
-    	if (currentLevel.ordinal == 3 && userLevel.ordinal == 4) {
-    		return false;
-    	}
-    	return number == 1? $scope.showEditUserButton : $scope.showDeleteUserButton;
     };
 })
 .directive('userManagementWidget', function () {

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,11 +45,7 @@ public class TenantServiceImpl implements TenantService {
         } catch (Exception e) {
             log.warn("Error registering tenant with GA.", e);
         }
-        try {
-            tenantEntityMgr.create(tenant);
-        } catch (ConstraintViolationException e) {
-            log.warn(String.format("Tenant %s already exists.", tenant.getId()), e);
-        }
+        tenantEntityMgr.create(tenant);
     }
 
     @Override

@@ -148,7 +148,7 @@ public class UserResource {
                 targetLevel = AccessLevel.valueOf(userReg.getUser().getAccessLevel());
             }
 
-            if (!userService.isSuperior(loginLevel, targetLevel)) {
+            if (!userService.isVisible(loginLevel, targetLevel)) {
                 httpResponse.setStatus(403);
                 response.setErrors(Collections.singletonList("Cannot create a user with higher access level."));
                 return response;
@@ -249,7 +249,7 @@ public class UserResource {
         if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
             // using access level if it is provided
             AccessLevel targetLevel = AccessLevel.valueOf(data.getAccessLevel());
-            if (userService.isSuperior(currentLevel, targetLevel)) {
+            if (userService.isVisible(currentLevel, targetLevel)) {
                 userService.assignAccessLevel(targetLevel, tenantId, username);
                 LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s",
                         loginUsername, targetLevel.name(), username, tenantId));
@@ -295,7 +295,7 @@ public class UserResource {
 
         if (userService.inTenant(tenantId, username)) {
             AccessLevel targetLevel = userService.getAccessLevel(tenantId, username);
-            if (!userService.isSuperior(loginLevel,  targetLevel)) {
+            if (!userService.isVisible(loginLevel,  targetLevel)) {
                 return SimpleBooleanResponse.getFailResponse(
                         Collections.singletonList(
                                 String.format("Could not delete a %s user using a %s user.",

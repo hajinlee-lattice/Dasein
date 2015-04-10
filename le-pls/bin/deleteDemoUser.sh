@@ -8,11 +8,7 @@ import httplib
 
 def deleteUser(params):
     print 'Connecting to the host ...'
-    protocal, host = params["host"].split('://')
-    if protocal=='http':
-        conn = httplib.HTTPConnection(host, int(params["port"]))
-    else:
-        conn = httplib.HTTPSConnection(host)
+    conn = httplib.HTTPConnection(params["host"], int(params["port"]))
     conn.request('GET', "/")
     response = conn.getresponse()
     print response.status, response.reason
@@ -30,8 +26,8 @@ def deleteUser(params):
 
 if __name__ == "__main__":
     parser = OptionParser()
-    parser.add_option("-o", "--host", dest="host", default="https://app.lattice-engines.com", help='default = https://app.lattice-engines.com')
-    parser.add_option("-p", "--port", dest="port", default=8080, help="used only for http connection, default = 8080")
+    parser.add_option("-o", "--host", dest="host", default="app.lattice-engines.com", help='default = app.lattice-engines.com')
+    parser.add_option("-p", "--port", dest="port", default=80, help="default = 80")
     parser.add_option("-t", "--tenant", dest="tenant")
     parser.add_option("-u", "--username", dest="username")	
     (options, _) = parser.parse_args()

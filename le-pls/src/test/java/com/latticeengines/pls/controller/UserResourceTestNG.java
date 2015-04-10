@@ -121,7 +121,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         testGetAllUsersSuccess(2);
 
         switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
-        testGetAllUsersSuccess(5);
+        testGetAllUsersSuccess(4);
 
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testGetAllUsersSuccess(5);

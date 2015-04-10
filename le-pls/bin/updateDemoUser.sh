@@ -9,11 +9,7 @@ import json
 
 def updateUser(params):
     print 'Connecting to the host ...'
-    protocal, host = params["host"].split('://')
-    if protocal=='http':
-        conn = httplib.HTTPConnection(host, int(params["port"]))
-    else:
-        conn = httplib.HTTPSConnection(host)
+    conn = httplib.HTTPConnection(params["host"], int(params["port"]))
     conn.request('GET', "/")
     response = conn.getresponse()
     print response.status, response.reason
