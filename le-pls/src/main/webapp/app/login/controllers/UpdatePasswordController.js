@@ -29,7 +29,7 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
         $scope.newPasswordInputError = StringUtility.IsEmptyString($scope.newPassword) ? "error" : "";
         $scope.confirmPasswordInputError = StringUtility.IsEmptyString($scope.confirmPassword) ? "error" : "";
 
-        if ($scope.form.oldPassword.$error.required) {
+        if ($scope.oldPassword === "") {
             $scope.validateErrorMessage = ResourceUtility.getString("LOGIN_PASSWORD_EMPTY_OLDPASSWORD");
             $scope.oldPasswordInputError = "error";
             return false;
