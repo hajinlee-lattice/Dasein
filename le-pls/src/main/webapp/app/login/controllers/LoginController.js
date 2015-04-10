@@ -150,6 +150,7 @@ angular.module('mainApp.login.controllers.LoginController', [
             $event.preventDefault();
         }
         $scope.showLoginForm = true;
+        $scope.showForgotPasswordError = false;
     };
     
     $scope.forgotPasswordOkClick = function () {
