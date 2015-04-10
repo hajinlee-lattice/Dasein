@@ -41,9 +41,6 @@ public class BatonServiceImpl implements BatonService {
                 // XXX For now
                 ContractLifecycleManager.create(contractId, new ContractInfo(new ContractProperties()));
             }
-            if (TenantLifecycleManager.exists(contractId, tenantId)) {
-                throw new RuntimeException(String.format("Tenant %s already exists", tenantId));
-            }
             // XXX For now
             TenantLifecycleManager.create(contractId, tenantId, //
                     new TenantInfo(new TenantProperties(spaceInfo.properties.displayName,

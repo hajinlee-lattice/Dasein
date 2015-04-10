@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.inf.ArgumentGroup;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
@@ -25,6 +26,7 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.CamilleConfiguration;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 
@@ -46,8 +48,7 @@ public class BatonTool {
         });
     }
 
-    // XXX This needs to be cleaned up to use subcommands and also to have a
-    // single try/catch block
+    // XXX This needs to be cleaned up
     public static void main(String[] args) {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("Baton");
 
@@ -61,9 +62,8 @@ public class BatonTool {
         Subparser createTenant = subparsers.addParser("createTenant").help(
                 "Creates a new tenant. Requires contractId, tenantID, defaultSpaceId, featureFlags, and properties");
 
-        createTenant.addArgument("--contractId").required(true);
-        createTenant.addArgument("--tenantId").required(true);
-        createTenant.addArgument("--defaultSpaceId").required(true);
+        createTenant.addArgument("--customerSpace");
+        
         createTenant
                 .addArgument("--featureFlags")
                 .required(true)
@@ -80,7 +80,7 @@ public class BatonTool {
         try {
             namespace = parser.parseArgs(args);
         } catch (ArgumentParserException e) {
-            log.error("Error parsing input arguments", e.getMessage());
+            log.error("Error parsing input arguments: {}", e.getMessage());
             System.exit(1);
         }
 
@@ -124,9 +124,11 @@ public class BatonTool {
         }
 
         else if (namespace.get("command").equals("createTenant")) {
-            String contractId = namespace.get("contractId");
-            String tenantId = namespace.get("tenantId");
-            String defaultSpaceId = namespace.get("defaultSpaceId");
+            String customerSpace = namespace.get("customerSpace");
+            CustomerSpace space = CustomerSpace.parse(customerSpace);
+            String contractId = space.getContractId();
+            String tenantId = space.getTenantId();
+            String defaultSpaceId = space.getSpaceId();
 
             String flagsFilename = namespace.get("featureFlags");
             String propertiesFilename = namespace.get("properties");
@@ -178,14 +180,5 @@ public class BatonTool {
      */
     static void loadDirectory(String source, String destination) {
         batonService.loadDirectory(source, destination);
-    }
-
-    private static boolean anyNull(String... args) {
-        for (String arg : args) {
-            if (arg == null) {
-                return true;
-            }
-        }
-        return false;
     }
 }

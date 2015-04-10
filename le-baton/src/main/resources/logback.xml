@@ -1,31 +1,15 @@
 <configuration scan="true">
-    <timestamp key="byMillisecond" datePattern="yyyyMMddHHmmssSSS" />
-
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/${byMillisecond}.log</file>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level
-                %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
-
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level
                 %logger{36} - %msg%n</pattern>
         </encoder>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>ERROR</level>
+            <level>INFO</level>
         </filter>
     </appender>
 
-    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-        <discardingThreshold>0</discardingThreshold>
-        <appender-ref ref="FILE" />
-    </appender>
-
     <root level="info">
-        <appender-ref ref="ASYNC" />
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>
