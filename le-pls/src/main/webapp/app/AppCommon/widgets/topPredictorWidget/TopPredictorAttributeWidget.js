@@ -244,7 +244,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
         chart.selectAll("text.percentLeads")
             .data(percentLeads)
             .enter().append("text")
-            .attr("x", width + 180)
+            .attr("x", width + 177)
             .attr("y", function(d, i) {
                 return (i * (barHeight + 2 * gap)) + 42;
             })
