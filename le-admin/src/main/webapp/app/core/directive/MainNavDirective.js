@@ -9,15 +9,19 @@ app.service('MainNavService', function(_, $state){
         if (seg.indexOf('tenantId') > -1) {
             return params.tenantId;
         }
+        if (seg === "tenants") {
+            return "Tenants";
+        }
+
     };
 
     var parseSegment = function(seg, params){
         if (seg === "tenants") {
-            return "<a href='" + $state.href('STATE_TENANTS') + "'>Tenants</a>";
+            return "<a href='" + $state.href('TENANTS') + "'>" + parseLastSegment(seg, params) + "</a>";
         }
 
         if (seg.indexOf('tenantId') > -1) {
-            return "<a href='" + $state.href('STATE_TENANT_INFO', params) + "'>" + params.tenantId + "</a>";
+            return "<a href='" + $state.href('TENANT_INFO', params) + "'>" + parseLastSegment(seg, params) + "</a>";
         }
     };
 
@@ -43,7 +47,7 @@ app.directive('mainNav', function(){
         controller: ['$scope', '$rootScope', '$state', '$stateParams', 'MainNavService',
             function ($scope, $rootScope, $state, $stateParams, MainNavService) {
                 $scope.name = "hehe";
-
+                $scope.links = MainNavService.parseState($state.current, $stateParams);
                 $rootScope.$on('$stateChangeSuccess', function () {
                     $scope.links = MainNavService.parseState($state.current, $stateParams);
                 });

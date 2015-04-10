@@ -1,5 +1,56 @@
 <div ng-controller="TenantInfoCtrl">
-
+    <div class="well">
+    View tenant info here. <br>
     Tenant ID: {{ tenantId }}
+    </div>
+
+    <ul kendo-panel-bar k-options="panelBarOptions">
+        <li>
+            PLS <span class="component-status pull-right"><i class="fa fa-check-circle text-success"></i></span>
+            <ul>
+                <li>Config1
+                    <ul>
+                        <li>Config1.1</li>
+                        <li>Config1.2</li>
+                        <li>Config1.3</li>
+                    </ul>
+                </li>
+                <li>Config2</li>
+                <li>Config3</li>
+            </ul>
+        </li>
+        <li>
+            Data Loader <span class="component-status pull-right"><i class="fa fa-times-circle text-danger"></i></span>
+            <ul>
+                <li>Config1
+                    <ul>
+                        <li>Config1.1</li>
+                        <li>Config1.2</li>
+                        <li>Config1.3</li>
+                    </ul>
+                </li>
+                <li>Config2</li>
+                <li>Config3</li>
+            </ul>
+        </li>
+        <li>
+            JAMS <span class="component-status pull-right"><i class="fa fa-minus-circle text-muted"></i></span>
+            <ul>
+                <li>Config1
+                    <ul>
+                        <li>Config1.1</li>
+                        <li>Config1.2</li>
+                        <li>Config1.3</li>
+                    </ul>
+                </li>
+                <li>Config2</li>
+                <li>Config3</li>
+            </ul>
+        </li>
+        <li>
+            Custom component <span class="component-status pull-right"><i class="fa fa-exclamation-circle text-warning"></i></span>
+            <div style="padding: 0 1em"></div>
+        </li>
+    </ul>
 
 </div>

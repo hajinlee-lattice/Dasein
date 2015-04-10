@@ -11,11 +11,11 @@ app.config(function($stateProvider, $urlRouterProvider) {
 
     // define states of the app
     $stateProvider
-        .state('STATE_TENANTS', {
+        .state('TENANTS', {
             url: "/tenants",
             templateUrl: "app/tenants/view/TenantsView.html"
         })
-        .state('STATE_TENANT_INFO', {
+        .state('TENANT_INFO', {
             url: "/tenants/{tenantId}",
             templateUrl: "app/tenants/view/TenantInfoView.html"
         });

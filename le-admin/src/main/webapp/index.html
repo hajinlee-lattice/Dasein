@@ -10,11 +10,23 @@
     <!-- build:template:dist
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/<%= version.bootstrap %>/simplex/bootstrap.min.css"/>
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/<%= version["font-awesome"] %>/css/font-awesome.css"/>
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.dataviz.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.kendostatic.com/<%= version.kendo %>/styles/kendo.mobile.all.min.css">
     <link rel="stylesheet" type="text/css" href="assets/css/main_<%= versionString %>.min.css"/>
     /build -->
     <!-- build:remove:dist -->
     <link rel="stylesheet" type="text/css" href="lib/css/bootstrap.css"/>
     <link rel="stylesheet" type="text/css" href="lib/css/font-awesome.css"/>
+
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.common-bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.dataviz.bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="lib/css/kendo.mobile.all.min.css">
+
     <link rel="stylesheet" type="text/css" href="assets/css/main_compiled.css"/>
     <!-- /build -->
 </head>
@@ -47,6 +59,7 @@
 <script src="lib/js/angular-ui-router.js"></script>
 <script src="lib/js/underscore.js"></script>
 <script src="lib/js/bootstrap.js"></script>
+<script src="lib/js/kendo.all.min.js"></script>
 <script src="lib/js/le-common.js"></script>
 
 <script src="app/core/directive/MainNavDirective.js"></script>
@@ -76,6 +89,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/<%= version["angular-ui-router"] %>/angular-ui-router.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/<%= version.underscore %>/underscore-min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/<%= version.bootstrap %>/js/bootstrap.min.js"></script>
+<script src="http://cdn.kendostatic.com/<%= version.kendo %>/js/kendo.all.min.js"></script>
 <script src="/assets/js/app_<%= versionString %>.min.js"></script>
 /build -->
 

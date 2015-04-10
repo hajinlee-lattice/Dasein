@@ -18,7 +18,9 @@ module.exports = function(grunt) {
             webfont: '1.5.16',
 
             bootstrap: '3.3.4',
-            "font-awesome": '4.3.0'
+            "font-awesome": '4.3.0',
+
+            kendo: '2015.1.408'
         },
         env: {
             dev: {
@@ -74,6 +76,44 @@ module.exports = function(grunt) {
                     'font-awesome/<%= app.version["font-awesome"] %>/fonts/fontawesome-webfont.woff2'
                 ],
                 dest: '<%= app.dir %>/lib/fonts'
+            },
+
+            kendojs: {
+                options: {
+                    baseUrl: 'http://cdn.kendostatic.com/<%= app.version.kendo %>/js/'
+                },
+                src: ['kendo.all.min.js', 'kendo.all.min.js'],
+                dest: '<%= app.dir %>/lib/js'
+            },
+
+            kendocss: {
+                options: {
+                    baseUrl: 'http://cdn.kendostatic.com/<%= app.version.kendo %>/styles/'
+                },
+                src: [
+                    'kendo.common-bootstrap.min.css',
+                    'kendo.bootstrap.min.css',
+                    'kendo.dataviz.min.css',
+                    'kendo.dataviz.bootstrap.min.css',
+                    'kendo.mobile.all.min.css'
+                ],
+                dest: '<%= app.dir %>/lib/css'
+            },
+
+            kendofonts: {
+                options: {
+                    baseUrl: 'http://cdn.kendostatic.com/<%= app.version.kendo %>/styles/images/'
+                },
+                src: ['kendoui.woff', 'kendoui.woff'],
+                dest: '<%= app.dir %>/lib/css/images'
+            },
+
+            kendoimages: {
+                options: {
+                    baseUrl: 'http://cdn.kendostatic.com/<%= app.version.kendo %>/styles/'
+                },
+                src: ['Bootstrap/sprite.png', 'Bootstrap/sprite.png'],
+                dest: '<%= app.dir %>/lib/css/Bootstrap'
             }
         },
 
@@ -85,19 +125,8 @@ module.exports = function(grunt) {
             default: {
                 files: {
                     '<%= app.dir %>/assets/js/app_<%= app.versionString %>.min.js': [
-                        '<%= app.dir %>/app/lib/le-common.js',
+                        '<%= app.dir %>/lib/js/le-common.js',
                         '<%= app.dir %>/app/core/directive/MainNavDirective.js',
-                        '<%= app.dir %>/app/tenants/controller/TenantsCtrl.js',
-                        '<%= app.dir %>/app/tenants/controller/TenantInfoCtrl.js',
-                        '<%= app.dir %>/app/app.js'
-                    ]
-                }
-            },
-            // it is temporary to compile le-common.js in this project. it will be moved to le-common later.
-            common: {
-                files: {
-                    '<%= app.dir %>/assets/js/app_<%= app.versionString %>.min.js': [
-                        '<%= app.dir %>/app/LECommon/util/MainNavDirective.js',
                         '<%= app.dir %>/app/tenants/controller/TenantsCtrl.js',
                         '<%= app.dir %>/app/tenants/controller/TenantInfoCtrl.js',
                         '<%= app.dir %>/app/app.js'
@@ -200,7 +229,14 @@ module.exports = function(grunt) {
     ]);
 
     // download vendor javascript and css
-    grunt.registerTask('init', ['clean:vendor', 'copy:lecommon', 'wget:js', 'wget:css', 'wget:fonts', 'less']);
+    grunt.registerTask('init', [
+        'clean:vendor',
+        'copy:lecommon',
+        'wget:js',
+        'wget:css',
+        'wget:fonts',
+        'wget:kendojs', 'wget:kendocss', 'wget:kendofonts', 'wget:kendoimages',
+        'less']);
 
     grunt.registerTask('unit', ['jshint']);
 
