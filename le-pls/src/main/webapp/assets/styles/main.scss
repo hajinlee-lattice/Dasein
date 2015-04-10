@@ -318,46 +318,57 @@ Model-detail
 /*
 User-list
 */
-.user-list h2 {
-  font-family: 'ProximaNova-Regular';
-  font-size: 2em;
-  text-align: left;
-  margin: auto;
+
+.user-list {
+  width: 800px;
+
+  h2 {
+    font-family: 'ProximaNova-Regular';
+    font-size: 2em;
+    text-align: left;
+    margin: auto;
+    float: none;
+  }
+
+  table {
+    width: 100%;
+    float: none;
+
+    thead th {
+      border-bottom: #ccc solid 1px;
+      background: #fff;
+      text-transform: uppercase;
+      color: #999;
+      font-weight: bold;
+    }
+
+    tbody {
+      tr.shaded {
+        background: #eaeaea;
+      }
+
+      tr:hover {
+        background: #B3D5F3;
+      }
+
+      tr td.edit-icons {
+        width: 10%;
+
+        i {
+          padding: 0 2px;
+        }
+
+      }
+    }
+  }
+
+  button {
+    margin-left: 0;
+    margin-top: 1em;
+  }
+
 }
 
-.user-list h2, .user-list table {
-  float: none;
-}
-
-.user-list table {
-  width: 100%;
-}
-
-.user-list table thead th {
-  border-bottom: #ccc solid 1px;
-  background: #fff;
-  text-transform: uppercase;
-  color: #999;
-  font-weight: bold; }
-
-
-.user-list table tbody tr.shaded {
-  background: #eaeaea;
-}
-
-.user-list table tbody tr:hover {
-  background: #B3D5F3;
-}
-
-.user-list button {
-  margin-left: auto;
-  margin-top: 1em;
-}
-
-.user-list #delete-icon {
-  color: red;
-  font-size: large;
-}
 
 #delete-users-modal p {
   margin-top: 0.5em;
