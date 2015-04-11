@@ -48,6 +48,7 @@ public class ModelCommandCallable implements Callable<Long> {
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
     private static final int SUCCESS = 0;
     private static final int FAIL = -1;
+    @SuppressWarnings("unused")
     private static final String HTTPFS_SUFFIX = "?op=OPEN&user.name=yarn";
 
     private Configuration yarnConfiguration;
@@ -76,6 +77,7 @@ public class ModelCommandCallable implements Callable<Long> {
 
     private ModelCommand modelCommand;
 
+    @SuppressWarnings("unused")
     private String httpFsPrefix;
 
     private String resourceManagerWebAppAddress;
