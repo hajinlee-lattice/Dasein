@@ -1,6 +1,5 @@
 package com.latticeengines.camille.exposed.config.bootstrap;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
