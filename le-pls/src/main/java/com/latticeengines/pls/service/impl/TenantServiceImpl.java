@@ -30,19 +30,7 @@ public class TenantServiceImpl implements TenantService {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @Value("${pls.zk.pod.id}")
-    private String PODID;
-
-    @Value("${pls.zk.connectionString}")
-    private String CONNECTION_STRING;
-
     public TenantServiceImpl() throws Exception {
-        try {
-            CamilleEnvironment.getPodId();
-        } catch (IllegalStateException e) {
-            CamilleEnvironment.start(CamilleEnvironment.Mode.BOOTSTRAP,
-                    new CamilleConfiguration(PODID, CONNECTION_STRING));
-        }
         ServiceProperties serviceProps = new ServiceProperties();
         serviceProps.dataVersion = 1;
         serviceProps.versionString = "2.0";
