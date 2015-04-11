@@ -23,17 +23,32 @@ public class MultiTenantEntityMgrAspect {
 
     
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.find*(..))")
-    public void find(JoinPoint joinPoint) {
+    public void findModelSummary(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint);
     }
     
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.find*(..))")
+    public void findSegment(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint);
+    }
+
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.update*(..))")
-    public void update(JoinPoint joinPoint) {
+    public void updateModelSummary(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.update*(..))")
+    public void updateSegment(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint);
     }
 
     @Before("execution(* com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl.delete*(..))")
-    public void delete(JoinPoint joinPoint) {
+    public void deleteModelSummary(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint);
+    }
+
+    @Before("execution(* com.latticeengines.pls.entitymanager.impl.SegmentEntityMgrImpl.delete*(..))")
+    public void deleteSegment(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint);
     }
 

@@ -66,4 +66,9 @@
     <bean id="keyValueDao" class="com.latticeengines.pls.dao.impl.KeyValueDaoImpl">
         <property name="sessionFactory" ref="sessionFactoryPLS" />
     </bean>
+
+    <bean id="segmentDao" class="com.latticeengines.pls.dao.impl.SegmentDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryPLS" />
+    </bean>
+
 </beans>
