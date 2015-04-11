@@ -87,7 +87,9 @@ public enum LedpCode {
     LEDP_18021("Cannot delete active model."), //
     LEDP_18022("Failed to download file."), //
     LEDP_18023("File not found."), //
-    LEDP_18024("Cannot change deleted model to active directly; change it to inactive first, then delete it.");
+    LEDP_18024("Cannot change deleted model to active directly; change it to inactive first, then delete it."), //
+    LEDP_18025("Segment with name {0} not found."), //
+    LEDP_18026("Cannot update the name of a segment. Delete and recreate.");
 
     private String message;
 

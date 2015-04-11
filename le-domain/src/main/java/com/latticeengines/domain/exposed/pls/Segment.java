@@ -68,7 +68,7 @@ public class Segment implements HasName, HasPid, HasTenant, HasTenantId {
         return tenantId;
     }
 
-    @JsonProperty("Tenant")
+    @JsonIgnore
     @Override
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
@@ -76,7 +76,7 @@ public class Segment implements HasName, HasPid, HasTenant, HasTenantId {
     }
 
     @Override
-    @JsonProperty("Tenant")
+    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
