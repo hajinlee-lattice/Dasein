@@ -5,4 +5,5 @@ import com.latticeengines.domain.exposed.pls.Segment;
 
 public interface SegmentDao extends BaseDao<Segment> {
 
+    Segment findByName(String name);
 }

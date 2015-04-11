@@ -9,4 +9,6 @@ public interface SegmentEntityMgr extends BaseEntityMgr<Segment> {
 
     List<Segment> getAll();
 
+    Segment findByName(String segmentName);
+
 }

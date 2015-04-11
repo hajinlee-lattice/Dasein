@@ -70,7 +70,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         String tenant2 = ticket.getTenants().get(1).getId();
         tenantToAttach = ticket.getTenants().get(1);
         tenant = tenantToAttach.getId();
-        setupDb(tenant1, tenant2, false);
+        setupDb(tenant1, tenant2, false, false);
 
         globalAuthenticationService.discard(ticket);
     }

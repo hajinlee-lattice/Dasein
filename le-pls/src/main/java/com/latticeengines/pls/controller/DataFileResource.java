@@ -17,7 +17,7 @@ import com.latticeengines.pls.service.DataFileProviderService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "datafiles", description = "REST resource for retrieving data files")
+@Api(value = "datafile", description = "REST resource for retrieving data files")
 @RestController
 @RequestMapping(value = "/datafiles")
 @PreAuthorize("hasRole('View_PLS_Configuration')")

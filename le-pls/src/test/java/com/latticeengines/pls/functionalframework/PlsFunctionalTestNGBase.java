@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
+import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
@@ -44,6 +45,7 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.entitymanager.KeyValueEntityMgr;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -78,6 +80,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private KeyValueEntityMgr keyValueEntityMgr;
+    
+    @Autowired
+    private SegmentEntityMgr segmentEntityMgr;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -286,7 +291,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected void setupDbUsingAdminTenantIds(boolean useTenant1, boolean useTenant2) throws Exception {
-        setupDbUsingAdminTenantIds(useTenant1, useTenant2, true);
+        setupDbUsingAdminTenantIds(useTenant1, useTenant2, true, true);
     }
 
     /**
@@ -296,21 +301,21 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
      * @param createSummaries create model summaries?
      * @throws Exception
      */
-    protected void setupDbUsingAdminTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries) throws Exception {
+    protected void setupDbUsingAdminTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries, boolean createSegments) throws Exception {
         setupUsers();
 
         Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
         String tenant1Name = useTenant1 ? ticket.getTenants().get(0).getId() : null;
         String tenant2Name = useTenant2 ? ticket.getTenants().get(1).getId() : null;
-        setupDb(tenant1Name, tenant2Name, createSummaries);
+        setupDb(tenant1Name, tenant2Name, createSummaries, createSegments);
         globalAuthenticationService.discard(ticket);
     }
 
     protected void setupDb(String tenant1Name, String tenant2Name) throws Exception {
-        setupDb(tenant1Name, tenant2Name, true);
+        setupDb(tenant1Name, tenant2Name, true, true);
     }
 
-    protected void setupDb(String tenant1Name, String tenant2Name, boolean createSummaries) throws Exception {
+    protected void setupDb(String tenant1Name, String tenant2Name, boolean createSummaries, boolean createSegments) throws Exception {
         keyValueEntityMgr.deleteAll();
         tenantEntityMgr.deleteAll();
 
@@ -320,10 +325,21 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             tenant1.setName(tenant1Name);
             tenantEntityMgr.create(tenant1);
 
+            ModelSummary summary1 = null;
             if (createSummaries) {
-                ModelSummary summary1 = getDetails(tenant1, "marketo");
+                summary1 = getDetails(tenant1, "marketo");
                 modelSummaryEntityMgr.create(summary1);
             }
+            
+            if (createSummaries && createSegments) {
+                Segment segment1 = new Segment();
+                segment1.setModelId(summary1.getId());
+                segment1.setName("SMB");
+                segment1.setPriority(1);
+                segment1.setTenant(tenant1);
+                segmentEntityMgr.create(segment1);
+            }
+        
         }
 
         if (tenant2Name != null) {
@@ -332,8 +348,9 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             tenant2.setName(tenant2Name);
             tenantEntityMgr.create(tenant2);
 
+            ModelSummary summary2 = null;
             if (createSummaries) {
-                ModelSummary summary2 = getDetails(tenant2, "eloqua");
+                summary2 = getDetails(tenant2, "eloqua");
                 Predictor s2p1 = new Predictor();
                 s2p1.setApprovedUsage("Model");
                 s2p1.setCategory("Construction");
@@ -366,6 +383,16 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
                 modelSummaryEntityMgr.create(summary2);
             }
+            
+            if (createSummaries && createSegments) {
+                Segment segment2 = new Segment();
+                segment2.setModelId(summary2.getId());
+                segment2.setName("SMB");
+                segment2.setPriority(1);
+                segment2.setTenant(tenant2);
+                segmentEntityMgr.create(segment2);
+            }
+
         }
     }
 

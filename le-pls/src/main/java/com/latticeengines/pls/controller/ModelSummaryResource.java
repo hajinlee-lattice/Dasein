@@ -19,13 +19,12 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
-import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
+import com.latticeengines.security.exposed.util.SecurityUtils;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -84,15 +83,17 @@ public class ModelSummaryResource {
     @ResponseBody
     @ApiOperation(value = "Register a model summary")
     @PreAuthorize("hasRole('Create_PLS_Models')")
-    public ModelSummary createModelSummary(@RequestBody ModelSummary modelSummary, @RequestParam(value = "raw", required = false) boolean usingRaw, HttpServletRequest request) {
+    public ModelSummary createModelSummary(@RequestBody ModelSummary modelSummary,
+            @RequestParam(value = "raw", required = false) boolean usingRaw, HttpServletRequest request) {
         if (usingRaw) {
             modelSummary = modelSummaryParser.parse("", modelSummary.getRawFile());
             modelSummary.setUploaded(true);
         }
 
-        Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
-        Tenant tenant = globalSessionManagementService.retrieve(ticket).getTenant();
-        if (tenant == null) { return null; }
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, globalSessionManagementService);
+        if (tenant == null) { 
+            return null; 
+        }
 
         modelSummaryService.resolveNameIdConflict(modelSummary, tenant.getId());
 

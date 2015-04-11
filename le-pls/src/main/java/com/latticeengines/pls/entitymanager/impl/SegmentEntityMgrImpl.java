@@ -35,5 +35,11 @@ public class SegmentEntityMgrImpl extends BasePLSEntityMgrImpl<Segment> implemen
         return super.findAll();
     }
 
+    @Override
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Segment findByName(String segmentName) {
+        return segmentDao.findByName(segmentName);
+    }
+
 
 }

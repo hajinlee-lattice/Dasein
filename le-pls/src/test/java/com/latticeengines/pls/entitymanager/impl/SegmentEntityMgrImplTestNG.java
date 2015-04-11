@@ -1,6 +1,7 @@
 package com.latticeengines.pls.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.List;
 
@@ -53,11 +54,9 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Segment segment2 = new Segment();
         segment2.setModelId(summariesForTenant2.get(0).getId());
         segment2.setName("US");
-        segment2.setPriority(1);
+        segment2.setPriority(2);
         segment2.setTenant(tenant2);
         segmentEntityMgr.create(segment2);
-        
-        assertEquals(segmentEntityMgr.getAll().size(), 2);
     }
     
     @Test(groups = "functional")
@@ -66,4 +65,18 @@ public class SegmentEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         List<Segment> segments = segmentEntityMgr.findAll();
         assertEquals(segments.size(), 1);
     }
+    
+    @Test(groups = "functional")
+    public void getAll() {
+        assertEquals(segmentEntityMgr.getAll().size(), 2);
+    }
+
+    @Test(groups = "functional")
+    public void findByName() {
+        setupSecurityContext(tenant2);
+        Segment segment = segmentEntityMgr.findByName("US");
+        assertNotNull(segment);
+        assertEquals(segment.getPriority().intValue(), 2);
+    }
+
 }
