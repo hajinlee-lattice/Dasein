@@ -64,11 +64,6 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         importOutputDir1 = setupProgress(yesterday, dailyProgress1, "MadisonLogicDepivoted_test1");
         importOutputDir2 = setupProgress(today, dailyProgress2, "MadisonLogicDepivoted_test2");
 
-        // importOutputDir1 = setupProgress(yesterday, dailyProgress1,
-        // "MadisonLogicDepivoted_20150311");
-        // importOutputDir2 = setupProgress(today, dailyProgress2,
-        // "MadisonLogicDepivoted_20150323");
-
         transformOutput1 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(yesterday);
         transformOutput2 = ((PropDataMadisonServiceImpl) propDataService).getHdfsWorkflowTotalRawPath(today);
 
