@@ -5,11 +5,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.CamilleConfiguration;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
