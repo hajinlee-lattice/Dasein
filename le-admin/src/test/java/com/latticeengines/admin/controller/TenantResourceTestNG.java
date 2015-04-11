@@ -39,10 +39,16 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
     }
     
     @Test(groups = "functional")
-    public void getServiceState() {
+    public void getServiceState() throws InterruptedException {
         String url = getRestHostPort() + "/admin/tenants/TENANT1/services/TestComponent/state?contractId=CONTRACT1";
-        BootstrapState state = restTemplate.getForObject(url, BootstrapState.class, new HashMap<>());
-        assertNotNull(state);
+
+        BootstrapState state;
+        int numTries = 0;
+        do {
+            state = restTemplate.getForObject(url, BootstrapState.class, new HashMap<>());
+            Thread.sleep(1000L);
+            numTries++;
+        } while (state.state != BootstrapState.State.OK && numTries < 5);
         assertEquals(state.state, BootstrapState.State.OK);
     }
     
