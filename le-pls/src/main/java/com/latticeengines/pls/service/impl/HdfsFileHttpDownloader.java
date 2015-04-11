@@ -20,6 +20,9 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 
 public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
 
+    @SuppressWarnings("unused")
+    private static final Log log = LogFactory.getLog(HdfsFileHttpDownloader.class);
+    
     private String modelId;
     private Configuration yarnConfiguration;
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -28,7 +31,7 @@ public class HdfsFileHttpDownloader extends AbstractHttpFileDownLoader {
     private String modelingServiceHdfsBaseDir;
 
     private String filePath;
-    private static final Log log = LogFactory.getLog(HdfsFileHttpDownloader.class);
+    
 
     public HdfsFileHttpDownloader(DownloadRequestBuilder requestBuilder) {
         super(requestBuilder.mimeType);
