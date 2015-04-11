@@ -3,9 +3,11 @@ package com.latticeengines.madison.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.service.DataTransformationService;
@@ -20,6 +22,9 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Value("${propdata.madison.use.default.job.properties}")
+    private boolean useDefaultProperties;
 
     @Override
     public void execute(String flowName, List<String> sourcePaths, String targetPath, String targetSchemaPath) {
@@ -46,8 +51,8 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         ctx.setProperty("QUEUE", "Priority0.MapReduce.0");
         ctx.setProperty("FLOWNAME", flowName + "-Aggregation");
         ctx.setProperty("CHECKPOINT", false);
-//        ctx.setProperty("HADOOPCONF", new Configuration());
-         ctx.setProperty("HADOOPCONF", yarnConfiguration);
+        ctx.setProperty("HADOOPCONF", yarnConfiguration);
+        ctx.setProperty("JOBPROPERTIES", getJobProperties());
         dataTransformationService.executeNamedTransformation(ctx, "madisonDataFlowAggregationBuilder");
     }
 
@@ -65,8 +70,23 @@ public class PropDataMadisonDataFlowServiceImpl implements PropDataMadisonDataFl
         ctx.setProperty("QUEUE", "Priority0.MapReduce.0");
         ctx.setProperty("FLOWNAME", flowName + "-GroupAndExpand");
         ctx.setProperty("CHECKPOINT", false);
-//        ctx.setProperty("HADOOPCONF", new Configuration());
         ctx.setProperty("HADOOPCONF", yarnConfiguration);
+        ctx.setProperty("JOBPROPERTIES", getJobProperties());
         dataTransformationService.executeNamedTransformation(ctx, "madisonDataFlowGroupAndExpandBuilder");
+    }
+
+    private Properties getJobProperties() {
+        Properties jobProperties = new Properties();
+        if (useDefaultProperties) {
+            return jobProperties;
+        }
+        jobProperties.put("mapred.reduce.tasks", "36");
+        jobProperties.put("mapred.tasktracker.map.tasks.maximum", "4");
+        jobProperties.put("mapred.tasktracker.reduce.tasks.maximum", "4");
+        jobProperties.put("mapred.compress.map.output", "true");
+        jobProperties.put("mapred.output.compression.type", "BLOCK");
+        jobProperties.put("mapred.map.output.compression.codec", "org.apache.hadoop.io.compress.BZip2Codec");
+
+        return jobProperties;
     }
 }
