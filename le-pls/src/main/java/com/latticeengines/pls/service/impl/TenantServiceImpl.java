@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
@@ -18,6 +19,7 @@ import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 
 @Component("tenantService")
+@Lazy(value = true)
 public class TenantServiceImpl implements TenantService {
     private static final Log log = LogFactory.getLog(TenantServiceImpl.class);
 
