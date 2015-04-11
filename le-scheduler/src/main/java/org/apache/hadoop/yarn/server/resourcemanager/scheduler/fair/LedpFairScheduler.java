@@ -52,6 +52,7 @@ public class LedpFairScheduler extends FairScheduler {
         return Resources.none();
     }
 
+    @SuppressWarnings("unused")
     private boolean canPreemptUsingNonP0Resources(Collection<FSLeafQueue> scheds, Resource toPreempt) {
         List<RMContainer> runningContainers = new ArrayList<RMContainer>();
         for (FSLeafQueue sched : scheds) {
@@ -118,6 +119,7 @@ public class LedpFairScheduler extends FairScheduler {
         return queue.getQueueName().contains("Priority0");
     }
 
+    @SuppressWarnings("unused")
     private boolean isMapReduce(FSLeafQueue queue) {
         return queue.getQueueName().contains("MapReduce");
     }
