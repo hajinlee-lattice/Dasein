@@ -623,6 +623,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         String flowName = dataFlowCtx.getProperty("FLOWNAME", String.class);
         String targetPath = dataFlowCtx.getProperty("TARGETPATH", String.class);
         String queue = dataFlowCtx.getProperty("QUEUE", String.class);
+        Properties jobProperties = dataFlowCtx.getProperty("JOBPROPERTIES", Properties.class);
 
         String lastOperator = constructFlowDefinition(dataFlowCtx, sourceTables);
         Schema schema = getSchema(flowName, lastOperator, dataFlowCtx);
@@ -634,6 +635,10 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
         }
         Properties properties = new Properties();
         properties.put("mapred.job.queue.name", queue);
+        if (jobProperties != null) {
+            properties.putAll(jobProperties);
+        }
+
         AppProps.setApplicationJarClass(properties, getClass());
         HadoopFlowConnector flowConnector = new HadoopFlowConnector(properties);
 
