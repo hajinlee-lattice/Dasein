@@ -13,6 +13,7 @@
         <le.camille.version>1.0.31-SNAPSHOT</le.camille.version>
         <le.propdata.version>1.0.31-SNAPSHOT</le.propdata.version>
         <le.pls.version>1.0.31-SNAPSHOT</le.pls.version>
+        <le.scoring.version>1.0.31-SNAPSHOT</le.scoring.version>
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
     </properties>
@@ -53,7 +54,7 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
+                                    <argLine>-XX:MaxPermSize=2048m ${argLine}</argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${functional.classes.include}</include>
@@ -143,6 +144,12 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-propdata</artifactId>
             <version>${le.propdata.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-scoring</artifactId>
+            <version>${le.scoring.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <!--dependency>
             <groupId>com.latticeengines</groupId>

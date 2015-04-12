@@ -149,6 +149,9 @@ public class SchemaGenerator {
                     "com.latticeengines.domain.exposed.eai");
             gen.generateToScript();
 
+            gen = new SchemaGenerator("scoring", DBDialect.MYSQL, "com.latticeengines.domain.exposed.scoring");
+            gen.generateToScript();
+
             genDlOrchestration = new SchemaGenerator("dlOrchestration", DBDialect.MYSQL,
                     "com.latticeengines.domain.exposed.dataplatform.dlorchestration",
                     "com.latticeengines.domain.exposed.dataplatform.dlorchestration.hibernate");
