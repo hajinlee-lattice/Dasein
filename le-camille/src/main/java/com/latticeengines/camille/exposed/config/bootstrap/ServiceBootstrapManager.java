@@ -113,7 +113,7 @@ public class ServiceBootstrapManager {
         private void install(int executableVersion, Map<String, String> bootstrapProperties) throws Exception {
             Path serviceDirectoryPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), this.serviceName);
             InstallerAdaptor adaptor = new ServiceInstallerAdaptor(installer, serviceName, bootstrapProperties);
-            BootstrapUtil.install(adaptor, executableVersion, serviceDirectoryPath, false, logPrefix);
+            BootstrapUtil.install(adaptor, executableVersion, serviceDirectoryPath, logPrefix);
         }
     }
 }

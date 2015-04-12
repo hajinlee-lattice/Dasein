@@ -3,7 +3,9 @@ package com.latticeengines.camille.exposed.config.bootstrap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -23,68 +25,45 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceU
 import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 
 public class BootstrapUtil {
-    /**
-     * 
-     * @param force
-     *            True to force the installation of new files to occur -
-     *            deleting the old directory if it exists.
-     * @param installer
-     * @param executableVersion
-     * @param serviceDirectoryPath
-     * @param logPrefix
-     * @throws Exception
-     */
+
     public static void install(InstallerAdaptor installer, int executableVersion, Path serviceDirectoryPath,
-            boolean force, String logPrefix) throws Exception {
+            String logPrefix) throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
 
         log.info("{}Running install of version {}", new Object[] { logPrefix, executableVersion });
 
-        // If force is set, blow away the existing service directory if it
-        // exists. It's not necessary to check the version file and only delete
-        // it if the executableVersion differs - doing so would be an
-        // unnecessary optimization.
-        if (force) {
-            if (camille.exists(serviceDirectoryPath)) {
-                log.info("{}Service directory {} exists. Removing it before installing.", new Object[] { logPrefix,
-                        serviceDirectoryPath });
-                try {
-                    camille.delete(serviceDirectoryPath);
-                } catch (KeeperException.NoNodeException e) {
-                    // pass
-                }
-            }
-        }
+        // Initialize the service directory
+        camille.upsert(serviceDirectoryPath.parent(), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        camille.upsert(serviceDirectoryPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
-        if (!camille.exists(serviceDirectoryPath)) {
+        BootstrapState state = BootstrapStateUtil.getState(serviceDirectoryPath);
+        if (state.state == State.INITIAL) {
+            InterProcessMutex lock = createLock(serviceDirectoryPath);
             try {
-                DocumentDirectory configurationDirectory = installer.install(executableVersion);
-                if (configurationDirectory == null) {
-                    throw new NullPointerException("Installer returned a null document directory");
+                boolean acquired = lock.acquire(30, TimeUnit.MINUTES);
+                if (!acquired) {
+                    throw new RuntimeException(String.format("Could not acquire lock after 30 minutes to install %s",
+                            serviceDirectoryPath));
                 }
 
-                CamilleTransaction transaction = new CamilleTransaction();
+                state = BootstrapStateUtil.getState(serviceDirectoryPath);
+                if (state.state == State.INITIAL) {
+                    DocumentDirectory configuration = installer.install(executableVersion);
 
-                // Create the parent Services directory
-                camille.upsert(serviceDirectoryPath.parent(), ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                    CamilleTransaction transaction = new CamilleTransaction();
 
-                // Create the service directory
-                transaction.create(serviceDirectoryPath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                    BootstrapStateUtil.initializeState(serviceDirectoryPath, transaction,
+                            BootstrapState.constructOKState(executableVersion));
 
-                // Initialize bootstrap state
-                BootstrapStateUtil.initializeState(serviceDirectoryPath, transaction,
-                        BootstrapState.constructOKState(executableVersion));
+                    Iterator<DocumentDirectory.Node> iter = configuration.breadthFirstIterator();
+                    while (iter.hasNext()) {
+                        DocumentDirectory.Node node = iter.next();
+                        transaction.create(node.getPath().prefix(serviceDirectoryPath), node.getDocument(),
+                                ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                    }
 
-                // Create everything under it
-                Iterator<DocumentDirectory.Node> iter = configurationDirectory.breadthFirstIterator();
-                while (iter.hasNext()) {
-                    DocumentDirectory.Node node = iter.next();
-                    transaction.create(node.getPath().prefix(serviceDirectoryPath), node.getDocument(),
-                            ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                    transaction.commit();
                 }
-
-                transaction.commit();
-
             } catch (KeeperException.NodeExistsException e) {
                 log.warn("{}Another process already installed the initial configuration", logPrefix, e);
             } catch (Exception e) {
@@ -94,14 +73,28 @@ public class BootstrapUtil {
                         BootstrapState.constructErrorState(executableVersion, -1,
                                 e.getMessage() + ": " + e.getStackTrace()));
                 throw e;
+            } finally {
+                lock.release();
             }
         }
     }
 
+    private static InterProcessMutex createLock(Path serviceDirectoryPath) {
+        return new InterProcessMutex(CamilleEnvironment.getCamille().getCuratorClient(), serviceDirectoryPath.append(
+                PathConstants.BOOTSTRAP_LOCK).toString());
+    }
+
     private static void removeStateFile(DocumentDirectory directory) {
-        Path stateFilePath = new Path(new String[]{PathConstants.BOOTSTRAP_STATE_FILE});
+        Path stateFilePath = new Path(new String[] { PathConstants.BOOTSTRAP_STATE_FILE });
         if (directory.get(stateFilePath) != null) {
             directory.delete(stateFilePath);
+        }
+    }
+
+    private static void removeLockFile(DocumentDirectory directory) {
+        Path lockPath = new Path(new String[] { PathConstants.BOOTSTRAP_LOCK });
+        if (directory.get(lockPath) != null) {
+            directory.delete(lockPath);
         }
     }
 
@@ -152,6 +145,7 @@ public class BootstrapUtil {
         BootstrapState state = BootstrapStateUtil.getState(serviceDirectoryPath);
 
         try {
+
             if (state.installedVersion > executableVersion) {
                 Exception vme = new VersionMismatchException(space, serviceName, state.installedVersion,
                         executableVersion);
@@ -166,51 +160,56 @@ public class BootstrapUtil {
             }
 
             if (state.installedVersion < executableVersion) {
-                log.info("{}Running upgrade from version {} to version {}", new Object[] { logPrefix,
-                        state.installedVersion, executableVersion });
+                InterProcessMutex lock = createLock(serviceDirectoryPath);
+
                 try {
-                    DocumentDirectory source = camille.getDirectory(serviceDirectoryPath);
+                    boolean acquired = lock.acquire(30, TimeUnit.MINUTES);
+                    if (!acquired) {
+                        throw new RuntimeException(String.format(
+                                "Could not acquire lock after 30 minutes to upgrade %s", serviceDirectoryPath));
+                    }
 
-                    // Remove leading /etc/etc/Services/ServiceName/ from each
-                    // path
-                    source.makePathsLocal();
+                    state = BootstrapStateUtil.getState(serviceDirectoryPath);
+                    if (state.installedVersion < executableVersion) {
+                        log.info("{}Running upgrade from version {} to version {}", new Object[] { logPrefix,
+                                state.installedVersion, executableVersion });
 
-                    // Upgrade
-                    DocumentDirectory upgraded = upgrader.upgrade(space, serviceName, state.installedVersion,
-                            executableVersion, source, new HashMap<String, String>());
+                        DocumentDirectory source = camille.getDirectory(serviceDirectoryPath);
+                        source.makePathsLocal();
 
-                    
-                    // Perform a transaction
-                    CamilleTransaction transaction = new CamilleTransaction();
-                    
-                    // - Delete all existing items in the hierarchy, leaf nodes
-                    // -> root nodes
-                    Path stateFilePath = new Path(new String[]{PathConstants.BOOTSTRAP_STATE_FILE});
-                    Iterator<DocumentDirectory.Node> iter = source.leafFirstIterator();
-                    while (iter.hasNext()) {
-                        DocumentDirectory.Node node = iter.next();
-                        if (!node.getPath().equals(stateFilePath)) {
+                        // Upgrade
+                        DocumentDirectory upgraded = upgrader.upgrade(space, serviceName, state.installedVersion,
+                                executableVersion, source, new HashMap<String, String>());
+
+                        // Perform a transaction
+                        CamilleTransaction transaction = new CamilleTransaction();
+
+                        // Delete all existing items in the hierarchy, leaf
+                        // nodes -> root nodes
+                        Iterator<DocumentDirectory.Node> iter = source.leafFirstIterator();
+                        while (iter.hasNext()) {
+                            DocumentDirectory.Node node = iter.next();
                             transaction.delete(node.getPath().prefix(serviceDirectoryPath));
                         }
+
+                        // Create the new items in the hierarchy, root nodes ->
+                        // leaf nodes
+                        iter = upgraded.breadthFirstIterator();
+                        while (iter.hasNext()) {
+                            DocumentDirectory.Node node = iter.next();
+                            transaction.create(node.getPath().prefix(serviceDirectoryPath), node.getDocument(),
+                                    ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                        }
+
+                        // Update state
+                        state.installedVersion = executableVersion;
+                        state.desiredVersion = executableVersion;
+                        state.state = State.OK;
+                        state.errorMessage = null;
+                        BootstrapStateUtil.setState(serviceDirectoryPath, transaction, state);
+
+                        transaction.commit();
                     }
-
-                    // - Create the new items in the hierarchy, root nodes ->
-                    // leaf nodes
-                    iter = upgraded.breadthFirstIterator();
-                    while (iter.hasNext()) {
-                        DocumentDirectory.Node node = iter.next();
-                        transaction.create(node.getPath().prefix(serviceDirectoryPath), node.getDocument(),
-                                ZooDefs.Ids.OPEN_ACL_UNSAFE);
-                    }
-
-                    // Update state
-                    state.installedVersion = executableVersion;
-                    state.desiredVersion = executableVersion;
-                    state.state = State.OK;
-                    state.errorMessage = null;
-                    BootstrapStateUtil.setState(serviceDirectoryPath, transaction, state);
-
-                    transaction.commit();
                 } catch (KeeperException.BadVersionException e) {
                     log.warn("{}Another process already attempted to upgrade the configuration", logPrefix);
 
@@ -224,6 +223,8 @@ public class BootstrapUtil {
                 } catch (Exception e) {
                     log.error("{}Unexpected failure occurred attempting to upgrade configuration", logPrefix, e);
                     throw e;
+                } finally {
+                    lock.release();
                 }
             }
         } catch (Exception e) {
@@ -251,6 +252,7 @@ public class BootstrapUtil {
                     return new DocumentDirectory();
                 }
                 BootstrapUtil.removeStateFile(toReturn);
+                BootstrapUtil.removeLockFile(toReturn);
                 return toReturn;
             }
 
@@ -261,6 +263,7 @@ public class BootstrapUtil {
                 }
                 DocumentDirectory toReturn = installer.getDefaultConfiguration(serviceName);
                 BootstrapUtil.removeStateFile(toReturn);
+                BootstrapUtil.removeLockFile(toReturn);
                 return toReturn;
             }
         };
@@ -273,15 +276,18 @@ public class BootstrapUtil {
             public DocumentDirectory upgrade(CustomerSpace space, String serviceName, int sourceVersion,
                     int targetVersion, DocumentDirectory source, Map<String, String> properties) {
                 BootstrapUtil.removeStateFile(source);
+                BootstrapUtil.removeLockFile(source);
                 if (upgrader == null) {
                     return source;
                 }
 
-                DocumentDirectory toReturn = upgrader.upgrade(space, serviceName, sourceVersion, targetVersion, source, properties);
+                DocumentDirectory toReturn = upgrader.upgrade(space, serviceName, sourceVersion, targetVersion, source,
+                        properties);
                 if (toReturn == null) {
                     return new DocumentDirectory();
                 }
                 BootstrapUtil.removeStateFile(toReturn);
+                BootstrapUtil.removeLockFile(toReturn);
                 return toReturn;
             }
         };
@@ -299,6 +305,7 @@ public class BootstrapUtil {
                     return new DocumentDirectory();
                 }
                 BootstrapUtil.removeStateFile(toReturn);
+                BootstrapUtil.removeLockFile(toReturn);
                 return toReturn;
             }
         };

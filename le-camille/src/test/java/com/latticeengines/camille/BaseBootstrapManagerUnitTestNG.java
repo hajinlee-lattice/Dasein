@@ -57,7 +57,8 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         }
 
         @Override
-        public DocumentDirectory install(CustomerSpace space, String service, int dataVersion, Map<String, String> properties) {
+        public DocumentDirectory install(CustomerSpace space, String service, int dataVersion,
+                Map<String, String> properties) {
             if (dataVersion == INITIAL_VERSION) {
                 return BaseBootstrapManagerUnitTestNG.getInitialConfiguration();
             } else if (dataVersion == UPGRADED_VERSION) {
@@ -97,7 +98,8 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         }
 
         @Override
-        public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
+        public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion,
+                Map<String, String> properties) {
             throw new RuntimeException("VisiDB!");
         }
 
@@ -160,6 +162,7 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         // TODO Eventually will not be necessary once ConfigurationControllers
         // omit hidden files
         configuration.delete(new Path("/").append(PathConstants.BOOTSTRAP_STATE_FILE));
+        configuration.delete(new Path("/").append(PathConstants.BOOTSTRAP_LOCK));
 
         DocumentDirectory sourceConfiguration = getConfiguration(retrieved.installedVersion);
         return equivalentState && configuration.equals(sourceConfiguration);

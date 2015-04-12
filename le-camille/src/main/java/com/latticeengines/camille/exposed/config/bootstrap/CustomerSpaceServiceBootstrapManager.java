@@ -185,7 +185,7 @@ public class CustomerSpaceServiceBootstrapManager {
         private void install(int executableVersion) throws Exception {
             InstallerAdaptor adaptor = new CustomerSpaceServiceInstallerAdaptor(installer, space, serviceName,
                     bootstrapProperties);
-            BootstrapUtil.install(adaptor, executableVersion, serviceDirectoryPath, false, logPrefix);
+            BootstrapUtil.install(adaptor, executableVersion, serviceDirectoryPath, logPrefix);
         }
 
         private void upgrade(int executableVersion) throws Exception {
