@@ -34,13 +34,11 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                 model: {
                     fields: {
                         TenantId: { type: "string" },
+                        ContractId: { type: "string" },
                         DisplayName: { type: "string" },
-                        VDB: { type: "string" },
-                        PLS: { type: "string" },
-                        Dante: { type: "string" },
-                        GlobalAuth: { type: "string" },
-                        DataLoader: {type: "string"},
-                        TPL: {type: "string"}
+                        CreatedDate: { type: "date" },
+                        Product: { type: "string" },
+                        Status: { type: "string" }
                     }
                 }
             },
@@ -57,87 +55,14 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
             },
             columns: [
                 {field: "TenantId", title: "Tenant ID"},
-                {field: "DisplayName", title: "Name"},
+                {field: "DisplayName", title: "Customer Name"},
+                {field: "ContractId", title: "Contract ID"},
+                {field: "CreatedDate", title: "Created Date", format: "{0:yyyy-MMM-dd }"},
+                "Product",
                 {
-                    field: "VDB",
+                    field: "Status",
                     template: function(dataItem){
-                        return TenantUtility.getStatusTemplate(dataItem.VDB);
-                    },
-                    filterable: {
-                        operators: {
-                            string: {
-                                eq: "Is equal to",
-                                neq: "Is not equal to"
-                            }
-                        },
-                        ui: statusFilter
-                    }
-                },
-                {
-                    field: "DataLoader",
-                    title:"DL",
-                    template: function(dataItem){
-                        return TenantUtility.getStatusTemplate(dataItem.DataLoader);
-                    },
-                    filterable: {
-                        operators: {
-                            string: {
-                                eq: "Is equal to",
-                                neq: "Is not equal to"
-                            }
-                        },
-                        ui: statusFilter
-                    }
-                },
-                {
-                    field: "PLS",
-                    template: function(dataItem){
-                        return TenantUtility.getStatusTemplate(dataItem.PLS);
-                    },
-                    filterable: {
-                        operators: {
-                            string: {
-                                eq: "Is equal to",
-                                neq: "Is not equal to"
-                            }
-                        },
-                        ui: statusFilter
-                    }
-                },
-                {
-                    field: "Dante",
-                    template: function(dataItem){
-                        return TenantUtility.getStatusTemplate(dataItem.Dante);
-                    },
-                    filterable: {
-                        operators: {
-                            string: {
-                                eq: "Is equal to",
-                                neq: "Is not equal to"
-                            }
-                        },
-                        ui: statusFilter
-                    }
-                },
-                {
-                    field: "GlobalAuth",
-                    title: "GA",
-                    template: function(dataItem){
-                        return TenantUtility.getStatusTemplate(dataItem.GlobalAuth);
-                    },
-                    filterable: {
-                        operators: {
-                            string: {
-                                eq: "Is equal to",
-                                neq: "Is not equal to"
-                            }
-                        },
-                        ui: statusFilter
-                    }
-                },
-                {
-                    field: "TPL", template: function(dataItem){
-                        return TenantUtility.getStatusTemplate(dataItem.TPL);
+                        return TenantUtility.getStatusTemplate(dataItem.Status);
                     },
                     filterable: {
                         operators: {
@@ -155,7 +80,7 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
 
     function statusFilter(element) {
         element.kendoDropDownList({
-            dataSource: ["OK", "FAILED", "INITIAL", "INSTALLING"],
+            dataSource: _.map(["OK", "FAILED", "INITIAL", "INSTALLING"], TenantUtility.getStatusDisplayName),
             optionLabel: "--Select Value--"
         });
     }
