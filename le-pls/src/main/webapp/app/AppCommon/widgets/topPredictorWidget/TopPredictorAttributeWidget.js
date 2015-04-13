@@ -168,12 +168,36 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             .style("fill", data.color)
             .attr('opacity', function(d) {
                 if (d > 1) {
-                    return 0.9;
+                    return 0.8;
                 } else {
                     return 0.4;
                 }
 
             });
+        
+        // These are the "borders" that accompany each bar
+        chart.selectAll("rect.barBorder")
+            .data(liftValues)
+            .enter().append("rect")
+            .attr("x", left_width)
+            .attr("y", function(d, i) {
+                return (i * (barHeight + 2 * gap)) + (28 + barHeight);
+            })
+            .attr("width", function (d) {
+                var barWidth = x(d);
+                return barWidth-0.4;
+            })
+            .attr("height", 1)
+            .style("fill", data.color)
+            .attr('opacity', function(d) {
+                if (d > 1) {
+                    return 1;
+                } else {
+                    return 0.6;
+                }
+
+            });
+            
 
         // This is the 1x line
         chart.selectAll("line.baselineLift")
