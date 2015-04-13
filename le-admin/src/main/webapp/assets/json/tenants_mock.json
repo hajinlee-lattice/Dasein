@@ -1,0 +1,110 @@
+[
+  {
+    "key": "TENANT1",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  },
+  {
+    "key": "TENANT2",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  },
+  {
+    "key": "TENANT3",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  },
+  {
+    "key": "TENANT4",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  },
+  {
+    "key": "TENANT5",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  },
+  {
+    "key": "TENANT6",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  },
+  {
+    "key": "TENANT7",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  },
+  {
+    "key": "TENANT8",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  },
+  {
+    "key": "TENANT9",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  },
+  {
+    "key": "TENANT10",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  },
+  {
+    "key": "TENANT11",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  },
+  {
+    "key": "TENANT12",
+    "value": {
+      "Properties": {
+        "displayName": "Tenant for testing",
+        "description": "Test tenant for contract id CONTRACT1 and tenant id TENANT1"
+      }
+    }
+  }
+]

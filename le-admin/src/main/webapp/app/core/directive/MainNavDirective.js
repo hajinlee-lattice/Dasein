@@ -4,7 +4,7 @@ var app = angular.module("app.core.directive.MainNavDirective", [
 
 app.service('MainNavService', function(){
     this.parseNavState = function (stateName) {
-        if (stateName.indexOf("TENANTS") === 0) {
+        if (stateName.indexOf("TENANT") === 0) {
             return "Tenants";
         }
         return "unknown";
@@ -13,7 +13,7 @@ app.service('MainNavService', function(){
 
 app.directive('mainNav', function(){
     return {
-        restrict: 'E',
+        restrict: 'AE',
         templateUrl: 'app/core/view/MainNavView.html',
         scope: {activeNav: '='},
         controller: ['$scope', '$rootScope', '$state', 'MainNavService',

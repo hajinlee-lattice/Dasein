@@ -1,0 +1,10 @@
+{
+  "node": "VDB",
+  "children": [
+    {"node": "Config4", "metadata": {
+      "type": "options",
+      "options": ["OPTION_1", "OPTION_2", "OPTION_3", "OPTION_4"],
+      "default": "OPTION_1"
+    }}
+  ]
+}

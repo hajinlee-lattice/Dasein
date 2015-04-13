@@ -1,6 +1,16 @@
 <div ng-controller="TenantListCtrl">
-    Show all tenants here. {{ data | json }}
-    <br>
-    Go to tenant
-    <a ui-sref="TENANTS.INFO({tenantId: 'TENANT1'})">TENANT1</a>
+
+    <div ng-show="loading">
+        <div class="loader"> </div>
+        <h2 class="text-center">Loading tenants data ...</h2>
+    </div>
+
+    <div kendo-grid="grid"
+         k-options="gridOptions"
+         k-ng-delay="gridOptions"
+         k-on-change="handleKendoChange(data)"
+         ng-show="!loading"
+         class="tenants-grid">
+    </div>
+
 </div>

@@ -14,6 +14,7 @@ module.exports = function(grunt) {
             angular: '1.3.15',
             "angular-local-storage": '0.1.5',
             "angular-ui-router": '0.2.13',
+            "angular-ui-bootstrap": '0.12.1',
             underscore: '1.8.3',
             webfont: '1.5.16',
 
@@ -44,6 +45,8 @@ module.exports = function(grunt) {
                     'angular.js/<%= app.version.angular %>/angular-sanitize.js',
                     'angular-local-storage/<%= app.version["angular-local-storage"] %>/angular-local-storage.js',
                     'angular-ui-router/<%= app.version["angular-ui-router"] %>/angular-ui-router.js',
+                    'angular-ui-bootstrap/<%= app.version["angular-ui-bootstrap"] %>/ui-bootstrap.js',
+                    'angular-ui-bootstrap/<%= app.version["angular-ui-bootstrap"] %>/ui-bootstrap-tpls.js',
                     'underscore.js/<%= app.version.underscore %>/underscore.js',
                     'webfont/<%= app.version.webfont %>/webfontloader.js',
                     'twitter-bootstrap/<%= app.version.bootstrap %>/js/bootstrap.js'
@@ -112,7 +115,7 @@ module.exports = function(grunt) {
                 options: {
                     baseUrl: 'http://cdn.kendostatic.com/<%= app.version.kendo %>/styles/'
                 },
-                src: ['Bootstrap/sprite.png', 'Bootstrap/sprite.png'],
+                src: ['Bootstrap/sprite.png', 'Bootstrap/loading-image.gif'],
                 dest: '<%= app.dir %>/lib/css/Bootstrap'
             }
         },
@@ -127,9 +130,11 @@ module.exports = function(grunt) {
                     '<%= app.dir %>/assets/js/app.min.js': [
                         '<%= app.distDir %>/lib/js/le-common.js',
                         '<%= app.distDir %>/app/core/directive/MainNavDirective.js',
+                        '<%= app.distDir %>/app/login/controller/LoginCtrl.js',
                         '<%= app.distDir %>/app/tenants/service/TenantService.js',
+                        '<%= app.distDir %>/app/tenants/directive/CamilleConfigDirective.js',
                         '<%= app.distDir %>/app/tenants/controller/TenantListCtrl.js',
-                        '<%= app.distDir %>/app/tenants/controller/TenantInfoCtrl.js',
+                        '<%= app.distDir %>/app/tenants/controller/TenantConfigCtrl.js',
                         '<%= app.distDir %>/app/app.js'
                     ]
                 }

@@ -1,0 +1,9 @@
+{
+  "node": "VDB",
+  "children": [
+    {"node": "Config1", "data": "value1"},
+    {"node": "Config2", "data": 2.34},
+    {"node": "Config3", "data": true},
+    {"node": "Config4", "data": "OPTION_1"}
+  ]
+}
