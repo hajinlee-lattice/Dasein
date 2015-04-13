@@ -65,6 +65,7 @@ a#back-to-summary-link:hover {
 }
 
 .attribute-hover h4 {
+    height: 15px;
     padding-left: 6px;
     margin: 0;
     display: inline-block;
@@ -74,6 +75,7 @@ a#back-to-summary-link:hover {
     text-overflow: ellipsis;
     width: 100%;
     font-size: 16px;
+    line-height: 21px;
 }
 
 .attribute-hover-left-arrow > div:after,
