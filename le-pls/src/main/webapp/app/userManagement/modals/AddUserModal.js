@@ -139,6 +139,11 @@ app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUti
         $("#modalContainer").modal('hide');
     };
 
+    $scope.refreshClick = function(){
+        $("#modalContainer").modal('hide');
+        $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
+    };
+
     $scope.yesClick = function ($event) {
         if ($event != null) {
             $event.preventDefault();
@@ -153,7 +158,8 @@ app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUti
         UserManagementService.AssignAccessLevel($scope.user.Username, $scope.user.AccessLevel).then(function(result){
             if (result.Success) {
                 $scope.showAddUserSuccess = true;
-                $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_EXSITING_USER_SUCCESS", [$scope.user.Username]);
+                $scope.addUserSuccessMessage=ResourceUtility.getString("ADD_EXSITING_USER_SUCCESS",
+                    [$scope.user.Username, ResourceUtility.getString('ACCESS_LEVEL_' + $scope.user.AccessLevel)]);
             } else {
                 $scope.addUserErrorMessage = ResourceUtility.getString("ADD_USER_GENERAL_ERROR");
                 $scope.showAddUserSuccess = false;
