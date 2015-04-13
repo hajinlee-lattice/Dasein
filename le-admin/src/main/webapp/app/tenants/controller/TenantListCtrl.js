@@ -1,10 +1,11 @@
 var app = angular.module("app.tenants.controller.TenantListCtrl", [
     'le.common.util.UnderscoreUtility',
     'app.tenants.service.TenantService',
-    'kendo.directives'
+    'kendo.directives',
+    'ui.bootstrap'
 ]);
 
-app.controller('TenantListCtrl', function($scope, $state, _, TenantService, TenantUtility) {
+app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantService, TenantUtility) {
     $scope.loading = true;
 
     TenantService.GetAllTenants().then(function(result){
@@ -79,6 +80,63 @@ app.controller('TenantListCtrl', function($scope, $state, _, TenantService, Tena
 
     $scope.handleKendoChange = function(data) {
         $state.go('TENANT.CONFIG', {tenantId: data.TenantId});
+    };
+
+    $scope.onAddClick = function(){
+        $scope.cleanData = TenantUtility.cleanupComponentConfigs($scope.data);
+
+        var modalInstance = $modal.open({
+            templateUrl: 'addNewTenantModal.html',
+            resolve: {
+                TenantUtility: function () {
+                    return TenantUtility;
+                }
+            },
+            controller: function($scope, $modalInstance, TenantUtility){
+                $scope.spaceOptions = ["production", "sandbox"];
+
+                $scope.tenantInfo = {
+                    space: "production"
+                };
+
+                $scope.isValid = true;
+
+                $scope.validateTenantId = function(){
+                    if ($scope.addtenantform.tenantId.$dirty && $scope.addtenantform.tenantId.$error.required) {
+                        $scope.tenantIdErrorMsg = "Tenant ID is required.";
+                        $scope.showTenantIdError = true;
+                        $scope.isValid = false;
+                        return;
+                    }
+
+                    var validationResult = TenantUtility.validateTenantId($scope.tenantInfo.tenantId);
+                    if (!validationResult.valid) {
+                        $scope.tenantIdErrorMsg = validationResult.reason;
+                        $scope.showTenantIdError = true;
+                        $scope.isValid = false;
+                    } else {
+                        $scope.showTenantIdError = false;
+                        $scope.isValid = true;
+                    }
+                };
+
+                $scope.ok = function () {
+                    $modalInstance.close($scope.tenantInfo);
+                };
+
+                $scope.cancel = function () {
+                    $modalInstance.dismiss('cancel');
+                };
+            }
+        });
+
+        modalInstance.result.then(function (tenantInfo) {
+            $scope.tenantInfo = tenantInfo;
+            $state.go('TENANT.CONFIG', {tenantId: tenantInfo.tenantId, mode: "NEW"});
+        }, function () {
+            $state.go('TENANT.LIST');
+        });
+
     };
 
 });

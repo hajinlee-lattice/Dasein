@@ -90,6 +90,8 @@ app.service('TenantService', function($q, $http, _){
 
         asyncMockTenantService(tenantId, service).then(function(data){
 
+            data.rootPath = "/Pods/Default/Contracts/CONTRACT1/Tenants/Tenant1/Spaces/production/Services/" + service;
+
             var result = {
                 success: true,
                 resultObj: data
@@ -120,7 +122,16 @@ app.service('TenantService', function($q, $http, _){
 
 app.service('TenantUtility', function(_){
 
-    function applyMetadata(data, metadata) {
+    function applyMetadataToComponent(component, metadata) {
+        _.each(component.configuration, function(dataNode){
+            var metaNode = _.findWhere(metadata, {"node": dataNode.node});
+            if (metaNode) {
+                applyMetadataToNode(dataNode, metaNode);
+            }
+        });
+    }
+
+    function applyMetadataToNode(data, metadata) {
         if (data.node === metadata.node) {
             if (metadata.hasOwnProperty("metadata")) {
                 data.metadata = metadata.metadata;
@@ -132,14 +143,28 @@ app.service('TenantUtility', function(_){
                 _.each(data.children, function(child){
                     var metaChild = _.findWhere(metadata.children, {"node": child.node});
                     if (metaChild) {
-                        applyMetadata(child, metaChild);
+                        applyMetadataToNode(child, metaChild);
                     }
                 });
             }
         }
     }
 
-    this.applyMetadata = applyMetadata;
+    this.applyMetadataToComponent = applyMetadataToComponent;
+
+    function cleanupComponentConfigs(components) {
+        return _.map(components,
+            function(component){
+                var componentConfig = {
+                    component: config.component,
+                    rootPath:  config.rootPath
+                };
+                if (config.hasOwnProperty("children")) {
+                    componentConfig.children = cleanupConfigData(config.children);
+                }
+                return componentConfig;
+            });
+    }
 
     function cleanupConfigData(configs) {
         return _.map(configs,
@@ -155,7 +180,7 @@ app.service('TenantUtility', function(_){
             });
     }
 
-    this.cleanupConfigData = cleanupConfigData;
+    this.cleanupComponentConfigs = cleanupComponentConfigs;
 
     this.getStatusTemplate = function(status) {
         switch (status) {
@@ -174,5 +199,18 @@ app.service('TenantUtility', function(_){
             default:
                 return status;
         }
+    };
+
+    this.validateTenantId = function(tenantId) {
+        var result = {
+            valid: true,
+            reason: null
+        };
+        if (tenantId.indexOf(" ") > -1) {
+            result.valid = false;
+            result.reason = "Tenant ID must not contain spaces";
+            return result
+        }
+        return result;
     };
 });

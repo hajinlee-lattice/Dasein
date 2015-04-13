@@ -1,6 +1,8 @@
 var app = angular.module("app.tenants.directive.CamilleConfigDirective", [
     'app.tenants.service.TenantService',
-    'ui.router'
+    'ui.bootstrap',
+    'ui.router',
+    'ngSanitize'
 ]);
 
 app.factory('RecursionHelper', ['$compile', function($compile){
@@ -71,11 +73,26 @@ app.service('CamilleConfigUtility', function(){
     this.isSelect = function(type) { return type === "options"; };
 });
 
+app.directive('componentsConfig', function(){
+    return {
+        restrict: 'AE',
+        templateUrl: 'app/tenants/view/ComponentsConfigView.html',
+        scope: {data: '=', isValid: '=', mode: '='},
+        controller: function($scope, TenantUtility){
+            $scope.readonly = ($scope.mode !== "NEW");
+            $scope.TenantUtility = TenantUtility;
+            $scope.getStatusHtml = function(state) {
+                return TenantUtility.getStatusTemplate(state);
+            };
+        }
+    };
+});
+
 app.directive('camilleConfig', function(RecursionHelper, TenantUtility){
     return {
         restrict: 'AE',
         templateUrl: 'app/tenants/view/CamilleConfigView.html',
-        scope: {config: '=', isValid: '='},
+        scope: {config: '=', isValid: '=', readonly: '='},
         controller: function($scope){
             $scope.TenantUtility = TenantUtility;
 
@@ -98,7 +115,7 @@ app.directive('configEntry', function(){
     return {
         restrict: 'AE',
         templateUrl: 'app/tenants/view/ConfigEntryView.html',
-        scope: {config: '=', isValid: '=', isOpen: '=', expandable: '='},
+        scope: {config: '=', isValid: '=', isOpen: '=', expandable: '=', readonly: '='},
         controller: function($scope, CamilleConfigUtility){
             $scope.type =
                 CamilleConfigUtility.getDataType($scope.config);

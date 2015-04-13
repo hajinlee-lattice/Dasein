@@ -8,7 +8,11 @@ var app = angular.module("app.tenants.controller.TenantConfigCtrl", [
 ]);
 
 app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal, $interval, _, TenantService, TenantUtility) {
+    $scope.mode = $stateParams.mode;
     $scope.tenantId = $stateParams.tenantId;
+    $scope.contractId = $stateParams.hasOwnProperty("contractId") ? $stateParams.contractId : $stateParams.tenantId;
+    $scope.space = $stateParams.hasOwnProperty("space") ? $stateParams.space : "production";
+
     $scope.loading = true;
     $scope.services = ["PLS", "VDB"];
 
@@ -22,10 +26,11 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     _.each($scope.services, function(service){
         TenantService.GetTenantServiceConfig($scope.tenantId, service).then(
             function(result){
+                var component = result.resultObj;
                 TenantService.GetServiceMetadata(service).then(
                     function(metadata){
-                        TenantUtility.applyMetadata(result.resultObj, metadata);
-                        $scope.data.push(result.resultObj);
+                        TenantUtility.applyMetadataToComponent(component, metadata);
+                        $scope.data.push(component);
 
                         if ($scope.data.length == $scope.services.length) {
                             $scope.loading = false;
@@ -39,11 +44,11 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
 
     function updateServiceStatus() {
         _.each($scope.data, function(component){
-            TenantService.GetTenantServiceStatus($scope.tenantId, component.node).then(
+            TenantService.GetTenantServiceStatus($scope.tenantId, component.component).then(
                 function(result){
                     component.state = result.state;
                     console.debug(
-                        "The status of " + component.node +
+                        "The status of " + component.component +
                         " is updated to " + component.state);
                 }
             );
@@ -59,12 +64,8 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
         }
     }, 5000);
 
-    $scope.getStatusHtml = function(state) {
-      return TenantUtility.getStatusTemplate(state);
-    };
-
     $scope.onSaveClick = function(){
-        $scope.cleanData = TenantUtility.cleanupConfigData($scope.data);
+        $scope.cleanData = TenantUtility.cleanupComponentConfigs($scope.data);
 
         $modal.open({
             template: '<div class="modal-header">' +

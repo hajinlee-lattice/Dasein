@@ -28,7 +28,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
             templateUrl: "app/tenants/view/TenantListView.html"
         })
         .state('TENANT.CONFIG', {
-            url: "/{tenantId}",
+            url: "/{tenantId}?mode",
             templateUrl: "app/tenants/view/TenantConfigView.html"
         })
         .state('NOWHERE', {

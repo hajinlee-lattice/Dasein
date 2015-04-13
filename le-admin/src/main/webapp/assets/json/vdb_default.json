@@ -1,6 +1,6 @@
 {
-  "node": "VDB",
-  "children": [
+  "component": "VDB",
+  "configuration": [
     {"node": "Config1", "data": "value1"},
     {"node": "Config2", "data": 2.34},
     {"node": "Config3", "data": true},

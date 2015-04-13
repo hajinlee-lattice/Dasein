@@ -13,4 +13,38 @@
          class="tenants-grid">
     </div>
 
+    <script type="text/ng-template" id="addNewTenantModal.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Add New Tenant</h3>
+        </div>
+        <div class="modal-body">
+            <form class="add-tenant-form form-inline" name="addtenantform" novalidate>
+                <div class="control-group" ng-class='{"has-error": showTenantIdError}'>
+                    <label class="control-label">Tenant ID</label>
+                    <input type="text" name="tenantId" class="form-control"
+                           ng-model-options="{ debounce: 200 }" ng-model="tenantInfo.tenantId"
+                           ng-change="validateTenantId()" required/>
+                    <p ng-if="showTenantIdError" class="help-block"><span class="text-danger">{{ tenantIdErrorMsg }}</span></p>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Contract ID</label>
+                    <input type="text" name="contracId" class="form-control" ng-model="tenantInfo.contractId"
+                            placeholder="Leave it blank if it is the same as Tenant ID."/>
+                </div>
+                <div class="control-group">
+                    <label class="control-label">Space</label>
+                    <select class="form-control" ng-options="option for option in spaceOptions" ng-model="tenantInfo.space"></select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="ok()" ng-disabled="!isValid">OK</button>
+            <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+
+    <div>
+        <button id="add-new-model-btn" class="btn btn-primary" ng-click="onAddClick()">ADD NEW TENANT</button>
+    </div>
+
 </div>

@@ -1,6 +1,6 @@
 {
-  "node": "PLS",
-  "children": [
+  "component": "PLS",
+  "configuration": [
     {
       "node": "Config1",
       "data": 1.3,
