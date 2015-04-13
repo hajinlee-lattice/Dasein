@@ -4,31 +4,31 @@
     <span>{{ config.data }}</span>
 </p>
 
-<form ng-if="!readonly" name="configform" class="form-inline" ng-class='{"has-error": showError}' novalidate>
-<label class="control-label">
-        <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
-        {{ config.node }}
-</label>
+<form name="configform" class="form-inline" ng-class='{"has-error": showError}' novalidate>
+    <div ng-if="!readonly">
+        <label class="control-label">
+            <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
+            {{ config.node }}
+        </label>
 
-<input ng-if="isInput" class="form-control"
-       type="{{ inputType }}" ng-model="config.data"
-       ng-model-options="{ debounce: 200 }"
-       ng-change="changeHandler()" required />
+        <input ng-if="isInput" class="form-control"
+               type="{{ inputType }}" ng-model="config.data"
+               ng-model-options="{ debounce: 200 }"
+               ng-change="validateInput()" required />
 
-<input ng-if="isBoolean" class="checkbox"
-       type="checkbox" ng-model="config.data"
-       ng-model-options="{ debounce: 200 }"
-       ng-change="changeHandler()" />
+        <input ng-if="isBoolean" class="checkbox"
+               type="checkbox" ng-model="config.data"
+               ng-model-options="{ debounce: 200 }"
+               ng-change="validateInput()" />
 
-<select ng-if="isSelect" class="form-control"
-        ng-options="option for option in options"
-        ng-model="config.data"
-        ng-model-options="{ debounce: 200 }"
-        ng-change="changeHandler()"></select>
+        <select ng-if="isSelect" class="form-control"
+                ng-options="option for option in options"
+                ng-model="config.data"
+                ng-model-options="{ debounce: 200 }"
+                ng-change="validateInput()"></select>
 
-<label ng-if="showError" class="control-label">
-
-    <span class="text-danger">{{ errorMsg }}</span>
-</label>
-
+        <label ng-if="showError" class="control-label">
+            <span class="text-danger">{{ errorMsg }}</span>
+        </label>
+    </div>
 </form>

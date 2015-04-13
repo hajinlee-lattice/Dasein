@@ -144,7 +144,7 @@ app.directive('configEntry', function(){
                 }
             }
 
-            $scope.changeHandler = function() {
+            $scope.validateInput = function() {
                 if ($scope.configform.$dirty && $scope.configform.$invalid) {
                     $scope.showError = true;
                     $scope.isValid.valid = false;

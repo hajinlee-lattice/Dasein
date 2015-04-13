@@ -8,8 +8,8 @@
         <div class="loader"> </div>
         <h2 class="text-center">Loading tenant configuration ...</h2>
     </div>
-    <components-config data="data" mode="mode" is-valid="isValid"></components-config>
     <div ng-if="!loading">
+        <components-config data="data" mode="mode" is-valid="isValid"></components-config>
         <p ng-show="!isValid.valid" class="alert alert-danger">The configuration is invalid. Please check error messages above.</p>
         <button class="btn btn-primary" ng-disabled="!isValid.valid" ng-click="onSaveClick()">SAVE</button>
     </div>
