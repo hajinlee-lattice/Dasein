@@ -3,14 +3,21 @@ package com.latticeengines.security.functionalframework;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.IOException;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
@@ -33,6 +40,11 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     protected static final String generalUsername = "lming@lattice-engines.com";
     protected static final String generalPassword = "admin";
     protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
+    protected RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${security.test.api.hostport}")
+    private String hostPort;
+
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
@@ -42,6 +54,10 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
+
+    protected String getRestAPIHostPort() {
+        return hostPort;
+    }
 
     protected void createUser(String username, String email, String firstName, String lastName) {
         createUser(username, email, firstName, lastName, generalPasswordHash);
@@ -77,6 +93,22 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         System.out.println(password);
         Ticket ticket = globalAuthenticationService.authenticateUser(username, password);
         return globalSessionManagementService.attach(ticket);
+    }
+
+    protected static class GetHttpStatusErrorHandler implements ResponseErrorHandler {
+
+        public GetHttpStatusErrorHandler() {
+        }
+
+        @Override
+        public boolean hasError(ClientHttpResponse response) throws IOException {
+            return response.getStatusCode() != HttpStatus.OK;
+        }
+
+        @Override
+        public void handleError(ClientHttpResponse response) throws IOException {
+            throw new RuntimeException("" + response.getStatusCode());
+        }
     }
 
 
