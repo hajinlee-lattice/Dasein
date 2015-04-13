@@ -66,10 +66,8 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         log.info("ScoringManager started!");
         log.info("look at database rows:" + scoringCommandEntityMgr.getPopulated());
-        ScoringCommand sc = new ScoringCommand(1L, "Nutanix", ScoringCommandStatus.POPULATED, "Q_EventTable_Nutanix", 0, 100,
-                new Timestamp(System.currentTimeMillis()));
-        if (scoringCommandEntityMgr.findByKey(sc) == null){
-        scoringCommandEntityMgr.create(new ScoringCommand(1L, "Nutanix", ScoringCommandStatus.POPULATED, "Q_EventTable_Nutanix", 0, 100,
+        if (scoringCommandEntityMgr.findAll().isEmpty()){
+        scoringCommandEntityMgr.create(new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, "Q_EventTable_Nutanix", 0, 100,
                 new Timestamp(System.currentTimeMillis())));
         }
         

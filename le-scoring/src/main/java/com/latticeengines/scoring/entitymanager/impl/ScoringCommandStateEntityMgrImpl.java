@@ -24,6 +24,7 @@ public class ScoringCommandStateEntityMgrImpl extends BaseScoringEntityMgrImpl<S
     public ScoringCommandStateEntityMgrImpl(){
         super();
     }
+
     @Override
     public BaseDao<ScoringCommandState> getDao() {
         return scoringCommandStateDao;

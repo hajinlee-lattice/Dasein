@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.runtime.mapreduce;
+package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.io.IOException;
 import java.util.List;
@@ -6,7 +6,6 @@ import java.util.Properties;
 
 import org.apache.avro.Schema;
 import org.apache.avro.mapred.AvroKey;
-import org.apache.avro.mapred.AvroValue;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
 import org.apache.avro.mapreduce.AvroKeyOutputFormat;
@@ -27,62 +26,37 @@ import org.apache.hadoop.util.ToolRunner;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.client.mapreduce.MRJobCustomization;
+import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
-import com.latticeengines.domain.exposed.modeling.SamplingElement;
 
-public class EventDataSamplingJob extends Configured implements Tool, MRJobCustomization {
+public class EventDataScoringJob extends Configured implements Tool, MRJobCustomization{
 
-    public static final String LEDP_SAMPLE_CONFIG = "ledp.sample.config";
-    private static final String SAMPLE_JOB_TYPE = "samplingJob";
+    private static final String SCORING_JOB_TYPE = "scoringJob";
 
-    public EventDataSamplingJob(Configuration config) {
+    public EventDataScoringJob(Configuration config) {
         setConf(config);
     }
 
-    @SuppressWarnings({ "deprecation" })
     @Override
-    public int run(String[] args) throws Exception {
-        JobConf jobConf = new JobConf(getConf(), getClass());
-
-        Job job = new Job(jobConf);
-
-        Properties properties = new Properties();
-        properties.setProperty(MapReduceProperty.INPUT.name(), args[0]);
-        properties.setProperty(MapReduceProperty.OUTPUT.name(), args[1]);
-        properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), args[2]);
-        properties.setProperty(MapReduceProperty.QUEUE.name(), args[3]);
-
-        customize(job, properties);
-        if (job.waitForCompletion(true)) {
-            return 0;
-        }
-        return 1;
-    }
-
-    public static void main(String[] args) throws Exception {
-        int res = ToolRunner.run(new EventDataSamplingJob(new Configuration()), args);
-        System.exit(res);
+    public String getJobType() {
+       return SCORING_JOB_TYPE;
     }
 
     @Override
-    public void customize(Job job, Properties properties) {
-        try {
-            Configuration config = job.getConfiguration();
-            String samplingConfigStr = properties.getProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name());
-            config.set(LEDP_SAMPLE_CONFIG, samplingConfigStr);
+    public void customize(Job mrJob, Properties properties) {
+       try {
+            Configuration config = mrJob.getConfiguration();
             String queueName = properties.getProperty(MapReduceProperty.QUEUE.name());
             config.set("mapreduce.job.queuename", queueName);
             String inputDir = properties.getProperty(MapReduceProperty.INPUT.name());
-            AvroKeyInputFormat.setInputPathFilter(job, IgnoreDirectoriesAndSupportOnlyAvroFilesFilter.class);
-            AvroKeyInputFormat.addInputPath(job, new Path(inputDir));
-            AvroKeyOutputFormat.setOutputPath(job,
+            AvroKeyInputFormat.setInputPathFilter(mrJob, IgnoreDirectoriesAndSupportOnlyAvroFilesFilter.class);
+            AvroKeyInputFormat.addInputPath(mrJob, new Path(inputDir));
+            AvroKeyOutputFormat.setOutputPath(mrJob,
                     new Path(properties.getProperty(MapReduceProperty.OUTPUT.name())));
 
-            List<String> files = HdfsUtils.getFilesForDir(job.getConfiguration(), inputDir, new HdfsFilenameFilter() {
+            List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, new HdfsFilenameFilter() {
 
                 @Override
                 public boolean accept(String filename) {
@@ -97,40 +71,48 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             Path path = new Path(filename);
             Schema schema = AvroUtils.getSchema(config, path);
 
-            AvroJob.setInputKeySchema(job, schema);
-            AvroJob.setMapOutputValueSchema(job, schema);
-            AvroJob.setOutputKeySchema(job, schema);
-            AvroKeyOutputFormat.setCompressOutput(job,
-                    Boolean.valueOf(properties.getProperty(EventDataSamplingProperty.COMPRESS_SAMPLE.name(), "true")));
+            AvroJob.setInputKeySchema(mrJob, schema);
+            AvroJob.setOutputKeySchema(mrJob, schema);
+//          AvroKeyOutputFormat.setCompressOutput(mrJob,
+//                    Boolean.valueOf(properties.getProperty(EventDataSamplingProperty.COMPRESS_SAMPLE.name(), "true")));
 
-            SamplingConfiguration samplingConfig = JsonUtils
-                    .deserialize(samplingConfigStr, SamplingConfiguration.class);
+            AvroMultipleOutputs.addNamedOutput(mrJob, "somename", AvroKeyOutputFormat.class, schema);
 
-            for (SamplingElement samplingElement : samplingConfig.getSamplingElements()) {
-                AvroMultipleOutputs.addNamedOutput(job, samplingElement.getName() + "Training",
-                        AvroKeyOutputFormat.class, schema);
-                AvroMultipleOutputs.addNamedOutput(job, samplingElement.getName() + "Test", AvroKeyOutputFormat.class,
-                        schema);
-
-            }
-
-            job.setInputFormatClass(AvroKeyInputFormat.class);
-            job.setMapOutputKeyClass(Text.class);
-            job.setMapOutputValueClass(AvroValue.class);
-            job.setMapperClass(EventDataSamplingMapper.class);
-            job.setReducerClass(EventDataSamplingReducer.class);
-            job.setOutputKeyClass(AvroKey.class);
-            job.setOutputValueClass(NullWritable.class);
+            mrJob.setInputFormatClass(AvroKeyInputFormat.class);
+            mrJob.setMapOutputKeyClass(Text.class);
+            mrJob.setMapOutputValueClass(Text.class);
+            mrJob.setMapperClass(EventDataScoringMapper.class);
+            mrJob.setReducerClass(EventDataScoringReducer.class);
+            mrJob.setOutputKeyClass(AvroKey.class);
+            mrJob.setOutputValueClass(NullWritable.class);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
     }
 
     @Override
-    public String getJobType() {
-        return SAMPLE_JOB_TYPE;
+    public int run(String[] args) throws Exception {
+        JobConf jobConf = new JobConf(getConf(), getClass());
+
+        Job job = new Job(jobConf);
+
+        Properties properties = new Properties();
+        properties.setProperty(MapReduceProperty.INPUT.name(), args[0]);
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), args[1]);
+        properties.setProperty(MapReduceProperty.QUEUE.name(), args[2]);
+
+        customize(job, properties);
+        if (job.waitForCompletion(true)) {
+            return 0;
+        }
+        return 1;
     }
 
+    public static void main(String[] args) throws Exception {
+        int res = ToolRunner.run(new EventDataScoringJob(new Configuration()), args);
+        System.exit(res);
+    }
+    
     static class IgnoreDirectoriesAndSupportOnlyAvroFilesFilter extends Configured implements PathFilter {
         private FileSystem fs;
 
@@ -171,5 +153,4 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
             }
         }
     }
-
 }

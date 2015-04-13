@@ -35,10 +35,10 @@ public class ScoringCommandLogEntityMgrImplTestNG extends ScoringFunctionalTestN
 
     @Test(groups = "functional")
     public void testFindByModelCommand() throws Exception {
-        ScoringCommand scoringCommand = new ScoringCommand(1L, "Nutanix", ScoringCommandStatus.POPULATED, "Q_Table_Nutanix", 0, 100, Timestamp.valueOf("2015-04-28 00:00:00"));
+        ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, "Q_Table_Nutanix", 0, 100, Timestamp.valueOf("2015-04-28 00:00:00"));
         scoringCommandEntityMgr.create(scoringCommand);
 
-        ScoringCommand anotherScoringCommand = new ScoringCommand(2L, "Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix", 0, 100, Timestamp.valueOf("2015-04-28 00:00:01"));
+        ScoringCommand anotherScoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix", 0, 100, Timestamp.valueOf("2015-04-28 00:00:01"));
         scoringCommandEntityMgr.create(anotherScoringCommand);
 
         for (int i = 0; i < 3; i++) {

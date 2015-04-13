@@ -34,6 +34,7 @@ import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
+import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
@@ -257,11 +258,11 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void testSubmitMRJob() throws Exception {
         Properties properties = new Properties();
-        properties.setProperty(EventDataSamplingProperty.QUEUE.name(), "Priority0.MapReduce.0");
-        properties.setProperty(EventDataSamplingProperty.INPUT.name(), inputDir);
-        properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), outputDir);
+        properties.setProperty(MapReduceProperty.QUEUE.name(), "Priority0.MapReduce.0");
+        properties.setProperty(MapReduceProperty.INPUT.name(), inputDir);
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
-        properties.setProperty(EventDataSamplingProperty.CUSTOMER.name(), "Dell");
+        properties.setProperty(MapReduceProperty.CUSTOMER.name(), "Dell");
         ApplicationId applicationId = modelingJobService.submitMRJob("samplingJob", properties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -280,12 +281,12 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     // @Test(groups = { "functional", "functional.production" }, enabled = true)
     public void testSubmitMRJobWithBadCustomerName() throws Exception {
         Properties properties = new Properties();
-        properties.setProperty(EventDataSamplingProperty.QUEUE.name(), "Priority0.MapReduce.0");
-        properties.setProperty(EventDataSamplingProperty.INPUT.name(), inputDir);
-        properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), outputDir);
+        properties.setProperty(MapReduceProperty.QUEUE.name(), "Priority0.MapReduce.0");
+        properties.setProperty(MapReduceProperty.INPUT.name(), inputDir);
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
-        properties.setProperty(EventDataSamplingProperty.CUSTOMER.name(), "{Dell}");
-        properties.setProperty(EventDataSamplingProperty.INPUT.name(), baseDir + "/{Dell}/eventTable");
+        properties.setProperty(MapReduceProperty.CUSTOMER.name(), "{Dell}");
+        properties.setProperty(MapReduceProperty.INPUT.name(), baseDir + "/{Dell}/eventTable");
 
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.mkdirs(new Path(baseDir + "/{Dell}/eventTable"));

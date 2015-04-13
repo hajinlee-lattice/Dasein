@@ -34,12 +34,12 @@ public class ScoringCommandEntityMgrImplTestNG extends ScoringFunctionalTestNGBa
         List<ScoringCommand> commands = scoringCommandEntityMgr.getPopulated();
         assertEquals(commands.size(), 0);
 
-        ScoringCommand scoringCommand = new ScoringCommand(1L, "Nutanix", ScoringCommandStatus.POPULATED, "Q_Table_Nutanix", 0, 100, new Timestamp(System.currentTimeMillis()));
+        ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, "Q_Table_Nutanix", 0, 100, new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.create(scoringCommand);
         commands = scoringCommandEntityMgr.getPopulated();
         assertEquals(commands.size(), 1);
 
-        ScoringCommand secondScoringCommand = new ScoringCommand(2L, "Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix", 0, 100, new Timestamp(System.currentTimeMillis()));
+        ScoringCommand secondScoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix", 100, 200, new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.create(secondScoringCommand);
         commands = scoringCommandEntityMgr.getPopulated();
         assertEquals(commands.size(), 1);
@@ -48,7 +48,7 @@ public class ScoringCommandEntityMgrImplTestNG extends ScoringFunctionalTestNGBa
         scoringCommandEntityMgr.createOrUpdate(secondScoringCommand);
         assertEquals(commands.size(), 1);
 
-        ScoringCommand anotherScoringCommand = new ScoringCommand(3L, "MuleSoft", ScoringCommandStatus.POPULATED, "Q_Table_MuleSoft", 0, 100, new Timestamp(System.currentTimeMillis()));
+        ScoringCommand anotherScoringCommand = new ScoringCommand("MuleSoft", ScoringCommandStatus.POPULATED, "Q_Table_MuleSoft", 10, 100, new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.create(anotherScoringCommand);
         commands = scoringCommandEntityMgr.getPopulated();
         assertEquals(commands.size(), 2);
@@ -57,13 +57,13 @@ public class ScoringCommandEntityMgrImplTestNG extends ScoringFunctionalTestNGBa
         scoringCommandEntityMgr.createOrUpdate(scoringCommand);
         assertEquals(commands.size(), 2);
 
-        ScoringCommand lastScoringCommand = new ScoringCommand(4L, "Nutanix", ScoringCommandStatus.POPULATED, "Q_Table_Nutanix", 0, 100, new Timestamp(System.currentTimeMillis()));
+        ScoringCommand lastScoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, "Q_Table_Nutanix", 200, 300, new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.create(lastScoringCommand);
         commands = scoringCommandEntityMgr.getPopulated();
         assertEquals(commands.size(), 2);
 
         for(ScoringCommand command : commands){
-            assertTrue(command.getPid() == 2L || command.getPid() == 3L);
+            assertTrue(command.getLower() == 100 || command.getLower() == 10);
         }
     }
 }

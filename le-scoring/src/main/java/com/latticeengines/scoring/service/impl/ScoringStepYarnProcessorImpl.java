@@ -2,6 +2,7 @@ package com.latticeengines.scoring.service.impl;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
@@ -67,7 +69,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
             appId = load(deploymentExternalId, scoringCommand);
             break;
 //        case SCORE_DATA:
-//            // appIds = score(deploymentExternalId, modelCommand);
+//            appId = score(deploymentExternalId, scoringCommand);
 //            break;
 //        case EXPORT_DATA:
 //            // appIds = export(deploymentExternalId, modelCommand);
@@ -92,6 +94,16 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         // customer, commandParameters));
         // appIds.add(pivotedAppIds);
 
+        return appId;
+    }
+
+    private ApplicationId score(String customer, ScoringCommand scoringCommand) {
+        String table = scoringCommand.getTableName();
+        Properties properties = new Properties();
+        properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getMRQueueNameForSubmission());
+        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + customer + "/scoring/data/" + table);
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + customer + "/scoring/result/" + table);
+        ApplicationId appId = modelingJobService.submitMRJob("scoringJob", properties);
         return appId;
     }
 }

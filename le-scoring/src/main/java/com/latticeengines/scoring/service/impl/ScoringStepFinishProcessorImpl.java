@@ -1,6 +1,5 @@
 package com.latticeengines.scoring.service.impl;
 
-
 import java.sql.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,22 +13,21 @@ import com.latticeengines.scoring.service.ScoringStepProcessor;
 
 @Component("scoringStepFinishProcessor")
 public class ScoringStepFinishProcessorImpl implements ScoringStepProcessor {
-    
-        @Autowired
-        private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
-        @Autowired
-        private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
+    @Autowired
+    private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
-        @Override
-        public void executeStep(ScoringCommand scoringCommand) {
-            ScoringCommandResult result = scoringCommandResultEntityMgr.findByScoringCommand(scoringCommand);
-            result.setConsumed(new Timestamp(System.currentTimeMillis()));
-            result.setStatus(ScoringCommandStatus.POPULATED);
-            scoringCommandResultEntityMgr.update(result);
+    @Autowired
+    private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
-            scoringCommand.setConsumed(new Timestamp(System.currentTimeMillis()));
-            scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
-            scoringCommandEntityMgr.update(scoringCommand);
-        }
-  }
+    @Override
+    public void executeStep(ScoringCommand scoringCommand) {
+        ScoringCommandResult result = new ScoringCommandResult(scoringCommand.getId(), ScoringCommandStatus.POPULATED,
+                "TABLE", scoringCommand.getTotal(), new Timestamp(System.currentTimeMillis()));
+        scoringCommandResultEntityMgr.create(result);
+
+        scoringCommand.setConsumed(new Timestamp(System.currentTimeMillis()));
+        scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
+        scoringCommandEntityMgr.update(scoringCommand);
+    }
+}

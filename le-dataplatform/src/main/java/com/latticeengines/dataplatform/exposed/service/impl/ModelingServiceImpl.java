@@ -40,6 +40,7 @@ import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurat
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
+import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -377,12 +378,12 @@ public class ModelingServiceImpl implements ModelingService {
         String inputDir = model.getDataHdfsPath();
         String outputDir = model.getSampleHdfsPath();
         Properties properties = new Properties();
-        properties.setProperty(EventDataSamplingProperty.INPUT.name(), inputDir);
-        properties.setProperty(EventDataSamplingProperty.OUTPUT.name(), outputDir);
+        properties.setProperty(MapReduceProperty.INPUT.name(), inputDir);
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), config.toString());
-        properties.setProperty(EventDataSamplingProperty.CUSTOMER.name(), model.getCustomer());
+        properties.setProperty(MapReduceProperty.CUSTOMER.name(), model.getCustomer());
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        properties.setProperty(EventDataSamplingProperty.QUEUE.name(), assignedQueue);
+        properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
         return modelingJobService.submitMRJob("samplingJob", properties);
     }
 

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.client.mapreduce.MapReduceCustomizationRegistry;
-import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
+import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 
@@ -25,8 +25,8 @@ public class MapReduceCustomizationServiceImpl implements MapReduceCustomization
     public void addCustomizations(Job mrJob, String mrJobType, Properties properties) {
         MRJobCustomization customization = mapReduceCustomizationRegistry.getCustomization(mrJobType);
         customization.customize(mrJob, properties);
-        
-        mrJob.setJobName(jobNameService.createJobName(properties.getProperty(EventDataSamplingProperty.CUSTOMER.name()), mrJob.getJobName()));
+
+        mrJob.setJobName(jobNameService.createJobName(properties.getProperty(MapReduceProperty.CUSTOMER.name()), mrJob.getJobName()));
     }
 
     @Override

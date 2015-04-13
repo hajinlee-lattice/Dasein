@@ -6,6 +6,8 @@ import java.sql.Timestamp;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -37,6 +39,7 @@ public class ScoringCommand implements HasPid, HasId<String>, Serializable{
     @Id
     @JsonIgnore
     @Basic(optional = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "LeadInputQueue_ID", unique = true, nullable = false)
     public Long getPid() {
         return leadInputQueueId;
@@ -118,9 +121,8 @@ public class ScoringCommand implements HasPid, HasId<String>, Serializable{
     }
 
     @VisibleForTesting
-    public ScoringCommand(Long pid, String deploymentExternalId, ScoringCommandStatus status, String tableName, int lower, int total, Timestamp populated) {
+    public ScoringCommand(String deploymentExternalId, ScoringCommandStatus status, String tableName, int lower, int total, Timestamp populated) {
         super();
-        this.leadInputQueueId = pid;
         this.leDeploymentId = deploymentExternalId;
         this.status = status;
         this.tableName = tableName;

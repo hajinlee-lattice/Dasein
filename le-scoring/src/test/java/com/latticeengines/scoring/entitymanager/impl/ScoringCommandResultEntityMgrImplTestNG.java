@@ -42,13 +42,13 @@ public class ScoringCommandResultEntityMgrImplTestNG extends ScoringFunctionalTe
     }
 
     @Test(groups = "functional")
-    public void testFindByModelCommand() throws Exception {
-        ScoringCommand command = new ScoringCommand(1L, "Nutanix", ScoringCommandStatus.POPULATED, "Q_Table_Nutanix", 0, 100, Timestamp.valueOf("2015-04-28 00:00:00"));
+    public void testFindByScoringCommand() throws Exception {
+        ScoringCommand command = new ScoringCommand("Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix", 0, 100, Timestamp.valueOf("2015-04-28 00:00:00"));
         scoringCommandEntityMgr.create(command);
 
         assertNull(scoringCommandResultEntityMgr.findByScoringCommand(command));
 
-        ScoringCommandResult result = new ScoringCommandResult(2L, "Nutanix", ScoringCommandStatus.POPULATED, "Q_Table_Nutanix", 100, Timestamp.valueOf("2015-04-28 00:00:01"));
+        ScoringCommandResult result = new ScoringCommandResult("Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix", 100, Timestamp.valueOf("2015-04-28 00:00:01"));
         scoringCommandResultEntityMgr.create(result);
 
         ScoringCommandResult retrieved = scoringCommandResultEntityMgr.findByScoringCommand(command);
@@ -56,7 +56,7 @@ public class ScoringCommandResultEntityMgrImplTestNG extends ScoringFunctionalTe
         assertEquals(retrieved.getId(), command.getId());
 
         retrieved.setConsumed(Timestamp.valueOf("2015-04-28 00:00:02"));
-        retrieved.setStatus(ScoringCommandStatus.CONSUMED);
+        retrieved.setStatus(ScoringCommandStatus.POPULATED);
         scoringCommandResultEntityMgr.update(retrieved);
     }
 }

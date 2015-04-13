@@ -32,4 +32,5 @@ public class ScoringCommandDaoImpl extends BaseDaoImpl<ScoringCommand> implement
                 .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
         return commands;
     }
+
 }
