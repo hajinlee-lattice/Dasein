@@ -50,33 +50,79 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
         $scope.gridOptions = {
             dataSource: dataSource,
             sortable: true,
-            filterable: true,
             pageable: pageable,
             selectable: "row",
+            filterable: {
+                extra: false
+            },
             columns: [
-                {field: "TenantId", title: "Tenant ID"},
-                {field: "DisplayName", title: "Name"},
-                {field: "VDB", template: function(dataItem){
-                    return TenantUtility.getStatusTemplate(dataItem.VDB);
-                }},
-                {field: "DataLoader", title:"DL", template: function(dataItem){
-                    return TenantUtility.getStatusTemplate(dataItem.DataLoader);
-                }},
-                {field: "PLS", template: function(dataItem){
-                    return TenantUtility.getStatusTemplate(dataItem.PLS);
-                }},
-                {field: "Dante", template: function(dataItem){
-                    return TenantUtility.getStatusTemplate(dataItem.Dante);
-                }},
-                {field: "GlobalAuth", title: "GA", template: function(dataItem){
-                    return TenantUtility.getStatusTemplate(dataItem.GlobalAuth);
-                }},
-                {field: "TPL", template: function(dataItem){
-                    return TenantUtility.getStatusTemplate(dataItem.TPL);
-                }}
+                {field: "TenantId", title: "Tenant ID", filterable: true},
+                {field: "DisplayName", title: "Name", filterable: true},
+                {
+                    field: "VDB",
+                    template: function(dataItem){
+                        return TenantUtility.getStatusTemplate(dataItem.VDB);
+                    },
+                    filterable: {
+                        ui: statusFilter
+                    }
+                },
+                {
+                    field: "DataLoader",
+                    title:"DL",
+                    template: function(dataItem){
+                        return TenantUtility.getStatusTemplate(dataItem.DataLoader);
+                    },
+                    filterable: {
+                        ui: statusFilter
+                    }
+                },
+                {
+                    field: "PLS",
+                    template: function(dataItem){
+                        return TenantUtility.getStatusTemplate(dataItem.PLS);
+                    },
+                    filterable: {
+                        ui: statusFilter
+                    }
+                },
+                {
+                    field: "Dante",
+                    template: function(dataItem){
+                        return TenantUtility.getStatusTemplate(dataItem.Dante);
+                    },
+                    filterable: {
+                        ui: statusFilter
+                    }
+                },
+                {
+                    field: "GlobalAuth",
+                    title: "GA",
+                    template: function(dataItem){
+                        return TenantUtility.getStatusTemplate(dataItem.GlobalAuth);
+                    },
+                    filterable: {
+                        ui: statusFilter
+                    }
+                },
+                {
+                    field: "TPL", template: function(dataItem){
+                        return TenantUtility.getStatusTemplate(dataItem.TPL);
+                    },
+                    filterable: {
+                        ui: statusFilter
+                    }
+                }
             ]
         };
     };
+
+    function statusFilter(element) {
+        element.kendoDropDownList({
+            dataSource: ["OK", "FAILED", "INITIAL", "INSTALLING"],
+            optionLabel: "--Select Value--"
+        });
+    }
 
     $scope.handleKendoChange = function(data) {
         $state.go('TENANT.CONFIG', {tenantId: data.TenantId});
