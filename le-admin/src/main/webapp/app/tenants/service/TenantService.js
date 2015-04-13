@@ -40,6 +40,18 @@ app.service('TenantService', function($q, $http, _){
         });
     }
 
+    function getRandomServiceStatus() {
+        var answers = ['OK', 'FAILED', 'INITIAL', 'INSTALLING'];
+        var randIdx = Math.floor((Math.random() * 4));
+        var result = {
+            "state": answers[randIdx],
+            "desiredVersion": 1,
+            "installedVersion": 1,
+            "errorMessage": null
+        };
+        return result;
+    }
+
     function asyncMockServiceStatus() {
         return $q(function(resolve) {
             setTimeout(function() {
@@ -65,12 +77,12 @@ app.service('TenantService', function($q, $http, _){
                return {
                    TenantId: record.key,
                    DisplayName: record.value.Properties.displayName,
-                   VDB: "INITIAL",
-                   PLS: "OK",
-                   Dante: "FAILED",
-                   GlobalAuth: "OK",
-                   DataLoader: "INSTALLING",
-                   TPL: "OK"
+                   VDB: getRandomServiceStatus().state,
+                   PLS: getRandomServiceStatus().state,
+                   Dante: getRandomServiceStatus().state,
+                   GlobalAuth: getRandomServiceStatus().state,
+                   DataLoader: getRandomServiceStatus().state,
+                   TPL: getRandomServiceStatus().state
                 };
             });
 

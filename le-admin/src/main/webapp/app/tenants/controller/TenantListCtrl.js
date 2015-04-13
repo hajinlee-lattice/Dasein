@@ -56,14 +56,20 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                 extra: false
             },
             columns: [
-                {field: "TenantId", title: "Tenant ID", filterable: true},
-                {field: "DisplayName", title: "Name", filterable: true},
+                {field: "TenantId", title: "Tenant ID"},
+                {field: "DisplayName", title: "Name"},
                 {
                     field: "VDB",
                     template: function(dataItem){
                         return TenantUtility.getStatusTemplate(dataItem.VDB);
                     },
                     filterable: {
+                        operators: {
+                            string: {
+                                eq: "Is equal to",
+                                neq: "Is not equal to"
+                            }
+                        },
                         ui: statusFilter
                     }
                 },
@@ -74,6 +80,12 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                         return TenantUtility.getStatusTemplate(dataItem.DataLoader);
                     },
                     filterable: {
+                        operators: {
+                            string: {
+                                eq: "Is equal to",
+                                neq: "Is not equal to"
+                            }
+                        },
                         ui: statusFilter
                     }
                 },
@@ -83,6 +95,12 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                         return TenantUtility.getStatusTemplate(dataItem.PLS);
                     },
                     filterable: {
+                        operators: {
+                            string: {
+                                eq: "Is equal to",
+                                neq: "Is not equal to"
+                            }
+                        },
                         ui: statusFilter
                     }
                 },
@@ -92,6 +110,12 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                         return TenantUtility.getStatusTemplate(dataItem.Dante);
                     },
                     filterable: {
+                        operators: {
+                            string: {
+                                eq: "Is equal to",
+                                neq: "Is not equal to"
+                            }
+                        },
                         ui: statusFilter
                     }
                 },
@@ -102,6 +126,12 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                         return TenantUtility.getStatusTemplate(dataItem.GlobalAuth);
                     },
                     filterable: {
+                        operators: {
+                            string: {
+                                eq: "Is equal to",
+                                neq: "Is not equal to"
+                            }
+                        },
                         ui: statusFilter
                     }
                 },
@@ -110,6 +140,12 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                         return TenantUtility.getStatusTemplate(dataItem.TPL);
                     },
                     filterable: {
+                        operators: {
+                            string: {
+                                eq: "Is equal to",
+                                neq: "Is not equal to"
+                            }
+                        },
                         ui: statusFilter
                     }
                 }
