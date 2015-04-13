@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.service.TenantService;
+import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;

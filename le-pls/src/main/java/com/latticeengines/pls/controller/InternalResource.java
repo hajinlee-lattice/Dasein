@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.impl.ModelSummaryEntityMgrImpl;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
