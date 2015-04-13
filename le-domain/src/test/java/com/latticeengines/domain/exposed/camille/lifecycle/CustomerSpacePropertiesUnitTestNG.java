@@ -9,7 +9,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 public class CustomerSpacePropertiesUnitTestNG {
     @Test(groups = "unit")
     public void testSerDe() {
-        CustomerSpaceProperties props = new CustomerSpaceProperties("name", "description", "sfdcOrg1");
+        CustomerSpaceProperties props = new CustomerSpaceProperties("name", "description", "sfdcOrg1", "sandboxSfdcOrg1");
         CustomerSpaceInfo info = new CustomerSpaceInfo(props, "");
         String serializedInfo = JsonUtils.serialize(info);
         
