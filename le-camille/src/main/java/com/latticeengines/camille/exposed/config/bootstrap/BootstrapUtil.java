@@ -1,6 +1,5 @@
 package com.latticeengines.camille.exposed.config.bootstrap;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleTransaction;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -58,8 +58,7 @@ public class BootstrapUtil {
                     Iterator<DocumentDirectory.Node> iter = configuration.breadthFirstIterator();
                     while (iter.hasNext()) {
                         DocumentDirectory.Node node = iter.next();
-                        transaction.create(node.getPath().prefix(serviceDirectoryPath), node.getDocument(),
-                                ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                        transaction.create(node.getPath(), node.getDocument(), ZooDefs.Ids.OPEN_ACL_UNSAFE);
                     }
 
                     transaction.commit();
@@ -79,67 +78,7 @@ public class BootstrapUtil {
         }
     }
 
-    private static InterProcessMutex createLock(Path serviceDirectoryPath) {
-        return new InterProcessMutex(CamilleEnvironment.getCamille().getCuratorClient(), serviceDirectoryPath.append(
-                PathConstants.BOOTSTRAP_LOCK).toString());
-    }
-
-    private static void removeStateFile(DocumentDirectory directory) {
-        Path stateFilePath = new Path(new String[] { PathConstants.BOOTSTRAP_STATE_FILE });
-        if (directory.get(stateFilePath) != null) {
-            directory.delete(stateFilePath);
-        }
-    }
-
-    private static void removeLockFile(DocumentDirectory directory) {
-        Path lockPath = new Path(new String[] { PathConstants.BOOTSTRAP_LOCK });
-        if (directory.get(lockPath) != null) {
-            directory.delete(lockPath);
-        }
-    }
-
-    public static interface InstallerAdaptor {
-        public DocumentDirectory install(int dataVersion);
-    }
-
-    public static class CustomerSpaceServiceInstallerAdaptor implements InstallerAdaptor {
-        private final CustomerSpace space;
-        private final String service;
-        private final CustomerSpaceServiceInstaller installer;
-        private final Map<String, String> properties;
-
-        public CustomerSpaceServiceInstallerAdaptor(CustomerSpaceServiceInstaller installer, CustomerSpace space,
-                String service, Map<String, String> properties) {
-            this.space = space;
-            this.service = service;
-            this.installer = installer;
-            this.properties = properties;
-        }
-
-        @Override
-        public DocumentDirectory install(int dataVersion) {
-            return installer.install(space, service, dataVersion, properties);
-        }
-    }
-
-    public static class ServiceInstallerAdaptor implements InstallerAdaptor {
-        private final String service;
-        private final ServiceInstaller installer;
-        private final Map<String, String> properties;
-
-        public ServiceInstallerAdaptor(ServiceInstaller installer, String service, Map<String, String> properties) {
-            this.service = service;
-            this.installer = installer;
-            this.properties = properties;
-        }
-
-        @Override
-        public DocumentDirectory install(int dataVersion) {
-            return installer.install(service, dataVersion, properties);
-        }
-    }
-
-    public static void upgrade(CustomerSpaceServiceUpgrader upgrader, int executableVersion, Path serviceDirectoryPath,
+    public static void upgrade(UpgraderAdaptor upgrader, int executableVersion, Path serviceDirectoryPath,
             CustomerSpace space, String serviceName, String logPrefix) throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         BootstrapState state = BootstrapStateUtil.getState(serviceDirectoryPath);
@@ -175,21 +114,21 @@ public class BootstrapUtil {
                                 state.installedVersion, executableVersion });
 
                         DocumentDirectory source = camille.getDirectory(serviceDirectoryPath);
-                        source.makePathsLocal();
 
                         // Upgrade
-                        DocumentDirectory upgraded = upgrader.upgrade(space, serviceName, state.installedVersion,
-                                executableVersion, source, new HashMap<String, String>());
+                        DocumentDirectory upgraded = upgrader
+                                .upgrade(state.installedVersion, executableVersion, source);
 
                         // Perform a transaction
                         CamilleTransaction transaction = new CamilleTransaction();
 
                         // Delete all existing items in the hierarchy, leaf
                         // nodes -> root nodes
+                        removeSystemFiles(source);
                         Iterator<DocumentDirectory.Node> iter = source.leafFirstIterator();
                         while (iter.hasNext()) {
                             DocumentDirectory.Node node = iter.next();
-                            transaction.delete(node.getPath().prefix(serviceDirectoryPath));
+                            transaction.delete(node.getPath());
                         }
 
                         // Create the new items in the hierarchy, root nodes ->
@@ -197,8 +136,7 @@ public class BootstrapUtil {
                         iter = upgraded.breadthFirstIterator();
                         while (iter.hasNext()) {
                             DocumentDirectory.Node node = iter.next();
-                            transaction.create(node.getPath().prefix(serviceDirectoryPath), node.getDocument(),
-                                    ZooDefs.Ids.OPEN_ACL_UNSAFE);
+                            transaction.create(node.getPath(), node.getDocument(), ZooDefs.Ids.OPEN_ACL_UNSAFE);
                         }
 
                         // Update state
@@ -237,78 +175,172 @@ public class BootstrapUtil {
         }
     }
 
-    public static CustomerSpaceServiceInstaller sandbox(final CustomerSpaceServiceInstaller installer) {
+    private static InterProcessMutex createLock(Path serviceDirectoryPath) {
+        return new InterProcessMutex(CamilleEnvironment.getCamille().getCuratorClient(), serviceDirectoryPath.append(
+                PathConstants.BOOTSTRAP_LOCK).toString());
+    }
+
+    public static interface InstallerAdaptor {
+        public DocumentDirectory install(int dataVersion);
+    }
+
+    public static class CustomerSpaceServiceInstallerAdaptor implements InstallerAdaptor {
+        private final CustomerSpace space;
+        private final String service;
+        private final CustomerSpaceServiceInstaller installer;
+        private final Map<String, String> properties;
+
+        public CustomerSpaceServiceInstallerAdaptor(CustomerSpaceServiceInstaller installer, CustomerSpace space,
+                String service, Map<String, String> properties) {
+            this.space = space;
+            this.service = service;
+            Path serviceDirectoryPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), space,
+                    service);
+            this.installer = BootstrapUtil.sandbox(installer, serviceDirectoryPath);
+            this.properties = properties;
+        }
+
+        @Override
+        public DocumentDirectory install(int dataVersion) {
+            return installer.install(space, service, dataVersion, properties);
+        }
+    }
+
+    public static class ServiceInstallerAdaptor implements InstallerAdaptor {
+        private final String service;
+        private final ServiceInstaller installer;
+        private final Map<String, String> properties;
+
+        public ServiceInstallerAdaptor(ServiceInstaller installer, String service, Map<String, String> properties) {
+            this.service = service;
+            Path serviceDirectoryPath = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), service);
+            this.installer = BootstrapUtil.sandbox(installer, serviceDirectoryPath);
+            this.properties = properties;
+        }
+
+        @Override
+        public DocumentDirectory install(int dataVersion) {
+            return installer.install(service, dataVersion, properties);
+        }
+    }
+
+    public static class UpgraderAdaptor {
+        private final CustomerSpace space;
+        private final String service;
+        private final CustomerSpaceServiceUpgrader upgrader;
+        private final Map<String, String> properties;
+
+        public UpgraderAdaptor(CustomerSpaceServiceUpgrader upgrader, CustomerSpace space, String service,
+                Map<String, String> properties) {
+            this.space = space;
+            this.service = service;
+            Path serviceDirectoryPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), space,
+                    service);
+            this.upgrader = BootstrapUtil.sandbox(upgrader, serviceDirectoryPath);
+            this.properties = properties;
+        }
+
+        public DocumentDirectory upgrade(int sourceVersion, int targetVersion, DocumentDirectory source) {
+            return upgrader.upgrade(space, service, sourceVersion, targetVersion, source, properties);
+        }
+    }
+
+    public static CustomerSpaceServiceInstaller sandbox(final CustomerSpaceServiceInstaller installer,
+            final Path serviceDirectoryPath) {
         return new CustomerSpaceServiceInstaller() {
 
             @Override
             public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion,
                     Map<String, String> properties) {
+                DocumentDirectory toReturn;
                 if (installer == null) {
-                    return new DocumentDirectory();
+                    toReturn = new DocumentDirectory();
+                } else {
+                    toReturn = installer.install(space, serviceName, dataVersion, properties);
+                }
+                if (toReturn == null) {
+                    toReturn = new DocumentDirectory();
                 }
 
-                DocumentDirectory toReturn = installer.install(space, serviceName, dataVersion, properties);
-                if (toReturn == null) {
-                    return new DocumentDirectory();
-                }
-                BootstrapUtil.removeStateFile(toReturn);
-                BootstrapUtil.removeLockFile(toReturn);
+                BootstrapUtil.removeSystemFiles(toReturn);
+                toReturn.makePathsAbsolute(serviceDirectoryPath);
                 return toReturn;
             }
 
             @Override
             public DocumentDirectory getDefaultConfiguration(String serviceName) {
+                DocumentDirectory toReturn;
                 if (installer == null) {
-                    return new DocumentDirectory();
+                    toReturn = new DocumentDirectory();
+                } else {
+                    toReturn = installer.getDefaultConfiguration(serviceName);
                 }
-                DocumentDirectory toReturn = installer.getDefaultConfiguration(serviceName);
-                BootstrapUtil.removeStateFile(toReturn);
-                BootstrapUtil.removeLockFile(toReturn);
+                BootstrapUtil.removeSystemFiles(toReturn);
+                toReturn.makePathsAbsolute(serviceDirectoryPath);
                 return toReturn;
             }
         };
     }
 
-    public static CustomerSpaceServiceUpgrader sandbox(final CustomerSpaceServiceUpgrader upgrader) {
+    public static CustomerSpaceServiceUpgrader sandbox(final CustomerSpaceServiceUpgrader upgrader,
+            final Path serviceDirectoryPath) {
         return new CustomerSpaceServiceUpgrader() {
 
             @Override
             public DocumentDirectory upgrade(CustomerSpace space, String serviceName, int sourceVersion,
                     int targetVersion, DocumentDirectory source, Map<String, String> properties) {
-                BootstrapUtil.removeStateFile(source);
-                BootstrapUtil.removeLockFile(source);
+                DocumentDirectory sourceCopy = new DocumentDirectory(source);
+
+                sourceCopy.makePathsLocal();
+                BootstrapUtil.removeSystemFiles(sourceCopy);
                 if (upgrader == null) {
-                    return source;
+                    sourceCopy.makePathsAbsolute(serviceDirectoryPath);
+                    return sourceCopy;
                 }
 
-                DocumentDirectory toReturn = upgrader.upgrade(space, serviceName, sourceVersion, targetVersion, source,
-                        properties);
+                DocumentDirectory toReturn = upgrader.upgrade(space, serviceName, sourceVersion, targetVersion,
+                        sourceCopy, properties);
                 if (toReturn == null) {
-                    return new DocumentDirectory();
+                    toReturn = new DocumentDirectory();
                 }
-                BootstrapUtil.removeStateFile(toReturn);
-                BootstrapUtil.removeLockFile(toReturn);
+                BootstrapUtil.removeSystemFiles(toReturn);
+                toReturn.makePathsAbsolute(serviceDirectoryPath);
                 return toReturn;
             }
         };
     }
 
-    public static ServiceInstaller sandbox(final ServiceInstaller installer) {
+    public static ServiceInstaller sandbox(final ServiceInstaller installer, final Path serviceDirectoryPath) {
         return new ServiceInstaller() {
             @Override
             public DocumentDirectory install(String serviceName, int dataVersion, Map<String, String> properties) {
+                DocumentDirectory toReturn;
                 if (installer == null) {
-                    return new DocumentDirectory();
+                    toReturn = new DocumentDirectory();
+                } else {
+                    toReturn = installer.install(serviceName, dataVersion, properties);
                 }
-                DocumentDirectory toReturn = installer.install(serviceName, dataVersion, properties);
                 if (toReturn == null) {
-                    return new DocumentDirectory();
+                    toReturn = new DocumentDirectory();
                 }
-                BootstrapUtil.removeStateFile(toReturn);
-                BootstrapUtil.removeLockFile(toReturn);
+
+                BootstrapUtil.removeSystemFiles(toReturn);
+                toReturn.makePathsAbsolute(serviceDirectoryPath);
                 return toReturn;
             }
         };
+    }
+
+    private static void removeSystemFiles(DocumentDirectory directory) {
+        Path root = directory.getRootPath();
+        Path stateFilePath = root.append(PathConstants.BOOTSTRAP_STATE_FILE);
+        if (directory.get(stateFilePath) != null) {
+            directory.delete(stateFilePath);
+        }
+        Path lockPath = root.append(PathConstants.BOOTSTRAP_LOCK);
+        if (directory.get(lockPath) != null) {
+            directory.delete(lockPath);
+        }
     }
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {

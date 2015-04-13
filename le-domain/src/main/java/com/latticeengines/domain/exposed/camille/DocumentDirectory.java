@@ -46,6 +46,16 @@ public class DocumentDirectory implements Serializable {
         }
     }
 
+    public DocumentDirectory(DocumentDirectory source) {
+        this(source.root);
+
+        Iterator<Node> iter = source.breadthFirstIterator();
+        while (iter.hasNext()) {
+            Node node = iter.next();
+            add(node.getPath(), node.getDocument());
+        }
+    }
+
     public List<Node> getChildren() {
         return children;
     }
@@ -61,6 +71,15 @@ public class DocumentDirectory implements Serializable {
             node.setPath(node.getPath().local(root));
         }
         root = new Path("/");
+    }
+
+    public void makePathsAbsolute(Path newroot) {
+        Iterator<Node> iter = depthFirstIterator();
+        while (iter.hasNext()) {
+            Node node = iter.next();
+            node.setPath(node.getPath().prefix(newroot));
+        }
+        root = newroot;
     }
 
     public Node get(Path path) {

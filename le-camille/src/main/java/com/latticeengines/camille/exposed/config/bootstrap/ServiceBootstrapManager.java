@@ -29,12 +29,11 @@ public class ServiceBootstrapManager {
 
     public static void register(String serviceName, ServiceProperties properties, ServiceInstaller installer) {
         Bootstrapper bootstrapper = bootstrappers.get(serviceName);
-        ServiceInstaller sandboxedInstaller = BootstrapUtil.sandbox(installer);
         if (bootstrapper == null) {
-            bootstrapper = new Bootstrapper(serviceName, properties, sandboxedInstaller);
+            bootstrapper = new Bootstrapper(serviceName, properties, installer);
             bootstrappers.put(serviceName, bootstrapper);
         } else {
-            bootstrapper.set(sandboxedInstaller, properties);
+            bootstrapper.set(installer, properties);
         }
     }
 

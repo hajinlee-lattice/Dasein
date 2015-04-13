@@ -14,6 +14,7 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.CustomerSpaceServiceInstallerAdaptor;
 import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.InstallerAdaptor;
+import com.latticeengines.camille.exposed.config.bootstrap.BootstrapUtil.UpgraderAdaptor;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -34,16 +35,14 @@ public class CustomerSpaceServiceBootstrapManager {
 
     public static void register(String serviceName, ServiceProperties properties,
             CustomerSpaceServiceInstaller installer, CustomerSpaceServiceUpgrader upgrader) {
-        CustomerSpaceServiceInstaller sandboxedInstaller = BootstrapUtil.sandbox(installer);
-        CustomerSpaceServiceUpgrader sandboxedUpgrader = BootstrapUtil.sandbox(upgrader);
 
         // Retrieve/Set the bootstrapper for the provided service
         Bootstrapper bootstrapper = bootstrappers.get(serviceName);
         if (bootstrapper == null) {
-            bootstrapper = new Bootstrapper(serviceName, properties, sandboxedInstaller, sandboxedUpgrader);
+            bootstrapper = new Bootstrapper(serviceName, properties, installer, upgrader);
             bootstrappers.put(serviceName, bootstrapper);
         } else {
-            bootstrapper.set(properties, sandboxedInstaller, sandboxedUpgrader);
+            bootstrapper.set(properties, installer, upgrader);
         }
     }
 
@@ -189,7 +188,8 @@ public class CustomerSpaceServiceBootstrapManager {
         }
 
         private void upgrade(int executableVersion) throws Exception {
-            BootstrapUtil.upgrade(upgrader, executableVersion, serviceDirectoryPath, space, serviceName, logPrefix);
+            UpgraderAdaptor adaptor = new UpgraderAdaptor(upgrader, space, serviceName, bootstrapProperties);
+            BootstrapUtil.upgrade(adaptor, executableVersion, serviceDirectoryPath, space, serviceName, logPrefix);
         }
 
         private static Path getServiceDirectoryPath(CustomerSpace space, String serviceName) {
