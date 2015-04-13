@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.scoring;
 
 import java.io.Serializable;
-import java.sql.Date;
 import java.sql.Timestamp;
 
 import javax.persistence.Basic;
