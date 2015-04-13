@@ -15,5 +15,5 @@ public final class PathConstants {
     public static final String BOOTSTRAP_STATE_FILE = "state.json";
     public static final String BOOTSTRAP_LOCK = "Lock";
 
-    public static final String DEFAULT_SPACE_FILE = ".default-space";
+    public static final String DEFAULT_SPACE_FILE = "default-space";
 }
