@@ -209,7 +209,7 @@ app.service('TenantUtility', function(_){
         if (tenantId.indexOf(" ") > -1) {
             result.valid = false;
             result.reason = "Tenant ID must not contain spaces";
-            return result
+            return result;
         }
         return result;
     };

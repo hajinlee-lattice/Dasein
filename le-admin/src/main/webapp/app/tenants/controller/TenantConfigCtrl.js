@@ -34,7 +34,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
 
                         if ($scope.data.length == $scope.services.length) {
                             $scope.loading = false;
-                            updateServiceStatus();
+                            if ($scope.mode !== 'NEW') { updateServiceStatus(); }
                         }
                     }
                 );
@@ -55,14 +55,16 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
         });
     }
 
-    var statusUpdater = $interval(function(){
-        if ($state.current.name !== "TENANT.CONFIG") {
-            $interval.cancel(statusUpdater);
-        }
-        if (!$scope.loading) {
-            updateServiceStatus();
-        }
-    }, 5000);
+    if ($scope.mode !== 'NEW') {
+        var statusUpdater = $interval(function(){
+            if ($state.current.name !== "TENANT.CONFIG") {
+                $interval.cancel(statusUpdater);
+            }
+            if (!$scope.loading) {
+                updateServiceStatus();
+            }
+        }, 5000);
+    }
 
     $scope.onSaveClick = function(){
         $scope.cleanData = TenantUtility.cleanupComponentConfigs($scope.data);
