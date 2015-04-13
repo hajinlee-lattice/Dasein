@@ -58,10 +58,8 @@ public class BatonTool {
                 "Path to camille.json.  Specify instead of explicitly specifying podId and connectionString.");
 
         Subparsers subparsers = parser.addSubparsers().dest("command");
-        Subparser createPod = subparsers.addParser("createPod").help("Creates a new Pod.");
         Subparser createTenant = subparsers.addParser("createTenant").help(
                 "Creates a new tenant. Requires contractId, tenantID, defaultSpaceId, featureFlags, and properties");
-        Subparser destroyPod = subparsers.addParser("destroyPod").help("Only for development use!");
         
         createTenant.addArgument("--customerSpace");
         
