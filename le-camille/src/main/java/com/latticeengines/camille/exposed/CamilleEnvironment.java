@@ -1,5 +1,8 @@
 package com.latticeengines.camille.exposed;
 
+import java.util.AbstractMap;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
@@ -16,13 +19,16 @@ public class CamilleEnvironment {
         BOOTSTRAP, RUNTIME
     };
 
-    private static final Logger log = LoggerFactory.getLogger(new Object() {
-    }.getClass().getEnclosingClass());
-
     // these are reasonable arguments for the ExponentialBackoffRetry. The first
     // retry will wait 1 second - the second will wait up to 2 seconds - the
     // third will wait up to 4 seconds.
-    private static final ExponentialBackoffRetry retryPolicy = new ExponentialBackoffRetry(1000, 3);
+    private static final ExponentialBackoffRetry RETRY_POLICY = new ExponentialBackoffRetry(1000, 3);
+    private static final int CONNECTION_WAIT_TIME = 1;
+    private static final TimeUnit CONNECTION_WAIT_TIME_UNITS = TimeUnit.SECONDS; 
+     
+    
+    private static final Logger log = LoggerFactory.getLogger(new Object() {
+    }.getClass().getEnclosingClass());
 
     // singleton instance
     private static Camille camille = null;
@@ -43,10 +49,10 @@ public class CamilleEnvironment {
 
         camilleConfig = config;
 
-        CuratorFramework client = CuratorFrameworkFactory.newClient(camilleConfig.getConnectionString(), retryPolicy);
+        CuratorFramework client = CuratorFrameworkFactory.newClient(camilleConfig.getConnectionString(), RETRY_POLICY);
         client.start();
         try {
-            client.blockUntilConnected();
+            client.blockUntilConnected(CONNECTION_WAIT_TIME, CONNECTION_WAIT_TIME_UNITS);
         } catch (InterruptedException ie) {
             log.error("Waiting for Curator connection was interrupted.", ie);
             stopNoSync();
