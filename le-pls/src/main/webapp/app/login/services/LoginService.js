@@ -1,6 +1,7 @@
 angular.module('mainApp.login.services.LoginService', [
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.appCommon.utilities.UnderscoreUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.core.services.SessionService'
@@ -25,6 +26,9 @@ angular.module('mainApp.login.services.LoginService', [
                 result = data;
                 BrowserStorageUtility.setTokenDocument(data.Uniqueness + "." + data.Randomness);
                 data.Result.UserName = username;
+                data.Result.Tenants = _.filter(data.Result.Tenants, function(t){
+                    return t.Identifier !== 'GLOBAL_ADMIN_TENANT';
+                });
                 BrowserStorageUtility.setLoginDocument(data.Result);
             }
             deferred.resolve(result);

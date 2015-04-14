@@ -1,7 +1,5 @@
 from optparse import OptionParser
 import urllib
-import subprocess
-import sys
 import httplib
 import json
 
@@ -19,15 +17,15 @@ def updateUser(params):
     print response.status, response.reason
     response.read()
 
-    # print 'Updating the user ...'
-    # headers = {"MagicAuthentication": "Security through obscurity!", "Content-Type": "application/json"}
-    # qpars = 'tenants=["' + params["tenant"] + '"]&namepattern=' + urllib.quote_plus(params["username"])
-    # data = {"AccessLevel": params["accesslevel"], "OldPassword": params["oldpassword"],
-    #         "NewPassword": params["newpassword"]}
-    # conn.request('PUT', "/pls/internal/users?" + qpars, json.dumps(data), headers=headers)
-    # response = conn.getresponse()
-    # print response.status, response.reason
-    # print response.read()
+    print 'Updating the user ...'
+    headers = {"MagicAuthentication": "Security through obscurity!", "Content-Type": "application/json"}
+    qpars = 'tenants=["' + params["tenant"] + '"]&namepattern=' + urllib.quote_plus(params["username"])
+    data = {"AccessLevel": params["accesslevel"], "OldPassword": params["oldpassword"],
+            "NewPassword": params["newpassword"]}
+    conn.request('PUT', "/pls/internal/users?" + qpars, json.dumps(data), headers=headers)
+    response = conn.getresponse()
+    print response.status, response.reason
+    print response.read()
 
     conn.close()
 
