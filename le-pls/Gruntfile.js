@@ -80,6 +80,12 @@ module.exports = function (grunt) {
                 options: {
                     force: true
                 }
+            },
+            coverage: {
+            	src: ['target/protractor_coverage'],
+            	options: {
+                    force: true
+                }
             }
         },
 
@@ -121,6 +127,15 @@ module.exports = function (grunt) {
             tmpIndex: {
                 src:  '<%= pls.app %>/index.html',
                 dest: '.tmp/index.html'
+            },
+
+            instrumented: {
+                files: [{
+                	expand: true,
+                	cwd: 'target/protractor_coverage/instrumented/src/main/webapp/',
+                    src: ['**/*'],
+                    dest: 'src/main/webapp/'
+                }]
             }
         },
 
@@ -478,6 +493,47 @@ module.exports = function (grunt) {
                 files: ['<%= pls.app %>/assets/styles/**/*.scss'],
                 tasks: ['sass:dev']
             }
+        },
+        
+        
+        
+        // E2E UI Automation with code coverage
+        protractor_coverage: {
+            options: {
+                keepAlive: false,
+                noColor: false,
+                coverageDir: 'target/protractor_coverage',
+                configFile: '<%= testenv.protractorConf %>'
+            },
+            chrome:           {
+                options: {
+                    args: {
+                        browser:       'chrome',
+                        //baseUrl:       'http://localhost:8080/',
+                        baseUrl:       '<%= testenv.url %>',
+                        seleniumAddress:    'http://localhost:4444/wd/hub'
+                        //seleniumPort:    '4444'
+                    }
+                }
+            },
+            run: {}
+        },
+
+        instrument: {
+            files: 'src/main/webapp/app/**/*.js',
+            options: {
+            	lazy: true,
+                basePath: "target/protractor_coverage/instrumented"
+            }
+        },
+
+        makeReport: {
+            src: 'target/protractor_coverage/*.json',
+            options: {
+                type: 'cobertura',
+                dir: 'target/protractor_coverage/reports',
+                print: 'detail'
+            }
         }
 
     });
@@ -496,6 +552,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-rename');
     grunt.loadNpmTasks('grunt-replace');
     grunt.loadNpmTasks('grunt-http');
+    grunt.loadNpmTasks('grunt-protractor-coverage');
+    grunt.loadNpmTasks('grunt-istanbul');
 
     var defaultText = 'The default grunt build task. Runs a full build for everything including: file linting and minification (including css), running unit tests, and versioning for production. This website ready for distribution will be placed in the <SVN Directory>\<Product>\Projects\dist directory. This can be called just with the grunt command. The production files will then be named production_.js and production_.css.';
     grunt.registerTask('default', defaultText, [
@@ -592,5 +650,23 @@ module.exports = function (grunt) {
         'watch:css'
     ]);
 
+    var e2eChromeCcText = 'Runs selenium end to end (protractor) unit tests on Chrome with code coverage';
+    grunt.registerTask('e2eChromeCc', e2eChromeCcText, [
+        //'clean:coverage',
+        //'copy:e2eCoverage',
+        //'instrument',
+        //'connect:server',
+        'protractor_coverage:chrome',
+        'makeReport',
+//        'http:cleanupUsers'
+    ]);
+    
+    var instrumentJsText = 'Instrument javascript code for code coverage';
+    grunt.registerTask('instrumentJs', instrumentJsText, [
+        //'clean:coverage',
+        //'copy:e2eCoverage',
+        'instrument',
+        'copy:instrumented'
+    ]);
 
 };
