@@ -10,7 +10,13 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.common.exposed.util.HttpWithRetryUtils;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.api.client.http.ByteArrayContent;
+import com.google.api.client.http.GenericUrl;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.javanet.NetHttpTransport;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 @Service
@@ -33,10 +39,21 @@ public class SkaldDestination implements RecordDestination {
         data.put("combination", combinationName);
 
         try {
-            String response = HttpWithRetryUtils.executePostRequest(target, data, null);
+            // TODO Add TypeReference support into the JSON utilities.
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> result = mapper.readValue(response, new TypeReference<Map<String, Object>>() {
-            });
+            mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+
+            // TODO Retry on non-transient failures.
+            NetHttpTransport transport = new NetHttpTransport();
+            HttpRequestFactory factory = transport.createRequestFactory();
+            HttpRequest request = factory.buildPostRequest(new GenericUrl(target),
+                    ByteArrayContent.fromString("application/json", mapper.writeValueAsString(data)));
+
+            request.execute();
+            HttpResponse response = request.execute();
+            Map<String, Object> result = mapper.readValue(response.getContent(),
+                    new TypeReference<Map<String, Object>>() {
+                    });
 
             return result;
         } catch (Exception ex) {

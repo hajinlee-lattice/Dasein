@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.rest.DetailedErrors;
 @RestController
 @DetailedErrors
 public class MarketoReceiverService {
+    // TODO Make this reject content-type json requests; they'll fail.
     @RequestMapping(value = "MarketoReceiver", method = RequestMethod.POST)
     public Map<String, Object> receiveRecord(@RequestBody String input) {
         // Marketo sends the WebHook request with the x-www-form-urlencoded
