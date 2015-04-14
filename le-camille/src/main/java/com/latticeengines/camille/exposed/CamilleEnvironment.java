@@ -1,6 +1,5 @@
 package com.latticeengines.camille.exposed;
 
-import java.util.AbstractMap;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.curator.framework.CuratorFramework;
@@ -24,9 +23,8 @@ public class CamilleEnvironment {
     // third will wait up to 4 seconds.
     private static final ExponentialBackoffRetry RETRY_POLICY = new ExponentialBackoffRetry(1000, 3);
     private static final int CONNECTION_WAIT_TIME = 1;
-    private static final TimeUnit CONNECTION_WAIT_TIME_UNITS = TimeUnit.SECONDS; 
-     
-    
+    private static final TimeUnit CONNECTION_WAIT_TIME_UNITS = TimeUnit.SECONDS;
+
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 
