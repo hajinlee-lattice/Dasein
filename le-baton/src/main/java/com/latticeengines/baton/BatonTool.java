@@ -69,11 +69,8 @@ public class BatonTool {
                 .addArgument("--featureFlags")
                 .required(true)
                 .help("File containing the feature flags to use for the default customer space created for this tenant");
-        createTenant.addArgument("--properties").help(
-                "File containing the properties to use for the default customer space created for this tenant");
-        createTenant
-                .addArgument("--propertiesList")
-                .help("Comma-delimited properties to use instead of the properties file.  For example --propertiesList property1:value1,property2:value2");
+        createTenant.addArgument("--properties").required(true)
+                .help("File containing the properties to use for the default customer space created for this tenant");
 
         // Don't let PLO know about this...
         Subparser loadDirectory = subparsers.addParser("loadDirectory").help("Only for development use!");
