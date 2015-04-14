@@ -1,8 +1,10 @@
 package com.latticeengines.common.exposed.rest;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -20,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 // Filter that overloads servlet requests and responses to allow the raw body to be read multiple times.
 public class BodyBufferFilter implements Filter {
@@ -84,7 +88,14 @@ public class BodyBufferFilter implements Filter {
 
         @Override
         public ServletInputStream getInputStream() throws IOException {
+            log.error("getInputStream");
             return new BufferedServletInputStream(body);
+        }
+
+        @Override
+        public BufferedReader getReader() throws IOException {
+            log.error("getReader");
+            return new BufferedReader(new InputStreamReader(getInputStream(), "UTF-8"));
         }
 
         public byte[] getBody() {
@@ -92,6 +103,8 @@ public class BodyBufferFilter implements Filter {
         }
 
         private byte[] body;
+
+        private static final Log log = LogFactory.getLog(BufferedServletRequest.class);
     }
 
     public static class BufferedServletOutputStream extends ServletOutputStream {

@@ -26,8 +26,7 @@ public class RecordDispatcher {
         // TODO: Add a caching layer for the key definitions file.
         KeyDefinitions definitions;
         try {
-            ServiceScope scope = new ServiceScope(MarketoAdapterBootstrapper.SERVICE_NAME,
-                    MarketoAdapterBootstrapper.DATA_VERSION);
+            ServiceScope scope = new ServiceScope(MarketoAdapterBootstrapper.SERVICE_NAME);
             ConfigurationController<ServiceScope> controller = ConfigurationController.construct(scope);
 
             Path path = new Path("/KeyDefinitions.json");
