@@ -82,7 +82,9 @@ app.directive('componentsConfig', function(){
             $scope.readonly = ($scope.mode !== "NEW");
             $scope.TenantUtility = TenantUtility;
             $scope.getStatusHtml = function(state) {
-                return TenantUtility.getStatusTemplate(state);
+                return TenantUtility.getStatusTemplate(
+                    TenantUtility.getStatusDisplayName(state)
+                );
             };
         }
     };

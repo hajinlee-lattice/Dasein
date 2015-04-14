@@ -68,16 +68,16 @@ app.service('TenantUtility', function(_){
         switch (status) {
             case this.getStatusDisplayName('OK'):
                 return '<i class="fa fa-check-circle text-success component-status"></i> ' +
-                    '<span class="text-success">OK</span>';
+                    '<span class="text-success">' + this.getStatusDisplayName('OK') + '</span>';
             case this.getStatusDisplayName('INITIAL'):
                 return '<i class="fa fa-exclamation-circle text-warning component-status"></i> ' +
-                    '<span class="text-warning">INITIAL</span>';
+                    '<span class="text-warning">' + this.getStatusDisplayName('INITIAL') + '</span>';
             case this.getStatusDisplayName('FAILED'):
                 return '<i class="fa fa-times-circle text-danger component-status"></i> ' +
-                    '<span class="text-danger">FAILED</span>';
+                    '<span class="text-danger">' + this.getStatusDisplayName('FAILED') + '</span>';
             case this.getStatusDisplayName('INSTALLING'):
                 return '<i class="fa fa-minus-circle text-muted component-status"></i> ' +
-                    '<span class="text-muted">INSTALLING</span>';
+                    '<span class="text-muted">' + this.getStatusDisplayName('INSTALLING') + '</span>';
             default:
                 return status;
         }
