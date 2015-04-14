@@ -49,8 +49,9 @@ public class CamilleEnvironment {
 
         CuratorFramework client = CuratorFrameworkFactory.newClient(camilleConfig.getConnectionString(), RETRY_POLICY);
         client.start();
+        boolean connected;
         try {
-            client.blockUntilConnected(CONNECTION_WAIT_TIME, CONNECTION_WAIT_TIME_UNITS);
+            connected = client.blockUntilConnected(CONNECTION_WAIT_TIME, CONNECTION_WAIT_TIME_UNITS);
         } catch (InterruptedException ie) {
             log.error(String.format(
                     "Interrupted waiting for connection to Zookeeper (connectionString=%s) to be established.",
@@ -59,11 +60,12 @@ public class CamilleEnvironment {
             throw ie;
         }
 
-        if (!client.getZookeeperClient().isConnected()) {
+        if (!connected) {
             stopNoSync();
             throw new RuntimeException(String.format(
                     "Timed out connecting to Zookeeper (connectionString=%s) after %s %s",
-                    config.getConnectionString(), CONNECTION_WAIT_TIME, CONNECTION_WAIT_TIME_UNITS));
+                    config.getConnectionString(), CONNECTION_WAIT_TIME, CONNECTION_WAIT_TIME_UNITS.toString()
+                            .toLowerCase()));
         }
 
         camille = new Camille(client);
