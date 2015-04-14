@@ -58,18 +58,21 @@ public class BatonTool {
                 "Path to camille.json.  Specify instead of explicitly specifying podId and connectionString.");
 
         Subparsers subparsers = parser.addSubparsers().dest("command");
+        subparsers.addParser("createPod").help("Creates a new Pod.");
         Subparser createTenant = subparsers.addParser("createTenant").help(
                 "Creates a new tenant. Requires contractId, tenantID, defaultSpaceId, featureFlags, and properties");
-        
+        subparsers.addParser("destroyPod").help("Only for development use!");
+
         createTenant.addArgument("--customerSpace");
-        
+
         createTenant
                 .addArgument("--featureFlags")
                 .required(true)
                 .help("File containing the feature flags to use for the default customer space created for this tenant");
-        createTenant.addArgument("--properties")
-                .help("File containing the properties to use for the default customer space created for this tenant");
-        createTenant.addArgument("--propertiesList")
+        createTenant.addArgument("--properties").help(
+                "File containing the properties to use for the default customer space created for this tenant");
+        createTenant
+                .addArgument("--propertiesList")
                 .help("Comma-delimited properties to use instead of the properties file.  For example --propertiesList property1:value1,property2:value2");
 
         // Don't let PLO know about this...
@@ -159,10 +162,10 @@ public class BatonTool {
             batonService.createTenant(contractId, tenantId, defaultSpaceId, new CustomerSpaceInfo(properties, flags));
 
         }
-        
+
         else if (namespace.get("command").equals("destroyPod")) {
-        	log.info(String.format("Sucessfully destroyed pod %s", podId));
-        	PodLifecycleManager.delete(podId);
+            log.info(String.format("Sucessfully destroyed pod %s", podId));
+            PodLifecycleManager.delete(podId);
         }
     }
 }

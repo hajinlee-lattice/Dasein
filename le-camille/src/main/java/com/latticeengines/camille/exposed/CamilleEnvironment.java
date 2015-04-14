@@ -23,7 +23,7 @@ public class CamilleEnvironment {
     // third will wait up to 4 seconds.
     private static final ExponentialBackoffRetry RETRY_POLICY = new ExponentialBackoffRetry(1000, 3);
     private static final int CONNECTION_WAIT_TIME = 1;
-    private static final TimeUnit CONNECTION_WAIT_TIME_UNITS = TimeUnit.SECONDS;
+    private static final TimeUnit CONNECTION_WAIT_TIME_UNITS = TimeUnit.MINUTES;
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
@@ -52,9 +52,18 @@ public class CamilleEnvironment {
         try {
             client.blockUntilConnected(CONNECTION_WAIT_TIME, CONNECTION_WAIT_TIME_UNITS);
         } catch (InterruptedException ie) {
-            log.error("Waiting for Curator connection was interrupted.", ie);
+            log.error(String.format(
+                    "Interrupted waiting for connection to Zookeeper (connectionString=%s) to be established.",
+                    config.getConnectionString()), ie);
             stopNoSync();
             throw ie;
+        }
+
+        if (!client.getZookeeperClient().isConnected()) {
+            stopNoSync();
+            throw new RuntimeException(String.format(
+                    "Timed out connecting to Zookeeper (connectionString=%s) after %s %s",
+                    config.getConnectionString(), CONNECTION_WAIT_TIME, CONNECTION_WAIT_TIME_UNITS));
         }
 
         camille = new Camille(client);
