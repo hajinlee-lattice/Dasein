@@ -57,7 +57,7 @@ public class SpaceLifecycleManager {
         camille.upsert(propertiesPath, properties, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         log.debug("created properties @ {}", propertiesPath);
 
-        Document flags = DocumentUtils.toRawDocument(info.featureFlags);
+        Document flags = new Document(info.featureFlags);
         Path flagsPath = spacePath.append(PathConstants.FEATURE_FLAGS_FILE);
         camille.upsert(flagsPath, flags, ZooDefs.Ids.OPEN_ACL_UNSAFE);
         log.debug("created feature flags @ {}", flagsPath);
@@ -100,7 +100,8 @@ public class SpaceLifecycleManager {
         return spaceInfo;
     }
 
-    public static List<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>> getAll(String contractId, String tenantId) throws Exception {
+    public static List<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>> getAll(String contractId, String tenantId)
+            throws Exception {
         LifecycleUtils.validateIds(contractId, tenantId);
 
         List<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, CustomerSpaceInfo>>();
@@ -111,7 +112,8 @@ public class SpaceLifecycleManager {
 
         for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
             String spaceId = childPair.getValue().getSuffix();
-            toReturn.add(new AbstractMap.SimpleEntry<String, CustomerSpaceInfo>(spaceId, getInfo(contractId, tenantId, spaceId)));
+            toReturn.add(new AbstractMap.SimpleEntry<String, CustomerSpaceInfo>(spaceId, getInfo(contractId, tenantId,
+                    spaceId)));
         }
 
         return toReturn;
@@ -121,21 +123,21 @@ public class SpaceLifecycleManager {
         List<AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>>();
 
         Camille c = CamilleEnvironment.getCamille();
-        List<AbstractMap.SimpleEntry<Document, Path>> contracts = c.getChildren(PathBuilder.buildContractsPath(CamilleEnvironment
-                .getPodId()));
+        List<AbstractMap.SimpleEntry<Document, Path>> contracts = c.getChildren(PathBuilder
+                .buildContractsPath(CamilleEnvironment.getPodId()));
         for (AbstractMap.SimpleEntry<Document, Path> contract : contracts) {
             String contractId = contract.getValue().getSuffix();
             List<AbstractMap.SimpleEntry<Document, Path>> tenants = c.getChildren(PathBuilder.buildTenantsPath(
                     CamilleEnvironment.getPodId(), contractId));
             for (AbstractMap.SimpleEntry<Document, Path> tenant : tenants) {
                 String tenantId = tenant.getValue().getSuffix();
-                List<AbstractMap.SimpleEntry<Document, Path>> spaces = c.getChildren(PathBuilder.buildCustomerSpacesPath(
-                        CamilleEnvironment.getPodId(), contractId, tenantId));
+                List<AbstractMap.SimpleEntry<Document, Path>> spaces = c.getChildren(PathBuilder
+                        .buildCustomerSpacesPath(CamilleEnvironment.getPodId(), contractId, tenantId));
 
                 for (AbstractMap.SimpleEntry<Document, Path> space : spaces) {
                     String spaceId = space.getValue().getSuffix();
-                    toReturn.add(new AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>(new CustomerSpace(contractId,
-                            tenantId, spaceId), getInfo(contractId, tenantId, spaceId)));
+                    toReturn.add(new AbstractMap.SimpleEntry<CustomerSpace, CustomerSpaceInfo>(new CustomerSpace(
+                            contractId, tenantId, spaceId), getInfo(contractId, tenantId, spaceId)));
                 }
             }
         }
