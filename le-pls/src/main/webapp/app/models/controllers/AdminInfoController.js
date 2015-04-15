@@ -2,12 +2,12 @@ angular.module('mainApp.models.controllers.AdminInfoController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.core.services.GriotWidgetService'
+    'mainApp.core.services.WidgetService'
 ])
-.controller('AdminInfoController', function ($scope, $rootScope, $http, ResourceUtility, GriotWidgetService, WidgetConfigUtility, WidgetFrameworkService) {
+.controller('AdminInfoController', function ($scope, $rootScope, $http, ResourceUtility, WidgetService, WidgetConfigUtility, WidgetFrameworkService) {
     $scope.ResourceUtility = ResourceUtility;
 
-    var widgetConfig = GriotWidgetService.GetApplicationWidgetConfig();
+    var widgetConfig = WidgetService.GetApplicationWidgetConfig();
     if (widgetConfig == null) {
         return;
     }

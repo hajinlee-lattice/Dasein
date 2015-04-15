@@ -4,11 +4,11 @@ angular.module('mainApp.userManagement.controllers.UserManagementController', [
     'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.core.services.GriotWidgetService',
+    'mainApp.core.services.WidgetService',
     'mainApp.userManagement.services.UserManagementService'
 ])
 
-.controller('UserManagementController', function ($scope, BrowserStorageUtility, ResourceUtility, RightsUtility, GriotWidgetService, WidgetConfigUtility, WidgetFrameworkService, UserManagementService) {
+.controller('UserManagementController', function ($scope, BrowserStorageUtility, ResourceUtility, RightsUtility, WidgetService, WidgetConfigUtility, WidgetFrameworkService, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.loading = true;
 
@@ -17,7 +17,7 @@ angular.module('mainApp.userManagement.controllers.UserManagementController', [
     $("#userManagementError").hide();
     $scope.errorMessage = ResourceUtility.getString("USER_MANAGEMENT_GET_USERS_ERROR");
 
-    var widgetConfig = GriotWidgetService.GetApplicationWidgetConfig();
+    var widgetConfig = WidgetService.GetApplicationWidgetConfig();
     if (widgetConfig == null) {
         return;
     }

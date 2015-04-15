@@ -1,9 +1,9 @@
-angular.module('mainApp.core.services.GriotWidgetService', [
+angular.module('mainApp.core.services.WidgetService', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.utilities.MetadataUtility'
 ])
-.service('GriotWidgetService', function ($compile, BrowserStorageUtility, WidgetConfigUtility, MetadataUtility) {
+.service('WidgetService', function ($compile, BrowserStorageUtility, WidgetConfigUtility, MetadataUtility) {
     
     this.GetApplicationWidgetConfig = function () {
         var applicationId = "PredictiveLeadScoring";

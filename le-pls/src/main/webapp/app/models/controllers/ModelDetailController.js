@@ -6,7 +6,7 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.core.services.GriotWidgetService',
+    'mainApp.core.services.WidgetService',
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.controllers.ModelDetailController',
     'mainApp.models.services.ModelService',
@@ -15,13 +15,13 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
 ])
 
 .controller('ModelDetailController', function ($scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility, WidgetConfigUtility,
-    NavUtility, WidgetFrameworkService, GriotWidgetService, ModelService, TopPredictorService, ThresholdExplorerService) {
+    NavUtility, WidgetFrameworkService, WidgetService, ModelService, TopPredictorService, ThresholdExplorerService) {
     $scope.ResourceUtility = ResourceUtility;
     
     var modelId = $scope.data.Id;
     $scope.displayName = $scope.data.DisplayName;
 
-    var widgetConfig = GriotWidgetService.GetApplicationWidgetConfig();
+    var widgetConfig = WidgetService.GetApplicationWidgetConfig();
     if (widgetConfig == null) {
         return;
     }

@@ -2,15 +2,15 @@ angular.module('mainApp.models.controllers.ModelListController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.WidgetConfigUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
-    'mainApp.core.services.GriotWidgetService',
+    'mainApp.core.services.WidgetService',
     'mainApp.appCommon.widgets.ModelListTileWidget',
     'mainApp.models.services.ModelService'
 ])
-.controller('ModelListController', function ($scope, ResourceUtility, WidgetConfigUtility, WidgetFrameworkService, GriotWidgetService, ModelService) {
+.controller('ModelListController', function ($scope, ResourceUtility, WidgetConfigUtility, WidgetFrameworkService, WidgetService, ModelService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.loading = true;
 
-    var widgetConfig = GriotWidgetService.GetApplicationWidgetConfig();
+    var widgetConfig = WidgetService.GetApplicationWidgetConfig();
     if (widgetConfig == null) {
         return;
     }
