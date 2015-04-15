@@ -5,7 +5,7 @@ var app = angular.module('mainApp.userManagement.modals.AddUserModal', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.PasswordUtility',
     'mainApp.core.utilities.RightsUtility',
-    'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.NavUtility',
     'mainApp.userManagement.services.UserManagementService'
 ]);
 
@@ -33,7 +33,7 @@ app.service('AddUserModal', function ($compile, $rootScope, $http) {
     };
 });
 
-app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, GriotNavUtility, RightsUtility, UserManagementService) {
+app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, NavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.levelsToSelect = [RightsUtility.accessLevel.EXTERNAL_USER.name, RightsUtility.accessLevel.EXTERNAL_ADMIN.name];
 
@@ -141,7 +141,7 @@ app.controller('AddUserController', function ($scope, $rootScope, _, ResourceUti
 
     $scope.refreshClick = function(){
         $("#modalContainer").modal('hide');
-        $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
+        $rootScope.$broadcast(NavUtility.USER_MANAGEMENT_NAV_EVENT);
     };
 
     $scope.yesClick = function ($event) {

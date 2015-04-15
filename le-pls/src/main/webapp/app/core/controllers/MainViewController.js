@@ -2,7 +2,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.NavUtility',
     'mainApp.core.services.HelpService',
     'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainHeaderController',
@@ -15,7 +15,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.models.controllers.ModelCreationHistoryController'
 ])
 
-.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, GriotNavUtility, HelpService, ConfigService) {
+.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, NavUtility, HelpService, ConfigService) {
     $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
     $scope.ResourceUtility = ResourceUtility;
     var directToPassword = $scope.directToPassword;
@@ -39,13 +39,13 @@ angular.module('mainApp.core.controllers.MainViewController', [
     };
     
     // Handle when the Manage Credentials link is clicked
-    $scope.$on(GriotNavUtility.MANAGE_CREDENTIALS_NAV_EVENT, function (event, data) {
+    $scope.$on(NavUtility.MANAGE_CREDENTIALS_NAV_EVENT, function (event, data) {
         createManageCredentialsView();
     });
     
     function createManageCredentialsView() {
         // Set the hash
-        window.location.hash = GriotNavUtility.MANAGE_CREDENTIALS_HASH;
+        window.location.hash = NavUtility.MANAGE_CREDENTIALS_HASH;
         
         // Fetch the view and make it Angular aware
         $http.get('./app/config/views/ManageCredentialsView.html').success(function (html) {
@@ -55,7 +55,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     }
     
     // Handle when the Update Password link is clicked
-    $scope.$on(GriotNavUtility.UPDATE_PASSWORD_NAV_EVENT, function (event, data) {
+    $scope.$on(NavUtility.UPDATE_PASSWORD_NAV_EVENT, function (event, data) {
         if (data != null && data.Success) {
             createUpdatePasswordSuccessView();
         } else {
@@ -65,7 +65,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     
     function createUpdatePasswordView() {
         // Set the hash
-        window.location.hash = GriotNavUtility.UPDATE_PASSWORD_HASH;
+        window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
         
         // Fetch the view and make it Angular aware
         $http.get('./app/login/views/UpdatePasswordView.html').success(function (html) {
@@ -76,7 +76,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
 
     function createUpdatePasswordSuccessView() {
         // Set the hash
-        window.location.hash = GriotNavUtility.UPDATE_PASSWORD_HASH;
+        window.location.hash = NavUtility.UPDATE_PASSWORD_HASH;
         $http.get('./app/login/views/UpdatePasswordSuccessView.html').success(function (html) {
             var scope = $rootScope.$new();
             $compile($("#mainContentView").html(html))(scope);
@@ -84,13 +84,13 @@ angular.module('mainApp.core.controllers.MainViewController', [
     }
 
     // Handle when the User Management link is clicked
-    $scope.$on(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT, function (event, data) {
+    $scope.$on(NavUtility.USER_MANAGEMENT_NAV_EVENT, function (event, data) {
         createUserManagementView();
     });
     
     function createUserManagementView() {
         // Set the hash
-        window.location.hash = GriotNavUtility.USER_MANAGEMENT_HASH;
+        window.location.hash = NavUtility.USER_MANAGEMENT_HASH;
         
         // Fetch the view and make it Angular aware
         $http.get('./app/userManagement/views/UserManagementView.html').success(function (html) {
@@ -100,13 +100,13 @@ angular.module('mainApp.core.controllers.MainViewController', [
     }
 
     // Handle when the User Management link is clicked
-    $scope.$on(GriotNavUtility.ADMIN_INFO_NAV_EVENT, function (event, data) {
+    $scope.$on(NavUtility.ADMIN_INFO_NAV_EVENT, function (event, data) {
         createAdminInfoView(data);
     });
 
     function createAdminInfoView(data) {
         // Set the hash
-        window.location.hash = GriotNavUtility.ADMIN_INFO_HASH;
+        window.location.hash = NavUtility.ADMIN_INFO_HASH;
 
         // Fetch the view and make it Angular aware
         $http.get('./app/models/views/AdminInfoView.html').success(function (html) {
@@ -116,12 +116,12 @@ angular.module('mainApp.core.controllers.MainViewController', [
         });
     }
     
-    $scope.$on(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT, function (event, data) {
+    $scope.$on(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT, function (event, data) {
         modelCreationHistoryView();
     });
     
     function modelCreationHistoryView() {
-        window.location.hash = GriotNavUtility.MODEL_CREATION_HISTORY_HASH;
+        window.location.hash = NavUtility.MODEL_CREATION_HISTORY_HASH;
         
         $http.get('./app/models/views/ModelCreationHistoryView.html').success(function (html) {
             var scope = $rootScope.$new();
@@ -130,13 +130,13 @@ angular.module('mainApp.core.controllers.MainViewController', [
     }
     
     // Handle when the Model List link is clicked
-    $scope.$on(GriotNavUtility.MODEL_LIST_NAV_EVENT, function (event, data) {
+    $scope.$on(NavUtility.MODEL_LIST_NAV_EVENT, function (event, data) {
         createModelListView();
     });
     
     function createModelListView() {
         // Set the hash
-        window.location.hash = GriotNavUtility.MODEL_LIST_HASH;
+        window.location.hash = NavUtility.MODEL_LIST_HASH;
         
         // Fetch the view and make it Angular aware
         $http.get('./app/models/views/ModelListView.html').success(function (html) {
@@ -146,13 +146,13 @@ angular.module('mainApp.core.controllers.MainViewController', [
     }
     
     // Handle when the Model List link is clicked
-    $scope.$on(GriotNavUtility.MODEL_DETAIL_NAV_EVENT, function (event, data) {
+    $scope.$on(NavUtility.MODEL_DETAIL_NAV_EVENT, function (event, data) {
         createModelDetailView(data);
     });
     
     function createModelDetailView(data) {
         // Set the hash
-        window.location.hash = GriotNavUtility.MODEL_DETAIL_HASH;
+        window.location.hash = NavUtility.MODEL_DETAIL_HASH;
         
         // Fetch the view and make it Angular aware
         $http.get('./app/models/views/ModelDetailView.html').success(function (html) {

@@ -3,7 +3,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.appCommon.utilities.TrackingConstantsUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
-    'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.appCommon.services.WidgetFrameworkService',
@@ -11,7 +11,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
     'mainApp.models.modals.DeleteModelModal'
 ])
 .controller('ModelListTileWidgetController', function ($scope, $rootScope, $element, ResourceUtility, BrowserStorageUtility, RightsUtility, DateTimeFormatUtility,
-    EvergageUtility, TrackingConstantsUtility, GriotNavUtility, WidgetFrameworkService, DeleteModelModal) {
+    EvergageUtility, TrackingConstantsUtility, NavUtility, WidgetFrameworkService, DeleteModelModal) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.nameStatus = {
         editing: false
@@ -60,12 +60,12 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
         if (targetElement.hasClass("fa-trash-o") || targetElement.hasClass("delete-model")) {
             DeleteModelModal.show($scope.data.Id);
         } else if (!$scope.nameStatus.editing) {
-            $rootScope.$broadcast(GriotNavUtility.MODEL_DETAIL_NAV_EVENT, data);
+            $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);
         }
     };
     
 })
-.controller('ChangeModelNameController', function ($scope, $rootScope, GriotNavUtility, ResourceUtility, ModelService) {
+.controller('ChangeModelNameController', function ($scope, $rootScope, NavUtility, ResourceUtility, ModelService) {
     $scope.data = {name: $scope.$parent.displayName};
     $scope.submitting = false;
     $scope.showNameEditError = false;
@@ -97,7 +97,7 @@ angular.module('mainApp.appCommon.widgets.ModelListTileWidget', [
 
         ModelService.ChangeModelName($scope.$parent.data.Id, $scope.data.name).then(function(result) {
             if (result.Success) {
-                $rootScope.$broadcast(GriotNavUtility.MODEL_LIST_NAV_EVENT, {});
+                $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT, {});
             } else {
                 $scope.nameEditErrorMessage = result.ResultErrors;
                 $scope.showNameEditError = true;

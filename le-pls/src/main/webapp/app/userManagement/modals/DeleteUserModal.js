@@ -5,7 +5,7 @@ var app = angular.module('mainApp.userManagement.modals.DeleteUserModal', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.PasswordUtility',
     'mainApp.core.utilities.RightsUtility',
-    'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.NavUtility',
     'mainApp.userManagement.services.UserManagementService'
 ]);
 
@@ -35,7 +35,7 @@ app.service('DeleteUserModal', function ($compile, $rootScope, $http) {
 
 app.controller('DeleteUserController', function ($scope, $rootScope, _, ResourceUtility,
                                                  BrowserStorageUtility, StringUtility, PasswordUtility,
-                                                 GriotNavUtility, RightsUtility, UserManagementService) {
+                                                 NavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
 
     $scope.deleteInProgress = false;
@@ -52,7 +52,7 @@ app.controller('DeleteUserController', function ($scope, $rootScope, _, Resource
         UserManagementService.DeleteUser($scope.user).then(function(result){
             if(result.Success) {
                 $("#modalContainer").modal('hide');
-                $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
+                $rootScope.$broadcast(NavUtility.USER_MANAGEMENT_NAV_EVENT);
             } else {
                 //TODO:song handle error
                 alert(result.Errors[0]);

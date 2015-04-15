@@ -1,13 +1,13 @@
 var app = angular.module('mainApp.appCommon.widgets.ModelListCreationHistoryWidget', [
     'mainApp.models.services.ModelService',
     'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.models.modals.ImportModelModal'
 ]);
 
 app.controller('ModelListCreationHistoryWidgetController', function ($scope, $rootScope, ModelService, ResourceUtility,
-                                                                     RightsUtility, GriotNavUtility, ImportModelModal) {
+                                                                     RightsUtility, NavUtility, ImportModelModal) {
     
     $scope.ResourceUtility = ResourceUtility;
     $scope.models = $scope.data;
@@ -20,10 +20,10 @@ app.controller('ModelListCreationHistoryWidgetController', function ($scope, $ro
 
         ModelService.undoDeletedModel(modelId).then(function(result){
             if (result.Success) {
-                $rootScope.$broadcast(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
+                $rootScope.$broadcast(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
             } else {
                 //TODO:song handle errors
-                $rootScope.$broadcast(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
+                $rootScope.$broadcast(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
             }
         });
     };

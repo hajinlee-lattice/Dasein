@@ -42,5 +42,6 @@ app.service('RightsUtility', function (_, BrowserStorageUtility) {
     this.maySeeModelCreationHistory = function() { return this.currentUserMay("View", "Reporting"); };
 
     this.maySeeSystemSetup = function() { return this.currentUserMay("Edit", "Configuration"); };
+    this.mayEditMultipleModelSetup = function() { return this.currentUserMay("Edit", "Configuration"); };
 
 });

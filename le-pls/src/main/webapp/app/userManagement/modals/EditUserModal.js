@@ -5,7 +5,7 @@ var app = angular.module('mainApp.userManagement.modals.EditUserModal', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.PasswordUtility',
     'mainApp.core.utilities.RightsUtility',
-    'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.NavUtility',
     'mainApp.userManagement.services.UserManagementService'
 ]);
 
@@ -34,7 +34,7 @@ app.service('EditUserModal', function ($compile, $rootScope, $http) {
 });
 
 
-app.controller('EditUserController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, GriotNavUtility, RightsUtility, UserManagementService) {
+app.controller('EditUserController', function ($scope, $rootScope, _, ResourceUtility, BrowserStorageUtility, StringUtility, PasswordUtility, NavUtility, RightsUtility, UserManagementService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.user = $scope.$parent.user;
     

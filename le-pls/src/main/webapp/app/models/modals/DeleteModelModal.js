@@ -2,7 +2,7 @@ angular.module('mainApp.models.modals.DeleteModelModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.models.services.ModelService',
-    'mainApp.core.utilities.GriotNavUtility'
+    'mainApp.core.utilities.NavUtility'
 ])
 .service('DeleteModelModal', function ($compile, $rootScope, $http, ResourceUtility, ModelService) {
     var self = this;
@@ -29,7 +29,7 @@ angular.module('mainApp.models.modals.DeleteModelModal', [
         });
     };
 })
-.controller('DeleteModelController', function ($scope, $rootScope, ResourceUtility, GriotNavUtility, ModelService) {
+.controller('DeleteModelController', function ($scope, $rootScope, ResourceUtility, NavUtility, ModelService) {
     $scope.ResourceUtility = ResourceUtility;
     
     $scope.deleteModelClick = function ($event) {
@@ -45,7 +45,7 @@ angular.module('mainApp.models.modals.DeleteModelModal', [
         ModelService.updateAsDeletedModel(modelId).then(function(result) {
             if (result != null && result.success === true) {
                 $("#modalContainer").modal('hide');
-                $rootScope.$broadcast(GriotNavUtility.MODEL_LIST_NAV_EVENT);                                  
+                $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT);                                  
             } else {
                 $scope.deleteModelErrorMessage = result.ResultErrors;
                 $("#deleteModelError").fadeIn();

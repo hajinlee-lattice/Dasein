@@ -1,10 +1,10 @@
 angular.module('mainApp.config.controllers.ManageCredentialsController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.core.utilities.GriotNavUtility'
+    'mainApp.core.utilities.NavUtility'
 ])
 
-.controller('ManageCredentialsController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, GriotNavUtility) {
+.controller('ManageCredentialsController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility) {
     $scope.ResourceUtility = ResourceUtility;
     
     $scope.crmCredentialsCompleteClass = "";
@@ -26,7 +26,7 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     
     function checkIfSystemCredentialsComplete () {
         if (configDoc != null && configDoc.CrmApiCredentials != null && configDoc.MapApiCredentials != null) {
-            $rootScope.$broadcast(GriotNavUtility.SYSTEM_CONFIGURED_COMPLETE_EVENT);
+            $rootScope.$broadcast(NavUtility.SYSTEM_CONFIGURED_COMPLETE_EVENT);
         }
     }
     

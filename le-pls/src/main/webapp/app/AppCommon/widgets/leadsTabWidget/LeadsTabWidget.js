@@ -3,9 +3,9 @@ angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
     'mainApp.core.utilities.RightsUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.core.utilities.GriotNavUtility'
+    'mainApp.core.utilities.NavUtility'
 ])
-.controller('LeadsTabWidgetController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, RightsUtility, GriotNavUtility) {
+.controller('LeadsTabWidgetController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, RightsUtility, NavUtility) {
     $scope.ResourceUtility = ResourceUtility;
 
     var clientSession = BrowserStorageUtility.getClientSession();
@@ -13,7 +13,7 @@ angular.module('mainApp.appCommon.widgets.LeadsTabWidget', [
     $scope.data.TenantId = clientSession.Tenant.Identifier;
 
     $scope.adminLinkClick = function() {
-       $rootScope.$broadcast(GriotNavUtility.ADMIN_INFO_NAV_EVENT, $scope.data);
+       $rootScope.$broadcast(NavUtility.ADMIN_INFO_NAV_EVENT, $scope.data);
     };
 
 })

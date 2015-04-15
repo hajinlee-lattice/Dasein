@@ -1,5 +1,5 @@
-angular.module('mainApp.core.utilities.GriotNavUtility', [])
-.service('GriotNavUtility', function () {
+angular.module('mainApp.core.utilities.NavUtility', [])
+.service('NavUtility', function () {
     
     // Hash Constants
     this.MANAGE_CREDENTIALS_HASH = "/ManageCredentials";

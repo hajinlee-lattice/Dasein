@@ -1,11 +1,11 @@
 angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.DateTimeFormatUtility',
-    'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.NavUtility',
     'mainApp.appCommon.utilities.StringUtility'
 ])
 
-.controller('ModelDetailsWidgetController', function ($scope, $rootScope, ResourceUtility, DateTimeFormatUtility, GriotNavUtility, StringUtility) {
+.controller('ModelDetailsWidgetController', function ($scope, $rootScope, ResourceUtility, DateTimeFormatUtility, NavUtility, StringUtility) {
     $scope.ResourceUtility = ResourceUtility;
     
     var widgetConfig = $scope.widgetConfig;
@@ -66,7 +66,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             $event.preventDefault();
         }
         
-        $rootScope.$broadcast(GriotNavUtility.MODEL_LIST_NAV_EVENT);
+        $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT);
     };
     
     $scope.showMoreClicked = function ($event) {

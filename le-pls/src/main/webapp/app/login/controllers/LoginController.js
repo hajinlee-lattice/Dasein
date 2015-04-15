@@ -5,7 +5,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.NavUtility',
     'mainApp.login.services.LoginService',
     'mainApp.core.services.HelpService',
     'mainApp.login.modals.TenantSelectionModal',
@@ -13,7 +13,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainViewController'
 ])
-.controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, GriotNavUtility, ServiceErrorUtility, EvergageUtility,
+.controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, NavUtility, ServiceErrorUtility, EvergageUtility,
     BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, ConfigService, TenantSelectionModal) {
     
     $("body").addClass("login-body");

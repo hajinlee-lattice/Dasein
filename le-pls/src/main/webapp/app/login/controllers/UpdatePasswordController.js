@@ -2,12 +2,12 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.NavUtility',
     'mainApp.core.utilities.PasswordUtility',
     'mainApp.login.services.LoginService'
 ])
 
-.controller('UpdatePasswordController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, PasswordUtility, StringUtility, GriotNavUtility, LoginService) {
+.controller('UpdatePasswordController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, PasswordUtility, StringUtility, NavUtility, LoginService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.oldPassword = null;
     $scope.newPassword = null;
@@ -61,7 +61,7 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
             $event.preventDefault();
         }
         
-        $rootScope.$broadcast(GriotNavUtility.MODEL_LIST_NAV_EVENT);
+        $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT);
     };
     
     $scope.closeErrorClick = function ($event) {
@@ -84,7 +84,7 @@ angular.module('mainApp.login.controllers.UpdatePasswordController', [
                 $scope.saveInProgess = false;
                 if (result.Success) {
                     $("#changePasswordSuccessAlert").fadeIn();
-                    $rootScope.$broadcast(GriotNavUtility.UPDATE_PASSWORD_NAV_EVENT, {Success: true});
+                    $rootScope.$broadcast(NavUtility.UPDATE_PASSWORD_NAV_EVENT, {Success: true});
                 } else {
                     if (result.Status == 401) {
                         $scope.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_BAD_CREDS");

@@ -2,11 +2,11 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.RightsUtility',
-    'mainApp.core.utilities.GriotNavUtility',
+    'mainApp.core.utilities.NavUtility',
     'mainApp.login.services.LoginService'
 ])
 
-.controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, RightsUtility, GriotNavUtility, LoginService) {
+.controller('MainHeaderController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, RightsUtility, NavUtility, LoginService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.showUserManagement = false;
 
@@ -19,6 +19,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
     $scope.showUserManagement = RightsUtility.maySeeUserManagement();
     $scope.showSystemSetup =  RightsUtility.maySeeSystemSetup();
     $scope.showModelCreationHistory = RightsUtility.maySeeModelCreationHistory();
+    $scope.showMultipleModelSetup = RightsUtility.mayEditMultipleModelSetup();
     
     $scope.dropdownClicked = function ($event) {
         if ($event != null) {
@@ -31,7 +32,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $event.preventDefault();
         }
         
-        $rootScope.$broadcast(GriotNavUtility.MODEL_LIST_NAV_EVENT);
+        $rootScope.$broadcast(NavUtility.MODEL_LIST_NAV_EVENT);
     };
     
     $scope.userManagementClicked = function ($event) {
@@ -39,7 +40,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $event.preventDefault();
         }
         
-        $rootScope.$broadcast(GriotNavUtility.USER_MANAGEMENT_NAV_EVENT);
+        $rootScope.$broadcast(NavUtility.USER_MANAGEMENT_NAV_EVENT);
     };
 
     $scope.systemSetupClicked = function ($event) {
@@ -47,14 +48,14 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $event.preventDefault();
         }
         //TODO:song to be finished
-        //$rootScope.$broadcast(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
+        //$rootScope.$broadcast(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
     };
 
     $scope.showModelCreationHistory = function ($event) {
         if ($event != null) {
             $event.preventDefault();
         }
-        $rootScope.$broadcast(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
+        $rootScope.$broadcast(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
     };
     
     $scope.updatePasswordClicked = function ($event) {
@@ -62,7 +63,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $event.preventDefault();
         }
         
-        $rootScope.$broadcast(GriotNavUtility.UPDATE_PASSWORD_NAV_EVENT);
+        $rootScope.$broadcast(NavUtility.UPDATE_PASSWORD_NAV_EVENT);
     };
     
     $scope.manageCredentialsClicked = function ($event) {
@@ -70,7 +71,15 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $event.preventDefault();
         }
         
-        $rootScope.$broadcast(GriotNavUtility.MANAGE_CREDENTIALS_NAV_EVENT);
+        $rootScope.$broadcast(NavUtility.MANAGE_CREDENTIALS_NAV_EVENT);
+    };
+    
+    $scope.multipleModelSetupClicked = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        
+        $rootScope.$broadcast(NavUtility.MANAGE_CREDENTIALS_NAV_EVENT);
     };
     
     $scope.logoutClicked = function ($event) {

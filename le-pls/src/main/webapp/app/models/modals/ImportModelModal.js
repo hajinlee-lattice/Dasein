@@ -2,7 +2,7 @@ angular.module('mainApp.models.modals.ImportModelModal', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
     'mainApp.models.services.ModelService',
-    'mainApp.core.utilities.GriotNavUtility'
+    'mainApp.core.utilities.NavUtility'
 ])
 .directive('jsonUploader', ['$parse', function ($parse) {
     return {
@@ -57,7 +57,7 @@ angular.module('mainApp.models.modals.ImportModelModal', [
     };
 
 }])
-.service('ImportModelModal', function ($compile, $rootScope, $http, GriotNavUtility) {
+.service('ImportModelModal', function ($compile, $rootScope, $http, NavUtility) {
     this.show = function () {
         $http.get('./app/models/views/ImportModelModalView.html').success(function (html) {
 
@@ -75,11 +75,11 @@ angular.module('mainApp.models.modals.ImportModelModal', [
             // Remove the created HTML from the DOM
             modalElement.on('hidden.bs.modal', function (evt) {
                 modalElement.empty();
-                $rootScope.$broadcast(GriotNavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
+                $rootScope.$broadcast(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
             });
         });
     };
 })
-.controller('ImportModelModalController', function ($scope, $rootScope, ResourceUtility, GriotNavUtility, ModelService) {
+.controller('ImportModelModalController', function ($scope, $rootScope, ResourceUtility, NavUtility, ModelService) {
     $scope.ResourceUtility = ResourceUtility;
 });
