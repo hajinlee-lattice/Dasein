@@ -22,6 +22,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
+import com.latticeengines.dataplatform.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -30,6 +31,7 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringJob;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
 @Component("scoringStepYarnProcessor")
@@ -61,6 +63,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
+    
+    @Autowired
+    private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
     private static final String JSON_SUFFIX = ".json";
 
@@ -87,9 +92,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         case LOAD_DATA:
             appId = load(deploymentExternalId, scoringCommand);
             break;
-//        case SCORE_DATA:
-//            appId = score(deploymentExternalId, scoringCommand);
-//            break;
+        case SCORE_DATA:
+            appId = score(deploymentExternalId, scoringCommand);
+            break;
 //        case EXPORT_DATA:
 //             appId = export(deploymentExternalId, scoringCommand);
 //            break;
@@ -115,6 +120,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     private ApplicationId score(String customer, ScoringCommand scoringCommand) {
         String table = scoringCommand.getTableName();
         Properties properties = new Properties();
+        properties.setProperty(MapReduceProperty.CUSTOMER.name(), customer);
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getMRQueueNameForSubmission());
 
         properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + customer + "/scoring/data/" + table);
@@ -142,6 +148,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         }
 
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelFilePaths));
+        mapReduceCustomizationRegistry.register(new EventDataScoringJob(yarnConfiguration));
         ApplicationId appId = modelingJobService.submitMRJob("scoringJob", properties);
 
         return appId;
