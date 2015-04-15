@@ -46,7 +46,7 @@ angular.module('mainApp.appCommon.utilities.EvergageUtility', [])
     // Determine if instance is Production, DEP or Development
     this.GetEnvironment = function (hostName) {
         var toReturn = "development";
-        if (hostName != null && hostName.toLowerCase().indexOf("clients") != -1) {
+        if (hostName != null && hostName.toLowerCase().indexOf("clients") !== -1 || hostName != null && hostName.toLowerCase().indexOf("pls") !== -1) {
             toReturn = "production";
         } else if (hostName != null && hostName.toLowerCase().indexOf("dep") != -1) {
             toReturn = "deployment";
