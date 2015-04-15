@@ -306,6 +306,7 @@ module.exports = function (grunt) {
                         '<%= pls.app %>/app/config/controllers/ManageCredentialsController.js',
                         '<%= pls.app %>/app/userManagement/controllers/UserManagementController.js',
                         '<%= pls.app %>/app/models/controllers/ModelCreationHistoryController.js',
+                        '<%= pls.app %>/app/models/controllers/MultipleModelSetupController.js',
                         '<%= pls.app %>/app/models/controllers/ModelListController.js',
                         '<%= pls.app %>/app/models/controllers/ModelDetailController.js',
                         '<%= pls.app %>/app/models/controllers/AdminInfoController.js',

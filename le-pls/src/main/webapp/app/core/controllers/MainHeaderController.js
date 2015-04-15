@@ -79,7 +79,7 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
             $event.preventDefault();
         }
         
-        $rootScope.$broadcast(NavUtility.MANAGE_CREDENTIALS_NAV_EVENT);
+        $rootScope.$broadcast(NavUtility.MULTIPLE_MODEL_SETUP);
     };
     
     $scope.logoutClicked = function ($event) {
