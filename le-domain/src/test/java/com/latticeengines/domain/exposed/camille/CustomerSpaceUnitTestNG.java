@@ -12,4 +12,13 @@ public class CustomerSpaceUnitTestNG {
         Assert.assertEquals(space.getTenantId(), "Foo");
         Assert.assertEquals(CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, space.getSpaceId());
     }
+
+    @Test(groups = "unit")
+    public void testBackwardsCompatibleIdentifier() {
+        CustomerSpace space = CustomerSpace.parse("Foo");
+        Assert.assertEquals(space.getBackwardsCompatibleIdentifier(), "Foo");
+
+        space = CustomerSpace.parse("Foo.Bar.Baz");
+        Assert.assertEquals(space.getBackwardsCompatibleIdentifier(), "Foo.Bar.Baz");
+    }
 }

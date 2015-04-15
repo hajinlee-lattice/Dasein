@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.camille;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class CustomerSpace {
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
@@ -16,7 +18,7 @@ public class CustomerSpace {
     // Serialization constructor.
     public CustomerSpace() {
     }
-    
+
     public CustomerSpace(String contractId, String tenantId, String spaceId) {
         this.contractId = contractId;
         this.tenantId = tenantId;
@@ -53,6 +55,18 @@ public class CustomerSpace {
         }
 
         return new CustomerSpace(parts[0], parts[1], parts[2]);
+    }
+
+    /**
+     * @return the 1-part identifier of this customer space, if possible.
+     *         Otherwise, returns a 3-part identifier.
+     */
+    @JsonIgnore
+    public String getBackwardsCompatibleIdentifier() {
+        if (getSpaceId().equals(BACKWARDS_COMPATIBLE_SPACE_ID) && getContractId().equals(getTenantId())) {
+            return getContractId();
+        }
+        return toString();
     }
 
     @Override
