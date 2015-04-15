@@ -26,7 +26,7 @@ app.service('RightsUtility', function (_, BrowserStorageUtility) {
 
     this.currentUserMay = function(operation, category) {
         var clientSession = BrowserStorageUtility.getClientSession();
-        return this.may(clientSession.availableRights, operation, category);
+        return this.may(clientSession.AvailableRights, operation, category);
     };
 
     this.mayChangeModelNames = function() { return this.currentUserMay("Edit", "Models"); };
