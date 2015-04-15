@@ -126,7 +126,7 @@ angular.module('le.common.util.BrowserStorageUtility', ['LocalStorageModule'])
                     var fromStorage = localStorageService.get(this[propStorageKeyName]);
                     this[propStorageObjName] = fromStorage || null;
                 }
-                return this[propStorageObjName];
+                return localStorageService.get(this[propStorageKeyName]);
             } else {
                 return null;
             }

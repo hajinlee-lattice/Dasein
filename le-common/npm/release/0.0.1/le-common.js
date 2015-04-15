@@ -131,7 +131,7 @@ angular.module('le.common.util.BrowserStorageUtility', ['LocalStorageModule'])
                     var fromStorage = localStorageService.get(this[propStorageKeyName]);
                     this[propStorageObjName] = fromStorage || null;
                 }
-                return this[propStorageObjName];
+                return localStorageService.get(this[propStorageKeyName]);
             } else {
                 return null;
             }
@@ -161,12 +161,12 @@ angular.module('le.common.util.BrowserStorageUtility', ['LocalStorageModule'])
 angular.module('le.common.util.SessionUtility', [
     'le.common.util.BrowserStorageUtility'
 ])
-.service('SessionUtility', function (BrowserStorageUtility) {
+.service('SessionUtility', function (BrowserStorageUtility, $window) {
 
     this.ClearSession = function () {
         BrowserStorageUtility.clear(false);
         //ResourceUtility.clearResourceStrings();
-        window.location.reload();
+        $window.location.href = '/';
     };
 
     this.HandleResponseErrors = function (data, status) {

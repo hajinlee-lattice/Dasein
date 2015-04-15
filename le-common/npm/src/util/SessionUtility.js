@@ -1,12 +1,12 @@
 angular.module('le.common.util.SessionUtility', [
     'le.common.util.BrowserStorageUtility'
 ])
-.service('SessionUtility', function (BrowserStorageUtility) {
+.service('SessionUtility', function (BrowserStorageUtility, $window) {
 
     this.ClearSession = function () {
         BrowserStorageUtility.clear(false);
         //ResourceUtility.clearResourceStrings();
-        window.location.reload();
+        $window.location.href = '/';
     };
 
     this.HandleResponseErrors = function (data, status) {
