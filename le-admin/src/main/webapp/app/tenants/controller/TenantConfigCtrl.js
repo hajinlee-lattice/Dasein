@@ -18,8 +18,6 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     $scope.space = $stateParams.space || "production";
     $scope.product = $stateParams.product;
 
-    console.log($stateParams, $scope.readonly, $scope.listenState);
-
     $scope.loading = true;
     $scope.services = ["PLS", "VDB"];
 
