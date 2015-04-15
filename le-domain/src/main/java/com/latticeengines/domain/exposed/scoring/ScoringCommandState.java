@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.dataplatform.jpa.AbstractTimestampEntity;
 

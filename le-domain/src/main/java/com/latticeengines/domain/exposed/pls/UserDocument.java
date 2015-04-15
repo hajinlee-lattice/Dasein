@@ -155,10 +155,12 @@ public class UserDocument {
                 this.accessLevel = accessLevel;
             }
 
+            @JsonProperty("AvailableRights")
             public Map<String, EntityAccessRightsData> getAvailableRights() {
                 return availableRights;
             }
 
+            @JsonProperty("AvailableRights")
             public void setAvailableRights(Map<String, EntityAccessRightsData> availableRights) {
                 this.availableRights = availableRights;
             }

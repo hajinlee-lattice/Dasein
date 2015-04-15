@@ -38,7 +38,6 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     private static final Log log = LogFactory.getLog(SecurityFunctionalTestNGBase.class);
 
-    protected static boolean usersInitialized = false;
     protected static final String adminUsername = "bnguyen@lattice-engines.com";
     protected static final String adminPassword = "tahoe";
     protected static final String adminPasswordHash = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
