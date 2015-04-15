@@ -10,6 +10,8 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 
+import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
+
 public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 
     private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
@@ -24,5 +26,6 @@ public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable
         while (context.nextKeyValue()) {
             log.info("key: " + context.getCurrentKey().datum());
         }
+        log.info("outputDir: " + context.getConfiguration().get(MapReduceProperty.OUTPUT.name()));
     }
 }

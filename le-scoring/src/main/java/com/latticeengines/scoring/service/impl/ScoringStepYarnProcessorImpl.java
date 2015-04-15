@@ -118,6 +118,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getMRQueueNameForSubmission());
 
         properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + customer + "/scoring/data/" + table);
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + customer + "/scoring/scores/" + table);
         String customerModelPath = customerBaseDir + "/" + customer + "/models";
 
         List<String> modelFilePaths = Collections.emptyList();

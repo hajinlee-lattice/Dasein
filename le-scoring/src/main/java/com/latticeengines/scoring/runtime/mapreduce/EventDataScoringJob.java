@@ -69,9 +69,11 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             Path path = new Path(filename);
             Schema schema = AvroUtils.getSchema(config, path);
             AvroJob.setInputKeySchema(mrJob, schema);
+            
+            String outputDir = properties.getProperty(MapReduceProperty.OUTPUT.name());
+            config.set(MapReduceProperty.OUTPUT.name(), outputDir);
             mrJob.setInputFormatClass(AvroKeyInputFormat.class);
             mrJob.setOutputFormatClass(NullOutputFormat.class);
-
             mrJob.setMapperClass(EventDataScoringMapper.class);
             mrJob.setNumReduceTasks(0);
             if(properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()) != null){
@@ -105,8 +107,9 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.INPUT.name(), args[0]);
-        properties.setProperty(MapReduceProperty.QUEUE.name(), args[1]);
-        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), args[2]);
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), args[1]);
+        properties.setProperty(MapReduceProperty.QUEUE.name(), args[2]);
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), args[3]);
 
         customize(job, properties);
         if (job.waitForCompletion(true)) {
