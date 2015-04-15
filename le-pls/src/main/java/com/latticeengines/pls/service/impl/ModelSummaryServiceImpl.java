@@ -1,16 +1,17 @@
 package com.latticeengines.pls.service.impl;
 
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.service.ModelSummaryService;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.service.ModelSummaryService;
 
 @DisallowConcurrentExecution
 @Component("modelSummaryService")

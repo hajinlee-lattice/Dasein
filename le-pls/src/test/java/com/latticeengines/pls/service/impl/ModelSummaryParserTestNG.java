@@ -1,13 +1,14 @@
 package com.latticeengines.pls.service.impl;
 
-import com.latticeengines.common.exposed.util.CompressionUtils;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import org.apache.commons.io.IOUtils;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 import java.io.InputStream;
 
-import static org.testng.Assert.assertEquals;
+import org.apache.commons.io.IOUtils;
+import org.testng.annotations.Test;
+
+import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 
 public class ModelSummaryParserTestNG {
     

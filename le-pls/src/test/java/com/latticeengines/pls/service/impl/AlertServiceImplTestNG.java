@@ -10,7 +10,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-import com.latticeengines.pls.service.impl.AlertServiceImpl;
 
 
 public class AlertServiceImplTestNG extends PlsFunctionalTestNGBase {
