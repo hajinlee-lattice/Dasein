@@ -6,5 +6,7 @@ public enum MapReduceProperty {
     JOB_TYPE, //
     INPUT, //
     OUTPUT, //
-    QUEUE;
+    QUEUE, //
+    CACHE_FILE_PATH, //
+    CACHE_ARCHIVE_PATH;
 }

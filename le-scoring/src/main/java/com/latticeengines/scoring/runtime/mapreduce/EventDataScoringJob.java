@@ -1,25 +1,22 @@
 package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
-import org.apache.avro.mapred.AvroKey;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
-import org.apache.avro.mapreduce.AvroKeyOutputFormat;
-import org.apache.avro.mapreduce.AvroMultipleOutputs;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -34,6 +31,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class EventDataScoringJob extends Configured implements Tool, MRJobCustomization{
 
     private static final String SCORING_JOB_TYPE = "scoringJob";
+
+    private static String comma = ",";
 
     public EventDataScoringJob(Configuration config) {
         setConf(config);
@@ -50,11 +49,10 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             Configuration config = mrJob.getConfiguration();
             String queueName = properties.getProperty(MapReduceProperty.QUEUE.name());
             config.set("mapreduce.job.queuename", queueName);
+
             String inputDir = properties.getProperty(MapReduceProperty.INPUT.name());
             AvroKeyInputFormat.setInputPathFilter(mrJob, IgnoreDirectoriesAndSupportOnlyAvroFilesFilter.class);
             AvroKeyInputFormat.addInputPath(mrJob, new Path(inputDir));
-            AvroKeyOutputFormat.setOutputPath(mrJob,
-                    new Path(properties.getProperty(MapReduceProperty.OUTPUT.name())));
 
             List<String> files = HdfsUtils.getFilesForDir(mrJob.getConfiguration(), inputDir, new HdfsFilenameFilter() {
 
@@ -70,21 +68,30 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             }
             Path path = new Path(filename);
             Schema schema = AvroUtils.getSchema(config, path);
-
             AvroJob.setInputKeySchema(mrJob, schema);
-            AvroJob.setOutputKeySchema(mrJob, schema);
-//          AvroKeyOutputFormat.setCompressOutput(mrJob,
-//                    Boolean.valueOf(properties.getProperty(EventDataSamplingProperty.COMPRESS_SAMPLE.name(), "true")));
-
-            AvroMultipleOutputs.addNamedOutput(mrJob, "somename", AvroKeyOutputFormat.class, schema);
-
             mrJob.setInputFormatClass(AvroKeyInputFormat.class);
-            mrJob.setMapOutputKeyClass(Text.class);
-            mrJob.setMapOutputValueClass(Text.class);
+            mrJob.setOutputFormatClass(NullOutputFormat.class);
+
             mrJob.setMapperClass(EventDataScoringMapper.class);
-            mrJob.setReducerClass(EventDataScoringReducer.class);
-            mrJob.setOutputKeyClass(AvroKey.class);
-            mrJob.setOutputValueClass(NullWritable.class);
+            mrJob.setNumReduceTasks(0);
+            if(properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()) != null){
+                String[] cachePaths = properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()).split(comma);
+                URI[] cacheFiles = new URI[cachePaths.length];
+                for(int i = 0; i < cacheFiles.length; i++){
+                    cacheFiles[i] = new URI(cachePaths[0]);
+                }
+                mrJob.setCacheFiles(cacheFiles);
+            }
+
+            if(properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name())!= null){
+                String[] cacheArchivePaths = properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()).split(comma);
+                URI[] cacheArchives = new URI[cacheArchivePaths.length];
+                for(int i = 0; i < cacheArchives.length; i++){
+                    cacheArchives[i] = new URI(cacheArchivePaths[0]);
+                }
+                mrJob.setCacheArchives(cacheArchives);
+            }
+
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
@@ -98,8 +105,8 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
         Properties properties = new Properties();
         properties.setProperty(MapReduceProperty.INPUT.name(), args[0]);
-        properties.setProperty(MapReduceProperty.OUTPUT.name(), args[1]);
-        properties.setProperty(MapReduceProperty.QUEUE.name(), args[2]);
+        properties.setProperty(MapReduceProperty.QUEUE.name(), args[1]);
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), args[2]);
 
         customize(job, properties);
         if (job.waitForCompletion(true)) {
@@ -112,7 +119,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
         int res = ToolRunner.run(new EventDataScoringJob(new Configuration()), args);
         System.exit(res);
     }
-    
+
     static class IgnoreDirectoriesAndSupportOnlyAvroFilesFilter extends Configured implements PathFilter {
         private FileSystem fs;
 
