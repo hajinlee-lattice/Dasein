@@ -37,7 +37,8 @@ module.exports = function(grunt) {
             default: {
                 src: [
                     'src/util/UnderscoreUtility.js',
-                    'src/util/BrowserStorageUtility.js'
+                    'src/util/BrowserStorageUtility.js',
+                    'src/util/SessionUtility.js'
                 ],
                 dest: 'release/<%= pkg.version %>/le-common.js'
             }
