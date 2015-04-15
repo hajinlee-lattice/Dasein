@@ -15,11 +15,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgress;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatus;
-import com.latticeengines.jobs.PropDataJobService;
 import com.latticeengines.madison.entitymanager.PropDataMadisonEntityMgr;
 import com.latticeengines.madison.service.PropDataMadisonDataFlowService;
 import com.latticeengines.madison.service.PropDataMadisonService;
@@ -37,7 +37,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     private PropDataMadisonEntityMgr propDataMadisonEntityMgr;
 
     @Autowired
-    private PropDataJobService propDataJobService;
+    private SqoopSyncJobService propDataJobService;
 
     @Autowired
     private PropDataMadisonDataFlowService propDataMadisonDataFlowService;

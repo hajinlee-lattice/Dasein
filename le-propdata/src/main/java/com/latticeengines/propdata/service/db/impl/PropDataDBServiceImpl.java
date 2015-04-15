@@ -23,11 +23,11 @@ import org.springframework.util.StringUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.CommandIds;
 import com.latticeengines.domain.exposed.propdata.Commands;
-import com.latticeengines.jobs.PropDataJobService;
 import com.latticeengines.propdata.entitymanager.PropDataEntityMgr;
 import com.latticeengines.propdata.service.db.PropDataContext;
 import com.latticeengines.propdata.service.db.PropDataDBService;
@@ -50,7 +50,7 @@ public class PropDataDBServiceImpl implements PropDataDBService {
     private PropDataEntityMgr propDataEntityMgr;
 
     @Autowired
-    private PropDataJobService propDataJobService;
+    private SqoopSyncJobService propDataJobService;
 
     @Autowired
     protected Configuration yarnConfiguration;

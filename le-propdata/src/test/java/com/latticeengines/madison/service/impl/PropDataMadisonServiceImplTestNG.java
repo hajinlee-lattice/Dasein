@@ -16,9 +16,9 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgress;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatus;
-import com.latticeengines.jobs.PropDataJobService;
 import com.latticeengines.madison.entitymanager.PropDataMadisonEntityMgr;
 import com.latticeengines.madison.service.PropDataMadisonService;
 import com.latticeengines.propdata.service.db.PropDataContext;
@@ -36,7 +36,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     private PropDataMadisonService propDataService;
 
     @Autowired
-    private PropDataJobService propDataJobService;
+    private SqoopSyncJobService propDataJobService;
 
     @Autowired
     private PropDataMadisonEntityMgr propDataMadisonEntityMgr;
