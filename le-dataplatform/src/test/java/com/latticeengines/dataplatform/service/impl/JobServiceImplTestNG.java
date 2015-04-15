@@ -30,13 +30,13 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.dataplatform.exposed.service.JobNameService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
-import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.client.mapreduce.MRJobCustomization;
 import com.latticeengines.dataplatform.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.service.JobNameService;
 import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
-import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.MapReduceCustomizationService;
 
 @Component("mapReduceCustomizationService")

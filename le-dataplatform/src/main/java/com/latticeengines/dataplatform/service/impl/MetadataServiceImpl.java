@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.service.MetadataService;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.service.impl.metadata.MetadataProvider;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;

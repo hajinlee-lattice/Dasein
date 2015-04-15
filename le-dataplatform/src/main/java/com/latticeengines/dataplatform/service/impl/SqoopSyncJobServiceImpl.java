@@ -6,17 +6,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.sqoop.LedpSqoop;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.yarn.client.YarnClient;
 
+import com.latticeengines.dataplatform.exposed.service.JobNameService;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.runtime.load.LoadProperty;
-import com.latticeengines.dataplatform.service.JobNameService;
-import com.latticeengines.dataplatform.service.MetadataService;
-import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
@@ -24,13 +27,27 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Field;
 
 @Component("sqoopSyncJobService")
-public class SqoopSyncJobServiceImpl extends JobServiceImpl implements SqoopSyncJobService {
+public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
+
+    @Autowired
+    private Configuration hadoopConfiguration;
+
+    @Autowired
+    private Configuration yarnConfiguration;
 
     @Autowired
     private JobNameService jobNameService;
 
     @Autowired
     private MetadataService metadataService;
+
+    @Autowired
+    protected YarnClient defaultYarnClient;
+
+    protected static final int MAX_TRIES = 60;
+    protected static final long APP_WAIT_TIME = 1000L;
+
+    protected static final Log log = LogFactory.getLog(SqoopSyncJobServiceImpl.class);
 
     @Override
     public ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer, List<String> splitCols, Map<String, String> properties) {
@@ -140,46 +157,39 @@ public class SqoopSyncJobServiceImpl extends JobServiceImpl implements SqoopSync
     }
 
     @Override
-    public JobStatus getJobStatus(String applicationId) {
-        return null;
-    }
-
-    @Override
-    public ApplicationId exportData(String table, String sourceDir, String queue, String customer, String jdbcUrl) {
+    public ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer) {
 
         int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 8);
-        return exportData(table, sourceDir, queue, customer, numDefaultMappers, jdbcUrl);
+        return exportData(table, sourceDir, creds, queue, customer, numDefaultMappers);
     }
 
     @Override
-    public ApplicationId exportData(String table, String sourceDir, String queue, String customer, int numMappers,
-            String jdbcUrl) {
+    public ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer, int numMappers) {
 
         final String jobName = jobNameService.createJobName(customer, "sqoop-export");
 
-        exportSync(table, sourceDir, queue, jobName, numMappers, jdbcUrl, null);
+        exportSync(table, sourceDir, creds, queue, jobName, numMappers, null);
 
         return getApplicationId(jobName);
     }
 
     @Override
-    public ApplicationId exportData(String table, String sourceDir, String queue, String customer, int numMappers,
-            String jdbcUrl, String javaColumnTypeMappings) {
+    public ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer, int numMappers, String javaColumnTypeMappings) {
 
         final String jobName = jobNameService.createJobName(customer, "sqoop-export");
 
-        exportSync(table, sourceDir, queue, jobName, numMappers, jdbcUrl, javaColumnTypeMappings);
+        exportSync(table, sourceDir, creds, queue, jobName, numMappers, javaColumnTypeMappings);
 
         return getApplicationId(jobName);
     }
 
-    private void exportSync(final String table, final String sourceDir, final String queue, final String jobName,
-            final int numMappers, String jdbcUrl, String javaColumnTypeMappings) {
+    private void exportSync(final String table, final String sourceDir, final DbCreds creds, final String queue, final String jobName,
+            final int numMappers, String javaColumnTypeMappings) {
         List<String> cmds = new ArrayList<>();
         cmds.add("export");
         cmds.add("-Dmapred.job.queue.name=" + queue);
         cmds.add("--connect");
-        cmds.add(jdbcUrl);
+        cmds.add(metadataService.getJdbcConnectionUrl(creds));
         cmds.add("--m");
         cmds.add(Integer.toString(numMappers));
         cmds.add("--table");
@@ -208,4 +218,33 @@ public class SqoopSyncJobServiceImpl extends JobServiceImpl implements SqoopSync
         LedpSqoop.runTool(cmds.toArray(new String[0]), new Configuration(yarnConfiguration));
     }
 
+    protected ApplicationId getAppIdFromName(String appName) {
+        // Running state means one of:
+        // YarnApplicationState.NEW
+        // YarnApplicationState.NEW_SAVING
+        // YarnApplicationState.SUBMITTED 
+        // YarnApplicationState.ACCEPTED
+        // YarnApplicationState.RUNNING
+        ApplicationId appId = getAppIdFromName(appName, defaultYarnClient.listRunningApplications("MAPREDUCE"));
+        if (appId != null) {
+            return appId;
+        }
+        try {
+            Thread.sleep(APP_WAIT_TIME);
+        } catch (InterruptedException e) {
+            // Do nothing
+        }
+        // If it still comes here, then go through all the existing applications of type MAPREDUCE
+        appId = getAppIdFromName(appName, defaultYarnClient.listApplications("MAPREDUCE"));
+        return appId;
+    }
+
+    private ApplicationId getAppIdFromName(String appName, List<ApplicationReport> apps) {
+        for (ApplicationReport app : apps) {
+            if (app.getName().equals(appName)) {
+                return app.getApplicationId();
+            }
+        }
+        return null;
+    }
 }

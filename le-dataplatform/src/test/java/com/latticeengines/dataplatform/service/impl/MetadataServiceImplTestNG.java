@@ -8,8 +8,8 @@ import org.apache.avro.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-import com.latticeengines.dataplatform.service.MetadataService;
 import com.latticeengines.domain.exposed.modeling.DataSchema;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.Field;

@@ -23,11 +23,11 @@ import org.springframework.yarn.fs.ResourceLocalizer;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.dataplatform.exposed.service.JobNameService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.YarnClientCustomization;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
-import com.latticeengines.dataplatform.service.JobNameService;
 import com.latticeengines.dataplatform.service.YarnClientCustomizationService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;

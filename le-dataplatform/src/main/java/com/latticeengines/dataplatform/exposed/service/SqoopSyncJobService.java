@@ -15,13 +15,11 @@ public interface SqoopSyncJobService {
     ApplicationId importData(String table, String targetDir, DbCreds creds, String queue, String customer,
             List<String> splitCols, Map<String, String> properties, int numMappers);
 
-    ApplicationId exportData(String table, String sourceDir, String queue, String customer, String jdbcUrl);
+    ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer);
 
-    ApplicationId exportData(String table, String sourceDir, String queue, String customer, int numMappers,
-            String jdbcUrl);
+    ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer, int numMappers);
 
-    ApplicationId exportData(String table, String sourceDir, String queue, String customer, int numMappers,
-            String jdbcUrl, String javaTypeMappings);
+    ApplicationId exportData(String table, String sourceDir, DbCreds creds, String queue, String customer, int numMappers, String javaColumnTypeMappings);
 
     void eval(String sql, String assignedQueue, String jobName, int i, String connectionString);
 

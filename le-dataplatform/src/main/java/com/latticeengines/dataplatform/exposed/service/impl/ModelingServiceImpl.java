@@ -38,6 +38,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
+import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
@@ -78,6 +79,9 @@ public class ModelingServiceImpl implements ModelingService {
 
     @Autowired
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
+
+    @Autowired
+    private SqoopSyncJobService sqoopSyncJobService;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
@@ -583,7 +587,7 @@ public class ModelingServiceImpl implements ModelingService {
         setupModelProperties(model);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
 
-        return modelingJobService.loadData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
+        return sqoopSyncJobService.importData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
                 model.getCustomer(), config.getKeyCols(), config.getProperties());
     }
 

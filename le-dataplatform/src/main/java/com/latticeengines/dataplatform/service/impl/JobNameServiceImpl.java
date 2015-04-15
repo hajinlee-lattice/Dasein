@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.latticeengines.dataplatform.service.JobNameService;
+import com.latticeengines.dataplatform.exposed.service.JobNameService;
 
 @Component("jobNameService")
 public class JobNameServiceImpl implements JobNameService {

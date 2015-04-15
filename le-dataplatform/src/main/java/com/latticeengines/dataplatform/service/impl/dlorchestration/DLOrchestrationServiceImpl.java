@@ -22,7 +22,7 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandResultEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.ModelCommandStateEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.AlertService;
-import com.latticeengines.dataplatform.service.MetadataService;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.service.dlorchestration.DLOrchestrationService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogService;
 import com.latticeengines.dataplatform.service.dlorchestration.ModelStepProcessor;

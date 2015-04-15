@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.service;
+package com.latticeengines.dataplatform.exposed.service;
 
 import org.joda.time.DateTime;
 
