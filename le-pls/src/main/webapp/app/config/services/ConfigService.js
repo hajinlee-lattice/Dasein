@@ -1,11 +1,11 @@
-angular.module('mainApp.config.services.GriotConfigService', [
+angular.module('mainApp.config.services.ConfigService', [
     'mainApp.core.utilities.ServiceErrorUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.URLUtility',
     'mainApp.core.services.SessionService'
 ])
-.service('GriotConfigService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, URLUtility, SessionService) {
+.service('ConfigService', function ($http, $q, BrowserStorageUtility, ServiceErrorUtility, ResourceUtility, URLUtility, SessionService) {
     
     this.GetConfigDocument = function () {
         var deferred = $q.defer();

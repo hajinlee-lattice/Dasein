@@ -10,11 +10,11 @@ angular.module('mainApp.login.controllers.LoginController', [
     'mainApp.core.services.HelpService',
     'mainApp.login.modals.TenantSelectionModal',
     'mainApp.core.services.ResourceStringsService',
-    'mainApp.config.services.GriotConfigService',
+    'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainViewController'
 ])
 .controller('LoginController', function ($scope, $http, $rootScope, $compile, ResourceUtility, GriotNavUtility, ServiceErrorUtility, EvergageUtility,
-    BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, GriotConfigService, TenantSelectionModal) {
+    BrowserStorageUtility, HelpService, LoginService, ResourceStringsService, ConfigService, TenantSelectionModal) {
     
     $("body").addClass("login-body");
     $('[autofocus]').focus();
@@ -109,15 +109,14 @@ angular.module('mainApp.login.controllers.LoginController', [
         });
     };
     
-    //TODO:pierce Add this back when we can configure credentials in PLS
-    /*$scope.getConfigDoc = function () {
-        GriotConfigService.GetConfigDocument().then(function(result) {
+    $scope.getConfigDoc = function () {
+        ConfigService.GetConfigDocument().then(function(result) {
             $scope.getWidgetConfigDoc();
         });
-    };*/
+    };
     
     $scope.getWidgetConfigDoc = function () {
-        GriotConfigService.GetWidgetConfigDocument().then(function(result) {
+        ConfigService.GetWidgetConfigDocument().then(function(result) {
             $("body").removeClass("login-body");
             $http.get('./app/core/views/MainView.html').success(function (html) {
                 var scope = $rootScope.$new();

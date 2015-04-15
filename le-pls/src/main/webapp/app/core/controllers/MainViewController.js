@@ -4,7 +4,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.GriotNavUtility',
     'mainApp.core.services.HelpService',
-    'mainApp.config.services.GriotConfigService',
+    'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainHeaderController',
     'mainApp.config.controllers.ManageCredentialsController',
     'mainApp.login.controllers.UpdatePasswordController',
@@ -15,7 +15,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.models.controllers.ModelCreationHistoryController'
 ])
 
-.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, GriotNavUtility, HelpService, GriotConfigService) {
+.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, GriotNavUtility, HelpService, ConfigService) {
     $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
     $scope.ResourceUtility = ResourceUtility;
     var directToPassword = $scope.directToPassword;
