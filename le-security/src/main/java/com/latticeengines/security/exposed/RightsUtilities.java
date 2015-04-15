@@ -13,28 +13,27 @@ public class RightsUtilities {
         Map<String, EntityAccessRightsData> availableRights = new HashMap<>();
 
         for (String right : accessRights) {
+            if (GrantedRight.getGrantedRight(right) == null) break;
             String[] rightPair = right.split("_", 2);
-            if (rightPair[1].toUpperCase().contains("PLS")) { // if it is a GrantedRight related string
-                EntityAccessRightsData rightsDocument = availableRights.get(rightPair[1]);
-                if (rightsDocument == null) {
-                    rightsDocument = new EntityAccessRightsData();
-                    availableRights.put(rightPair[1], rightsDocument);
-                }
+            EntityAccessRightsData rightsDocument = availableRights.get(rightPair[1]);
+            if (rightsDocument == null) {
+                rightsDocument = new EntityAccessRightsData();
+                availableRights.put(rightPair[1], rightsDocument);
+            }
 
-                switch (rightPair[0].toLowerCase()) {
-                    case "view":
-                        rightsDocument.setMayView(true);
-                        break;
-                    case "edit":
-                        rightsDocument.setMayEdit(true);
-                        break;
-                    case "execute":
-                        rightsDocument.setMayExecute(true);
-                        break;
-                    case "create":
-                        rightsDocument.setMayCreate(true);
-                        break;
-                }
+            switch (rightPair[0].toLowerCase()) {
+                case "view":
+                    rightsDocument.setMayView(true);
+                    break;
+                case "edit":
+                    rightsDocument.setMayEdit(true);
+                    break;
+                case "execute":
+                    rightsDocument.setMayExecute(true);
+                    break;
+                case "create":
+                    rightsDocument.setMayCreate(true);
+                    break;
             }
         }
 
@@ -62,20 +61,5 @@ public class RightsUtilities {
             }
         }
         return accessRights;
-    }
-
-    public static boolean isAdmin(Map<String, EntityAccessRightsData> availableRights) {
-        if (!availableRights.containsKey("PLS_Users")) { return false; }
-        if (!availableRights.containsKey("PLS_Configuration")) { return false; }
-        if (!availableRights.containsKey("PLS_Models")) { return false; }
-        if (!availableRights.containsKey("PLS_Reporting")) { return false; }
-
-        if (!availableRights.get("PLS_Users").isMayEdit()) { return false; }
-        if (!availableRights.get("PLS_Models").isMayEdit()) { return false; }
-        if (!availableRights.get("PLS_Configuration").isMayEdit()) { return false; }
-
-        if (!availableRights.get("PLS_Models").isMayCreate()) { return false; }
-
-        return true;
     }
 }

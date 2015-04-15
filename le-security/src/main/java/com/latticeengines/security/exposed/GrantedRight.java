@@ -1,9 +1,7 @@
 package com.latticeengines.security.exposed;
 
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -57,6 +55,10 @@ public enum GrantedRight implements GrantedAuthority {
         public String getAuthority() {
             return "Edit_PLS_Users";
         }
+    }, //
+    EDIT_ADMIN_CONFIGURATION {
+        @Override
+        public String getAuthority() { return "Edit_ADMIN_Configuration"; }
     };
 
     private static Map<String, GrantedRight> grantedRightsMap = new HashMap<>();
@@ -69,18 +71,6 @@ public enum GrantedRight implements GrantedAuthority {
 
     public static GrantedRight getGrantedRight(String value) {
         return grantedRightsMap.get(value);
-    }
-
-    public static List<GrantedRight> getDefaultRights() {
-        return Arrays.asList(
-            GrantedRight.VIEW_PLS_MODELS,
-            GrantedRight.VIEW_PLS_REPORTING,
-            GrantedRight.VIEW_PLS_CONFIGURATION
-        );
-    }
-
-    public static List<GrantedRight> getAdminRights() {
-        return AccessLevel.SUPER_ADMIN.getGrantedRights();
     }
 
 }

@@ -1,11 +1,11 @@
 package com.latticeengines.security.exposed.globalauth;
 
+import java.util.AbstractMap;
+import java.util.List;
+
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
-
-import java.util.AbstractMap;
-import java.util.List;
 
 public interface GlobalUserManagementService {
 

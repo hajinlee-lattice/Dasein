@@ -24,7 +24,7 @@ public class GlobalAuthenticationServiceImplTestNG extends SecurityFunctionalTes
         String passwd = DigestUtils.sha256Hex(adminPassword);
         Ticket ticket = globalAuthenticationService.authenticateUser(adminUsername, passwd);
         assertNotNull(ticket);
-        assertEquals(ticket.getTenants().size(), 2);
+        assertTrue(ticket.getTenants().size() >= 2);
 
         boolean result = globalAuthenticationService.discard(ticket);
         assertTrue(result);

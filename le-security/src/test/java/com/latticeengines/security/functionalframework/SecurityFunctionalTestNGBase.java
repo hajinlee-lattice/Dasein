@@ -10,8 +10,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -23,6 +27,7 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
@@ -45,7 +50,6 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @Value("${security.test.api.hostport}")
     private String hostPort;
 
-
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
 
@@ -54,6 +58,31 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
+
+    protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
+            "");
+
+    public static class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+
+        private String headerValue;
+
+        public AuthorizationHeaderHttpRequestInterceptor(String headerValue) {
+            this.headerValue = headerValue;
+        }
+
+        @Override
+        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+                throws IOException {
+            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
+            requestWrapper.getHeaders().add(Constants.AUTHORIZATION, headerValue);
+
+            return execution.execute(requestWrapper, body);
+        }
+
+        public void setAuthValue(String headerValue) {
+            this.headerValue = headerValue;
+        }
+    }
 
     protected String getRestAPIHostPort() {
         return hostPort;
