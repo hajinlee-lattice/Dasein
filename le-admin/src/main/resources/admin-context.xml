@@ -18,5 +18,6 @@
     <mvc:annotation-driven />
 
     <import resource="classpath:admin-camille-context.xml"/>
+    <import resource="classpath:security-context.xml"/>
 
 </beans>

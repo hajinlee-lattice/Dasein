@@ -38,7 +38,8 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
     
     @Test(groups = "functional")
     public void getDefaultTenantServiceConfig() {
-        SerializableDocumentDirectory dir = tenantEntityMgr.getDefaultTenantServiceConfig(testLatticeComponent.getScope().getServiceName());
+        SerializableDocumentDirectory dir =
+                tenantEntityMgr.getDefaultTenantServiceConfig(testLatticeComponent.getScope().getServiceName());
         assertNotNull(dir.getDocumentDirectory());
     }
 

@@ -12,6 +12,7 @@
         <le.common.version>1.0.31-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.31-SNAPSHOT</le.domain.version>
         <le.camille.version>1.0.31-SNAPSHOT</le.camille.version>
+        <le.security.version>1.0.31-SNAPSHOT</le.security.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
@@ -205,6 +206,18 @@
                     <artifactId>jython-standalone</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${le.security.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

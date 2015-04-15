@@ -3,10 +3,32 @@ var app = angular.module("TenantConsoleApp", [
     "app.login.controller.LoginCtrl",
     "app.tenants.controller.TenantListCtrl",
     "app.tenants.controller.TenantConfigCtrl",
-    "ui.router"
+    "ui.router",
+    'LocalStorageModule',
+    'le.common.util.BrowserStorageUtility'
 ]);
 
-app.config(function($stateProvider, $urlRouterProvider) {
+app.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {
+    return {
+        request: function (config) {
+            config.headers = config.headers || {};
+            if (BrowserStorageUtility.getTokenDocument()) {
+                config.headers.Authorization = BrowserStorageUtility.getTokenDocument();
+            }
+            return config;
+        },
+        response: function (response) {
+            if (response.status === 401) {
+                // handle the case where the user is not authenticated
+            }
+            return response || $q.when(response);
+        }
+    };
+});
+
+app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStorageServiceProvider) {
+    $httpProvider.interceptors.push('authInterceptor');
+
     $urlRouterProvider.when("", "/login");
     $urlRouterProvider.when("/tenants", "/tenants/");
 
@@ -35,4 +57,9 @@ app.config(function($stateProvider, $urlRouterProvider) {
             url: "/",
             templateUrl: 'app/core/view/Http404View.html'
         });
+
+    localStorageServiceProvider
+        .setPrefix('lattice.engines')
+        .setStorageType('sessionStorage')
+        .setNotify(true, true);
 });

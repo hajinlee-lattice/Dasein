@@ -1,5 +1,7 @@
 var app = angular.module("app.core.directive.MainNavDirective", [
-    'ui.router'
+    'ui.router',
+    'le.common.util.BrowserStorageUtility',
+    'le.common.util.SessionUtility'
 ]);
 
 app.service('MainNavService', function(){
@@ -16,13 +18,24 @@ app.directive('mainNav', function(){
         restrict: 'AE',
         templateUrl: 'app/core/view/MainNavView.html',
         scope: {activeNav: '='},
-        controller: ['$scope', '$rootScope', '$state', 'MainNavService',
-            function ($scope, $rootScope, $state, MainNavService) {
-                $scope.activeState = MainNavService.parseNavState($state.current.name);
+        controller: function ($scope, $rootScope, $state,
+                              MainNavService, BrowserStorageUtility) {
+            if(BrowserStorageUtility.getClientSession() === null){
+                BrowserStorageUtility.clear(false);
+                $state.go('LOGIN');
+            }
+            $scope.activeState = MainNavService.parseNavState($state.current.name);
 
-                $rootScope.$on('$stateChangeSuccess', function () {
-                    $scope.activeState = MainNavService.parseNavState($state.current.name);
-                });
-            }]
+
+            $rootScope.$on('$stateChangeSuccess', function () {
+                if(BrowserStorageUtility.getClientSession() === null){
+                    BrowserStorageUtility.clear(false);
+                    $state.go('LOGIN');
+                }
+                $scope.activeState = MainNavService.parseNavState($state.current.name);
+            });
+        }
     };
 });
+
+
