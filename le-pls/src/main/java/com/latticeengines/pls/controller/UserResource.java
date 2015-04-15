@@ -70,7 +70,12 @@ public class UserResource {
             Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             Session session = globalSessionManagementService.retrieve(ticket);
             String tenantId = session.getTenant().getId();
-            AccessLevel currentLevel = AccessLevel.valueOf(session.getAccessLevel());
+            AccessLevel currentLevel;
+            try {
+                currentLevel = AccessLevel.valueOf(session.getAccessLevel());
+            } catch (NullPointerException|IllegalArgumentException e) {
+                throw new LedpException(LedpCode.LEDP_18016, e, new String[] { tenantId });
+            }
 
             List<User> users = new ArrayList<>();
             for (User user : userService.getUsers(tenantId)) {
