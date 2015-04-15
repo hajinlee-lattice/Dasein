@@ -49,7 +49,6 @@ public class SkaldDestination implements RecordDestination {
             HttpRequest request = factory.buildPostRequest(new GenericUrl(target),
                     ByteArrayContent.fromString("application/json", mapper.writeValueAsString(data)));
 
-            request.execute();
             HttpResponse response = request.execute();
             Map<String, Object> result = mapper.readValue(response.getContent(),
                     new TypeReference<Map<String, Object>>() {
@@ -57,6 +56,8 @@ public class SkaldDestination implements RecordDestination {
 
             return result;
         } catch (Exception ex) {
+            // TODO For Skald errors, repack the error information nicely to
+            // avoided nested JSON.
             throw new RuntimeException("Error connecting to Skald", ex);
         }
     }
