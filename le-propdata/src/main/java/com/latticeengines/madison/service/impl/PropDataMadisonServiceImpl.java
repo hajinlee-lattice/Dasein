@@ -2,7 +2,9 @@ package com.latticeengines.madison.service.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -14,10 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.kenai.jffi.Array;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgress;
 import com.latticeengines.domain.exposed.propdata.MadisonLogicDailyProgressStatus;
 import com.latticeengines.madison.entitymanager.PropDataMadisonEntityMgr;
@@ -54,6 +58,14 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     @Value("${propdata.madison.datasource.data.url}")
     private String sourceDataJdbcUrl;
+    @Value("${propdata.madison.datasource.data.host}")
+    private String sourceDataJdbcHost;
+    @Value("${propdata.madison.datasource.data.port}")
+    private String sourceDataJdbcPort;
+    @Value("${propdata.madison.datasource.data.dbname}")
+    private String sourceDataJdbcDb;
+    @Value("${propdata.madison.datasource.data.type}")
+    private String sourceDataJdbcType;
     @Value("${propdata.madison.datasource.data.user}")
     private String sourceDataJdbcUser;
     @Value("${propdata.madison.datasource.data.password.encrypted}")
@@ -78,6 +90,14 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     private String targetTable;
     @Value("${propdata.madison.datatarget.url}")
     private String targetJdbcUrl;
+    @Value("${propdata.madison.datatarget.host}")
+    private String targetJdbcHost;
+    @Value("${propdata.madison.datatarget.port}")
+    private String targetJdbcPort;
+    @Value("${propdata.madison.datatarget.dbname}")
+    private String targetJdbcDb;
+    @Value("${propdata.madison.datatarget.type}")
+    private String targetJdbcType;
     @Value("${propdata.madison.datatarget.user}")
     private String targetJdbcUser;
     @Value("${propdata.madison.datatarget.password.encrypted}")
@@ -114,9 +134,13 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             }
 
             String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-            propDataJobService.importData(dailyProgress.getDestinationTable(), targetDir, assignedQueue, getJobName()
-                    + "-Progress Id-" + dailyProgress.getPid(), splitColumns, numMappers,
-                    getConnectionString(sourceDataJdbcUrl, sourceDataJdbcUser, sourceDataJdbcPassword));
+            DbCreds.Builder builder = new DbCreds.Builder();
+            builder.host(sourceDataJdbcHost).port(Integer.parseInt(sourceDataJdbcPort)).db(sourceDataJdbcDb)
+                    .user(sourceDataJdbcUser).password(sourceDataJdbcPassword).dbType(sourceDataJdbcType);
+            DbCreds creds = new DbCreds(builder);
+            propDataJobService.importData(dailyProgress.getDestinationTable(), targetDir, creds, assignedQueue,
+                    getJobName() + "-Progress Id-" + dailyProgress.getPid(), Arrays.asList(splitColumns.split(",")),
+                    new HashMap<String, String>(), numMappers);
 
             dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
             propDataMadisonEntityMgr.executeUpdate(dailyProgress);
@@ -224,9 +248,12 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                     HdfsUtils.rmdir(yarnConfiguration, schemaPath);
                 }
                 String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-                propDataJobService.importData(targetTable + "_new", schemaPath, assignedQueue,
-                        getJobName() + "-schema", "DomainID", 1,
-                        getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+                DbCreds.Builder builder = new DbCreds.Builder();
+                builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
+                        .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
+                DbCreds creds = new DbCreds(builder);
+                propDataJobService.importData(targetTable + "_new", schemaPath, creds, assignedQueue, getJobName()
+                        + "-schema", Arrays.asList("DomainID"), new HashMap<String, String>(), 1);
                 log.info("Finished getting targetTable's schema file=" + schemaPath);
             }
         } catch (Exception e) {

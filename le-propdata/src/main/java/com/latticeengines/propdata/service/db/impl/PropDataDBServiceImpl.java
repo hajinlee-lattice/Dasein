@@ -1,7 +1,9 @@
 package com.latticeengines.propdata.service.db.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +28,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.CommandIds;
 import com.latticeengines.domain.exposed.propdata.Commands;
 import com.latticeengines.propdata.entitymanager.PropDataEntityMgr;
@@ -57,6 +60,14 @@ public class PropDataDBServiceImpl implements PropDataDBService {
 
     @Value("${propdata.datasource.url}")
     private String jdbcUrl;
+    @Value("${propdata.datasource.host}")
+    private String jdbcHost;
+    @Value("${propdata.datasource.port}")
+    private String jdbcPort;
+    @Value("${propdata.datasource.dbname}")
+    private String jdbcDb;
+    @Value("${propdata.datasource.type}")
+    private String jdbcType;
     @Value("${propdata.datasource.user}")
     private String jdbcUser;
     @Value("${propdata.datasource.password.encrypted}")
@@ -82,12 +93,16 @@ public class PropDataDBServiceImpl implements PropDataDBService {
             generateNewTables(requestContext, tableList, keyColsList);
 
             String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
+            DbCreds.Builder builder = new DbCreds.Builder();
+            builder.host(jdbcHost).port(Integer.parseInt(jdbcPort)).db(jdbcDb)
+                    .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
+            DbCreds creds = new DbCreds(builder);
             for (int i = 0; i < tableList.size(); i++) {
                 String newTable = tableList.get(i);
                 String keyCols = keyColsList.get(i);
                 ApplicationId appId = propDataJobService.importData(newTable,
-                        getDataHdfsPath(customer, tableName + "/" + newTable, PROPDATA_OUTPUT), assignedQueue,
-                        customer, keyCols, getConnectionString());
+                        getDataHdfsPath(customer, tableName + "/" + newTable, PROPDATA_OUTPUT), creds, assignedQueue,
+                        customer, Arrays.asList(keyCols), new HashMap<String, String>());
                 Integer applicationId;
                 if (appId != null) {
                     applicationId = appId.getId();
@@ -121,11 +136,14 @@ public class PropDataDBServiceImpl implements PropDataDBService {
         String keyCols = requestContext.getProperty(ImportExportKey.KEY_COLS.getKey(), String.class);
 
         try {
-
+            DbCreds.Builder builder = new DbCreds.Builder();
+            builder.host(jdbcHost).port(Integer.parseInt(jdbcPort)).db(jdbcDb)
+                    .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
+            DbCreds creds = new DbCreds(builder);
             String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
             ApplicationId appId = propDataJobService.importData(tableName,
-                    getDataHdfsPath(customer, tableName, PROPDATA_OUTPUT), assignedQueue, customer, keyCols,
-                    getConnectionString());
+                    getDataHdfsPath(customer, tableName, PROPDATA_OUTPUT), creds, assignedQueue, customer, Arrays.asList(keyCols),
+                    new HashMap<String, String>());
             Integer applicationId;
             if (appId != null) {
                 applicationId = appId.getId();

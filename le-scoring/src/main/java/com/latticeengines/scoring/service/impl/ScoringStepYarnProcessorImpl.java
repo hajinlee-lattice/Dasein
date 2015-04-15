@@ -23,6 +23,7 @@ import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -36,6 +37,9 @@ import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
 @Component("scoringStepYarnProcessor")
 public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
+
+    @Autowired
+    private SqoopSyncJobService sqoopSyncJobService;
 
     @Autowired
     private ModelingJobService modelingJobService;
@@ -63,7 +67,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
-    
+
     @Autowired
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
@@ -110,10 +114,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String table = scoringCommand.getTableName();
         String targetDir = customerBaseDir + "/" + customer + "/scoring/data/" + table;
 
-        ApplicationId appId = modelingJobService.loadData(table, targetDir, creds,
+        ApplicationId appId = sqoopSyncJobService.importData(table, targetDir, creds,
                 LedpQueueAssigner.getMRQueueNameForSubmission(), customer, Arrays.asList("Nutanix_EventTable_Clean"),
                 new HashMap<String, String>(), 4);
-
         return appId;
     }
 
