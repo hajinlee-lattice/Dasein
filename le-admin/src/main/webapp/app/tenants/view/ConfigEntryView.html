@@ -1,29 +1,29 @@
 <p class="readonly-config-entry" ng-if="readonly">
     <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
-    <b>{{ config.node }}</b> :
-    <span>{{ config.data }}</span>
+    <b>{{ config.Node }}</b> :
+    <span>{{ config.Data }}</span>
 </p>
 
 <form name="configform" class="form-inline" ng-class='{"has-error": showError}' novalidate>
     <div ng-if="!readonly">
         <label class="control-label">
             <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
-            {{ config.node }}
+            {{ config.Node }}
         </label>
 
         <input ng-if="isInput" class="form-control"
-               type="{{ inputType }}" ng-model="config.data"
+               type="{{ inputType }}" ng-model="config.Data"
                ng-model-options="{ debounce: 200 }"
                ng-change="validateInput()" required />
 
         <input ng-if="isBoolean" class="checkbox"
-               type="checkbox" ng-model="config.data"
+               type="checkbox" ng-model="config.Data"
                ng-model-options="{ debounce: 200 }"
                ng-change="validateInput()" />
 
         <select ng-if="isSelect" class="form-control"
                 ng-options="option for option in options"
-                ng-model="config.data"
+                ng-model="config.Data"
                 ng-model-options="{ debounce: 200 }"
                 ng-change="validateInput()"></select>
 

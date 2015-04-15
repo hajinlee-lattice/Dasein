@@ -23,7 +23,7 @@
                     <label class="control-label">Tenant ID</label>
                     <input type="text" name="tenantId" class="form-control"
                            ng-model-options="{ debounce: 200 }" ng-model="tenantInfo.tenantId"
-                           ng-change="validateTenantId()" required/>
+                           ng-change="validateTenantInfo()" required/>
                     <p ng-if="showTenantIdError" class="help-block"><span class="text-danger">{{ tenantIdErrorMsg }}</span></p>
                 </div>
                 <div class="control-group">
@@ -32,8 +32,8 @@
                             placeholder="Leave it blank if it is the same as Tenant ID."/>
                 </div>
                 <div class="control-group">
-                    <label class="control-label">Space</label>
-                    <select class="form-control" ng-options="option for option in spaceOptions" ng-model="tenantInfo.space"></select>
+                    <label class="control-label">Product</label>
+                    <select class="form-control" ng-options="option for option in productOptions" ng-model="tenantInfo.product"></select>
                 </div>
             </form>
         </div>

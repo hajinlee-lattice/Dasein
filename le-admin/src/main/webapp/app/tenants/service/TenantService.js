@@ -5,8 +5,8 @@ var app = angular.module("app.tenants.service.TenantService", [
 app.service('TenantUtility', function(_){
 
     function applyMetadataToComponent(component, metadata) {
-        _.each(component.configuration, function(dataNode){
-            var metaNode = _.findWhere(metadata, {"node": dataNode.node});
+        _.each(component.Nodes, function(dataNode){
+            var metaNode = _.findWhere(metadata.Nodes, {"Node": dataNode.Node});
             if (metaNode) {
                 applyMetadataToNode(dataNode, metaNode);
             }
@@ -14,16 +14,16 @@ app.service('TenantUtility', function(_){
     }
 
     function applyMetadataToNode(data, metadata) {
-        if (data.node === metadata.node) {
-            if (metadata.hasOwnProperty("metadata")) {
-                data.metadata = metadata.metadata;
+        if (data.Node === metadata.Node) {
+            if (metadata.hasOwnProperty("Data") && typeof metadata.Data === "object") {
+                data.Metadata = metadata.Data;
             }
             if (
-                data.hasOwnProperty("children") &&
-                metadata.hasOwnProperty("children")
+                data.hasOwnProperty("Children") &&
+                metadata.hasOwnProperty("Children")
             ) {
-                _.each(data.children, function(child){
-                    var metaChild = _.findWhere(metadata.children, {"node": child.node});
+                _.each(data.Children, function(child){
+                    var metaChild = _.findWhere(metadata.Children, {"Node": child.Node});
                     if (metaChild) {
                         applyMetadataToNode(child, metaChild);
                     }
@@ -34,15 +34,14 @@ app.service('TenantUtility', function(_){
 
     this.applyMetadataToComponent = applyMetadataToComponent;
 
-    function cleanupComponentConfigs(components) {
+    function cleanupComponentConfigs(components, tenant, contract, space) {
         return _.map(components,
             function(component){
                 var componentConfig = {
-                    component: component.component,
-                    rootPath:  component.rootPath
+                    RootPath: "Tenants/tenant/Contracts/contract/Space/space/Services/" + component.Component
                 };
-                if (component.hasOwnProperty("configuration")) {
-                    componentConfig.configuration = cleanupConfigData(component.configuration);
+                if (component.hasOwnProperty("Nodes")) {
+                    componentConfig.Nodes = cleanupConfigData(component.Nodes);
                 }
                 return componentConfig;
             });
@@ -51,12 +50,12 @@ app.service('TenantUtility', function(_){
     function cleanupConfigData(configs) {
         return _.map(configs,
             function(config){
-                var cleanedConfig = {node: config.node};
-                if (config.hasOwnProperty("data")) {
-                    cleanedConfig.data = config.data;
+                var cleanedConfig = {Node: config.Node};
+                if (config.hasOwnProperty("Data")) {
+                    cleanedConfig.Data = config.Data;
                 }
-                if (config.hasOwnProperty("children")) {
-                    cleanedConfig.children = cleanupConfigData(config.children);
+                if (config.hasOwnProperty("Children")) {
+                    cleanedConfig.Children = cleanupConfigData(config.Children);
                 }
                 return cleanedConfig;
             });
@@ -70,14 +69,11 @@ app.service('TenantUtility', function(_){
                 return '<i class="fa fa-check-circle text-success component-status"></i> ' +
                     '<span class="text-success">' + this.getStatusDisplayName('OK') + '</span>';
             case this.getStatusDisplayName('INITIAL'):
-                return '<i class="fa fa-exclamation-circle text-warning component-status"></i> ' +
+                return '<i class="fa fa-minus-circle text-muted component-status"></i> ' +
                     '<span class="text-warning">' + this.getStatusDisplayName('INITIAL') + '</span>';
             case this.getStatusDisplayName('FAILED'):
                 return '<i class="fa fa-times-circle text-danger component-status"></i> ' +
                     '<span class="text-danger">' + this.getStatusDisplayName('FAILED') + '</span>';
-            case this.getStatusDisplayName('INSTALLING'):
-                return '<i class="fa fa-minus-circle text-muted component-status"></i> ' +
-                    '<span class="text-muted">' + this.getStatusDisplayName('INSTALLING') + '</span>';
             default:
                 return status;
         }
@@ -104,8 +100,6 @@ app.service('TenantUtility', function(_){
                 return "New";
             case "FAILED":
                 return "Installation Failed";
-            case "INSTALLING":
-                return "Installing";
         }
     };
 });
@@ -149,7 +143,7 @@ app.service('TenantService', function($q, $http, _, TenantUtility){
     }
 
     function getRandomServiceStatus() {
-        var answers = ['OK', 'FAILED', 'INITIAL', 'INSTALLING'];
+        var answers = ['OK', 'FAILED', 'INITIAL'];
         var randIdx = Math.floor((Math.random() * 4));
         var result = {
             "state": answers[randIdx],
@@ -163,7 +157,7 @@ app.service('TenantService', function($q, $http, _, TenantUtility){
     function asyncMockServiceStatus() {
         return $q(function(resolve) {
             setTimeout(function() {
-                var answers = ['OK', 'FAILED', 'INITIAL', 'INSTALLING'];
+                var answers = ['OK', 'FAILED', 'INITIAL'];
                 var randIdx = Math.floor((Math.random() * 4));
                 var result = {
                     "state": answers[randIdx],
@@ -208,7 +202,7 @@ app.service('TenantService', function($q, $http, _, TenantUtility){
 
         asyncMockTenantService(tenantId, service).then(function(data){
 
-            data.rootPath = "/Pods/Default/Contracts/CONTRACT1/Tenants/Tenant1/Spaces/production/Services/" + service;
+            data.Component = service;
 
             var result = {
                 success: true,

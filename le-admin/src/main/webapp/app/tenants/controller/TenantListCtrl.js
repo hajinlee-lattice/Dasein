@@ -100,20 +100,18 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                 }
             },
             controller: function($scope, $modalInstance, TenantUtility){
-                $scope.spaceOptions = ["production", "sandbox"];
+                $scope.productOptions = ["LPA 2.0"];
 
-                $scope.tenantInfo = {
-                    space: "production"
-                };
+                $scope.tenantInfo = { product: "LPA 2.0" };
 
                 $scope.isValid = true;
 
-                $scope.validateTenantId = function(){
-                    if ($scope.addtenantform.tenantId.$dirty && $scope.addtenantform.tenantId.$error.required) {
+                $scope.validateTenantInfo = function(){
+                    if ($scope.addtenantform.tenantId.$error.required || $scope.tenantInfo.tenantId === '') {
                         $scope.tenantIdErrorMsg = "Tenant ID is required.";
                         $scope.showTenantIdError = true;
                         $scope.isValid = false;
-                        return;
+                        return false;
                     }
 
                     var validationResult = TenantUtility.validateTenantId($scope.tenantInfo.tenantId);
@@ -121,14 +119,22 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                         $scope.tenantIdErrorMsg = validationResult.reason;
                         $scope.showTenantIdError = true;
                         $scope.isValid = false;
+                        return false;
                     } else {
                         $scope.showTenantIdError = false;
                         $scope.isValid = true;
                     }
+
+                    return true;
                 };
 
                 $scope.ok = function () {
-                    $modalInstance.close($scope.tenantInfo);
+                    if ($scope.validateTenantInfo()) {
+                        if (!$scope.tenantInfo.hasOwnProperty("contractId") || $scope.tenantInfo.contractId === '') {
+                            $scope.tenantInfo.contractId = $scope.tenantInfo.tenantId;
+                        }
+                        $modalInstance.close($scope.tenantInfo);
+                    }
                 };
 
                 $scope.cancel = function () {
@@ -139,7 +145,13 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
 
         modalInstance.result.then(function (tenantInfo) {
             $scope.tenantInfo = tenantInfo;
-            $state.go('TENANT.CONFIG', {tenantId: tenantInfo.tenantId, mode: "NEW"});
+            $state.go('TENANT.CONFIG', {
+                tenantId: tenantInfo.tenantId,
+                readonly: false,
+                listenState: false,
+                product: tenantInfo.product,
+                contractId: tenantInfo.contractId
+            });
         }, function () {
             $state.go('TENANT.LIST');
         });

@@ -2,14 +2,14 @@
     <div class="well">
         <p>Tenant ID: {{ tenantId }}</p>
         <p>Contract ID: {{ contractId }}</p>
-        <p>space: {{ space }}</p>
+        <p>Product: {{ product }}</p>
     </div>
     <div ng-show="loading">
         <div class="loader"> </div>
         <h2 class="text-center">Loading tenant configuration ...</h2>
     </div>
     <div ng-if="!loading">
-        <components-config data="data" mode="mode" is-valid="isValid"></components-config>
+        <components-config data="components" readonly="readonly" is-valid="isValid"></components-config>
         <p ng-show="!isValid.valid" class="alert alert-danger">The configuration is invalid. Please check error messages above.</p>
         <button class="btn btn-primary" ng-disabled="!isValid.valid" ng-click="onSaveClick()">SAVE</button>
     </div>

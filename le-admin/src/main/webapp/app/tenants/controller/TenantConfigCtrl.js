@@ -8,10 +8,17 @@ var app = angular.module("app.tenants.controller.TenantConfigCtrl", [
 ]);
 
 app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal, $interval, _, TenantService, TenantUtility) {
-    $scope.mode = $stateParams.mode;
+    $scope.readonly = true;
+    $scope.listenState = true;
+    if ($stateParams.readonly) $scope.readonly = $stateParams.readonly === "true";
+    if ($stateParams.listenState) $scope.listenState = $stateParams.listenState === "true";
+
     $scope.tenantId = $stateParams.tenantId;
-    $scope.contractId = $stateParams.hasOwnProperty("contractId") ? $stateParams.contractId : $stateParams.tenantId;
-    $scope.space = $stateParams.hasOwnProperty("space") ? $stateParams.space : "production";
+    $scope.contractId = $stateParams.contractId || $stateParams.tenantId;
+    $scope.space = $stateParams.space || "production";
+    $scope.product = $stateParams.product;
+
+    console.log($stateParams, $scope.readonly, $scope.listenState);
 
     $scope.loading = true;
     $scope.services = ["PLS", "VDB"];
@@ -20,7 +27,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
         return { open: false, disabled: false };
     });
 
-    $scope.data = [];
+    $scope.components = [];
     $scope.isValid = {valid: true};
 
     _.each($scope.services, function(service){
@@ -30,11 +37,11 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                 TenantService.GetServiceMetadata(service).then(
                     function(metadata){
                         TenantUtility.applyMetadataToComponent(component, metadata);
-                        $scope.data.push(component);
+                        $scope.components.push(component);
 
-                        if ($scope.data.length == $scope.services.length) {
+                        if ($scope.components.length == $scope.services.length) {
                             $scope.loading = false;
-                            if ($scope.mode !== 'NEW') { updateServiceStatus(); }
+                            if ($scope.listenState) { updateServiceStatus(); }
                         }
                     }
                 );
@@ -43,31 +50,31 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     });
 
     function updateServiceStatus() {
-        _.each($scope.data, function(component){
+        _.each($scope.components, function(component){
             TenantService.GetTenantServiceStatus($scope.tenantId, component.component).then(
                 function(result){
-                    component.state = result.state;
+                    component.State = result.state;
                     console.debug(
-                        "The status of " + component.component +
-                        " is updated to " + component.state);
+                        "The status of " + component.Component +
+                        " is updated to " + component.State);
                 }
             );
         });
     }
 
-    if ($scope.mode !== 'NEW') {
-        var statusUpdater = $interval(function(){
-            if ($state.current.name !== "TENANT.CONFIG") {
-                $interval.cancel(statusUpdater);
-            }
-            if (!$scope.loading) {
-                updateServiceStatus();
-            }
-        }, 5000);
-    }
+    //if ($scope.mode !== 'NEW') {
+    //    var statusUpdater = $interval(function(){
+    //        if ($state.current.name !== "TENANT.CONFIG") {
+    //            $interval.cancel(statusUpdater);
+    //        }
+    //        if (!$scope.loading) {
+    //            updateServiceStatus();
+    //        }
+    //    }, 5000);
+    //}
 
     $scope.onSaveClick = function(){
-        $scope.cleanData = TenantUtility.cleanupComponentConfigs($scope.data);
+        $scope.cleanData = TenantUtility.cleanupComponentConfigs($scope.components, $scope.tenantId, $scope.contractId, $scope.space);
 
         $modal.open({
             template: '<div class="modal-header">' +

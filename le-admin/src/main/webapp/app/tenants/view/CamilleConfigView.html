@@ -2,9 +2,9 @@
               is-valid="isValid" expandable="false" readonly="readonly"
               class="config-entry" config="config"></config-entry>
 
-<accordion-group ng-if="hasChildren" is-open="isOpen">
+<accordion-group ng-if="hasChildren"  ng-init="isOpen = true" is-open="isOpen">
     <accordion-heading class="accordion-heading" is-open="isOpen">
         <config-entry expandable="true" is-valid="isValid" is-open="isOpen" readonly="readonly" ng-show="hasData" config="config"></config-entry>
     </accordion-heading>
-    <camille-config config="child" is-valid="isValid" readonly="readonly" ng-repeat="child in config.children"></camille-config>
+    <camille-config config="child" is-valid="isValid" readonly="readonly" ng-repeat="child in config.Children"></camille-config>
 </accordion-group>

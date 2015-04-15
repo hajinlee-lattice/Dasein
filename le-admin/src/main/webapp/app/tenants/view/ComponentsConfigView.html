@@ -1,11 +1,10 @@
-
 <accordion ng-if="!loading" close-others="oneAtATime" class="tenant-config">
-    <accordion-group ng-repeat="component in data" is-open="accordion[component.component].open">
+    <accordion-group ng-repeat="component in data" ng-init="accordion[component.Component].open = true" is-open="accordion[component.Component].open">
         <accordion-heading>
-            <i class="fa" ng-class="{'fa-caret-down': accordion[component.component].open, 'fa-caret-right': !accordion[component.component].open}"></i>
-            {{component.component}}
-            <span ng-if="readonly" ng-bind-html="getStatusHtml(component.state)"></span>
+            <i class="fa" ng-class="{'fa-caret-down': accordion[component.Component].open, 'fa-caret-right': !accordion[component.Component].open}"></i>
+            {{component.Component}}
+            <span ng-if="readonly" ng-bind-html="getStatusHtml(component.State)"></span>
         </accordion-heading>
-        <camille-config config="child" is-valid="isValid" readonly="readonly" ng-repeat="child in component.configuration"></camille-config>
+        <camille-config config="config" is-valid="isValid" readonly="readonly" ng-repeat="config in component.Nodes"></camille-config>
     </accordion-group>
 </accordion>

@@ -50,7 +50,7 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
             templateUrl: "app/tenants/view/TenantListView.html"
         })
         .state('TENANT.CONFIG', {
-            url: "/{tenantId}?mode",
+            url: "/{tenantId}?readonly&listenState&product&contractId",
             templateUrl: "app/tenants/view/TenantConfigView.html"
         })
         .state('NOWHERE', {

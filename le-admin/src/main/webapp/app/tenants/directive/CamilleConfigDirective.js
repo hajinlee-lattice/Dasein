@@ -49,9 +49,9 @@ app.factory('RecursionHelper', ['$compile', function($compile){
 
 app.service('CamilleConfigUtility', function(){
     this.getDataType = function(config) {
-        var data = config.data;
-        if (config.hasOwnProperty("metadata")) {
-            return config.metadata.type;
+        var data = config.Data;
+        if (config.hasOwnProperty("Metadata")) {
+            return config.Metadata.Type;
         } else if (typeof data === "number") {
             return "number";
         } else if (typeof data === "boolean") {
@@ -77,14 +77,11 @@ app.directive('componentsConfig', function(){
     return {
         restrict: 'AE',
         templateUrl: 'app/tenants/view/ComponentsConfigView.html',
-        scope: {data: '=', isValid: '=', mode: '='},
+        scope: {data: '=', isValid: '=', readonly: '='},
         controller: function($scope, TenantUtility){
-            $scope.readonly = ($scope.mode !== "NEW");
             $scope.TenantUtility = TenantUtility;
             $scope.getStatusHtml = function(state) {
-                return TenantUtility.getStatusTemplate(
-                    TenantUtility.getStatusDisplayName(state)
-                );
+                return TenantUtility.getStatusTemplate(TenantUtility.getStatusDisplayName(state));
             };
         }
     };
@@ -99,10 +96,10 @@ app.directive('camilleConfig', function(RecursionHelper, TenantUtility){
             $scope.TenantUtility = TenantUtility;
 
             $scope.hasChildren =
-                $scope.config.hasOwnProperty("children") &&
-                $scope.config.children.length > 0;
+                $scope.config.hasOwnProperty("Children") &&
+                $scope.config.Children.length > 0;
 
-            $scope.hasData = $scope.config.hasOwnProperty("data");
+            $scope.hasData = $scope.config.hasOwnProperty("Data");
 
         },
         compile: function(element) {
@@ -134,17 +131,7 @@ app.directive('configEntry', function(){
             $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);
             $scope.isSelect = CamilleConfigUtility.isSelect($scope.type);
 
-            if ($scope.isSelect) {
-                $scope.options = $scope.config.metadata.options;
-                if ($scope.config.metadata.hasOwnProperty("default")) {
-                    $scope.defaultOption = $scope.config.metadata.default;
-                } else {
-                    $scope.defaultOption = $scope.options[0];
-                }
-                if (!$scope.config.hasOwnProperty("data")) {
-                    $scope.config.data = $scope.defaultOption;
-                }
-            }
+            if ($scope.isSelect) { $scope.options = $scope.config.Metadata.Options; }
 
             $scope.validateInput = function() {
                 if ($scope.configform.$dirty && $scope.configform.$invalid) {
