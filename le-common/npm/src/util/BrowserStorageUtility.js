@@ -1,8 +1,3 @@
-angular.module('le.common.util.UnderscoreUtility', [
-])
-.factory('_', function() {
-    return window._; // assumes underscore has already been loaded on the page
-});
 angular.module('le.common.util.BrowserStorageUtility', ['LocalStorageModule'])
 .service('BrowserStorageUtility', function(localStorageService) {
         this.CacheTimeout = 28800000; // 8 hours in Milliseconds

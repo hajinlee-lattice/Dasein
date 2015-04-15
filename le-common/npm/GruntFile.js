@@ -36,7 +36,8 @@ module.exports = function(grunt) {
         concat: {
             default: {
                 src: [
-                    'src/util/UnderscoreUtility.js'
+                    'src/util/UnderscoreUtility.js',
+                    'src/util/BrowserStorageUtility.js'
                 ],
                 dest: 'release/<%= pkg.version %>/le-common.js'
             }
@@ -74,7 +75,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
     // main task to run before deploy the dist war
-    grunt.registerTask('default', ['unit', 'concat', 'uglify']);
+    grunt.registerTask('dist', ['unit', 'concat', 'uglify']);
 
     // download vendor javascript
     grunt.registerTask('init', ['clean:lib', 'wget']);
