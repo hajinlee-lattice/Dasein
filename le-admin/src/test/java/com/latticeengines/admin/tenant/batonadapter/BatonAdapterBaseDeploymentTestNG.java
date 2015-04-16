@@ -13,9 +13,9 @@ import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 
 public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTestNGBase {
-    
+
     private static final Log log = LogFactory.getLog(BatonAdapterBaseDeploymentTestNG.class);
-    
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         LatticeComponent component = getLatticeComponent();
@@ -26,7 +26,7 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
         createTenant(component);
         bootstrap(component);
     }
-    
+
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
         LatticeComponent component = getLatticeComponent();
@@ -35,7 +35,7 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
         }
         deleteTenant(component);
     }
-    
+
     @Test(groups = "deployment")
     public void getDefaultConfig() throws Exception {
         LatticeComponent component = getLatticeComponent();
@@ -46,45 +46,45 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
         SerializableDocumentDirectory dir = restTemplate.getForObject(url, SerializableDocumentDirectory.class);
         testGetDefaultConfig(dir);
     }
-    
+
     private LatticeComponent getLatticeComponent() throws Exception {
         Class<? extends LatticeComponent> componentClass = getLatticeComponentClassToTest();
         LatticeComponent comp = componentClass.newInstance();
         Map<String, LatticeComponent> componentMap = LatticeComponent.getRegisteredServices();
-        
+
         return componentMap.get(comp.getName());
     }
-    
+
     private void bootstrap(LatticeComponent component) throws Exception {
         String contractId = getContractId(component);
         String tenantId = getTenantId(component);
-        
+
         Map<String, String> overrideProps = getOverrideProperties();
         if (overrideProps == null) {
             overrideProps = new HashMap<>();
         }
         super.bootstrap(contractId, tenantId, component.getName(), overrideProps);
     }
-    
+
     private void deleteTenant(LatticeComponent component) throws Exception {
         super.deleteTenant(getContractId(component), getTenantId(component));
     }
-    
+
     private void createTenant(LatticeComponent component) throws Exception {
         super.createTenant(getContractId(component), getTenantId(component));
     }
-    
+
     private String getContractId(LatticeComponent component) {
         return component.getName() + "-contract";
     }
-    
+
     private String getTenantId(LatticeComponent component) {
         return component.getName() + "-tenant";
     }
 
     public abstract Class<? extends LatticeComponent> getLatticeComponentClassToTest();
-    
+
     public abstract Map<String, String> getOverrideProperties();
-    
+
     public abstract void testGetDefaultConfig(SerializableDocumentDirectory dir);
 }

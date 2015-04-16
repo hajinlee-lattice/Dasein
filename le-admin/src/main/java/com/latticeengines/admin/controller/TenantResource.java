@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-
 @Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController
 @RequestMapping(value = "/tenants")
@@ -31,7 +30,7 @@ public class TenantResource {
 
     @Autowired
     private TenantService tenantService;
-    
+
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a Lattice tenant")
@@ -40,34 +39,34 @@ public class TenantResource {
             @RequestBody CustomerSpaceInfo info) {
         return tenantService.createTenant(contractId, tenantId, info);
     }
-    
+
     @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Bootstrap a Lattice tenant service")
     public Boolean bootstrapTenant(@PathVariable String tenantId, //
-            @PathVariable String serviceName,
-            @RequestParam(value = "contractId") String contractId, //
+            @PathVariable String serviceName, @RequestParam(value = "contractId") String contractId, //
             @RequestBody Map<String, String> overrideProperties) {
         return tenantService.bootstrap(contractId, tenantId, serviceName, overrideProperties);
     }
-    
+
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenants for a particular contract id, or all tenants if contractId is null")
-    public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(@RequestParam(value = "contractId", required = false) String contractId) {
+    public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(
+            @RequestParam(value = "contractId", required = false) String contractId) {
         if (StringUtils.isEmpty(contractId)) {
             contractId = null;
         }
         return tenantService.getTenants(contractId);
     }
-    
+
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete tenant for a particular contract id")
     public Boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
         return tenantService.deleteTenant(contractId, tenantId);
     }
-    
+
     @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get config for currently provisioned tenant service")
@@ -80,9 +79,9 @@ public class TenantResource {
     @ResponseBody
     @ApiOperation(value = "Get list of tenant services")
     public List<String> getServices() {
-        return new ArrayList<String>(tenantService.getRegisteredServices());
+        return new ArrayList<String>(tenantService.getRegisteredServiceKeySet());
     }
-    
+
     @RequestMapping(value = "/services/{serviceName}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get metadata of particular metadata service")

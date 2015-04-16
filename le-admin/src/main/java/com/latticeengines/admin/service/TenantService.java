@@ -18,7 +18,7 @@ public interface TenantService {
     
     Boolean deleteTenant(String contractId, String tenantId);
     
-    Set<String> getRegisteredServices();
+    Set<String> getRegisteredServiceKeySet();
 
     BootstrapState getTenantServiceState(String contractId, String tenantId, String serviceName);
     

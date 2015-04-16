@@ -1,9 +1,12 @@
 package com.latticeengines.admin.service.impl;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,13 +34,33 @@ public class TenantServiceImpl implements TenantService {
     private TenantEntityMgr tenantEntityMgr;
 
     public TenantServiceImpl() {
-        Map<String, LatticeComponent> components = LatticeComponent.getRegisteredServices();
+    }
 
-        for (Map.Entry<String, LatticeComponent> entry : components.entrySet()) {
+    @Autowired
+    List<LatticeComponent> components;
+
+    private static Map<String, LatticeComponent> componentMap = new HashMap<>();
+
+    protected static void register(LatticeComponent component) {
+        componentMap.put(component.getName(), component);
+    }
+
+    public Map<String, LatticeComponent> getRegisteredServices() {
+        return componentMap;
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+        for (LatticeComponent component : components) {
+            componentMap.put(component.getName(), component);
+        }
+
+        for (Map.Entry<String, LatticeComponent> entry : componentMap.entrySet()) {
             if (!entry.getValue().doRegistration()) {
                 continue;
             }
             LatticeComponent component = entry.getValue();
+
             ServiceProperties serviceProps = new ServiceProperties();
             serviceProps.dataVersion = 1;
             serviceProps.versionString = component.getVersionString();
@@ -65,8 +88,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Set<String> getRegisteredServices() {
-        return LatticeComponent.getRegisteredServices().keySet();
+    public Set<String> getRegisteredServiceKeySet() {
+        return getRegisteredServices().keySet();
     }
 
     @Override

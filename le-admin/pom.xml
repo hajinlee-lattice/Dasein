@@ -12,6 +12,7 @@
         <le.common.version>1.0.31-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.31-SNAPSHOT</le.domain.version>
         <le.camille.version>1.0.31-SNAPSHOT</le.camille.version>
+	    <le.db.version>1.0.31-SNAPSHOT</le.db.version>
         <le.security.version>1.0.31-SNAPSHOT</le.security.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
@@ -237,6 +238,11 @@
             <version>${le.baton.version}</version>
             <classifier>intf</classifier>
         </dependency>
+	<dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${le.db.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.mangofactory</groupId>
             <artifactId>swagger-springmvc</artifactId>
@@ -283,6 +289,11 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.9.9</version>
+        </dependency>
+	<dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>sqljdbc4</artifactId>
+            <version>4.0</version>
         </dependency>
     </dependencies>
 

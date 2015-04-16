@@ -1,9 +1,12 @@
 package com.latticeengines.admin.tenant.batonadapter.template;
 
+import org.springframework.stereotype.Component;
+
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
+@Component
 public class TemplateComponent extends LatticeComponent {
     
     private CustomerSpaceServiceInstaller installer = new TemplateInstaller();

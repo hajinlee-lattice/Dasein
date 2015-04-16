@@ -14,43 +14,36 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 
 public abstract class LatticeComponent implements HasName {
     private static Log log = LogFactory.getLog(LatticeComponent.class);
-    
-    private static Map<String, LatticeComponent> componentMap = new HashMap<>();
-    
-    protected static void register(LatticeComponent component) {
-        componentMap.put(component.getName(), component);
-    }
-    
-    public static Map<String, LatticeComponent> getRegisteredServices() {
-        scanLatticeComponents();
-        return componentMap;
-    }
-    
-    private static void scanLatticeComponents() {
-        Reflections reflections = new Reflections("com.latticeengines.admin");
 
-        Set<Class<? extends LatticeComponent>> latticeComponentClasses = reflections.getSubTypesOf(LatticeComponent.class);
-        
+    public boolean doRegistration() {
+        return true;
+    }
+
+    public static Map<String, LatticeComponent> getRegisteredServices() {
+        return scanLatticeComponents();
+    }
+
+    private static Map<String, LatticeComponent> scanLatticeComponents() {
+        Map<String, LatticeComponent> componentMap = new HashMap<>();
+        Reflections reflections = new Reflections("com.latticeengines.admin");
+        Set<Class<? extends LatticeComponent>> latticeComponentClasses = reflections
+                .getSubTypesOf(LatticeComponent.class);
+
         for (Class<? extends LatticeComponent> c : latticeComponentClasses) {
             try {
-                c.newInstance();
+                LatticeComponent instance = c.newInstance();
+                componentMap.put(instance.getName(), instance);
             } catch (InstantiationException | IllegalAccessException e) {
                 log.error(String.format("Error instantating LatticeComponent instance %s.", c));
             }
         }
+
+        return componentMap;
     }
-    
-    protected LatticeComponent() {
-        register(this);
-    }
-    
-    public boolean doRegistration() {
-        return true;
-    }
-    
+
     public abstract CustomerSpaceServiceInstaller getInstaller();
-    
+
     public abstract CustomerSpaceServiceUpgrader getUpgrader();
-    
+
     public abstract String getVersionString();
 }
