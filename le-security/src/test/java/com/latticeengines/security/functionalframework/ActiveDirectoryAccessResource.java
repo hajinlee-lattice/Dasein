@@ -9,15 +9,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.security.Credentials;
-
 @RestController
 public class ActiveDirectoryAccessResource {
 
-    @RequestMapping(value = "/adlogin", method = RequestMethod.POST, headers = "Accept=application/json")
-    public void loginWithActiveDirectoryAuthentication(Credentials creds) {
-    }
-    
     @PreAuthorize("hasRole('Enterprise Admins')")
     @RequestMapping(value = "/adhasaccess", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody

@@ -12,12 +12,4 @@
     <import resource="classpath:test-security-properties-context.xml"/>
     <import resource="classpath:security-provider-context.xml"/>
 
-    <security:http auto-config="false"
-                   use-expressions="true" 
-                   pattern="/security/ad*/**" 
-                   authentication-manager-ref="authenticationManager"
-                   entry-point-ref="restAuthenticationEntryPoint" 
-                   create-session="stateless">
-        <security:custom-filter ref="restActiveDirectoryServicesFilter" before="PRE_AUTH_FILTER" />
-    </security:http>
 </beans>

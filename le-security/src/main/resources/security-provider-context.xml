@@ -21,4 +21,13 @@
         </property>
     </bean>
 
+    <security:http auto-config="false"
+                   use-expressions="true" 
+                   pattern="/**/adlogin/**" 
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint" 
+                   create-session="stateless">
+        <security:custom-filter ref="restActiveDirectoryServicesFilter" before="PRE_AUTH_FILTER" />
+    </security:http>
+
 </beans>

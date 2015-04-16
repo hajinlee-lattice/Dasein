@@ -67,7 +67,9 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
             
             try {
                 String token = buildToken(auth);
+                response.setContentType("application/json; charset=UTF-8");
                 response.getOutputStream().write(token.getBytes());
+                response.getOutputStream().flush();
             } catch (Exception e) {
                 throw new BadCredentialsException("Unauthorized.");
             }
@@ -89,7 +91,7 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
         token.append(StringUtils.join(rights, "|"));
         String encrypted = CipherUtils.encrypt(token.toString());
         encrypted = encrypted.replaceAll("[\\r\\n\\t]+", "");
-        return encrypted;
+        return String.format("{ \"Token\": \"%s\" }", encrypted);
     }
     
     private UsernamePasswordAuthenticationToken buildAuth(String ticket) throws Exception {
