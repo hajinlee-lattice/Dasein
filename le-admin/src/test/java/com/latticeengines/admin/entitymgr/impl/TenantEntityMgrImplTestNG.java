@@ -24,7 +24,7 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
     @Test(groups = "functional", timeOut = 5000)
     public void getTenantServiceState() throws Exception {
         CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
-        
+
         BootstrapState state = null;
         int numTries = 0;
         do {
@@ -32,10 +32,10 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
             Thread.sleep(1000L);
             numTries++;
         } while (state.state != BootstrapState.State.OK && numTries < 5);
-        
+
         assertEquals(state.installedVersion, 1);
     }
-    
+
     @Test(groups = "functional")
     public void getDefaultTenantServiceConfig() {
         SerializableDocumentDirectory dir =

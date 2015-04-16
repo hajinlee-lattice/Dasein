@@ -1,5 +1,6 @@
 package com.latticeengines.admin.functionalframework;
 
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
@@ -7,7 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +33,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
-import com.latticeengines.domain.exposed.pls.LoginDocument;
-import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.Constants;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -45,8 +42,8 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     private static final Log log = LogFactory.getLog(AdminFunctionalTestNGBase.class);
 
-    protected static final String adminUsername = "bnguyen@lattice-engines.com";
-    protected static final String adminPassword = "tahoe";
+    protected static final String ADTesterUsername = Constants.ACTIVE_DIRECTORY_TESTER_USERNAME;
+    protected static final String ADTesterPassword = Constants.ACTIVE_DIRECTORY_TESTER_PASSWORD;
 
     @Autowired
     private BatonService batonService;
@@ -56,6 +53,8 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     
     @Value("${admin.api.hostport}")
     private String hostPort;
+
+    private String token;
     
     protected RestTemplate restTemplate = new RestTemplate();
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
@@ -63,8 +62,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
             "");
     
-    public AdminFunctionalTestNGBase() {
-    }
+    public AdminFunctionalTestNGBase() {}
 
     public static class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
 
@@ -94,6 +92,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        loginAD();
         createTenant("CONTRACT1", "TENANT1");
         CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
         ServiceWarden.commandBootstrap(scope.getServiceName(), scope.getCustomerSpace(), scope.getProperties());
@@ -115,8 +114,6 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     }
     
     protected void createTenant(String contractId, String tenantId) throws Exception {
-
-        loginAndAttach();
 
         if (ContractLifecycleManager.exists(contractId)) {
             ContractLifecycleManager.delete(contractId);
@@ -154,20 +151,17 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         }
     }
 
-    protected UserDocument loginAndAttach(){
+    @SuppressWarnings("unchecked")
+    protected void loginAD(){
         Credentials creds = new Credentials();
-        creds.setUsername(adminUsername);
-        creds.setPassword(DigestUtils.sha256Hex(adminPassword));
+        creds.setUsername(ADTesterUsername);
+        creds.setPassword(ADTesterPassword);
 
-        LoginDocument loginDoc = restTemplate.postForObject(getRestHostPort() + "/admin/login", creds, LoginDocument.class);
-
-        Tenant tenant = new Tenant();
-        tenant.setId(Constants.GLOBAL_ADMIN_TENANT_ID);
-        tenant.setName(Constants.GLOBAL_ADMIN_TENANT_NAME);
-        addAuthHeader.setAuthValue(loginDoc.getData());
+        Map<String, String> map = restTemplate.postForObject(getRestHostPort() + "/admin/adlogin", creds, Map.class);
+        token = map.get("Token");
+        assertNotNull(token);
+        addAuthHeader.setAuthValue(token);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
-
-        return restTemplate.postForObject(getRestHostPort() + "/admin/attach", tenant, UserDocument.class);
     }
 
 }
