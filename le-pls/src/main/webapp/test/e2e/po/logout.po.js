@@ -3,8 +3,8 @@
 var Logout = function() {
     var userDropdown = require('./userdropdown.po');
  
-    this.logout = function(name) {
-        userDropdown.toggleDropdown().click();
+    this.logout = function() {
+        userDropdown.toggleDropdown();
         browser.driver.wait(function(){
             return userDropdown.signout.isPresent();
         }, 10000, 'dropdown menu should appear with in 10 sec.');
@@ -13,11 +13,11 @@ var Logout = function() {
     };
 
   	this.logoutAsAdmin = function() {
-        this.logout(browser.params.adminDisplayName);
+        this.logout();
     };
 
   	this.logoutAsNonAdmin = function() {
-        this.logout(browser.params.nonAdminDisplayName);
+        this.logout();
     };
 
 };
