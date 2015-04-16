@@ -3,6 +3,7 @@ package com.latticeengines.security.provider.activedirectory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
@@ -63,7 +64,6 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
 
             UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) getAuthenticationManager()
                     .authenticate(authRequest);
-
             
             try {
                 String token = buildToken(auth);
@@ -98,11 +98,26 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
         String decrypted = CipherUtils.decrypt(ticket);
         String[] tokens = decrypted.split("\\|");
         
+        long ticketTime = Long.parseLong(tokens[1]);
+        
+        if (!isSameDay(ticketTime, System.currentTimeMillis())) {
+            throw new BadCredentialsException("Token expired.");
+        }
         List<GrantedAuthority> rights = new ArrayList<>();
         for (int i = 2; i < tokens.length; i++) {
             rights.add(new SimpleGrantedAuthority(tokens[i]));
         }
         return new UsernamePasswordAuthenticationToken(tokens[0], null, rights);
+    }
+    
+    boolean isSameDay(long ticketTime, long currentTime) {
+        Calendar ticketDay = Calendar.getInstance();
+        ticketDay.setTimeInMillis(ticketTime);
+        
+        Calendar today = Calendar.getInstance();
+        today.setTimeInMillis(currentTime);
+        
+        return ticketDay.get(Calendar.DATE) == today.get(Calendar.DATE);
     }
 
     @SuppressWarnings("deprecation")
