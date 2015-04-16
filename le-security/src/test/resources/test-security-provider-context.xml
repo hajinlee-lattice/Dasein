@@ -8,13 +8,16 @@
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
-    <import resource="classpath:test-security-context.xml"/>
-    <mvc:annotation-driven/>
+    <import resource="classpath:security-context.xml"/>
+    <import resource="classpath:test-security-properties-context.xml"/>
+    <import resource="classpath:security-provider-context.xml"/>
 
-    <security:global-method-security 
-        secured-annotations="enabled" 
-        jsr250-annotations="enabled"
-        pre-post-annotations="enabled" 
-        proxy-target-class="true" />
-    
+    <security:http auto-config="false"
+                   use-expressions="true" 
+                   pattern="/security/ad*/**" 
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint" 
+                   create-session="stateless">
+        <security:custom-filter ref="restActiveDirectoryServicesFilter" before="PRE_AUTH_FILTER" />
+    </security:http>
 </beans>

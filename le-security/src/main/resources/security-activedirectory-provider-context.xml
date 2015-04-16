@@ -8,13 +8,17 @@
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
-    <import resource="classpath:test-security-context.xml"/>
-    <mvc:annotation-driven/>
-
-    <security:global-method-security 
-        secured-annotations="enabled" 
-        jsr250-annotations="enabled"
-        pre-post-annotations="enabled" 
-        proxy-target-class="true" />
+    <bean id="activeDirectoryProvider"
+        class="org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider">
+        <constructor-arg value="${security.ldap.domain:ldapserver}" />
+        <constructor-arg value="${security.ldap.url: lattice.local}" />
+        <property name="convertSubErrorCodesToExceptions" value="true" />
+        <property name="useAuthenticationRequestCredentials" value="true" />
+    </bean>    
+    
+    <bean id="restActiveDirectoryServicesFilter" class="com.latticeengines.security.provider.activedirectory.RestActiveDirectoryFilter">
+        <property name="authenticationManager" ref="authenticationManager" />
+        <property name="authenticationSuccessHandler" ref="restAuthenticationSuccessHandler" />
+    </bean>
     
 </beans>

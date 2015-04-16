@@ -1,4 +1,4 @@
-package com.latticeengines.security.provider.globalauth;
+package com.latticeengines.security.provider;
 
 import java.io.IOException;
 

@@ -8,22 +8,9 @@
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
-    <context:component-scan base-package="com.latticeengines.security" />
-
     <bean id="restServicesFilter" class="com.latticeengines.security.provider.globalauth.RestGlobalAuthenticationFilter">
         <property name="authenticationManager" ref="authenticationManager" />
         <property name="authenticationSuccessHandler" ref="restAuthenticationSuccessHandler" />
     </bean>
     
-    <security:authentication-manager alias="authenticationManager">
-        <security:authentication-provider ref="globalAuthProvider" />
-    </security:authentication-manager>
-
-    <security:global-method-security 
-        secured-annotations="enabled" 
-        jsr250-annotations="enabled"
-        pre-post-annotations="enabled" 
-        proxy-target-class="true" />
-
-
 </beans>

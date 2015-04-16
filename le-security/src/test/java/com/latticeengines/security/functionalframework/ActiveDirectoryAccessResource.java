@@ -1,0 +1,39 @@
+package com.latticeengines.security.functionalframework;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.latticeengines.domain.exposed.security.Credentials;
+
+@RestController
+public class ActiveDirectoryAccessResource {
+
+    @RequestMapping(value = "/adlogin", method = RequestMethod.POST, headers = "Accept=application/json")
+    public void loginWithActiveDirectoryAuthentication(Credentials creds) {
+    }
+    
+    @PreAuthorize("hasRole('Enterprise Admins')")
+    @RequestMapping(value = "/adhasaccess", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    public Map<String, String> getSomethingWithAccess() {
+        Map<String, String> returnVal = new HashMap<>();
+        returnVal.put("SomeReturnValue", "ABCD");
+        return returnVal;
+    }
+    
+    @PreAuthorize("hasRole('Enterprise Admins1')")
+    @RequestMapping(value = "/adnoaccess", method = RequestMethod.GET, headers = "Accept=application/json")
+    public Map<String, String> getSomethingWithoutAccess() {
+        Map<String, String> returnVal = new HashMap<>();
+        returnVal.put("SomeReturnValue", "ABCD");
+        return returnVal;
+    }
+    
+    
+}

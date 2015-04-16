@@ -8,13 +8,17 @@
   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
   http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
-    <import resource="classpath:test-security-context.xml"/>
-    <mvc:annotation-driven/>
+    <context:component-scan base-package="com.latticeengines.security" />
+    <import resource="classpath:security-activedirectory-provider-context.xml"/>
+    <import resource="classpath:security-globalauth-provider-context.xml"/>
 
-    <security:global-method-security 
-        secured-annotations="enabled" 
-        jsr250-annotations="enabled"
-        pre-post-annotations="enabled" 
-        proxy-target-class="true" />
-    
+    <bean id="authenticationManager" class="org.springframework.security.authentication.ProviderManager">
+        <property name="providers">
+            <list>
+                <ref bean="activeDirectoryProvider"/>
+                <ref bean="globalAuthProvider"/>
+            </list>
+        </property>
+    </bean>
+
 </beans>

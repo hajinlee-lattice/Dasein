@@ -12,8 +12,8 @@
         <le.domain.version>1.0.31-SNAPSHOT</le.domain.version>
         <le.camille.version>1.0.31-SNAPSHOT</le.camille.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
-        <globalauth.base.url>https://bodcdevvcus209.dev.lattice.local/test</globalauth.base.url>
-        <certificate.name>bodcdevvcus209.dev.lattice.local.jks</certificate.name>
+        <globalauth.base.url>https://tynamo.lattice.local/Bard</globalauth.base.url>
+        <certificate.name>tynamo.lattice.local.jks</certificate.name>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
 
@@ -435,6 +435,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-ldap</artifactId>
+            <version>${spring.security.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
             <version>${spring.security.version}</version>
         </dependency>
@@ -464,12 +469,23 @@
             <groupId>com.mangofactory</groupId>
             <artifactId>swagger-springmvc</artifactId>
             <version>0.9.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-webmvc</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.ajar</groupId>
             <artifactId>swagger-spring-mvc-ui</artifactId>
             <version>0.4</version>
         </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>jsr250-api</artifactId>
+            <version>1.0</version>
+        </dependency>    
     </dependencies>
 
 </project>

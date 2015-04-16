@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 @ControllerAdvice
+@SuppressWarnings("deprecation")
 public class SecurityControllerExceptionHandler {
 
     private static final Log log = LogFactory.getLog(SecurityControllerExceptionHandler.class);
@@ -25,6 +26,7 @@ public class SecurityControllerExceptionHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ModelAndView handleException(AccessDeniedException e) {
+        
         MappingJacksonJsonView jsonView = new MappingJacksonJsonView();
         String stackTrace = e.getCause() != null ? ExceptionUtils.getFullStackTrace(e.getCause()) : ExceptionUtils.getStackTrace(e);
         log.error(stackTrace);
