@@ -6,11 +6,6 @@
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <Set name="contextPath">/</Set>
     <Set name="war"><Property name="jetty.webapps" default="."/>/le-admin-1.0.31-SNAPSHOT.war</Set>
-    <Set name="connectorNames">
-        <Array type="String">
-            <Item>connB</Item>
-        </Array>
-    </Set>
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Optional context configuration                                  -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
