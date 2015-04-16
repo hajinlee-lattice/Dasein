@@ -16,7 +16,7 @@
     <import resource="classpath:pls-yarn-config-context.xml"/>
     <import resource="classpath:pls-properties-context.xml"/>
     <import resource="classpath:pls-camille-context.xml"/>
-    <import resource="classpath:security-globalauth-provider-context.xml"/>
+    <import resource="classpath:security-provider-context.xml"/>
     
     <security:http use-expressions="true" 
                    pattern="/pls/modelsummaries/**" 
@@ -49,4 +49,5 @@
                    create-session="stateless">
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER" />
     </security:http>
+
 </beans>
