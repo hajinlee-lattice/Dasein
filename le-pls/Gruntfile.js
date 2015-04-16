@@ -509,10 +509,7 @@ module.exports = function (grunt) {
                 options: {
                     args: {
                         browser:       'chrome',
-                        //baseUrl:       'http://localhost:8080/',
-                        baseUrl:       '<%= testenv.url %>',
-                        seleniumAddress:    'http://localhost:4444/wd/hub'
-                        //seleniumPort:    '4444'
+                        baseUrl:       '<%= testenv.url %>'
                     }
                 }
             },
@@ -652,19 +649,14 @@ module.exports = function (grunt) {
 
     var e2eChromeCcText = 'Runs selenium end to end (protractor) unit tests on Chrome with code coverage';
     grunt.registerTask('e2eChromeCc', e2eChromeCcText, [
-        //'clean:coverage',
-        //'copy:e2eCoverage',
-        //'instrument',
-        //'connect:server',
+        'http:cleanupUsers',
         'protractor_coverage:chrome',
         'makeReport',
-//        'http:cleanupUsers'
+        'http:cleanupUsers'
     ]);
     
     var instrumentJsText = 'Instrument javascript code for code coverage';
     grunt.registerTask('instrumentJs', instrumentJsText, [
-        //'clean:coverage',
-        //'copy:e2eCoverage',
         'instrument',
         'copy:instrumented'
     ]);
