@@ -26,8 +26,6 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.propdata.CommandIds;
 import com.latticeengines.domain.exposed.propdata.Commands;
@@ -391,8 +389,12 @@ public class PropDataDBServiceImpl implements PropDataDBService {
         String keyCols = requestContext.getProperty(ImportExportKey.KEY_COLS.getKey(), String.class);
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
 
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.host(jdbcHost).port(Integer.parseInt(jdbcPort)).db(jdbcDb)
+                .user(jdbcUser).password(jdbcPassword).dbType(jdbcType);
+        DbCreds creds = new DbCreds(builder);
         Integer appId = propDataJobService.exportData(table, getDataHdfsPath(customer, table, PROPDATA_INPUT),
-                assignedQueue, customer, getConnectionString()).getId();
+                creds, assignedQueue, customer).getId();
 
         Integer applicationId;
         if (appId != null) {
@@ -454,16 +456,5 @@ public class PropDataDBServiceImpl implements PropDataDBService {
         commands.setSourceTable(sourceTable);
 
         return commands;
-    }
-
-    private String getConnectionString() {
-
-        String driverClass = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-        try {
-            Class.forName(driverClass);
-        } catch (ClassNotFoundException e) {
-            throw new LedpException(LedpCode.LEDP_11000, e, new String[] { driverClass });
-        }
-        return jdbcUrl + "user=" + jdbcUser + ";password=" + jdbcPassword;
     }
 }

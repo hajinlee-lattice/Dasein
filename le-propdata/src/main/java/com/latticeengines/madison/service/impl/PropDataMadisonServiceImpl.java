@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.kenai.jffi.Array;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -319,9 +318,12 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             }
             log.info("Uploading today's aggregation data=" + sourceDir);
             String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
-            propDataJobService.exportData(getTableNew(), getOutputDir(sourceDir), assignedQueue, getJobName()
-                    + "-uploadAggregationData", numMappers,
-                    getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword));
+            DbCreds.Builder builder = new DbCreds.Builder();
+            builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
+                    .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
+            DbCreds creds = new DbCreds(builder);
+            propDataJobService.exportData(getTableNew(), getOutputDir(sourceDir), creds, assignedQueue, getJobName()
+                    + "-uploadAggregationData", numMappers);
 
             swapTargetTables(assignedQueue);
             uploadTodayRawData(today);
@@ -360,6 +362,10 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         String connectionString = getConnectionString(targetJdbcUrl, targetJdbcUser, targetJdbcPassword);
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.host(targetJdbcHost).port(Integer.parseInt(targetJdbcPort)).db(targetJdbcDb)
+                .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
+        DbCreds creds = new DbCreds(builder);
         // propDataJobService.eval("DROP TABLE" + tableName, assignedQueue,
         // getJobName() + "-uploadRawData0", 1,
         // connectionString);
@@ -367,8 +373,9 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                 + ";ALTER TABLE " + tableName + " DROP COLUMN ID1", assignedQueue, getJobName()
                 + "-uploadRawDataCreateTable", 1, connectionString);
         log.info("Uploading today's data, targetTable=" + tableName + " connectionUrl=" + connectionString);
-        propDataJobService.exportData(tableName, todayIncrementalPath, assignedQueue, getJobName()
-                + "-uploadRawDataExportData", numMappers, connectionString);
+        
+        propDataJobService.exportData(tableName, todayIncrementalPath, creds, assignedQueue, getJobName()
+                + "-uploadRawDataExportData", numMappers);
         propDataJobService.eval("EXEC MadisonLogic_MergeDailyDepivoted " + tableName, assignedQueue, getJobName()
                 + "-uploadRawDataMergeTable", 1, connectionString);
         log.info("Finished uploading today's raw data=" + todayIncrementalPath);
