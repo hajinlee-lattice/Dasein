@@ -357,5 +357,68 @@ angular.module('mainApp.models.services.ModelService', [
         return deferred.promise;
 
     };
+    
+    this.GetAllSegments = function (modelList) {
+        var deferred = $q.defer();
+        var result;
+
+        $http({
+            method: 'GET',
+            url: '/pls/segments/',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        .success(function(data, status, headers, config) {
+            if (data == null) {
+                result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                };
+                deferred.resolve(result);
+            } else {
+                result = {
+                    success: true,
+                    resultObj: {},
+                    resultErrors: null
+                };
+                
+                var modelDict = {};
+                if (modelList != null && modelList.length > 0) {
+                    for (var i=0;i<modelList.length;i++) {
+                        modelDict[modelList[i].Id] = modelList[i].DisplayName;
+                    }
+                }
+                
+                var segmentList = data;
+                if (segmentList != null && segmentList.length > 0 && 
+                    Object.keys(modelDict).length > 0) {
+                    for (var x=0;x<segmentList.length;x++) {
+                        var segment = segmentList[x];
+                        if (!StringUtility.IsEmptyString(segment.ModelId)) {
+                            segment.ModelName = modelDict[segment.ModelId];
+                        }
+                    }
+                }
+                
+                result.resultObj = segmentList;
+            }
+
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            result = {
+                success: false,
+                resultObj: null,
+                resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+            };
+
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
 
 });
