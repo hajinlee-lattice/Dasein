@@ -23,7 +23,7 @@
 
     <security:http auto-config="false"
                    use-expressions="true" 
-                   pattern="/**/adlogin/**" 
+                   pattern="/*/adlogin/**" 
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint" 
                    create-session="stateless">

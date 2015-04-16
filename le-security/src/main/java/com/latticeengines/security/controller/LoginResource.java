@@ -35,7 +35,7 @@ import com.latticeengines.security.exposed.service.SessionService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
-@Api(value = "login", description = "REST resource for logging in")
+@Api(value = "login", description = "REST resource for logging in using Lattice Global Auth")
 @RestController
 public class LoginResource {
 
@@ -50,7 +50,7 @@ public class LoginResource {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Login to the PLS application")
+    @ApiOperation(value = "Login to Lattice external application")
     public LoginDocument login(@RequestBody Credentials creds) {
         LoginDocument doc = new LoginDocument();
 
