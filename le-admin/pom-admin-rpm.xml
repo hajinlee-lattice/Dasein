@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>le-admin-rpm</artifactId>
+    <packaging>rpm</packaging>
+    <description>LE ADMIN RPM</description>
+
+    <properties>
+        <le.rpm.version>1.0.31-SNAPSHOT</le.rpm.version>
+    </properties>
+    <parent>
+        <groupId>com.latticeengines</groupId>
+        <artifactId>le-parent</artifactId>
+        <version>1.0.31-SNAPSHOT</version>
+        <relativePath>../le-parent</relativePath>
+    </parent>
+
+    <profiles>
+        <profile>
+            <id>development</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>devcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <admin.properties.path>conf/env/devcluster</admin.properties.path>
+                <bin.env.path>bin/env/devcluster</bin.env.path>
+                <jks.name>bodcdevvcus209.dev.lattice.local.jks</jks.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>integration</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>environment.type</name>
+                    <value>intcluster</value>
+                </property>
+            </activation>
+            <properties>
+                <admin.properties.path>conf/env/intcluster</admin.properties.path>
+                <bin.env.path>bin/env/intcluster</bin.env.path>
+                <jks.name>bodcdevvcus209.dev.lattice.local.jks</jks.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>qa</id>
+            <activation>
+                <property>
+                    <name>environment.type</name>
+                    <value>qacluster</value>
+                </property>
+            </activation>
+            <properties>
+                <admin.properties.path>conf/env/qacluster</admin.properties.path>
+                <bin.env.path>bin/env/qacluster</bin.env.path>
+                <jks.name>bodcdevvcus209.dev.lattice.local.jks</jks.name>
+            </properties>
+        </profile>
+    </profiles>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>rpm-maven-plugin</artifactId>
+                <version>2.1-alpha-4</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <!-- license>GPL (c) 2005, SWWDC</license -->
+                    <!--distribution>Trash 2005</distribution -->
+                    <group>Application/Collectors</group>
+                    <!-- prefix>/usr/local</prefix -->
+                    <changelogFile>src/main/resources/changelog</changelogFile>
+                    <mappings>
+                        <mapping>
+                            <directory>/opt/jetty/webapps</directory>
+                            <filemode>755</filemode>
+                            <username>yarn</username>
+                            <groupname>yarn</groupname>
+                            <sources>
+                                <source>
+                                    <location>target/le-admin-${le.rpm.version}.war</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/etc/ledp</directory>
+                            <filemode>755</filemode>
+                            <username>root</username>
+                            <groupname>root</groupname>
+                            <sources>
+                                <source>
+                                    <location>${admin.properties.path}/admin.properties</location>
+                                </source>
+                                <source>
+                                    <location>certificates/${jks.name}</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/opt/jetty/bin</directory>
+                            <filemode>755</filemode>
+                            <usaername>yarn</usaername>
+                            <groupname>yarn</groupname>
+                            <sources>
+                                <source>
+                                    <location>${bin.env.path}/jetty.sh</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                        <mapping>
+                            <directory>/home/yarn</directory>
+                            <filemode>700</filemode>
+                            <username>yarn</username>
+                            <groupname>hadoop</groupname>
+                            <sources>
+                                <source>
+                                    <location>${bin.env.path}/.bashrc</location>
+                                </source>
+                            </sources>
+                        </mapping>
+                    </mappings>
+                    <preremoveScriptlet>
+                        <scriptFile>src/main/scripts/preremove</scriptFile>
+                    </preremoveScriptlet>
+                    <preinstallScriptlet>
+                        <scriptFile>src/main/scripts/preinstall</scriptFile>
+                    </preinstallScriptlet>
+                    <postinstallScriptlet>
+                        <scriptFile>src/main/scripts/postinstall</scriptFile>
+                        <fileEncoding>utf-8</fileEncoding>
+                    </postinstallScriptlet>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

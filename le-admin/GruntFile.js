@@ -258,7 +258,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
 
     // main task to run before deploy the dist war
-    grunt.registerTask('default', [
+    grunt.registerTask('dist', [
         'copy:backup',
         'clean:dist',
         'uglify',
