@@ -4,7 +4,7 @@
     <!--  + contextPath                                                  -->
     <!--  + war OR resourceBase                                          -->
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <Set name="contextPath">/</Set>
+    <Set name="contextPath">/tenantconsole</Set>
     <Set name="war"><Property name="jetty.webapps" default="."/>/le-admin-1.0.31-SNAPSHOT.war</Set>
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Optional context configuration                                  -->
