@@ -19,7 +19,7 @@ public class ActiveDirectoryAccessResourceTestNG extends SecurityFunctionalTestN
     private String token;
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "functional", dependsOnMethods = "loginWithActiveDirectoryAuthentication", enabled = true)
+    @Test(groups = "functional", dependsOnMethods = "loginWithActiveDirectoryAuthentication", enabled = false)
     public void getSomethingWithAccess() {
         addAuthHeader.setAuthValue(token);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
@@ -27,7 +27,7 @@ public class ActiveDirectoryAccessResourceTestNG extends SecurityFunctionalTestN
         assertTrue(retVal.containsKey("SomeReturnValue"));
     }
 
-    @Test(groups = "functional", dependsOnMethods = "loginWithActiveDirectoryAuthentication", enabled = true)
+    @Test(groups = "functional", dependsOnMethods = "loginWithActiveDirectoryAuthentication", enabled = false)
     public void getSomethingWithoutAccess() {
         addAuthHeader.setAuthValue(token);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
@@ -44,11 +44,11 @@ public class ActiveDirectoryAccessResourceTestNG extends SecurityFunctionalTestN
     }
 
     @SuppressWarnings("unchecked")
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void loginWithActiveDirectoryAuthentication() {
         Credentials creds = new Credentials();
-        creds.setUsername("s-opsview@lattice.local");
-        creds.setPassword("SUmp6UnpOXiwK45b");
+        creds.setUsername("a@lattice.local");
+        creds.setPassword("b");
         
         Map<String, String> map = restTemplate.postForObject(getRestAPIHostPort() + "/security/adlogin", creds, Map.class);
         token = map.get("Token");
