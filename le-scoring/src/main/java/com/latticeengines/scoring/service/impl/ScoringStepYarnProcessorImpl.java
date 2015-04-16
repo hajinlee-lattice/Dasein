@@ -1,8 +1,8 @@
 package com.latticeengines.scoring.service.impl;
 
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -24,18 +24,21 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
-import com.latticeengines.dataplatform.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
-import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
-import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
+import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringJob;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
@@ -46,7 +49,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     private SqoopSyncJobService sqoopSyncJobService;
 
     @Autowired
-    private ModelingJobService modelingJobService;
+    private JobService jobService;
 
     @Autowired
     private MetadataService metadataService;
@@ -86,6 +89,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     @Autowired
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
+
+    @Autowired
+    private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
     private static final String JSON_SUFFIX = ".json";
 
@@ -134,7 +140,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
         ApplicationId appId = sqoopSyncJobService.importData(table, targetDir, creds,
                 LedpQueueAssigner.getMRQueueNameForSubmission(), customer, Arrays.asList("Nutanix_EventTable_Clean"),
-                new HashMap<String, String>(), 4);
+                "", 4);
         return appId;
     }
 
@@ -170,7 +176,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelFilePaths));
         mapReduceCustomizationRegistry.register(new EventDataScoringJob(yarnConfiguration));
-        ApplicationId appId = modelingJobService.submitMRJob("scoringJob", properties);
+        ApplicationId appId = jobService.submitMRJob("scoringJob", properties);
 
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).dbType(dbType);
@@ -186,9 +192,15 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         DbCreds creds = new DbCreds(builder);
         String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
         String targetTable = createNewTable(customer, creds);
+
+        ScoringCommandResult result = new ScoringCommandResult(scoringCommand.getId(), ScoringCommandStatus.NEW,
+                targetTable, 0, new Timestamp(System.currentTimeMillis()));
+        scoringCommandResultEntityMgr.create(result);
+
         String sourceDir = customerBaseDir + "/" + customer + "/scoring/scores/" + scoringCommand.getTableName();
-        sqoopSyncJobService.exportData(targetTable, sourceDir, creds, queue, customer, 4);
-        return null;
+        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, creds, queue, customer, 4);
+
+        return appId;
     }
 
     private String createNewTable(String customer, DbCreds creds) {

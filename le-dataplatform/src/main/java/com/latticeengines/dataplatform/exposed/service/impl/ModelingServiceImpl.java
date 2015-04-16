@@ -1,5 +1,6 @@
 package com.latticeengines.dataplatform.exposed.service.impl;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -14,7 +16,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Field;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,11 +38,15 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.entitymanager.modeling.ModelEntityMgr;
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
+import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.ModelingService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
-import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
+import com.latticeengines.dataplatform.runtime.load.LoadProperty;
+import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingJob;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -50,6 +55,9 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 import com.latticeengines.domain.exposed.modeling.DataProfileConfiguration;
+import com.latticeengines.domain.exposed.modeling.DataSchema;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
@@ -81,7 +89,13 @@ public class ModelingServiceImpl implements ModelingService {
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     @Autowired
+    private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
+
+    @Autowired
     private SqoopSyncJobService sqoopSyncJobService;
+
+    @Autowired
+    private MetadataService metadataService;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
@@ -388,6 +402,7 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), model.getCustomer());
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
+        mapReduceCustomizationRegistry.register(new EventDataSamplingJob(yarnConfiguration));
         return modelingJobService.submitMRJob("samplingJob", properties);
     }
 
@@ -426,7 +441,7 @@ public class ModelingServiceImpl implements ModelingService {
             List<String> featureList = new ArrayList<String>();
             Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(schemaPath));
             boolean useIncludeList = includeList.size() > 0;
-            for (Field field : schema.getFields()) {
+            for (org.apache.avro.Schema.Field field : schema.getFields()) {
                 String name = field.name();
                 // If an include list is passed, only use the features in the
                 // include list
@@ -533,7 +548,7 @@ public class ModelingServiceImpl implements ModelingService {
 
             Set<String> columnSet = new HashSet<String>();
             Set<String> featureSet = new HashSet<String>();
-            for (Field field : dataSchema.getFields()) {
+            for (org.apache.avro.Schema.Field field : dataSchema.getFields()) {
                 columnSet.add(field.getProp("columnName"));
             }
 
@@ -588,7 +603,53 @@ public class ModelingServiceImpl implements ModelingService {
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
 
         return sqoopSyncJobService.importData(model.getTable(), model.getDataHdfsPath(), config.getCreds(), assignedQueue,
-                model.getCustomer(), config.getKeyCols(), config.getProperties());
+                model.getCustomer(), config.getKeyCols(), columnsToInclude(model.getTable(), config.getCreds(), config.getProperties()));
+    }
+
+
+    private String columnsToInclude(String table, DbCreds creds, Map<String, String> properties){
+        StringBuilder lb = new StringBuilder();
+        try {
+            DataSchema dataSchema = metadataService.createDataSchema(creds, table);
+            List<Field> fields = dataSchema.getFields();
+
+            boolean excludeTimestampCols = Boolean.parseBoolean(LoadProperty.EXCLUDETIMESTAMPCOLUMNS.getValue(properties));
+            boolean first = true;
+            for (Field field : fields) {
+                
+                // The scoring engine does not know how to convert datetime columns into a numeric value, 
+                // which Sqoop does automatically. This should not be a problem now since dates are
+                // typically not predictive anyway so we can safely exclude them for now.
+                // We can start including TIMESTAMP and TIME columns by explicitly setting EXCLUDETIMESTAMPCOLUMNS=false
+                // in the load configuration.
+                if (excludeTimestampCols && (field.getSqlType() == Types.TIMESTAMP || field.getSqlType() == Types.TIME)) {
+                    continue;
+                }
+                String name = field.getName();
+                String colName = field.getColumnName();
+                
+                if (name == null) {
+                    log.warn("Field name is null.");
+                    continue;
+                }
+                if (colName == null) {
+                    log.warn("Column name is null.");
+                    continue;
+                }
+                if (!first) {
+                    lb.append(",");
+                } else {
+                    first = false;
+                }
+                lb.append(colName);
+                if (!colName.equals(name)) {
+                    log.warn(LedpException.buildMessageWithCode(LedpCode.LEDP_11005, new String[] { colName, name }));
+                }
+            }
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_11004, new String[] { table });
+        }
+        return lb.toString();
     }
 
     @Override

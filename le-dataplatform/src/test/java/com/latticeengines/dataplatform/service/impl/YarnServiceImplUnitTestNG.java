@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.exposed.service.impl;
+package com.latticeengines.dataplatform.service.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -13,6 +13,8 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.AppsInfo;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.Test;
+
+import com.latticeengines.dataplatform.service.impl.YarnServiceImpl;
 
 public class YarnServiceImplUnitTestNG {
 

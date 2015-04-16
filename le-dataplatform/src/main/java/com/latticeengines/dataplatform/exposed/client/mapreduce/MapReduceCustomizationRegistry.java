@@ -1,17 +1,14 @@
-package com.latticeengines.dataplatform.client.mapreduce;
+package com.latticeengines.dataplatform.exposed.client.mapreduce;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingJob;
-
 @Component("mapReduceCustomizationRegistry")
-public class MapReduceCustomizationRegistry implements InitializingBean {
+public class MapReduceCustomizationRegistry {
 
     @Autowired
     private Configuration hadoopConfiguration;
@@ -27,11 +24,6 @@ public class MapReduceCustomizationRegistry implements InitializingBean {
 
     public MRJobCustomization getCustomization(String jobType) {
         return registry.get(jobType);
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        register(new EventDataSamplingJob(hadoopConfiguration));
     }
 
 }

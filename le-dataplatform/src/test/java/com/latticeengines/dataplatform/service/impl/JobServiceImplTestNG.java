@@ -10,7 +10,6 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -30,12 +29,15 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
+import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingJob;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
-import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -51,10 +53,16 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
     private ModelingJobService modelingJobService;
 
     @Autowired
+    private SqoopSyncJobService sqoopSyncJobService;
+
+    @Autowired
     private Configuration hadoopConfiguration;
 
     @Autowired
     private JobNameService jobNameService;
+
+    @Autowired
+    private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
     private String inputDir = null;
     private String outputDir = null;
@@ -263,6 +271,7 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         properties.setProperty(MapReduceProperty.OUTPUT.name(), outputDir);
         properties.setProperty(EventDataSamplingProperty.SAMPLE_CONFIG.name(), samplingConfig.toString());
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), "Dell");
+        mapReduceCustomizationRegistry.register(new EventDataSamplingJob(hadoopConfiguration));
         ApplicationId applicationId = modelingJobService.submitMRJob("samplingJob", properties);
         FinalApplicationStatus status = waitForStatus(applicationId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
@@ -323,9 +332,9 @@ public class JobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
         builder.host(dataSourceHost).port(dataSourcePort).db(dataSourceDB).user(dataSourceUser)
                 .password(dataSourcePasswd).dbType(dataSourceDBType);
         DbCreds creds = new DbCreds(builder);
-        ApplicationId appId = modelingJobService.loadData("iris", baseDir + "/tmp/import", creds,
+        ApplicationId appId = sqoopSyncJobService.importData("iris", baseDir + "/tmp/import", creds,
                 "Priority0.MapReduce.0", "Dell", Arrays.<String> asList(new String[] { "ID" }),
-                new HashMap<String, String>());
+                "");
         FinalApplicationStatus status = waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
         List<String> files = HdfsUtils.getFilesForDir(hadoopConfiguration, baseDir + "/tmp/import",

@@ -13,7 +13,7 @@
            http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 
     <aop:aspectj-autoproxy/>           
-        <bean id="validationAspect" class="com.latticeengines.dataplatform.exposed.service.impl.ModelingServiceValidationAspect">
+        <bean id="validationAspect" class="com.latticeengines.dataplatform.service.impl.ModelingServiceValidationAspect">
     </bean>
 	
 </beans>

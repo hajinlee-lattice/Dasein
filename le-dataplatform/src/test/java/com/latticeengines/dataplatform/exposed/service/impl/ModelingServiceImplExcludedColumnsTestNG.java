@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.service.impl.modeling;
+package com.latticeengines.dataplatform.exposed.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -17,6 +17,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -24,21 +25,31 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
+import com.latticeengines.dataplatform.exposed.service.ModelingService;
+import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.runtime.load.LoadProperty;
-import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
+import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 
-public class ModelingJobServiceImplTestNG extends DataPlatformFunctionalTestNGBase {
+public class ModelingServiceImplExcludedColumnsTestNG extends DataPlatformFunctionalTestNGBase {
 
     @Autowired
     private Configuration yarnConfiguration;
 
     @Autowired
-    private ModelingJobService modelingJobService;
+    private ModelingService modelingService;
 
-    private String dataPath = "/tmp/ModelingJobServiceImplTestNG";
+    @Autowired
+    private SqoopSyncJobService sqoopSyncJobService;
+
+    @Value("${dataplatform.customer.basedir}")
+    private String custmoderBaseDir;
+
+    private String dataPath;
     private DbCreds creds = null;
+
+    private LoadConfiguration loadConfig = new LoadConfiguration();
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
@@ -50,10 +61,15 @@ public class ModelingJobServiceImplTestNG extends DataPlatformFunctionalTestNGBa
                 .password("welcome");
 
         creds = new DbCreds(builder);
+        loadConfig.setTable("Play_11_TrainingSample_WithRevenue_2");
+        loadConfig.setCreds(creds);
+        loadConfig.setKeyCols(Arrays.<String> asList(new String[] { "LEAccount_ID" }));
+        loadConfig.setCustomer("ModelingServiceImplExcludedColumnsTestNG");
     }
-    
+
     @BeforeMethod(groups = { "functional" })
     public void beforeMethod() throws Exception {
+        dataPath = custmoderBaseDir + "/ModelingServiceImplExcludedColumnsTestNG/data/Play_11_TrainingSample_WithRevenue_2";
         FileSystem fs = FileSystem.get(yarnConfiguration);
         fs.delete(new Path(dataPath), true);
     }
@@ -77,20 +93,16 @@ public class ModelingJobServiceImplTestNG extends DataPlatformFunctionalTestNGBa
 
     @Test(groups = { "functional" })
     public void loadDataWithDefaultConfigs() throws Exception {
-        ApplicationId appId = modelingJobService.loadData("Play_11_TrainingSample_WithRevenue_2", //
-                dataPath, //
-                creds, //
-                "Priority0.MapReduce", //
-                "INTERNAL", //
-                Arrays.<String> asList(new String[] { "LEAccount_ID" }), //
-                new HashMap<String, String>());
+        loadConfig.setProperties(new HashMap<String, String>());
+        ApplicationId appId = modelingService.loadData(loadConfig);
         Schema schema = waitForStatusAndGetSchema(appId);
         List<Field> avroFields = schema.getFields();
 
         for (Field field : avroFields) {
             int sqlType = Integer.parseInt(field.getProp("sqlType"));
-            
-            assertTrue(sqlType != Types.TIMESTAMP && sqlType != Types.TIME, "Found timestamp or time column with name " + field.getProp("columnName"));
+
+            assertTrue(sqlType != Types.TIMESTAMP && sqlType != Types.TIME, "Found timestamp or time column with name "
+                    + field.getProp("columnName"));
         }
 
     }
@@ -99,13 +111,8 @@ public class ModelingJobServiceImplTestNG extends DataPlatformFunctionalTestNGBa
     public void loadDataWithNoExcludedColumns() throws Exception {
         Map<String, String> properties = new HashMap<>();
         properties.put(LoadProperty.EXCLUDETIMESTAMPCOLUMNS.name(), "false");
-        ApplicationId appId = modelingJobService.loadData("Play_11_TrainingSample_WithRevenue_2", //
-                dataPath, //
-                creds, //
-                "Priority0.MapReduce", //
-                "INTERNAL", //
-                Arrays.<String> asList(new String[] { "LEAccount_ID" }), //
-                properties);
+        loadConfig.setProperties(properties);
+        ApplicationId appId = modelingService.loadData(loadConfig);
         Schema schema = waitForStatusAndGetSchema(appId);
         List<Field> avroFields = schema.getFields();
 

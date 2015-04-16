@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -139,7 +138,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             DbCreds creds = new DbCreds(builder);
             propDataJobService.importData(dailyProgress.getDestinationTable(), targetDir, creds, assignedQueue,
                     getJobName() + "-Progress Id-" + dailyProgress.getPid(), Arrays.asList(splitColumns.split(",")),
-                    new HashMap<String, String>(), numMappers);
+                    "", numMappers);
 
             dailyProgress.setStatus(MadisonLogicDailyProgressStatus.FINISHED.getStatus());
             propDataMadisonEntityMgr.executeUpdate(dailyProgress);
@@ -252,7 +251,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
                         .user(targetJdbcUser).password(targetJdbcPassword).dbType(targetJdbcType);
                 DbCreds creds = new DbCreds(builder);
                 propDataJobService.importData(targetTable + "_new", schemaPath, creds, assignedQueue, getJobName()
-                        + "-schema", Arrays.asList("DomainID"), new HashMap<String, String>(), 1);
+                        + "-schema", Arrays.asList("DomainID"), "", 1);
                 log.info("Finished getting targetTable's schema file=" + schemaPath);
             }
         } catch (Exception e) {

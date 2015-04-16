@@ -16,8 +16,7 @@
                 <entry key="scoringCommandResultEntityMgr" value-ref="scoringCommandResultEntityMgr" />
                 <entry key="scoringStepYarnProcessor" value-ref="scoringStepYarnProcessor"/>
                 <entry key="scoringStepFinishProcessor" value-ref="scoringStepFinishProcessor"/>
-                <entry key="modelingJobService" value-ref="modelingJobService"/>
-                <entry key="metadataService" value-ref="metadataService"/>
+                <entry key="jobService" value-ref="jobService"/>
                 <entry key="yarnConfiguration" value-ref="yarnConfiguration" />
                 <entry key="appTimeLineWebAppAddress" value="${dataplatform.yarn.timeline-service.webapp.address}" />
             </map>

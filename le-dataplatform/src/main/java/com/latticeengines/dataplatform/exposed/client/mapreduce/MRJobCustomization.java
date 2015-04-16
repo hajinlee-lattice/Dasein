@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.client.mapreduce;
+package com.latticeengines.dataplatform.exposed.client.mapreduce;
 
 import java.util.Properties;
 

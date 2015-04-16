@@ -19,8 +19,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
-import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
@@ -51,11 +50,9 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
 
     private ScoringStepProcessor scoringStepFinishProcessor;
-    
-    private ModelingJobService modelingJobService;
-    
-    private MetadataService metadataService;
-    
+
+    private JobService jobService;
+
     private Configuration yarnConfiguration;
     
     private String appTimeLineWebAppAddress;
@@ -76,7 +73,7 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         for(ScoringCommand scoringCommand : scoringCommands){
             futures.add(scoringProcessorExecutor.submit(new ScoringProcessorCallable(scoringCommand, scoringCommandEntityMgr, scoringCommandLogService, scoringCommandStateEntityMgr, 
                     scoringCommandResultEntityMgr, scoringStepYarnProcessor, scoringStepFinishProcessor,
-                    modelingJobService, metadataService, yarnConfiguration, appTimeLineWebAppAddress)));
+                    jobService, yarnConfiguration, appTimeLineWebAppAddress)));
         }
 
         for(Future<Long> future : futures){ 
@@ -149,20 +146,12 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         this.scoringStepFinishProcessor = scoringStepFinishProcessor;
     }
     
-    public ModelingJobService getModelingJobService() {
-        return modelingJobService;
+    public JobService getJobService() {
+        return jobService;
     }
 
-    public void setModelingJobService(ModelingJobService modelingJobService) {
-        this.modelingJobService = modelingJobService;
-    }
-
-    public MetadataService getMetadataService() {
-        return metadataService;
-    }
-
-    public void setMetadataService(MetadataService metadataService) {
-        this.metadataService = metadataService;
+    public void setJobService(JobService jobService) {
+        this.jobService = jobService;
     }
 
     public Configuration getYarnConfiguration() {

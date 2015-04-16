@@ -10,7 +10,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 
-import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
+import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 
 public class EventDataScoringMapper extends Mapper<AvroKey<Record>, NullWritable, NullWritable, NullWritable> {
 

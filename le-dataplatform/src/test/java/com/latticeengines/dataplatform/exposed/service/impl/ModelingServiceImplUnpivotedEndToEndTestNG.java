@@ -29,7 +29,6 @@ import com.latticeengines.dataplatform.exposed.service.YarnService;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.functionalframework.StandaloneHttpServer;
 import com.latticeengines.dataplatform.functionalframework.VisiDBMetadataServlet;
-import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelCommandParameters;
 import com.latticeengines.dataplatform.service.impl.dlorchestration.ModelStepRetrieveMetadataProcessorImpl;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;

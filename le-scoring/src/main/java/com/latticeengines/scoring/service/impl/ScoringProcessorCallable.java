@@ -13,8 +13,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.dataplatform.exposed.service.MetadataService;
-import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
+import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
@@ -48,9 +47,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
 
     private ScoringStepProcessor scoringStepFinishProcessor;
 
-    private ModelingJobService modelingJobService;
-
-    private MetadataService metadataService;
+    private JobService jobService;
 
     private Configuration yarnConfiguration;
 
@@ -66,7 +63,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
             ScoringCommandStateEntityMgr scoringCommandStateEntityMgr,
             ScoringCommandResultEntityMgr scoringCommandResultEntityMgr,
             ScoringStepYarnProcessor scoringStepYarnProcessor, ScoringStepProcessor scoringStepFinishProcessor,
-            ModelingJobService modelingJobService, MetadataService metadataService, Configuration yarnConfiguration,
+            JobService jobService, Configuration yarnConfiguration,
             String appTimeLineWebAppAddress) {
         this.scoringCommand = scoringCommand;
         this.scoringCommandEntityMgr = scoringCommandEntityMgr;
@@ -75,8 +72,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
         this.scoringCommandResultEntityMgr = scoringCommandResultEntityMgr;
         this.scoringStepYarnProcessor = scoringStepYarnProcessor;
         this.scoringStepFinishProcessor = scoringStepFinishProcessor;
-        this.modelingJobService = modelingJobService;
-        this.metadataService = metadataService;
+        this.jobService = jobService;
         this.yarnConfiguration = yarnConfiguration;
         this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
     }
@@ -126,7 +122,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
             // + rowSize + " Column count: " + columnSize);
         } else { // modelCommand IN_PROGRESS
             String yarnApplicationId = scoringCommandState.getYarnApplicationId();
-            JobStatus jobStatus = modelingJobService.getJobStatus(yarnApplicationId);
+            JobStatus jobStatus = jobService.getJobStatus(yarnApplicationId);
             saveScoringCommandStateFromJobStatus(scoringCommandState, jobStatus);
             if (jobStatus.getStatus().equals(FinalApplicationStatus.SUCCEEDED)) {
                 handleAllJobsSucceeded();
@@ -164,7 +160,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
                 scoringCommand);
         String appIdString = appId.toString();
         scoringCommandLogService.logYarnAppId(scoringCommand, appIdString, scoringCommandStep);
-        JobStatus jobStatus = modelingJobService.getJobStatus(appIdString);
+        JobStatus jobStatus = jobService.getJobStatus(appIdString);
         saveScoringCommandStateFromJobStatus(scoringCommandState, jobStatus);
 
     }

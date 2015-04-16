@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.service.impl;
+package com.latticeengines.dataplatform.exposed.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,10 +1,11 @@
-package com.latticeengines.dataplatform.exposed.service.impl;
+package com.latticeengines.dataplatform.service.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.latticeengines.dataplatform.service.impl.ModelingServiceValidationAspect;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;

@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.exposed.service.impl;
+package com.latticeengines.dataplatform.service.impl;
 
 import java.io.IOException;
 
@@ -10,6 +10,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
+import com.latticeengines.dataplatform.service.impl.AlertServiceImpl;
 
 public class AlertServiceTestNG extends DataPlatformFunctionalTestNGBase {
 

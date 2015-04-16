@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;

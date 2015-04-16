@@ -68,6 +68,6 @@
     </yarn:master>
     
     <context:component-scan base-package="com.latticeengines.dataplatform.runtime.python"/>
-    <bean id="yarnService" class="com.latticeengines.dataplatform.exposed.service.impl.YarnServiceImpl"/>
+    <bean id="yarnService" class="com.latticeengines.dataplatform.service.impl.YarnServiceImpl"/>
 
 </beans>

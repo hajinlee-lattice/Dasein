@@ -1,16 +1,8 @@
 package com.latticeengines.dataplatform.service.impl.modeling;
 
-import java.sql.Types;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.sqoop.LedpSqoop;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -24,17 +16,11 @@ import com.latticeengines.dataplatform.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.dataplatform.exposed.service.JobNameService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
-import com.latticeengines.dataplatform.runtime.load.LoadProperty;
 import com.latticeengines.dataplatform.runtime.python.PythonContainerProperty;
 import com.latticeengines.dataplatform.service.impl.JobServiceImpl;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.modeling.Classifier;
-import com.latticeengines.domain.exposed.modeling.DataSchema;
-import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.domain.exposed.modeling.Field;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
@@ -59,134 +45,6 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
 
     @Autowired
     private JobEntityMgr jobEntityMgr;
-
-    @Override
-    public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
-            List<String> splitCols, Map<String, String> properties) {
-        int numDefaultMappers = hadoopConfiguration.getInt("mapreduce.map.cpu.vcores", 4);
-        return loadData(table, targetDir, creds, queue, customer, splitCols, properties, numDefaultMappers);
-    }
-
-    @Override
-    public ApplicationId loadData(String table, String targetDir, DbCreds creds, String queue, String customer,
-            List<String> splitCols, Map<String, String> properties, int numMappers) {
-
-        final String jobName = jobNameService.createJobName(customer, "data-load");
-
-        Future<Integer> future = loadAsync(table, targetDir, creds, queue, jobName, splitCols, properties, numMappers);
-
-        int tries = 0;
-        ApplicationId appId = null;
-        while (tries < MAX_TRIES) {
-            try {
-                Thread.sleep(APP_WAIT_TIME);
-            } catch (InterruptedException e) {
-                // do nothing
-                log.warn("Thread.sleep interrupted.", e);
-            }
-            appId = getAppIdFromName(jobName);
-            if (appId != null) {
-                return appId;
-            }
-            tries++;
-        }
-        try {
-            future.get();
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof RuntimeException) {
-                if (e.getCause().getMessage().contains("No columns to generate for ClassWriter")) {
-                    throw new LedpException(LedpCode.LEDP_12008, new String[] { table });
-                } else {
-                    throw (RuntimeException) e.getCause();
-                }
-            } else {
-                log.error(e);
-            }
-        } catch (InterruptedException e) {
-            log.error(e);
-        }
-        // Final try
-        appId = getAppIdFromName(jobName);
-        if (appId == null) {
-            throw new LedpException(LedpCode.LEDP_12002, new String[] { jobName });
-        }
-        return appId;
-    }
-
-    private Future<Integer> loadAsync(final String table, final String targetDir, final DbCreds creds,
-            final String queue, final String jobName, final List<String> splitCols,
-            final Map<String, String> properties, final int numMappers) {
-        StringBuilder lb = new StringBuilder();
-        try {
-            DataSchema dataSchema = metadataService.createDataSchema(creds, table);
-            List<Field> fields = dataSchema.getFields();
-            
-            boolean excludeTimestampCols = Boolean.parseBoolean(LoadProperty.EXCLUDETIMESTAMPCOLUMNS.getValue(properties));
-            boolean first = true;
-            for (Field field : fields) {
-                
-                // The scoring engine does not know how to convert datetime columns into a numeric value, 
-                // which Sqoop does automatically. This should not be a problem now since dates are
-                // typically not predictive anyway so we can safely exclude them for now.
-                // We can start including TIMESTAMP and TIME columns by explicitly setting EXCLUDETIMESTAMPCOLUMNS=false
-                // in the load configuration.
-                if (excludeTimestampCols && (field.getSqlType() == Types.TIMESTAMP || field.getSqlType() == Types.TIME)) {
-                    continue;
-                }
-                String name = field.getName();
-                String colName = field.getColumnName();
-                
-                if (name == null) {
-                    log.warn("Field name is null.");
-                    continue;
-                }
-                if (colName == null) {
-                    log.warn("Column name is null.");
-                    continue;
-                }
-                if (!first) {
-                    lb.append(",");
-                } else {
-                    first = false;
-                }
-                lb.append(colName);
-                if (!colName.equals(name)) {
-                    log.warn(LedpException.buildMessageWithCode(LedpCode.LEDP_11005, new String[] { colName, name }));
-                }
-            }
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_11004, new String[] { table });
-        }
-        final String colList = lb.toString();
- 
-        return sqoopJobTaskExecutor.submit(new Callable<Integer>() {
-
-            @Override
-            public Integer call() throws Exception {
-
-                return LedpSqoop.runTool(new String[] { //
-                        "import", //
-                                "-Dmapred.job.queue.name=" + queue, //
-                                "--connect", //
-                                metadataService.getJdbcConnectionUrl(creds), //
-                                "--m", //
-                                Integer.toString(numMappers), //
-                                "--table", //
-                                table, //
-                                "--as-avrodatafile", //
-                                "--compress", //
-                                "--mapreduce-job-name", //
-                                jobName, //
-                                "--columns", //
-                                colList, //
-                                "--split-by", //
-                                StringUtils.join(splitCols, ","), //
-                                "--target-dir", //
-                                targetDir }, new Configuration(yarnConfiguration));
-
-            }
-        });
-    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)

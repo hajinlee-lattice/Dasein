@@ -3,7 +3,6 @@ package com.latticeengines.propdata.service.db.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -100,7 +99,7 @@ public class PropDataDBServiceImpl implements PropDataDBService {
                 String keyCols = keyColsList.get(i);
                 ApplicationId appId = propDataJobService.importData(newTable,
                         getDataHdfsPath(customer, tableName + "/" + newTable, PROPDATA_OUTPUT), creds, assignedQueue,
-                        customer, Arrays.asList(keyCols), new HashMap<String, String>());
+                        customer, Arrays.asList(keyCols), "");
                 Integer applicationId;
                 if (appId != null) {
                     applicationId = appId.getId();
@@ -141,7 +140,7 @@ public class PropDataDBServiceImpl implements PropDataDBService {
             String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
             ApplicationId appId = propDataJobService.importData(tableName,
                     getDataHdfsPath(customer, tableName, PROPDATA_OUTPUT), creds, assignedQueue, customer, Arrays.asList(keyCols),
-                    new HashMap<String, String>());
+                    "");
             Integer applicationId;
             if (appId != null) {
                 applicationId = appId.getId();

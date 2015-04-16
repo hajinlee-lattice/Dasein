@@ -67,6 +67,6 @@
 
     <context:component-scan base-package="org.springframework.yarn.batch.am" />
     <bean id="yarnService"
-        class="com.latticeengines.dataplatform.exposed.service.impl.YarnServiceImpl" />
+        class="com.latticeengines.dataplatform.service.impl.YarnServiceImpl" />
 
 </beans>

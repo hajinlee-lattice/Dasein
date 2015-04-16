@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.runtime.mapreduce;
+package com.latticeengines.dataplatform.exposed.mapreduce;
 
 public enum MapReduceProperty {
 

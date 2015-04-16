@@ -182,6 +182,13 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-dataplatform</artifactId>
             <version>${le.dataplatform.version}</version>
+            <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-dataplatform</artifactId>
+            <version>${le.dataplatform.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>

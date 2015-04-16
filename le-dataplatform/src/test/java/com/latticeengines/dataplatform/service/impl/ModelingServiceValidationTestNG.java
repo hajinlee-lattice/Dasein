@@ -1,4 +1,4 @@
-package com.latticeengines.dataplatform.exposed.service.impl;
+package com.latticeengines.dataplatform.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;

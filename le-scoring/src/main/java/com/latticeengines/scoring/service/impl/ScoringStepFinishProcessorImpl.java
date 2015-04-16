@@ -1,6 +1,7 @@
 package com.latticeengines.scoring.service.impl;
 
 import java.sql.Timestamp;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,9 +24,10 @@ public class ScoringStepFinishProcessorImpl implements ScoringStepProcessor {
     @Override
     public void executeStep(ScoringCommand scoringCommand) {
         //TODO Create a new table
-        ScoringCommandResult result = new ScoringCommandResult(scoringCommand.getId(), ScoringCommandStatus.POPULATED,
-                "TABLE", scoringCommand.getTotal(), new Timestamp(System.currentTimeMillis()));
-        scoringCommandResultEntityMgr.create(result);
+        ScoringCommandResult result = scoringCommandResultEntityMgr.findByScoringCommand(scoringCommand);
+        result.setStatus(ScoringCommandStatus.POPULATED);
+        result.setPopulated(new Timestamp(System.currentTimeMillis()));
+        scoringCommandResultEntityMgr.update(result);
 
         scoringCommand.setConsumed(new Timestamp(System.currentTimeMillis()));
         scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
