@@ -59,6 +59,6 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public String createNewEmptyTableFromExistingOne(String newTable, String oldTable){
-        return "create table " + newTable + " select * from " + oldTable;
+        return "create table " + newTable + " select * from " + oldTable + " where 1 = 0";
     }
 }
