@@ -15,8 +15,10 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.UserService;
 
 @Component("userService")
@@ -25,6 +27,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
+
+    @Autowired
+    private SessionService sessionService;
 
     @Override
     public boolean addAdminUser(UserRegistrationWithTenant userRegistrationWithTenant) {
@@ -69,6 +74,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username) {
+        if (accessLevel == null) { return resignAccessLevel(tenantId, username); }
         if (!accessLevel.equals(getAccessLevel(tenantId, username)) && resignAccessLevel(tenantId, username)) {
             try {
                 return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username);
@@ -93,7 +99,8 @@ public class UserServiceImpl implements UserService {
                 }
             } catch (Exception e) {
                 LOGGER.warn(
-                        String.format("Error resigning access level %s from user %s.", accessLevel.name(), username),
+                        String.format("Error resigning access level %s from user %s.",
+                                accessLevel.name(), username),
                         e);
             }
         }
@@ -103,27 +110,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public AccessLevel getAccessLevel(String tenantId, String username) {
         List<String> rights = globalUserManagementService.getRights(username, tenantId);
-        AccessLevel toReturn = getAccessLevel(rights);
-        if (rights.size() > 1 && !rights.contains(toReturn.name()) && !username.equals("admin")) {
-            assignAccessLevel(toReturn, tenantId, username);
+        AccessLevel toReturn = AccessLevel.findAccessLevel(rights);
+        if (toReturn == null && hasPLSRights(rights)) {
+            User user = globalUserManagementService.getUserByUsername(username);
+            toReturn = sessionService.upgradeFromDeprecatedBARD(
+                    tenantId, username, user.getEmail(), rights);
         }
         return  toReturn;
-    }
-
-    @Override
-    public AccessLevel getAccessLevel(List<String> rights) {
-        AccessLevel toReturn = null;
-        for (String right : rights) {
-            try {
-                AccessLevel accessLevel = AccessLevel.valueOf(right);
-                if (toReturn == null || accessLevel.compareTo(toReturn) > 0) {
-                    toReturn = accessLevel;
-                }
-            } catch (IllegalArgumentException e) {
-                //ignore
-            }
-        }
-        return toReturn;
     }
 
     @Override
@@ -171,8 +164,8 @@ public class UserServiceImpl implements UserService {
                     = globalUserManagementService.getAllUsersOfTenant(tenantId);
             for (Map.Entry<User, List<String>> userRights : userRightsList) {
                 User user = userRights.getKey();
-                if (!user.getUsername().equals("admin")) {
-                    AccessLevel accessLevel = getAccessLevel(userRights.getValue());
+                if (!user.getUsername().equals(Constants.DEPRECATED_ADMIN_USERNAME)) {
+                    AccessLevel accessLevel = AccessLevel.findAccessLevel(userRights.getValue());
                     if (accessLevel == null) {
                         accessLevel = getAccessLevel(tenantId, user.getUsername());
                     }
@@ -204,5 +197,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean inTenant(String tenantId, String username) {
         return !globalUserManagementService.getRights(username, tenantId).isEmpty();
+    }
+
+    private boolean hasPLSRights(List<String> rights) {
+        for (String right : rights) {
+            if (right.contains("_PLS_")) { return true; }
+        }
+        return false;
     }
 }

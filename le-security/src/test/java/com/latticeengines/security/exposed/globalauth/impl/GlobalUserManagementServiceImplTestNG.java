@@ -39,7 +39,7 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
 
     private String testTenantId;
     private Ticket ticket;
-    private final String testUsername = "test" + UUID.randomUUID().toString() + "@test.com";
+    private final String testUsername = "ga_usermanagementservice_tester@test.lattice-engines.com";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {

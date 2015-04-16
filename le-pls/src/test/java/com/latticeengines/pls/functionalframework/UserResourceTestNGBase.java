@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -38,7 +39,11 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
         testTenant.setName("User Resource Test Tenant");
         testTenant.setId("USER_RESOURCE_TEST_TENANT");
         destroyTestTenant();
-        tenantService.registerTenant(testTenant);
+        try {
+            tenantService.registerTenant(testTenant);
+        } catch (ConstraintViolationException e) {
+            //ignore
+        }
     }
 
     protected void destroyTestTenant() {

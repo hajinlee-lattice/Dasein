@@ -5,8 +5,9 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,51 +60,80 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
         Ticket t = new Ticket(ticket.getUniqueness() + "." + ticket.getRandomness());
         Session session = sessionService.retrieve(t);
         assertNotNull(session);
-        assertTrue(session.getRights().size() >=4);
+        assertTrue(session.getRights().size() >= 4);
         assertNotNull(session.getTicket());
         assertNotNull(session.getTenant());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "attach" })
-    public void decodeGlobalAuthRights() {
-        testLevelInLevelOut();
-        testLevelRightsInLevelOut();
+    public void interpretGlobalAuthRights() {
+        // rights in rights out
+        List<GrantedRight> rightsIn = Arrays.asList(
+                GrantedRight.VIEW_PLS_CONFIGURATION,
+                GrantedRight.VIEW_PLS_MODELS
+        );
+        AccessLevel levelIn;
+        List<GrantedRight> rightsOut = AccessLevel.INTERNAL_USER.getGrantedRights();
+        AccessLevel levelOut = AccessLevel.INTERNAL_USER;
+        testInterpretGARights(rightsIn, null, rightsOut, levelOut);
+
+        rightsIn = Arrays.asList(
+                GrantedRight.VIEW_PLS_CONFIGURATION,
+                GrantedRight.VIEW_PLS_MODELS,
+                GrantedRight.VIEW_PLS_MODELS,
+                GrantedRight.EDIT_PLS_MODELS
+        );
+        rightsOut = AccessLevel.INTERNAL_ADMIN.getGrantedRights();
+        levelOut = AccessLevel.INTERNAL_ADMIN;
+        testInterpretGARights(rightsIn, null, rightsOut, levelOut);
+
+        // level in level out
+        rightsIn = new ArrayList<>();
+        levelIn = AccessLevel.SUPER_ADMIN;
+        rightsOut = AccessLevel.SUPER_ADMIN.getGrantedRights();
+        levelOut = AccessLevel.SUPER_ADMIN;
+        testInterpretGARights(rightsIn, levelIn, rightsOut, levelOut);
+
+        // level + rights in level + rights out
+        rightsIn = Arrays.asList(
+                GrantedRight.VIEW_PLS_MODELS, GrantedRight.VIEW_PLS_CONFIGURATION);
+        levelIn = AccessLevel.INTERNAL_USER;
+        rightsOut = AccessLevel.INTERNAL_USER.getGrantedRights();
+        levelOut = AccessLevel.INTERNAL_USER;
+        testInterpretGARights(rightsIn, levelIn, rightsOut, levelOut);
     }
 
-    private void testLevelInLevelOut() {
+    private void testInterpretGARights(
+            List<GrantedRight> rightsIn, AccessLevel levelIn,
+            List<GrantedRight> rightsOut, AccessLevel levelOut
+    ) {
         makeSureUserDoesNotExist(testUsername);
         createUser(testUsername, testUsername, "Test", "Tester", generalPasswordHash);
 
-        grantRight(AccessLevel.INTERNAL_ADMIN.name(), tenant.getId(), testUsername);
-
-        Session session = loginAndAttach(testUsername);
-
-        assertEquals(session.getAccessLevel(), AccessLevel.INTERNAL_ADMIN.name());
-        Set<String> rightsInGA = new HashSet<>(session.getRights());
-        for (GrantedRight right: AccessLevel.INTERNAL_ADMIN.getGrantedRights()) {
-            rightsInGA.remove(right.getAuthority());
+        if (levelIn != null) {
+            grantRight(levelIn.name(), tenant.getId(), testUsername);
         }
-        assertTrue(rightsInGA.isEmpty());
-
-        makeSureUserDoesNotExist(testUsername);
-    }
-
-    private void testLevelRightsInLevelOut() {
-        makeSureUserDoesNotExist(testUsername);
-        createUser(testUsername, testUsername, "SessionService", "Tester", generalPasswordHash);
-
-        for (GrantedRight right : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
+        for (GrantedRight right : rightsIn) {
             grantRight(right.getAuthority(), tenant.getId(), testUsername);
         }
 
         Session session = loginAndAttach(testUsername);
 
-        assertNull(session.getAccessLevel());
-        Set<String> rightsInGA = new HashSet<>(session.getRights());
-        for (GrantedRight right: AccessLevel.SUPER_ADMIN.getGrantedRights()) {
-            rightsInGA.remove(right.getAuthority());
+        if (levelOut == null) {
+            assertNull(session.getAccessLevel());
+        } else {
+            assertEquals(session.getAccessLevel(), levelOut.name());
         }
-        assertTrue(rightsInGA.isEmpty());
+
+        List<String> rightsInSession = new ArrayList<>();
+        rightsInSession.addAll(session.getRights());
+
+        rightsInSession.removeAll(GrantedRight.getAuthorities(rightsOut));
+        assertTrue(rightsInSession.isEmpty());
+
+        List<String> valuesOut = GrantedRight.getAuthorities(rightsOut);
+        valuesOut.removeAll(session.getRights());
+        assertTrue(valuesOut.isEmpty());
 
         makeSureUserDoesNotExist(testUsername);
     }

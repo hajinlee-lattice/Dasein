@@ -1,7 +1,6 @@
 package com.latticeengines.security.exposed.globalauth.impl;
 
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +51,6 @@ public class GlobalSessionManagementServiceImplTestNG extends SecurityFunctional
         Ticket t = new Ticket(ticket.getUniqueness() + "." + ticket.getRandomness());
         Session session = globalSessionManagementService.retrieve(t);
         assertNotNull(session);
-        assertTrue(session.getRights().size() >=4);
         assertNotNull(session.getTicket());
         assertNotNull(session.getTenant());
     }

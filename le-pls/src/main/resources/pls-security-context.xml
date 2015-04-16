@@ -17,7 +17,7 @@
     <import resource="classpath:pls-properties-context.xml"/>
     <import resource="classpath:pls-camille-context.xml"/>
     <import resource="classpath:security-provider-context.xml"/>
-    
+
     <security:http use-expressions="true" 
                    pattern="/pls/modelsummaries/**" 
                    authentication-manager-ref="authenticationManager"

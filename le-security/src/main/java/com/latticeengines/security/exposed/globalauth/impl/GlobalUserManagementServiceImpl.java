@@ -195,7 +195,6 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         IUserManagementService service = getService();
         addMagicHeaderAndSystemProperty(service);
         try {
-            log.info(String.format("Deleting user %s.", username));
             boolean result = service.deleteUser(username);
             log.info(String.format("Deleting user %s success = %s", username, result));
             return result;

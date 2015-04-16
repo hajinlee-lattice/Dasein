@@ -1,7 +1,9 @@
 package com.latticeengines.security.exposed;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -71,6 +73,23 @@ public enum GrantedRight implements GrantedAuthority {
 
     public static GrantedRight getGrantedRight(String value) {
         return grantedRightsMap.get(value);
+    }
+
+    public static List<GrantedRight> getGrantedRights (List<String> values) {
+        List<GrantedRight> result = new ArrayList<>();
+        for (String value : values) {
+            GrantedRight right = GrantedRight.getGrantedRight(value);
+            if (right != null) { result.add(right); }
+        }
+        return result;
+    }
+
+    public static List<String> getAuthorities (List<GrantedRight> rights) {
+        List<String> result = new ArrayList<>();
+        for (GrantedRight right : rights) {
+            result.add(right.getAuthority());
+        }
+        return result;
     }
 
 }

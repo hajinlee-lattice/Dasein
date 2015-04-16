@@ -68,4 +68,19 @@ public enum AccessLevel {
         }
         return maxLevel;
     }
+
+    public static AccessLevel findAccessLevel(List<String> rights) {
+        AccessLevel maxLevel = null;
+        for (String right: rights) {
+            try {
+                AccessLevel level = AccessLevel.valueOf(right);
+                if (maxLevel == null || level.compareTo(maxLevel) > 0) {
+                    maxLevel = level;
+                }
+            } catch (IllegalArgumentException e) {
+                //ignore
+            }
+        }
+        return maxLevel;
+    }
 }

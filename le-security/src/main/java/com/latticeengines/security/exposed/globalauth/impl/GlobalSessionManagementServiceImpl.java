@@ -1,10 +1,6 @@
 package com.latticeengines.security.exposed.globalauth.impl;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
@@ -19,8 +15,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.globalauth.generated.sessionmgr.ISessionManagementService;
@@ -145,8 +139,7 @@ public class GlobalSessionManagementServiceImpl
         public Session build() {
             Session s = new Session();
             s.setTenant(new TenantBuilder(session.getTenant()).build());
-            s.setRights(decodeGlobalAuthRights(session.getRights().getValue().getString()));
-            s.setAccessLevel(decodeGlobalAuthAccessLevel(session.getRights().getValue().getString()));
+            s.setRights(session.getRights().getValue().getString());
             s.setDisplayName(session.getDisplayName().getValue());
             s.setEmailAddress(session.getEmailAddress().getValue());
             s.setIdentifier(session.getIdentifier().getValue());
@@ -168,49 +161,6 @@ public class GlobalSessionManagementServiceImpl
             t.setName(tenant.getDisplayName().getValue());
             t.setId(tenant.getIdentifier().getValue());
             return t;
-        }
-    }
-
-    private static List<String> decodeGlobalAuthRights(List<String> globalAuthRights) {
-        String levelName = decodeGlobalAuthAccessLevel(globalAuthRights);
-        Set<String> decodedRights = new HashSet<>();
-        if (levelName != null) {
-            for (GrantedRight right: AccessLevel.valueOf(levelName).getGrantedRights()) {
-                decodedRights.add(right.getAuthority());
-            }
-        }
-
-        for (String right : globalAuthRights) {
-            if (GrantedRight.getGrantedRight(right) != null) {
-                if (!right.contains("PLS") || levelName == null) {
-                    decodedRights.add(right);
-                }
-            }
-        }
-
-        List<String> result = new ArrayList<>();
-        result.addAll(decodedRights);
-
-        return result;
-    }
-
-    private static String decodeGlobalAuthAccessLevel(List<String> globalAuthRights) {
-        AccessLevel maxAccessLevel = null;
-        for (String right : globalAuthRights) {
-            try {
-                AccessLevel accessLevel = AccessLevel.valueOf(right);
-                if (maxAccessLevel == null || accessLevel.compareTo(maxAccessLevel) > 0) {
-                    maxAccessLevel = accessLevel;
-                }
-            } catch (IllegalArgumentException e) {
-                //ignore
-            }
-        }
-
-        if (maxAccessLevel == null) {
-            return null;
-        } else {
-            return maxAccessLevel.name();
         }
     }
 
