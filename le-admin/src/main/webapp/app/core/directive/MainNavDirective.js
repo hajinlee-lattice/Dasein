@@ -20,7 +20,7 @@ app.directive('mainNav', function(){
         scope: {activeNav: '='},
         controller: function ($scope, $rootScope, $state,
                               MainNavService, BrowserStorageUtility) {
-            if(BrowserStorageUtility.getClientSession() === null){
+            if(BrowserStorageUtility.getTokenDocument() === null){
                 BrowserStorageUtility.clear(false);
                 $state.go('LOGIN');
             }
@@ -28,7 +28,7 @@ app.directive('mainNav', function(){
 
 
             $rootScope.$on('$stateChangeSuccess', function () {
-                if(BrowserStorageUtility.getClientSession() === null){
+                if(BrowserStorageUtility.getTokenDocument() === null){
                     BrowserStorageUtility.clear(false);
                     $state.go('LOGIN');
                 }

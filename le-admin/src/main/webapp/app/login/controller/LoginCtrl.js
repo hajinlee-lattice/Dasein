@@ -14,37 +14,14 @@ app.controller('LoginCtrl', function($scope, $state, BrowserStorageUtility, Logi
     };
 
     function restoreSession() {
-        var session = BrowserStorageUtility.getClientSession();
-        if (session !== null) {
+        var token = BrowserStorageUtility.getTokenDocument();
+        if (token !== null) {
             $state.go('TENANT.LIST');
         }
     }
 
     function login(){
         LoginService.Login($scope.Username, $scope.Password).then(function(result){
-            if (result.success) {
-                var globalAdminTenant = BrowserStorageUtility.getGlobalAdminTenantDocument();
-                if (globalAdminTenant === null) {
-                    LoginService.RetrieveGlobalAdminTenant().then(function(result){
-                        if (result.success) {
-                            attachGlobalAdminTenant();
-                        } else {
-                            $scope.showLoginError = true;
-                            $scope.loginErrorMsg = "Authentication failed."
-                        }
-                    });
-                } else {
-                    attachGlobalAdminTenant();
-                }
-            } else {
-                $scope.showLoginError = true;
-                $scope.loginErrorMsg = "Authentication failed."
-            }
-        });
-    }
-
-    function attachGlobalAdminTenant() {
-        LoginService.Attach().then(function(result){
             if (result.success) {
                 $state.go('TENANT.LIST');
             } else {
