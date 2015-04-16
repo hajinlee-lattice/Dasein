@@ -56,9 +56,9 @@ public enum GrantedRight implements GrantedAuthority {
             return "Edit_PLS_Users";
         }
     }, //
-    EDIT_ADMIN_CONFIGURATION {
+    EDIT_LATTICE_CONFIGURATION {
         @Override
-        public String getAuthority() { return "Edit_ADMIN_Configuration"; }
+        public String getAuthority() { return "Edit_LATTICE_Configuration"; }
     };
 
     private static Map<String, GrantedRight> grantedRightsMap = new HashMap<>();

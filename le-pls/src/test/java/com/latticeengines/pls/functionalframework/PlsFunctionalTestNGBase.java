@@ -30,6 +30,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -466,6 +467,22 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         Mockito.when(securityContext.getAuthentication()).thenReturn(token);
         SecurityContextHolder.setContext(securityContext);
 
+    }
+
+    protected void grantRight (String right, String tenantId, String username) {
+        try {
+            globalUserManagementService.grantRight(right, tenantId, username);
+        } catch (LedpException e) {
+            //ignore
+        }
+    }
+
+    protected void revokeRight (String right, String tenantId, String username) {
+        try {
+            globalUserManagementService.revokeRight(right, tenantId, username);
+        } catch (LedpException e) {
+            //ignore
+        }
     }
 
 }

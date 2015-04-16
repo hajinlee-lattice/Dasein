@@ -35,8 +35,8 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.exception.LoginException;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -55,7 +55,7 @@ public class UserResource {
     private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
-    private GlobalSessionManagementService globalSessionManagementService;
+    private SessionService sessionService;
 
     @Autowired
     private UserService userService;
@@ -68,7 +68,7 @@ public class UserResource {
         ResponseDocument<List<User>> response = new ResponseDocument<>();
         try {
             Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
-            Session session = globalSessionManagementService.retrieve(ticket);
+            Session session = sessionService.retrieve(ticket);
             String tenantId = session.getTenant().getId();
             AccessLevel currentLevel;
             try {
@@ -117,7 +117,7 @@ public class UserResource {
         AccessLevel loginLevel;
         try {
             Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
-            Session session = globalSessionManagementService.retrieve(ticket);
+            Session session = sessionService.retrieve(ticket);
             tenantId = session.getTenant().getId();
             loginUsername = session.getEmailAddress();
             loginLevel = AccessLevel.valueOf(session.getAccessLevel());
@@ -185,7 +185,7 @@ public class UserResource {
         try {
             ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             user = globalUserManagementService.getUserByEmail(
-                    globalSessionManagementService.retrieve(ticket).getEmailAddress()
+                    sessionService.retrieve(ticket).getEmailAddress()
             );
             if (!user.getUsername().equals(username)) {
                 throw new LedpException(LedpCode.LEDP_18001, new String[]{username});
@@ -239,7 +239,7 @@ public class UserResource {
         username = username.toLowerCase();
         try {
             Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
-            Session session = globalSessionManagementService.retrieve(ticket);
+            Session session = sessionService.retrieve(ticket);
             tenantId = session.getTenant().getId();
             currentLevel = AccessLevel.valueOf(session.getAccessLevel());
             loginUsername = session.getEmailAddress();
@@ -286,7 +286,7 @@ public class UserResource {
         username = username.toLowerCase();
         try {
             Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
-            Session session = globalSessionManagementService.retrieve(ticket);
+            Session session = sessionService.retrieve(ticket);
             Tenant tenant = session.getTenant();
             tenantId = tenant.getId();
             loginLevel = AccessLevel.valueOf(session.getAccessLevel());

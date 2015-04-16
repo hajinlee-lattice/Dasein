@@ -23,6 +23,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -31,6 +32,7 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.SessionService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-security-context.xml" })
@@ -57,6 +59,9 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @Autowired
     private GlobalSessionManagementService globalSessionManagementService;
+
+    @Autowired
+    private SessionService sessionService;
 
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
             "");
@@ -118,9 +123,8 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     
     protected Session loginAndAttach(String username, String password) {
         password = DigestUtils.sha256Hex(password);
-        System.out.println(password);
         Ticket ticket = globalAuthenticationService.authenticateUser(username, password);
-        return globalSessionManagementService.attach(ticket);
+        return sessionService.attach(ticket);
     }
 
     protected static class GetHttpStatusErrorHandler implements ResponseErrorHandler {
@@ -139,5 +143,20 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         }
     }
 
+    protected void grantRight (String right, String tenantId, String username) {
+        try {
+            globalUserManagementService.grantRight(right, tenantId, username);
+        } catch (LedpException e) {
+            //ignore
+        }
+    }
+
+    protected void revokeRight (String right, String tenantId, String username) {
+        try {
+            globalUserManagementService.revokeRight(right, tenantId, username);
+        } catch (LedpException e) {
+            //ignore
+        }
+    }
 
 }

@@ -23,7 +23,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
-import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
+import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -41,7 +41,7 @@ public class ModelSummaryResource {
     private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
-    private GlobalSessionManagementService globalSessionManagementService;
+    private SessionService sessionService;
 
     @Autowired
     private ModelSummaryService modelSummaryService;
@@ -90,7 +90,7 @@ public class ModelSummaryResource {
             modelSummary.setUploaded(true);
         }
 
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, globalSessionManagementService);
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         if (tenant == null) { 
             return null; 
         }

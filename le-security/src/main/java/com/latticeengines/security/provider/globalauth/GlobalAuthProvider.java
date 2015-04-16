@@ -18,21 +18,21 @@ import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
-import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
+import com.latticeengines.security.exposed.service.SessionService;
 
 @Component("globalAuthProvider")
 public class GlobalAuthProvider implements AuthenticationProvider {
     private static final Log log = LogFactory.getLog(GlobalAuthProvider.class);
     
     @Autowired
-    private GlobalSessionManagementService globalSessionManagementService;
+    private SessionService sessionService;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         Ticket ticket = (Ticket) authentication.getCredentials();
         
         try {
-            Session session = globalSessionManagementService.retrieve(ticket);
+            Session session = sessionService.retrieve(ticket);
             List<GrantedRight> rights = new ArrayList<>();
             
             for (String right : session.getRights()) {
@@ -60,14 +60,6 @@ public class GlobalAuthProvider implements AuthenticationProvider {
     @Override
     public boolean supports(Class<?> authentication) {
         return authentication.isAssignableFrom(TicketAuthenticationToken.class);
-    }
-
-    public GlobalSessionManagementService getGlobalSessionManagementService() {
-        return globalSessionManagementService;
-    }
-
-    public void setGlobalSessionManagementService(GlobalSessionManagementService globalSessionManagementService) {
-        this.globalSessionManagementService = globalSessionManagementService;
     }
 
 }

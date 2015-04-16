@@ -12,14 +12,14 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.SegmentEntityMgr;
 import com.latticeengines.pls.entitymanager.TenantEntityMgr;
 import com.latticeengines.pls.service.SegmentService;
-import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
+import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.util.SecurityUtils;
 
 @Component("segmentService")
 public class SegmentServiceImpl implements SegmentService {
 
     @Autowired
-    private GlobalSessionManagementService globalSessionManagementService; 
+    private SessionService sessionService;
 
     @Autowired
     private SegmentEntityMgr segmentEntityMgr;
@@ -30,7 +30,7 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public void createSegment(Segment segment, HttpServletRequest request) {
-        Tenant tenant = SecurityUtils.getTenantFromRequest(request, globalSessionManagementService);
+        Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         tenant = tenantEntityMgr.findByTenantId(tenant.getId());
         segment.setTenant(tenant);
         segmentEntityMgr.create(segment);

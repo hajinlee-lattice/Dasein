@@ -2,13 +2,16 @@ package com.latticeengines.security.exposed.globalauth.impl;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -19,6 +22,7 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.globalauth.generated.sessionmgr.ISessionManagementService;
 import com.latticeengines.security.globalauth.generated.sessionmgr.ObjectFactory;
 import com.latticeengines.security.globalauth.generated.sessionmgr.SessionManagementService;
@@ -27,6 +31,9 @@ import com.latticeengines.security.globalauth.generated.sessionmgr.SessionManage
 public class GlobalSessionManagementServiceImpl
         extends GlobalAuthenticationServiceBaseImpl
         implements GlobalSessionManagementService {
+
+    @Autowired
+    private GlobalUserManagementService globalUserManagementService;
 
     private static final Log LOGGER = LogFactory.getLog(GlobalSessionManagementServiceImpl.class);
 
@@ -165,37 +172,30 @@ public class GlobalSessionManagementServiceImpl
     }
 
     private static List<String> decodeGlobalAuthRights(List<String> globalAuthRights) {
-        AccessLevel maxAccessLevel = null;
-        List<String> decodedRights = new ArrayList<>();
-
-        for (String right : globalAuthRights) {
-            if (GrantedRight.getGrantedRight(right) != null) {
-                decodedRights.add(right);
-            } else {
-                try {
-                    AccessLevel accessLevel = AccessLevel.valueOf(right);
-                    if (maxAccessLevel == null || accessLevel.compareTo(maxAccessLevel) > 0) {
-                        maxAccessLevel = accessLevel;
-                    }
-                } catch (IllegalArgumentException e) {
-                    //ignore
-                }
-            }
-        }
-
-        if (maxAccessLevel != null) {
-            decodedRights = new ArrayList<>();
-            for (GrantedRight right : maxAccessLevel.getGrantedRights()) {
+        String levelName = decodeGlobalAuthAccessLevel(globalAuthRights);
+        Set<String> decodedRights = new HashSet<>();
+        if (levelName != null) {
+            for (GrantedRight right: AccessLevel.valueOf(levelName).getGrantedRights()) {
                 decodedRights.add(right.getAuthority());
             }
         }
 
-        return decodedRights;
+        for (String right : globalAuthRights) {
+            if (GrantedRight.getGrantedRight(right) != null) {
+                if (!right.contains("PLS") || levelName == null) {
+                    decodedRights.add(right);
+                }
+            }
+        }
+
+        List<String> result = new ArrayList<>();
+        result.addAll(decodedRights);
+
+        return result;
     }
 
     private static String decodeGlobalAuthAccessLevel(List<String> globalAuthRights) {
         AccessLevel maxAccessLevel = null;
-
         for (String right : globalAuthRights) {
             try {
                 AccessLevel accessLevel = AccessLevel.valueOf(right);
@@ -213,4 +213,5 @@ public class GlobalSessionManagementServiceImpl
             return maxAccessLevel.name();
         }
     }
+
 }

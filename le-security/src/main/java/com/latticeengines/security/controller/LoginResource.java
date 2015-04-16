@@ -30,8 +30,8 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.RightsUtilities;
 import com.latticeengines.security.exposed.exception.LoginException;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.SessionService;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -43,7 +43,7 @@ public class LoginResource {
     private GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
-    private GlobalSessionManagementService globalSessionManagementService;
+    private SessionService sessionService;
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
@@ -88,7 +88,7 @@ public class LoginResource {
             ticket.setTenants(Collections.singletonList(tenant));
             doc.setTicket(ticket);
 
-            Session session = globalSessionManagementService.attach(ticket);
+            Session session = sessionService.attach(ticket);
             doc.setSuccess(true);
 
             UserResult result = doc.new UserResult();
