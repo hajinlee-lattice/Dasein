@@ -9,7 +9,7 @@ var UserDropdown = function() {
     };
 
     this.toggleDropdown = function() {
-        element(by.css('a.dropdown-toggle')).click();
+        element(by.css('a.nav-personal')).click();
     };
 };
 

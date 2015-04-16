@@ -4,7 +4,7 @@ var Logout = function() {
     var userDropdown = require('./userdropdown.po');
  
     this.logout = function(name) {
-        userDropdown.getUserLink(name).click();
+        userDropdown.toggleDropdown().click();
         browser.driver.wait(function(){
             return userDropdown.signout.isPresent();
         }, 10000, 'dropdown menu should appear with in 10 sec.');
