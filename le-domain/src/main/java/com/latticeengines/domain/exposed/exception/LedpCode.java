@@ -57,7 +57,7 @@ public enum LedpCode {
     LEDP_16006("Retrieved empty DL metadata columns for model command:{0} from url:{1}."), //
     LEDP_16007("LeadScoringCommand failed."), //
     LEDP_16008("Error message received in DL metadata columns response: {0}"), //
-    LEDP_16009("Problem writing metadata to HDFS path: {0}, metadata content: (1)"),//
+    LEDP_16009("Problem writing metadata to HDFS path: {0}, metadata content: (1)"), //
     LEDP_16010("Problem publishing model for model command:{0}, yarnAppId:{1}."), //
     LEDP_16011("Problem publishing model-artifacts for model command:{0}, yarnAppId:{1}."), //
     // Eai Service 17000-17999
@@ -89,7 +89,9 @@ public enum LedpCode {
     LEDP_18023("File not found."), //
     LEDP_18024("Cannot change deleted model to active directly; change it to inactive first, then delete it."), //
     LEDP_18025("Segment with name {0} not found."), //
-    LEDP_18026("Cannot update the name of a segment. Delete and recreate.");
+    LEDP_18026("Cannot update the name of a segment. Delete and recreate."), //
+    LEDP_18027("Can not provision JAMS."), //
+    LEDP_18028("Can not load file.");
 
     private String message;
 
