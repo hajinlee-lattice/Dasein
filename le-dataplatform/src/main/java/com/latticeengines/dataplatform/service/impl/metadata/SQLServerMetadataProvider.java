@@ -56,4 +56,9 @@ public class SQLServerMetadataProvider extends MetadataProvider {
         return "Microsoft JDBC Driver 4.0 for SQL Server";
     }
 
+    @Override
+    public String createNewEmptyTableFromExistingOne(String newTable, String oldTable){
+        return "SELECT * INTO " + newTable + " select * from " + oldTable + " WHERE 1 = 0";
+    }
+
 }

@@ -13,7 +13,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.YarnUtils;
-import com.latticeengines.dataplatform.service.MetadataService;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpException;

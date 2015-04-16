@@ -33,6 +33,8 @@ public abstract class MetadataProvider {
     
     public abstract Long getDataSize(JdbcTemplate jdbcTemplate, String tableName);
 
+    public abstract String createNewEmptyTableFromExistingOne(String newTable, String oldTable);
+
     public Schema getSchema(DbCreds dbCreds, String tableName) {
         SqoopOptions options = new SqoopOptions();
         options.setConnectString(getConnectionString(dbCreds));

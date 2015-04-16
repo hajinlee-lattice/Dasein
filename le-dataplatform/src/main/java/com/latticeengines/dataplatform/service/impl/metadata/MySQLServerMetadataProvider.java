@@ -56,4 +56,9 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
     public String getDriverName() {
         return "MySQL Connector Java";
     }
+
+    @Override
+    public String createNewEmptyTableFromExistingOne(String newTable, String oldTable){
+        return "create table " + newTable + " select * from " + oldTable;
+    }
 }

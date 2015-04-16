@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,6 +17,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -23,6 +25,8 @@ import com.google.common.base.Joiner;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.dataplatform.client.mapreduce.MapReduceCustomizationRegistry;
+import com.latticeengines.dataplatform.exposed.service.JobNameService;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.runtime.mapreduce.MapReduceProperty;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
@@ -43,6 +47,12 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
     @Autowired
     private ModelingJobService modelingJobService;
+
+    @Autowired
+    private MetadataService metadataService;
+
+    @Autowired
+    private JobNameService jobNameService;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -68,10 +78,18 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
+    @Value("${scoring.output.table.sample}")
+    private String targetRawTable;
+
+    @Autowired
+    private JdbcTemplate scoringJdbcTemplate;
+
     @Autowired
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
     private static final String JSON_SUFFIX = ".json";
+
+    private static final String OUTPUT_TABLE_PREFIX = "Lead_";
 
     private static final Joiner commaJoiner = Joiner.on(", ").skipNulls();
 
@@ -154,11 +172,31 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         mapReduceCustomizationRegistry.register(new EventDataScoringJob(yarnConfiguration));
         ApplicationId appId = modelingJobService.submitMRJob("scoringJob", properties);
 
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).dbType(dbType);
+        DbCreds creds = new DbCreds(builder);
+        createNewTable(customer, creds);
+
         return appId;
     }
 
-    private ApplicationId export(String deploymentExternalId, ScoringCommand scoringCommand) {
-        // TODO Auto-generated method stub
+    private ApplicationId export(String customer, ScoringCommand scoringCommand) {
+        DbCreds.Builder builder = new DbCreds.Builder();
+        builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).dbType(dbType);
+        DbCreds creds = new DbCreds(builder);
+        String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        String targetTable = createNewTable(customer, creds);
+        String sourceDir = customerBaseDir + "/" + customer + "/scoring/scores/" + scoringCommand.getTableName();
+        sqoopSyncJobService.exportData(targetTable, sourceDir, creds, queue, customer, 4);
         return null;
+    }
+
+    private String createNewTable(String customer, DbCreds creds) {
+        String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
+        String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
+        sqoopSyncJobService.eval(metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable),
+                queue, jobNameService.createJobName(customer, "create-table"), 1,
+                metadataService.getJdbcConnectionUrl(creds));
+        return newTable;
     }
 }

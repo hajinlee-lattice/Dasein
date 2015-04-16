@@ -43,7 +43,7 @@ public class MetadataServiceImpl implements MetadataService {
         MetadataProvider provider = metadataProviders.get(dbType);
         return provider.getConnectionString(creds);
     }
-    
+
     private MetadataProvider getProvider(JdbcTemplate jdbcTemplate) {
         try {
             return metadataProviders.get(jdbcTemplate.getDataSource().getConnection().getMetaData().getDriverName());
@@ -86,5 +86,11 @@ public class MetadataServiceImpl implements MetadataService {
             throw new RuntimeException(e);
         }
         return numCols;
+    }
+    
+    @Override
+    public String createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable){
+        MetadataProvider provider = getProvider(jdbcTemplate);
+        return provider.createNewEmptyTableFromExistingOne(newTable, oldTable);
     }
 }

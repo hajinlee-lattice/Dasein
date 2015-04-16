@@ -21,5 +21,7 @@ public interface MetadataService {
     Integer getColumnCount(JdbcTemplate jdbcTemplate, String tableName);
 
     Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName);
+
+    String createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
     
 }
