@@ -1,13 +1,13 @@
 package com.latticeengines.admin.entitymgr;
 
-import com.latticeengines.domain.exposed.admin.BardJamsTenants;
+import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 
 public interface BardJamsEntityMgr {
 
-    void create(BardJamsTenants request);
+    void create(BardJamsTenant request);
 
-    void delete(BardJamsTenants request);
+    void delete(BardJamsTenant request);
 
-    BardJamsTenants findByKey(BardJamsTenants request);
+    BardJamsTenant findByKey(BardJamsTenant request);
 
 }
