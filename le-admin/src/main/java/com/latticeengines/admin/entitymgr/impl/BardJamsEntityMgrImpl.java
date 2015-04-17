@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.admin.dao.BardJamsRequestDao;
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
-import com.latticeengines.domain.exposed.admin.BardJamsTenants;
+import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 
 @Component("bardJamsEntityMgr")
 public class BardJamsEntityMgrImpl implements BardJamsEntityMgr {
@@ -19,19 +19,19 @@ public class BardJamsEntityMgrImpl implements BardJamsEntityMgr {
 
     @Override
     @Transactional(value = "bardJamsRequest")
-    public void create(BardJamsTenants request) {
+    public void create(BardJamsTenant request) {
         bardJamsRequestDao.create(request);
     }
 
     @Override
     @Transactional(value = "bardJamsRequest")
-    public void delete(BardJamsTenants request) {
+    public void delete(BardJamsTenant request) {
         bardJamsRequestDao.delete(request);
     }
 
     @Override
     @Transactional(value = "bardJamsRequest")
-    public BardJamsTenants findByKey(BardJamsTenants request) {
+    public BardJamsTenant findByKey(BardJamsTenant request) {
         return bardJamsRequestDao.findByKey(request);
     }
 }

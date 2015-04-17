@@ -4,14 +4,14 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.dao.BardJamsRequestDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
-import com.latticeengines.domain.exposed.admin.BardJamsTenants;
+import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 
 @Component
-public class BardJamsRequestDaoImpl extends BaseDaoImpl<BardJamsTenants> implements BardJamsRequestDao {
+public class BardJamsRequestDaoImpl extends BaseDaoImpl<BardJamsTenant> implements BardJamsRequestDao {
 
     @Override
-    protected Class<BardJamsTenants> getEntityClass() {
-        return BardJamsTenants.class;
+    protected Class<BardJamsTenant> getEntityClass() {
+        return BardJamsTenant.class;
     }
 
 }
