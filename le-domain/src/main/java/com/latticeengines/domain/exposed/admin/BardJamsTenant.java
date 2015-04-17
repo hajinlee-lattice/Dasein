@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Table(name = "Tenants")
-public class BardJamsTenants implements HasPid {
+public class BardJamsTenant implements HasPid {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -108,7 +108,7 @@ public class BardJamsTenants implements HasPid {
     @Column(name = "Status", nullable = true)
     private String status;
 
-    public BardJamsTenants() {
+    public BardJamsTenant() {
         super();
     }
 
@@ -477,7 +477,7 @@ public class BardJamsTenants implements HasPid {
         if (!other.getClass().equals(this.getClass())) {
             return false;
         }
-        BardJamsTenants theOther = (BardJamsTenants) other;
+        BardJamsTenant theOther = (BardJamsTenant) other;
         return new EqualsBuilder().append(tenantId, theOther.getPid()).isEquals();
     }
 

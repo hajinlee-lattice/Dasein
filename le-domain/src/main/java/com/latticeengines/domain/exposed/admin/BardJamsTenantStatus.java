@@ -1,6 +1,6 @@
 package com.latticeengines.domain.exposed.admin;
 
-public enum BardJamsRequestStatus {
+public enum BardJamsTenantStatus {
 
     NEW("New"), //
     FINISHED("Finished"), //
@@ -8,7 +8,7 @@ public enum BardJamsRequestStatus {
 
     private String status;
 
-    private BardJamsRequestStatus(String status) {
+    private BardJamsTenantStatus(String status) {
         this.status = status;
     }
 
