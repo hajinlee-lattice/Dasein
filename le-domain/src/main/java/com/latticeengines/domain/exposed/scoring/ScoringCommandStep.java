@@ -5,7 +5,7 @@ public enum ScoringCommandStep {
     VALIDATE_DATA("Validate data"),
     LOAD_DATA("Load data"),
     SCORE_DATA("Score data"),
-//    EXPORT_DATA("Export data"),
+    EXPORT_DATA("Export data"),
     OUTPUT_COMMAND_RESULTS("Output command results"),
     FINISH("Finished");
 
