@@ -19,15 +19,33 @@
                             <th>{{ResourceUtility.getString('MULTIPLE_MODEL_SEGMENT_NAME')}}</th>
                             <th>{{ResourceUtility.getString('MULTIPLE_MODEL_MODEL_NAME')}}</th>
                             <th>{{ResourceUtility.getString('MULTIPLE_MODEL_MODEL_ID')}}</th>
-                            <th>{{ResourceUtility.getString('MULTIPLE_MODEL_PRIORITY')}}</th>
+                            <th data-ng-hide="segments.length === 1">{{ResourceUtility.getString('MULTIPLE_MODEL_PRIORITY')}}</th>
                             <th>{{ResourceUtility.getString('MULTIPLE_MODEL_DELETE')}}</th>
                         </thead>
                         <tbody>
                             <tr data-ng-repeat="segment in segments" data-ng-class="{shaded: $index % 2}">
                                 <td>{{segment.Name}}</td>
-                                <td>{{segment.ModelName}}</td>
-                                <td>{{segment.ModelId}}</td>
-                                <td>{{segment.Priority}}</td>
+                                <td>
+                                    <select class="js-model-select" data-ng-model="segment.NewModelId" data-ng-change="modelChanged(segment)">
+                                        <option 
+                                            data-ng-repeat="model in models" 
+                                            value="{{model.Id}}" 
+                                            data-ng-selected="segment.ModelId == model.Id">
+                                            {{model.DisplayName}}
+                                        </option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <p data-ng-hide="segment.ModelId == 'FAKE_MODEL'">
+                                        {{segment.ModelId}}
+                                    </p>
+                                </td>
+                                <td data-ng-hide="segments.length === 1">
+                                    <div>
+                                        <a href="#" data-ng-show="showDecreasePriority(segment)" data-ng-click="decreasePriorityClicked($event, segment)">&#8595;</a>
+                                        <a href="#" data-ng-show="showIncreasePriority(segment)" data-ng-click="increasePriorityClicked($event, segment)">&#8593;</a>
+                                    </div>
+                                </td>
                                 <td class="edit-icons">
                                     <a class="delete-user-link" data-ng-click="deleteSegmentClicked(segment)" href="#"><i class="fa fa-trash-o"></i></a>
                                 </td>

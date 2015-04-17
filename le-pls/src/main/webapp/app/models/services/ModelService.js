@@ -398,6 +398,8 @@ angular.module('mainApp.models.services.ModelService', [
                         var segment = segmentList[x];
                         if (!StringUtility.IsEmptyString(segment.ModelId)) {
                             segment.ModelName = modelDict[segment.ModelId];
+                        } else {
+                            segment.ModelId = "FAKE_MODEL";
                         }
                     }
                 }
@@ -426,6 +428,10 @@ angular.module('mainApp.models.services.ModelService', [
         var result;
         if (segment == null || StringUtility.IsEmptyString(segment.Name)) {
             return null;
+        }
+        
+        if (segment.ModelId == "FAKE_MODEL") {
+            segment.ModelId = null;
         }
 
         $http({
@@ -487,6 +493,63 @@ angular.module('mainApp.models.services.ModelService', [
             headers: {
                 "Content-Type": "application/json"
             }
+        })
+        .success(function(data, status, headers, config) {
+            if (data == null) {
+                result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                };
+                deferred.resolve(result);
+            } else {
+                result = {
+                    success: data.Success,
+                    resultObj: {},
+                    resultErrors: null
+                };
+                if (result.success === false) {
+                    result.resultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+                }
+                
+            }
+
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            result = {
+                success: false,
+                resultObj: null,
+                resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+            };
+
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
+    
+    this.UpdateSegment = function (segment) {
+        var deferred = $q.defer();
+        var result;
+        if (segment == null) {
+            deferred.resolve(result);
+            return deferred.promise;
+        }
+        
+        
+        if (segment.ModelId == "FAKE_MODEL") {
+            segment.ModelId = null;
+        }
+
+        $http({
+            method: 'PUT',
+            url: '/pls/segments/' + segment.Name,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            data: segment
         })
         .success(function(data, status, headers, config) {
             if (data == null) {
