@@ -33,12 +33,13 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
             segmentDict[segments[i].ModelId] = 1;
         }
         
-        while (models.length > 0) {
-            var model = models.shift();
-            if (segmentDict[model.Id] == null) {
-                toReturn.push(model);
+        for (var x=0;x<models.length;x++) {
+            if (segmentDict[models[x].Id] == null) {
+                toReturn.push(models[x]);
             }
         }
+        
+        return toReturn;
     };
     
     this.ValidateSegmentName = function (name, segments) {
@@ -62,12 +63,13 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
 })
 
 .service('AddSegmentModal', function ($compile, $rootScope, $http) {
-    this.show = function (segments, models) {
+    this.show = function (segments, models, successCallback) {
         $http.get('./app/models/views/AddSegmentView.html').success(function (html) {
             
             var scope = $rootScope.$new();
             scope.segments = segments;
             scope.models = models;
+            scope.successCallback = successCallback;
 
             var modalElement = $("#modalContainer");
             $compile(modalElement.html(html))(scope);
@@ -96,11 +98,18 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
     
     var segments = $scope.segments;
     $scope.filteredModels = AddSegmentService.GetUnassociatedModels(segments, $scope.models);
+    // Add the empty model so they don't have to choose one
+    var emptyModel = {
+        Id: "FAKE_MODEL",
+        DisplayName: "Select"
+    };
+    $scope.filteredModels.unshift(emptyModel);
     
     $scope.newSegment = {
         Name: null,
         Priority: AddSegmentService.GetLowestPriorityAvailable(segments),
-        ModelId: ""
+        ModelId: null,
+        ModelName: null
     };
 
     $scope.addSegmentClick = function () {
@@ -111,10 +120,20 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
         var isValid = AddSegmentService.ValidateSegmentName($scope.newSegment.Name, segments);
         if (isValid) {
             $scope.saveInProgress = true;
+            
+            var modelId = $(".js-model-select").val();
+            if (modelId != "FAKE_MODEL") {
+                $scope.newSegment.ModelId = modelId;
+                $scope.newSegment.ModelName = $(".js-model-select option:selected").text();
+            }
+            
             ModelService.AddSegment($scope.newSegment).then(function(result) {
                 $scope.saveInProgress = false;
                 if (result && result.success === true) {
                     $("#modalContainer").modal('hide');
+                    if ($scope.successCallback) {
+                        $scope.successCallback($scope.newSegment);
+                    }
                 } else {
                     $scope.addSegmentErrorMessage = result.resultErrors;
                     $scope.showAddSegmentError = true;

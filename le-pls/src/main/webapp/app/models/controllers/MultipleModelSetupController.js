@@ -32,6 +32,29 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
     });
     
     $scope.addNewSegmentClicked = function () {
-        AddSegmentModal.show($scope.segments, models);
+        AddSegmentModal.show($scope.segments, models, function (segment) {
+            if (segment != null) {
+                $scope.segments.push(segment);
+            }
+        });
+    };
+    
+    $scope.deleteSegmentClicked = function (segment) {
+        if (segment == null) {
+            return;
+        }
+        ModelService.DeleteSegment(segment.Name).then(function(result) {
+            if (result != null && result.success === true) {
+                for (var i=0;i<$scope.segments.length;i++) {
+                    if (segment.Name == $scope.segments[i].Name) {
+                        $scope.segments.splice(i, 1);
+                        break;
+                    }
+                }
+            } else {
+                // Need to handle error case
+            }
+        });
+        
     };
 });
