@@ -3,7 +3,7 @@ package com.latticeengines.domain.exposed.admin;
 public enum BardJamsTenantStatus {
 
     NEW("New"), //
-    FINISHED("Finished"), //
+    FINISHED("Succeeded"), //
     FAILED("Failed");
 
     private String status;
