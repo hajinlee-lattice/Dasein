@@ -64,10 +64,12 @@ angular.module('mainApp.login.services.LoginService', [
                 data.Result.User.Tenant = tenant;
                 BrowserStorageUtility.setClientSession(data.Result.User);
                 result = data;
-            } else {
+            }
+            if (result.Result.User.AccessLevel === null) {
+                status = 401;
                 SessionService.HandleResponseErrors(data, status);
             }
-            
+
             deferred.resolve(result);
         })
         .error(function(data, status, headers, config) {
