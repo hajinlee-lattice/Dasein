@@ -52,6 +52,9 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
     $scope.addNewSegmentClicked = function () {
         AddSegmentModal.show($scope.segments, $scope.models, function (segment) {
             if (segment != null) {
+                if (segment.ModelId == null) {
+                    segment.ModelId = "FAKE_MODEL";
+                }
                 segment.NewModelId = segment.ModelId;
                 $scope.segments.push(segment);
             }

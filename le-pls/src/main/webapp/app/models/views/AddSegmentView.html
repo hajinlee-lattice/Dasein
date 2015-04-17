@@ -20,7 +20,10 @@
                             <div class="form-group" data-ng-show="filteredModels.length > 0">
                                 <label class="control-label">{{ResourceUtility.getString('MULTIPLE_MODEL_MODEL')}}</label>
                                 <select class="js-model-select">
-                                    <option data-ng-repeat="model in filteredModels" value="{{model.Id}}">{{model.DisplayName}}</option>
+                                    <option 
+                                        data-ng-repeat="model in filteredModels" 
+                                        value="{{model.Id}}"
+                                        data-ng-selected="segment.ModelId == model.Id">{{model.DisplayName}}</option>
                                 </select>
                             </div>
                         </div>
