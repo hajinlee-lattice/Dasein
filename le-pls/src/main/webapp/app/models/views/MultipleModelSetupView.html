@@ -29,15 +29,14 @@
                                 <td>{{segment.ModelId}}</td>
                                 <td>{{segment.Priority}}</td>
                                 <td class="edit-icons">
-                                    <a class="delete-user-link" data-ng-click="deleteSegmentClicked(segment)" href="#">
-                                        <i class="fa fa-trash-o"></i>
-                                    </a>
+                                    <a class="delete-user-link" data-ng-click="editSegmentClicked(segment)" href="#"><i class="fa fa-pencil"></i></a>
+                                    <a class="delete-user-link" data-ng-click="deleteSegmentClicked(segment)" href="#"><i class="fa fa-trash-o"></i></a>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                     <div class="text-left">
-                        <button class="btn btn-primary" data-ng-click="addNewSegmentClicked($event)">
+                        <button class="btn btn-primary" data-ng-click="addNewSegmentClicked()">
                             {{ResourceUtility.getString('MULTIPLE_MODEL_ADD_NEW')}}
                         </button>
                     </div>

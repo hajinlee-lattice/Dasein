@@ -420,5 +420,57 @@ angular.module('mainApp.models.services.ModelService', [
 
         return deferred.promise;
     };
+    
+    this.AddSegment = function (segment) {
+        var deferred = $q.defer();
+        var result;
+        if (segment == null || StringUtility.IsEmptyString(segment.Name)) {
+            return null;
+        }
+
+        $http({
+            method: 'POST',
+            url: '/pls/segments/',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            
+            data: segment
+        })
+        .success(function(data, status, headers, config) {
+            if (data == null) {
+                result = {
+                    success: false,
+                    resultObj: null,
+                    resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+                };
+                deferred.resolve(result);
+            } else {
+                result = {
+                    success: data.Success,
+                    resultObj: {},
+                    resultErrors: null
+                };
+                if (result.success === false) {
+                    result.resultErrors = ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR');
+                }
+                
+            }
+
+            deferred.resolve(result);
+        })
+        .error(function(data, status, headers, config) {
+            SessionService.HandleResponseErrors(data, status);
+            result = {
+                success: false,
+                resultObj: null,
+                resultErrors: ResourceUtility.getString('UNEXPECTED_SERVICE_ERROR')
+            };
+
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    };
 
 });

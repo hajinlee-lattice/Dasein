@@ -439,6 +439,10 @@ table.existing-user-info tr td {
   color: #4070a8;
 }
 
+.form-group select {
+  display: block;
+}
+
 /*
 Spinner
 */
@@ -454,6 +458,7 @@ Spinner
   -webkit-animation: load6 1.7s infinite ease;
   animation: load6 1.7s infinite ease;
 }
+
 @-webkit-keyframes load6 {
   0% {
     -webkit-transform: rotate(0deg);
