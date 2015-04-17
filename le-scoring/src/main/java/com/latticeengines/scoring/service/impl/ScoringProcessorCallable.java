@@ -115,7 +115,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
         if (scoringCommandState == null) {
             // executeStep(modelStepRetrieveMetadataProcessor,
             // ModelCommandStep.RETRIEVE_METADATA, commandParameters);
-            executeYarnStep(ScoringCommandStep.LOAD_DATA);
+            executeYarnStep(ScoringCommandStep.EXPORT_DATA);
             scoringCommandLogService.log(scoringCommand, "Total: " + scoringCommand.getTotal());
             // scoringCommandLogService.log(scoringCommand, "Data Size: " +
             // readableFileSize(dataSize) + " Row count: "

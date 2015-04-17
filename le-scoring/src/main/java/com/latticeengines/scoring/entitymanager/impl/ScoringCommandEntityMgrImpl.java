@@ -1,10 +1,6 @@
 package com.latticeengines.scoring.entitymanager.impl;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -33,14 +29,12 @@ public class ScoringCommandEntityMgrImpl extends BaseScoringEntityMgrImpl<Scorin
     @Override
     @Transactional(value = "scoring", propagation = Propagation.REQUIRED)
     public List<ScoringCommand> getPopulated() {
-        Set<String> leDeploymentIds = new HashSet<>();
-        List<ScoringCommand> scoringCommands = new ArrayList<>();
-        for(ScoringCommand scoringCommand : scoringCommandDao.getPopulated()){
-            if(leDeploymentIds.add(scoringCommand.getId())){
-                scoringCommands.add(scoringCommand);
-            }
-        }
-        return scoringCommands;
+        return scoringCommandDao.getPopulated();
     }
 
+    @Override
+    @Transactional(value = "scoring", propagation = Propagation.REQUIRED)
+    public List<ScoringCommand> getConsumed() {
+        return scoringCommandDao.getConsumed();
+    }
 }

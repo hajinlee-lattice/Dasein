@@ -64,7 +64,7 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         log.info("ScoringManager started!");
         log.info("look at database rows:" + scoringCommandEntityMgr.getPopulated());
         if (scoringCommandEntityMgr.findAll().isEmpty()){
-        scoringCommandEntityMgr.create(new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, "Q_EventTable_Nutanix", 0, 100,
+        scoringCommandEntityMgr.create(new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, "TestDataTable", 0, 1292,
                 new Timestamp(System.currentTimeMillis())));
         }
         

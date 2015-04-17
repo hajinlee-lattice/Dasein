@@ -9,4 +9,6 @@ public interface ScoringCommandDao extends BaseDao<ScoringCommand>{
 
     List<ScoringCommand> getPopulated();
 
+    List<ScoringCommand> getConsumed();
+
 }

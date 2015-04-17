@@ -9,4 +9,6 @@ public interface ScoringCommandEntityMgr extends BaseEntityMgr<ScoringCommand>{
 
     List<ScoringCommand> getPopulated();
 
+    List<ScoringCommand> getConsumed();
+
 }

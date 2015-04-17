@@ -33,4 +33,15 @@ public class ScoringCommandDaoImpl extends BaseDaoImpl<ScoringCommand> implement
         return commands;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ScoringCommand> getConsumed() {
+        Session session = getSessionFactory().getCurrentSession();
+        List<ScoringCommand> commands = session
+                .createCriteria(ScoringCommand.class)
+                .add(Restrictions.eq("status", ScoringCommandStatus.CONSUMED))
+                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+        return commands;
+    }
+
 }

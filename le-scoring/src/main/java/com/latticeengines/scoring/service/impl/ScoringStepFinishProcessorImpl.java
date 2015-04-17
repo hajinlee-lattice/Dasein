@@ -23,7 +23,6 @@ public class ScoringStepFinishProcessorImpl implements ScoringStepProcessor {
 
     @Override
     public void executeStep(ScoringCommand scoringCommand) {
-        //TODO Create a new table
         ScoringCommandResult result = scoringCommandResultEntityMgr.findByScoringCommand(scoringCommand);
         result.setStatus(ScoringCommandStatus.POPULATED);
         result.setPopulated(new Timestamp(System.currentTimeMillis()));

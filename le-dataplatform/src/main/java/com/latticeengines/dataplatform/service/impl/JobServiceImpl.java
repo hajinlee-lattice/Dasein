@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.data.hadoop.mapreduce.JobRunner;
+import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.CommandYarnClient;
 import org.springframework.yarn.client.YarnClient;
 
@@ -32,7 +33,8 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-public abstract class JobServiceImpl implements JobService, ApplicationContextAware {
+@Component("jobService")
+public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     protected static final Log log = LogFactory.getLog(JobServiceImpl.class);
     protected static final int MAX_TRIES = 60;
@@ -200,6 +202,13 @@ public abstract class JobServiceImpl implements JobService, ApplicationContextAw
                 log.warn(LedpException.buildMessage(LedpCode.LEDP_00000, new String[] { directory }));
             }
         }
+    }
+
+    @Override
+    public JobStatus getJobStatus(String applicationId) {
+        JobStatus jobStatus = new JobStatus();
+        populateJobStatusFromYarnAppReport(jobStatus, applicationId);
+        return jobStatus;
     }
 
 }

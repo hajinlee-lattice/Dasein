@@ -123,15 +123,15 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         case SCORE_DATA:
             appId = score(deploymentExternalId, scoringCommand);
             break;
-//        case EXPORT_DATA:
-//             appId = export(deploymentExternalId, scoringCommand);
-//            break;
+        case EXPORT_DATA:
+            appId = export(deploymentExternalId, scoringCommand);
+            break;
         }
 
         return appId;
     }
 
-    private ApplicationId load(String customer, ScoringCommand scoringCommand){
+    private ApplicationId load(String customer, ScoringCommand scoringCommand) {
         DbCreds.Builder builder = new DbCreds.Builder();
         builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).dbType(dbType);
         DbCreds creds = new DbCreds(builder);
@@ -139,8 +139,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         String targetDir = customerBaseDir + "/" + customer + "/scoring/data/" + table;
 
         ApplicationId appId = sqoopSyncJobService.importData(table, targetDir, creds,
-                LedpQueueAssigner.getMRQueueNameForSubmission(), customer, Arrays.asList("Nutanix_EventTable_Clean"),
-                "", 4);
+                LedpQueueAssigner.getMRQueueNameForSubmission(), customer, Arrays.asList("LeadID"), "", 4);
         return appId;
     }
 
@@ -150,23 +149,26 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), customer);
         properties.setProperty(MapReduceProperty.QUEUE.name(), LedpQueueAssigner.getMRQueueNameForSubmission());
 
-        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + customer + "/scoring/data/" + table);
-        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + customer + "/scoring/scores/" + table);
+        properties.setProperty(MapReduceProperty.INPUT.name(), customerBaseDir + "/" + customer + "/scoring/data/"
+                + table);
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), customerBaseDir + "/" + customer + "/scoring/scores/"
+                + table);
         String customerModelPath = customerBaseDir + "/" + customer + "/models";
 
         List<String> modelFilePaths = Collections.emptyList();
         try {
-            modelFilePaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelPath, new HdfsFileFilter() {
-                @Override
-                public boolean accept(FileStatus fileStatus) {
-                    if (fileStatus == null) {
-                        return false;
-                    }
-                    Pattern p = Pattern.compile(".*model" + JSON_SUFFIX);
-                    Matcher matcher = p.matcher(fileStatus.getPath().getName());
-                    return matcher.matches();
-                }
-            });
+            modelFilePaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, customerModelPath,
+                    new HdfsFileFilter() {
+                        @Override
+                        public boolean accept(FileStatus fileStatus) {
+                            if (fileStatus == null) {
+                                return false;
+                            }
+                            Pattern p = Pattern.compile(".*model" + JSON_SUFFIX);
+                            Matcher matcher = p.matcher(fileStatus.getPath().getName());
+                            return matcher.matches();
+                        }
+                    });
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
@@ -177,11 +179,6 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelFilePaths));
         mapReduceCustomizationRegistry.register(new EventDataScoringJob(yarnConfiguration));
         ApplicationId appId = jobService.submitMRJob("scoringJob", properties);
-
-        DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).dbType(dbType);
-        DbCreds creds = new DbCreds(builder);
-        createNewTable(customer, creds);
 
         return appId;
     }
@@ -197,8 +194,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
                 targetTable, 0, new Timestamp(System.currentTimeMillis()));
         scoringCommandResultEntityMgr.create(result);
 
-        String sourceDir = customerBaseDir + "/" + customer + "/scoring/scores/" + scoringCommand.getTableName();
-        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, creds, queue, customer, 4);
+        String sourceDir = customerBaseDir + "/" + customer + "/scoring/data/" + scoringCommand.getTableName();
+        log.info("connection url: " + metadataService.getJdbcConnectionUrl(creds));
+        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, creds, queue, customer);
 
         return appId;
     }
@@ -206,7 +204,8 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     private String createNewTable(String customer, DbCreds creds) {
         String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
         String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        sqoopSyncJobService.eval(metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable),
+        sqoopSyncJobService.eval(
+                metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable),
                 queue, jobNameService.createJobName(customer, "create-table"), 1,
                 metadataService.getJdbcConnectionUrl(creds));
         return newTable;

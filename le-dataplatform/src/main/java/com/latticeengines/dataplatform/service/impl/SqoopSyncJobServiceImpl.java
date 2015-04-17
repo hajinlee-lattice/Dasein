@@ -146,7 +146,6 @@ public class SqoopSyncJobServiceImpl implements SqoopSyncJobService {
         cmds.add(Integer.toString(numMappers));
         cmds.add("--table");
         cmds.add(table);
-        cmds.add("--direct");
         cmds.add("--mapreduce-job-name");
         cmds.add(jobName);
         cmds.add("--export-dir");
