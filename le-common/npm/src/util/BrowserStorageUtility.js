@@ -144,6 +144,7 @@ angular.module('le.common.util.BrowserStorageUtility', ['LocalStorageModule'])
             if(!keepAuthentication) {
                 this.setClientSession(null);
             }
+            this.setTokenDocument(null);
             this.setLoginDocument(null);
             this.setSessionDocument(null);
             this.setCurrentTab(null);

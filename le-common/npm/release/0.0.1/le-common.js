@@ -149,6 +149,7 @@ angular.module('le.common.util.BrowserStorageUtility', ['LocalStorageModule'])
             if(!keepAuthentication) {
                 this.setClientSession(null);
             }
+            this.setTokenDocument(null);
             this.setLoginDocument(null);
             this.setSessionDocument(null);
             this.setCurrentTab(null);
@@ -157,21 +158,4 @@ angular.module('le.common.util.BrowserStorageUtility', ['LocalStorageModule'])
         };
 
 
-});
-angular.module('le.common.util.SessionUtility', [
-    'le.common.util.BrowserStorageUtility'
-])
-.service('SessionUtility', function (BrowserStorageUtility, $window) {
-
-    this.ClearSession = function () {
-        BrowserStorageUtility.clear(false);
-        //ResourceUtility.clearResourceStrings();
-        $window.location.href = '/';
-    };
-
-    this.HandleResponseErrors = function (data, status) {
-        if (status === 401) {
-            this.ClearSession();
-        }
-    };
 });

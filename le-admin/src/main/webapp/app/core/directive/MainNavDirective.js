@@ -1,7 +1,6 @@
 var app = angular.module("app.core.directive.MainNavDirective", [
     'ui.router',
-    'le.common.util.BrowserStorageUtility',
-    'le.common.util.SessionUtility'
+    'le.common.util.BrowserStorageUtility'
 ]);
 
 app.service('MainNavService', function(){
@@ -20,20 +19,23 @@ app.directive('mainNav', function(){
         scope: {activeNav: '='},
         controller: function ($scope, $rootScope, $state,
                               MainNavService, BrowserStorageUtility) {
-            if(BrowserStorageUtility.getTokenDocument() === null){
+            routeToCorrectState();
+
+
+            $rootScope.$on('$stateChangeSuccess', function () { routeToCorrectState(); });
+
+            $scope.onSignOutClick = function() {
                 BrowserStorageUtility.clear(false);
                 $state.go('LOGIN');
-            }
-            $scope.activeState = MainNavService.parseNavState($state.current.name);
+            };
 
-
-            $rootScope.$on('$stateChangeSuccess', function () {
+            function routeToCorrectState(){
                 if(BrowserStorageUtility.getTokenDocument() === null){
                     BrowserStorageUtility.clear(false);
                     $state.go('LOGIN');
                 }
                 $scope.activeState = MainNavService.parseNavState($state.current.name);
-            });
+            }
         }
     };
 });
