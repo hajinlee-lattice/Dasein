@@ -9,8 +9,8 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
-import com.latticeengines.domain.exposed.admin.BardJamsRequestStatus;
-import com.latticeengines.domain.exposed.admin.BardJamsTenants;
+import com.latticeengines.domain.exposed.admin.BardJamsTenantStatus;
+import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-admin-context.xml" })
@@ -21,11 +21,11 @@ public class BardJamsEntityMgrImplTestNG extends AbstractTestNGSpringContextTest
 
     @Test(groups = "functional")
     public void testCRUD() {
-        BardJamsTenants tenant = getBardJamsTenant();
+        BardJamsTenant tenant = getBardJamsTenant();
         bardJamsEntityMgr.create(tenant);
         Assert.assertNotNull(tenant.getPid());
 
-        BardJamsTenants newTenant = bardJamsEntityMgr.findByKey(tenant);
+        BardJamsTenant newTenant = bardJamsEntityMgr.findByKey(tenant);
         Assert.assertNotNull(newTenant);
         Assert.assertEquals(newTenant.getPid(), tenant.getPid());
 
@@ -36,19 +36,19 @@ public class BardJamsEntityMgrImplTestNG extends AbstractTestNGSpringContextTest
 
     }
 
-    private BardJamsTenants getBardJamsTenant() {
-        BardJamsTenants request = new BardJamsTenants();
-        request.setTenant("newTenant3");
+    private BardJamsTenant getBardJamsTenant() {
+        BardJamsTenant tenant = new BardJamsTenant();
+        tenant.setTenant("newTenant3");
 
-        request.setDlUrl("https://dataloader-prod.lattice-engines.com/Dataloader_PLS/");
-        request.setDlUser("admin.dataloader@lattice-engines.com");
-        request.setDlPassword("adm1nDLpr0d");
-        request.setImmediateFolderStruct("DanteTesting\\Immediate\\");
-        request.setScheduledFolderStruct("DataLoader\\DL TEST\\Scheduled Jobs");
-        request.setAgentName("10.41.1.247");
-        request.setTenantType("P");
+        tenant.setDlUrl("https://dataloader-prod.lattice-engines.com/Dataloader_PLS/");
+        tenant.setDlUser("admin.dataloader@lattice-engines.com");
+        tenant.setDlPassword("adm1nDLpr0d");
+        tenant.setImmediateFolderStruct("DanteTesting\\Immediate\\");
+        tenant.setScheduledFolderStruct("DataLoader\\DL TEST\\Scheduled Jobs");
+        tenant.setAgentName("10.41.1.247");
+        tenant.setTenantType("P");
 
-        request.setStatus(BardJamsRequestStatus.NEW.getStatus());
-        return request;
+        tenant.setStatus(BardJamsTenantStatus.NEW.getStatus());
+        return tenant;
     }
 }

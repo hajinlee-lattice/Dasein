@@ -17,8 +17,8 @@ import com.google.common.base.Function;
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.domain.exposed.admin.BardJamsRequestStatus;
-import com.latticeengines.domain.exposed.admin.BardJamsTenants;
+import com.latticeengines.domain.exposed.admin.BardJamsTenantStatus;
+import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -39,16 +39,16 @@ public class BardJamsInstaller implements CustomerSpaceServiceInstaller {
     public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion,
             Map<String, String> properties) {
 
-        BardJamsTenants tenant = pupulateRequest(space, serviceName, dataVersion, properties);
+        BardJamsTenant tenant = pupulateTenant(space, serviceName, dataVersion, properties);
         bardJamsEntityMgr.create(tenant);
 
-        log.info("Created BardJams Request=" + tenant.toString());
+        log.info("Created BardJams tenant=" + tenant.toString());
 
-        boolean isSuccessful = checkRequest(tenant);
+        boolean isSuccessful = checkTenant(tenant);
         if (isSuccessful) {
-            log.info("Successfully created BardJams Request=" + tenant);
+            log.info("Successfully created BardJams tenant=" + tenant);
         } else {
-            log.info("Failed to create BardJams Request=" + tenant);
+            log.info("Failed to create BardJams tenant=" + tenant);
             throw new LedpException(LedpCode.LEDP_18027);
         }
 
@@ -69,18 +69,18 @@ public class BardJamsInstaller implements CustomerSpaceServiceInstaller {
         this.timeout = timeout;
     }
 
-    private boolean checkRequest(BardJamsTenants request) {
+    private boolean checkTenant(BardJamsTenant tenant) {
         long currTime = System.currentTimeMillis();
         long endTime = currTime + timeout;
         boolean isSuccessful = false;
         while (currTime < endTime) {
-            log.info("Starting to check status of request=" + request.toString());
-            BardJamsTenants newRequest = bardJamsEntityMgr.findByKey(request);
-            if (newRequest.getStatus().equals(BardJamsRequestStatus.FINISHED.toString())) {
+            log.info("Starting to check status of tenant=" + tenant.toString());
+            BardJamsTenant newTenant = bardJamsEntityMgr.findByKey(tenant);
+            if (newTenant.getStatus().equals(BardJamsTenantStatus.FINISHED.toString())) {
                 isSuccessful = true;
                 break;
             }
-            if (newRequest.getStatus().equals(BardJamsRequestStatus.FAILED.toString())) {
+            if (newTenant.getStatus().equals(BardJamsTenantStatus.FAILED.toString())) {
                 isSuccessful = false;
                 break;
             }
@@ -96,39 +96,39 @@ public class BardJamsInstaller implements CustomerSpaceServiceInstaller {
         return isSuccessful;
     }
 
-    private BardJamsTenants pupulateRequest(CustomerSpace space, String serviceName, int dataVersion,
+    private BardJamsTenant pupulateTenant(CustomerSpace space, String serviceName, int dataVersion,
             Map<String, String> properties) {
-        BardJamsTenants request = new BardJamsTenants();
+        BardJamsTenant tenant = new BardJamsTenant();
 
-        request.setTenant(properties.get("Tenant"));
-        request.setTenantType(properties.get("TenantType"));
-        request.setDlTenantName(properties.get("DL_TenantName"));
-        request.setDlUrl(properties.get("DL_URL"));
-        request.setDlUser(properties.get("DL_User"));
-        request.setDlPassword(properties.get("DL_Password"));
-        request.setNotificationEmail(properties.get("NotificationEmail"));
-        request.setNotifyEmailJob(properties.get("NotifyEmailJob"));
-        request.setJamsUser(properties.get("JAMSUser"));
-        request.setImmediateFolderStruct(properties.get("ImmediateFolderStruct"));
-        request.setScheduledFolderStruct(properties.get("ScheduledFolderStruct"));
-        request.setDanteManifestPath(properties.get("DanteManifestPath"));
-        request.setQueueName(properties.get("Queue_Name"));
-        request.setAgentName(properties.get("Agent_Name"));
-        request.setWeekdayScheduleName(properties.get("WeekdaySchedule_Name"));
-        request.setWeekendScheduleName(properties.get("WeekendSchedule_Name"));
-        request.setDataLaunchPath(properties.get("Data_LaunchPath"));
-        request.setDataArchivePath(properties.get("Data_ArchivePath"));
-        request.setDataLoaderToolsPath(properties.get("DataLoaderTools_Path"));
-        request.setDanteToolPath(properties.get("DanteTool_Path"));
+        tenant.setTenant(properties.get("Tenant"));
+        tenant.setTenantType(properties.get("TenantType"));
+        tenant.setDlTenantName(properties.get("DL_TenantName"));
+        tenant.setDlUrl(properties.get("DL_URL"));
+        tenant.setDlUser(properties.get("DL_User"));
+        tenant.setDlPassword(properties.get("DL_Password"));
+        tenant.setNotificationEmail(properties.get("NotificationEmail"));
+        tenant.setNotifyEmailJob(properties.get("NotifyEmailJob"));
+        tenant.setJamsUser(properties.get("JAMSUser"));
+        tenant.setImmediateFolderStruct(properties.get("ImmediateFolderStruct"));
+        tenant.setScheduledFolderStruct(properties.get("ScheduledFolderStruct"));
+        tenant.setDanteManifestPath(properties.get("DanteManifestPath"));
+        tenant.setQueueName(properties.get("Queue_Name"));
+        tenant.setAgentName(properties.get("Agent_Name"));
+        tenant.setWeekdayScheduleName(properties.get("WeekdaySchedule_Name"));
+        tenant.setWeekendScheduleName(properties.get("WeekendSchedule_Name"));
+        tenant.setDataLaunchPath(properties.get("Data_LaunchPath"));
+        tenant.setDataArchivePath(properties.get("Data_ArchivePath"));
+        tenant.setDataLoaderToolsPath(properties.get("DataLoaderTools_Path"));
+        tenant.setDanteToolPath(properties.get("DanteTool_Path"));
         String active = properties.get("Active");
         if (active != null) {
-            request.setActive(Integer.parseInt(active));
+            tenant.setActive(Integer.parseInt(active));
         }
-        request.setDanteQueueName(properties.get("Dante_Queue_Name"));
-        request.setLoadGroupList(properties.get("LoadGroupList"));
-        request.setStatus(BardJamsRequestStatus.NEW.getStatus());
+        tenant.setDanteQueueName(properties.get("Dante_Queue_Name"));
+        tenant.setLoadGroupList(properties.get("LoadGroupList"));
+        tenant.setStatus(BardJamsTenantStatus.NEW.getStatus());
 
-        return request;
+        return tenant;
     }
 
     @Override

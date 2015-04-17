@@ -46,8 +46,7 @@ public class BardJamsComponent extends LatticeComponent {
 
     @Override
     public String getVersionString() {
-        // TODO Auto-generated method stub
-        return null;
+        return "1.0";
     }
 
 }
