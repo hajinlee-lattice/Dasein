@@ -28,8 +28,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(name = "SEGMENT", uniqueConstraints = { @UniqueConstraint(columnNames = { "MODEL_ID" }),
-        @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
+@Table(name = "SEGMENT", uniqueConstraints = { @UniqueConstraint(columnNames = { "NAME", "TENANT_ID" }) })
 @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 public class Segment implements HasName, HasPid, HasTenant, HasTenantId {
     
