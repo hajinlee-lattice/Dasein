@@ -158,6 +158,8 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     @Test(groups = "functional", dependsOnMethods = "transform")
     public void exportToDB() throws Exception {
 
+        ((PropDataMadisonServiceImpl) propDataService).cleanupTargetRawData(today);
+        
         PropDataContext requestContext = new PropDataContext();
         requestContext.setProperty(PropDataMadisonService.TODAY_KEY, today);
         PropDataContext responseContext = propDataService.exportToDB(requestContext);
