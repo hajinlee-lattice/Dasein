@@ -107,7 +107,7 @@
                         <mapping>
                             <directory>/opt/jetty/bin</directory>
                             <filemode>755</filemode>
-                            <usaername>yarn</usaername>
+                            <username>yarn</username>
                             <groupname>yarn</groupname>
                             <sources>
                                 <source>
