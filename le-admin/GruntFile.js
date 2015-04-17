@@ -4,6 +4,7 @@ module.exports = function(grunt) {
     var appConfig = {
         dir:  sourceDir,
         dist: 'dist',
+        www: 'www',
         distDir: 'dist/' + sourceDir,
         leCommon: '../le-common/npm/release',
         versionString: new Date().getTime(),
@@ -179,10 +180,16 @@ module.exports = function(grunt) {
             postDist: [
                 '<%= app.dir %>/assets/css/*.compiled.css'
             ],
+            www: [
+                '<%= app.dir %>/app',
+                '<%= app.dir %>/assets',
+                '<%= app.dir %>/*.html'
+            ],
             restore: [
                 '<%= app.dir %>/assets/js',
                 '<%= app.dir %>/assets/css/main_*.min.css',
-                '<%= app.dist %>'
+                '<%= app.dist %>',
+                '<%= app.www %>'
             ]
         },
 
@@ -208,6 +215,18 @@ module.exports = function(grunt) {
                 ],
                 dest: '<%= app.dist %>',
                 filter: 'isFile'
+            },
+            www: {
+                expand: true,
+                cwd: '<%= app.dir %>',
+                src: '**/*',
+                dest: '<%= app.www %>'
+            },
+            restorewww: {
+                expand: true,
+                cwd: '<%= app.www %>',
+                src: '**/*',
+                dest: '<%= app.dir %>'
             },
             restore: {
                 expand: true,
@@ -276,9 +295,11 @@ module.exports = function(grunt) {
         'wget:kendojs', 'wget:kendocss', 'wget:kendofonts', 'wget:kendoimages',
         'less:dev']);
 
+    grunt.registerTask('www', ['copy:www', 'clean:www']);
+
     grunt.registerTask('unit', ['jshint']);
 
     // restore dev setup after run a default task
-    grunt.registerTask('restore', ['copy:restore', 'clean:restore', 'less:dev']);
+    grunt.registerTask('restore', ['copy:restorewww','copy:restore', 'clean:restore', 'less:dev']);
 
 };
