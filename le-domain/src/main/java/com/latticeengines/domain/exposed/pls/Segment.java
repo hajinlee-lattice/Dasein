@@ -98,7 +98,7 @@ public class Segment implements HasName, HasPid, HasTenant, HasTenantId {
     }
 
     @JsonProperty("ModelId")
-    @Column(name = "MODEL_ID", nullable = false)
+    @Column(name = "MODEL_ID", nullable = true)
     public String getModelId() {
         return modelId;
     }
