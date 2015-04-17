@@ -80,7 +80,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
             propDataMadisonEntityMgr.delete(dailyProgress2);
         }
 
-        ((PropDataMadisonServiceImpl) propDataService).cleanupTargetRawData(today);
+//        ((PropDataMadisonServiceImpl) propDataService).cleanupTargetRawData(today);
 
         removeImportHdfsDirs();
         removeTransformHdfsDirs();
