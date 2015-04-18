@@ -94,11 +94,14 @@ public class BatonToolUnitTestNG {
         sourceDir.add("/prop/prop2", "1.23");
         sourceDir.add("/prop2", "value2");
         sourceDir.add("/prop2/prop1", "value2");
-        service.loadDirectory(sourceDir, "root");
 
         Camille c = CamilleEnvironment.getCamille();
         String podId = CamilleEnvironment.getPodId();
-        DocumentDirectory storedDir = c.getDirectory(PathBuilder.buildPodPath(podId).append(new Path("/root")));
+
+        Path rootPath = PathBuilder.buildPodPath(podId).append(new Path("/root"));
+        service.loadDirectory(sourceDir, rootPath);
+
+        DocumentDirectory storedDir = c.getDirectory(rootPath);
 
         // change to the same root path before compare two directories
         sourceDir.makePathsLocal();

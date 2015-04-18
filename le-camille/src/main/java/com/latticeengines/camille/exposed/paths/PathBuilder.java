@@ -22,6 +22,14 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId, PathConstants.SERVICES, serviceName);
     }
 
+    public static Path buildServiceDefaultConfigPath(String podId, String serviceName) {
+        return new Path(PathConstants.PODS, podId, PathConstants.SERVICES, serviceName, PathConstants.DEFAULTCONFIG_NODE);
+    }
+
+    public static Path buildServiceConfigSchemaPath(String podId, String serviceName) {
+        return new Path(PathConstants.PODS, podId, PathConstants.SERVICES, serviceName, PathConstants.CONFIGSCHEMA_NODE);
+    }
+
     public static Path buildContractsPath(String podId) {
         return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS);
     }

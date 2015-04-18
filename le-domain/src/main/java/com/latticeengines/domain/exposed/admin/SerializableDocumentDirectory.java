@@ -66,7 +66,7 @@ public class SerializableDocumentDirectory {
         return deserialize(serializedDir);
     }
 
-    private static JsonNode textifyJsonDir(JsonNode jDir) {
+    public static JsonNode textifyJsonDir(JsonNode jDir) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode oNode = mapper.createObjectNode();
         oNode.put("RootPath", jDir.get("RootPath").asText());
@@ -85,7 +85,11 @@ public class SerializableDocumentDirectory {
         ObjectNode oNode = mapper.createObjectNode();
         oNode.put("Node", jNode.get("Node").asText());
         if (jNode.has("Data")) {
-            oNode.put("Data", jNode.get("Data").asText());
+            if (jNode.get("Data").isObject()) {
+                oNode.put("Data", jNode.get("Data").toString());
+            } else {
+                oNode.put("Data", jNode.get("Data").asText());
+            }
         }
         if (jNode.has("Version")) {
             oNode.put("Version", jNode.get("Version").asInt());

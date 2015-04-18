@@ -1,0 +1,12 @@
+{
+  "RootPath": "/whatever",
+  "Nodes": [
+    {
+      "Node": "Config1",
+      "Data": {"Type": "number"},
+      "Children": [
+        {"Node": "Config1.2", "Data": {"Type": "options", "Options": ["string", "string2"]}}
+      ]
+    }
+  ]
+}

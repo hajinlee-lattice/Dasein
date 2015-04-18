@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.admin;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -63,6 +64,17 @@ public class SerializableDocumentDirectoryUnitTestNG {
         SerializableDocumentDirectory serializedConfigDir = new SerializableDocumentDirectory(configDir);
         DocumentDirectory deserializedDir = SerializableDocumentDirectory.deserialize(serializedConfigDir);
         Assert.assertTrue(deserializedDir.equals(configDir));
+    }
+
+    @Test(groups = "unit")
+    public void testDeserializeJson() throws IOException {
+        String json = "{\"RootPath\":\"/root\",\"Nodes\":[{\"Node\":\"prop\", \"Data\":{\"propa\": 1.23}}]}";
+        DocumentDirectory deserializedDir = SerializableDocumentDirectory.deserialize(json);
+        Iterator<DocumentDirectory.Node> iter = deserializedDir.breadthFirstIterator();
+        while (iter.hasNext()) {
+            DocumentDirectory.Node node = iter.next();
+            System.out.println(node.getPath().toString() + " : " + node.getDocument());
+        }
     }
 
     @Test(groups = "unit")

@@ -19,6 +19,7 @@ import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -59,15 +60,44 @@ public class BatonServiceImpl implements BatonService {
     @Override
     public boolean loadDirectory(String source, String destination) {
         try {
+            String rawPath = "";
+            String podId = CamilleEnvironment.getPodId();
+
+            // handle case where we want root pod directory
+            if (destination.equals("")) {
+                rawPath = String.format("/Pods/%s", podId.substring(0, podId.length()));
+            } else {
+                rawPath = String.format("/Pods/%s/%s", podId, destination);
+            }
+
+            Path parent = new Path(rawPath);
             File f = new File(source);
             DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(f));
 
-            return loadDirectory(docDir, destination);
+            return loadDirectory(docDir, parent);
 
         } catch (IOException e) {
             log.error("Error converting source string to file", e);
             return false;
         }
+    }
+
+    @Override
+    public boolean loadDirectory(DocumentDirectory sourceDir, Path absoluteRootPath) {
+        String rawPath = "";
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            // convert paths to relative to parent
+            sourceDir.makePathsLocal();
+            c.upsertDirectory(absoluteRootPath, sourceDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+
+        } catch (Exception e) {
+            log.error("Error loading directory", e);
+            return false;
+        }
+
+        log.info(String.format("Succesfully loaded files into directory %s", rawPath));
+        return true;
     }
 
     @Override
@@ -80,34 +110,6 @@ public class BatonServiceImpl implements BatonService {
             log.error("Error commanding bootstrap for service " + serviceName + " and space " + space);
             return false;
         }
-        return true;
-    }
-
-    @Override
-    public boolean loadDirectory(DocumentDirectory sourceDir, String destination) {
-        String rawPath = "";
-        try {
-            Camille c = CamilleEnvironment.getCamille();
-            String podId = CamilleEnvironment.getPodId();
-
-            // handle case where we want root pod directory
-            if (destination.equals("")) {
-                rawPath = String.format("/Pods/%s", podId.substring(0, podId.length()));
-            } else {
-                rawPath = String.format("/Pods/%s/%s", podId, destination);
-            }
-
-            Path parent = new Path(rawPath);
-            // convert paths to relative to parent
-            sourceDir.makePathsLocal();
-            c.upsertDirectory(parent, sourceDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
-
-        } catch (Exception e) {
-            log.error("Error loading directory", e);
-            return false;
-        }
-
-        log.info(String.format("Succesfully loaded files into directory %s", rawPath));
         return true;
     }
 

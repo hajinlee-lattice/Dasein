@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
@@ -15,7 +16,7 @@ public interface BatonService {
 
     boolean loadDirectory(String source, String destination);
 
-    boolean loadDirectory(DocumentDirectory sourceDir, String destination);
+    boolean loadDirectory(DocumentDirectory sourceDir, Path absoluteRootPath);
 
     boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName,
             Map<String, String> properties);

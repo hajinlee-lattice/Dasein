@@ -10,6 +10,9 @@ public final class PathConstants {
     public static final String SERVICES = "Services";
     public static final String QUEUES = "Queues";
 
+    public static final String DEFAULTCONFIG_NODE = "Default";
+    public static final String CONFIGSCHEMA_NODE = "Metadata";
+
     public static final String PROPERTIES_FILE = "properties.json";
     public static final String FEATURE_FLAGS_FILE = "feature-flags.json";
     public static final String BOOTSTRAP_STATE_FILE = "state.json";
