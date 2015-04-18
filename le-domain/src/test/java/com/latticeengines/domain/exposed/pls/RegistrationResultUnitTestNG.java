@@ -1,13 +1,14 @@
 package com.latticeengines.domain.exposed.pls;
 
-import com.latticeengines.domain.exposed.security.User;
-import org.testng.annotations.Test;
-
-import java.io.IOException;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+
+import java.io.IOException;
+
+import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.security.User;
 
 public class RegistrationResultUnitTestNG {
     

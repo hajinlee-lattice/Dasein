@@ -1,11 +1,13 @@
 package com.latticeengines.domain.exposed.pls;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.testng.Assert.*;
+import org.testng.annotations.Test;
 
 public class DeleteUsersResultUnitTestNG {
     

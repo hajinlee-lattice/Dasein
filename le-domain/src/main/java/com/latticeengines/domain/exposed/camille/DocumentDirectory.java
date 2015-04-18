@@ -30,15 +30,15 @@ public class DocumentDirectory implements Serializable {
 
     public DocumentDirectory(Path root) {
         this.root = root;
-        children = new ArrayList<Node>();
+        children = new ArrayList<>();
     }
 
     public DocumentDirectory(Path root, Function<Path, List<Map.Entry<Document, Path>>> getChildren) {
         List<Entry<Document, Path>> childPairs = getChildren.apply(this.root = root);
         if (childPairs == null) {
-            children = new ArrayList<Node>(0);
+            children = new ArrayList<>(0);
         } else {
-            children = new ArrayList<Node>(childPairs.size());
+            children = new ArrayList<>(childPairs.size());
             for (Entry<Document, Path> childPair : childPairs) {
                 children.add(new Node(childPair, getChildren));
             }
@@ -82,6 +82,18 @@ public class DocumentDirectory implements Serializable {
         root = newroot;
     }
 
+    public Node get(String relativePath) {
+        return get(relativePath, false);
+    }
+
+    public Node get(String path, boolean pathIsAbsolute) {
+        if (pathIsAbsolute) {
+            return get(new Path(path));
+        } else {
+            return get(this.root.append(new Path(path)));
+        }
+    }
+
     public Node get(Path path) {
         Iterator<Node> iter = depthFirstIterator();
         while (iter.hasNext()) {
@@ -92,6 +104,19 @@ public class DocumentDirectory implements Serializable {
         }
 
         return null;
+    }
+
+    public Node add(String relativePath, String data) {
+        return add(relativePath, data, false);
+    }
+
+    public Node add(String path, String data, boolean pathIsAbsolute) {
+        Path relativePath = new Path(path);
+        if (pathIsAbsolute) {
+            return add(relativePath, new Document(data));
+        } else {
+            return add(this.root.append(relativePath), new Document(data));
+        }
     }
 
     public Node add(Path path) {
@@ -306,7 +331,7 @@ public class DocumentDirectory implements Serializable {
             Collections.sort(children);
         }
 
-        private Node(Path path, Document document) {
+        public Node(Path path, Document document) {
             this.path = path;
             this.document = document;
             this.children = new ArrayList<Node>();
