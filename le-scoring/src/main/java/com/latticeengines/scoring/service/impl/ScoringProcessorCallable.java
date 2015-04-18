@@ -1,5 +1,6 @@
 package com.latticeengines.scoring.service.impl;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -79,12 +80,6 @@ public class ScoringProcessorCallable implements Callable<Long> {
 
     @Override
     public Long call() throws Exception {
-//        try {
-//            HdfsUtils.rmdir(yarnConfiguration, "/user/s-analytics/customers/testcustomer");
-//        } catch (Exception e) {
-//            log.info(ExceptionUtils.getStackTrace(e));
-//        }
-
         int result = SUCCESS;
         try {
             log.info("Begin scheduled work on " + ScoringCommandLogServiceImpl.SCORINGCOMMAND_ID_LOG_PREFIX + ":"
@@ -115,7 +110,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
         if (scoringCommandState == null) {
             // executeStep(modelStepRetrieveMetadataProcessor,
             // ModelCommandStep.RETRIEVE_METADATA, commandParameters);
-            executeYarnStep(ScoringCommandStep.EXPORT_DATA);
+            executeYarnStep(ScoringCommandStep.LOAD_DATA);
             scoringCommandLogService.log(scoringCommand, "Total: " + scoringCommand.getTotal());
             // scoringCommandLogService.log(scoringCommand, "Data Size: " +
             // readableFileSize(dataSize) + " Row count: "
@@ -201,6 +196,10 @@ public class ScoringProcessorCallable implements Callable<Long> {
                 ScoringCommandStatus.FAIL);
         scoringCommandState.setStatus(FinalApplicationStatus.FAILED);
         scoringCommandStateEntityMgr.update(scoringCommandState);
+
+        scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
+        scoringCommand.setConsumed(new Timestamp(System.currentTimeMillis()));
+        scoringCommandEntityMgr.update(scoringCommand);
 
         String appIds = "";
         StringBuilder clientUrl = new StringBuilder(appTimeLineWebAppAddress);

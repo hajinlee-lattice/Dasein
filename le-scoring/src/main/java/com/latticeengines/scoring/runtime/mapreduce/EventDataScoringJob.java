@@ -28,7 +28,7 @@ import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-public class EventDataScoringJob extends Configured implements Tool, MRJobCustomization{
+public class EventDataScoringJob extends Configured implements Tool, MRJobCustomization {
 
     private static final String SCORING_JOB_TYPE = "scoringJob";
 
@@ -40,12 +40,12 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
     @Override
     public String getJobType() {
-       return SCORING_JOB_TYPE;
+        return SCORING_JOB_TYPE;
     }
 
     @Override
     public void customize(Job mrJob, Properties properties) {
-       try {
+        try {
             Configuration config = mrJob.getConfiguration();
             String queueName = properties.getProperty(MapReduceProperty.QUEUE.name());
             config.set("mapreduce.job.queuename", queueName);
@@ -69,27 +69,33 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             Path path = new Path(filename);
             Schema schema = AvroUtils.getSchema(config, path);
             AvroJob.setInputKeySchema(mrJob, schema);
-            
+
             String outputDir = properties.getProperty(MapReduceProperty.OUTPUT.name());
             config.set(MapReduceProperty.OUTPUT.name(), outputDir);
             mrJob.setInputFormatClass(AvroKeyInputFormat.class);
             mrJob.setOutputFormatClass(NullOutputFormat.class);
             mrJob.setMapperClass(EventDataScoringMapper.class);
             mrJob.setNumReduceTasks(0);
-            if(properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()) != null){
+
+            String customer = properties.getProperty(MapReduceProperty.CUSTOMER.name());
+            if (properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()) != null) {
                 String[] cachePaths = properties.getProperty(MapReduceProperty.CACHE_FILE_PATH.name()).split(comma);
                 URI[] cacheFiles = new URI[cachePaths.length];
-                for(int i = 0; i < cacheFiles.length; i++){
-                    cacheFiles[i] = new URI(cachePaths[0]);
+                for (int i = 0; i < cacheFiles.length; i++) {
+                    int idx = cachePaths[i].indexOf(customer);
+                    // ${customer}/models/${table_name}/model_id
+                    String id = cachePaths[i].substring(idx).split("/")[3];
+                    cacheFiles[i] = new URI(cachePaths[i] + "#" + id);
                 }
                 mrJob.setCacheFiles(cacheFiles);
             }
 
-            if(properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name())!= null){
-                String[] cacheArchivePaths = properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()).split(comma);
+            if (properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()) != null) {
+                String[] cacheArchivePaths = properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()).split(
+                        comma);
                 URI[] cacheArchives = new URI[cacheArchivePaths.length];
-                for(int i = 0; i < cacheArchives.length; i++){
-                    cacheArchives[i] = new URI(cacheArchivePaths[0]);
+                for (int i = 0; i < cacheArchives.length; i++) {
+                    cacheArchives[i] = new URI(cacheArchivePaths[i]);
                 }
                 mrJob.setCacheArchives(cacheArchives);
             }
@@ -106,16 +112,17 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
         Job job = new Job(jobConf);
 
         Properties properties = new Properties();
-        properties.setProperty(MapReduceProperty.INPUT.name(), args[0]);
-        properties.setProperty(MapReduceProperty.OUTPUT.name(), args[1]);
-        properties.setProperty(MapReduceProperty.QUEUE.name(), args[2]);
-        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), args[3]);
+        properties.setProperty(MapReduceProperty.CUSTOMER.name(), args[0]);
+        properties.setProperty(MapReduceProperty.INPUT.name(), args[1]);
+        properties.setProperty(MapReduceProperty.OUTPUT.name(), args[2]);
+        properties.setProperty(MapReduceProperty.QUEUE.name(), args[3]);
+        properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), args[4]);
 
         customize(job, properties);
         if (job.waitForCompletion(true)) {
             return 0;
         }
-        return 1;
+        return 0;
     }
 
     public static void main(String[] args) throws Exception {

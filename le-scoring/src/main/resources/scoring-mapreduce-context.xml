@@ -11,8 +11,5 @@
       http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
 
     <!-- Configures the word count job. -->
-    <hdp:job id="scoringJob" number-reducers="1"
-        mapper="com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper"
-        reducer="com.latticeengines.scoring.runtime.mapreduce.EventDataScoringReducer" />
-
+    <hdp:job id="scoringJob" mapper="com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper" />
 </beans>

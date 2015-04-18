@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.scoring;
 
 public enum ScoringCommandStep {
 
-    VALIDATE_DATA("Validate data"),
     LOAD_DATA("Load data"),
     SCORE_DATA("Score data"),
     EXPORT_DATA("Export data"),

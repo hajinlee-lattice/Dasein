@@ -196,7 +196,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 
         String sourceDir = customerBaseDir + "/" + customer + "/scoring/data/" + scoringCommand.getTableName();
         log.info("connection url: " + metadataService.getJdbcConnectionUrl(creds));
-        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, creds, queue, customer);
+        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, creds, queue, customer, 4);
 
         return appId;
     }
