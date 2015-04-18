@@ -17,7 +17,9 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
@@ -82,6 +84,27 @@ public class BatonToolUnitTestNG {
 
         Assert.assertTrue(c.get(new Path(String.format("/Pods/%s/0/0.txt", podId))).getData().equals("zero"));
         Assert.assertTrue(c.get(new Path(String.format("/Pods/%s/0/1/1.txt", podId))).getData().equals("one"));
+    }
+
+    @Test(groups = "unit")
+    public void testLoadDirecotoryByDirectory() {
+        DocumentDirectory sourceDir = new DocumentDirectory(new Path("/whatever"));
+        sourceDir.add("/prop", "");
+        sourceDir.add("/prop/prop1", "1.23");
+        sourceDir.add("/prop/prop2", "1.23");
+        sourceDir.add("/prop2", "value2");
+        sourceDir.add("/prop2/prop1", "value2");
+        service.loadDirectory(sourceDir, "root");
+
+        Camille c = CamilleEnvironment.getCamille();
+        String podId = CamilleEnvironment.getPodId();
+        DocumentDirectory storedDir = c.getDirectory(PathBuilder.buildPodPath(podId).append(new Path("/root")));
+
+        // change to the same root path before compare two directories
+        sourceDir.makePathsLocal();
+        storedDir.makePathsLocal();
+
+        Assert.assertTrue(storedDir.equals(sourceDir));
     }
 
     private static void createDirectory(String path) {

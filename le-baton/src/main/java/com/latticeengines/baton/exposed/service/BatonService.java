@@ -11,16 +11,18 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 public interface BatonService {
 
-    Boolean createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo);
+    boolean createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo);
 
-    Boolean loadDirectory(String source, String destination);
+    boolean loadDirectory(String source, String destination);
 
-    Boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName,
+    boolean loadDirectory(DocumentDirectory sourceDir, String destination);
+
+    boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName,
             Map<String, String> properties);
 
     List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId);
 
-    Boolean deleteTenant(String contractId, String tenantId);
+    boolean deleteTenant(String contractId, String tenantId);
 
     BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String serviceName);
 

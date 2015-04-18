@@ -1,6 +1,7 @@
 package com.latticeengines.baton.exposed.service.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ public class BatonServiceImpl implements BatonService {
     }.getClass().getEnclosingClass());
 
     @Override
-    public Boolean createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo) {
+    public boolean createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo) {
         try {
             if (!ContractLifecycleManager.exists(contractId)) {
                 log.info(String.format("Creating contract %s", contractId));
@@ -56,7 +57,34 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
-    public Boolean loadDirectory(String source, String destination) {
+    public boolean loadDirectory(String source, String destination) {
+        try {
+            File f = new File(source);
+            DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(f));
+
+            return loadDirectory(docDir, destination);
+
+        } catch (IOException e) {
+            log.error("Error converting source string to file", e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName,
+            Map<String, String> properties) {
+        CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
+        try {
+            ServiceWarden.commandBootstrap(serviceName, space, properties);
+        } catch (Exception e) {
+            log.error("Error commanding bootstrap for service " + serviceName + " and space " + space);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean loadDirectory(DocumentDirectory sourceDir, String destination) {
         String rawPath = "";
         try {
             Camille c = CamilleEnvironment.getCamille();
@@ -69,11 +97,10 @@ public class BatonServiceImpl implements BatonService {
                 rawPath = String.format("/Pods/%s/%s", podId, destination);
             }
 
-            File f = new File(source);
-            DocumentDirectory docDir = new DocumentDirectory(new Path("/"), new FileSystemGetChildrenFunction(f));
             Path parent = new Path(rawPath);
-
-            c.upsertDirectory(parent, docDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+            // convert paths to relative to parent
+            sourceDir.makePathsLocal();
+            c.upsertDirectory(parent, sourceDir, ZooDefs.Ids.OPEN_ACL_UNSAFE);
 
         } catch (Exception e) {
             log.error("Error loading directory", e);
@@ -81,19 +108,6 @@ public class BatonServiceImpl implements BatonService {
         }
 
         log.info(String.format("Succesfully loaded files into directory %s", rawPath));
-        return true;
-    }
-
-    @Override
-    public Boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName,
-            Map<String, String> properties) {
-        CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
-        try {
-            ServiceWarden.commandBootstrap(serviceName, space, properties);
-        } catch (Exception e) {
-            log.error("Error commanding bootstrap for service " + serviceName + " and space " + space);
-            return false;
-        }
         return true;
     }
 
@@ -120,7 +134,7 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
-    public Boolean deleteTenant(String contractId, String tenantId) {
+    public boolean deleteTenant(String contractId, String tenantId) {
         try {
             CamilleEnvironment.getCamille();
             if (TenantLifecycleManager.exists(contractId, tenantId)) {
