@@ -1,11 +1,11 @@
 var app = angular.module("TenantConsoleApp", [
+    "ui.router",
+    'LocalStorageModule',
+    'le.common.util.BrowserStorageUtility',
     "app.core.directive.MainNavDirective",
     "app.login.controller.LoginCtrl",
     "app.tenants.controller.TenantListCtrl",
-    "app.tenants.controller.TenantConfigCtrl",
-    "ui.router",
-    'LocalStorageModule',
-    'le.common.util.BrowserStorageUtility'
+    "app.tenants.controller.TenantConfigCtrl"
 ]);
 
 app.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorageUtility) {
@@ -20,14 +20,26 @@ app.factory('authInterceptor', function ($rootScope, $q, $window, BrowserStorage
         response: function (response) {
             if (response.status === 401) {
                 // handle the case where the user is not authenticated
+                $window.location.href="/";
             }
             return response || $q.when(response);
         }
     };
 });
 
+app.factory('jsonInterceptor', function () {
+    return {
+        request: function (config) {
+            config.headers = config.headers || {};
+            config.headers["Content-Type"] = "application/json";
+            return config;
+        }
+    };
+});
+
 app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStorageServiceProvider) {
     $httpProvider.interceptors.push('authInterceptor');
+    $httpProvider.interceptors.push('jsonInterceptor');
 
     $urlRouterProvider.when("", "/login");
     $urlRouterProvider.when("/tenants", "/tenants/");
@@ -59,7 +71,7 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
         });
 
     localStorageServiceProvider
-        .setPrefix('lattice.engines')
+        .setPrefix('lattice-engines')
         .setStorageType('sessionStorage')
         .setNotify(true, true);
 });

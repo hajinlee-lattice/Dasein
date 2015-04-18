@@ -1,5 +1,6 @@
 var app = angular.module("app.tenants.service.TenantService", [
-    'le.common.util.UnderscoreUtility'
+    'le.common.util.UnderscoreUtility',
+    'app.core.util.SessionUtility'
 ]);
 
 app.service('TenantUtility', function(_){
@@ -104,17 +105,7 @@ app.service('TenantUtility', function(_){
     };
 });
 
-app.service('TenantService', function($q, $http, _, TenantUtility){
-
-    function asycMockAllTenants() {
-        return $q(function(resolve) {
-            setTimeout(function() {
-                $http.get('/assets/json/tenants_mock.json').then(function(response){
-                    resolve(response.data);
-                });
-            }, 500);
-        });
-    }
+app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtility){
 
     function asyncMockTenantService(tenant, service) {
         var url = '/assets/json/' + service.toLowerCase() + '_default.json';
@@ -173,25 +164,31 @@ app.service('TenantService', function($q, $http, _, TenantUtility){
     this.GetAllTenants = function() {
         var defer = $q.defer();
 
-        asycMockAllTenants().then(function(data){
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
 
-            var tenants = _.map(data, function(record){
-               return {
-                   TenantId: record.key,
-                   ContractId: "CONTRACT" + Math.floor((Math.random() * 10) + 1),
-                   DisplayName: record.value.Properties.displayName,
-                   Product: "LPA 2.0",
-                   Status: TenantUtility.getStatusDisplayName(getRandomServiceStatus().state),
-                   CreatedDate: new Date()
+        $http({
+            method: 'GET',
+            url: '/admin/tenants'
+        }).success(function(data){
+            console.log(data);
+            result.resultObj = _.map(data, function(record){
+                return {
+                    TenantId: record.key,
+                    ContractId: "CONTRACT" + Math.floor((Math.random() * 10) + 1),
+                    DisplayName: record.value.Properties.displayName,
+                    Product: "LPA 2.0",
+                    Status: TenantUtility.getStatusDisplayName(getRandomServiceStatus().state),
+                    CreatedDate: new Date()
                 };
             });
-
-            var result = {
-                success: true,
-                resultObj: tenants
-            };
-
             defer.resolve(result);
+
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
         });
 
         return defer.promise;

@@ -25,13 +25,13 @@ app.directive('mainNav', function(){
             $rootScope.$on('$stateChangeSuccess', function () { routeToCorrectState(); });
 
             $scope.onSignOutClick = function() {
-                BrowserStorageUtility.clear(false);
+                BrowserStorageUtility.clear();
                 $state.go('LOGIN');
             };
 
             function routeToCorrectState(){
                 if(BrowserStorageUtility.getTokenDocument() === null){
-                    BrowserStorageUtility.clear(false);
+                    BrowserStorageUtility.clear();
                     $state.go('LOGIN');
                 }
                 $scope.activeState = MainNavService.parseNavState($state.current.name);

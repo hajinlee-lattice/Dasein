@@ -23,6 +23,8 @@ app.service('LoginService', function($q, $http, BrowserStorageUtility){
                 result.success = true;
                 result.resultObj = data;
                 BrowserStorageUtility.setTokenDocument(data.Token);
+                BrowserStorageUtility.setLoginDocument({ Token: data.Token });
+                BrowserStorageUtility.setSessionDocument({ Token: data.Token });
             }
             deferred.resolve(result);
         })

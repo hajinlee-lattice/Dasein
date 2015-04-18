@@ -79,7 +79,7 @@ public class TenantResource {
     @ResponseBody
     @ApiOperation(value = "Get list of tenant services")
     public List<String> getServices() {
-        return new ArrayList<String>(tenantService.getRegisteredServiceKeySet());
+        return new ArrayList<>(tenantService.getRegisteredServiceKeySet());
     }
 
     @RequestMapping(value = "/services/{serviceName}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")

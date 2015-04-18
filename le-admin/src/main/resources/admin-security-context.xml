@@ -20,7 +20,7 @@
     <import resource="classpath:security-provider-context.xml"/>
 
     <security:http use-expressions="true"
-                   pattern="/admin/tenants/**"
+                   pattern="/admin/tenants2/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"
                    create-session="stateless">

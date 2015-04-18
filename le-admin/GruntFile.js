@@ -130,6 +130,7 @@ module.exports = function(grunt) {
                 files: {
                     '<%= app.dir %>/assets/js/app.min.js': [
                         '<%= app.distDir %>/lib/js/le-common.js',
+                        '<%= app.distDir %>/app/core/util/SessionUtility.js',
                         '<%= app.distDir %>/app/core/directive/MainNavDirective.js',
                         '<%= app.distDir %>/app/login/service/LoginService.js',
                         '<%= app.distDir %>/app/login/controller/LoginCtrl.js',
