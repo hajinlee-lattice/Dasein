@@ -1,14 +1,14 @@
 package com.latticeengines.domain.exposed.admin;
 
 import java.io.IOException;
-import java.util.Iterator;
 
+import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 
@@ -25,37 +25,59 @@ public class SerializableDocumentDirectoryUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testSerializeDirectory() throws JsonProcessingException {
-        DocumentDirectory dir = new DocumentDirectory(new Path("/root"));
-        dir.add("/prop1", "value1");
-        dir.add("/prop1/prop11", "value11");
-        dir.add("/prop1/prop12", "123");
-        SerializableDocumentDirectory serializedDir = new SerializableDocumentDirectory(dir);
-        String expected = "{\"RootPath\":\"/root\",\"Nodes\":[{\"Node\":\"prop1\",\"Data\":\"value1\",\"Version\":-1,\"Children\":[{\"Node\":\"prop11\",\"Data\":\"value11\",\"Version\":-1},{\"Node\":\"prop12\",\"Data\":\"123\",\"Version\":-1}]}]}";
-        Assert.assertEquals(objectMapper.writeValueAsString(serializedDir), expected);
+    public void testSerializeValue() throws JsonProcessingException {
+        String expectedJson = "{\"RootPath\":\"/\",\"Nodes\":[{\"Node\":\"property\",\"Data\":\"value\",\"Version\":-1}]}";
+        testSingleValueNode("value", null, expectedJson);
+
+        SerializableDocumentDirectory.Metadata metadata = new SerializableDocumentDirectory.Metadata();
+        metadata.setType("number");
+        expectedJson = "{\"RootPath\":\"/\",\"Nodes\":[{\"Node\":\"property\",\"Data\":\"1.23\",\"Metadata\":{\"Type\":\"number\"},\"Version\":-1}]}";
+        testSingleValueNode("1.23", metadata, expectedJson);
+
+        boolean exception = false;
+        try {
+            testSingleValueNode("fdsrdc", metadata, expectedJson);
+        } catch (IllegalArgumentException e) {
+            exception = true;
+        }
+        Assert.assertTrue(exception);
+
+        metadata = new SerializableDocumentDirectory.Metadata();
+        metadata.setType("object");
+        expectedJson = "{\"RootPath\":\"/\",\"Nodes\":[{\"Node\":\"property\",\"Data\":\"{\\\"Field1\\\":\\\"value1\\\",\\\"Field2\\\":1.23}\",\"Metadata\":{\"Type\":\"object\"},\"Version\":-1}]}";
+        ObjectNode oNode = new ObjectMapper().createObjectNode();
+        oNode.put("Field1", "value1");
+        oNode.put("Field2", 1.23);
+
+        testSingleValueNode(oNode.toString(), metadata, expectedJson);
+
+        exception = false;
+        try {
+            testSingleValueNode("string", metadata, expectedJson);
+        } catch (IllegalArgumentException e) {
+            exception = true;
+        }
+        Assert.assertTrue(exception);
     }
 
-    @Test(groups = "unit")
-    public void testApplyMetadata() throws IOException {
-        DocumentDirectory configDir = new DocumentDirectory(new Path("/root"));
-        configDir.add("/prop", "");
-        configDir.add("/prop/prop1", "1.23");
-        configDir.add("/prop2", "true");
+    private void testSingleValueNode(String value, SerializableDocumentDirectory.Metadata metadata, String expectedJson) throws JsonProcessingException {
+        DocumentDirectory dir = new DocumentDirectory(new Path("/"));
+        dir.add("/property", value);
+        SerializableDocumentDirectory serializedDir = new SerializableDocumentDirectory(dir);
 
-        DocumentDirectory metaDir = new DocumentDirectory(new Path("/root"));
-        metaDir.add("/prop", "");
-        metaDir.add("/prop/prop1", "{\"Type\": \"number\"}");
-        metaDir.add("/prop2", "");
-        SerializableDocumentDirectory serializedConfigDir = new SerializableDocumentDirectory(configDir);
+        DocumentDirectory metaDir = null;
+        if (metadata != null) {
+            metaDir = new DocumentDirectory(new Path("/"));
+            metaDir.add("/property", metadata.toString());
+        }
+        serializedDir.applyMetadata(metaDir);
 
-        JsonNode jNode = serializedConfigDir.applyMetadata(metaDir);
-        String expected = "{\"RootPath\":\"/root\",\"Nodes\":[{\"Node\":\"prop\",\"Version\":-1,\"Children\":[{\"Node\":\"prop1\",\"Data\":\"1.23\",\"Version\":-1}]},{\"Node\":\"prop2\",\"Data\":true,\"Version\":-1}]}";
-        Assert.assertEquals(jNode.toString(), expected);
+        Assert.assertEquals(objectMapper.writeValueAsString(serializedDir), expectedJson);
     }
 
     @Test(groups = "unit")
     public void testDeserialize() throws JsonProcessingException {
-        DocumentDirectory configDir = new DocumentDirectory(new Path("/root"));
+        DocumentDirectory configDir = new DocumentDirectory(new Path("/"));
         configDir.add("/prop", "");
         configDir.add("/prop/prop1", "1.23");
         configDir.add("/prop/prop2", "1.23");
@@ -67,30 +89,48 @@ public class SerializableDocumentDirectoryUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testDeserializeJson() throws IOException {
-        String json = "{\"RootPath\":\"/root\",\"Nodes\":[{\"Node\":\"prop\", \"Data\":{\"propa\": 1.23}}]}";
-        DocumentDirectory deserializedDir = SerializableDocumentDirectory.deserialize(json);
-        Iterator<DocumentDirectory.Node> iter = deserializedDir.breadthFirstIterator();
-        while (iter.hasNext()) {
-            DocumentDirectory.Node node = iter.next();
-            System.out.println(node.getPath().toString() + " : " + node.getDocument());
-        }
+    public void testConstructFromTwoJsons() throws IOException {
+        String defaultJson = IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream("com/latticeengines/domain/exposed/admin/default.json"),
+                "UTF-8"
+        );
+        String metadataJson = IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream("com/latticeengines/domain/exposed/admin/metadata.json"),
+                "UTF-8"
+        );
+        String expectedJson = IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream("com/latticeengines/domain/exposed/admin/expected.json"),
+                "UTF-8"
+        );
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(defaultJson, metadataJson);
+        Assert.assertEquals(objectMapper.valueToTree(sDir), objectMapper.readTree(expectedJson));
+
+        // test null metadata directory
+        expectedJson = IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream("com/latticeengines/domain/exposed/admin/expected_nometa.json"),
+                "UTF-8"
+        );
+        sDir = new SerializableDocumentDirectory(defaultJson);
+        Assert.assertEquals(objectMapper.valueToTree(sDir), objectMapper.readTree(expectedJson));
     }
 
     @Test(groups = "unit")
-    public void testDeserializeFromJson() throws IOException {
-        String json = "{\"RootPath\":\"/root\",\"Nodes\":[{\"Node\":\"prop\",\"Children\":[{\"Node\":\"prop1\",\"Data\":\"1.23\",\"Version\":-1}]},{\"Node\":\"prop2\",\"Data\":true,\"Version\":-1}]}";
-
-        DocumentDirectory expected = new DocumentDirectory(new Path("/root"));
-        expected.add("/prop", "");
-        expected.add("/prop/prop1", "1.23");
-        expected.add("/prop2", "true");
-
-        DocumentDirectory deserializedDir = SerializableDocumentDirectory.deserialize(json);
-        Assert.assertTrue(deserializedDir.equals(expected));
-
-        SerializableDocumentDirectory serializedConfigDir = new SerializableDocumentDirectory(deserializedDir);
-        String expectedStr = "{\"RootPath\":\"/root\",\"Nodes\":[{\"Node\":\"prop\",\"Version\":-1,\"Children\":[{\"Node\":\"prop1\",\"Data\":\"1.23\",\"Version\":-1}]},{\"Node\":\"prop2\",\"Data\":true,\"Version\":-1}]}";
-        Assert.assertEquals(serializedConfigDir.toJson().toString(), expectedStr);
+    public void testStripeOutMetadataDirectory() throws IOException {
+        String defaultJson = IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream("com/latticeengines/domain/exposed/admin/default.json"),
+                "UTF-8"
+        );
+        String metadataJson = IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream("com/latticeengines/domain/exposed/admin/metadata.json"),
+                "UTF-8"
+        );
+        String expectedMetadataJson = IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream("com/latticeengines/domain/exposed/admin/expected_metadata.json"),
+                "UTF-8"
+        );
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(defaultJson, metadataJson);
+        DocumentDirectory metaDir = sDir.getMetadataAsDirectory();
+        SerializableDocumentDirectory metaSDir = new SerializableDocumentDirectory(metaDir);
+        Assert.assertEquals(objectMapper.valueToTree(metaSDir), objectMapper.readTree(expectedMetadataJson));
     }
 }

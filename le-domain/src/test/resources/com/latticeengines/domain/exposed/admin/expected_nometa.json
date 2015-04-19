@@ -1,0 +1,16 @@
+{
+  "RootPath": "/",
+  "Nodes": [
+    { "Node": "Config1", "Data": "1", "Metadata": {"Type":"number"}, "Version": -1},
+    { "Node": "Config2", "Data": "{\"property1\":\"value1\",\"property2\":\"value2\"}", "Metadata": {"Type": "object"}, "Version": -1},
+    { "Node": "Config3", "Data": "string", "Version": -1},
+    { "Node": "Config4", "Data": "true", "Metadata": {"Type": "boolean"}, "Version": -1},
+    { "Node": "Config5",
+      "Version": -1,
+      "Children" : [
+        { "Node" : "Config5.1", "Data": "value5.1", "Version": -1 },
+        { "Node" : "Config5.2", "Data": "value5.2", "Version": -1 }
+      ]
+    }
+  ]
+}

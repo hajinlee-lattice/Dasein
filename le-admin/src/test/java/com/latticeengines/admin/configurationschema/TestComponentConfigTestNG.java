@@ -20,4 +20,12 @@ public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
         setupPaths();
     }
 
+    /*
+    ================================================================================
+    Test how you want to use the configuration
+    ================================================================================
+    */
+
+
+
 }

@@ -29,11 +29,15 @@ import jdk.nashorn.internal.ir.ObjectNode;
 class ConfigurationSchemaTestNGBase {
 
     protected BatonService batonService = new BatonServiceImpl();
+    private ObjectMapper objectMapper = new ObjectMapper();
     protected Camille camille;
     protected String podId;
-    protected String defaultJson, metadataJson, expectedJson;
+    protected String defaultJson, expectedJson; // required
+    protected String metadataJson;              // optional
     protected String componentName;
     protected Path defaultRootPath, metadataRootPath;
+    protected DocumentDirectory configDir;
+    protected SerializableDocumentDirectory serializableConfigDir;
 
     @BeforeMethod(groups = "unit")
     protected void setUp() throws Exception {
@@ -48,40 +52,38 @@ class ConfigurationSchemaTestNGBase {
     }
 
     @Test(groups = "unit")
-    protected void testUploadMainFlow() {
+    protected void testMainFlow() {
         if (defaultJson == null) {
             throw new AssertionError("Required json files are not provided.");
         }
 
         // deserialize and upload configuration json
-        DocumentDirectory dir = readJsonAsDirectory(this.defaultJson);
+        DocumentDirectory dir = constructConfigDirectory();
         batonService.loadDirectory(dir, defaultRootPath);
 
         // deserialize and upload metadata json
-        if (this.metadataJson != null) {
-            dir = readJsonAsDirectory(this.metadataJson);
-            batonService.loadDirectory(dir, metadataRootPath);
-        }
+        dir = constructMetadataDirectory();
+        batonService.loadDirectory(dir, metadataRootPath);
 
         // download from camille
         DocumentDirectory storedDir = camille.getDirectory(defaultRootPath);
+        storedDir.makePathsLocal();
         // serialize downloaded directory
         SerializableDocumentDirectory serializableDir = new SerializableDocumentDirectory(storedDir);
         // download metadata directory
         DocumentDirectory metaDir = camille.getDirectory(metadataRootPath);
-        try {
-            JsonNode jNode = serializableDir.applyMetadata(metaDir);
-            JsonNode expectedNode = readJson(this.expectedJson);
-            assertDirectoryJsonEquals(jNode, expectedNode);
-        } catch (IOException e) {
-            throw new AssertionError("Failed to apply metadata", e);
-        }
+        // apply metadata to downloaded config dir
+        serializableDir.applyMetadata(metaDir);
 
-        // read expected json
-        DocumentDirectory expectedDir = readJsonAsDirectory(this.expectedJson);
-        expectedDir.makePathsLocal();
-        storedDir.makePathsLocal();
-        Assert.assertTrue(storedDir.equals(expectedDir));
+        try {
+            String jsonStr = IOUtils.toString(
+                    Thread.currentThread().getContextClassLoader().getResourceAsStream(this.expectedJson),
+                    "UTF-8"
+            );
+            Assert.assertEquals(objectMapper.valueToTree(serializableDir), objectMapper.readTree(jsonStr));
+        } catch (IOException e) {
+            throw new AssertionError("Could not deserialize the input json to a directory.", e);
+        }
     }
 
     protected void setupPaths() {
@@ -90,26 +92,43 @@ class ConfigurationSchemaTestNGBase {
         this.metadataRootPath = PathBuilder.buildServiceConfigSchemaPath(podId, componentName);
     }
 
-    protected static DocumentDirectory readJsonAsDirectory(String fileNameInTestResources) {
-        JsonNode jsonNode = readJson(fileNameInTestResources);
+    private DocumentDirectory constructConfigDirectory() {
         try {
-            return SerializableDocumentDirectory.deserialize(jsonNode);
+            String configStr = IOUtils.toString(
+                    Thread.currentThread().getContextClassLoader().getResourceAsStream(this.defaultJson),
+                    "UTF-8"
+            );
+            String metaStr = null;
+            if (this.metadataJson != null) {
+                metaStr = IOUtils.toString(
+                        Thread.currentThread().getContextClassLoader().getResourceAsStream(this.metadataJson),
+                        "UTF-8"
+                );
+            }
+            SerializableDocumentDirectory sDir =  new SerializableDocumentDirectory(configStr, metaStr);
+            return SerializableDocumentDirectory.deserialize(sDir);
         } catch (IOException e) {
             throw new AssertionError("Could not deserialize the input json to a directory.", e);
         }
     }
 
-    private static JsonNode readJson(String fileNameInTestResources) {
+    private DocumentDirectory constructMetadataDirectory() {
         try {
-            String json = IOUtils.toString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(fileNameInTestResources),
+            String configStr = IOUtils.toString(
+                    Thread.currentThread().getContextClassLoader().getResourceAsStream(this.defaultJson),
                     "UTF-8"
             );
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readTree(json);
-        } catch (IOException|NullPointerException e) {
-            throw new AssertionError(
-                    String.format("Could not open the specified json file: %s.", fileNameInTestResources), e);
+            String metaStr = null;
+            if (this.metadataJson != null) {
+                metaStr = IOUtils.toString(
+                        Thread.currentThread().getContextClassLoader().getResourceAsStream(this.metadataJson),
+                        "UTF-8"
+                );
+            }
+            SerializableDocumentDirectory sDir =  new SerializableDocumentDirectory(configStr, metaStr);
+            return sDir.getMetadataAsDirectory();
+        } catch (IOException e) {
+            throw new AssertionError("Could not deserialize the input json to a directory.", e);
         }
     }
 

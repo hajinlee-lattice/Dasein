@@ -7,11 +7,9 @@ import java.util.Collection;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -37,71 +35,57 @@ public class SerializableDocumentDirectory {
         if (!nodes.isEmpty()) this.nodes = nodes;
     }
 
-    public JsonNode applyMetadata (DocumentDirectory metadataDirectory) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode jNode = mapper.valueToTree(this);
-        // apply metadata to nodes
-        Collection<Node> docNodes = this.getNodes();
-        if (docNodes != null) {
-            ArrayNode aNode = mapper.createArrayNode();
-            for (Node node : docNodes) {
-                DocumentDirectory.Node metaNode = metadataDirectory.get("/" + node.getNode());
-                JsonNode childNode = node.applyMetadata(metaNode);
-                aNode.add(childNode);
-            }
-            jNode.put("Nodes", aNode);
-        }
-        return jNode;
+    public SerializableDocumentDirectory(String configJson) {
+        this(configJson, null);
     }
 
-    public static DocumentDirectory deserialize(String jsonStr) throws IOException {
+    public SerializableDocumentDirectory(String configJson, String metadataJson) {
         ObjectMapper mapper = new ObjectMapper();
-        return deserialize(mapper.readTree(jsonStr));
-    }
+        JsonNode configNode, metadataNodes;
 
-    public static DocumentDirectory deserialize(JsonNode jsonDir) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode textifiedDir = textifyJsonDir(jsonDir);
-        SerializableDocumentDirectory serializedDir = mapper.readValue(textifiedDir.toString(), SerializableDocumentDirectory.class);
-        return deserialize(serializedDir);
-    }
-
-    public static JsonNode textifyJsonDir(JsonNode jDir) {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode oNode = mapper.createObjectNode();
-        oNode.put("RootPath", jDir.get("RootPath").asText());
-        if (jDir.has("Nodes") && jDir.get("Nodes").size() > 0) {
-            ArrayNode aNode = mapper.createArrayNode();
-            for (JsonNode node : jDir.get("Nodes")) {
-                aNode.add(textifyJsonNode(node));
-            }
-            oNode.put("Nodes", aNode);
-        }
-        return oNode;
-    }
-
-    private static JsonNode textifyJsonNode(JsonNode jNode) {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode oNode = mapper.createObjectNode();
-        oNode.put("Node", jNode.get("Node").asText());
-        if (jNode.has("Data")) {
-            if (jNode.get("Data").isObject()) {
-                oNode.put("Data", jNode.get("Data").toString());
+        try {
+            configNode = mapper.readTree(configJson);
+            if (metadataJson != null) {
+                metadataNodes = mapper.readTree(metadataJson).get("Nodes");
             } else {
-                oNode.put("Data", jNode.get("Data").asText());
+                metadataNodes = null;
+            }
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Invalid format of input json.", e);
+        }
+
+        Collection<Node> nodes;
+        try {
+            nodes = Metadata.applyMetadataOnJsonArrays(configNode.get("Nodes"), metadataNodes);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException("Cannot apply the schema to the configuration.", e);
+        }
+
+        this.rootPath = "/";
+        if (nodes != null && !nodes.isEmpty()) this.nodes = nodes;
+    }
+
+    public void applyMetadata (DocumentDirectory metadataDirectory) {
+        if (metadataDirectory != null && this.getNodes() != null) {
+            // apply metadata to nodes
+            for (Node node : this.getNodes()) {
+                DocumentDirectory.Node metaNode = metadataDirectory.get("/" + node.getNode());
+                node.applyMetadata(metaNode);
             }
         }
-        if (jNode.has("Version")) {
-            oNode.put("Version", jNode.get("Version").asInt());
-        }
-        if (jNode.has("Children") && jNode.get("Children").size() > 0) {
-            ArrayNode aNode = mapper.createArrayNode();
-            for (JsonNode node : jNode.get("Children")) {
-                aNode.add(textifyJsonNode(node));
+    }
+
+    @JsonIgnore
+    public DocumentDirectory getMetadataAsDirectory() {
+        Path rootPath = new Path("/dummyroot");
+        DocumentDirectory dir =  new DocumentDirectory(rootPath);
+        if (this.getNodes() != null) {
+            for (Node node : this.getNodes()) {
+                node.writeMetadataToDir(dir, "");
             }
-            oNode.put("Children", aNode);
         }
-        return oNode;
+        dir.makePathsLocal();
+        return dir;
     }
 
     public static DocumentDirectory deserialize(SerializableDocumentDirectory serializedDir) {
@@ -148,24 +132,12 @@ public class SerializableDocumentDirectory {
     @JsonProperty("Nodes")
     public void setNodes(Collection<Node> nodes) { this.nodes = nodes; }
 
-    @Override
-    public String toString() {
-        return this.toJson().toString();
-    }
-
-    public JsonNode toJson() {
-        try {
-            return this.applyMetadata(new DocumentDirectory(new Path(this.rootPath)));
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Node {
 
         private String node;
         private String data;
+        private Metadata metadata;
         private int version = -1;
         private Collection<Node> children;
 
@@ -174,6 +146,7 @@ public class SerializableDocumentDirectory {
         public Node(DocumentDirectory.Node documentNode) {
             this.node = documentNode.getPath().getSuffix();
             this.data = documentNode.getDocument().getData();
+            if (this.data.equals("")) { this.data = null; }
             this.version = documentNode.getDocument().getVersion();
 
             Collection<Node> children = new ArrayList<>();
@@ -195,6 +168,12 @@ public class SerializableDocumentDirectory {
         @JsonProperty("Data")
         public void setData(String data) { this.data = data; }
 
+        @JsonProperty("Metadata")
+        public Metadata getMetadata() { return metadata; }
+
+        @JsonProperty("Metadata")
+        public void setMetadata(Metadata metadata) { this.metadata = metadata; }
+
         @JsonProperty("Version")
         public int getVersion() { return version; }
 
@@ -207,46 +186,76 @@ public class SerializableDocumentDirectory {
         @JsonProperty("Children")
         public void setChildren(Collection<Node> children) { this.children = children; }
 
-        public JsonNode applyMetadata (DocumentDirectory.Node metaNode) throws IOException {
-            if (this.getData() == null) return null;
+        public void applyMetadata (DocumentDirectory.Node metaNode) {
+            if (this.getData() == null || metaNode == null) return;
 
+            Metadata metadataProvided;
             ObjectMapper mapper = new ObjectMapper();
-            ObjectNode jNode = mapper.valueToTree(this);
 
-            if (this.getData().equals("")) {
-                jNode.remove("Data");
-                return jNode;
+            try {
+                metadataProvided = mapper.readValue(metaNode.getDocument().getData(), Metadata.class);
+            } catch (NullPointerException|IOException e) {
+                return;
             }
 
-            Metadata metadata = new Metadata();
-            if (metaNode != null) {
-                try {
-                    mapper.readValue(metaNode.getDocument().getData(), Metadata.class);
-                } catch (JsonMappingException e) {
-                    //ignore
-                }
-            }
-            String type = metadata.interpretType(this.getData());
-            metadata.convertDataToType(jNode, type);
+            this.applySingleMetadata(metadataProvided);
 
             // apply metadata to children
-            Collection<Node> children = this.getChildren();
-            if (children != null) {
-                ArrayNode aNode = mapper.createArrayNode();
-                for (Node node : children) {
-                    DocumentDirectory.Node childMetaNode = null;
-                    if (metaNode != null) {
-                        childMetaNode = metaNode.getChild(node.getNode());
-                    }
-                    JsonNode childNode = node.applyMetadata(childMetaNode);
-                    aNode.add(childNode);
+            if (this.getChildren() != null) {
+                for (Node child : this.getChildren()) {
+                    DocumentDirectory.Node childMetaNode = metaNode.getChild(child.getNode());
+                    child.applyMetadata(childMetaNode);
                 }
-                jNode.put("Children", aNode);
             }
-
-            return jNode;
         }
 
+        public void applySingleMetadata (Metadata metadata) {
+            if (this.getData() == null) return;
+
+            if (metadata != null && metadata.getType() != null && !metadata.getType().equals("")) {
+                if (metadata.validateData(this.getData())) {
+                    this.metadata = metadata;
+                } else {
+                    throw new IllegalArgumentException(
+                            String.format("data \"%s\" does not match the specified schema %s",
+                                    this.getData(), metadata.toString()));
+                }
+            } else {
+                String type = interpretDataType();
+                if (!type.equals("string")) {
+                    Metadata interpretedMetadata = new Metadata();
+                    interpretedMetadata.setType(type);
+                    this.setMetadata(interpretedMetadata);
+                }
+            }
+        }
+
+        public void writeMetadataToDir(DocumentDirectory dir, String parentPath){
+            String nodePath = parentPath + "/" + this.node;
+
+            if (this.metadata != null && this.metadata.getType() != null
+                    && !(this.metadata.getType().equals("") || this.metadata.getType().equals("string"))) {
+                dir.add(nodePath, this.metadata.toString());
+            }
+
+            if (this.getChildren() != null) {
+                for (Node child : this.getChildren()) {
+                    child.writeMetadataToDir(dir, nodePath);
+                }
+            }
+        }
+
+        private String interpretDataType() {
+            String data = this.getData();
+            if (Metadata.isNumber(data)) {
+                return "number";
+            } else if (Metadata.isBoolean(data)) {
+                return "boolean";
+            } else if (Metadata.isObject(data)) {
+                return "object";
+            }
+            return "string";
+        }
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -254,6 +263,7 @@ public class SerializableDocumentDirectory {
         private String type;
         private Collection<String> options;
 
+        private ObjectMapper mapper = new ObjectMapper();
         public Metadata(){}
 
         @JsonProperty("Type")
@@ -268,28 +278,20 @@ public class SerializableDocumentDirectory {
         @JsonProperty("Options")
         public void setOptions(Collection<String> options) { this.options = options; }
 
-        public void convertDataToType(ObjectNode jNode, String type) {
-            if (type.toLowerCase().equals("string")) { return; }
-            JsonNode data = jNode.get("Data");
-            if (type.toLowerCase().equals("number")) {
-                jNode.put("Data", data.asDouble());
-            } else if (type.toLowerCase().equals("boolean")) {
-                jNode.put("Data", data.asBoolean());
+        private boolean validateData(String data) {
+            if (this.getType() == null) { return true; }
+            switch (this.getType()) {
+                case "number":
+                    return isNumber(data);
+                case "boolean":
+                    return isBoolean(data);
+                case "object":
+                    return isObject(data);
+                case "options":
+                    return this.getOptions().contains(data);
+                default:
+                    return false;
             }
-        }
-
-        public String interpretType(String data) {
-            String type = this.getType();
-            if (type == null) {
-                if (isNumber(data)) {
-                    type = "number";
-                } else if (isBoolean(data)) {
-                    type = "boolean";
-                } else {
-                    type = "string";
-                }
-            }
-            return type;
         }
 
         private static boolean isNumber(String str)
@@ -308,6 +310,75 @@ public class SerializableDocumentDirectory {
         private static boolean isBoolean(String str)
         {
             return str.toLowerCase().equals("true") || str.toLowerCase().equals("false");
+        }
+
+        private static boolean isObject(String str)
+        {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jNode = mapper.readTree(str);
+                return jNode.isObject();
+            } catch (IOException e) {
+                return false;
+            }
+        }
+
+        public static Collection<Node> applyMetadataOnJsonArrays(JsonNode configNodes, JsonNode metaNodes)
+                throws JsonProcessingException {
+            if (configNodes == null || !configNodes.isArray()) return null;
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            Collection<Node> docNodes = new ArrayList<>();
+            JsonNode metaNode = null;
+            for (JsonNode jNode : configNodes) {
+                Node docNode = new Node();
+
+                docNode.setNode(jNode.get("Node").asText());
+
+                // read data as text
+                JsonNode dataNode = jNode.get("Data");
+                if (dataNode != null) {
+                    if (Metadata.isObject(dataNode.toString())) {
+                        docNode.setData(dataNode.toString());
+                    } else {
+                        docNode.setData(dataNode.asText());
+                    }
+                }
+
+                // sync with metadata
+                Metadata metadata = null;
+                if (metaNodes != null && metaNodes.isArray()) {
+                    for (JsonNode thisMetaNode : metaNodes) {
+                        if (thisMetaNode.isObject() && thisMetaNode.has("Node") &&
+                                thisMetaNode.get("Node").asText().equals(docNode.getNode())){
+                            metadata = mapper.treeToValue(thisMetaNode.get("Data"), Metadata.class);
+                            metaNode = thisMetaNode;
+                            break;
+                        }
+                    }
+                }
+                docNode.applySingleMetadata(metadata);
+
+                // process children
+                if (jNode.has("Children")) {
+                    JsonNode metaChildren = metaNode != null ? metaNode.get("Children") : null;
+                    docNode.setChildren(applyMetadataOnJsonArrays(jNode.get("Children"), metaChildren));
+                }
+
+                // add to the collection
+                docNodes.add(docNode);
+            }
+            return docNodes;
+        }
+
+        @Override
+        public String toString() {
+            try {
+                return mapper.writeValueAsString(this);
+            } catch (JsonProcessingException e) {
+                return this.toString();
+            }
         }
     }
 }
