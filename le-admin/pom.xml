@@ -76,6 +76,12 @@
                             <webAppConfig>
                                 <extraClasspath>${env.HADOOP_HOME}/etc/hadoop;${env.JAVA_HOME}/lib/tools.jar</extraClasspath>
                             </webAppConfig>
+                            <systemProperties>
+                                <systemProperty>
+                                    <name>log4j.configuration</name>
+                                    <value>file:./target/classes/log4j.properties</value>
+                                </systemProperty>
+                            </systemProperties>
                         </configuration>
                         <dependencies>
                             <dependency>
@@ -205,6 +211,10 @@
                 <exclusion>
                     <groupId>org.python</groupId>
                     <artifactId>jython-standalone</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,16 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
@@ -53,6 +60,9 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     
     @Value("${admin.api.hostport}")
     private String hostPort;
+
+    private Camille camille;
+    private String podId;
 
     private String token;
     
@@ -92,6 +102,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
+        //uploadDefaultConfigs();
         loginAD();
         createTenant("CONTRACT1", "TENANT1");
         CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
@@ -162,6 +173,41 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         assertNotNull(token);
         addAuthHeader.setAuthValue(token);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+    }
+
+    private void uploadDefaultConfigs() throws Exception {
+        uploadDefaultConfig("PLS", "pls_default.json", "pls_metadata.json");
+        uploadDefaultConfig("GA", "ga_default.json", "ga_metadata.json");
+        uploadDefaultConfig("VDB", "vdb_default.json", "vdb_metadata.json");
+    }
+
+    private void uploadDefaultConfig(String componentName, String configFile, String metadataFile) throws Exception {
+        String configStr = IOUtils.toString(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream(configFile),
+                "UTF-8"
+        );
+        String metaStr = null;
+        if (metadataFile != null) {
+            metaStr = IOUtils.toString(
+                    Thread.currentThread().getContextClassLoader().getResourceAsStream(metadataFile),
+                    "UTF-8"
+            );
+        }
+        SerializableDocumentDirectory sDir =  new SerializableDocumentDirectory(configStr, metaStr);
+        DocumentDirectory configDir = SerializableDocumentDirectory.deserialize(sDir);
+        DocumentDirectory metaDir = sDir.getMetadataAsDirectory();
+
+        camille = CamilleEnvironment.getCamille();
+        podId = CamilleEnvironment.getPodId();
+
+        Path defauldConfigPath = PathBuilder.buildServiceDefaultConfigPath(podId, componentName);
+        Path metadataPath = PathBuilder.buildServiceConfigSchemaPath(podId, componentName);
+
+        camille.delete(defauldConfigPath);
+        camille.delete(metadataPath);
+
+        batonService.loadDirectory(configDir, defauldConfigPath);
+        batonService.loadDirectory(metaDir, metadataPath);
     }
 
 }

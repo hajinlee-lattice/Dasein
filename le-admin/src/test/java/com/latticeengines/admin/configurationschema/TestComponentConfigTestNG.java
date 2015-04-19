@@ -1,11 +1,16 @@
 package com.latticeengines.admin.configurationschema;
 
+import java.io.IOException;
+
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.Path;
 
 public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
 
@@ -15,17 +20,44 @@ public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
         super.setUp();
         this.componentName = "TestComponent";
         this.defaultJson = "testcomponent_default.json";
-        this.metadataJson = "testcomponent_metadata.json";
+        this.metadataJson = "testcomponent_metadata.json";  // optional
         this.expectedJson = "testcomponent_expected.json";
         setupPaths();
+        uploadDirectory();
     }
+
+    @Test(groups = "unit")
+    public void testMainFlow() { runMainFlow(); }
 
     /*
     ================================================================================
-    Test how you want to use the configuration
+        Test how you want to use the configuration
     ================================================================================
     */
 
+    /**
+     * this test demonstrate how to get configuration using DocumentDirectory
+     */
+    @Test(groups = "unit")
+    public void testConfig4() throws IOException {
+        Path configPath = PathBuilder.buildServiceDefaultConfigPath(podId, componentName);
 
+        DocumentDirectory dir = camille.getDirectory(configPath);
+        String config4 = dir.get("/Config4").getDocument().getData();
+        Assert.assertTrue(Boolean.valueOf(config4));
+
+        String config2 = dir.get("/Config2").getDocument().getData();
+        Properties properties = new ObjectMapper().readValue(config2, Properties.class);
+        Assert.assertEquals(properties.property1, "value1");
+        Assert.assertEquals(properties.property2, "value2");
+    }
+
+    private static class Properties {
+        @JsonProperty("property1")
+        public String property1;
+
+        @JsonProperty("property2")
+        public String property2;
+    }
 
 }

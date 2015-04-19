@@ -3,9 +3,6 @@ package com.latticeengines.admin.configurationschema;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.zookeeper.KeeperException;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -22,8 +19,6 @@ import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
-
-import jdk.nashorn.internal.ir.ObjectNode;
 
 @Test
 class ConfigurationSchemaTestNGBase {
@@ -51,20 +46,7 @@ class ConfigurationSchemaTestNGBase {
         CamilleTestEnvironment.stop();
     }
 
-    @Test(groups = "unit")
-    protected void testMainFlow() {
-        if (defaultJson == null) {
-            throw new AssertionError("Required json files are not provided.");
-        }
-
-        // deserialize and upload configuration json
-        DocumentDirectory dir = constructConfigDirectory();
-        batonService.loadDirectory(dir, defaultRootPath);
-
-        // deserialize and upload metadata json
-        dir = constructMetadataDirectory();
-        batonService.loadDirectory(dir, metadataRootPath);
-
+    protected void runMainFlow() {
         // download from camille
         DocumentDirectory storedDir = camille.getDirectory(defaultRootPath);
         storedDir.makePathsLocal();
@@ -90,6 +72,16 @@ class ConfigurationSchemaTestNGBase {
         if (this.componentName == null) { throw new AssertionError("Must define component name before setting up paths."); }
         this.defaultRootPath = PathBuilder.buildServiceDefaultConfigPath(podId, componentName);
         this.metadataRootPath = PathBuilder.buildServiceConfigSchemaPath(podId, componentName);
+    }
+
+    protected void uploadDirectory() {
+        // deserialize and upload configuration json
+        DocumentDirectory dir = constructConfigDirectory();
+        batonService.loadDirectory(dir, defaultRootPath);
+
+        // deserialize and upload metadata json
+        dir = constructMetadataDirectory();
+        batonService.loadDirectory(dir, metadataRootPath);
     }
 
     private DocumentDirectory constructConfigDirectory() {
