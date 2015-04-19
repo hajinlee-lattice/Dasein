@@ -1,7 +1,7 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "Config1", "Data": "{\"Type\":\"number\"}", "Version": -1},
+    { "Node": "Config1", "Data": "{\"Type\":\"options\",\"Options\":[\"1\",\"2\",\"3\"]}", "Version": -1},
     { "Node": "Config2", "Data": "{\"Type\":\"object\"}", "Version": -1},
     { "Node": "Config4", "Data": "{\"Type\":\"boolean\"}", "Version": -1}
   ]
