@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.admin;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -13,6 +15,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.microsoft.windowsazure.storage.core.PathUtility;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SerializableDocumentDirectory {
@@ -21,18 +25,28 @@ public class SerializableDocumentDirectory {
     private Collection<Node> nodes;
 
     private DocumentDirectory documentDirectory;
+    private Map<String, String> otherProperties;
 
     public SerializableDocumentDirectory() {
     }
 
     public SerializableDocumentDirectory(DocumentDirectory documentDirectory) {
-        this.setDocumentDirectory(documentDirectory);
-        this.rootPath = documentDirectory.getRootPath().toString();
-        Collection<Node> nodes = new ArrayList<>();
-        for (DocumentDirectory.Node node : documentDirectory.getChildren()) {
-            nodes.add(new Node(node));
+        constructByDocumentDirectory(documentDirectory);
+    }
+
+    public SerializableDocumentDirectory(Map<String, String> properties) {
+        Map<String, String> residualProp = new HashMap<>();
+        DocumentDirectory docDir = new DocumentDirectory(new Path("/"));
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            try {
+                Path nodePath = new Path(entry.getKey());
+                docDir.add(nodePath, new Document(entry.getValue()));
+            } catch (IllegalArgumentException e) {
+                residualProp.put(entry.getKey(), entry.getValue());
+            }
         }
-        if (!nodes.isEmpty()) this.nodes = nodes;
+        constructByDocumentDirectory(docDir);
+        this.setOtherProperties(residualProp);
     }
 
     public SerializableDocumentDirectory(String configJson) {
@@ -63,6 +77,16 @@ public class SerializableDocumentDirectory {
 
         this.rootPath = "/";
         if (nodes != null && !nodes.isEmpty()) this.nodes = nodes;
+    }
+
+    private void constructByDocumentDirectory(DocumentDirectory documentDirectory) {
+        this.setDocumentDirectory(documentDirectory);
+        this.rootPath = documentDirectory.getRootPath().toString();
+        Collection<Node> nodes = new ArrayList<>();
+        for (DocumentDirectory.Node node : documentDirectory.getChildren()) {
+            nodes.add(new Node(node));
+        }
+        if (!nodes.isEmpty()) this.nodes = nodes;
     }
 
     public void applyMetadata (DocumentDirectory metadataDirectory) {
@@ -118,6 +142,14 @@ public class SerializableDocumentDirectory {
     @JsonIgnore
     public void setDocumentDirectory(DocumentDirectory documentDirectory) {
         this.documentDirectory = documentDirectory;
+    }
+
+    @JsonIgnore
+    public Map<String, String> getOtherProperties() { return otherProperties; }
+
+    @JsonIgnore
+    public void setOtherProperties(Map<String, String> otherProperties) {
+        this.otherProperties = otherProperties;
     }
 
     @JsonProperty("RootPath")
