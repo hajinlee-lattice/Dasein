@@ -5,6 +5,7 @@ import static org.testng.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -37,6 +38,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
@@ -168,6 +170,22 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         assertNotNull(token);
         addAuthHeader.setAuthValue(token);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+    }
+
+
+    protected static Map<String, String> flattenPropConfig(CustomerSpaceProperties spaceProp, DocumentDirectory configDir) {
+        Map<String, String> toReturn = new HashMap<>();
+        Iterator<DocumentDirectory.Node> iter = configDir.breadthFirstIterator();
+        while (iter.hasNext()) {
+            DocumentDirectory.Node node = iter.next();
+            if (node.getDocument() != null && !node.getDocument().getData().equals("")) {
+                toReturn.put(node.getPath().toString(), node.getDocument().getData());
+            }
+        }
+        if (spaceProp != null) {
+            toReturn.put("CustomerSpaceProperties", JsonUtils.serialize(spaceProp));
+        }
+        return toReturn;
     }
 
 }

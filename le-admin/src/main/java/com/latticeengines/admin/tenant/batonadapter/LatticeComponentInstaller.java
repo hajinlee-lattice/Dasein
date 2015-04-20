@@ -23,13 +23,13 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
     }
 
     // the true installation steps other than writing to Camille
-    protected abstract DocumentDirectory installCore(
+    protected abstract void installCore(
             CustomerSpace space, String serviceName, int dataVersion, CustomerSpaceProperties spaceProps, DocumentDirectory configDir);
 
     @Override
     public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
         DocumentDirectory dir = this.getDefaultConfiguration(serviceName);
-        if (!this.dryrun) { dir = installCore(space, serviceName, dataVersion, new CustomerSpaceProperties(), dir); }
+        if (!this.dryrun) { installCore(space, serviceName, dataVersion, new CustomerSpaceProperties(), dir); }
         // remember to turn it into a local directory
         dir.makePathsLocal();
         return dir;

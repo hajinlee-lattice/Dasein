@@ -11,10 +11,9 @@ public class DataLoaderInstaller extends LatticeComponentInstaller {
     public DataLoaderInstaller() { super(DataLoaderComponent.componentName); }
 
     @Override
-    public DocumentDirectory installCore(
+    public void installCore(
             CustomerSpace space, String serviceName, int dataVersion,
-            CustomerSpaceProperties properties, DocumentDirectory autoGenDocDir) {
-        return null;
+            CustomerSpaceProperties spaceProps, DocumentDirectory autoGenDocDir) {
     }
 
 }

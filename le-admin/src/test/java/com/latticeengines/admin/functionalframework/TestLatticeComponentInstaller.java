@@ -5,15 +5,16 @@ import java.util.Map;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 
 public class TestLatticeComponentInstaller extends LatticeComponentInstaller {
 
     public TestLatticeComponentInstaller() { super(TestLatticeComponent.componentName); }
 
     @Override
-    public DocumentDirectory installCore(
+    public void installCore(
             CustomerSpace space, String serviceName, int dataVersion,
-            Map<String, String> properties, DocumentDirectory autoGenDocDir) {
+            CustomerSpaceProperties properties, DocumentDirectory autoGenDocDir) {
         return null;
     }
 }
