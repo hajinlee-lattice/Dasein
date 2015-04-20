@@ -170,12 +170,15 @@ app.directive('configEntry', function(){
             if ($scope.isInput) {
                 if ($scope.type === "number") {
                     $scope.inputType = "number";
+                    $scope.config.Data = parseFloat($scope.config.Data);
                 } else {
                     $scope.inputType = "text";
                 }
             }
 
             $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);
+            if ($scope.isBoolean) $scope.config.Data = ($scope.config.Data === "true" || $scope.config.Data === true);
+
             $scope.isSelect = CamilleConfigUtility.isSelect($scope.type);
             $scope.isObject = CamilleConfigUtility.isObject($scope.type);
             if ($scope.isObject) {
