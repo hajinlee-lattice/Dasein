@@ -90,6 +90,10 @@ public class SerializableDocumentDirectory {
 
     public Map<String, String> flatten() {
         Map<String, String> result = new HashMap<>();
+
+        if (this.documentDirectory == null)
+            this.documentDirectory = SerializableDocumentDirectory.deserialize(this);
+
         Iterator<DocumentDirectory.Node> iter = this.documentDirectory.breadthFirstIterator();
         while (iter.hasNext()) {
             DocumentDirectory.Node node = iter.next();
@@ -97,6 +101,7 @@ public class SerializableDocumentDirectory {
                 result.put(node.getPath().toString(), node.getDocument().getData());
             }
         }
+
         return result;
     }
 
