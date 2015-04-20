@@ -5,36 +5,6 @@ var app = angular.module("app.tenants.service.TenantService", [
 
 app.service('TenantUtility', function(_){
 
-    function applyMetadataToComponent(component, metadata) {
-        _.each(component.Nodes, function(dataNode){
-            var metaNode = _.findWhere(metadata.Nodes, {"Node": dataNode.Node});
-            if (metaNode) {
-                applyMetadataToNode(dataNode, metaNode);
-            }
-        });
-    }
-
-    function applyMetadataToNode(data, metadata) {
-        if (data.Node === metadata.Node) {
-            if (metadata.hasOwnProperty("Data") && typeof metadata.Data === "object") {
-                data.Metadata = metadata.Data;
-            }
-            if (
-                data.hasOwnProperty("Children") &&
-                metadata.hasOwnProperty("Children")
-            ) {
-                _.each(data.Children, function(child){
-                    var metaChild = _.findWhere(metadata.Children, {"Node": child.Node});
-                    if (metaChild) {
-                        applyMetadataToNode(child, metaChild);
-                    }
-                });
-            }
-        }
-    }
-
-    this.applyMetadataToComponent = applyMetadataToComponent;
-
     function cleanupComponentConfigs(components, tenant, contract, space) {
         return _.map(components,
             function(component){
@@ -107,32 +77,6 @@ app.service('TenantUtility', function(_){
 
 app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtility){
 
-    function asyncMockTenantService(tenant, service) {
-        var url = '/assets/json/' + service.toLowerCase() + '_default.json';
-        return $q(function(resolve) {
-            setTimeout(function() {
-                $http.get(url).then(
-                    function(response){
-                        resolve(response.data);
-                    }
-                );
-            }, 10 * Math.floor((Math.random() * 100) + 1));
-        });
-    }
-
-    function asyncMockServiceMetadata(service) {
-        var url = '/assets/json/' + service.toLowerCase() + '_metadata.json';
-        return $q(function(resolve) {
-            setTimeout(function() {
-                $http.get(url).then(
-                    function(response){
-                        resolve(response.data);
-                    }
-                );
-            }, 10 * Math.floor((Math.random() * 100) + 1));
-        });
-    }
-
     function getRandomServiceStatus() {
         var answers = ['OK', 'FAILED', 'INITIAL'];
         var randIdx = Math.floor((Math.random() * 4));
@@ -149,7 +93,7 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
         return $q(function(resolve) {
             setTimeout(function() {
                 var answers = ['OK', 'FAILED', 'INITIAL'];
-                var randIdx = Math.floor((Math.random() * 4));
+                var randIdx = Math.floor((Math.random() * 3));
                 var result = {
                     "state": answers[randIdx],
                     "desiredVersion": 1,
@@ -195,30 +139,32 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
         return defer.promise;
     };
 
-    this.GetTenantServiceConfig = function(tenantId, service) {
+    this.GetServiceDefaultConfig = function(service) {
         var defer = $q.defer();
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
 
-        asyncMockTenantService(tenantId, service).then(function(data){
-
+        $http({
+            method: 'GET',
+            url: '/admin/services/' + service + '/default'
+        }).success(function(data){
+            console.log(data);
             data.Component = service;
-
-            var result = {
-                success: true,
-                resultObj: data
-            };
+            result.resultObj = data;
 
             defer.resolve(result);
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
         });
 
         return defer.promise;
     };
 
-    this.GetServiceMetadata = function(service) {
-        var defer = $q.defer();
-        asyncMockServiceMetadata(service).then(function(data){
-            defer.resolve(data);
-        });
-        return defer.promise;
+    this.GetTenantServiceConfig = function(tenantId, service) {
+        return this.GetServiceDefaultConfig(service);
     };
 
     this.GetTenantServiceStatus = function(tenantId, service) {

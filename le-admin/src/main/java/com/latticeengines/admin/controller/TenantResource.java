@@ -77,16 +77,9 @@ public class TenantResource {
 
     @RequestMapping(value = "/services/", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get list of tenant services")
+    @ApiOperation(value = "Get list of services belong to a tenant")
     public List<String> getServices() {
-        return new ArrayList<>(tenantService.getRegisteredServiceKeySet());
-    }
-
-    @RequestMapping(value = "/services/{serviceName}/default", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get default config for tenant service")
-    public SerializableDocumentDirectory getServiceDefaultConfig(@PathVariable String serviceName) {
-        return tenantService.getDefaultServiceConfig(serviceName);
+        return new ArrayList<>();
     }
 
     @RequestMapping(value = "/{tenantId}/services/{serviceName}/state", method = RequestMethod.GET, headers = "Accept=application/json")

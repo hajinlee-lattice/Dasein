@@ -56,6 +56,8 @@ app.service('CamilleConfigUtility', function(){
             return "number";
         } else if (typeof data === "boolean") {
             return "boolean";
+        } else if (typeof data === "object") {
+            return "object";
         } else {
             return "string";
         }
@@ -64,6 +66,7 @@ app.service('CamilleConfigUtility', function(){
         switch (type) {
             case "boolean":
             case "options":
+            case "object":
                 return false;
             default:
                 return true;
@@ -71,6 +74,12 @@ app.service('CamilleConfigUtility', function(){
     };
     this.isBoolean = function(type) { return type === "boolean"; };
     this.isSelect = function(type) { return type === "options"; };
+    this.isObject = function(type) { return type === "object"; };
+
+    this.convertObjectToConfig = function(data) {
+        return data;
+    }
+
 });
 
 app.directive('componentsConfig', function(){
@@ -110,16 +119,54 @@ app.directive('camilleConfig', function(RecursionHelper, TenantUtility){
     };
 });
 
+app.directive('objectEntry', function(){
+    return {
+        restrict: 'AE',
+        templateUrl: 'app/tenants/view/ObjectEntryView.html',
+        scope: {key: '=', value : '=', json: '=', isValid: '=', updater: '&'},
+        controller: function($scope, CamilleConfigUtility){
+            $scope.isObject = false;
+            $scope.type = CamilleConfigUtility.getDataType($scope.value);
+            $scope.isInput = CamilleConfigUtility.isInput($scope.type);
+            if ($scope.isInput) {
+                if ($scope.type === "number") {
+                    $scope.inputType = "number";
+                } else {
+                    $scope.inputType = "text";
+                }
+            }
+            $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);
+
+            $scope.validateInput = function() {
+                if ($scope.configform.$dirty && $scope.configform.$invalid) {
+                    $scope.showError = true;
+                    $scope.isValid.valid = false;
+                    if ($scope.configform.$error.required) {
+                        $scope.errorMsg = "cannot be empty.";
+                    }
+                    if ($scope.configform.$error.number) {
+                        $scope.errorMsg = "must be a number.";
+                    }
+                } else {
+                    $scope.showError = false;
+                    $scope.isValid.valid = true;
+                    $scope.errorMsg = "no error";
+                    $scope.updater();
+                }
+            }
+        }
+    };
+});
+
 app.directive('configEntry', function(){
     return {
         restrict: 'AE',
         templateUrl: 'app/tenants/view/ConfigEntryView.html',
         scope: {config: '=', isValid: '=', isOpen: '=', expandable: '=', readonly: '='},
         controller: function($scope, CamilleConfigUtility){
-            $scope.type =
-                CamilleConfigUtility.getDataType($scope.config);
+            $scope.type = CamilleConfigUtility.getDataType($scope.config);
 
-            $scope.isInput = CamilleConfigUtility.isInput($scope.type);
+            $scope.isInput = CamilleConfigUtility.isInput($scope.type) && $scope.config.hasOwnProperty("Data");
             if ($scope.isInput) {
                 if ($scope.type === "number") {
                     $scope.inputType = "number";
@@ -130,6 +177,13 @@ app.directive('configEntry', function(){
 
             $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);
             $scope.isSelect = CamilleConfigUtility.isSelect($scope.type);
+            $scope.isObject = CamilleConfigUtility.isObject($scope.type);
+            if ($scope.isObject) {
+                $scope.jsonData = JSON.parse($scope.config.Data);
+                $scope.objectUpdater = function() {
+                    $scope.config.Data = JSON.stringify($scope.jsonData);
+                }
+            }
 
             if ($scope.isSelect) { $scope.options = $scope.config.Metadata.Options; }
 

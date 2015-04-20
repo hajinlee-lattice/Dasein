@@ -19,7 +19,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     $scope.product = $stateParams.product;
 
     $scope.loading = true;
-    $scope.services = ["PLS", "VDB"];
+    $scope.services = ["GlobalAuth", "VisiDB", "DataLoader", "Template"];
 
     $scope.accordion = _.map($scope.services, function(){
         return { open: false, disabled: false };
@@ -32,17 +32,11 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
         TenantService.GetTenantServiceConfig($scope.tenantId, service).then(
             function(result){
                 var component = result.resultObj;
-                TenantService.GetServiceMetadata(service).then(
-                    function(metadata){
-                        TenantUtility.applyMetadataToComponent(component, metadata);
-                        $scope.components.push(component);
-
-                        if ($scope.components.length == $scope.services.length) {
-                            $scope.loading = false;
-                            if ($scope.listenState) { updateServiceStatus(); }
-                        }
-                    }
-                );
+                $scope.components.push(component);
+                if ($scope.components.length == $scope.services.length) {
+                    $scope.loading = false;
+                    if ($scope.listenState) { updateServiceStatus(); }
+                }
             }
         );
     });

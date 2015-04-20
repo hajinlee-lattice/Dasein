@@ -1,10 +1,10 @@
-<p class="readonly-config-entry" ng-if="readonly">
+<p class="readonly-config-entry" ng-if="readonly && !isObject">
     <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
-    <b>{{ config.Node }}</b> :
+    <span class="node">{{ config.Node }}</span> :
     <span>{{ config.Data }}</span>
 </p>
 
-<form name="configform" class="form-inline" ng-class='{"has-error": showError}' novalidate>
+<form name="configform" ng-hide="isObject" class="form-inline" ng-class='{"has-error": showError}' novalidate>
     <div ng-if="!readonly">
         <label class="control-label">
             <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
@@ -32,3 +32,14 @@
         </label>
     </div>
 </form>
+
+<accordion-group ng-if="isObject" ng-init="isOpen = true" is-open="isOpen">
+    <accordion-heading class="accordion-heading" is-open="isOpen">
+        <p class="readonly-config-entry">
+            <i class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
+            <span ng-class="{node: readonly}">{{ config.Node }}</span>
+        </p>
+    </accordion-heading>
+    <pre ng-if="readonly">{{ jsonData | json }}</pre>
+    <object-entry key="key" value="value" json="jsonData" is-valid="isValid" updater="objectUpdater()" ng-repeat="(key, value) in jsonData"></object-entry>
+</accordion-group>
