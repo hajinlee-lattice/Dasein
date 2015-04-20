@@ -11,10 +11,10 @@ public class TenantRegistration {
     private List<SerializableDocumentDirectory> configDirectories;
 
     @JsonProperty("CustomerSpaceInfo")
-    public CustomerSpaceInfo getSpaceProperties() { return spaceInfo; }
+    public CustomerSpaceInfo setSpaceInfo() { return spaceInfo; }
 
     @JsonProperty("CustomerSpaceInfo")
-    public void setSpaceProperties(CustomerSpaceInfo spaceInfo) {
+    public void setSpaceInfo(CustomerSpaceInfo spaceInfo) {
         this.spaceInfo = spaceInfo;
     }
 
