@@ -1,10 +1,9 @@
 package com.latticeengines.admin.tenant.batonadapter.globalauth;
 
-import java.util.Map;
-
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 
 public class GlobalAuthInstaller extends LatticeComponentInstaller {
 
@@ -13,7 +12,7 @@ public class GlobalAuthInstaller extends LatticeComponentInstaller {
     @Override
     public DocumentDirectory installCore(
             CustomerSpace space, String serviceName, int dataVersion,
-            Map<String, String> properties, DocumentDirectory autoGenDocDir) {
+            CustomerSpaceProperties properties, DocumentDirectory autoGenDocDir) {
         return null;
     }
 }

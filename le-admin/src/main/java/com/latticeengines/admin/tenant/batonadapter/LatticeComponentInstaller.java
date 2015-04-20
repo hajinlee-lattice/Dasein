@@ -10,11 +10,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 
 public abstract class LatticeComponentInstaller implements CustomerSpaceServiceInstaller {
 
     private String componentName;
-    // dry run flag: when it is up, install only write to camille, skip all other installation steps.
+    // dry run flag: when it is up, installer only write default configuration to camille, skip all other installation steps.
     private boolean dryrun = false;
 
     protected LatticeComponentInstaller(String componentName) {
@@ -22,12 +23,13 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
     }
 
     // the true installation steps other than writing to Camille
-    protected abstract DocumentDirectory installCore(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties, DocumentDirectory autoGenDocDir);
+    protected abstract DocumentDirectory installCore(
+            CustomerSpace space, String serviceName, int dataVersion, CustomerSpaceProperties spaceProps, DocumentDirectory configDir);
 
     @Override
     public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
         DocumentDirectory dir = this.getDefaultConfiguration(serviceName);
-        if (!this.dryrun) { dir = installCore(space, serviceName, dataVersion, properties, dir); }
+        if (!this.dryrun) { dir = installCore(space, serviceName, dataVersion, new CustomerSpaceProperties(), dir); }
         // remember to turn it into a local directory
         dir.makePathsLocal();
         return dir;
