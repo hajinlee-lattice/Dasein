@@ -11,10 +11,14 @@ public class DataLoaderComponent extends LatticeComponent {
     
     private CustomerSpaceServiceInstaller installer = new DataLoaderInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new DataLoaderUpgrader();
+    public static final String componentName = "DataLoader";
+
+    @Override
+    public boolean doRegistration() { return false; }
     
     @Override
     public String getName() {
-        return "DataLoader";
+        return componentName;
     }
 
     @Override

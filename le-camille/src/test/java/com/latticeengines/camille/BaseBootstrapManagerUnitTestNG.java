@@ -79,9 +79,10 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
         }
 
         @Override
-        public DocumentDirectory getDefaultConfiguration(String serviceName) {
-            return null;
-        }
+        public DocumentDirectory getDefaultConfiguration(String serviceName) { return null; }
+
+        @Override
+        public DocumentDirectory getConfigurationSchema(String serviceName) { return null; }
     }
 
     public static class EvilBootstrapper implements CustomerSpaceServiceInstaller, CustomerSpaceServiceUpgrader,
@@ -105,6 +106,11 @@ public abstract class BaseBootstrapManagerUnitTestNG<T extends ConfigurationScop
 
         @Override
         public DocumentDirectory getDefaultConfiguration(String serviceName) {
+            return null;
+        }
+
+        @Override
+        public DocumentDirectory getConfigurationSchema(String serviceName) {
             return null;
         }
     }

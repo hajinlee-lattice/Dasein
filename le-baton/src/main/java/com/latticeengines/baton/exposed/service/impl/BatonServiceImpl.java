@@ -32,8 +32,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 
 public class BatonServiceImpl implements BatonService {
 
-    private static final Logger log = LoggerFactory.getLogger(new Object() {
-    }.getClass().getEnclosingClass());
+    private static final Logger log = LoggerFactory.getLogger(new Object() {}.getClass().getEnclosingClass());
 
     @Override
     public boolean createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo) {
@@ -153,6 +152,26 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
+    public boolean discardService(String serviceName) {
+        try {
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
+            Path serviceRootPath = PathBuilder.buildServicePath(podId, serviceName);
+            if (camille.exists(serviceRootPath)) {
+                camille.delete(serviceRootPath);
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (Exception e) {
+            log.error("Error discarding service " + serviceName, e);
+            return false;
+        }
+    }
+
+
+    @Override
     public BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String serviceName) {
         CustomerSpace customerSpace = new CustomerSpace(contractId, tenantId,
                 CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
@@ -168,6 +187,16 @@ public class BatonServiceImpl implements BatonService {
     public DocumentDirectory getDefaultConfiguration(String serviceName) {
         try {
             return CustomerSpaceServiceBootstrapManager.getDefaultConfiguration(serviceName);
+        } catch (Exception e) {
+            log.error("Error retrieving default config for service " + serviceName, e);
+            return null;
+        }
+    }
+
+    @Override
+    public DocumentDirectory getConfigurationSchema(String serviceName) {
+        try {
+            return CustomerSpaceServiceBootstrapManager.getConfigurationSchema(serviceName);
         } catch (Exception e) {
             log.error("Error retrieving default config for service " + serviceName, e);
             return null;

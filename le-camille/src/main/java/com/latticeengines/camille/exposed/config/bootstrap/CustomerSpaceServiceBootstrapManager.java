@@ -63,6 +63,14 @@ public class CustomerSpaceServiceBootstrapManager {
         return bootstrapper.getInstaller().getDefaultConfiguration(serviceName);
     }
 
+    public static DocumentDirectory getConfigurationSchema(String serviceName) throws Exception {
+        Bootstrapper bootstrapper = bootstrappers.get(serviceName);
+        if (bootstrapper == null) {
+            throw new IllegalArgumentException("Must register an upgrader and an installer for service " + serviceName);
+        }
+        return bootstrapper.getInstaller().getConfigurationSchema(serviceName);
+    }
+
     public static void reset(String serviceName, CustomerSpace space) {
         Bootstrapper bootstrapper = bootstrappers.get(serviceName);
         if (bootstrapper != null) {

@@ -24,9 +24,7 @@ public interface TenantService {
     
     Boolean bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties);
     
-    SerializableDocumentDirectory  getDefaultTenantServiceConfig(String serviceName);
+    SerializableDocumentDirectory getDefaultServiceConfig(String serviceName);
     
     SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName);
-    
-    String getTenantServiceMetadata(String serviceName);
 }

@@ -17,8 +17,8 @@ import com.google.common.base.Function;
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.domain.exposed.admin.BardJamsTenantStatus;
 import com.latticeengines.domain.exposed.admin.BardJamsTenant;
+import com.latticeengines.domain.exposed.admin.BardJamsTenantStatus;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -149,6 +149,9 @@ public class BardJamsInstaller implements CustomerSpaceServiceInstaller {
             throw new LedpException(LedpCode.LEDP_18028);
         }
     }
+
+    @Override
+    public DocumentDirectory getConfigurationSchema(String serviceName) { return null; }
 
     private class DefaultConfigGetChildrenFunction implements Function<Path, List<Map.Entry<Document, Path>>> {
 

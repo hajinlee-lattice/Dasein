@@ -2,19 +2,16 @@ package com.latticeengines.admin.tenant.batonadapter.vdb;
 
 import java.util.Map;
 
+import com.latticeengines.admin.tenant.batonadapter.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
-import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 
-public class VisiDBInstaller implements CustomerSpaceServiceInstaller {
+public class VisiDBInstaller extends LatticeComponentInstaller {
+
+    public VisiDBInstaller() { super(VisiDBComponent.componentName); }
 
     @Override
     public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
-        return null;
-    }
-
-    @Override
-    public DocumentDirectory getDefaultConfiguration(String serviceName) {
         return null;
     }
 }

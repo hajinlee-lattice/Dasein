@@ -37,6 +37,7 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                         ContractId: { type: "string" },
                         DisplayName: { type: "string" },
                         CreatedDate: { type: "date" },
+                        LastModifiedDate: { type: "date" },
                         Product: { type: "string" },
                         Status: { type: "string" }
                     }
@@ -48,6 +49,7 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
         $scope.gridOptions = {
             dataSource: dataSource,
             sortable: true,
+            scrollable: false,
             pageable: pageable,
             selectable: "row",
             filterable: {
@@ -58,6 +60,7 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
                 {field: "DisplayName", title: "Customer Name"},
                 {field: "ContractId", title: "Contract ID"},
                 {field: "CreatedDate", title: "Created Date", format: "{0:yyyy-MMM-dd }"},
+                {field: "LastModifiedDate", title: "Last Modified Date", format: "{0:yyyy-MMM-dd }", width: 150},
                 "Product",
                 {
                     field: "Status",

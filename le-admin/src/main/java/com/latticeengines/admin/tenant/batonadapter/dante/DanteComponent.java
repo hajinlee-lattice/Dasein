@@ -8,10 +8,11 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceU
 
 @Component
 public class DanteComponent extends LatticeComponent {
+    public static final String componentName = "Dante";
     
     @Override
     public String getName() {
-        return "Dante";
+        return componentName;
     }
 
     @Override

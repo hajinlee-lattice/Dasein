@@ -279,6 +279,19 @@ public class BootstrapUtil {
                 toReturn.makePathsAbsolute(serviceDirectoryPath);
                 return toReturn;
             }
+
+            @Override
+            public DocumentDirectory getConfigurationSchema(String serviceName) {
+                DocumentDirectory toReturn;
+                if (installer == null) {
+                    toReturn = new DocumentDirectory();
+                } else {
+                    toReturn = installer.getConfigurationSchema(serviceName);
+                }
+                BootstrapUtil.removeSystemFiles(toReturn);
+                toReturn.makePathsAbsolute(serviceDirectoryPath);
+                return toReturn;
+            }
         };
     }
 

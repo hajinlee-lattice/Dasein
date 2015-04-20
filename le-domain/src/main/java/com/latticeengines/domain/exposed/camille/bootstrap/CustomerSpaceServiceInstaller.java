@@ -10,4 +10,6 @@ public interface CustomerSpaceServiceInstaller {
     DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties);
     
     DocumentDirectory getDefaultConfiguration(String serviceName);
+
+    DocumentDirectory getConfigurationSchema(String serviceName);
 }

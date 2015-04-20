@@ -8,17 +8,16 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
-import com.latticeengines.domain.exposed.camille.Path;
 
 public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
 
     @Override
-    @BeforeMethod(groups = "unit")
+    @BeforeMethod(groups = {"unit", "functional"})
     protected void setUp() throws Exception {
         super.setUp();
-        this.componentName = "TestComponent";
+        this.component = new TestLatticeComponent();
         this.defaultJson = "testcomponent_default.json";
         this.metadataJson = "testcomponent_metadata.json";  // optional
         this.expectedJson = "testcomponent_expected.json";
@@ -27,7 +26,10 @@ public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
     }
 
     @Test(groups = "unit")
-    public void testMainFlow() { runMainFlow(); }
+    public void testUnitMainFlow() { runUnitMainFlow(); }
+
+    @Test(groups = "functional")
+    public void testDefaultConfigurationFuncational() { runFunctionalMainFlow(); }
 
     /*
     ================================================================================
@@ -40,9 +42,8 @@ public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
      */
     @Test(groups = "unit")
     public void testConfig4() throws IOException {
-        Path configPath = PathBuilder.buildServiceDefaultConfigPath(podId, componentName);
+        DocumentDirectory dir = component.getInstaller().getDefaultConfiguration(this.component.getName());
 
-        DocumentDirectory dir = camille.getDirectory(configPath);
         String config4 = dir.get("/Config4").getDocument().getData();
         Assert.assertTrue(Boolean.valueOf(config4));
 

@@ -82,18 +82,11 @@ public class TenantResource {
         return new ArrayList<>(tenantService.getRegisteredServiceKeySet());
     }
 
-    @RequestMapping(value = "/services/{serviceName}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get metadata of particular metadata service")
-    public String getServiceMetadata(@PathVariable String serviceName) {
-        return tenantService.getTenantServiceMetadata(serviceName);
-    }
-
     @RequestMapping(value = "/services/{serviceName}/default", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get default config for tenant service")
     public SerializableDocumentDirectory getServiceDefaultConfig(@PathVariable String serviceName) {
-        return tenantService.getDefaultTenantServiceConfig(serviceName);
+        return tenantService.getDefaultServiceConfig(serviceName);
     }
 
     @RequestMapping(value = "/{tenantId}/services/{serviceName}/state", method = RequestMethod.GET, headers = "Accept=application/json")

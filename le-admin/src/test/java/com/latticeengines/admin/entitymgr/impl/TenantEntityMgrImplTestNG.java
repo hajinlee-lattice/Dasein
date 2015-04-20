@@ -36,25 +36,11 @@ public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
         assertEquals(state.installedVersion, 1);
     }
 
-    @Test(groups = "functional")
-    public void getDefaultTenantServiceConfig() {
-        SerializableDocumentDirectory dir =
-                tenantEntityMgr.getDefaultTenantServiceConfig(testLatticeComponent.getScope().getServiceName());
-        assertNotNull(dir.getDocumentDirectory());
-    }
-
     @Test(groups = "functional", dependsOnMethods = { "getTenantServiceState" })
     public void getTenantServiceConfig() {
         CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
         SerializableDocumentDirectory dir = tenantEntityMgr.getTenantServiceConfig( //
                 scope.getContractId(), scope.getTenantId(), scope.getServiceName());
         assertNotNull(dir.getDocumentDirectory());
-    }
-
-    @Test(groups = "functional")
-    public void getTenantServiceMetadata() {
-        CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
-        String metadata = tenantEntityMgr.getTenantServiceMetadata(scope.getServiceName());
-        assertEquals(metadata, "<metadata><property name=\"PROP1\" type=\"String\"/></metadata>");
     }
 }

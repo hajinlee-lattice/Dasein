@@ -9,8 +9,8 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
-import com.latticeengines.domain.exposed.admin.BardJamsTenantStatus;
 import com.latticeengines.domain.exposed.admin.BardJamsTenant;
+import com.latticeengines.domain.exposed.admin.BardJamsTenantStatus;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-admin-context.xml" })

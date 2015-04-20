@@ -10,13 +10,13 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
@@ -25,8 +25,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 public class TenantEntityMgrImpl implements TenantEntityMgr {
     private static final Log log = LogFactory.getLog(TenantEntityMgrImpl.class);
 
-    @Autowired
-    private BatonService batonService;
+    private final BatonService batonService = new BatonServiceImpl();
 
     @Override
     public Boolean createTenant(String contractId, String tenantId, CustomerSpaceInfo customerSpaceInfo) {
@@ -63,34 +62,4 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
             return null;
         }
     }
-
-    @Override
-    public SerializableDocumentDirectory getDefaultTenantServiceConfig(String serviceName) {
-        DocumentDirectory dir = batonService.getDefaultConfiguration(serviceName);
-        if (dir == null) {
-            return null;
-        }
-        return new SerializableDocumentDirectory(dir);
-    }
-
-    @Override
-    public String getTenantServiceMetadata(String serviceName) {
-        SerializableDocumentDirectory dir = getDefaultTenantServiceConfig(serviceName);
-        if (dir == null) {
-            return null;
-        }
-        
-        DocumentDirectory documentDir = dir.getDocumentDirectory();
-        if (documentDir == null) {
-            return null;
-        }
-        
-        DocumentDirectory.Node node = documentDir.get(new Path("/metadata.xml"));
-        if (node == null) {
-            return null;
-        }
-        
-        return node.getDocument().getData();
-    }
-
 }

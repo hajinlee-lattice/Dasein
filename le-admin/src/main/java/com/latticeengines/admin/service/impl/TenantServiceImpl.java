@@ -15,9 +15,11 @@ import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
@@ -27,8 +29,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 @Component("tenantService")
 public class TenantServiceImpl implements TenantService {
 
-    @Autowired
-    private BatonService batonService;
+    private final BatonService batonService = new BatonServiceImpl();
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -104,18 +105,19 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public SerializableDocumentDirectory getDefaultTenantServiceConfig(String serviceName) {
-        return tenantEntityMgr.getDefaultTenantServiceConfig(serviceName);
+    public SerializableDocumentDirectory getDefaultServiceConfig(String serviceName) {
+        DocumentDirectory dir = batonService.getDefaultConfiguration(serviceName);
+        if (dir != null) {
+            SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(dir);
+            DocumentDirectory metaDir = batonService.getConfigurationSchema(serviceName);
+            sDir.applyMetadata(metaDir);
+            return sDir;
+        }
+        return null;
     }
 
     @Override
     public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName) {
         return tenantEntityMgr.getTenantServiceConfig(contractId, tenantId, serviceName);
     }
-
-    @Override
-    public String getTenantServiceMetadata(String serviceName) {
-        return tenantEntityMgr.getTenantServiceMetadata(serviceName);
-    }
-
 }

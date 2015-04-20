@@ -20,10 +20,14 @@ public class BardJamsComponent extends LatticeComponent {
 
     private CustomerSpaceServiceInstaller installer = new BardJamsInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new BardJamsUpgrader();
+    public static final String componentName = "BardJams";
+
+    @Override
+    public boolean doRegistration() { return false; }
 
     @Override
     public String getName() {
-        return "BardJams";
+        return componentName;
     }
 
     @Override

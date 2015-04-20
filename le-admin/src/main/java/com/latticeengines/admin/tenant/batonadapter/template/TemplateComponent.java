@@ -11,10 +11,11 @@ public class TemplateComponent extends LatticeComponent {
     
     private CustomerSpaceServiceInstaller installer = new TemplateInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new TemplateUpgrader();
+    public static final String componentName = "TPL";
 
     @Override
     public String getName() {
-        return "TPL";
+        return componentName;
     }
 
     @Override

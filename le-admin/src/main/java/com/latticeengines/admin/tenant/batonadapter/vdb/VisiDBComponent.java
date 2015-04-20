@@ -11,11 +11,13 @@ public class VisiDBComponent extends LatticeComponent {
     
     private CustomerSpaceServiceInstaller installer = new VisiDBInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new VisiDBUpgrader();
+    public static final String componentName = "VDB";
 
     @Override
-    public String getName() {
-        return "VDB";
-    }
+    public boolean doRegistration() { return true; }
+
+    @Override
+    public String getName() { return componentName; }
 
     @Override
     public void setName(String name) {
@@ -37,5 +39,4 @@ public class VisiDBComponent extends LatticeComponent {
         // TODO Auto-generated method stub
         return null;
     }
-
 }

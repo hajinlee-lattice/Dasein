@@ -178,11 +178,12 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
             result.resultObj = _.map(data, function(record){
                 return {
                     TenantId: record.key,
-                    ContractId: "CONTRACT" + Math.floor((Math.random() * 10) + 1),
+                    ContractId: record.value.ContractId,
                     DisplayName: record.value.Properties.displayName,
                     Product: "LPA 2.0",
                     Status: TenantUtility.getStatusDisplayName(getRandomServiceStatus().state),
-                    CreatedDate: new Date()
+                    CreatedDate: new Date(),
+                    LastModifiedDate: new Date()
                 };
             });
             defer.resolve(result);

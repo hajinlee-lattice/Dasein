@@ -127,7 +127,8 @@ public class TenantLifecycleManager {
             TenantProperties properties = DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
 
             TenantInfo tenantInfo = new TenantInfo(properties);
-            toReturn.add(new AbstractMap.SimpleEntry<String, TenantInfo>(childPair.getValue().getSuffix(), tenantInfo));
+            tenantInfo.contractId = contractId;
+            toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), tenantInfo));
         }
 
         return toReturn;

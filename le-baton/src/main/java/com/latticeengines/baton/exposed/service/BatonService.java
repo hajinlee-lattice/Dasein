@@ -25,7 +25,11 @@ public interface BatonService {
 
     boolean deleteTenant(String contractId, String tenantId);
 
+    boolean discardService(String serviceName);
+
     BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String serviceName);
 
     DocumentDirectory getDefaultConfiguration(String serviceName);
+
+    DocumentDirectory getConfigurationSchema(String serviceName);
 }

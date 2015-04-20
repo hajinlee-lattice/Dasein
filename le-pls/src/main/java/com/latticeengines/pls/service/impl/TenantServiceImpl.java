@@ -19,7 +19,6 @@ import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 
 @Component("tenantService")
-@Lazy(value = true)
 public class TenantServiceImpl implements TenantService {
     private static final Log log = LogFactory.getLog(TenantServiceImpl.class);
 

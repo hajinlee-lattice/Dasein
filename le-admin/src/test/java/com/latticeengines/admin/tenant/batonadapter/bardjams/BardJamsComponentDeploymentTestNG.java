@@ -8,7 +8,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.admin.tenant.batonadapter.bardjams.BardJamsComponent;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 
 public class BardJamsComponentDeploymentTestNG extends BatonAdapterBaseDeploymentTestNG {

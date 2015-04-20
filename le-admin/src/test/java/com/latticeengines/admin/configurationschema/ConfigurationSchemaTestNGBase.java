@@ -8,8 +8,8 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
@@ -23,30 +23,27 @@ import com.latticeengines.domain.exposed.camille.Path;
 @Test
 class ConfigurationSchemaTestNGBase {
 
-    protected BatonService batonService = new BatonServiceImpl();
-    private ObjectMapper objectMapper = new ObjectMapper();
+    protected final BatonService batonService = new BatonServiceImpl();
     protected Camille camille;
     protected String podId;
     protected String defaultJson, expectedJson; // required
     protected String metadataJson;              // optional
-    protected String componentName;
     protected Path defaultRootPath, metadataRootPath;
-    protected DocumentDirectory configDir;
-    protected SerializableDocumentDirectory serializableConfigDir;
+    protected LatticeComponent component;
 
-    @BeforeMethod(groups = "unit")
+    @BeforeMethod(groups = {"unit", "functional"})
     protected void setUp() throws Exception {
         CamilleTestEnvironment.start();
         camille = CamilleEnvironment.getCamille();
         podId = CamilleEnvironment.getPodId();
     }
 
-    @AfterMethod(groups = "unit")
+    @AfterMethod(groups = {"unit", "functional"})
     protected void tearDown() throws Exception {
         CamilleTestEnvironment.stop();
     }
 
-    protected void runMainFlow() {
+    protected void runUnitMainFlow() {
         // download from camille
         DocumentDirectory storedDir = camille.getDirectory(defaultRootPath);
         storedDir.makePathsLocal();
@@ -57,74 +54,53 @@ class ConfigurationSchemaTestNGBase {
         // apply metadata to downloaded config dir
         serializableDir.applyMetadata(metaDir);
 
-        try {
-            String jsonStr = IOUtils.toString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(this.expectedJson),
-                    "UTF-8"
-            );
-            Assert.assertEquals(objectMapper.valueToTree(serializableDir), objectMapper.readTree(jsonStr));
-        } catch (IOException e) {
-            throw new AssertionError("Could not deserialize the input json to a directory.", e);
-        }
+        assertSerializableDirAndJsonAreEqual(serializableDir, this.expectedJson);
+    }
+
+    protected void runFunctionalMainFlow() {
+        // register component
+        Assert.assertTrue(this.component.doRegistration());
+        // download from camille
+        DocumentDirectory storedDir = this.component.getInstaller().getDefaultConfiguration(this.component.getName());
+        storedDir.makePathsLocal();
+        // serialize downloaded directory
+        SerializableDocumentDirectory serializableDir = new SerializableDocumentDirectory(storedDir);
+        // download metadata directory
+        DocumentDirectory metaDir = this.component.getInstaller().getConfigurationSchema(this.component.getName());
+        // apply metadata to downloaded config dir
+        serializableDir.applyMetadata(metaDir);
+
+        assertSerializableDirAndJsonAreEqual(serializableDir, this.expectedJson);
+
+        batonService.discardService(this.component.getName());
     }
 
     protected void setupPaths() {
-        if (this.componentName == null) { throw new AssertionError("Must define component name before setting up paths."); }
-        this.defaultRootPath = PathBuilder.buildServiceDefaultConfigPath(podId, componentName);
-        this.metadataRootPath = PathBuilder.buildServiceConfigSchemaPath(podId, componentName);
+        if (this.component == null) { throw new AssertionError("Must define component before setting up paths."); }
+        this.defaultRootPath = PathBuilder.buildServiceDefaultConfigPath(podId, this.component.getName());
+        this.metadataRootPath = PathBuilder.buildServiceConfigSchemaPath(podId, this.component.getName());
     }
 
     protected void uploadDirectory() {
         // deserialize and upload configuration json
-        DocumentDirectory dir = constructConfigDirectory();
+        DocumentDirectory dir = LatticeComponent.constructConfigDirectory(this.defaultJson, this.metadataJson);
         batonService.loadDirectory(dir, defaultRootPath);
 
         // deserialize and upload metadata json
-        dir = constructMetadataDirectory();
+        dir = LatticeComponent.constructMetadataDirectory(this.defaultJson, this.metadataJson);
         batonService.loadDirectory(dir, metadataRootPath);
     }
 
-    private DocumentDirectory constructConfigDirectory() {
+    public static void assertSerializableDirAndJsonAreEqual(SerializableDocumentDirectory sDir, String jsonFile) {
         try {
-            String configStr = IOUtils.toString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(this.defaultJson),
+            String jsonStr = IOUtils.toString(
+                    Thread.currentThread().getContextClassLoader().getResourceAsStream(jsonFile),
                     "UTF-8"
             );
-            String metaStr = null;
-            if (this.metadataJson != null) {
-                metaStr = IOUtils.toString(
-                        Thread.currentThread().getContextClassLoader().getResourceAsStream(this.metadataJson),
-                        "UTF-8"
-                );
-            }
-            SerializableDocumentDirectory sDir =  new SerializableDocumentDirectory(configStr, metaStr);
-            return SerializableDocumentDirectory.deserialize(sDir);
+            ObjectMapper objectMapper = new ObjectMapper();
+            Assert.assertEquals(objectMapper.valueToTree(sDir), objectMapper.readTree(jsonStr));
         } catch (IOException e) {
             throw new AssertionError("Could not deserialize the input json to a directory.", e);
         }
-    }
-
-    private DocumentDirectory constructMetadataDirectory() {
-        try {
-            String configStr = IOUtils.toString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(this.defaultJson),
-                    "UTF-8"
-            );
-            String metaStr = null;
-            if (this.metadataJson != null) {
-                metaStr = IOUtils.toString(
-                        Thread.currentThread().getContextClassLoader().getResourceAsStream(this.metadataJson),
-                        "UTF-8"
-                );
-            }
-            SerializableDocumentDirectory sDir =  new SerializableDocumentDirectory(configStr, metaStr);
-            return sDir.getMetadataAsDirectory();
-        } catch (IOException e) {
-            throw new AssertionError("Could not deserialize the input json to a directory.", e);
-        }
-    }
-
-    private static void assertDirectoryJsonEquals(JsonNode actualJson, JsonNode expectedJson) {
-        Assert.assertEquals(actualJson.get("Nodes"), expectedJson.get("Nodes"));
     }
 }

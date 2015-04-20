@@ -9,4 +9,7 @@ public class TenantInfo {
 
     @JsonProperty("Properties")
     public TenantProperties properties;
+
+    @JsonProperty("ContractId")
+    public String contractId;
 }

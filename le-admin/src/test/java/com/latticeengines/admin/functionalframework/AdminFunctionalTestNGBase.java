@@ -1,7 +1,6 @@
 package com.latticeengines.admin.functionalframework;
 
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -26,6 +25,7 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -54,6 +54,9 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     @Autowired
     private BatonService batonService;
+
+    @Autowired
+    private TenantService tenantService;
     
     @Autowired
     private TestLatticeComponent testLatticeComponent;
@@ -102,8 +105,8 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        //uploadDefaultConfigs();
-        loginAD();
+        uploadDefaultConfigs();
+        //loginAD();
         createTenant("CONTRACT1", "TENANT1");
         CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
         ServiceWarden.commandBootstrap(scope.getServiceName(), scope.getCustomerSpace(), scope.getProperties());
@@ -135,9 +138,11 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         CustomerSpaceInfo info = new CustomerSpaceInfo(props, "");
         System.out.println(JsonUtils.serialize(info));
         log.info(String.format("Creating tenant %s.%s in %s.", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID));
-        String url = String.format("%s/admin/tenants/%s?contractId=%s",getRestHostPort(), tenantId, contractId);
-        Boolean created = restTemplate.postForObject(url, info, Boolean.class);
-        assertTrue(created);
+//        String url = String.format("%s/admin/tenants/%s?contractId=%s",getRestHostPort(), tenantId, contractId);
+//        Boolean created = restTemplate.postForObject(url, info, Boolean.class);
+//        assertTrue(created);
+        // bypass AD temporarily
+        tenantService.createTenant(contractId, tenantId, info);
     }
     
     public static class MagicAuthenticationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
@@ -203,8 +208,8 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         Path defauldConfigPath = PathBuilder.buildServiceDefaultConfigPath(podId, componentName);
         Path metadataPath = PathBuilder.buildServiceConfigSchemaPath(podId, componentName);
 
-        camille.delete(defauldConfigPath);
-        camille.delete(metadataPath);
+        if (camille.exists(defauldConfigPath)) { camille.delete(defauldConfigPath); }
+        if (camille.exists(metadataPath)) { camille.delete(metadataPath); }
 
         batonService.loadDirectory(configDir, defauldConfigPath);
         batonService.loadDirectory(metaDir, metadataPath);
