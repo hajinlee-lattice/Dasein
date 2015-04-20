@@ -7,11 +7,22 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
 
 .controller('MultipleModelSetupController', function ($scope, BrowserStorageUtility, ResourceUtility, ModelService, AddSegmentModal) {
     $scope.ResourceUtility = ResourceUtility;
-    $scope.loading = true;
-    $scope.segments = [];
     if (BrowserStorageUtility.getClientSession() == null) { 
         return; 
     }
+    
+    $scope.loading = true;
+    $scope.segments = [];
+    $scope.showError = false;
+    $scope.errorMessage = "";
+    
+    $scope.closeErrorClick = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        
+        $scope.showError = false;
+    };
     
     $scope.models = [{
         Id: "FAKE_MODEL",
@@ -44,7 +55,8 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
                 }
                 $scope.segments = result.resultObj.sort(sortByPriority);
             } else {
-                // Need to handle error case
+                $scope.showError = true;
+                $scope.errorMessage = ResourceUtility.getString("MULTIPLE_MODEL_GET_SEGMENTS_ERROR");
             }
         });
     });
@@ -74,20 +86,25 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
                     }
                 }
             } else {
-                // Need to handle error case
+                $scope.showError = true;
+                $scope.errorMessage = ResourceUtility.getString("MULTIPLE_MODEL_DELETE_SEGMENT_ERROR", [segment.Name]);
             }
         });
         
     };
     
-    function updateSegment (segment, successCallback) {
+    function updateSegment(segment, successCallback, failCallback) {
         ModelService.UpdateSegment(segment).then(function(result) {
             if (result != null && result.success === true) {
                 if (successCallback) {
                     successCallback();
                 }
             } else {
-                // Need to handle error case
+               $scope.showError = true;
+               $scope.errorMessage = ResourceUtility.getString("MULTIPLE_MODEL_UPDATE_SEGMENT_ERROR", [segment.Name]);
+               if (failCallback) {
+                   failCallback();
+               }
             }
         });
     }
@@ -109,7 +126,9 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
             return;
         }
         
+        var backupSegment = $.extend(true, {}, segment);
         var secondSegment = null;
+        var backupSecondSegment = null;
         if (segment.NewModelId == "FAKE_MODEL") {
             segment.ModelId = null;
             segment.ModelName = null;
@@ -126,6 +145,7 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
             }
             
             if (secondSegment != null) {
+                backupSecondSegment = $.extend(true, {}, secondSegment);
                 secondSegment.ModelId = null;
                 secondSegment.ModelName = null;
                 secondSegment.NewModelId = "FAKE_MODEL";
@@ -135,10 +155,20 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
         // Save updated segments here
         if (secondSegment) {
             updateSegment(secondSegment, function () {
-                updateSegment(segment);
+                updateSegment(segment, null, function () {
+                    // Undo changes if a failure occurs
+                    $.extend(true, segment, backupSegment);
+                });
+            }, function () {
+                // Undo changes if a failure occurs
+                $.extend(true, secondSegment, backupSecondSegment);
+                $.extend(true, segment, backupSegment);
             });
         } else {
-            updateSegment(segment);
+            updateSegment(segment, null, function () {
+                // Undo changes if a failure occurs
+                $.extend(true, segment, backupSegment);
+            });
         }
     };
     
@@ -196,7 +226,16 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
             updateSegment(segment, function () {
                 updateSegment(nextLowest, function () {
                     $scope.segments = $scope.segments.sort(sortByPriority);
+                }, function () {
+                    // Undo changes if a failure occurs
+                    segment.Priority = currentPriority;
+                    $scope.segments = $scope.segments.sort(sortByPriority);
                 });
+            }, function () {
+                // Undo changes if a failure occurs
+                nextLowest.Priority = segment.Priority;
+                segment.Priority = currentPriority;
+                $scope.segments = $scope.segments.sort(sortByPriority);
             });
         }
         
@@ -228,7 +267,16 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
             updateSegment(segment, function () {
                 updateSegment(nextHighest, function () {
                     $scope.segments = $scope.segments.sort(sortByPriority);
+                }, function () {
+                    // Undo changes if a failure occurs
+                    segment.Priority = currentPriority;
+                    $scope.segments = $scope.segments.sort(sortByPriority);
                 });
+            }, function () {
+                // Undo changes if a failure occurs
+                nextHighest.Priority = segment.Priority;
+                segment.Priority = currentPriority;
+                $scope.segments = $scope.segments.sort(sortByPriority);
             });
         }
     };

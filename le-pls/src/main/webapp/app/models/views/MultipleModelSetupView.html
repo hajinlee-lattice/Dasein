@@ -6,6 +6,12 @@
             </div>
         </div>
     </header>
+    <div class="container" data-ng-show="showError">
+        <div class="global-error">
+            <span><i class="fa fa-exclamation-circle fa-inverse"></i>{{errorMessage}}</span>
+            <a class="close" href="#" data-ng-click="closeErrorClick($event)"><i class="fa fa-times fa-inverse"></i></a>
+        </div>
+    </div>
     <div data-ng-show="loading">
         <div class="loader"> </div>
         <h2 class="text-center">{{ResourceUtility.getString('GENERAL_LOADING')}}</h2>
