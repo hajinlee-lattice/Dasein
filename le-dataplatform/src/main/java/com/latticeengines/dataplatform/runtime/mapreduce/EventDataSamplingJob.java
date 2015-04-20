@@ -29,6 +29,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
+import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -40,8 +41,16 @@ public class EventDataSamplingJob extends Configured implements Tool, MRJobCusto
     public static final String LEDP_SAMPLE_CONFIG = "ledp.sample.config";
     private static final String SAMPLE_JOB_TYPE = "samplingJob";
 
+    private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
+
     public EventDataSamplingJob(Configuration config) {
         setConf(config);
+    }
+
+    public EventDataSamplingJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
+        setConf(config);
+        this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
+        this.mapReduceCustomizationRegistry.register(this);
     }
 
     @SuppressWarnings({ "deprecation" })

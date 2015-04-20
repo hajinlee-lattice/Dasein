@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
 import com.latticeengines.dataplatform.exposed.client.mapreduce.MRJobCustomization;
+import com.latticeengines.dataplatform.exposed.client.mapreduce.MapReduceCustomizationRegistry;
 import com.latticeengines.dataplatform.exposed.mapreduce.MapReduceProperty;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -34,8 +35,16 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
     private static String comma = ",";
 
+    private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
+
     public EventDataScoringJob(Configuration config) {
         setConf(config);
+    }
+    
+    public EventDataScoringJob(Configuration config, MapReduceCustomizationRegistry mapReduceCustomizationRegistry) {
+        setConf(config);
+        this.mapReduceCustomizationRegistry = mapReduceCustomizationRegistry;
+        this.mapReduceCustomizationRegistry.register(this);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.latticeengines.scoring.dao.impl;
 
+import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -8,8 +9,8 @@ import org.hibernate.criterion.Restrictions;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.scoring.dao.ScoringCommandResultDao;
-
 
 public class ScoringCommandResultDaoImpl extends BaseDaoImpl<ScoringCommandResult> implements ScoringCommandResultDao {
 
@@ -37,5 +38,16 @@ public class ScoringCommandResultDaoImpl extends BaseDaoImpl<ScoringCommandResul
 
         return scoringCommandResult;
 
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ScoringCommandResult> getConsumed() {
+        Session session = getSessionFactory().getCurrentSession();
+        List<ScoringCommandResult> result = session
+                .createCriteria(ScoringCommandResult.class)
+                .add(Restrictions.eq("status", ScoringCommandStatus.CONSUMED))
+                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+        return result;
     }
 }

@@ -46,7 +46,6 @@ import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.dataplatform.exposed.yarn.client.AppMasterProperty;
 import com.latticeengines.dataplatform.exposed.yarn.client.ContainerProperty;
 import com.latticeengines.dataplatform.runtime.load.LoadProperty;
-import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingJob;
 import com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingProperty;
 import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
@@ -402,7 +401,6 @@ public class ModelingServiceImpl implements ModelingService {
         properties.setProperty(MapReduceProperty.CUSTOMER.name(), model.getCustomer());
         String assignedQueue = LedpQueueAssigner.getMRQueueNameForSubmission();
         properties.setProperty(MapReduceProperty.QUEUE.name(), assignedQueue);
-        mapReduceCustomizationRegistry.register(new EventDataSamplingJob(yarnConfiguration));
         return modelingJobService.submitMRJob("samplingJob", properties);
     }
 

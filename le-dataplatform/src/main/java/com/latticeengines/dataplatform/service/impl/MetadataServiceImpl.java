@@ -93,4 +93,10 @@ public class MetadataServiceImpl implements MetadataService {
         MetadataProvider provider = getProvider(jdbcTemplate);
         return provider.createNewEmptyTableFromExistingOne(newTable, oldTable);
     }
+    
+    @Override
+    public String dropTable(JdbcTemplate jdbcTemplate, String table){
+        MetadataProvider provider = getProvider(jdbcTemplate);
+        return provider.dropTable(table);
+    }
 }

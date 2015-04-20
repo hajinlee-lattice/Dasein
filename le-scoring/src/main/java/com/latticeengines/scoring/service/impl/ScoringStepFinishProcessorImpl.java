@@ -21,11 +21,12 @@ public class ScoringStepFinishProcessorImpl implements ScoringStepProcessor {
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
-    @Override
+    @Override 
     public void executeStep(ScoringCommand scoringCommand) {
         ScoringCommandResult result = scoringCommandResultEntityMgr.findByScoringCommand(scoringCommand);
         result.setStatus(ScoringCommandStatus.POPULATED);
         result.setPopulated(new Timestamp(System.currentTimeMillis()));
+        result.setTotal(scoringCommand.getTotal());
         scoringCommandResultEntityMgr.update(result);
 
         scoringCommand.setConsumed(new Timestamp(System.currentTimeMillis()));

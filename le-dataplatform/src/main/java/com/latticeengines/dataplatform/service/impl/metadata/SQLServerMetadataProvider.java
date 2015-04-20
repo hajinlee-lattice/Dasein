@@ -61,4 +61,8 @@ public class SQLServerMetadataProvider extends MetadataProvider {
         return "SELECT * INTO " + newTable + " select * from " + oldTable + " WHERE 1 = 0";
     }
 
+    @Override
+    public String dropTable(String table) {
+        return "drop table " + table;
+    }
 }

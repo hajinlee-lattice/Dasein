@@ -1,5 +1,7 @@
 package com.latticeengines.scoring.entitymanager.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -30,6 +32,12 @@ public class ScoringCommandResultEntityMgrImpl extends BaseScoringEntityMgrImpl<
     @Transactional(value = "scoring", propagation = Propagation.REQUIRED)
     public ScoringCommandResult findByScoringCommand(ScoringCommand scoringCommand) {
         return scoringCommandResultDao.findByScoringCommand(scoringCommand);
+    }
+
+    @Override
+    @Transactional(value = "scoring", propagation = Propagation.REQUIRED)
+    public List<ScoringCommandResult> getConsumed() {
+        return scoringCommandResultDao.getConsumed();
     }
 
 }

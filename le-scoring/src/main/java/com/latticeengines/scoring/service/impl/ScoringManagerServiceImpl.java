@@ -8,7 +8,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -16,11 +16,16 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.exposed.service.JobService;
+import com.latticeengines.dataplatform.exposed.service.MetadataService;
+import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
+import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
@@ -30,21 +35,20 @@ import com.latticeengines.scoring.service.ScoringManagerService;
 import com.latticeengines.scoring.service.ScoringStepProcessor;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
 
-
 @DisallowConcurrentExecution
 @Component("scoringManagerService")
-public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringManagerService{
+public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringManagerService {
 
     private static final Log log = LogFactory.getLog(ScoringManagerServiceImpl.class);
 
     private AsyncTaskExecutor scoringProcessorExecutor;
-    
+
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
     private ScoringCommandLogService scoringCommandLogService;
-    
+
     private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
-    
+
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
@@ -53,9 +57,19 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
 
     private JobService jobService;
 
+    private MetadataService metadataService;
+
+    private SqoopSyncJobService sqoopSyncJobService;
+
     private Configuration yarnConfiguration;
-    
+
     private String appTimeLineWebAppAddress;
+
+    private JdbcTemplate scoringJdbcTemplate;
+
+    private String cleanUpInterval;
+
+    private DbCreds scoringCreds;
 
     private int waitTime = 180;
 
@@ -63,20 +77,21 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         log.info("ScoringManager started!");
         log.info("look at database rows:" + scoringCommandEntityMgr.getPopulated());
-        if (scoringCommandEntityMgr.findAll().isEmpty()){
-        scoringCommandEntityMgr.create(new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, "TestDataTable", 0, 1292,
-                new Timestamp(System.currentTimeMillis())));
+        if (scoringCommandEntityMgr.findAll().isEmpty()) {
+            scoringCommandEntityMgr.create(new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED,
+                    "TestDataTable", 0, 1292, new Timestamp(System.currentTimeMillis())));
         }
-        
+        cleanTables();
         List<Future<Long>> futures = new ArrayList<>();
         List<ScoringCommand> scoringCommands = scoringCommandEntityMgr.getPopulated();
-        for(ScoringCommand scoringCommand : scoringCommands){
-            futures.add(scoringProcessorExecutor.submit(new ScoringProcessorCallable(scoringCommand, scoringCommandEntityMgr, scoringCommandLogService, scoringCommandStateEntityMgr, 
-                    scoringCommandResultEntityMgr, scoringStepYarnProcessor, scoringStepFinishProcessor,
-                    jobService, yarnConfiguration, appTimeLineWebAppAddress)));
+        for (ScoringCommand scoringCommand : scoringCommands) {
+            futures.add(scoringProcessorExecutor.submit(new ScoringProcessorCallable(scoringCommand,
+                    scoringCommandEntityMgr, scoringCommandLogService, scoringCommandStateEntityMgr,
+                    scoringStepYarnProcessor, scoringStepFinishProcessor, jobService, yarnConfiguration,
+                    appTimeLineWebAppAddress)));
         }
 
-        for(Future<Long> future : futures){ 
+        for (Future<Long> future : futures) {
             try {
                 Long pid = future.get(waitTime, TimeUnit.SECONDS);
                 log.info("PId: " + pid);
@@ -89,7 +104,30 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
             }
         }
     }
-    
+
+    private void cleanTables() {
+        int cleanUpInterval = Integer.parseInt(this.cleanUpInterval);
+
+         List<ScoringCommand> consumedCommands = scoringCommandEntityMgr.getConsumed();
+         for(ScoringCommand scoringCommand : consumedCommands){
+             if (scoringCommand.getConsumed().getTime() + cleanUpInterval < System.currentTimeMillis()) {
+                 sqoopSyncJobService.eval(metadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName()), "",
+                         "drop-table", 1, metadataService.getJdbcConnectionUrl(scoringCreds));
+                 scoringCommandEntityMgr.delete(scoringCommand);
+             }
+         }
+
+        List<ScoringCommandResult> consumedResultCommands = scoringCommandResultEntityMgr.getConsumed();
+        for (ScoringCommandResult scoringCommandResult : consumedResultCommands) {
+            if (scoringCommandResult.getConsumed().getTime() + cleanUpInterval < System.currentTimeMillis()) {
+                sqoopSyncJobService.eval(metadataService.dropTable(scoringJdbcTemplate, scoringCommandResult.getTableName()), "",
+                        "drop-table", 1, metadataService.getJdbcConnectionUrl(scoringCreds));
+                scoringCommandResultEntityMgr.delete(scoringCommandResult);
+            }
+        }
+
+    }
+
     public AsyncTaskExecutor getScoringProcessorExecutor() {
         return scoringProcessorExecutor;
     }
@@ -106,15 +144,15 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         this.scoringCommandEntityMgr = scoringCommandEntityMgr;
     }
 
-    public ScoringCommandLogService getScoringCommandLogService(){
+    public ScoringCommandLogService getScoringCommandLogService() {
         return this.scoringCommandLogService;
     }
-    
+
     public void setScoringCommandLogService(ScoringCommandLogService scoringCommandLogService) {
         this.scoringCommandLogService = scoringCommandLogService;
     }
 
-    public ScoringCommandStateEntityMgr getScoringCommandStateEntityMgr(){
+    public ScoringCommandStateEntityMgr getScoringCommandStateEntityMgr() {
         return this.scoringCommandStateEntityMgr;
     }
 
@@ -122,36 +160,52 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         this.scoringCommandStateEntityMgr = scoringCommandStateEntityMgr;
     }
 
-    public ScoringCommandResultEntityMgr getScoringCommandResultEntityMgr(){
-        return this.scoringCommandResultEntityMgr;
+    public ScoringCommandResultEntityMgr getScoringCommandResultEntityMgr() {
+        return scoringCommandResultEntityMgr;
     }
 
     public void setScoringCommandResultEntityMgr(ScoringCommandResultEntityMgr scoringCommandResultEntityMgr) {
         this.scoringCommandResultEntityMgr = scoringCommandResultEntityMgr;
     }
 
-    public ScoringStepYarnProcessor getScoringStepYarnProcessor(){
+    public ScoringStepYarnProcessor getScoringStepYarnProcessor() {
         return this.scoringStepYarnProcessor;
     }
-    
+
     public void setScoringStepYarnProcessor(ScoringStepYarnProcessor scoringStepYarnProcessor) {
         this.scoringStepYarnProcessor = scoringStepYarnProcessor;
     }
-    
-    public ScoringStepProcessor getScoringStepFinishProcessor(){
+
+    public ScoringStepProcessor getScoringStepFinishProcessor() {
         return this.scoringStepFinishProcessor;
     }
 
     public void setScoringStepFinishProcessor(ScoringStepProcessor scoringStepFinishProcessor) {
         this.scoringStepFinishProcessor = scoringStepFinishProcessor;
     }
-    
+
     public JobService getJobService() {
         return jobService;
     }
 
     public void setJobService(JobService jobService) {
         this.jobService = jobService;
+    }
+
+    public MetadataService getMetadataService() {
+        return metadataService;
+    }
+
+    public void setMetadataService(MetadataService metadataService) {
+        this.metadataService = metadataService;
+    }
+
+    public SqoopSyncJobService getSqoopSyncJobService() {
+        return sqoopSyncJobService;
+    }
+
+    public void setSqoopSyncJobService(SqoopSyncJobService sqoopSyncJobService) {
+        this.sqoopSyncJobService = sqoopSyncJobService;
     }
 
     public Configuration getYarnConfiguration() {
@@ -168,5 +222,29 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
 
     public void setAppTimeLineWebAppAddress(String appTimeLineWebAppAddress) {
         this.appTimeLineWebAppAddress = appTimeLineWebAppAddress;
+    }
+
+    public JdbcTemplate getScoringJdbcTemplate() {
+        return scoringJdbcTemplate;
+    }
+
+    public void setScoringJdbcTemplate(JdbcTemplate scoringJdbcTemplate) {
+        this.scoringJdbcTemplate = scoringJdbcTemplate;
+    }
+
+    public String getCleanUpInterval() {
+        return cleanUpInterval;
+    }
+
+    public void setCleanUpInterval(String cleanUpInterval) {
+        this.cleanUpInterval = cleanUpInterval;
+    }
+
+    public DbCreds getScoringCreds() {
+        return scoringCreds;
+    }
+
+    public void setScoringCreds(DbCreds scoringCreds) {
+        this.scoringCreds = scoringCreds;
     }
 }

@@ -93,6 +93,9 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
+    @Autowired
+    private DbCreds scorngCreds;
+
     private static final String JSON_SUFFIX = ".json";
 
     private static final String OUTPUT_TABLE_PREFIX = "Lead_";
@@ -177,37 +180,33 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         }
 
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), commaJoiner.join(modelFilePaths));
-        mapReduceCustomizationRegistry.register(new EventDataScoringJob(yarnConfiguration));
         ApplicationId appId = jobService.submitMRJob("scoringJob", properties);
 
         return appId;
     }
 
     private ApplicationId export(String customer, ScoringCommand scoringCommand) {
-        DbCreds.Builder builder = new DbCreds.Builder();
-        builder.host(dbHost).port(dbPort).db(dbName).user(dbUser).password(dbPassword).dbType(dbType);
-        DbCreds creds = new DbCreds(builder);
         String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        String targetTable = createNewTable(customer, creds);
+        String targetTable = createNewTable(customer);
 
         ScoringCommandResult result = new ScoringCommandResult(scoringCommand.getId(), ScoringCommandStatus.NEW,
                 targetTable, 0, new Timestamp(System.currentTimeMillis()));
         scoringCommandResultEntityMgr.create(result);
 
         String sourceDir = customerBaseDir + "/" + customer + "/scoring/data/" + scoringCommand.getTableName();
-        log.info("connection url: " + metadataService.getJdbcConnectionUrl(creds));
-        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, creds, queue, customer, 4);
+        log.info("connection url: " + metadataService.getJdbcConnectionUrl(scorngCreds));
+        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scorngCreds, queue, customer, 4);
 
         return appId;
     }
 
-    private String createNewTable(String customer, DbCreds creds) {
+    private String createNewTable(String customer) {
         String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
         String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
         sqoopSyncJobService.eval(
                 metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable),
                 queue, jobNameService.createJobName(customer, "create-table"), 1,
-                metadataService.getJdbcConnectionUrl(creds));
+                metadataService.getJdbcConnectionUrl(scorngCreds));
         return newTable;
     }
 }

@@ -35,6 +35,8 @@ public abstract class MetadataProvider {
 
     public abstract String createNewEmptyTableFromExistingOne(String newTable, String oldTable);
 
+    public abstract String dropTable(String table);
+
     public Schema getSchema(DbCreds dbCreds, String tableName) {
         SqoopOptions options = new SqoopOptions();
         options.setConnectString(getConnectionString(dbCreds));

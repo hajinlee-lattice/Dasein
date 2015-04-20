@@ -10,6 +10,11 @@
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
       http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
 
-    <!-- Configures the word count job. -->
+    <!-- Configures the scoring job. -->
     <hdp:job id="scoringJob" mapper="com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper" />
+
+    <bean id="scoringCustomization" class="com.latticeengines.scoring.runtime.mapreduce.EventDataScoringJob">
+        <constructor-arg ref="hadoopConfiguration" />
+        <constructor-arg ref="mapReduceCustomizationRegistry" />
+    </bean>
 </beans>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xmlns:yarn="http://www.springframework.org/schema/yarn"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:yarn="http://www.springframework.org/schema/yarn"
     xmlns:hdp="http://www.springframework.org/schema/hadoop"
     xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="
@@ -10,7 +9,7 @@
       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
       http://www.springframework.org/schema/hadoop http://www.springframework.org/schema/hadoop/spring-hadoop.xsd">
-    
+
     <hdp:configuration id="hadoopConfiguration">
         dfs.client.failover.proxy.provider.${dataplatform.dfs.nameservices}=${dataplatform.dfs.client.failover.proxy.provider}
         dfs.nameservices=${dataplatform.dfs.nameservices}
@@ -29,10 +28,15 @@
         mapreduce.job.queuename=Priority0.MapReduce.0
     </hdp:configuration>
 
-    <!-- Configures the word count job. -->
-    <hdp:job id="samplingJob" 
-        number-reducers="1"
+    <!-- Configures the sampling job. -->
+    <hdp:job id="samplingJob" number-reducers="1"
         mapper="com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingMapper"
         reducer="com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingReducer" />
+
+    <bean id="samplingCustomization"
+        class="com.latticeengines.dataplatform.runtime.mapreduce.EventDataSamplingJob">
+        <constructor-arg ref="hadoopConfiguration" />
+        <constructor-arg ref="mapReduceCustomizationRegistry" />
+    </bean>
 
 </beans>

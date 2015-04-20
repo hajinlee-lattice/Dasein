@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
-import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.service.ScoringCommandLogService;
 import com.latticeengines.scoring.service.ScoringStepProcessor;
@@ -41,8 +40,6 @@ public class ScoringProcessorCallable implements Callable<Long> {
     private ScoringCommandLogService scoringCommandLogService;
 
     private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
-
-    private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
 
@@ -62,7 +59,6 @@ public class ScoringProcessorCallable implements Callable<Long> {
     public ScoringProcessorCallable(ScoringCommand scoringCommand, ScoringCommandEntityMgr scoringCommandEntityMgr,
             ScoringCommandLogService scoringCommandLogService,
             ScoringCommandStateEntityMgr scoringCommandStateEntityMgr,
-            ScoringCommandResultEntityMgr scoringCommandResultEntityMgr,
             ScoringStepYarnProcessor scoringStepYarnProcessor, ScoringStepProcessor scoringStepFinishProcessor,
             JobService jobService, Configuration yarnConfiguration,
             String appTimeLineWebAppAddress) {
@@ -70,7 +66,6 @@ public class ScoringProcessorCallable implements Callable<Long> {
         this.scoringCommandEntityMgr = scoringCommandEntityMgr;
         this.scoringCommandLogService = scoringCommandLogService;
         this.scoringCommandStateEntityMgr = scoringCommandStateEntityMgr;
-        this.scoringCommandResultEntityMgr = scoringCommandResultEntityMgr;
         this.scoringStepYarnProcessor = scoringStepYarnProcessor;
         this.scoringStepFinishProcessor = scoringStepFinishProcessor;
         this.jobService = jobService;
@@ -108,13 +103,8 @@ public class ScoringProcessorCallable implements Callable<Long> {
         ScoringCommandState scoringCommandState = scoringCommandStateEntityMgr
                 .findLastStateByScoringCommand(scoringCommand);
         if (scoringCommandState == null) {
-            // executeStep(modelStepRetrieveMetadataProcessor,
-            // ModelCommandStep.RETRIEVE_METADATA, commandParameters);
             executeYarnStep(ScoringCommandStep.LOAD_DATA);
             scoringCommandLogService.log(scoringCommand, "Total: " + scoringCommand.getTotal());
-            // scoringCommandLogService.log(scoringCommand, "Data Size: " +
-            // readableFileSize(dataSize) + " Row count: "
-            // + rowSize + " Column count: " + columnSize);
         } else { // modelCommand IN_PROGRESS
             String yarnApplicationId = scoringCommandState.getYarnApplicationId();
             JobStatus jobStatus = jobService.getJobStatus(yarnApplicationId);
