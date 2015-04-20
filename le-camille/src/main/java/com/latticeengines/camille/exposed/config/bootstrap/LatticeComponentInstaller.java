@@ -1,4 +1,4 @@
-package com.latticeengines.admin.tenant.batonadapter;
+package com.latticeengines.camille.exposed.config.bootstrap;
 
 import java.util.Map;
 
@@ -16,7 +16,7 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
 
     private String componentName;
     // dry run flag: when it is up, installer only write default configuration to camille, skip all other installation steps.
-    private boolean dryrun = false;
+    private boolean dryrun = true;
 
     protected LatticeComponentInstaller(String componentName) {
         this.componentName = componentName;
@@ -24,14 +24,21 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
 
     // the true installation steps other than writing to Camille
     protected abstract void installCore(
-            CustomerSpace space, String serviceName, int dataVersion, CustomerSpaceProperties spaceProps, DocumentDirectory configDir);
+            CustomerSpace space, String serviceName, int dataVersion,
+            CustomerSpaceProperties spaceProps, DocumentDirectory configDir);
 
     @Override
     public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
-        DocumentDirectory dir = this.getDefaultConfiguration(serviceName);
-        if (!this.dryrun) { installCore(space, serviceName, dataVersion, new CustomerSpaceProperties(), dir); }
-        // remember to turn it into a local directory
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(properties);
+        Map<String, String> residualProps = sDir.getOtherProperties();
+        DocumentDirectory dir = sDir.getDocumentDirectory();
         dir.makePathsLocal();
+
+        if (!dryrun) {
+            // do the true installation
+            installCore(space, serviceName, dataVersion, new CustomerSpaceProperties(), dir);
+        }
+
         return dir;
     }
 
