@@ -444,15 +444,34 @@ table.existing-user-info tr td {
 }
 
 .priority-column {
-  padding-left: 15px;
+  padding-left: 5px;
 }
 
 .priority-column div {
   display: inline-block;
-  width: 10px;
+  width: 20px;
 }
 .priority-arrow {
   margin-right: 10px;
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.priority-arrow-up {
+  background: url(../images/arrow-up.png) no-repeat center center;
+}
+
+.priority-arrow-up:hover {
+  background: url(../images/arrow-up-over.png) no-repeat center center;
+}
+
+.priority-arrow-down {
+  background: url(../images/arrow-down.png) no-repeat center center;
+}
+
+.priority-arrow-down:hover {
+  background: url(../images/arrow-down-over.png) no-repeat center center;
 }
 
 /*
