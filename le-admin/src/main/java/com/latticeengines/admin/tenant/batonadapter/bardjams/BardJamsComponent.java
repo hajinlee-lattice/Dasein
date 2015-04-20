@@ -23,7 +23,11 @@ public class BardJamsComponent extends LatticeComponent {
     public static final String componentName = "BardJams";
 
     @Override
-    public boolean doRegistration() { return false; }
+    public boolean doRegistration() {
+        String defaultJson = "bardjams_default.json";
+        String metadataJson = "bardjams_metadata.json";
+        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+    }
 
     @Override
     public String getName() {

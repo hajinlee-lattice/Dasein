@@ -1,15 +1,110 @@
 {
-  "RootPath": "/",
-  "Nodes": [
-    { "Node": "Config1", "Data": 1 },
-    { "Node": "Config2", "Data": {"property1": "value1", "property2": "value2"} },
-    { "Node": "Config3", "Data": "string" },
-    { "Node": "Config4", "Data": true},
-    { "Node": "Config5",
-      "Children" : [
-        { "Node" : "Config5.1", "Data": "value5.1" },
-        { "Node" : "Config5.2", "Data": "value5.2" }
-      ]
-    }
-  ]
+	"RootPath": "/",
+	"Nodes": 
+	[
+		{
+			"Node": "Tenant",
+			"Data": ""
+		},
+
+		{
+			"Node": "TenantType",
+			"Data": "P"
+		},
+
+		{
+			"Node": "DL_URL",
+			"Data": "https://dataloader-prod.lattice-engines.com/Dataloader_PLS"
+		},
+
+		{
+			"Node": "DL_User",
+			"Data": "admin.dataloader@lattice-engines.com"
+		},
+
+		{
+			"Node": "DL_Password",
+			"Data": "adm1nDLpr0d"
+		},
+
+		{
+			"Node": "NotificationEmail",
+			"Data": ""
+		},
+
+		{
+			"Node": "NotifyEmailJob",
+			"Data": "DataLoader\\DL Omnibus\\DL_NOTIFY_EMAIL"
+		},
+
+		{
+			"Node": "JAMSUser",
+			"Data": "PROD\\s-jams"
+		},
+
+		{
+			"Node": "ImmediateFolderStruct",
+			"Data": "DanteTesting\\Immediate"
+		},
+
+		{
+			"Node": "ScheduledFolderStruct",
+			"Data": "DataLoader\\DL TEST\\Scheduled Jobs"
+		},
+
+		{
+			"Node": "DanteManifestPath",
+			"Data": ""
+		},
+
+		{
+			"Node": "Queue_Name",
+			"Data": ""
+		},
+
+		{
+			"Node": "Dante_Queue_Name",
+			"Data": ""
+		},
+
+		{
+			"Node": "Agent_Name",
+			"Data": "10.51.1.131"
+		},
+
+		{
+			"Node": "WeekdaySchedule_Name",
+			"Data": ""
+		},
+
+		{
+			"Node": "Data_LaunchPath",
+			"Data": ""
+		},
+
+		{
+			"Node": "Data_ArchivePath",
+			"Data": ""
+		},
+
+		{
+			"Node": "DataLoaderTools_Path",
+			"Data": ""
+		},
+
+		{
+			"Node": "DanteTool_Path",
+			"Data": ""
+		},
+
+		{
+			"Node": "Active",
+			"Data": 1
+		},
+
+		{
+			"Node": "LoadGroupList",
+			"Data": ""
+		}
+	]
 }
