@@ -4,12 +4,13 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
-import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
+import com.latticeengines.admin.configurationschema.ConfigurationSchemaTestNGBase;
+import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.admin.tenant.batonadapter.template.TemplateComponent;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 
-public class TestComponentTestNG extends BatonAdapterDeploymentTestNGBase {
+public class TestComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
     
     @Test(groups = "functional")
     public void testInstallation() { }
@@ -24,6 +25,6 @@ public class TestComponentTestNG extends BatonAdapterDeploymentTestNGBase {
 
     @Override
     public void testGetDefaultConfig(SerializableDocumentDirectory sDir) {
-        assertSerializableDirAndJsonAreEqual(sDir, "testcomponent_expected.json");
+        ConfigurationSchemaTestNGBase.assertSerializableDirAndJsonAreEqual(sDir, "testcomponent_expected.json");
     }
 }

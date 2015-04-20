@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 
 @Test
-class ConfigurationSchemaTestNGBase {
+public class ConfigurationSchemaTestNGBase {
 
     protected final BatonService batonService = new BatonServiceImpl();
     protected Camille camille;
