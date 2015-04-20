@@ -45,8 +45,7 @@ public class SerializableDocumentDirectoryUnitTestNG {
         Assert.assertEquals(spaceProperties.description, deserializedProp.description);
 
         String expected = "{\"RootPath\":\"/\",\"Nodes\":[{\"Node\":\"Config1\",\"Data\":\"value1\",\"Version\":-1,\"Children\":[{\"Node\":\"Config1.1\",\"Data\":\"value1.1\",\"Version\":-1},{\"Node\":\"Config1.2\",\"Data\":\"value1.2\",\"Version\":-1}]},{\"Node\":\"Config2\",\"Data\":\"1.23\",\"Version\":-1},{\"Node\":\"Config3\",\"Data\":\"true\",\"Version\":-1}]}";
-        Assert.assertEquals(objectMapper.writeValueAsString(sDir), expected);
-
+        Assert.assertEquals(objectMapper.valueToTree(sDir), objectMapper.readTree(expected));
     }
 
     @Test(groups = "unit")
