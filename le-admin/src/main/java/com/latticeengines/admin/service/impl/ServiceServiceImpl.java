@@ -17,7 +17,6 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
-import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 

@@ -1,7 +1,5 @@
 package com.latticeengines.admin.functionalframework;
 
-import java.util.Map;
-
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -14,7 +12,6 @@ public class TestLatticeComponentInstaller extends LatticeComponentInstaller {
     @Override
     public void installCore(
             CustomerSpace space, String serviceName, int dataVersion,
-            CustomerSpaceProperties properties, DocumentDirectory autoGenDocDir) {
-        return null;
+            CustomerSpaceProperties spaceProps, DocumentDirectory autoGenDocDir) {
     }
 }
