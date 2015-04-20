@@ -25,7 +25,6 @@ public class SerializableDocumentDirectory {
     private Collection<Node> nodes;
 
     private DocumentDirectory documentDirectory;
-    private Map<String, String> otherProperties;
 
     public SerializableDocumentDirectory() {
     }
@@ -35,18 +34,16 @@ public class SerializableDocumentDirectory {
     }
 
     public SerializableDocumentDirectory(Map<String, String> properties) {
-        Map<String, String> residualProp = new HashMap<>();
         DocumentDirectory docDir = new DocumentDirectory(new Path("/"));
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             try {
                 Path nodePath = new Path(entry.getKey());
                 docDir.add(nodePath, new Document(entry.getValue()));
             } catch (IllegalArgumentException e) {
-                residualProp.put(entry.getKey(), entry.getValue());
+                //ignore
             }
         }
         constructByDocumentDirectory(docDir);
-        this.setOtherProperties(residualProp);
     }
 
     public SerializableDocumentDirectory(String configJson) {
@@ -142,14 +139,6 @@ public class SerializableDocumentDirectory {
     @JsonIgnore
     public void setDocumentDirectory(DocumentDirectory documentDirectory) {
         this.documentDirectory = documentDirectory;
-    }
-
-    @JsonIgnore
-    public Map<String, String> getOtherProperties() { return otherProperties; }
-
-    @JsonIgnore
-    public void setOtherProperties(Map<String, String> otherProperties) {
-        this.otherProperties = otherProperties;
     }
 
     @JsonProperty("RootPath")
