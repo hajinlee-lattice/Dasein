@@ -1,20 +1,13 @@
 package com.latticeengines.admin.functionalframework;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.admin.tenant.batonadapter.LatticeComponentInstaller;
-import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.config.bootstrap.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;

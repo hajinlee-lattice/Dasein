@@ -100,7 +100,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        //loginAD();
+        loginAD();
         createTenant("CONTRACT1", "TENANT1");
         CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
         ServiceWarden.commandBootstrap(scope.getServiceName(), scope.getCustomerSpace(), scope.getProperties());
