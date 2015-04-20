@@ -10,6 +10,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.admin.entitymgr.ServiceEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -24,6 +25,9 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 public class ServiceServiceImpl implements ServiceService {
 
     private final BatonService batonService = new BatonServiceImpl();
+
+    @Autowired
+    private ServiceEntityMgr serviceEntityMgr;
 
     public ServiceServiceImpl() {
     }
@@ -71,13 +75,6 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Override
     public SerializableDocumentDirectory getDefaultServiceConfig(String serviceName) {
-        DocumentDirectory dir = batonService.getDefaultConfiguration(serviceName);
-        if (dir != null) {
-            SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(dir);
-            DocumentDirectory metaDir = batonService.getConfigurationSchema(serviceName);
-            sDir.applyMetadata(metaDir);
-            return sDir;
-        }
-        return null;
+        return serviceEntityMgr.getDefaultServiceConfig(serviceName);
     }
 }

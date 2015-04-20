@@ -11,7 +11,9 @@ public class TemplateInstaller extends LatticeComponentInstaller {
     public TemplateInstaller() { super(TemplateComponent.componentName); }
 
     @Override
-    public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
+    public DocumentDirectory installCore(
+            CustomerSpace space, String serviceName, int dataVersion,
+            Map<String, String> properties, DocumentDirectory autoGenDocDir) {
         return null;
     }
 }

@@ -11,7 +11,9 @@ public class GlobalAuthInstaller extends LatticeComponentInstaller {
     public GlobalAuthInstaller() { super(GlobalAuthComponent.componentName); }
 
     @Override
-    public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
+    public DocumentDirectory installCore(
+            CustomerSpace space, String serviceName, int dataVersion,
+            Map<String, String> properties, DocumentDirectory autoGenDocDir) {
         return null;
     }
 }

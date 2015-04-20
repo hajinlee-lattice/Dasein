@@ -22,10 +22,12 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -51,21 +53,12 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     protected static final String ADTesterUsername = Constants.ACTIVE_DIRECTORY_TESTER_USERNAME;
     protected static final String ADTesterPassword = Constants.ACTIVE_DIRECTORY_TESTER_PASSWORD;
-
-    @Autowired
-    private BatonService batonService;
-
-    @Autowired
-    private TenantService tenantService;
     
     @Autowired
     private TestLatticeComponent testLatticeComponent;
     
     @Value("${admin.api.hostport}")
     private String hostPort;
-
-    private Camille camille;
-    private String podId;
 
     private String token;
     
@@ -105,7 +98,6 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        //uploadDefaultConfigs();
         //loginAD();
         createTenant("CONTRACT1", "TENANT1");
         CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
@@ -138,11 +130,9 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         CustomerSpaceInfo info = new CustomerSpaceInfo(props, "");
         System.out.println(JsonUtils.serialize(info));
         log.info(String.format("Creating tenant %s.%s in %s.", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID));
-//        String url = String.format("%s/admin/tenants/%s?contractId=%s",getRestHostPort(), tenantId, contractId);
-//        Boolean created = restTemplate.postForObject(url, info, Boolean.class);
-//        assertTrue(created);
-        // bypass AD temporarily
-        tenantService.createTenant(contractId, tenantId, info);
+        String url = String.format("%s/admin/tenants/%s?contractId=%s",getRestHostPort(), tenantId, contractId);
+        Boolean created = restTemplate.postForObject(url, info, Boolean.class);
+        Assert.assertTrue(created);
     }
     
     public static class MagicAuthenticationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
@@ -178,41 +168,6 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         assertNotNull(token);
         addAuthHeader.setAuthValue(token);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
-    }
-
-    private void uploadDefaultConfigs() throws Exception {
-        uploadDefaultConfig("PLS", "pls_default.json", "pls_metadata.json");
-        uploadDefaultConfig("GA", "ga_default.json", "ga_metadata.json");
-        uploadDefaultConfig("VDB", "vdb_default.json", "vdb_metadata.json");
-    }
-
-    private void uploadDefaultConfig(String componentName, String configFile, String metadataFile) throws Exception {
-        String configStr = IOUtils.toString(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream(configFile),
-                "UTF-8"
-        );
-        String metaStr = null;
-        if (metadataFile != null) {
-            metaStr = IOUtils.toString(
-                    Thread.currentThread().getContextClassLoader().getResourceAsStream(metadataFile),
-                    "UTF-8"
-            );
-        }
-        SerializableDocumentDirectory sDir =  new SerializableDocumentDirectory(configStr, metaStr);
-        DocumentDirectory configDir = SerializableDocumentDirectory.deserialize(sDir);
-        DocumentDirectory metaDir = sDir.getMetadataAsDirectory();
-
-        camille = CamilleEnvironment.getCamille();
-        podId = CamilleEnvironment.getPodId();
-
-        Path defauldConfigPath = PathBuilder.buildServiceDefaultConfigPath(podId, componentName);
-        Path metadataPath = PathBuilder.buildServiceConfigSchemaPath(podId, componentName);
-
-        if (camille.exists(defauldConfigPath)) { camille.delete(defauldConfigPath); }
-        if (camille.exists(metadataPath)) { camille.delete(metadataPath); }
-
-        batonService.loadDirectory(configDir, defauldConfigPath);
-        batonService.loadDirectory(metaDir, metadataPath);
     }
 
 }

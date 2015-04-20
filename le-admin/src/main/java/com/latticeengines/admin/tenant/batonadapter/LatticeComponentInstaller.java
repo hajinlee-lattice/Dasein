@@ -1,12 +1,12 @@
 package com.latticeengines.admin.tenant.batonadapter;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
 
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
@@ -14,9 +14,23 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceI
 public abstract class LatticeComponentInstaller implements CustomerSpaceServiceInstaller {
 
     private String componentName;
+    // dry run flag: when it is up, install only write to camille, skip all other installation steps.
+    private boolean dryrun = false;
 
     protected LatticeComponentInstaller(String componentName) {
         this.componentName = componentName;
+    }
+
+    // the true installation steps other than writing to Camille
+    protected abstract DocumentDirectory installCore(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties, DocumentDirectory autoGenDocDir);
+
+    @Override
+    public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
+        DocumentDirectory dir = this.getDefaultConfiguration(serviceName);
+        if (!this.dryrun) { dir = installCore(space, serviceName, dataVersion, properties, dir); }
+        // remember to turn it into a local directory
+        dir.makePathsLocal();
+        return dir;
     }
 
     @Override
@@ -46,4 +60,6 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
         sDir.applyMetadata(metaDir);
         return sDir;
     }
+
+    public void setDryrun(boolean dryrun) { this.dryrun = dryrun; }
 }
