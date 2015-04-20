@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -74,6 +75,7 @@ public class SerializableDocumentDirectory {
 
         this.rootPath = "/";
         if (nodes != null && !nodes.isEmpty()) this.nodes = nodes;
+        this.documentDirectory = SerializableDocumentDirectory.deserialize(this);
     }
 
     private void constructByDocumentDirectory(DocumentDirectory documentDirectory) {
@@ -84,6 +86,18 @@ public class SerializableDocumentDirectory {
             nodes.add(new Node(node));
         }
         if (!nodes.isEmpty()) this.nodes = nodes;
+    }
+
+    public Map<String, String> flatten() {
+        Map<String, String> result = new HashMap<>();
+        Iterator<DocumentDirectory.Node> iter = this.documentDirectory.breadthFirstIterator();
+        while (iter.hasNext()) {
+            DocumentDirectory.Node node = iter.next();
+            if (node.getDocument() != null && !node.getDocument().getData().equals("")) {
+                result.put(node.getPath().toString(), node.getDocument().getData());
+            }
+        }
+        return result;
     }
 
     public void applyMetadata (DocumentDirectory metadataDirectory) {

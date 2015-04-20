@@ -36,6 +36,9 @@ public class SerializableDocumentDirectoryUnitTestNG {
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(properties);
         String expected = "{\"RootPath\":\"/\",\"Nodes\":[{\"Node\":\"Config1\",\"Data\":\"value1\",\"Version\":-1,\"Children\":[{\"Node\":\"Config1.1\",\"Data\":\"value1.1\",\"Version\":-1},{\"Node\":\"Config1.2\",\"Data\":\"value1.2\",\"Version\":-1}]},{\"Node\":\"Config2\",\"Data\":\"1.23\",\"Version\":-1},{\"Node\":\"Config3\",\"Data\":\"true\",\"Version\":-1}]}";
         Assert.assertEquals(objectMapper.valueToTree(sDir), objectMapper.readTree(expected));
+
+        Map<String, String> flattendSDir = sDir.flatten();
+        Assert.assertEquals(flattendSDir.get("/Config1"), "value1");
     }
 
     @Test(groups = "unit")
