@@ -64,6 +64,6 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public String dropTable(String table) {
-        return "drop table " + table;
+        return "drop table if exists" + table;
     }
 }

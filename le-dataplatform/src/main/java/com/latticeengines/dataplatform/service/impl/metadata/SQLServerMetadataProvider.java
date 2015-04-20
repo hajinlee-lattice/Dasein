@@ -27,8 +27,7 @@ public class SQLServerMetadataProvider extends MetadataProvider {
         try {
             Class.forName(driverClass);
         } catch (ClassNotFoundException e) {
-            throw new LedpException(LedpCode.LEDP_11000, e,
-                    new String[] { driverClass });
+            throw new LedpException(LedpCode.LEDP_11000, e, new String[] { driverClass });
         }
         return replaceUrlWithParamsAndTestConnection(url, creds);
     }
@@ -57,12 +56,12 @@ public class SQLServerMetadataProvider extends MetadataProvider {
     }
 
     @Override
-    public String createNewEmptyTableFromExistingOne(String newTable, String oldTable){
+    public String createNewEmptyTableFromExistingOne(String newTable, String oldTable) {
         return "SELECT * INTO " + newTable + " select * from " + oldTable + " WHERE 1 = 0";
     }
 
     @Override
     public String dropTable(String table) {
-        return "drop table " + table;
+        return "IF OBJECT_ID('" + table + "', 'U') IS NOT NULL DROP TABLE " + table;
     }
 }
