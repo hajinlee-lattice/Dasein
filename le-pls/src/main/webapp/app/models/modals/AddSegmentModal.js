@@ -14,7 +14,7 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
         for (var i=0;i<segments.length;i++) {
             if (lowestPriority == null) {
                 lowestPriority = segments[i].Priority + 1;
-            } else if (segments[i].Priority < lowestPriority) {
+            } else if (segments[i].Priority <= lowestPriority) {
                 lowestPriority = segments[i].Priority + 1;
             }
             
@@ -91,8 +91,6 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
 .controller('AddSegmentController', function ($scope, $rootScope, ResourceUtility, ModelService, AddSegmentService) {
     $scope.ResourceUtility = ResourceUtility;
     $scope.saveInProgress = false;
-    $scope.showAddSegmentSuccess = false;
-    $scope.addSegmentSuccessMessage = "";
     $scope.showAddSegmentError = false;
     $scope.addSegmentErrorMessage = "";
     
@@ -113,8 +111,6 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
     };
 
     $scope.addSegmentClick = function () {
-        $scope.showAddSegmentSuccess = false;
-        $scope.addSegmentSuccessMessage = "";
         $scope.addSegmentErrorMessage = "";
         $scope.showAddSegmentError = false;
         var isValid = AddSegmentService.ValidateSegmentName($scope.newSegment.Name, segments);

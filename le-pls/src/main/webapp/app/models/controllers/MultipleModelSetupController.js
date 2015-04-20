@@ -119,7 +119,7 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
             
             // now we need to figure out if that model was associated to another segment and remove it
             for (var x=0;x<$scope.segments.length;x++) {
-                if ($scope.segments[x].ModelId == model.Id) {
+                if (segment.Name != $scope.segments[x].Name && $scope.segments[x].ModelId == model.Id) {
                     secondSegment = $scope.segments[x];
                     break;
                 }
@@ -128,6 +128,7 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
             if (secondSegment != null) {
                 secondSegment.ModelId = null;
                 secondSegment.ModelName = null;
+                secondSegment.NewModelId = "FAKE_MODEL";
             }
         }
         
@@ -142,33 +143,31 @@ angular.module('mainApp.models.controllers.MultipleModelSetupController', [
     };
     
     $scope.showDecreasePriority = function (segment) {
-        var toReturn = false;
         if (segment == null) {
-            return toReturn;
+            return false;
         }
         
         for (var i=0;i<$scope.segments.length;i++) {
-            if (segment.Name != $scope.segments[i].Name && segment.Priority < $scope.segments[i].Priority) {
-                toReturn = true;
-                break;
+            var toCheck = $scope.segments[i];
+            if (segment.Name != toCheck.Name && segment.Priority < toCheck.Priority) {
+                return true;
             }
         }
-        return toReturn;
+        return false;
     };
     
     $scope.showIncreasePriority = function (segment) {
-        var toReturn = false;
         if (segment == null) {
-            return toReturn;
+            return false;
         }
         
         for (var i=0;i<$scope.segments.length;i++) {
-            if (segment.Name != $scope.segments[i].Name && segment.Priority > $scope.segments[i].Priority) {
-                toReturn = true;
-                break;
+            var toCheck = $scope.segments[i];
+            if (segment.Name != toCheck.Name && segment.Priority > toCheck.Priority) {
+                return true;
             }
         }
-        return toReturn;
+        return false;
     };
     
     $scope.decreasePriorityClicked = function ($event, segment) {

@@ -41,9 +41,19 @@
                                     </p>
                                 </td>
                                 <td data-ng-hide="segments.length === 1">
-                                    <div>
-                                        <a href="#" data-ng-show="showDecreasePriority(segment)" data-ng-click="decreasePriorityClicked($event, segment)">&#8595;</a>
-                                        <a href="#" data-ng-show="showIncreasePriority(segment)" data-ng-click="increasePriorityClicked($event, segment)">&#8593;</a>
+                                    <div class="priority-column">
+                                        <div>
+                                            <a href="#" 
+                                               class="priority-arrow" 
+                                               data-ng-show="showDecreasePriority(segment)" 
+                                               data-ng-click="decreasePriorityClicked($event, segment)">&#8595;</a>
+                                        </div>
+                                        <div>
+                                            <a href="#" 
+                                               class="priority-arrow" 
+                                               data-ng-show="showIncreasePriority(segment)" 
+                                               data-ng-click="increasePriorityClicked($event, segment)">&#8593;</a>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="edit-icons">

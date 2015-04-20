@@ -32,10 +32,6 @@
                         <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{addSegmentErrorMessage}}</span>
                         <button class="close btn btn-link" data-ng-click="showAddSegmentError = false;"><i class="fa fa-times fa-inverse"></i></button>
                     </div>
-                    <div class="alert alert-success" data-ng-show="showAddSegmentSuccess">
-                        <span><i class="fa fa-exclamation-circle"></i> {{addSegmentSuccessMessage}}</span>
-                        <button class="close btn btn-link" data-ng-click="showAddSegmentSuccess = false;"><i class="fa fa-times fa-inverse"></i></button>
-                    </div>
                 </div>
                 <div class="modal-footer" data-ng-hide="saveInProgress">
                     <button class="btn btn-secondary" type="button" data-ng-click="cancelClick()" data-ng-hide="showAddUserSuccess">{{ResourceUtility.getString('BUTTON_CANCEL_LABEL')}}</button>

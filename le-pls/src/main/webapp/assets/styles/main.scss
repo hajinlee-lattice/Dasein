@@ -443,6 +443,18 @@ table.existing-user-info tr td {
   display: block;
 }
 
+.priority-column {
+  padding-left: 15px;
+}
+
+.priority-column div {
+  display: inline-block;
+  width: 10px;
+}
+.priority-arrow {
+  margin-right: 10px;
+}
+
 /*
 Spinner
 */
