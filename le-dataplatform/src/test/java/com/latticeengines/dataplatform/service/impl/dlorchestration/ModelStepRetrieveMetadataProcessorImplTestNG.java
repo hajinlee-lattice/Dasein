@@ -8,6 +8,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -69,10 +71,29 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
         modelCommandEntityMgr.createOrUpdate(command);
         ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
 
-        modelStepRetrieveMetadataProcessor.executeStep(command, commandParameters);
+        modelStepRetrieveMetadataProcessor.executeStepWithResult(command, commandParameters);
 
         assertTrue(HdfsUtils.fileExists(yarnConfiguration,
                 modelStepRetrieveMetadataProcessor.getHdfsPathForMetadataFile(command, commandParameters)));
+    }
+
+    @Test(groups = "functional")
+    public void testMetadataJsonFormat() throws Exception {
+        ModelCommand command = ModelingServiceTestUtils.createModelCommandWithCommandParameters();
+        modelCommandEntityMgr.createOrUpdate(command);
+        ModelCommandParameters commandParameters = new ModelCommandParameters(command.getCommandParameters());
+
+        commandParameters.setDlUrl("http://visidb.lattice-engines.com/DLRestService");
+        commandParameters.setDlQuery("View_Table_Cfg_PLS_Event");
+
+        String metadata = modelStepRetrieveMetadataProcessor.executeStepWithResult(command, commandParameters);
+
+        // Assert metadata is in json format
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(metadata);
+        long status = (long)jsonObject.get("Status");
+
+        assertEquals(status, 3);
     }
 
     @Test(groups = "functional", enabled = true)

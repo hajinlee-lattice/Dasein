@@ -78,6 +78,8 @@ public class HttpWithRetryUtils {
                 request.getHeaders().set(entry.getKey(), entry.getValue());
             }
         }
+        // Since the request data is json, the expected response is also json.
+        request.getHeaders().setAccept("application/json;");
         HttpResponse response = request.execute();
         String value = IOUtils.toString(response.getContent());
 

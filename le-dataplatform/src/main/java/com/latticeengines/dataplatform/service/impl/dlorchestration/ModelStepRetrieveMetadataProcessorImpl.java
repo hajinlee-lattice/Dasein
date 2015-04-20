@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpWithRetryUtils;
@@ -52,6 +53,11 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
 
     @Override
     public void executeStep(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
+        executeStepWithResult(modelCommand, modelCommandParameters);
+    }
+
+    @VisibleForTesting
+    String executeStepWithResult(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
         String customer = modelCommand.getDeploymentExternalId();
         String deletePath = customerBaseDir + "/" + customer + "/data";
         try (FileSystem fs = FileSystem.get(yarnConfiguration)) {
@@ -72,6 +78,7 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
                 modelCommandParameters.getDlTenant(), modelCommandParameters.getDlQuery());
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("MagicAuthentication", "Security through obscurity!");
+
         try {
             metadata = HttpWithRetryUtils.executePostRequest(queryMetadataUrl, request, headers);
         } catch (IOException e) {
@@ -96,6 +103,8 @@ public class ModelStepRetrieveMetadataProcessorImpl implements ModelStepProcesso
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_16009, e, new String[] { hdfsPath, metadata });
         }
+
+        return metadata;
     }
 
     String getHdfsPathForMetadataFile(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {
