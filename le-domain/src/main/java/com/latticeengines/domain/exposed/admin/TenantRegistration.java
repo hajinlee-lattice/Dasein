@@ -11,7 +11,7 @@ public class TenantRegistration {
     private List<SerializableDocumentDirectory> configDirectories;
 
     @JsonProperty("CustomerSpaceInfo")
-    public CustomerSpaceInfo setSpaceInfo() { return spaceInfo; }
+    public CustomerSpaceInfo getSpaceInfo() { return spaceInfo; }
 
     @JsonProperty("CustomerSpaceInfo")
     public void setSpaceInfo(CustomerSpaceInfo spaceInfo) {
