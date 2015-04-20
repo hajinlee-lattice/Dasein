@@ -37,7 +37,9 @@ public class PLSComponent extends LatticeComponent {
     
     @Override
     public boolean doRegistration() {
-        return false;
+        String defaultJson = "pls_default.json";
+        String metadataJson = "pls_metadata.json";
+        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
     }
 
 

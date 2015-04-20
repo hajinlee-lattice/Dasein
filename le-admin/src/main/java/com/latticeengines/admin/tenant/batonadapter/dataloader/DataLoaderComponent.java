@@ -14,7 +14,11 @@ public class DataLoaderComponent extends LatticeComponent {
     public static final String componentName = "DataLoader";
 
     @Override
-    public boolean doRegistration() { return false; }
+    public boolean doRegistration() {
+        String defaultJson = "dl_default.json";
+        String metadataJson = "dl_metadata.json";
+        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+    }
     
     @Override
     public String getName() {

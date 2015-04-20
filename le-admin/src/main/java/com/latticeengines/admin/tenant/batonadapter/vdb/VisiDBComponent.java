@@ -11,10 +11,14 @@ public class VisiDBComponent extends LatticeComponent {
     
     private CustomerSpaceServiceInstaller installer = new VisiDBInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new VisiDBUpgrader();
-    public static final String componentName = "VDB";
+    public static final String componentName = "VisiDB";
 
     @Override
-    public boolean doRegistration() { return true; }
+    public boolean doRegistration() {
+        String defaultJson = "vdb_default.json";
+        String metadataJson = "vdb_metadata.json";
+        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+    }
 
     @Override
     public String getName() { return componentName; }

@@ -41,7 +41,9 @@ public class TemplateComponent extends LatticeComponent {
     
     @Override
     public boolean doRegistration() {
-        return false;
+        String defaultJson = "tpl_default.json";
+        String metadataJson = "tpl_metadata.json";
+        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
     }
 
 

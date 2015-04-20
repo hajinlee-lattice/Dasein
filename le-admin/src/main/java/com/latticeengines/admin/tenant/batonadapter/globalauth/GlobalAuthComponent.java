@@ -14,7 +14,10 @@ public class GlobalAuthComponent extends LatticeComponent {
     public static final String componentName = "GlobalAuth";
 
     @Override
-    public boolean doRegistration() { return false; }
+    public boolean doRegistration() {
+        String defaultJson = "ga_default.json";
+        String metadataJson = "ga_metadata.json";
+        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson); }
 
     @Override
     public String getName() { return componentName; }

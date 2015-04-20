@@ -37,8 +37,9 @@ public class DanteComponent extends LatticeComponent {
     
     @Override
     public boolean doRegistration() {
-        return false;
-    }
+        String defaultJson = "dante_default.json";
+        String metadataJson = "dante_metadata.json";
+        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson); }
 
 
 }

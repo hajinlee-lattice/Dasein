@@ -26,7 +26,6 @@ public class TestLatticeComponent extends LatticeComponent {
     private final CustomerSpaceServiceUpgrader upgrader = new TestLatticeComponentUpgrader();
     public static final String componentName = "TestComponent";
 
-    private final BatonService batonService = new BatonServiceImpl();
     private CustomerSpaceServiceScope scope = null;
 
     public TestLatticeComponent() {
@@ -52,25 +51,7 @@ public class TestLatticeComponent extends LatticeComponent {
     public boolean doRegistration() {
         String defaultJson = "testcomponent_default.json";
         String metadataJson = "testcomponent_metadata.json";
-
-        String podId = CamilleEnvironment.getPodId();
-
-        Path defaultRootPath = PathBuilder.buildServiceDefaultConfigPath(podId, this.getName());
-        // deserialize and upload configuration json
-        DocumentDirectory dir = LatticeComponent.constructConfigDirectory(defaultJson, metadataJson);
-        batonService.loadDirectory(dir, defaultRootPath);
-
-        // deserialize and upload metadata json
-        Path metadataRootPath = PathBuilder.buildServiceConfigSchemaPath(podId, this.getName());
-        dir = LatticeComponent.constructMetadataDirectory(defaultJson, metadataJson);
-        batonService.loadDirectory(dir, metadataRootPath);
-
-        Camille camille = CamilleEnvironment.getCamille();
-        try {
-            return camille.exists(defaultRootPath) && camille.exists(metadataRootPath);
-        } catch (Exception e) {
-            return false;
-        }
+        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
     }
 
     @Override
