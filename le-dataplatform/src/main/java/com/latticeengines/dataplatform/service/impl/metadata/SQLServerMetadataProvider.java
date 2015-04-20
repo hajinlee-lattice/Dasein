@@ -57,7 +57,7 @@ public class SQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public String createNewEmptyTableFromExistingOne(String newTable, String oldTable) {
-        return "SELECT * INTO " + newTable + " select * from " + oldTable + " WHERE 1 = 0";
+        return "SELECT * INTO " + newTable + " SELECT * FROM " + oldTable + " WHERE 1 = 0";
     }
 
     @Override
