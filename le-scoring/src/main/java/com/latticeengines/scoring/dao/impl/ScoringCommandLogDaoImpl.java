@@ -25,11 +25,10 @@ public class ScoringCommandLogDaoImpl extends BaseDaoImpl<ScoringCommandLog> imp
     @Override
     public List<ScoringCommandLog> findByScoringCommand(ScoringCommand scoringCommand) {
         Session session = getSessionFactory().getCurrentSession();
-        List<ScoringCommandLog> logs = session
-                .createCriteria(ScoringCommandLog.class)
-                .add(Restrictions.eq("scoringCommand", scoringCommand))
-                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
-
+        List<ScoringCommandLog> logs = session.createCriteria(ScoringCommandLog.class) //
+                .add(Restrictions.eq("scoringCommand", scoringCommand)) //
+                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY) //
+                .list();
         return logs;
     }
 

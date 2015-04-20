@@ -12,9 +12,9 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.dao.ScoringCommandStateDao;
 
-public class ScoringCommandStateDaoImpl extends BaseDaoImpl<ScoringCommandState> implements ScoringCommandStateDao{
+public class ScoringCommandStateDaoImpl extends BaseDaoImpl<ScoringCommandState> implements ScoringCommandStateDao {
 
-    public ScoringCommandStateDaoImpl(){
+    public ScoringCommandStateDaoImpl() {
         super();
     }
 
@@ -28,10 +28,11 @@ public class ScoringCommandStateDaoImpl extends BaseDaoImpl<ScoringCommandState>
     public List<ScoringCommandState> findByScoringCommandAndStep(ScoringCommand scoringCommand,
             ScoringCommandStep scoringCommandStep) {
         Session session = getSessionFactory().getCurrentSession();
-        List<ScoringCommandState> states = session.createCriteria(ScoringCommandState.class)
-                .add(Restrictions.eq("scoringCommand", scoringCommand))
-                .add(Restrictions.eq("scorinbgCommandStep", scoringCommandStep))
-                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+        List<ScoringCommandState> states = session.createCriteria(ScoringCommandState.class) //
+                .add(Restrictions.eq("scoringCommand", scoringCommand)) //
+                .add(Restrictions.eq("scorinbgCommandStep", scoringCommandStep)) //
+                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY) //
+                .list();
         return states;
     }
 
@@ -39,9 +40,10 @@ public class ScoringCommandStateDaoImpl extends BaseDaoImpl<ScoringCommandState>
     @Override
     public List<ScoringCommandState> findByScoringCommand(ScoringCommand scoringCommand) {
         Session session = getSessionFactory().getCurrentSession();
-        List<ScoringCommandState> states = session.createCriteria(ScoringCommandState.class)
-                .add(Restrictions.eq("scoringCommand", scoringCommand))
-                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+        List<ScoringCommandState> states = session.createCriteria(ScoringCommandState.class) //
+                .add(Restrictions.eq("scoringCommand", scoringCommand)) //
+                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY) //
+                .list();
         return states;
     }
 }

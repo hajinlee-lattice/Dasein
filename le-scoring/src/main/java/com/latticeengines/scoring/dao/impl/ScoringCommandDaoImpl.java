@@ -13,7 +13,7 @@ import com.latticeengines.scoring.dao.ScoringCommandDao;
 
 public class ScoringCommandDaoImpl extends BaseDaoImpl<ScoringCommand> implements ScoringCommandDao {
 
-    public ScoringCommandDaoImpl(){
+    public ScoringCommandDaoImpl() {
         super();
     }
 
@@ -26,10 +26,10 @@ public class ScoringCommandDaoImpl extends BaseDaoImpl<ScoringCommand> implement
     @Override
     public List<ScoringCommand> getPopulated() {
         Session session = getSessionFactory().getCurrentSession();
-        List<ScoringCommand> commands = session
-                .createCriteria(ScoringCommand.class)
-                .add(Restrictions.eq("status", ScoringCommandStatus.POPULATED))
-                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+        List<ScoringCommand> commands = session.createCriteria(ScoringCommand.class) //
+                .add(Restrictions.eq("status", ScoringCommandStatus.POPULATED)) //
+                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY) //
+                .list();
         return commands;
     }
 
@@ -37,10 +37,10 @@ public class ScoringCommandDaoImpl extends BaseDaoImpl<ScoringCommand> implement
     @Override
     public List<ScoringCommand> getConsumed() {
         Session session = getSessionFactory().getCurrentSession();
-        List<ScoringCommand> commands = session
-                .createCriteria(ScoringCommand.class)
-                .add(Restrictions.eq("status", ScoringCommandStatus.CONSUMED))
-                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+        List<ScoringCommand> commands = session.createCriteria(ScoringCommand.class) //
+                .add(Restrictions.eq("status", ScoringCommandStatus.CONSUMED)) //
+                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY) //
+                .list();
         return commands;
     }
 
