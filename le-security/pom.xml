@@ -8,7 +8,7 @@
 
     <properties>
         <component-name>security</component-name>
-        <le.common.version>1.0.31-SNAPSHOT</le.common.version>
+        <le.common.version>1.0.32-SNAPSHOT</le.common.version>
         <le.domain.version>1.0.32-SNAPSHOT</le.domain.version>
         <le.camille.version>1.0.32-SNAPSHOT</le.camille.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
