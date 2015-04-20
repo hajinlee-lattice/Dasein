@@ -90,8 +90,7 @@ public enum LedpCode {
     LEDP_18024("Cannot change deleted model to active directly; change it to inactive first, then delete it."), //
     LEDP_18025("Segment with name {0} not found."), //
     LEDP_18026("Cannot update the name of a segment. Delete and recreate."), //
-    LEDP_18027("Can not provision JAMS."), //
-    LEDP_18028("Can not load file.");
+    LEDP_18027("Can not provision JAMS.");
 
     private String message;
 
