@@ -6,8 +6,12 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.avro.Schema;
+import org.apache.avro.Schema.Field;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.avro.mapreduce.AvroKeyInputFormat;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.FileSystem;
@@ -19,7 +23,9 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.NullOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.json.simple.JSONObject;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFilenameFilter;
@@ -33,10 +39,14 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
     private static final String SCORING_JOB_TYPE = "scoringJob";
 
+    private static final String dataTypeFile = "datatype.json";
+
     private static String comma = ",";
 
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
+    private static final Log log = LogFactory.getLog(EventDataScoringJob.class);
+ 
     public EventDataScoringJob(Configuration config) {
         setConf(config);
     }
@@ -79,6 +89,9 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             Schema schema = AvroUtils.getSchema(config, path);
             AvroJob.setInputKeySchema(mrJob, schema);
 
+            String dataTypeFilePath = inputDir + "/" + dataTypeFile;
+            generateSchema(schema, dataTypeFilePath, config);
+
             String outputDir = properties.getProperty(MapReduceProperty.OUTPUT.name());
             config.set(MapReduceProperty.OUTPUT.name(), outputDir);
             mrJob.setInputFormatClass(AvroKeyInputFormat.class);
@@ -98,6 +111,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
                 }
                 mrJob.setCacheFiles(cacheFiles);
             }
+            mrJob.addCacheFile(new URI(dataTypeFilePath));
 
             if (properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()) != null) {
                 String[] cacheArchivePaths = properties.getProperty(MapReduceProperty.CACHE_ARCHIVE_PATH.name()).split(
@@ -114,6 +128,25 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @VisibleForTesting
+    void generateSchema(Schema schema, String dataTypeFilePath, Configuration config) {
+        List<Field> fields = schema.getFields();
+        JSONObject jsonObj = new JSONObject();
+        for(Field field : fields){
+            String type = field.schema().getTypes().get(0).getName();
+            if (type.equals("string") || type.equals("bytes"))
+                jsonObj.put(field.name(), 1);
+            else
+                jsonObj.put(field.name(), 0);
+        }
+        try {
+            HdfsUtils.writeToFile(config, dataTypeFilePath, jsonObj.toJSONString());
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+        }
+    }
+
     @Override
     public int run(String[] args) throws Exception {
         JobConf jobConf = new JobConf(getConf(), getClass());
@@ -126,12 +159,12 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
         properties.setProperty(MapReduceProperty.OUTPUT.name(), args[2]);
         properties.setProperty(MapReduceProperty.QUEUE.name(), args[3]);
         properties.setProperty(MapReduceProperty.CACHE_FILE_PATH.name(), args[4]);
-
+        
         customize(job, properties);
         if (job.waitForCompletion(true)) {
             return 0;
         }
-        return 0;
+        return 1;
     }
 
     public static void main(String[] args) throws Exception {
