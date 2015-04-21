@@ -77,10 +77,6 @@ app.service('CamilleConfigUtility', function(){
     this.isSelect = function(type) { return type === "options"; };
     this.isObject = function(type) { return type === "object"; };
 
-    this.convertObjectToConfig = function(data) {
-        return data;
-    }
-
 });
 
 app.directive('componentsConfig', function(){
@@ -165,6 +161,10 @@ app.directive('configEntry', function(){
         templateUrl: 'app/tenants/view/ConfigEntryView.html',
         scope: {config: '=', isValid: '=', isOpen: '=', expandable: '=', readonly: '='},
         controller: function($scope, CamilleConfigUtility){
+            if (!$scope.config.hasOwnProperty("Data") && !$scope.config.hasOwnProperty("Children")) {
+                $scope.config.Data = "";
+            }
+
             $scope.type = CamilleConfigUtility.getDataType($scope.config);
 
             $scope.isInput = CamilleConfigUtility.isInput($scope.type) && $scope.config.hasOwnProperty("Data");
