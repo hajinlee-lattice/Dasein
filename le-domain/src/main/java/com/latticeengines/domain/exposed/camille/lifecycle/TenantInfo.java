@@ -1,15 +1,13 @@
 package com.latticeengines.domain.exposed.camille.lifecycle;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class TenantInfo {
     public TenantInfo(TenantProperties properties) {
         this.properties = properties;
     }
 
-    @JsonProperty("Properties")
-    public TenantProperties properties;
+    // constructor for serialization
+    public TenantInfo() {}
 
-    @JsonProperty("ContractId")
+    public TenantProperties properties;
     public String contractId;
 }
