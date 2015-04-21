@@ -1,8 +1,24 @@
 <div ng-controller="TenantConfigCtrl">
-    <div class="well">
-        <p>Tenant ID: {{ tenantId }}</p>
-        <p>Contract ID: {{ contractId }}</p>
-        <p>Product: {{ product }}</p>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Tenant Info</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col col-md-4 col-sm-4 col-xs-6">Tenant ID: {{ tenantId }}</div>
+                <div class="col col-md-4 col-sm-4 col-xs-6">Contract ID: {{ contractId }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">CustomerSpace Info</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col col-md-4 col-sm-4 col-xs-6">Product: {{ spaceInfo.properties.product }}</div>
+            </div>
+        </div>
     </div>
     <div ng-show="loading">
         <div class="loader"> </div>

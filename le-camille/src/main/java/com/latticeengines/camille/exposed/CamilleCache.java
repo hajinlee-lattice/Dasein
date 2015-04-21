@@ -8,8 +8,6 @@ import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-
 public class CamilleCache {
     private NodeCache cache;
 

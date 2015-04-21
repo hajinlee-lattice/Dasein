@@ -8,18 +8,6 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
 
     this.registeredServices = ["GlobalAuth", "VisiDB"];
 
-    function getRandomServiceStatus() {
-        var answers = ['OK', 'FAILED', 'INITIAL'];
-        var randIdx = Math.floor((Math.random() * 3));
-        var result = {
-            "state": answers[randIdx],
-            "desiredVersion": 1,
-            "installedVersion": 1,
-            "errorMessage": null
-        };
-        return result;
-    }
-
     this.CreateTenant = function(tenantId, contractId, tenantRegisration) {
         var defer = $q.defer();
 
@@ -84,19 +72,31 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
             method: 'GET',
             url: '/admin/tenants'
         }).success(function(data){
-            result.resultObj = _.map(data, function(record){
-                return {
-                    TenantId: record.key,
-                    ContractId: record.value.ContractId,
-                    DisplayName: record.value.Properties.displayName,
-                    Product: "LPA 2.0",
-                    Status: TenantUtility.getStatusDisplayName(getRandomServiceStatus().state),
-                    CreatedDate: new Date(),
-                    LastModifiedDate: new Date()
-                };
-            });
+            result.resultObj = _.map(data, TenantUtility.convertTenantRecordToGridData);
             defer.resolve(result);
 
+        }).error(function(err, status){
+            SessionUtility.handleAJAXError(err, status);
+        });
+
+        return defer.promise;
+    };
+
+    this.GetTenantInfo = function(tenantId, contractId) {
+        var defer = $q.defer();
+
+        var result = {
+            success: true,
+            resultObj: [],
+            errMsg: null
+        };
+
+        $http({
+            method: 'GET',
+            url: '/admin/tenants/' + tenantId + '?contractId=' + contractId
+        }).success(function(data){
+            result.resultObj = TenantUtility.parseTenantInfo(data);
+            defer.resolve(result);
         }).error(function(err, status){
             SessionUtility.handleAJAXError(err, status);
         });

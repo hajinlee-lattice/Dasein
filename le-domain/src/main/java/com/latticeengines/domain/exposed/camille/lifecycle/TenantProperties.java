@@ -12,4 +12,6 @@ public class TenantProperties extends BaseProperties {
     public TenantProperties() {
     }
 
+    public Long created;
+    public Long lastModified;
 }

@@ -38,8 +38,11 @@
         <p class="readonly-config-entry">
             <i class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
             <span ng-class="{node: readonly}">{{ config.Node }}</span>
+            <span class="text-muted">[JSON]</span>
         </p>
     </accordion-heading>
-    <pre ng-if="readonly">{{ jsonData | json }}</pre>
+    <p class="readonly-config-entry" ng-if="readonly" ng-repeat="(key, value) in jsonData">
+        <span class="node">{{ key }}</span> : <span>{{ value }}</span>
+    </p>
     <object-entry ng-if="!readonly" key="key" value="value" json="jsonData" is-valid="isValid" updater="objectUpdater()" ng-repeat="(key, value) in jsonData"></object-entry>
 </accordion-group>

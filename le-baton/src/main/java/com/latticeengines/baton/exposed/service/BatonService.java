@@ -7,12 +7,18 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 public interface BatonService {
 
     boolean createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo);
+
+    boolean createTenant(String contractId, String tenantId, String defaultSpaceId,
+                         ContractInfo contractInfo, TenantInfo tenantInfo, CustomerSpaceInfo spaceInfo);
+
+    TenantInfo getTenant(String contractId, String tenantId);
 
     boolean loadDirectory(String source, String destination);
 

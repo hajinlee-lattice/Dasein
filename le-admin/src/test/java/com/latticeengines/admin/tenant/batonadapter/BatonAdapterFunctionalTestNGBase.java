@@ -10,7 +10,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
-import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 
 public abstract class BatonAdapterFunctionalTestNGBase extends AdminFunctionalTestNGBase {

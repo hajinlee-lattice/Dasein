@@ -83,7 +83,7 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
 
     function statusFilter(element) {
         element.kendoDropDownList({
-            dataSource: _.map(["OK", "FAILED", "INITIAL", "INSTALLING"], TenantUtility.getStatusDisplayName),
+            dataSource: _.map(["OK", "ERROR", "INITIAL", "UNKNOWN"], TenantUtility.getStatusDisplayName),
             optionLabel: "--Select Value--"
         });
     }

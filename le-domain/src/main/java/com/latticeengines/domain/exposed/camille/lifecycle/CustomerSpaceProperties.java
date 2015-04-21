@@ -14,5 +14,6 @@ public class CustomerSpaceProperties extends BaseProperties {
 
     public String sfdcOrgId;
     public String sandboxSfdcOrgId;
+    public String product;
 
 }

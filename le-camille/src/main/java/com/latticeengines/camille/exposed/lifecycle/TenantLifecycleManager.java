@@ -133,4 +133,19 @@ public class TenantLifecycleManager {
 
         return toReturn;
     }
+
+    public static TenantInfo getInfo(String contractId, String tenantId) throws Exception {
+        LifecycleUtils.validateIds(contractId);
+        LifecycleUtils.validateIds(tenantId);
+        Camille c = CamilleEnvironment.getCamille();
+
+        Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
+        Document tenantPropertiesDocument = c.get(tenantPath.append(PathConstants.PROPERTIES_FILE));
+        TenantProperties properties = DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
+
+        TenantInfo tenantInfo = new TenantInfo(properties);
+        tenantInfo.contractId = contractId;
+        tenantInfo.contractInfo = ContractLifecycleManager.getInfo(contractId);
+        return tenantInfo;
+    }
 }

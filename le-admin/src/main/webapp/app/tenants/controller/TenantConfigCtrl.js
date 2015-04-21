@@ -19,7 +19,6 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
 
     $scope.tenantId = $stateParams.tenantId;
     $scope.contractId = $stateParams.contractId || $stateParams.tenantId;
-    $scope.space = $stateParams.space || "Production";
     $scope.product = $stateParams.product;
 
     $scope.loading = true;
@@ -33,6 +32,15 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     $scope.isValid = {valid: true};
 
     if ($scope.new) {
+        $scope.spaceInfo = {
+            properties: {
+                displayName: "LPA_" + $scope.tenantId,
+                description: "A LPA solution for " + $scope.tenantId + " in " + $scope.contractId,
+                product: $scope.product
+            },
+            featureFlags: ""
+        };
+
         _.each($scope.services, function(service){
             TenantService.GetServiceDefaultConfig(service).then(
                 function(result){
@@ -45,6 +53,14 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
             );
         });
     } else {
+        TenantService.GetTenantInfo($scope.tenantId, $scope.contractId).then(function(result){
+            if (result.success) {
+                $scope.spaceInfo = result.resultObj.spaceInfoList[0];
+                $scope.contractInfo = result.resultObj.contractInfo;
+                $scope.tenantInfo = result.resultObj;
+            }
+        });
+
         _.each($scope.services, function(service){
             TenantService.GetTenantServiceConfig($scope.tenantId, $scope.contractId, service).then(
                 function(result){
@@ -53,17 +69,6 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                     if ($scope.components.length == $scope.services.length) {
                         $scope.loading = false;
                     }
-                }
-            );
-        });
-    }
-
-    function updateServiceStatus() {
-        _.each($scope.components, function(component){
-            TenantService.GetTenantServiceStatus($scope.tenantId, $scope.contractId, component.Component).then(
-                function(result){
-                    component.State = result.resultObj;
-                    //console.debug("The status of " + component.Component + " is updated to " + component.State.state);
                 }
             );
         });
@@ -81,7 +86,10 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     }
 
     $scope.onSaveClick = function(){
-        $scope.tenantRegisration = TenantUtility.constructTenantRegistration($scope.components, $scope.tenantId, $scope.contractId, $scope.space);
+        var infos = {CustomerSpaceInfo: $scope.spaceInfo};
+
+        $scope.tenantRegisration =
+            TenantUtility.constructTenantRegistration($scope.components, $scope.tenantId, $scope.contractId, infos);
 
         $modal.open({
             template: '<div class="modal-header">' +
@@ -162,6 +170,17 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
             }
         });
     };
+
+    function updateServiceStatus() {
+        _.each($scope.components, function(component){
+            TenantService.GetTenantServiceStatus($scope.tenantId, $scope.contractId, component.Component).then(
+                function(result){
+                    component.State = result.resultObj;
+                    //console.debug("The status of " + component.Component + " is updated to " + component.State.state);
+                }
+            );
+        });
+    }
 });
 
 

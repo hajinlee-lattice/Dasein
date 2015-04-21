@@ -1,6 +1,7 @@
 package com.latticeengines.admin.entitymgr.impl;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -12,11 +13,13 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
@@ -27,15 +30,26 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
     private final BatonService batonService = new BatonServiceImpl();
 
     @Override
-    public Boolean createTenant(String contractId, String tenantId, CustomerSpaceInfo customerSpaceInfo) {
-        return batonService.createTenant(contractId, //
-                tenantId, //
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, //
-                customerSpaceInfo);
+    public Boolean createTenant(String contractId, String tenantId,
+                                ContractInfo contractInfo, TenantInfo tenantInfo, CustomerSpaceInfo customerSpaceInfo) {
+        return batonService.createTenant(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                contractInfo, tenantInfo, customerSpaceInfo);
     }
 
     public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId) {
-        return batonService.getTenants(contractId);
+        List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantInfoList = batonService.getTenants(contractId);
+        for (AbstractMap.SimpleEntry<String, TenantInfo> entry : tenantInfoList) {
+            try {
+                CustomerSpaceInfo spaceInfo =
+                        SpaceLifecycleManager.getInfo(
+                                entry.getValue().contractId, entry.getKey(), CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+                entry.getValue().spaceInfoList = new ArrayList<>();
+                entry.getValue().spaceInfoList.add(spaceInfo);
+            } catch (Exception e) {
+                log.error("Could not get the info of the default space for tenant " + entry.getKey());
+            }
+        }
+        return tenantInfoList;
     }
 
     @Override
@@ -43,6 +57,11 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
         boolean success = batonService.deleteTenant(contractId, tenantId);
         log.info(String.format("Deleting tenant %s with contract %s, success = %s", tenantId, contractId, String.valueOf(success)));
         return success;
+    }
+
+    @Override
+    public TenantInfo getTenant(String contractId, String tenantId) {
+        return batonService.getTenant(contractId, tenantId);
     }
 
     @Override

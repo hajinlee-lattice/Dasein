@@ -3,23 +3,23 @@ package com.latticeengines.admin.service.impl;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.admin.entitymgr.ServiceEntityMgr;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
+import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 @Component("tenantService")
@@ -31,15 +31,18 @@ public class TenantServiceImpl implements TenantService {
     private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
-    private ServiceEntityMgr serviceEntityMgr;
+    private ServiceService serviceService;
 
     public TenantServiceImpl() {
     }
 
     @Override
     public Boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration) {
+        ContractInfo contractInfo = tenantRegistration.getContractInfo();
+        TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
         CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
-        boolean tenantCreationSuccess = tenantEntityMgr.createTenant(contractId, tenantId, spaceInfo);
+
+        boolean tenantCreationSuccess = tenantEntityMgr.createTenant(contractId, tenantId, contractInfo, tenantInfo, spaceInfo);
         if (!tenantCreationSuccess) {
             tenantEntityMgr.deleteTenant(contractId, tenantId);
             return false;
@@ -62,7 +65,16 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public List<SimpleEntry<String, TenantInfo>> getTenants(String contractId) {
-        return tenantEntityMgr.getTenants(contractId);
+        List<SimpleEntry<String, TenantInfo>> tenants = tenantEntityMgr.getTenants(contractId);
+        if (tenants != null) {
+            for (SimpleEntry<String, TenantInfo> entry :  tenants) {
+                String cId = entry.getValue().contractId;
+                String tId = entry.getKey();
+                entry.getValue().bootstrapState = getTenantOverallState(cId, tId);
+            }
+            return tenants;
+        }
+        return null;
     }
 
     @Override
@@ -71,8 +83,24 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    public TenantInfo getTenant(String contractId, String tenantId) {
+        return tenantEntityMgr.getTenant(contractId, tenantId);
+    }
+
+    @Override
     public BootstrapState getTenantServiceState(String contractId, String tenantId, String serviceName) {
         return tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
+    }
+
+    @Override
+    public BootstrapState getTenantOverallState(String contractId, String tenantId) {
+        Set<String> components = serviceService.getRegisteredServiceKeySet();
+        BootstrapState state =  BootstrapState.createInitialState();
+        for (String serviceName : components) {
+            BootstrapState newState = tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);
+            state = mergeBootstrapStates(state, newState, serviceName);
+        }
+        return state;
     }
 
     @Override
@@ -84,8 +112,19 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName) {
         SerializableDocumentDirectory rawDir = tenantEntityMgr.getTenantServiceConfig(contractId, tenantId, serviceName);
-        DocumentDirectory metaDir = serviceEntityMgr.getConfigurationSchema(serviceName);
+        DocumentDirectory metaDir = serviceService.getConfigurationSchema(serviceName);
         rawDir.applyMetadata(metaDir);
         return rawDir;
+    }
+
+    private static BootstrapState mergeBootstrapStates(BootstrapState state1, BootstrapState state2, String serviceName) {
+        if (state1.state.equals(BootstrapState.State.ERROR) || state2.state.equals(BootstrapState.State.ERROR))
+            return BootstrapState.constructErrorState(
+                    0, 0, "At least one of the components encountered an error : " + serviceName);
+
+        if (state1.state.equals(BootstrapState.State.INITIAL) || state2.state.equals(BootstrapState.State.INITIAL))
+            return BootstrapState.createInitialState();
+
+        return BootstrapState.constructOKState(state2.installedVersion);
     }
 }

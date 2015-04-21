@@ -1,12 +1,12 @@
 package com.latticeengines.camille.exposed.translators;
 
 import com.latticeengines.domain.exposed.camille.scopes.ConfigurationScope;
-import com.latticeengines.domain.exposed.camille.scopes.PodScope;
 import com.latticeengines.domain.exposed.camille.scopes.ContractScope;
-import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
-import com.latticeengines.domain.exposed.camille.scopes.TenantScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
+import com.latticeengines.domain.exposed.camille.scopes.PodScope;
+import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
+import com.latticeengines.domain.exposed.camille.scopes.TenantScope;
 
 public class PathTranslatorFactory {
     public static PathTranslator getTranslator(ConfigurationScope scope) {

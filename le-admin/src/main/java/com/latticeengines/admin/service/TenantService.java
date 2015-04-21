@@ -7,7 +7,6 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 public interface TenantService {
@@ -18,8 +17,12 @@ public interface TenantService {
     
     Boolean deleteTenant(String contractId, String tenantId);
 
+    TenantInfo getTenant(String contractId, String tenantId);
+
     BootstrapState getTenantServiceState(String contractId, String tenantId, String serviceName);
-    
+
+    BootstrapState getTenantOverallState(String contractId, String tenantId);
+
     Boolean bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties);
     
     SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName);

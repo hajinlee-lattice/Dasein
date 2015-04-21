@@ -16,11 +16,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.service.TenantService;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -67,6 +65,13 @@ public class TenantResource {
     @ApiOperation(value = "Delete tenant for a particular contract id")
     public Boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
         return tenantService.deleteTenant(contractId, tenantId);
+    }
+
+    @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete tenant for a particular contract id")
+    public TenantInfo getTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
+        return tenantService.getTenant(contractId, tenantId);
     }
 
     @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.GET, headers = "Accept=application/json")

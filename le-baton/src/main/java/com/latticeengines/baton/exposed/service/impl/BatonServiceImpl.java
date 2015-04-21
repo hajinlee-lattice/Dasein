@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.zookeeper.ZooDefs;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -36,20 +38,30 @@ public class BatonServiceImpl implements BatonService {
 
     @Override
     public boolean createTenant(String contractId, String tenantId, String defaultSpaceId, CustomerSpaceInfo spaceInfo) {
+        ContractInfo contractInfo = new ContractInfo(new ContractProperties());
+        TenantInfo tenantInfo = new TenantInfo(
+                new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
+        return createTenant(contractId, tenantId, defaultSpaceId, contractInfo, tenantInfo, spaceInfo);
+    }
+
+    @Override
+    public boolean createTenant(String contractId, String tenantId, String defaultSpaceId,
+                                ContractInfo contractInfo, TenantInfo tenantInfo, CustomerSpaceInfo spaceInfo) {
         try {
             if (!ContractLifecycleManager.exists(contractId)) {
                 log.info(String.format("Creating contract %s", contractId));
                 // XXX For now
-                ContractLifecycleManager.create(contractId, new ContractInfo(new ContractProperties()));
+                ContractLifecycleManager.create(contractId, contractInfo);
             }
             // XXX For now
             if (TenantLifecycleManager.exists(contractId, tenantId)) {
                 TenantLifecycleManager.delete(contractId, tenantId);
             }
-            TenantLifecycleManager.create(contractId, tenantId, //
-                    new TenantInfo(new TenantProperties(spaceInfo.properties.displayName,
-                            spaceInfo.properties.description)), //
-                    defaultSpaceId, spaceInfo);
+            // Timestamp
+            tenantInfo.properties.created = new DateTime().getMillis();
+            tenantInfo.properties.lastModified = new DateTime().getMillis();
+
+            TenantLifecycleManager.create(contractId, tenantId, tenantInfo, defaultSpaceId, spaceInfo);
         } catch (Exception e) {
             log.error("Error creating tenant", e);
             return false;
@@ -153,6 +165,26 @@ public class BatonServiceImpl implements BatonService {
             log.error("Error retrieving tenants", e);
             return false;
         }
+    }
+
+    @Override
+    public TenantInfo getTenant(String contractId, String tenantId) {
+        TenantInfo tenantInfo = null;
+        try {
+            tenantInfo = TenantLifecycleManager.getInfo(contractId, tenantId);
+            try {
+                CustomerSpaceInfo spaceInfo =
+                        SpaceLifecycleManager.getInfo(contractId, tenantId,
+                                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+                tenantInfo.spaceInfoList = new ArrayList<>();
+                tenantInfo.spaceInfoList.add(spaceInfo);
+            } catch (Exception e) {
+                log.error("Could not get the info of the default space for tenant " + tenantId);
+            }
+        } catch (Exception e) {
+            log.error("Error retrieving tenant " + tenantId + " in " + contractId, e);
+        }
+        return tenantInfo;
     }
 
     @Override
