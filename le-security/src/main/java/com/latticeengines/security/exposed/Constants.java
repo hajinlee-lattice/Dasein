@@ -9,6 +9,6 @@ public class Constants {
     public static final String DEPRECATED_ADMIN_EMAIL = "build@lattice-engines.com";
     public static final String GLOBAL_ADMIN_TENANT_ID = "GLOBAL_ADMIN_TENANT";
     public static final String GLOBAL_ADMIN_TENANT_NAME = "Global Admin Tenant";
-    public static final String ACTIVE_DIRECTORY_TESTER_USERNAME = "TBD";
-    public static final String ACTIVE_DIRECTORY_TESTER_PASSWORD = "TBD";
+    public static final String ACTIVE_DIRECTORY_TESTER_USERNAME = "ysong";
+    public static final String ACTIVE_DIRECTORY_TESTER_PASSWORD = "Syt19871220";
 }
