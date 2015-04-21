@@ -89,4 +89,9 @@ app.controller('EditUserController', function ($scope, $rootScope, _, ResourceUt
         $("#modalContainer").modal('hide');
     };
 
+    $scope.refreshClick = function(){
+        $("#modalContainer").modal('hide');
+        $rootScope.$broadcast(NavUtility.USER_MANAGEMENT_NAV_EVENT);
+    };
+    
 });
