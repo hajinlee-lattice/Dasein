@@ -11,8 +11,5 @@ public class TestLatticeComponentInstaller extends LatticeComponentInstaller {
     public TestLatticeComponentInstaller() { super(TestLatticeComponent.componentName); }
 
     @Override
-    public void installCore(
-            CustomerSpace space, String serviceName, int dataVersion,
-            CustomerSpaceProperties spaceProps, DocumentDirectory autoGenDocDir) {
-    }
+    public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory autoGenDocDir) {}
 }
