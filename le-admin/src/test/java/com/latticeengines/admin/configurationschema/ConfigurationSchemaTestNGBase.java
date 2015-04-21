@@ -8,7 +8,10 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
@@ -69,8 +72,6 @@ public class ConfigurationSchemaTestNGBase {
         serializableDir.applyMetadata(metaDir);
 
         assertSerializableDirAndJsonAreEqual(serializableDir, this.expectedJson);
-
-        batonService.discardService(this.component.getName());
     }
 
     protected void setupPaths() {
@@ -89,6 +90,7 @@ public class ConfigurationSchemaTestNGBase {
         batonService.loadDirectory(dir, metadataRootPath);
     }
 
+    @Test(enabled = false)
     public static void assertSerializableDirAndJsonAreEqual(SerializableDocumentDirectory sDir, String jsonFile) {
         try {
             String jsonStr = IOUtils.toString(
@@ -96,9 +98,33 @@ public class ConfigurationSchemaTestNGBase {
                     "UTF-8"
             );
             ObjectMapper objectMapper = new ObjectMapper();
-            Assert.assertEquals(objectMapper.valueToTree(sDir), objectMapper.readTree(jsonStr));
+            ObjectNode oNode = objectMapper.valueToTree(sDir);
+            Assert.assertEquals(removeDataVersion(oNode), objectMapper.readTree(jsonStr));
         } catch (IOException e) {
             throw new AssertionError("Could not deserialize the input json to a directory.", e);
         }
+    }
+
+
+    private static JsonNode removeDataVersion(ObjectNode oNode){
+        ObjectMapper mapper = new ObjectMapper();
+        if (oNode.has("Version")) oNode.remove("Version");
+        if (oNode.has("Children")) {
+            ArrayNode newChildren = new ArrayNode(mapper.getNodeFactory());
+            for (JsonNode child : oNode.get("Children")) {
+                ObjectNode childNode = mapper.valueToTree(child);
+                newChildren.add(removeDataVersion(childNode));
+            }
+            oNode.put("Children", newChildren);
+        }
+        if (oNode.has("Nodes")) {
+            ArrayNode newChildren = new ArrayNode(mapper.getNodeFactory());
+            for (JsonNode child : oNode.get("Nodes")) {
+                ObjectNode childNode = mapper.valueToTree(child);
+                newChildren.add(removeDataVersion(childNode));
+            }
+            oNode.put("Nodes", newChildren);
+        }
+        return oNode;
     }
 }
