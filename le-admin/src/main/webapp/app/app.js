@@ -62,7 +62,7 @@ app.config(function($stateProvider, $urlRouterProvider, $httpProvider, localStor
             templateUrl: "app/tenants/view/TenantListView.html"
         })
         .state('TENANT.CONFIG', {
-            url: "/{tenantId}?readonly&listenState&product&contractId",
+            url: "/{tenantId}?new&readonly&listenState&product&contractId",
             templateUrl: "app/tenants/view/TenantConfigView.html"
         })
         .state('NOWHERE', {

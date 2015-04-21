@@ -1,5 +1,6 @@
 var app = angular.module("app.tenants.directive.CamilleConfigDirective", [
     'app.tenants.service.TenantService',
+    "app.tenants.util.TenantUtility",
     'ui.bootstrap',
     'ui.router',
     'ngSanitize'

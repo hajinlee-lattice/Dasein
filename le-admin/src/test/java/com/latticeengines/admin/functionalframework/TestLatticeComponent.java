@@ -7,10 +7,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.camille.exposed.config.bootstrap.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
 @Component
@@ -23,10 +21,8 @@ public class TestLatticeComponent extends LatticeComponent {
     private CustomerSpaceServiceScope scope = null;
 
     public TestLatticeComponent() {
-        CustomerSpaceProperties spaceProp = new CustomerSpaceProperties("LPA", "Lead Prioritization", "12345", "56789");
-        DocumentDirectory configDir = constructConfigDirectory("testcomponent_default.json", "testcomponent_metadata.json");
         //song: override properties are stored at the /Spaces/{spaceId} node.
-        Map<String, String> overrideProps = AdminFunctionalTestNGBase.flattenPropConfig(spaceProp, configDir);
+        Map<String, String> overrideProps = this.installer.getSerializableDefaultConfig().flatten();
         scope = new CustomerSpaceServiceScope("CONTRACT1", //
                 "TENANT1", //
                 CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, //

@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
@@ -36,8 +38,8 @@ public class TenantResource {
     @ApiOperation(value = "Create a Lattice tenant")
     public Boolean createTenant(@PathVariable String tenantId, //
             @RequestParam(value = "contractId") String contractId, //
-            @RequestBody CustomerSpaceInfo info) {
-        return tenantService.createTenant(contractId, tenantId, info);
+            @RequestBody TenantRegistration registration) {
+        return tenantService.createTenant(contractId, tenantId, registration);
     }
 
     @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.PUT, headers = "Accept=application/json")

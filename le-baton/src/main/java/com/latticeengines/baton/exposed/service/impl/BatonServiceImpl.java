@@ -43,6 +43,9 @@ public class BatonServiceImpl implements BatonService {
                 ContractLifecycleManager.create(contractId, new ContractInfo(new ContractProperties()));
             }
             // XXX For now
+            if (TenantLifecycleManager.exists(contractId, tenantId)) {
+                TenantLifecycleManager.delete(contractId, tenantId);
+            }
             TenantLifecycleManager.create(contractId, tenantId, //
                     new TenantInfo(new TenantProperties(spaceInfo.properties.displayName,
                             spaceInfo.properties.description)), //
@@ -104,6 +107,7 @@ public class BatonServiceImpl implements BatonService {
             Map<String, String> properties) {
         CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
         try {
+            log.info("Bootstrapping service " + serviceName + " in space " + space);
             ServiceWarden.commandBootstrap(serviceName, space, properties);
         } catch (Exception e) {
             log.error("Error commanding bootstrap for service " + serviceName + " and space " + space);

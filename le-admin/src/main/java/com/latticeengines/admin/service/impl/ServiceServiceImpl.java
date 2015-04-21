@@ -17,6 +17,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 
@@ -75,5 +76,10 @@ public class ServiceServiceImpl implements ServiceService {
     @Override
     public SerializableDocumentDirectory getDefaultServiceConfig(String serviceName) {
         return serviceEntityMgr.getDefaultServiceConfig(serviceName);
+    }
+
+    @Override
+    public DocumentDirectory getConfigurationSchema(String serviceName) {
+        return serviceEntityMgr.getConfigurationSchema(serviceName);
     }
 }

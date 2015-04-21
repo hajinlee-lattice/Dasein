@@ -37,6 +37,7 @@ import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -132,8 +133,12 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         CustomerSpaceInfo info = new CustomerSpaceInfo(props, "");
         System.out.println(JsonUtils.serialize(info));
         log.info(String.format("Creating tenant %s.%s in %s.", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID));
+
+        TenantRegistration reg = new TenantRegistration();
+        reg.setSpaceInfo(info);
+
         String url = String.format("%s/admin/tenants/%s?contractId=%s",getRestHostPort(), tenantId, contractId);
-        Boolean created = restTemplate.postForObject(url, info, Boolean.class);
+        Boolean created = restTemplate.postForObject(url, reg, Boolean.class);
         Assert.assertTrue(created);
     }
     

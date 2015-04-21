@@ -5,13 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 public interface TenantService {
     
-    Boolean createTenant(String contractId, String tenantId, CustomerSpaceInfo customerSpaceInfo);
+    Boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration);
 
     List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId);
     

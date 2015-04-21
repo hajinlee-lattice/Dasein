@@ -89,29 +89,33 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
     }
 
     $scope.handleKendoChange = function(data) {
-        $state.go('TENANT.CONFIG', {tenantId: data.TenantId});
+        $state.go('TENANT.CONFIG', {tenantId: data.TenantId, contractId: data.ContractId});
     };
 
     $scope.onAddClick = function(){
-        $scope.cleanData = TenantUtility.cleanupComponentConfigs($scope.data);
-
         var modalInstance = $modal.open({
             templateUrl: 'addNewTenantModal.html',
             resolve: {
-                TenantUtility: function () {
-                    return TenantUtility;
-                }
+                TenantUtility: function () { return TenantUtility; },
+                tenants: function () { return $scope.tenants; }
             },
-            controller: function($scope, $modalInstance, TenantUtility){
+            controller: function($scope, $modalInstance, _, tenants, TenantUtility){
+                $scope.tenants = tenants;
+
                 $scope.productOptions = ["LPA 2.0"];
-
                 $scope.tenantInfo = { product: "LPA 2.0" };
-
                 $scope.isValid = true;
 
                 $scope.validateTenantInfo = function(){
                     if ($scope.addtenantform.tenantId.$error.required || $scope.tenantInfo.tenantId === '') {
                         $scope.tenantIdErrorMsg = "Tenant ID is required.";
+                        $scope.showTenantIdError = true;
+                        $scope.isValid = false;
+                        return false;
+                    }
+
+                    if (_.findWhere($scope.tenants, {TenantId: $scope.tenantInfo.tenantId})) {
+                        $scope.tenantIdErrorMsg = "Tenant ID already exists.";
                         $scope.showTenantIdError = true;
                         $scope.isValid = false;
                         return false;
@@ -149,6 +153,7 @@ app.controller('TenantListCtrl', function($scope, $state, _, $modal, TenantServi
         modalInstance.result.then(function (tenantInfo) {
             $scope.tenantInfo = tenantInfo;
             $state.go('TENANT.CONFIG', {
+                new: true,
                 tenantId: tenantInfo.tenantId,
                 readonly: false,
                 listenState: false,

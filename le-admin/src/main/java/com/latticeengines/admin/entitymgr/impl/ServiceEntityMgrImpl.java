@@ -27,4 +27,9 @@ public class ServiceEntityMgrImpl implements ServiceEntityMgr {
         }
         return null;
     }
+
+    @Override
+    public DocumentDirectory getConfigurationSchema(String serviceName) {
+        return batonService.getConfigurationSchema(serviceName);
+    }
 }

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
@@ -33,7 +34,7 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         // Deserialization of List<AbstractMap.Entry> is strange from the testing perspective
         // In practice, only JS will be accessing this REST endpoint, so will let JS figure out how to best
         // handle this deserialization
-        assertEquals(tenants.size(), 1);
+        Assert.assertTrue(tenants.size() >= 1);
         Map<String, Object> map = tenants.get(0);
         assertEquals((String) map.get("key"), "TENANT1");
     }

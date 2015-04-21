@@ -94,6 +94,8 @@ public class SerializableDocumentDirectory {
         if (this.documentDirectory == null)
             this.documentDirectory = SerializableDocumentDirectory.deserialize(this);
 
+        this.documentDirectory.makePathsLocal();
+
         Iterator<DocumentDirectory.Node> iter = this.documentDirectory.breadthFirstIterator();
         while (iter.hasNext()) {
             DocumentDirectory.Node node = iter.next();

@@ -33,7 +33,7 @@
     </div>
 </form>
 
-<accordion-group ng-if="isObject" ng-init="isOpen = true" is-open="isOpen">
+<accordion-group ng-if="isObject" ng-init="isOpen = !readonly" is-open="isOpen">
     <accordion-heading class="accordion-heading" is-open="isOpen">
         <p class="readonly-config-entry">
             <i class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
@@ -41,5 +41,5 @@
         </p>
     </accordion-heading>
     <pre ng-if="readonly">{{ jsonData | json }}</pre>
-    <object-entry key="key" value="value" json="jsonData" is-valid="isValid" updater="objectUpdater()" ng-repeat="(key, value) in jsonData"></object-entry>
+    <object-entry ng-if="!readonly" key="key" value="value" json="jsonData" is-valid="isValid" updater="objectUpdater()" ng-repeat="(key, value) in jsonData"></object-entry>
 </accordion-group>
