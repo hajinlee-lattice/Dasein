@@ -1,7 +1,5 @@
 package com.latticeengines.admin.entitymgr.impl;
 
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
@@ -33,10 +31,5 @@ public class ServiceEntityMgrImpl implements ServiceEntityMgr {
     @Override
     public DocumentDirectory getConfigurationSchema(String serviceName) {
         return batonService.getConfigurationSchema(serviceName);
-    }
-
-    @Override
-    public Set<String> getRegisteredServices() {
-        return batonService.getRegisteredServices();
     }
 }

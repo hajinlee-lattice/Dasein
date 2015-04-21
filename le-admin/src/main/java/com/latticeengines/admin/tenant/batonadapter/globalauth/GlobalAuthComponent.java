@@ -14,9 +14,6 @@ public class GlobalAuthComponent extends LatticeComponent {
     private CustomerSpaceServiceUpgrader upgrader = new GlobalAuthUpgrader();
     public static final String componentName = "GlobalAuth";
 
-    // register bootstrapper upon instantiation
-    public GlobalAuthComponent() { register(); }
-
     @Override
     public boolean doRegistration() {
         String defaultJson = "ga_default.json";

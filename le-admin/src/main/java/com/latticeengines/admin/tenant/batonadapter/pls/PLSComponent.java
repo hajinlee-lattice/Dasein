@@ -9,11 +9,9 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceU
 @Component
 public class PLSComponent extends LatticeComponent {
     public static final String componentName = "PLS";
-    
+
     @Override
-    public String getName() {
-        return componentName;
-    }
+    public String getName() { return componentName; }
 
     @Override
     public void setName(String name) {
@@ -39,7 +37,8 @@ public class PLSComponent extends LatticeComponent {
     public boolean doRegistration() {
         String defaultJson = "pls_default.json";
         String metadataJson = "pls_metadata.json";
-        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+        uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+        return false;
     }
 
 

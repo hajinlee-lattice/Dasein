@@ -29,10 +29,6 @@ public class BardJamsConfigTestNG extends ConfigurationSchemaTestNGBase {
     @Test(groups = "functional")
     public void testDefaultConfigurationFuncational() { runFunctionalMainFlow(); }
 
-    // @Test(groups = "functional")
-    // public void testDefaultConfigurationFuncational() {
-    // runFunctionalMainFlow(); }
-
     /*
      * ==========================================================================
      * ====== Test how you want to use the configuration

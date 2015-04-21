@@ -22,9 +22,6 @@ public class BardJamsComponent extends LatticeComponent {
     private CustomerSpaceServiceUpgrader upgrader = new BardJamsUpgrader();
     public static final String componentName = "BardJams";
 
-    // register bootstrapper upon instantiation
-    public BardJamsComponent() { register(); }
-
     @Override
     public boolean doRegistration() {
         String defaultJson = "bardjams_default.json";
@@ -45,8 +42,8 @@ public class BardJamsComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
 
-        ((BardJamsInstaller) installer).setBardJamsEntityMgr(bardJamsEntityMgr);
-        ((BardJamsInstaller) installer).setTimeout(timeout);
+//        ((BardJamsInstaller) installer).setBardJamsEntityMgr(bardJamsEntityMgr);
+//        ((BardJamsInstaller) installer).setTimeout(timeout);
         return installer;
     }
 
