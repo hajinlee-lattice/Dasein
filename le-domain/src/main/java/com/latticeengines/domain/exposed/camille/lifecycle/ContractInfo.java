@@ -5,5 +5,7 @@ public class ContractInfo {
         this.properties = properties;
     }
 
+    public ContractInfo() {}
+
     public ContractProperties properties;
 }
