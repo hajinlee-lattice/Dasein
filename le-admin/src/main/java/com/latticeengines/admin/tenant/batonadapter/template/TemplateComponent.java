@@ -14,6 +14,9 @@ public class TemplateComponent extends LatticeComponent {
     private CustomerSpaceServiceUpgrader upgrader = new TemplateUpgrader();
     public static final String componentName = "Template";
 
+    // register bootstrapper upon instantiation
+    public TemplateComponent() { register(); }
+
     @Override
     public String getName() {
         return componentName;

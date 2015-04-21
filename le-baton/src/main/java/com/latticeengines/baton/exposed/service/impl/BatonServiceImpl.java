@@ -6,6 +6,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.zookeeper.ZooDefs;
 import org.joda.time.DateTime;
@@ -16,6 +17,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.CustomerSpaceServiceBootstrapManager;
+import com.latticeengines.camille.exposed.config.bootstrap.ServiceBootstrapManager;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
@@ -203,6 +205,16 @@ public class BatonServiceImpl implements BatonService {
         } catch (Exception e) {
             log.error("Error discarding service " + serviceName, e);
             return false;
+        }
+    }
+
+    @Override
+    public Set<String> getRegisteredServices() {
+        try {
+            return ServiceBootstrapManager.getRegisteredBootstrappers();
+        } catch (Exception e) {
+            log.error("Error getting all registered services.", e);
+            return null;
         }
     }
 

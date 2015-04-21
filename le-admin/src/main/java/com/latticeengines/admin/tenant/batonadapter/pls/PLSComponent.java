@@ -3,7 +3,7 @@ package com.latticeengines.admin.tenant.batonadapter.pls;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.camille.exposed.config.bootstrap.LatticeComponentInstaller;
+import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
 @Component
@@ -21,7 +21,7 @@ public class PLSComponent extends LatticeComponent {
     }
 
     @Override
-    public LatticeComponentInstaller getInstaller() {
+    public CustomerSpaceServiceInstaller getInstaller() {
         return null;
     }
 

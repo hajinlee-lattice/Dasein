@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 public interface ServiceService {
 
-    Set<String> getRegisteredServiceKeySet();
+    Set<String> getRegisteredServices();
     
     SerializableDocumentDirectory getDefaultServiceConfig(String serviceName);
 

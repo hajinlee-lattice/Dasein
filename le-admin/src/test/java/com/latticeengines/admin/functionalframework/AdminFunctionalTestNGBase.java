@@ -48,14 +48,17 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     private static final Log log = LogFactory.getLog(AdminFunctionalTestNGBase.class);
 
-    protected static final String ADTesterUsername = Constants.ACTIVE_DIRECTORY_TESTER_USERNAME;
-    protected static final String ADTesterPassword = Constants.ACTIVE_DIRECTORY_TESTER_PASSWORD;
-    
-    @Autowired
-    private TestLatticeComponent testLatticeComponent;
-    
+    @Value("${admin.adtester.username}")
+    protected String ADTesterUsername;
+
+    @Value("${admin.adtester.password}")
+    protected String ADTesterPassword;
+
     @Value("${admin.api.hostport}")
     private String hostPort;
+
+    @Autowired
+    private TestLatticeComponent testLatticeComponent;
 
     private String token;
     
@@ -96,6 +99,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         loginAD();
+        testLatticeComponent.register();
         createTenant("CONTRACT1", "TENANT1");
         CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
         ServiceWarden.commandBootstrap(scope.getServiceName(), scope.getCustomerSpace(), scope.getProperties());

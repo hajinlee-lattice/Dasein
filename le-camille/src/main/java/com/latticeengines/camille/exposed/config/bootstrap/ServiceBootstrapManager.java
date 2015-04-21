@@ -4,6 +4,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -57,6 +58,10 @@ public class ServiceBootstrapManager {
             throw new Exception(String.format("Error encountered retrieving bootstrap state for service %s",
                     serviceName), e);
         }
+    }
+
+    public static Set<String> getRegisteredBootstrappers() {
+        return bootstrappers.keySet();
     }
 
     public static List<AbstractMap.SimpleEntry<String, BootstrapState>> getBootstrapStates() throws Exception {

@@ -14,6 +14,9 @@ public class DataLoaderComponent extends LatticeComponent {
     private CustomerSpaceServiceUpgrader upgrader = new DataLoaderUpgrader();
     public static final String componentName = "DataLoader";
 
+    // register bootstrapper upon instantiation
+    public DataLoaderComponent() { register(); }
+
     @Override
     public boolean doRegistration() {
         String defaultJson = "dl_default.json";

@@ -50,7 +50,7 @@ public abstract class BatonAdapterFunctionalTestNGBase extends AdminFunctionalTe
     private LatticeComponent getLatticeComponent() throws Exception {
         Class<? extends LatticeComponent> componentClass = getLatticeComponentClassToTest();
         LatticeComponent comp = componentClass.newInstance();
-        Map<String, LatticeComponent> componentMap = LatticeComponent.getRegisteredServices();
+        Map<String, LatticeComponent> componentMap = LatticeComponent.getRegisteredServiceComponents();
 
         return componentMap.get(comp.getName());
     }

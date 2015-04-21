@@ -14,12 +14,15 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
+import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
 public abstract class LatticeComponent implements HasName {
@@ -29,7 +32,28 @@ public abstract class LatticeComponent implements HasName {
 
     public abstract boolean doRegistration();
 
-    public static Map<String, LatticeComponent> getRegisteredServices() {
+    public abstract CustomerSpaceServiceInstaller getInstaller();
+
+    public abstract CustomerSpaceServiceUpgrader getUpgrader();
+
+    public abstract String getVersionString();
+
+    public boolean register() {
+        if (doRegistration()) {
+            ServiceProperties serviceProps = new ServiceProperties();
+            serviceProps.dataVersion = 1;
+            serviceProps.versionString = getVersionString();
+            ServiceInfo serviceInfo = new ServiceInfo(serviceProps, //
+                    getInstaller(), //
+                    getUpgrader(), //
+                    null);
+            ServiceWarden.registerService(getName(), serviceInfo);
+            return true;
+        }
+        return false;
+    }
+
+    public static Map<String, LatticeComponent> getRegisteredServiceComponents() {
         return scanLatticeComponents();
     }
 
@@ -50,12 +74,6 @@ public abstract class LatticeComponent implements HasName {
 
         return componentMap;
     }
-
-    public abstract CustomerSpaceServiceInstaller getInstaller();
-
-    public abstract CustomerSpaceServiceUpgrader getUpgrader();
-
-    public abstract String getVersionString();
 
     protected boolean uploadDefaultConfigAndSchemaByJson(String defaultJson, String metadataJson) {
         String podId = CamilleEnvironment.getPodId();

@@ -94,7 +94,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public BootstrapState getTenantOverallState(String contractId, String tenantId) {
-        Set<String> components = serviceService.getRegisteredServiceKeySet();
+        Set<String> components = serviceService.getRegisteredServices();
         BootstrapState state =  BootstrapState.createInitialState();
         for (String serviceName : components) {
             BootstrapState newState = tenantEntityMgr.getTenantServiceState(contractId, tenantId, serviceName);

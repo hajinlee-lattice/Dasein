@@ -107,7 +107,7 @@ app.service('TenantUtility', function(_){
                     '<span class="text-danger">' + this.getStatusDisplayName('ERROR') + '</span>';
             case this.getStatusDisplayName('UNKNOWN'):
                 return '<i class="fa fa-question-circle text-muted component-status"></i> ' +
-                    '<span class="text-muted">' + this.getStatusDisplayName('ERROR') + '</span>';
+                    '<span class="text-muted">' + this.getStatusDisplayName('UNKNOWN') + '</span>';
             default:
                 return status;
         }

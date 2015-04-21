@@ -27,7 +27,7 @@ public class ServiceResource {
     @ResponseBody
     @ApiOperation(value = "Get list of services")
     public List<String> getServices() {
-        return new ArrayList<>(serviceService.getRegisteredServiceKeySet());
+        return new ArrayList<>(serviceService.getRegisteredServices());
     }
 
     @RequestMapping(value = "{serviceName}/default", method = RequestMethod.GET, headers = "Accept=application/json")

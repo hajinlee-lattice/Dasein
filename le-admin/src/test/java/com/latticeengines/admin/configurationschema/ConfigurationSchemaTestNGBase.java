@@ -58,8 +58,6 @@ public class ConfigurationSchemaTestNGBase {
     }
 
     protected void runFunctionalMainFlow() {
-        // register component
-        Assert.assertTrue(this.component.doRegistration());
         // download from camille
         DocumentDirectory storedDir = this.component.getInstaller().getDefaultConfiguration(this.component.getName());
         storedDir.makePathsLocal();

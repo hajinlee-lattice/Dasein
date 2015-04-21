@@ -3,6 +3,7 @@ package com.latticeengines.baton.exposed.service;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -32,6 +33,8 @@ public interface BatonService {
     boolean deleteTenant(String contractId, String tenantId);
 
     boolean discardService(String serviceName);
+
+    Set<String> getRegisteredServices();
 
     BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String serviceName);
 

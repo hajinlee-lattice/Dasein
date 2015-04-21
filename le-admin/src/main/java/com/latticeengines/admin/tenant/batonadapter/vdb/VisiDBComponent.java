@@ -3,13 +3,14 @@ package com.latticeengines.admin.tenant.batonadapter.vdb;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.camille.exposed.config.bootstrap.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
 @Component
 public class VisiDBComponent extends LatticeComponent {
     
-    private CustomerSpaceServiceInstaller installer = new VisiDBInstaller();
+    private LatticeComponentInstaller installer = new VisiDBInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new VisiDBUpgrader();
     public static final String componentName = "VisiDB";
 
