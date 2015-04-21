@@ -14,8 +14,6 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceI
 public abstract class LatticeComponentInstaller implements CustomerSpaceServiceInstaller {
 
     private String componentName;
-    // dry run flag: when it is up, installer only write default configuration to camille, skip all other installation steps.
-    private boolean dryrun = true;
 
     protected LatticeComponentInstaller(String componentName) {
         this.componentName = componentName;
@@ -29,11 +27,7 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(properties);
         DocumentDirectory dir = sDir.getDocumentDirectory();
         dir.makePathsLocal();
-        if (!dryrun) {
-            // do the true installation
-            installCore(space, serviceName, dataVersion, dir);
-        }
-
+        installCore(space, serviceName, dataVersion, dir);
         return dir;
     }
 
@@ -64,6 +58,4 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
         sDir.applyMetadata(metaDir);
         return sDir;
     }
-
-    public void setDryrun(boolean dryrun) { this.dryrun = dryrun; }
 }
