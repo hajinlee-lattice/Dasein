@@ -14,6 +14,9 @@ public class VisiDBComponent extends LatticeComponent {
     private CustomerSpaceServiceUpgrader upgrader = new VisiDBUpgrader();
     public static final String componentName = "VisiDB";
 
+    // register the bootstrapper upon instantiate
+    public VisiDBComponent() { register(); }
+
     @Override
     public boolean doRegistration() {
         String defaultJson = "vdb_default.json";

@@ -177,20 +177,4 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
     }
 
-
-    protected static Map<String, String> flattenPropConfig(CustomerSpaceProperties spaceProp, DocumentDirectory configDir) {
-        Map<String, String> toReturn = new HashMap<>();
-        Iterator<DocumentDirectory.Node> iter = configDir.breadthFirstIterator();
-        while (iter.hasNext()) {
-            DocumentDirectory.Node node = iter.next();
-            if (node.getDocument() != null && !node.getDocument().getData().equals("")) {
-                toReturn.put(node.getPath().toString(), node.getDocument().getData());
-            }
-        }
-        if (spaceProp != null) {
-            toReturn.put("CustomerSpaceProperties", JsonUtils.serialize(spaceProp));
-        }
-        return toReturn;
-    }
-
 }

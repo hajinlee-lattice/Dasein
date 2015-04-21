@@ -1,5 +1,6 @@
 var app = angular.module("app.tenants.controller.TenantConfigCtrl", [
     'app.tenants.service.TenantService',
+    'app.services.service.ServiceService',
     'app.tenants.directive.CamilleConfigDirective',
     'le.common.util.UnderscoreUtility',
     "app.tenants.util.TenantUtility",
@@ -8,7 +9,7 @@ var app = angular.module("app.tenants.controller.TenantConfigCtrl", [
     'ngSanitize'
 ]);
 
-app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal, $interval, _, TenantService, TenantUtility) {
+app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal, $interval, _, TenantService, TenantUtility, ServiceService) {
     $scope.new = false;
     $scope.readonly = true;
     $scope.listenState = true;
@@ -22,7 +23,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     $scope.product = $stateParams.product;
 
     $scope.loading = true;
-    $scope.services = TenantService.registeredServices;
+    $scope.services = [];
 
     $scope.accordion = _.map($scope.services, function(){
         return { open: false, disabled: false };
@@ -41,36 +42,46 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
             featureFlags: ""
         };
 
-        _.each($scope.services, function(service){
-            TenantService.GetServiceDefaultConfig(service).then(
-                function(result){
-                    var component = result.resultObj;
-                    $scope.components.push(component);
-                    if ($scope.components.length == $scope.services.length) {
-                        $scope.loading = false;
-                    }
-                }
-            );
-        });
-    } else {
-        TenantService.GetTenantInfo($scope.tenantId, $scope.contractId).then(function(result){
+        ServiceService.GetRegisteredServices().then( function(result) {
             if (result.success) {
-                $scope.spaceInfo = result.resultObj.spaceInfoList[0];
-                $scope.contractInfo = result.resultObj.contractInfo;
-                $scope.tenantInfo = result.resultObj;
+                $scope.services = result.resultObj;
+                _.each($scope.services, function(service){
+                    TenantService.GetServiceDefaultConfig(service).then(
+                        function(result){
+                            var component = result.resultObj;
+                            $scope.components.push(component);
+                            if ($scope.components.length == $scope.services.length) {
+                                $scope.loading = false;
+                            }
+                        }
+                    );
+                });
             }
         });
 
-        _.each($scope.services, function(service){
-            TenantService.GetTenantServiceConfig($scope.tenantId, $scope.contractId, service).then(
-                function(result){
-                    var component = result.resultObj;
-                    $scope.components.push(component);
-                    if ($scope.components.length == $scope.services.length) {
-                        $scope.loading = false;
+    } else {
+        TenantService.GetTenantInfo($scope.tenantId, $scope.contractId).then(function(result1){
+            if (result1.success) {
+                $scope.spaceInfo = result1.resultObj.spaceInfoList[0];
+                $scope.contractInfo = result1.resultObj.contractInfo;
+                $scope.tenantInfo = result1.resultObj;
+                ServiceService.GetRegisteredServices().then( function(result2) {
+                    if (result2.success) {
+                        $scope.services = result2.resultObj;
+                        _.each($scope.services, function(service){
+                            TenantService.GetTenantServiceConfig($scope.tenantId, $scope.contractId, service).then(
+                                function(result){
+                                    var component = result.resultObj;
+                                    $scope.components.push(component);
+                                    if ($scope.components.length == $scope.services.length) {
+                                        $scope.loading = false;
+                                    }
+                                }
+                            );
+                        });
                     }
-                }
-            );
+                });
+            }
         });
     }
 

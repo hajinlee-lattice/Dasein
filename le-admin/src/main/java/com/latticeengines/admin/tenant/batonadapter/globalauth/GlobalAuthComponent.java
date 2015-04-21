@@ -1,6 +1,5 @@
 package com.latticeengines.admin.tenant.batonadapter.globalauth;
 
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -9,9 +8,8 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceI
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
 @Component
-@Lazy(value=true)
 public class GlobalAuthComponent extends LatticeComponent {
-    
+
     private LatticeComponentInstaller installer = new GlobalAuthInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new GlobalAuthUpgrader();
     public static final String componentName = "GlobalAuth";

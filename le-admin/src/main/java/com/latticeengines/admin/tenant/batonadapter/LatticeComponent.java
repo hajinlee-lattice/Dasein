@@ -38,7 +38,7 @@ public abstract class LatticeComponent implements HasName {
 
     public abstract String getVersionString();
 
-    public boolean register() {
+    public final boolean register() {
         if (doRegistration()) {
             ServiceProperties serviceProps = new ServiceProperties();
             serviceProps.dataVersion = 1;
