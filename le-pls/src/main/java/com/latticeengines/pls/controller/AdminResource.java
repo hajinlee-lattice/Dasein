@@ -7,17 +7,21 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.InternalResourceBase;
 import com.latticeengines.security.exposed.service.UserService;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -49,6 +53,18 @@ public class AdminResource extends InternalResourceBase {
     public List<Tenant> getTenants(HttpServletRequest request) {
         checkHeader(request);
         return tenantService.getAllTenants();
+    }
+
+    @RequestMapping(value = "/tenants/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Delete a tenant.")
+    public Boolean deleteTenant(@PathVariable String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        Tenant tenant = new Tenant();
+        tenant.setName(" ");
+        tenant.setId(tenantId);
+        tenantService.discardTenant(tenant);
+        return true;
     }
     
     @RequestMapping(value = "/users", method = RequestMethod.POST, headers = "Accept=application/json")

@@ -45,12 +45,16 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
         ServiceService.GetRegisteredServices().then( function(result) {
             if (result.success) {
                 $scope.services = result.resultObj;
+                $scope.defaultConfigScaned = 0;
                 _.each($scope.services, function(service){
                     TenantService.GetServiceDefaultConfig(service).then(
                         function(result){
-                            var component = result.resultObj;
-                            $scope.components.push(component);
-                            if ($scope.components.length == $scope.services.length) {
+                            $scope.defaultConfigScaned += 1;
+                            if (result.success) {
+                                var component = result.resultObj;
+                                $scope.components.push(component);
+                            }
+                            if ($scope.defaultConfigScaned == $scope.services.length) {
                                 $scope.loading = false;
                             }
                         }
@@ -74,6 +78,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
                                     var component = result.resultObj;
                                     $scope.components.push(component);
                                     if ($scope.components.length == $scope.services.length) {
+                                        if ($scope.listenState) updateServiceStatus();
                                         $scope.loading = false;
                                     }
                                 }
@@ -93,7 +98,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
             if (!$scope.loading) {
                 updateServiceStatus();
             }
-        }, 5000);
+        }, 3000);
     }
 
     $scope.onSaveClick = function(){
@@ -106,7 +111,7 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
             template: '<div class="modal-header">' +
             '<h3 class="modal-title">Data to be saved.</h3></div>' +
             '<div class="modal-body">' +
-            '<pre ng-hide="showErrorMsg">{{ data | json }}</pre>' +
+            '<p ng-hide="showErrorMsg">Are you sure to start bootstrapping tenant {{ tenantId }}?</p>' +
             '<p class="text-danger" ng-show="showErrorMsg">{{ errorMsg }}</p>' +
             '</div>' +
             '<div class="modal-footer">' +
@@ -183,11 +188,22 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     };
 
     function updateServiceStatus() {
-        _.each($scope.components, function(component){
+        _.each($scope.components, function (component, idx) {
             TenantService.GetTenantServiceStatus($scope.tenantId, $scope.contractId, component.Component).then(
-                function(result){
-                    component.State = result.resultObj;
-                    //console.debug("The status of " + component.Component + " is updated to " + component.State.state);
+                function (result) {
+                    var newState = result.resultObj;
+                    if (typeof(component.State) === "undefined" ||
+                        newState.state !== component.State.state) {
+                        $scope.components.splice(idx, 1);
+                        TenantService.GetTenantServiceConfig(
+                            $scope.tenantId, $scope.contractId, component.Component).then(
+                            function (result) {
+                                var newComponent = result.resultObj;
+                                newComponent.State = newState;
+                                $scope.components.push(newComponent);
+                            }
+                        );
+                    }
                 }
             );
         });

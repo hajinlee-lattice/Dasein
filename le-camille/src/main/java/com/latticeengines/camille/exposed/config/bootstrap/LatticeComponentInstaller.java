@@ -28,6 +28,7 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
         DocumentDirectory dir = sDir.getDocumentDirectory();
         dir.makePathsLocal();
         installCore(space, serviceName, dataVersion, dir);
+        CustomerSpaceServiceBootstrapManager.reset(serviceName, space);
         return dir;
     }
 

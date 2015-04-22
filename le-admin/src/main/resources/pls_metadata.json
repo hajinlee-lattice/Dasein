@@ -1,6 +1,6 @@
 {
-  "RootPath": "/whatever",
+  "RootPath": "/",
   "Nodes": [
-    { "Node": "Config1", "Data": {"Type": "options", "Options": [1, 2, 3]} }
+    { "Node": "RootAdminEmail", "Data": {"Type": "email"} }
   ]
 }

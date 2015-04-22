@@ -1,15 +1,7 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "Config1", "Data": 1 },
-    { "Node": "Config2", "Data": {"property1": "value1", "property2": "value2"} },
-    { "Node": "Config3", "Data": "string" },
-    { "Node": "Config4", "Data": true},
-    { "Node": "Config5",
-      "Children" : [
-        { "Node" : "Config5.1", "Data": "value5.1" },
-        { "Node" : "Config5.2", "Data": "value5.2" }
-      ]
-    }
+    { "Node": "RootAdminEmail", "Data": "bnguyen@lattice-engines.com" },
+    { "Node": "TenantName", "Data": "LPA 2.0 Tenant" }
   ]
 }

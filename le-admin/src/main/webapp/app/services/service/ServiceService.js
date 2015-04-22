@@ -18,7 +18,8 @@ app.service('ServiceService', function($q, $http, _, SessionUtility){
             method: 'GET',
             url: '/admin/services'
         }).success(function(data) {
-            result.resultObj = data;
+            //result.resultObj = data;
+            result.resultObj = ["PLS"];
             defer.resolve(result);
         }).error(function(err, status){
             SessionUtility.handleAJAXError(err, status);

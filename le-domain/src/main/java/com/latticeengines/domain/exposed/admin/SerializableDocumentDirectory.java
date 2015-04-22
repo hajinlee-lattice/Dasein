@@ -16,8 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
-import com.microsoft.windowsazure.storage.core.PathUtility;
+
+import org.apache.commons.validator.routines.EmailValidator;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SerializableDocumentDirectory {
@@ -188,7 +188,9 @@ public class SerializableDocumentDirectory {
         public Node(DocumentDirectory.Node documentNode) {
             this.node = documentNode.getPath().getSuffix();
             this.data = documentNode.getDocument().getData();
-            if (this.data.equals("")) { this.data = null; }
+            if (this.data.equals("") && this.getChildren() != null && !this.getChildren().isEmpty()) {
+                this.data = null;
+            }
             this.version = documentNode.getDocument().getVersion();
 
             Collection<Node> children = new ArrayList<>();
@@ -298,6 +300,7 @@ public class SerializableDocumentDirectory {
             }
             return "string";
         }
+
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -307,6 +310,7 @@ public class SerializableDocumentDirectory {
 
         private ObjectMapper mapper = new ObjectMapper();
         public Metadata(){}
+        private static EmailValidator emailValidator = EmailValidator.getInstance();
 
         @JsonProperty("Type")
         public String getType() { return type; }
@@ -331,6 +335,8 @@ public class SerializableDocumentDirectory {
                     return isObject(data);
                 case "options":
                     return this.getOptions().contains(data);
+                case "email":
+                    return emailValidator.isValid(data);
                 default:
                     return false;
             }

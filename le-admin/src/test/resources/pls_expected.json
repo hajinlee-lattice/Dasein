@@ -1,16 +1,7 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "Config1", "Data": "1", "Metadata": {"Type":"options","Options":["1","2","3"]}, "Version": 0},
-    { "Node": "Config2", "Data": "{\"property1\":\"value1\",\"property2\":\"value2\"}", "Metadata": {"Type": "object"}, "Version": 0},
-    { "Node": "Config3", "Data": "string", "Version": 0},
-    { "Node": "Config4", "Data": "true", "Metadata": {"Type": "boolean"}, "Version": 0},
-    { "Node": "Config5",
-      "Version": 0,
-      "Children" : [
-        { "Node" : "Config5.1", "Data": "value5.1", "Version": 0 },
-        { "Node" : "Config5.2", "Data": "value5.2", "Version": 0 }
-      ]
-    }
+    { "Node": "RootAdminEmail", "Data": "bnguyen@lattice-engines.com", "Metadata": {"Type": "email"} },
+    { "Node": "TenantName", "Data": "LPA 2.0 Tenant" }
   ]
 }

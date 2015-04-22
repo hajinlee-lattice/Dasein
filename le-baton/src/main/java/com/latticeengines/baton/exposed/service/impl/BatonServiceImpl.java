@@ -234,7 +234,10 @@ public class BatonServiceImpl implements BatonService {
     @Override
     public DocumentDirectory getDefaultConfiguration(String serviceName) {
         try {
-            return CustomerSpaceServiceBootstrapManager.getDefaultConfiguration(serviceName);
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
+            Path defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(podId, serviceName);
+            return camille.getDirectory(defaultConfigPath);
         } catch (Exception e) {
             log.error("Error retrieving default config for service " + serviceName, e);
             return null;
@@ -244,9 +247,12 @@ public class BatonServiceImpl implements BatonService {
     @Override
     public DocumentDirectory getConfigurationSchema(String serviceName) {
         try {
-            return CustomerSpaceServiceBootstrapManager.getConfigurationSchema(serviceName);
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
+            Path metadataPath = PathBuilder.buildServiceConfigSchemaPath(podId, serviceName);
+            return camille.getDirectory(metadataPath);
         } catch (Exception e) {
-            log.error("Error retrieving default config for service " + serviceName, e);
+            log.error("Error retrieving configuration schema for service " + serviceName, e);
             return null;
         }
     }

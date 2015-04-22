@@ -1,9 +1,15 @@
 package com.latticeengines.admin.configurationschema;
 
+import java.io.IOException;
+
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 public class PLSConfigTestNG extends ConfigurationSchemaTestNGBase {
 
@@ -21,4 +27,24 @@ public class PLSConfigTestNG extends ConfigurationSchemaTestNGBase {
 
     @Test(groups = "unit")
     public void testUnitMainFlow() { runUnitMainFlow(); }
+
+    @Test(groups = "functional")
+    public void testDefaultConfigurationFuncational() { runFunctionalMainFlow(); }
+
+    /*
+    ================================================================================
+        Test how you want to use the configuration
+    ================================================================================
+    */
+
+    /**
+     * this test demonstrate how to get configuration using DocumentDirectory
+     */
+    @Test(groups = "unit")
+    public void testConfig4() throws IOException {
+        DocumentDirectory dir = batonService.getDefaultConfiguration(this.component.getName());
+
+        String adminEmail = dir.get("/RootAdminEmail").getDocument().getData();
+        Assert.assertEquals(adminEmail, "bnguyen@lattice-engines.com");
+    }
 }

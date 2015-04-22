@@ -21,41 +21,22 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 @Component("serviceService")
 public class ServiceServiceImpl implements ServiceService {
 
-    private final BatonService batonService = new BatonServiceImpl();
-
     @Autowired
     private ServiceEntityMgr serviceEntityMgr;
 
     public ServiceServiceImpl() {
     }
 
-    @Autowired
-    List<LatticeComponent> components;
-
-    private static Map<String, LatticeComponent> componentMap = new HashMap<>();
-
-    protected static void register(LatticeComponent component) {
-        componentMap.put(component.getName(), component);
-    }
-
-    public Map<String, LatticeComponent> getRegisteredServiceComponents() {
-        return componentMap;
-    }
-
     @PostConstruct
     public void postConstruct() {
-        for (LatticeComponent component : components) {
-            componentMap.put(component.getName(), component);
-        }
-
-        for (Map.Entry<String, LatticeComponent> entry : componentMap.entrySet()) {
+        for (Map.Entry<String, LatticeComponent> entry : LatticeComponent.getRegisteredServiceComponents().entrySet()) {
             entry.getValue().register();
         }
     }
 
     @Override
     public Set<String> getRegisteredServices() {
-        return getRegisteredServiceComponents().keySet();
+        return LatticeComponent.getRegisteredServiceComponents().keySet();
     }
 
     @Override

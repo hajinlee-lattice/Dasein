@@ -37,5 +37,12 @@ public class TenantEntityMgrImpl extends BasePLSEntityMgrImpl<Tenant> implements
         }
         super.create(tenant);
     }
+
+    @Override
+    @Transactional(value = "pls", propagation = Propagation.REQUIRED)
+    public void delete(Tenant tenant) {
+        Tenant tenant1 = findByTenantId(tenant.getId());
+        super.delete(tenant1);
+    }
     
 }

@@ -73,6 +73,38 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean createUser(UserRegistration userRegistration) {
+        if (userRegistration == null) {
+            LOGGER.error("User registration cannot be null.");
+            return false;
+        }
+
+        if (userRegistration.getUser() == null) {
+            LOGGER.error("User cannot be null.");
+            return false;
+        }
+        if (userRegistration.getCredentials() == null) {
+            LOGGER.error("Credentials cannot be null.");
+            return false;
+        }
+
+        User userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
+
+        if (userByEmail != null) {
+            LOGGER.warn(String.format("A user with the same email address %s already exists. Update instead of create user.", userByEmail));
+        } else {
+            try {
+                globalUserManagementService.registerUser(userRegistration.getUser(), userRegistration.getCredentials());
+                userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
+            } catch (Exception e) {
+                LOGGER.warn("Error creating admin user.", e);
+            }
+        }
+
+        return userByEmail != null;
+    }
+
+    @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username) {
         if (accessLevel == null) { return resignAccessLevel(tenantId, username); }
         if (!accessLevel.equals(getAccessLevel(tenantId, username)) && resignAccessLevel(tenantId, username)) {

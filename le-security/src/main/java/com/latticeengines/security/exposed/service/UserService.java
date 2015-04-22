@@ -3,12 +3,15 @@ package com.latticeengines.security.exposed.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
 
 public interface UserService {
 
     boolean addAdminUser(UserRegistrationWithTenant userRegistrationWithTenant);
+
+    boolean createUser(UserRegistration userRegistration);
 
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username);
 

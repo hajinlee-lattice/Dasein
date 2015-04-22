@@ -116,9 +116,13 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
             method: 'GET',
             url: '/admin/services/' + service + '/default'
         }).success(function(data){
-            data.Component = service;
-            result.resultObj = data;
-
+            if (data != null && data.hasOwnProperty("RootPath")) {
+                data.Component = service;
+                result.resultObj = data;
+            } else {
+                result.success = false;
+                result.errMsg = "Could not load default configuration.";
+            }
             defer.resolve(result);
         }).error(function(err, status){
             SessionUtility.handleAJAXError(err, status);
@@ -184,7 +188,7 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
         });
 
         return defer.promise;
-    };
+    }
 
     this.GetTenantServiceStatus = GetTenantServiceStatus;
 });
