@@ -188,19 +188,19 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     };
 
     function updateServiceStatus() {
-        _.each($scope.components, function (component, idx) {
+        _.each($scope.components, function (component) {
             TenantService.GetTenantServiceStatus($scope.tenantId, $scope.contractId, component.Component).then(
                 function (result) {
                     var newState = result.resultObj;
                     if (typeof(component.State) === "undefined" ||
                         newState.state !== component.State.state) {
-                        $scope.components.splice(idx, 1);
+                        component.State = newState;
                         TenantService.GetTenantServiceConfig(
                             $scope.tenantId, $scope.contractId, component.Component).then(
                             function (result) {
                                 var newComponent = result.resultObj;
-                                newComponent.State = newState;
-                                $scope.components.push(newComponent);
+                                component.RootPath = newComponent.RootPath;
+                                component.Nodes = newComponent.Nodes;
                             }
                         );
                     }
