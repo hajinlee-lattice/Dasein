@@ -19,11 +19,12 @@ angular.module('mainApp.models.modals.ImportModelModal', [
         }
     };
 }])
-.controller('jsonUploaderCtrl', ['$scope', '$rootScope', 'ModelService', function($scope, $rootScope, ModelService, ResourceUtility){
+.controller('jsonUploaderCtrl', ['$scope', '$rootScope', 'ModelService', 'ResourceUtility', function($scope, $rootScope, ModelService, ResourceUtility){
     $scope.showImportError = false;
     $scope.importErrorMsg = "";
     $scope.importing = false;
     $scope.showImportSuccess = false;
+    $scope.ResourceUtility = ResourceUtility;
 
     // define reader
     var reader = new FileReader();
@@ -36,7 +37,8 @@ angular.module('mainApp.models.modals.ImportModelModal', [
                     $scope.showImportSuccess = true;
                 } else {
                     $scope.showImportError = true;
-                    $scope.importErrorMsg = result.ResultErrors;
+                    $scope.importErrorMsg = ResourceUtility.getString('VALIDATION_ERROR_GENERAL');
+                    console.error(result.ResultErrors);
                 }
                 $scope.importing = false;
             });

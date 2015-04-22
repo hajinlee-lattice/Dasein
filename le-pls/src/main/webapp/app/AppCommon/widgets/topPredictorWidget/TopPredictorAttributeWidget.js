@@ -279,7 +279,7 @@ angular.module('mainApp.appCommon.widgets.TopPredictorAttributeWidget', [
             .attr("text-anchor", "end")
             .attr("class", "lift")
             .style("fill", "#666")
-            .text(function(d) { return d + "%"; } );
+            .text(function(d) { return $filter('number')(d, 0) + "%"; } );
 
         // This is the %Leads label to the right of the chart
         var leadsText = ResourceUtility.getString("TOP_PREDICTORS_HOVER_CHART_LEADS_LABEL").toUpperCase();
