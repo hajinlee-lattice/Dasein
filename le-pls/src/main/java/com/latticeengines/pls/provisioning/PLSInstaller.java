@@ -107,14 +107,18 @@ public class PLSInstaller extends LatticeComponentInstaller {
         headers.add("Content-Type", "application/json");
         headers.add("Accept", "application/json");
         HttpEntity<JsonNode> requestEntity = new HttpEntity<>(null, headers);
-        ResponseEntity<Boolean> responseEntity = restTemplate.exchange(
-                RESTAPI_HOST_PORT + "/pls/admin/tenants/" + tenantId,
-                HttpMethod.DELETE,
-                requestEntity,
-                Boolean.class
-        );
-        if (!responseEntity.getBody()) {
-            throw new LedpException(LedpCode.LEDP_18028, "Failed to delete the existing tenant, if any", e);
+        try {
+            ResponseEntity<Boolean> responseEntity = restTemplate.exchange(
+                    RESTAPI_HOST_PORT + "/pls/admin/tenants/" + tenantId,
+                    HttpMethod.DELETE,
+                    requestEntity,
+                    Boolean.class
+            );
+            if (!responseEntity.getBody()) {
+                throw new LedpException(LedpCode.LEDP_18028, "Failed to delete the existing tenant, if any", e);
+            }
+        } catch (Exception ex) {
+            //ignore
         }
 
         boolean tenantCreated = restTemplate.postForObject(RESTAPI_HOST_PORT + "/pls/admin/tenants", tenant, Boolean.class);

@@ -12,4 +12,10 @@
     <import resource="classpath:admin-properties-context.xml"/>
     <bean class="com.latticeengines.admin.swagger.SwaggerConfig" />
 
+    <security:global-method-security
+            secured-annotations="enabled"
+            jsr250-annotations="enabled"
+            pre-post-annotations="enabled"
+            proxy-target-class="true" />
+
 </beans>

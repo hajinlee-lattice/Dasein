@@ -1,8 +1,5 @@
 package com.latticeengines.admin.controller;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +32,14 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         // In practice, only JS will be accessing this REST endpoint, so will let JS figure out how to best
         // handle this deserialization
         Assert.assertTrue(tenants.size() >= 1);
-        Map<String, Object> map = tenants.get(0);
-        assertEquals((String) map.get("key"), "TENANT1");
+        boolean existTENANT1 = false;
+        for (Map<String, Object> map : tenants) {
+            if (map.get("key").equals("TENANT1")) {
+                existTENANT1 = true;
+                break;
+            }
+        }
+        Assert.assertTrue(existTENANT1);
     }
     
     @Test(groups = "functional")
@@ -50,14 +53,14 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
             Thread.sleep(1000L);
             numTries++;
         } while (state.state != BootstrapState.State.OK && numTries < 5);
-        assertEquals(state.state, BootstrapState.State.OK);
+        Assert.assertEquals(state.state, BootstrapState.State.OK);
     }
     
     @Test(groups = "functional")
     public void getServiceConfig() {
         String url = getRestHostPort() + "/admin/tenants/TENANT1/services/TestComponent?contractId=CONTRACT1";
         SerializableDocumentDirectory dir = restTemplate.getForObject(url, SerializableDocumentDirectory.class, new HashMap<>());
-        assertNotNull(dir);
+        Assert.assertNotNull(dir);
     }
     
 }

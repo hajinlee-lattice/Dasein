@@ -188,7 +188,7 @@ public class SerializableDocumentDirectory {
         public Node(DocumentDirectory.Node documentNode) {
             this.node = documentNode.getPath().getSuffix();
             this.data = documentNode.getDocument().getData();
-            if (this.data.equals("") && this.getChildren() != null && !this.getChildren().isEmpty()) {
+            if (this.data.equals("") && documentNode.getChildren() != null && !documentNode.getChildren().isEmpty()) {
                 this.data = null;
             }
             this.version = documentNode.getDocument().getVersion();

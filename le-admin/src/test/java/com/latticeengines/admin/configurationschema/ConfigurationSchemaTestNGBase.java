@@ -47,7 +47,8 @@ public class ConfigurationSchemaTestNGBase {
     }
 
     protected void runUnitMainFlow() {
-        // download from camille
+        uploadDirectory();
+        // download from ZK
         DocumentDirectory storedDir = camille.getDirectory(defaultRootPath);
         storedDir.makePathsLocal();
         // serialize downloaded directory

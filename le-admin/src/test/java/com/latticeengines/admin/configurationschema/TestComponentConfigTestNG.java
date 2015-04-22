@@ -22,6 +22,7 @@ public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
         this.metadataJson = "testcomponent_metadata.json";  // optional
         this.expectedJson = "testcomponent_expected.json";
         setupPaths();
+        // This is only required for the TestComponent
         uploadDirectory();
     }
 

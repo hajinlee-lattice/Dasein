@@ -5,7 +5,6 @@ import static org.testng.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -31,7 +30,6 @@ import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
@@ -48,11 +46,9 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     private static final Log log = LogFactory.getLog(AdminFunctionalTestNGBase.class);
 
-    @Value("${admin.adtester.username}")
-    protected String ADTesterUsername;
+    protected static final String ADTesterUsername = Constants.AD_TESTER_USERNAME;
 
-    @Value("${admin.adtester.password}")
-    protected String ADTesterPassword;
+    protected static final String ADTesterPassword = Constants.AD_TESTER_PASSWORD;
 
     @Value("${admin.api.hostport}")
     private String hostPort;
@@ -60,8 +56,6 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     @Autowired
     private TestLatticeComponent testLatticeComponent;
 
-    private String token;
-    
     protected RestTemplate restTemplate = new RestTemplate();
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
             "");
@@ -171,7 +165,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         creds.setPassword(ADTesterPassword);
 
         Map<String, String> map = restTemplate.postForObject(getRestHostPort() + "/admin/adlogin", creds, Map.class);
-        token = map.get("Token");
+        String token = map.get("Token");
         assertNotNull(token);
         addAuthHeader.setAuthValue(token);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
