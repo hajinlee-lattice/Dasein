@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ActiveDirectoryAccessResource {
 
-    @PreAuthorize("hasRole('Enterprise Admins')")
+    @PreAuthorize("hasRole('Platform Operations')")
     @RequestMapping(value = "/adhasaccess", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     public Map<String, String> getSomethingWithAccess() {
