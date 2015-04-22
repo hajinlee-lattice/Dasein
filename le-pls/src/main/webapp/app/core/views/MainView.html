@@ -1,14 +1,13 @@
 <div data-ng-controller="MainViewController">
-    <div id="mainHeaderView">
-        
-    </div>
-    <div id="mainContentView">
-                    
-    </div>
-    
-    <div class="footer">
-        <div class="wrapper">
-            © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}
+    <div class="content-wrap">
+        <div id="mainHeaderView">
+            
         </div>
+        <div id="mainContentView">
+                        
+        </div>
+    </div>
+    <div class="footer">
+        © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{ResourceUtility.getString('HEADER_PRIVACY_POLICY')}}
     </div>
 </div>
