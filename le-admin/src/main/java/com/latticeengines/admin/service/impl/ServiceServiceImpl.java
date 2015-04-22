@@ -1,5 +1,6 @@
 package com.latticeengines.admin.service.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,11 +24,12 @@ public class ServiceServiceImpl implements ServiceService {
     public ServiceServiceImpl() {
     }
 
+    @Autowired
+    List<LatticeComponent> components;
+
     @PostConstruct
     public void postConstruct() {
-        for (Map.Entry<String, LatticeComponent> entry : LatticeComponent.getRegisteredServiceComponents().entrySet()) {
-            entry.getValue().register();
-        }
+        for (LatticeComponent component : components) { component.register(); }
     }
 
     @Override
