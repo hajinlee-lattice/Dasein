@@ -1,7 +1,7 @@
 package com.latticeengines.admin.service.impl;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -27,15 +27,19 @@ public class ServiceServiceImpl implements ServiceService {
     @Autowired
     List<LatticeComponent> components;
 
+    private static Set<String> serviceNames;
+
     @PostConstruct
     public void postConstruct() {
-        for (LatticeComponent component : components) { component.register(); }
+        serviceNames = new HashSet<>();
+        for (LatticeComponent component : components) {
+            component.register();
+            serviceNames.add(component.getName());
+        }
     }
 
     @Override
-    public Set<String> getRegisteredServices() {
-        return LatticeComponent.getRegisteredServiceComponents().keySet();
-    }
+    public Set<String> getRegisteredServices() { return serviceNames; }
 
     @Override
     public SerializableDocumentDirectory getDefaultServiceConfig(String serviceName) {
