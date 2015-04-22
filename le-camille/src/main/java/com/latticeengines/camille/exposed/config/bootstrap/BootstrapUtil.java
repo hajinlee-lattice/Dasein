@@ -75,6 +75,9 @@ public class BootstrapUtil {
             } finally {
                 lock.release();
             }
+        } else {
+            log.warn("{}The service trying to install is not in INITIAL state, but rather in {}.",
+                    new String[]{logPrefix, state.state.name()});
         }
     }
 
