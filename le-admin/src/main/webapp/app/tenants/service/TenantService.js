@@ -6,8 +6,6 @@ var app = angular.module("app.tenants.service.TenantService", [
 
 app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtility){
 
-    this.registeredServices = ["GlobalAuth", "VisiDB"];
-
     this.CreateTenant = function(tenantId, contractId, tenantRegisration) {
         var defer = $q.defer();
 
