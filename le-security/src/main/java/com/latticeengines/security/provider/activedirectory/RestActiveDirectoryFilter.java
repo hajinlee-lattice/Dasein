@@ -23,6 +23,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsImpl;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -91,7 +94,15 @@ public class RestActiveDirectoryFilter extends UsernamePasswordAuthenticationFil
         token.append(StringUtils.join(rights, "|"));
         String encrypted = CipherUtils.encrypt(token.toString());
         encrypted = encrypted.replaceAll("[\\r\\n\\t]+", "");
-        return String.format("{ \"Token\": \"%s\" }", encrypted);
+        ObjectNode oNode = new ObjectMapper().createObjectNode();
+        oNode.put("Token", encrypted);
+        oNode.put("Principal", ldapDetails.getUsername());
+        oNode.putArray("Roles");
+        ArrayNode aNode = (ArrayNode) oNode.get("Roles");
+        for(GrantedAuthority right : rights) {
+            aNode.add(right.getAuthority());
+        }
+        return oNode.toString();
     }
     
     private UsernamePasswordAuthenticationToken buildAuth(String ticket) throws Exception {
