@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -30,7 +31,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -69,6 +69,20 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected static final String generalUsername = "lming@lattice-engines.com";
     protected static final String generalPassword = "admin";
     protected static final String generalPasswordHash = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
+    protected static final String deprecatedAdminUsername = Constants.DEPRECATED_ADMIN_USERNAME;
+    protected static final String deprecatedAdminEmail = Constants.DEPRECATED_ADMIN_EMAIL;
+    protected static final String deprecatedAdminPassword = "admin";
+
+    protected static final String SUPER_ADMIN_USERNAME = "pls-super-admin-tester@test.lattice-engines.com";
+    protected static final String INTERNAL_ADMIN_USERNAME = "pls-internal-admin-tester@test.lattice-engines.com";
+    protected static final String INTERNAL_USER_USERNAME = "pls-interal-user-tester@test.lattice-engines.com";
+    protected static final String EXTERNAL_ADMIN_USERNAME = "pls-exteranl-admin-tester@test.lattice-engines.ext";
+    protected static final String EXTERNAL_USER_USERNAME = "pls-external-user-tester@test.lattice-engines.ext";
+
+    private static HashMap<AccessLevel, User> testingUsers;
+    private static HashMap<AccessLevel, UserDocument> testingUserSessions;
+    protected static List<Tenant> testingTenants;
+    protected static Tenant mainTestingTenant;
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
@@ -222,14 +236,24 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         }
     }
 
+    @Deprecated
     protected UserDocument loginAndAttachAdmin() {
         return loginAndAttach(adminUsername, adminPassword);
     }
+
+    @Deprecated
     protected UserDocument loginAndAttachAdmin(Tenant tenant) {
         return loginAndAttach(adminUsername, adminPassword, tenant);
     }
+
+    @Deprecated
     protected UserDocument loginAndAttachGeneral() {
         return loginAndAttach(generalUsername, generalPassword);
+    }
+
+    protected UserDocument loginAndAttach(AccessLevel level, Tenant tenant) {
+        User user = getTheTestingUserAtLevel(level);
+        return loginAndAttach(user.getUsername(), generalPassword, tenant);
     }
 
     protected UserDocument loginAndAttach(String username) {
@@ -244,7 +268,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/pls/login", creds, LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/pls/attach", doc.getResult().getTenants().get(0),
                 UserDocument.class);
@@ -276,9 +300,25 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected void logoutTicket(Ticket ticket) { globalAuthenticationService.discard(ticket); }
 
+    protected void switchToSuperAdmin() { switchToTheSessionWithAccessLevel(AccessLevel.SUPER_ADMIN); }
+    protected void switchToInternalAdmin() { switchToTheSessionWithAccessLevel(AccessLevel.INTERNAL_ADMIN); }
+    protected void switchToInternalUser() { switchToTheSessionWithAccessLevel(AccessLevel.INTERNAL_USER); }
+    protected void switchToExternalAdmin() { switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_ADMIN); }
+    protected void switchToExternalUser() { switchToTheSessionWithAccessLevel(AccessLevel.EXTERNAL_USER); }
+
+    protected void switchToTheSessionWithAccessLevel(AccessLevel level) {
+        if (testingUserSessions == null || testingUserSessions.isEmpty()) { loginTestingUsersToMainTenant(); }
+        UserDocument uDoc = testingUserSessions.get(level);
+        if (uDoc == null) {
+            throw new NullPointerException("Could not find the session with access level " + level.name());
+        }
+        useSessionDoc(uDoc);
+    }
+
     protected void useSessionDoc(UserDocument doc) {
         addAuthHeader.setAuthValue(doc.getTicket().getData());
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
     }
 
     private ModelSummary getDetails(Tenant tenant, String suffix) throws Exception {
@@ -403,52 +443,133 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     }
 
     protected void setupUsers() {
-        Ticket ticket;
-        int numOfTestingTenants = 2;
-        if (globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com") != null) {
-            ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
-            // all tenants of bnguyen are testing tenants
-            numOfTestingTenants = ticket.getTenants().size();
-        } else {
-            ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
-        }
+        if (usersInitialized) return;
 
-        if (numOfTestingTenants < 2) {
-            ticket = globalAuthenticationService.authenticateUser("admin", DigestUtils.sha256Hex("admin"));
-            numOfTestingTenants = 2;
-        }
+        setTestingTenants();
 
-        // testing admin user
-        User user = globalUserManagementService.getUserByEmail("bnguyen@lattice-engines.com");
-        if (user == null || !user.getUsername().equals(adminUsername)) {
-            globalUserManagementService.deleteUser("bnguyen");
-            globalUserManagementService.deleteUser("bnguyen@lattice-engines.com");
-            createUser(adminUsername, "bnguyen@lattice-engines.com", "Super", "User", adminPasswordHash);
-        }
-
-        // testing general user
-        user = globalUserManagementService.getUserByEmail("lming@lattice-engines.com");
-        if (user == null || !user.getUsername().equals(generalUsername)) {
-            globalUserManagementService.deleteUser("lming");
-            globalUserManagementService.deleteUser("lming@lattice-engines.com");
-            createUser(generalUsername, "lming@lattice-engines.com", "General", "User", generalPasswordHash);
-        }
-
-        // PM admin user
-        if (globalUserManagementService.getUserByEmail("tsanghavi@lattice-engines.com") == null) {
-            globalUserManagementService.deleteUser("tsanghavi@lattice-engines.com");
-            createUser("tsanghavi@lattice-engines.com", "tsanghavi@lattice-engines.com", "Tejas", "Sanghavi");
-        }
-
-        for (Tenant tenant: ticket.getTenants().subList(0, numOfTestingTenants)) {
+        for (Tenant tenant: testingTenants) {
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
-            userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, tenant.getId(), generalUsername);
-            userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), "tsanghavi@lattice-engines.com");
-
+            userService.assignAccessLevel(AccessLevel.INTERNAL_USER, tenant.getId(), generalUsername);
             userService.resignAccessLevel(tenant.getId(), "admin");
         }
 
+        for (AccessLevel level : AccessLevel.values()) {
+            User user = getTheTestingUserAtLevel(level);
+            if (user != null) {
+                userService.assignAccessLevel(level, mainTestingTenant.getId(), user.getUsername());
+
+            }
+        }
+
+        loginTestingUsersToMainTenant();
+
         usersInitialized = true;
+    }
+
+    protected User getTheTestingUserAtLevel(AccessLevel level) {
+        if (testingUsers == null || testingUsers.isEmpty()) {
+            createTestUsers();
+        }
+        return testingUsers.get(level);
+    }
+
+    private void createTestUsers() {
+        testingUsers = new HashMap<>();
+        for (AccessLevel level : AccessLevel.values()) {
+            User user = createATestUser(level);
+            testingUsers.put(level, user);
+        }
+
+        // testing admin user
+        User user = globalUserManagementService.getUserByEmail(adminUsername);
+        if (user == null || !user.getUsername().equals(adminUsername)) {
+            globalUserManagementService.deleteUser("bnguyen");
+            globalUserManagementService.deleteUser(adminUsername);
+            createUser(adminUsername, adminUsername, "Super", "User", adminPasswordHash);
+        }
+
+        // testing general user
+        user = globalUserManagementService.getUserByEmail(generalUsername);
+        if (user == null || !user.getUsername().equals(generalUsername)) {
+            globalUserManagementService.deleteUser("lming");
+            globalUserManagementService.deleteUser(generalUsername);
+            createUser(generalUsername, generalUsername, "General", "User", generalPasswordHash);
+        }
+    }
+
+    private User createATestUser(AccessLevel accessLevel) {
+        String username;
+        switch (accessLevel) {
+            case SUPER_ADMIN:
+                username = SUPER_ADMIN_USERNAME;
+                break;
+            case INTERNAL_ADMIN:
+                username = INTERNAL_ADMIN_USERNAME;
+                break;
+            case INTERNAL_USER:
+                username = INTERNAL_USER_USERNAME;
+                break;
+            case EXTERNAL_ADMIN:
+                username = EXTERNAL_ADMIN_USERNAME;
+                break;
+            case EXTERNAL_USER:
+                username = EXTERNAL_USER_USERNAME;
+                break;
+            default:
+                return null;
+        }
+
+        User user = new User();
+        user.setEmail(username);
+        user.setFirstName("Lattice");
+        user.setLastName("Tester");
+
+        Credentials credentials = new Credentials();
+        credentials.setUsername(user.getEmail());
+        credentials.setPassword("WillBeModifiedImmediately");
+
+        user.setUsername(credentials.getUsername());
+
+        makeSureUserDoesNotExist(credentials.getUsername());
+
+        createUser(credentials.getUsername(), user.getEmail(), user.getFirstName(), user.getLastName());
+
+        return globalUserManagementService.getUserByEmail(username);
+    }
+
+    private void setTestingTenants(){
+        if (testingTenants == null || testingTenants.isEmpty()) {
+            Ticket ticket;
+            int numOfTestingTenants = 2;
+            if (globalUserManagementService.getUserByEmail(adminUsername) != null) {
+                ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
+                // all tenants of bnguyen are testing tenants
+                numOfTestingTenants = ticket.getTenants().size();
+            } else {
+                ticket = globalAuthenticationService.authenticateUser(
+                        deprecatedAdminUsername, DigestUtils.sha256Hex(deprecatedAdminPassword));
+            }
+
+            if (numOfTestingTenants < 2) {
+                ticket = globalAuthenticationService.authenticateUser(
+                        deprecatedAdminUsername, DigestUtils.sha256Hex(deprecatedAdminPassword));
+                numOfTestingTenants = 2;
+            }
+
+            testingTenants = ticket.getTenants().subList(0, numOfTestingTenants);
+            mainTestingTenant = testingTenants.get(0);
+        }
+    }
+
+    protected void loginTestingUsersToMainTenant() {
+        if (mainTestingTenant == null) { setTestingTenants(); }
+        if (testingUserSessions == null || testingUserSessions.isEmpty()) {
+            testingUserSessions = new HashMap<>();
+            for (AccessLevel level : AccessLevel.values()) {
+                UserDocument uDoc = loginAndAttach(level, mainTestingTenant);
+                testingUserSessions.put(level, uDoc);
+            }
+        }
     }
 
     protected void setupSecurityContext(ModelSummary summary) {
@@ -467,22 +588,6 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         Mockito.when(securityContext.getAuthentication()).thenReturn(token);
         SecurityContextHolder.setContext(securityContext);
 
-    }
-
-    protected void grantRight (String right, String tenantId, String username) {
-        try {
-            globalUserManagementService.grantRight(right, tenantId, username);
-        } catch (LedpException e) {
-            //ignore
-        }
-    }
-
-    protected void revokeRight (String right, String tenantId, String username) {
-        try {
-            globalUserManagementService.revokeRight(right, tenantId, username);
-        } catch (LedpException e) {
-            //ignore
-        }
     }
 
 }

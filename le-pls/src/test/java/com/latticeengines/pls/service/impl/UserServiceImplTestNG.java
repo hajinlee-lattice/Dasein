@@ -15,8 +15,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
 
@@ -24,10 +24,7 @@ import com.latticeengines.security.exposed.service.UserService;
 public class UserServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
-    GlobalUserManagementService globalUserManagementService;
-
-    @Autowired
-    GlobalTenantManagementService globalTenantManagementService;
+    TenantService tenantService;
 
     @Autowired
     UserService userService;
@@ -39,10 +36,12 @@ public class UserServiceImplTestNG extends PlsFunctionalTestNGBase {
     public void setup() {
         tenant = new Tenant();
         tenant.setName("UserService Test Tenant");
-        tenant.setId("Test_Tenant_" + UUID.randomUUID().toString());
-        globalTenantManagementService.registerTenant(tenant);
+        tenant.setId("USERSERVICE_TEST_TENANT");
 
-        globalUserManagementService.deleteUser(uReg.getCredentials().getUsername());
+        tenantService.discardTenant(tenant);
+        tenantService.registerTenant(tenant);
+
+        makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
 
         createUser(
             uReg.getCredentials().getUsername(),
@@ -54,8 +53,8 @@ public class UserServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @AfterClass(groups = {"functional"})
     public void tearDown() {
-        globalUserManagementService.deleteUser(uReg.getCredentials().getUsername());
-        globalTenantManagementService.discardTenant(tenant);
+        makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
+        tenantService.discardTenant(tenant);
     }
 
     @Test(groups = "functional")

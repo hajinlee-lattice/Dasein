@@ -31,11 +31,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Ticket;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
-import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 
 import junit.framework.Assert;
 
@@ -48,16 +45,6 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
-
-    @Autowired
-    private GlobalSessionManagementService globalSessionManagementService;
-
-    @Autowired
-    private GlobalUserManagementService globalUserManagementService;
-
-    @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
-
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
@@ -66,8 +53,8 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
+        setupUsers();
 
-        if (!usersInitialized) { setupUsers(); }
         ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
         assertTrue(ticket.getTenants().size() >= 2);
         assertNotNull(ticket);
@@ -95,9 +82,7 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test(groups = { "functional", "deployment" }, dataProvider = "dataFileProvider")
     public void dataFileResource(String fileType, final String mimeType) {
-        UserDocument adminDoc = loginAndAttachAdmin();
-        useSessionDoc(adminDoc);
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+        switchToSuperAdmin();
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
         assertEquals(response.size(), 1);
@@ -122,7 +107,6 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
                         return Collections.emptyMap();
                     }
                 });
-        logoutUserDoc(adminDoc);
     }
 
     @DataProvider(name = "dataFileProvider")

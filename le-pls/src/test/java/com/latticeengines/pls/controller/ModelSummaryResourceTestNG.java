@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,21 +12,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
-import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 
 /**
  * This test has two users with particular privileges:
@@ -47,15 +43,6 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
  */
 public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
-    @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(ModelSummaryResourceTestNG.class);
-
-    private UserDocument adminDoc;
-    private UserDocument generalDoc;
-
-    @Autowired
-    private GlobalAuthenticationService globalAuthenticationService;
-
     @Autowired
     private ModelSummaryParser modelSummaryParser;
 
@@ -63,32 +50,24 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
     public void setup() throws Exception {
         setupUsers();
         setupDbUsingAdminTenantIds(true, true);
-        adminDoc = loginAndAttachAdmin();
-        generalDoc = loginAndAttachGeneral();
-    }
-
-    @AfterClass(groups = { "functional", "deployment" })
-    public void tearDown() {
-        logoutUserDoc(adminDoc);
-        logoutUserDoc(generalDoc);
     }
 
     @BeforeMethod(groups = { "functional", "deployment" })
     public void beforeMethod() {
         // using admin session by default
-        useSessionDoc(adminDoc);
-        restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
+        switchToSuperAdmin();
     }
 
     @Test(groups = { "functional", "deployment" })
     public void deleteModelSummaryNoEditPlsModelsRight() {
-        useSessionDoc(generalDoc);
-        try {
-            restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/123");
-        } catch (Exception e) {
-            String code = e.getMessage();
-            assertEquals(code, "403");
-        }
+        switchToInternalUser();
+        assertDeleteModelSummaryGet403();
+
+        switchToExternalAdmin();
+        assertDeleteModelSummaryGet403();
+
+        switchToExternalUser();
+        assertDeleteModelSummaryGet403();
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -99,28 +78,30 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertEquals(response.size(), 1);
         Map<String, String> map = (Map) response.get(0);
         ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
-        //assertEquals(summary.getName(), "PLSModel-Eloqua-02/18/2015 07:25:38 GMT");
         assertNotNull(summary.getDetails());
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "getModelSummariesHasViewPlsModelsRight" })
-    public void updateModelSummaryHasEditPlsModelsRight() {
-        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
-        assertNotNull(response);
-        assertEquals(response.size(), 1);
-        Map<String, String> map = (Map) response.get(0);
-        AttributeMap attrMap = new AttributeMap();
-        attrMap.put("Name", "xyz");
-        restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
+    public void testUpdateModelSummary() {
+        switchToSuperAdmin();
+        assertChangeModelNameSuccess();
 
-        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
-        assertEquals(summary.getName(), "xyz");
-        assertNotNull(summary.getDetails());
+        switchToInternalAdmin();
+        assertChangeModelNameSuccess();
+
+        switchToInternalUser();
+        assertChangeModelNameGet403();
+
+        switchToExternalAdmin();
+        assertChangeModelNameGet403();
+
+        switchToExternalUser();
+        assertChangeModelNameGet403();
     }
 
+    @Deprecated
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "updateModelSummaryHasEditPlsModelsRight" })
+    @Test(groups = { "functional", "deployment" }, dependsOnMethods = { "testUpdateModelSummary" })
     public void updateAsDeletedModelSummaryHasEditPlsModelsRight() {
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
@@ -169,50 +150,21 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
 
     @Test(groups = { "functional", "deployment" })
-    public void postModelSummariesNoCreatePlsModelsRight() {
-        addAuthHeader.setAuthValue(loginAndAttachGeneral().getTicket().getData());
-        try {
-            InputStream ins = getClass().getClassLoader().getResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
-            assertNotNull(ins, "Testing json file is missing");
-            ModelSummary modelSummary = modelSummaryParser.parse("", new String(IOUtils.toByteArray(ins)));
-            restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries/", modelSummary, Boolean.class);
-        } catch (Exception e) {
-            String code = e.getMessage();
-            assertEquals(code, "403");
-        }
-    }
+    public void testPostModelSummariesNoCreatePlsModelsRight() throws IOException {
+        switchToSuperAdmin();
+        assertCreateModelSummariesSuccess();
 
-    @SuppressWarnings("rawtypes")
-    @Test(groups = { "functional", "deployment" })
-    public void postModelSummariesHasCreatePlsModelsRight() throws IOException {
-        InputStream ins = getClass().getClassLoader().getResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
-        assertNotNull(ins, "Testing json file is missing");
-        ModelSummary modelSummary = modelSummaryParser.parse("", new String(IOUtils.toByteArray(ins)));
-        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
-        int originalNumModels = response.size();
+        switchToInternalAdmin();
+        assertCreateModelSummaryGet403();
 
-        int version = 0;
-        String possibleID = modelSummary.getId();
-        String name = modelSummaryParser.parseOriginalName(modelSummary.getName());
-        ModelSummary existingSummary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + possibleID, ModelSummary.class);
-        while (existingSummary != null) {
-            possibleID = modelSummary.getId().replace(name, name + "-" + String.format("%03d", ++version));
-            existingSummary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + possibleID, ModelSummary.class);
-        }
-        modelSummary.setId(possibleID);
-        if (version > 0) {
-            modelSummary.setName(modelSummary.getName().replace(name, name + "-" + String.format("%03d", version)));
-        }
+        switchToInternalUser();
+        assertCreateModelSummaryGet403();
 
-        ModelSummary newSummary = restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries/", modelSummary, ModelSummary.class);
-        assertNotNull(newSummary);
-        response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
-        assertNotNull(response);
-        assertEquals(response.size(), originalNumModels + 1);
+        switchToExternalAdmin();
+        assertCreateModelSummaryGet403();
 
-        restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/" + newSummary.getId());
-        response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
-        assertEquals(response.size(), originalNumModels);
+        switchToExternalUser();
+        assertCreateModelSummaryGet403();
     }
 
     @SuppressWarnings("rawtypes")
@@ -234,6 +186,106 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
 
         ModelSummary newSummary = restTemplate.postForObject(
             getRestAPIHostPort() + "/pls/modelsummaries?raw=true", data, ModelSummary.class);
+        assertNotNull(newSummary);
+        response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+        assertNotNull(response);
+        assertEquals(response.size(), originalNumModels + 1);
+
+        restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/" + newSummary.getId());
+        response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+        assertEquals(response.size(), originalNumModels);
+    }
+
+    private void assertDeleteModelSummaryGet403(){
+        boolean exception = false;
+        try {
+            restTemplate.delete(getRestAPIHostPort() + "/pls/modelsummaries/123");
+        } catch (Exception e) {
+            String code = e.getMessage();
+            exception = true;
+            assertEquals(code, "403");
+        }
+        assertTrue(exception);
+    }
+
+    private void assertChangeModelNameSuccess(){
+        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+        assertNotNull(response);
+        assertEquals(response.size(), 1);
+        Map<String, String> map = (Map) response.get(0);
+        String originalName = map.get("Name");
+        AttributeMap attrMap = new AttributeMap();
+        attrMap.put("Name", "xyz");
+        restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
+
+        ModelSummary summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
+        assertEquals(summary.getName(), "xyz");
+        assertNotNull(summary.getDetails());
+
+        attrMap.put("Name", originalName);
+        restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
+        summary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), ModelSummary.class);
+        assertEquals(summary.getName(), originalName);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void assertChangeModelNameGet403(){
+        boolean exception = false;
+        try {
+            List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+            assertNotNull(response);
+            assertEquals(response.size(), 1);
+            Map<String, String> map = (Map) response.get(0);
+            AttributeMap attrMap = new AttributeMap();
+            attrMap.put("Name", "xyz");
+            restTemplate.put(getRestAPIHostPort() + "/pls/modelsummaries/" + map.get("Id"), attrMap, new HashMap<>());
+        } catch (Exception e) {
+            String code = e.getMessage();
+            exception = true;
+            assertEquals(code, "403");
+        }
+        assertTrue(exception);
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private void assertCreateModelSummaryGet403(){
+        boolean exception = false;
+        try {
+            InputStream ins = getClass().getClassLoader().getResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+            assertNotNull(ins, "Testing json file is missing");
+            ModelSummary modelSummary = modelSummaryParser.parse("", new String(IOUtils.toByteArray(ins)));
+            restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries/", modelSummary, Boolean.class);
+        } catch (Exception e) {
+            String code = e.getMessage();
+            exception = true;
+            assertEquals(code, "403");
+        }
+        assertTrue(exception);
+    }
+
+
+    @SuppressWarnings("rawtypes")
+    public void assertCreateModelSummariesSuccess() throws IOException {
+        InputStream ins = getClass().getClassLoader().getResourceAsStream("com/latticeengines/pls/functionalframework/modelsummary-eloqua.json");
+        assertNotNull(ins, "Testing json file is missing");
+        ModelSummary modelSummary = modelSummaryParser.parse("", new String(IOUtils.toByteArray(ins)));
+        List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
+        int originalNumModels = response.size();
+
+        int version = 0;
+        String possibleID = modelSummary.getId();
+        String name = modelSummaryParser.parseOriginalName(modelSummary.getName());
+        ModelSummary existingSummary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + possibleID, ModelSummary.class);
+        while (existingSummary != null) {
+            possibleID = modelSummary.getId().replace(name, name + "-" + String.format("%03d", ++version));
+            existingSummary = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/" + possibleID, ModelSummary.class);
+        }
+        modelSummary.setId(possibleID);
+        if (version > 0) {
+            modelSummary.setName(modelSummary.getName().replace(name, name + "-" + String.format("%03d", version)));
+        }
+
+        ModelSummary newSummary = restTemplate.postForObject(getRestAPIHostPort() + "/pls/modelsummaries/", modelSummary, ModelSummary.class);
         assertNotNull(newSummary);
         response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);

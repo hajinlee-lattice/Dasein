@@ -35,7 +35,13 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public void discardTenant(Tenant tenant) {
-        tenantEntityMgr.delete(tenant);
+        try {
+            tenantEntityMgr.delete(tenant);
+        } catch (IllegalArgumentException e) {
+            if (!e.getMessage().contains("null entity")) {
+                throw e;
+            }
+        }
         try {
             globalTenantManagementService.discardTenant(tenant);
         } catch (LedpException e) {

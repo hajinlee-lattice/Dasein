@@ -80,7 +80,7 @@ public class UserResourceTestNGBase extends PlsFunctionalTestNGBase {
 
     private void addOldFashionAdminUser() {
         for (GrantedRight grantedRight : AccessLevel.SUPER_ADMIN.getGrantedRights()) {
-            globalUserManagementService.grantRight(grantedRight.getAuthority(), testTenant.getId(), "admin");
+            globalUserManagementService.grantRight(grantedRight.getAuthority(), testTenant.getId(), deprecatedAdminUsername);
         }
     }
 
