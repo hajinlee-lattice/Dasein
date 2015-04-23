@@ -30,5 +30,6 @@
         <module>le-propdata</module>
         <module>le-security</module>
         <module>le-pls</module>
+		<module>le-dellebi</module>
     </modules>
 </project>
