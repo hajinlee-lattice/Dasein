@@ -22,26 +22,6 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
         return lowestPriority;
     };
     
-    this.GetUnassociatedModels = function (segments, models) {
-        var toReturn = [];
-        if (segments == null || segments.length === 0 || models == null || models.length === 0) {
-            return toReturn;
-        }
-        
-        var segmentDict = {};
-        for (var i=0;i<segments.length;i++) {
-            segmentDict[segments[i].ModelId] = 1;
-        }
-        
-        for (var x=0;x<models.length;x++) {
-            if (segmentDict[models[x].Id] == null) {
-                toReturn.push(models[x]);
-            }
-        }
-        
-        return toReturn;
-    };
-    
     this.ValidateSegmentName = function (name, segments) {
         if (StringUtility.IsEmptyString(name)) {
             return false;
@@ -95,13 +75,23 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
     $scope.addSegmentErrorMessage = "";
     
     var segments = $scope.segments;
-    $scope.filteredModels = AddSegmentService.GetUnassociatedModels(segments, $scope.models);
+    $scope.filteredModels = $scope.models;
+    
     // Add the empty model so they don't have to choose one
-    var emptyModel = {
-        Id: "FAKE_MODEL",
-        DisplayName: "Select"
-    };
-    $scope.filteredModels.unshift(emptyModel);
+    var hasEmptyModel = false;
+    for (var i=0;i<$scope.models.length;i++) {
+        if ($scope.models[i].Id == "FAKE_MODEL") {
+            hasEmptyModel = true;
+            break;
+        }
+    }
+    if (!hasEmptyModel) {
+        var emptyModel = {
+            Id: "FAKE_MODEL",
+            DisplayName: "Select"
+        };
+        $scope.models.unshift(emptyModel);
+    }
     
     $scope.newSegment = {
         Name: null,
@@ -118,28 +108,54 @@ angular.module('mainApp.models.modals.AddSegmentModal', [
             $scope.saveInProgress = true;
             
             var modelId = $(".js-model-select").val();
+            var secondSegment = null;
             if (modelId != "FAKE_MODEL") {
                 $scope.newSegment.ModelId = modelId;
                 $scope.newSegment.ModelName = $(".js-model-select option:selected").text();
+                
+                for (var i=0;i<segments.length;i++) {
+                    if (segments[i].ModelId == modelId) {
+                        secondSegment = $scope.segments[i];
+                        break;
+                    }
+                }
             }
             
-            ModelService.AddSegment($scope.newSegment).then(function(result) {
-                $scope.saveInProgress = false;
-                if (result && result.success === true) {
-                    $("#modalContainer").modal('hide');
-                    if ($scope.successCallback) {
-                        $scope.successCallback($scope.newSegment);
+            if (secondSegment != null) {
+                secondSegment.ModelId = "FAKE_MODEL";
+                secondSegment.ModelName = "";
+                ModelService.UpdateSegment(secondSegment).then(function(result) {
+                    if (result != null && result.success === true) {
+                        addSegment();
+                    } else {
+                       $scope.saveInProgress = false;
+                       $scope.showAddSegmentError = true;
+                       $scope.addSegmentErrorMessage = ResourceUtility.getString("MULTIPLE_MODEL_UPDATE_SEGMENT_ERROR", [secondSegment.Name]);
                     }
-                } else {
-                    $scope.addSegmentErrorMessage = result.resultErrors;
-                    $scope.showAddSegmentError = true;
-                }
-            });
+                });
+            } else {
+                addSegment();
+            }
         } else {
             $scope.addSegmentErrorMessage = ResourceUtility.getString('MULTIPLE_MODEL_ADD_SEGMENT_NAME_ERROR');
             $scope.showAddSegmentError = true;
         }
     };
+    
+    function addSegment () {
+        ModelService.AddSegment($scope.newSegment).then(function(result) {
+            $scope.saveInProgress = false;
+            if (result && result.success === true) {
+                $("#modalContainer").modal('hide');
+                if ($scope.successCallback) {
+                    $scope.successCallback($scope.newSegment);
+                }
+            } else {
+                $scope.addSegmentErrorMessage = result.resultErrors;
+                $scope.showAddSegmentError = true;
+            }
+        });
+    }
     
     $scope.cancelClick = function () {
         $("#modalContainer").modal('hide');
