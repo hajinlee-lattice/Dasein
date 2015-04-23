@@ -8,6 +8,11 @@
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <Set name="contextPath">/</Set>
     <Set name="war"><Property name="jetty.webapps" default="."/>/le-pls-1.0.32-SNAPSHOT.war</Set>
+    <Set name="virtualHosts">
+        <Array type="java.lang.String">
+            <Item>@ServerConnector</Item>
+        </Array>
+    </Set>
 
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- Optional context configuration                                  -->
