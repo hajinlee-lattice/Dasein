@@ -2,21 +2,21 @@
 
 var InternalAdmin = function() {
     var loginPage = require('./login.po');
-    var logoutPage = require('./logout.po');
-    var userDropdown = require('./userdropdown.po');
     var usermgmt = require('./usermgmt.po');
-    var params = browser.params;
+    var userdropdown = require('./userdropdown.po');
 
     this.testUserManagement = function() {
-        it('should verify user management is invisible to external users', function () {
-            loginPage.loginAsNonAdminToTenant(params.tenantIndex);
+        describe('An internal admin', function(){
+            it('should behave such and such', function () {
+                loginPage.loginAsInternalAdmin();
 
-            userDropdown.toggleDropdown();
-            usermgmt.testManageUserLink();
-            userDropdown.toggleDropdown();
+                // can see manage users link
+                userdropdown.toggleDropdown();
+                usermgmt.assertManageUsersIsVisible(true);
 
-            logoutPage.logoutAsNonAdmin();
-        }, 60000);
+                loginPage.logout();
+            }, 60000);
+        });
     };
 
 };

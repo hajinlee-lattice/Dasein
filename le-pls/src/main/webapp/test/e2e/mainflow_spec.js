@@ -1,22 +1,38 @@
 describe('smoketest main flow of app', function() {
 
-    var params = browser.params;
-
     var loginPage = require('./po/login.po');
-    var logoutPage = require('./po/logout.po');
     var modelDetails = require('./po/modeldetails.po');
     var modelList = require('./po/modellist.po');    
     var modelTabs = require('./po/modeltabs.po');
-    var userDropdown = require('./po/userdropdown.po');
-    var tenants = require('./po/tenantselection.po');
 
     it('should allow admin user to log in, choose tenant, choose model, verify existence of donut, verify existence of threshold explorer, and log out', function () {
-        loginPage.loginAsAdmin();
+        loginPage.loginAsSuperAdmin();
 
-        // choose tenant
-        console.log('tenant index:' + params.tenantIndex);
-        tenants.selectTenantByIndex(params.tenantIndex);
+        runMaiFlowTests();
 
+        loginPage.logout();
+    }, 60000);
+
+    it('should verify only super admin sees the hidden link', function () {
+        loginPage.loginAsExternalUser();
+        assertAdminLinkIsVisible(false);
+
+        loginPage.loginAsExternalAdmin();
+        assertAdminLinkIsVisible(false);
+
+        loginPage.loginAsInternalUser();
+        assertAdminLinkIsVisible(true);
+
+        loginPage.loginAsInternalAdmin();
+        assertAdminLinkIsVisible(true);
+
+        loginPage.loginAsSuperAdmin();
+        assertAdminLinkIsVisible(true);
+
+        loginPage.logout();
+    });
+
+    function runMaiFlowTests() {
         // choose any model
         expect(element(by.css('.js-top-predictor-donut')).isPresent()).toBe(false);
         modelList.getAnyModel().click();
@@ -54,19 +70,9 @@ describe('smoketest main flow of app', function() {
         browser.waitForAngular();
         browser.driver.sleep(1000);
         expect(element(by.id('adminInfoContainer')).isDisplayed()).toBe(true);
+    }
 
-        // logout
-        logoutPage.logoutAsAdmin();
-    }, 60000);
-
-    it('should validate model back button', function () {
-        // element(by.css('.back-button')).click();
-    });
-
-    it('should verify nonadmins do not see admin functionality', function () {    
-        loginPage.loginAsNonAdmin();
-        tenants.selectTenantByIndex(params.tenantIndex);
-
+    function assertAdminLinkIsVisible(expected) {
         element.all(by.css('a.model')).first().click();
         browser.driver.wait(function(){
             return element(by.css('a.back-button')).isDisplayed();
@@ -74,8 +80,11 @@ describe('smoketest main flow of app', function() {
 
         element(by.linkText('SAMPLE LEADS')).click();
 
-        expect(element(by.linkText('Admin')).isPresent()).toBe(false);
+        if (expected) {
+            expect(element(by.linkText('Admin')).isDisplayed()).toBe(true);
+        } else {
+            expect(element(by.linkText('Admin')).isPresent()).toBe(false);
+        }
 
-        logoutPage.logoutAsNonAdmin();
-    });  
+    }
 });

@@ -14,13 +14,7 @@ describe('model detail', function() {
         //==================================================
         // Login
         //==================================================
-        loginPage.loginAsNonAdmin();
-
-        //==================================================
-        // Select Tenant
-        //==================================================
-        tenants.selectTenantByIndex(params.tenantIndex);
-        browser.waitForAngular();
+        loginPage.loginAsSuperAdmin();
 
         //==================================================
         // Select Model
@@ -36,7 +30,7 @@ describe('model detail', function() {
         //==================================================
         // Logout
         //==================================================
-        logoutPage.logoutAsNonAdmin();
+        loginPage.logout();
     });
 
     //==================================================

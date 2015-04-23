@@ -67,7 +67,7 @@ describe('top predictors', function () {
         //==================================================
         // Login
         //==================================================
-        loginPage.loginAsNonAdminToTenant(params.tenantIndex);
+        loginPage.loginAsExternalUser();
 
         //==================================================
         // Select Model
@@ -82,32 +82,27 @@ describe('top predictors', function () {
         browser.waitForAngular();
 
         expect(element(by.id('chart')).isDisplayed()).toBe(true);
+
+        performTests();
+
+        loginPage.logout();
     });
 
-    it('should not see back button or hover', function () {
+    function performTests() {
         checkBackButtonHover(false, false);
-    });
 
-    it('should see back button when click on an attribute', function () {
         clickAttributeValue();
         checkBackButtonHoverAndGoBack();
-    });
 
-    it('should see back button when click on a wedge', function () {
         clickChartWedge();
         checkBackButtonHoverAndGoBack();
-    });
 
-
-    it('should see hover on and off by move to and off a wedge', function () {
         moveToChartWedge();
         checkBackButtonHover(false, true);
 
         moveOffChartWedge();
         checkBackButtonHover(false, false);
-    });
 
-    it('should verify the same behavior after go into an attribute', function () {
         clickChartWedge();
         checkBackButtonHover(true, false);
 
@@ -116,11 +111,7 @@ describe('top predictors', function () {
 
         moveOffChartWedge();
         checkBackButtonHover(true, false);
-    });
-
-    it('show logout non admin', function () {
-        logoutPage.logoutAsNonAdmin();
-    });
+    }
 
     function sleep(time) {
         if (time == null) { time = 2000; }

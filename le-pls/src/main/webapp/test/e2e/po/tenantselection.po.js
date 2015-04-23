@@ -10,14 +10,16 @@ var Tenants = function() {
     };
 
     this.selectTenantByIndex = function(index) {
-        browser.driver.wait(function(){
+        browser.wait(function(){
             return element(by.css('select#tenantSelectionInput')).isDisplayed();
         }, 10000, 'tenant list should appear with in 10 sec.');
         element(by.repeater('tenant in tenantList').row(index)).click();
-        browser.driver.wait(function(){
-            return element(by.css('div.page-title')).isDisplayed();
-        }, 10000, 'model list page should appear with in 10 sec.');
     };
+
+    this.tenantSelectionIsPresent = function(){
+        return element(by.css('select#tenantSelectionInput')).isPresent();
+    };
+
 
 };
 

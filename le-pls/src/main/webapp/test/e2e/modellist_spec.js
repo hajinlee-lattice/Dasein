@@ -2,11 +2,7 @@ var _ = require('underscore');
 
 describe('model list', function() {
 
-    var params = browser.params;
-
     var loginPage = require('./po/login.po');
-    var logoutPage = require('./po/logout.po');
-    var tenants = require('./po/tenantselection.po');
     var modellist = require('./po/modellist.po');
     var model, originalModelName;
     var createdDates;
@@ -17,8 +13,7 @@ describe('model list', function() {
     }
 
     it('login as non admin', function () {
-        loginPage.loginAsNonAdmin();
-        tenants.selectTenantByIndex(params.tenantIndex);
+        loginPage.loginAsExternalUser();
     }, 60000);
 
     it('should verify at least 2 models', function () {
@@ -57,12 +52,11 @@ describe('model list', function() {
     });
 
     it('should log out', function () {
-        logoutPage.logoutAsNonAdmin();
+        loginPage.logout();
     });
 
     it('login as admin', function () {
-        loginPage.loginAsAdmin();
-        tenants.selectTenantByIndex(params.tenantIndex);
+        loginPage.loginAsSuperAdmin();
     });
 
     it('should see name editing icons and deleting icons', function () {
@@ -144,7 +138,7 @@ describe('model list', function() {
     });
 
     it('should log out', function () {
-        logoutPage.logoutAsAdmin();
+        loginPage.logout();
     }, 60000);
 });
 

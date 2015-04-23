@@ -13,7 +13,7 @@ var UserManagement = function() {
         return text;
     };
 
-    this.testManageUserLink = function(expected) {
+    this.assertManageUsersIsVisible = function(expected) {
         if (expected) {
             expect(userDropdown.ManageUsersLink.isDisplayed()).toBe(true);
         } else {

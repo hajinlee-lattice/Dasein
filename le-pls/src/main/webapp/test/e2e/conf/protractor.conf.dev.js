@@ -5,6 +5,7 @@ exports.config = {
     // protractor is called.
     //specs: ['../**/*_spec.js'],
     specs: [
+        //'../**/loginlogout_spec.js',
         '../**/mainflow_spec.js',
         '../**/modellist_spec.js',
         '../**/modeldetail_spec.js',
@@ -17,12 +18,12 @@ exports.config = {
 	params: {
 		tenantIndex: 1,
         alternativeTenantIndex: 0,
-        adminDisplayName:       'Super User',
-        adminUsername:          'bnguyen@lattice-engines.com',
-        adminPassword:          'tahoe',
-        nonAdminDisplayName:    'General User',
-        nonAdminUsername:       'lming@lattice-engines.com',
-        nonAdminPassword:       'admin'        
+        superAdminUsername:     'pls-super-admin-tester@test.lattice-engines.com',
+        internalAdminUsername:  'pls-internal-admin-tester@test.lattice-engines.com',
+        internalUserUsername:   'pls-internal-user-tester@test.lattice-engines.com',
+        externalAdminUsername:  'pls-external-admin-tester@test.lattice-engines.ext',
+        externalUserUsername:   'pls-external-user-tester@test.lattice-engines.ext',
+        testingUserPassword:    'admin'
 	},
 
     allScriptsTimeout: 110000,

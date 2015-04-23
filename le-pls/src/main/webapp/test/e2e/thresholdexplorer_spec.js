@@ -2,25 +2,15 @@
 
 describe('threshold explorer', function() {
 
-    var params = browser.params;
-
     var loginPage = require('./po/login.po');
-    var tenants = require('./po/tenantselection.po');
     var modelList = require('./po/modellist.po');
     var modelTabs = require('./po/modeltabs.po');
-    var logoutPage = require('./po/logout.po');
 
     it('should validate functional threshold explorer chart', function () {
         //==================================================
         // Login
         //==================================================
-        loginPage.loginAsNonAdmin();
-
-        //==================================================
-        // Select Tenant
-        //==================================================
-        tenants.selectTenantByIndex(params.tenantIndex);
-        browser.waitForAngular();
+        loginPage.loginAsExternalUser();
 
         //==================================================
         // Select Model
@@ -117,6 +107,6 @@ describe('threshold explorer', function() {
         //==================================================
         // Logout
         //==================================================
-        logoutPage.logoutAsNonAdmin();
+        loginPage.logout();
     });
 });
