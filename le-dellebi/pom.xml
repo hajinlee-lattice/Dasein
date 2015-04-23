@@ -25,7 +25,7 @@
 		<camel.version>2.14.0</camel.version>
 		<cameljcifs.version>2.13.2</cameljcifs.version>
 		<cascading.version>2.5.0</cascading.version>
-		<le.common.version>1.0.13-SNAPSHOT</le.common.version>
+		<le.common.version>1.0.32-SNAPSHOT</le.common.version>
 		<jetty.version>6.1.26</jetty.version>
 	</properties>
 
