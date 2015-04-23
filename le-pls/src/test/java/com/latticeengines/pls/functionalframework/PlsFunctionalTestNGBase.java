@@ -85,7 +85,7 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected static Tenant mainTestingTenant;
 
     @Autowired
-    private GlobalAuthenticationService globalAuthenticationService;
+    protected GlobalAuthenticationService globalAuthenticationService;
 
     @Autowired
     private GlobalUserManagementService globalUserManagementService;
