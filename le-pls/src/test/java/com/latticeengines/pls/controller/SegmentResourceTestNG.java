@@ -22,6 +22,7 @@ public class SegmentResourceTestNG extends PlsFunctionalTestNGBase {
     private UserDocument adminDoc;
     private UserDocument generalDoc;
 
+    @SuppressWarnings("deprecation")
     @BeforeClass(groups = { "functional", "deployment" })
     public void setup() throws Exception {
         setupUsers();

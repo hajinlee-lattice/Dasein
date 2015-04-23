@@ -29,12 +29,9 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
-
-import junit.framework.Assert;
 
 public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
 
@@ -97,12 +94,12 @@ public class DataFileResourceTestNG extends PlsFunctionalTestNGBase {
                 }, new ResponseExtractor<Map<String, String>>() {
                     @Override
                     public Map<String, String> extractData(ClientHttpResponse response) throws IOException {
-                        Assert.assertEquals(response.getStatusCode(), HttpStatus.OK);
+                        assertEquals(response.getStatusCode(), HttpStatus.OK);
                         HttpHeaders headers = response.getHeaders();
-                        Assert.assertTrue(headers.containsKey("Content-Disposition"));
-                        Assert.assertTrue(headers.containsKey("Content-Type"));
-                        Assert.assertEquals(headers.getFirst("Content-Type"), mimeType);
-                        Assert.assertTrue(IOUtils.readLines(response.getBody()).size() > 0);
+                        assertTrue(headers.containsKey("Content-Disposition"));
+                        assertTrue(headers.containsKey("Content-Type"));
+                        assertEquals(headers.getFirst("Content-Type"), mimeType);
+                        assertTrue(IOUtils.readLines(response.getBody()).size() > 0);
                         response.close();
                         return Collections.emptyMap();
                     }

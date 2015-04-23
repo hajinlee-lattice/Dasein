@@ -125,7 +125,7 @@ public class EndToEndDeploymentTestNG extends PlsFunctionalTestNGBase {
         Thread.sleep(30000L);
     }
     
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "runPipeline" })
     public void checkModels() {
         UserDocument doc = loginAndAttachAdmin(tenantToAttach);

@@ -208,6 +208,7 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(exception);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void assertChangeModelNameSuccess(){
         List response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/", List.class);
         assertNotNull(response);
@@ -247,7 +248,6 @@ public class ModelSummaryResourceTestNG extends PlsFunctionalTestNGBase {
         assertTrue(exception);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void assertCreateModelSummaryGet403(){
         boolean exception = false;
         try {

@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.TenantService;
 import com.latticeengines.security.exposed.AccessLevel;
-import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserService;
 
 
