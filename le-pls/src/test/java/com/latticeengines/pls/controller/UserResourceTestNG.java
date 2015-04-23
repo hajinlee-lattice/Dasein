@@ -235,9 +235,9 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         boolean exception = false;
         try {
             restTemplate.postForObject(getRestAPIHostPort() + "/pls/users", userReg, String.class);
-        } catch (HttpClientErrorException e) {
+        } catch (RuntimeException e) {
             exception = true;
-            assertEquals(e.getStatusCode().value(), 403);
+            assertEquals(e.getMessage(), "403");
         }
         assertTrue(exception);
         assertNull(globalUserManagementService.getUserByEmail(userReg.getUser().getEmail()));
@@ -281,11 +281,14 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
         String url = getRestAPIHostPort() + "/pls/users/" + user.getUsername();
 
+        boolean exception = false;
         try {
             restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
-        } catch (HttpClientErrorException e) {
-            assertEquals(e.getStatusCode().value(), 403);
+        } catch (RuntimeException e) {
+            exception = true;
+            assertEquals(e.getMessage(), "403");
         }
+        assertTrue(exception);
     }
 
     private void testConflictingUserInTenant() {
@@ -328,9 +331,9 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         boolean exception = false;
         try {
             restTemplate.getForObject(getRestAPIHostPort() + "/pls/users", String.class);
-        } catch (HttpClientErrorException e) {
+        } catch (RuntimeException e) {
             exception = true;
-            assertEquals(e.getStatusCode().value(), 403);
+            assertEquals(e.getMessage(), "403");
         }
         assertTrue(exception);
     }
@@ -362,9 +365,9 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         boolean exception = false;
         try {
             restTemplate.exchange(url, HttpMethod.PUT, requestEntity, ResponseDocument.class);
-        } catch (HttpClientErrorException e) {
+        } catch (RuntimeException e) {
             exception = true;
-            assertEquals(e.getStatusCode().value(), 401);
+            assertEquals(e.getMessage(), "401");
         }
         assertTrue(exception);
 
