@@ -324,13 +324,6 @@ public class DocumentDirectory implements Serializable {
             }
         }
 
-        private Node(Path path, Document document, List<Node> children) {
-            this.path = path;
-            this.document = document;
-            this.children = children;
-            Collections.sort(children);
-        }
-
         public Node(Path path, Document document) {
             this.path = path;
             this.document = document;
