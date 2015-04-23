@@ -25,5 +25,6 @@ public interface MetadataService {
     String createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
 
     String dropTable(JdbcTemplate jdbcTemplate, String table);
-    
+
+    String showTable(JdbcTemplate jdbcTemplate, String table);
 }

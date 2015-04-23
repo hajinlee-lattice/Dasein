@@ -57,11 +57,16 @@ public class SQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public String createNewEmptyTableFromExistingOne(String newTable, String oldTable) {
-        return "SELECT * INTO " + newTable + " SELECT * FROM " + oldTable + " WHERE 1 = 0";
+        return "SELECT * INTO " + newTable + " FROM " + oldTable + " WHERE 1 = 0";
     }
 
     @Override
     public String dropTable(String table) {
         return "IF OBJECT_ID('" + table + "', 'U') IS NOT NULL DROP TABLE " + table;
+    }
+
+    @Override
+    public String showTable(String table){
+        return "SELECT [name] FROM SYS.TABLES WHERE [name] = '" + table + "'";
     }
 }

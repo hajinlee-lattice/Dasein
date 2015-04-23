@@ -37,6 +37,8 @@ public abstract class MetadataProvider {
 
     public abstract String dropTable(String table);
 
+    public abstract String showTable(String table);
+
     public Schema getSchema(DbCreds dbCreds, String tableName) {
         SqoopOptions options = new SqoopOptions();
         options.setConnectString(getConnectionString(dbCreds));
@@ -68,5 +70,4 @@ public abstract class MetadataProvider {
         return url;
 
     }
-
 }

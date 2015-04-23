@@ -40,9 +40,8 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
 
     @Override
     public Long getRowCount(JdbcTemplate jdbcTemplate, String tableName) {
-        Map<String, Object> resMap = jdbcTemplate.queryForMap("show table status where name = '" + tableName + "'");
-        BigInteger numRows = (BigInteger) resMap.get("Rows");
-        return numRows.longValue();
+        Map<String, Object> resMap = jdbcTemplate.queryForMap("select count(*) from " + tableName);
+        return (Long) resMap.get("count(*)");
     }
 
     @Override
@@ -65,5 +64,10 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
     @Override
     public String dropTable(String table) {
         return "drop table if exists " + table;
+    }
+
+    @Override
+    public String showTable(String table){
+        return "show tables like '" + table + "'";
     }
 }
