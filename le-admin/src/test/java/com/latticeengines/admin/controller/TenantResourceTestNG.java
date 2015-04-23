@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
@@ -12,7 +13,12 @@ import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
-    
+
+    @BeforeClass(groups = "functional")
+    public void setup() throws Exception {
+        loginAD();
+    }
+
     @SuppressWarnings("unchecked")
     @Test(groups = "functional")
     public void getTenantsWithContractId() {
