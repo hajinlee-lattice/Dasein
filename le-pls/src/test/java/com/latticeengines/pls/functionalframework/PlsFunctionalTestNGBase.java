@@ -75,8 +75,8 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected static final String SUPER_ADMIN_USERNAME = "pls-super-admin-tester@test.lattice-engines.com";
     protected static final String INTERNAL_ADMIN_USERNAME = "pls-internal-admin-tester@test.lattice-engines.com";
-    protected static final String INTERNAL_USER_USERNAME = "pls-interal-user-tester@test.lattice-engines.com";
-    protected static final String EXTERNAL_ADMIN_USERNAME = "pls-exteranl-admin-tester@test.lattice-engines.ext";
+    protected static final String INTERNAL_USER_USERNAME = "pls-internal-user-tester@test.lattice-engines.com";
+    protected static final String EXTERNAL_ADMIN_USERNAME = "pls-external-admin-tester@test.lattice-engines.ext";
     protected static final String EXTERNAL_USER_USERNAME = "pls-external-user-tester@test.lattice-engines.ext";
 
     private static HashMap<AccessLevel, User> testingUsers;
