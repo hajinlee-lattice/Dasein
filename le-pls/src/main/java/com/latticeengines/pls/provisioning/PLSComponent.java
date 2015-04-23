@@ -11,8 +11,6 @@ public class PLSComponent {
     public static final String componentName = "PLS";
     private static final String versionString = "2.0";
 
-    private PLSInstaller installer = new PLSInstaller();
-
     public static String getVersionString() { return versionString; }
 
     public void registerBootStrapper() {
@@ -20,11 +18,13 @@ public class PLSComponent {
         serviceProps.dataVersion = 1;
         serviceProps.versionString = getVersionString();
         ServiceInfo serviceInfo = new ServiceInfo(serviceProps, //
-                installer, //
+                getInstaller(), //
                 new PLSUpgrader(), //
                 null);
         ServiceWarden.registerService(componentName, serviceInfo);
     }
 
     public PLSComponent() { registerBootStrapper(); }
+
+    private PLSInstaller getInstaller() { return new PLSInstaller(); }
 }
