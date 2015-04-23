@@ -86,6 +86,10 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     private Model model = null;
 
     private StandaloneHttpServer httpServer;
+    
+    public String getCustomer() {
+        return "Nutanix";
+    }
 
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
@@ -95,7 +99,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
     public void setup() throws Exception {
         FileSystem fs = FileSystem.get(yarnConfiguration);
 
-        fs.delete(new Path(customerBaseDir + "/Nutanix"), true);
+        fs.delete(new Path(String.format("%s/%s", customerBaseDir, getCustomer())), true);
 
         RandomForestAlgorithm randomForestAlgorithm = new RandomForestAlgorithm();
         randomForestAlgorithm.setPriority(0);
@@ -122,7 +126,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         m.setMetadataTable("EventMetadata");
         m.setTargetsList(Arrays.<String> asList(new String[] { "P1_Event" }));
         m.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
-        m.setCustomer("Nutanix");
+        m.setCustomer(getCustomer());
         m.setDataFormat("avro");
 
         return m;
@@ -152,7 +156,7 @@ public class ModelingServiceImplUnpivotedEndToEndTestNG extends DataPlatformFunc
         LoadConfiguration config = new LoadConfiguration();
         DbCreds creds = getCreds();
         config.setCreds(creds);
-        config.setCustomer("Nutanix");
+        config.setCustomer(getCustomer());
         config.setTable("Q_EventTable_Nutanix");
         config.setMetadataTable("EventMetadata");
         config.setKeyCols(Arrays.<String> asList(new String[] { "Nutanix_EventTable_Clean" }));
