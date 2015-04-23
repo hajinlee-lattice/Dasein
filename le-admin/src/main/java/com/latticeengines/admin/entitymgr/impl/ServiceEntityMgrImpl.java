@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 @Component("serviceEntityMgr")
 public class ServiceEntityMgrImpl implements ServiceEntityMgr {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(ServiceEntityMgrImpl.class);
 
     private final BatonService batonService = new BatonServiceImpl();

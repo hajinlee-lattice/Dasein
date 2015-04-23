@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 
 @Component("bardJamsEntityMgr")
 public class BardJamsEntityMgrImpl implements BardJamsEntityMgr {
+    @SuppressWarnings("unused")
     private static final Log log = LogFactory.getLog(BardJamsEntityMgrImpl.class);
 
     @Autowired
