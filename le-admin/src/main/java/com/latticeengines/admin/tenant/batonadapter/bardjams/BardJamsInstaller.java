@@ -15,7 +15,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 public class BardJamsInstaller extends LatticeComponentInstaller {
 
-    private int timeout = 30000;
+    private int timeout = 60000;
+    private long wait_interval_mills = 3000L;
 
     private final Log log = LogFactory.getLog(this.getClass());
 
@@ -58,16 +59,16 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
         while (currTime < endTime) {
             log.info("Starting to check status of tenant=" + tenant.toString());
             BardJamsTenant newTenant = bardJamsEntityMgr.findByKey(tenant);
-            if (newTenant.getStatus().equals(BardJamsTenantStatus.FINISHED.toString())) {
+            String status = newTenant.getStatus().trim();
+            if (BardJamsTenantStatus.FINISHED.getStatus().equals(status)) {
                 isSuccessful = true;
                 break;
             }
-            if (newTenant.getStatus().equals(BardJamsTenantStatus.FAILED.toString())) {
+            if (BardJamsTenantStatus.FAILED.getStatus().equals(status)) {
                 isSuccessful = false;
                 break;
             }
             try {
-                long wait_interval_mills = 3000L;
                 Thread.sleep(wait_interval_mills);
             } catch (Exception ex) {
                 log.warn("Warning!", ex);
