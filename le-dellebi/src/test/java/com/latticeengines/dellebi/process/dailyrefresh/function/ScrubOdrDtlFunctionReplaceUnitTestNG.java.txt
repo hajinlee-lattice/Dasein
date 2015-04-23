@@ -1,0 +1,45 @@
+package com.latticeengines.dellebi.process.dailyrefresh.function;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.testng.PowerMockTestCase;
+import org.testng.annotations.Test;
+
+import cascading.flow.FlowProcess;
+import cascading.operation.FunctionCall;
+import cascading.tuple.Fields;
+import cascading.tuple.Tuple;
+import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
+
+@PrepareForTest({ScrubOdrDtlFunctionReplace.class})
+public class ScrubOdrDtlFunctionReplaceUnitTestNG extends PowerMockTestCase  {
+    
+    @Test(groups = "unit")
+    public void testProcess() throws Exception {
+        
+        FunctionCall mockFunctionCall = mock(FunctionCall.class);
+        FlowProcess mockFlowProcess = mock(FlowProcess.class);
+        Fields fields = new Fields("#ORD_NUM");       
+        ScrubOdrDtlFunctionReplace function = new ScrubOdrDtlFunctionReplace(fields);   
+        TupleEntryCollector mockTupleEntryCollector= mock(TupleEntryCollector.class);
+        
+        TupleEntry argument = mock(TupleEntry.class);
+        when(mockFunctionCall.getArguments()).thenReturn(argument);
+        when(argument.getString("SVC_TAG_ID")).thenReturn("01234567890123456789");
+        when(argument.getString("SRC_BU_ID")).thenReturn("11");
+        when(mockFunctionCall.getOutputCollector()).thenReturn(mockTupleEntryCollector);
+        
+        Tuple mockTuple = mock(Tuple.class);
+        PowerMockito.whenNew(Tuple.class).withNoArguments().thenReturn(mockTuple);        
+        
+        function.operate(mockFlowProcess, mockFunctionCall); 
+        verify(mockTuple).add("11");
+        verify(mockTuple).add("012345678901");       
+    }
+
+}

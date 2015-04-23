@@ -1,0 +1,68 @@
+package com.latticeengines.dellebi.flowdef;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.Properties;
+
+import org.apache.commons.io.FileUtils;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.testng.PowerMockTestCase;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
+
+import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
+import com.latticeengines.dellebi.util.NormalFileSystemOperations;
+
+import cascading.flow.Flow;
+import cascading.flow.FlowDef;
+import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
+
+@PrepareForTest({DailyFlow.class,Thread.class,FileUtils.class})
+public class DailyFlowUnitTestNG extends PowerMockTestCase {
+    
+    @BeforeSuite(groups = "unit")
+    private void setUpBeforeClass() throws Exception {
+        String dellebi_propdir = System.getProperty("user.dir") + "/conf/env/local";
+        System.setProperty("DELLEBI_PROPDIR", dellebi_propdir);
+    }
+    
+    @Test(groups = "unit")
+    public void doDailyFlowTest() throws Exception{    
+        FlowDefinition testFlowDefinition = new FlowDefinition();
+        testFlowDefinition.setOrderSummaryFields("test");
+        testFlowDefinition.setCascadingInputDelimiter(",");
+        
+        ArrayList<FlowDef> al = new ArrayList<FlowDef>();
+        al.add(testFlowDefinition.getOrderSumDailyFlow());
+        DailyFlow dailFlow = new DailyFlow(al);
+        dailFlow.setDataHadoopInPath("DataIncomeDataPath");
+        dailFlow.setDataHadoopInPath("HadoopInPath");
+        dailFlow.setOrderSummary("summary");     
+        
+        ClassPathXmlApplicationContext mockContext = mock(ClassPathXmlApplicationContext.class);
+        PowerMockito.whenNew(ClassPathXmlApplicationContext.class).withArguments("dellebi-properties-context.xml",
+                "dellebi-context.xml").thenReturn(mockContext);
+        
+        NormalFileSystemOperations normalFileSystemOperations = mock(NormalFileSystemOperations.class);
+        when(mockContext.getBean("normaloperation", NormalFileSystemOperations.class)).thenReturn(normalFileSystemOperations);
+        
+        when(normalFileSystemOperations.listFileNumber(any(String.class))).thenReturn(1);
+        
+        Hadoop2MR1FlowConnector mockFlowConnector = mock(Hadoop2MR1FlowConnector.class);
+        PowerMockito.whenNew(Hadoop2MR1FlowConnector.class).withArguments(any(Properties.class)).thenReturn(mockFlowConnector);
+        Flow mockFlow = mock(Flow.class);
+        when(mockFlowConnector.connect(any(FlowDef.class))).thenReturn(mockFlow);
+     
+        dailFlow.doDailyFlow(mockContext);
+        verify(mockFlow).complete();
+        
+    }
+}

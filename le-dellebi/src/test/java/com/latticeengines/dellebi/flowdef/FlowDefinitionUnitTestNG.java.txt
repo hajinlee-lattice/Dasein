@@ -1,0 +1,74 @@
+package com.latticeengines.dellebi.flowdef;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+
+import cascading.flow.FlowDef;
+
+@ContextConfiguration(locations = { "classpath:dellebi-properties-context.xml"})
+public class FlowDefinitionUnitTestNG  extends AbstractTestNGSpringContextTests {
+
+    @Value("${dellebi.ordersummaryfields}")
+    private String orderSummaryFields;
+    @Value("${dellebi.orderdetailfields}")
+    private String orderDetailFields;
+    @Value("${dellebi.shiptoaddrfields}")
+    private String shipToAddrFields;
+    @Value("${dellebi.warrantyfields}")
+    private String warrantyFields;
+    
+    @BeforeSuite(groups = "unit")
+    private void setUpBeforeClass() throws Exception {
+        String dellebi_propdir = System.getProperty("user.dir") + "/conf/env/devlocal";
+        System.setProperty("DELLEBI_PROPDIR", dellebi_propdir);
+    }
+    
+    @Test(groups = "unit")
+    public void getOrderSumDailyFlowTest() {
+        
+        FlowDefinition flowDefinition = new FlowDefinition();
+        flowDefinition.setOrderSummaryFields(orderSummaryFields);
+        flowDefinition.setCascadingInputDelimiter(",");
+        FlowDef testFlowDef= flowDefinition.getOrderSumDailyFlow();
+        
+        Assert.assertEquals(testFlowDef.getName(),"OrderSumDailyFlow");       
+    }
+    
+    @Test(groups = "unit")
+    public void getOrderDetailDailyFlowTest() {
+        
+        FlowDefinition flowDefinition = new FlowDefinition();
+        flowDefinition.setOrderDetailFields(orderDetailFields);
+        flowDefinition.setCascadingInputDelimiter(",");
+        FlowDef testFlowDef= flowDefinition.getOrderDetailDailyFlow();
+        
+        Assert.assertEquals(testFlowDef.getName(),"OrderDetailDailyFlow");        
+    }
+    
+    @Test(groups = "unit")
+    public void getShipDailyFlowTest() {
+        
+        FlowDefinition flowDefinition = new FlowDefinition();
+        flowDefinition.setShipToAddrFields(shipToAddrFields);
+        flowDefinition.setCascadingInputDelimiter(",");
+        FlowDef testFlowDef= flowDefinition.getShipDailyFlow();
+        
+        Assert.assertEquals(testFlowDef.getName(),"ShipDailyFlow");        
+    }
+    
+    @Test(groups = "unit")
+    public void getWarrantyDailyFlowTest() {
+        
+        FlowDefinition flowDefinition = new FlowDefinition();
+        flowDefinition.setWarrantyFields(warrantyFields);
+        flowDefinition.setCascadingInputDelimiter(",");
+        FlowDef testFlowDef= flowDefinition.getWarrantyDailyFlow();
+        
+        Assert.assertEquals(testFlowDef.getName(),"WarrantyDailyFlow");        
+    }
+}

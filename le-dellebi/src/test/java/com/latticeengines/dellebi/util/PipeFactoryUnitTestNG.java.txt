@@ -1,0 +1,59 @@
+package com.latticeengines.dellebi.util;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.io.File;
+
+import org.apache.commons.io.FileUtils;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.testng.PowerMockTestCase;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.Assert;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
+
+import static org.mockito.Mockito.when;
+
+import com.latticeengines.dellebi.flowdef.DailyFlow;
+import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrSumFunctionReplace;
+
+import cascading.pipe.Pipe;
+import cascading.property.ConfigDef;
+import cascading.tuple.Fields;
+
+@PrepareForTest({PipeFactory.class})
+public class PipeFactoryUnitTestNG extends PowerMockTestCase {
+    
+    @BeforeSuite(groups = "unit")
+    public void setUpBeforeClass() throws Exception {
+        String dellebi_propdir = System.getProperty("user.dir") + "/conf/env/dev";
+        System.setProperty("DELLEBI_PROPDIR", dellebi_propdir);
+    }
+
+    @Test(groups = "unit")
+    public void testCreateOdrSumPipe() throws Exception {
+        Fields Arguments1 = new Fields("SRC_BU_ID");
+        Fields Arguments2 = new Fields("PROCESSED_FLG");
+        Fields Arguments3 = new Fields("STAGE_DT");
+        Fields Arguments4 = new Fields("FileName");
+        Fields Arguments5 = new Fields("SRC_LCL_CHNL_CD", "REF_LCL_CHNL_CD","CNCL_DT","INV_DT","ORD_DT","ORD_STAT_DT","SHIP_DT","EXCH_DT","SHIP_BY_DT","PRF_OF_DLVR_DT","ESTD_BUS_DLVR_DT");
+             
+        Fields mockFields= mock(Fields.class);
+        ScrubOdrSumFunctionReplace fp = mock (ScrubOdrSumFunctionReplace.class);
+        PowerMockito.whenNew(Fields.class).withArguments("#ORD_NBR").thenReturn(mockFields);
+        PowerMockito.whenNew(Fields.class).withArguments("SRC_BU_ID").thenReturn(Arguments1); 
+        PowerMockito.whenNew(Fields.class).withArguments("PROCESSED_FLG").thenReturn(Arguments2);
+        PowerMockito.whenNew(Fields.class).withArguments("STAGE_DT").thenReturn(Arguments3);
+        PowerMockito.whenNew(Fields.class).withArguments("FileName").thenReturn(Arguments4);
+        PowerMockito.whenNew(Fields.class).withArguments("SRC_LCL_CHNL_CD", "REF_LCL_CHNL_CD","CNCL_DT","INV_DT","ORD_DT","ORD_STAT_DT","SHIP_DT","EXCH_DT","SHIP_BY_DT","PRF_OF_DLVR_DT","ESTD_BUS_DLVR_DT").thenReturn(Arguments5);
+        when(mockFields.append(Arguments1)).thenReturn(Arguments1);
+        
+        Pipe filePipe = PipeFactory.getPipe("order_summary_Pipe", "SRC_BU_ID");
+        verify(mockFields).append(Arguments1);    
+        Assert.assertEquals(filePipe.getName(),"copy");      
+    }
+}

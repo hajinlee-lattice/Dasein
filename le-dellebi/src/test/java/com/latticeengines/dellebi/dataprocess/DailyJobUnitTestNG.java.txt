@@ -1,0 +1,39 @@
+package com.latticeengines.dellebi.dataprocess;
+
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import static org.mockito.Mockito.*;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.testng.PowerMockTestCase;
+import org.quartz.JobExecutionContext;
+
+import com.latticeengines.dellebi.flowdef.DailyFlow;
+
+@PrepareForTest({DailyJob.class})
+public class DailyJobUnitTestNG extends PowerMockTestCase{ 
+
+	@BeforeClass(groups = "unit")
+	public static void setUpBeforeClass() throws Exception {
+
+        String dellebi_propdir = System.getProperty("user.dir") + "/conf/env/dev";
+        System.setProperty("DELLEBI_PROPDIR", dellebi_propdir);
+	}
+
+	@Test(groups = "unit")
+	public void testProcess() throws Exception {
+	    ClassPathXmlApplicationContext mockContext = mock(ClassPathXmlApplicationContext.class);
+	    PowerMockito.whenNew(ClassPathXmlApplicationContext.class).withArguments("dellebi-properties-context.xml",
+                "dellebi-context.xml").thenReturn(mockContext);
+	    
+	    DailyJob dailyJob = new DailyJob();
+	    JobExecutionContext mockExeContext = mock(JobExecutionContext.class);       
+        
+        DailyFlow mockDailyFlow = mock(DailyFlow.class);
+        when(mockContext.getBean("dailyFlow", DailyFlow.class)).thenReturn(mockDailyFlow);
+        dailyJob.execute(mockExeContext);
+        
+        verify(mockDailyFlow).doDailyFlow(mockContext);	  
+	}
+}
