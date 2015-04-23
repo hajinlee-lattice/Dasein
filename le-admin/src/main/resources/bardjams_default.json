@@ -78,6 +78,11 @@
 		},
 
 		{
+			"Node": "WeekendSchedule_Name",
+			"Data": ""
+		},
+
+		{
 			"Node": "Data_LaunchPath",
 			"Data": ""
 		},

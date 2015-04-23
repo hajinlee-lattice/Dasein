@@ -42,8 +42,8 @@ public class BardJamsComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
 
-//        ((BardJamsInstaller) installer).setBardJamsEntityMgr(bardJamsEntityMgr);
-//        ((BardJamsInstaller) installer).setTimeout(timeout);
+        ((BardJamsInstaller) installer).setBardJamsEntityMgr(bardJamsEntityMgr);
+        ((BardJamsInstaller) installer).setTimeout(timeout);
         return installer;
     }
 

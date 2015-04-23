@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.admin.BardJamsTenant;
 import com.latticeengines.domain.exposed.admin.BardJamsTenantStatus;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -113,6 +114,10 @@ public class BardJamsInstaller extends LatticeComponentInstaller {
     }
 
     private String getData(DocumentDirectory configDir, String field) {
-        return configDir.get("/" + field).getDocument().getData();
+        Node node = configDir.get("/" + field);
+        if (node == null || node.getDocument() == null) {
+            return null;
+        }
+        return node.getDocument().getData();
     }
 }
