@@ -34,6 +34,7 @@ public class ContractLifecycleManager {
             camille.create(contractsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Contracts path @ {}", contractsPath);
         } catch (KeeperException.NodeExistsException e) {
+            log.debug("Contracts path already exists in current Pod");
         }
 
         Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
@@ -74,23 +75,33 @@ public class ContractLifecycleManager {
         Camille c = CamilleEnvironment.getCamille();
 
         Path contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
-        Document contractPropertiesDocument = c.get(contractPath.append(PathConstants.PROPERTIES_FILE));
-        ContractProperties properties = DocumentUtils.toTypesafeDocument(contractPropertiesDocument, ContractProperties.class);
+        ContractProperties properties = null;
+        try {
+            Document contractPropertiesDocument = c.get(contractPath.append(PathConstants.PROPERTIES_FILE));
+            properties = DocumentUtils.toTypesafeDocument(contractPropertiesDocument, ContractProperties.class);
+        } catch (KeeperException.NoNodeException e) {
+            log.info("Failed to get properties.json for contract {}", contractId);
+        }
 
-        ContractInfo contractInfo = new ContractInfo(properties);
-        return contractInfo;
+        if (properties != null) {
+            return new ContractInfo(properties);
+        } else {
+            return null;
+        }
     }
 
-    public static List<AbstractMap.SimpleEntry<String, ContractInfo>> getAll() throws IllegalArgumentException, Exception {
-        List<AbstractMap.SimpleEntry<String, ContractInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, ContractInfo>>();
+    public static List<AbstractMap.SimpleEntry<String, ContractInfo>> getAll() throws Exception {
+        List<AbstractMap.SimpleEntry<String, ContractInfo>> toReturn = new ArrayList<>();
 
         Camille c = CamilleEnvironment.getCamille();
         List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder.buildContractsPath(CamilleEnvironment
                 .getPodId()));
 
         for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
-            toReturn.add(new AbstractMap.SimpleEntry<String, ContractInfo>(childPair.getValue().getSuffix(), getInfo(childPair
-                    .getValue().getSuffix())));
+            ContractInfo contractInfo = getInfo(childPair.getValue().getSuffix());
+            if (contractInfo != null) {
+                toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), contractInfo));
+            }
         }
 
         return toReturn;

@@ -123,12 +123,19 @@ public class TenantLifecycleManager {
                 CamilleEnvironment.getPodId(), contractId));
 
         for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
-            Document tenantPropertiesDocument = c.get(childPair.getValue().append(PathConstants.PROPERTIES_FILE));
-            TenantProperties properties = DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
+            TenantProperties properties = null;
+            try {
+                Document tenantPropertiesDocument = c.get(childPair.getValue().append(PathConstants.PROPERTIES_FILE));
+                properties = DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
+            } catch (KeeperException.NoNodeException e ) {
+                log.warn("Failed to retrieve the properties.json at path {}", childPair.getValue().toString());
+            }
 
-            TenantInfo tenantInfo = new TenantInfo(properties);
-            tenantInfo.contractId = contractId;
-            toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), tenantInfo));
+            if (properties != null) {
+                TenantInfo tenantInfo = new TenantInfo(properties);
+                tenantInfo.contractId = contractId;
+                toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), tenantInfo));
+            }
         }
 
         return toReturn;
