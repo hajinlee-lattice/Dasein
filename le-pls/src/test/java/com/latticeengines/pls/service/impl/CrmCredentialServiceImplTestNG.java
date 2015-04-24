@@ -30,7 +30,6 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setUserName("latticeenginessandbox1_9026948050BD016F376AE6");
         crmCredential.setPassword("41802295835604145500BBDD0011770133777863CA58");
         newCrmCredential = crmService.verifyCredential("marketo", "tenantId", "contractId", crmCredential);
-
         
         // eloqua
         crmCredential = new CrmCredential();
@@ -45,9 +44,6 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
     public void getCredential() {
         CrmCredentialService crmService = new CrmCredentialServiceImpl();
         CrmCredential newCrmCredential = crmService.getCredential("sfdc", "tenantId", "contractId");
-        Assert.assertEquals(newCrmCredential.getUserName(), "apeters-widgettech@lattice-engines.com");
-        Assert.assertEquals(newCrmCredential.getPassword(), "Happy2010");
-        Assert.assertEquals(newCrmCredential.getSecurityToken(), "oIogZVEFGbL3n0qiAp6F66TC");
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
 
     }

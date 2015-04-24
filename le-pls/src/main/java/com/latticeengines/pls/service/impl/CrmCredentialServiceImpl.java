@@ -18,11 +18,13 @@ import org.springframework.web.client.RestTemplate;
 
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HttpWithRetryUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.Document;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
@@ -44,7 +46,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
     private String eloquaLoginUrl;
 
     @Override
-    public CrmCredential verifyCredential(String crmType, String tenantId, String contractId, CrmCredential crmCredential) {
+    public CrmCredential verifyCredential(String crmType, String tenantId, String contractId,
+            CrmCredential crmCredential) {
         switch (crmType) {
         case CRM_SFDC:
             return updateSfdcConfig(crmType, tenantId, contractId, crmCredential);
@@ -57,7 +60,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         return new CrmCredential();
     }
 
-    private CrmCredential updateSfdcConfig(String crmType, String tenantId, String contractId, CrmCredential crmCredential) {
+    private CrmCredential updateSfdcConfig(String crmType, String tenantId, String contractId,
+            CrmCredential crmCredential) {
 
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
         String orgId = getSfdcOrgId(crmCredential);
@@ -69,24 +73,25 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         return newCrmCredential;
     }
 
-    private CrmCredential updateMarketoConfig(String crmType, String tenantId, String contractId, CrmCredential crmCredential) {
+    private CrmCredential updateMarketoConfig(String crmType, String tenantId, String contractId,
+            CrmCredential crmCredential) {
 
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
         verifyMarketoFromDataLoader(crmType, tenantId, contractId, newCrmCredential);
-        writeToZooKeeper(crmType, tenantId, contractId, newCrmCredential);
         return newCrmCredential;
 
     }
 
-    private CrmCredential updateEloquaConfig(String crmType, String tenantId, String contractId, CrmCredential crmCredential) {
+    private CrmCredential updateEloquaConfig(String crmType, String tenantId, String contractId,
+            CrmCredential crmCredential) {
         CrmCredential newCrmCredential = new CrmCredential(crmCredential);
         verifyEloquaFromDataLoader(crmType, tenantId, contractId, newCrmCredential);
-        writeToZooKeeper(crmType, tenantId, contractId, newCrmCredential);
         return newCrmCredential;
 
     }
 
-    private void verifyEloquaFromDataLoader(String crmType, String tenantId, String contractId, CrmCredential newCrmCredential) {
+    private void verifyEloquaFromDataLoader(String crmType, String tenantId, String contractId,
+            CrmCredential newCrmCredential) {
 
         String url = dataLoaderUrl + "/ValidateExternalAPICredentials";
         Map<String, String> parameters = new HashMap<>();
@@ -97,7 +102,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     }
 
-    private void verifyMarketoFromDataLoader(String crmType, String tenantId, String contractId, CrmCredential newCrmCredential) {
+    private void verifyMarketoFromDataLoader(String crmType, String tenantId, String contractId,
+            CrmCredential newCrmCredential) {
         String url = dataLoaderUrl + "/ValidateExternalAPICredentials";
 
         Map<String, String> parameters = new HashMap<>();
@@ -106,7 +112,8 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
         excuteHttpRequest(url, parameters);
     }
 
-    private void verifySfdcFromDataLoader(String crmType, String tenantId, String contractId, CrmCredential newCrmCredential) {
+    private void verifySfdcFromDataLoader(String crmType, String tenantId, String contractId,
+            CrmCredential newCrmCredential) {
         String url = dataLoaderUrl + "/ValidateExternalAPICredentials";
 
         Map<String, String> parameters = new HashMap<>();
@@ -150,12 +157,24 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     private void writeToZooKeeper(String crmType, String tenantId, String contractId, CrmCredential newCrmCredential) {
         try {
-            Camille camille = CamilleEnvironment.getCamille();
-            Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
-                    crmType);
-            Document doc = new Document(JsonUtils.serialize(newCrmCredential));
-            camille.upsert(docPath, doc, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
-
+            CustomerSpaceInfo spaceInfo = null;
+            try {
+                spaceInfo = SpaceLifecycleManager.getInfo(contractId, tenantId,
+                        CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+            } catch (Exception ex) {
+                Camille camille = CamilleEnvironment.getCamille();
+                Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
+                        CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+                log.warn("There's no tenant's space path:" + path.toString() + " create it.");
+                camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
+            }
+            if (spaceInfo == null) {
+                spaceInfo = new CustomerSpaceInfo(new CustomerSpaceProperties(), "");
+            } else if (spaceInfo.properties == null) {
+                spaceInfo.properties = new CustomerSpaceProperties();
+            }
+            spaceInfo.properties.sfdcOrgId = newCrmCredential.getOrgId();
+            SpaceLifecycleManager.create(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, spaceInfo);
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18030, ex);
         }
@@ -189,12 +208,13 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
     public CrmCredential getCredential(String crmType, String tenantId, String contractId) {
 
         try {
-            Path docPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
-                    crmType);
-            Camille camille = CamilleEnvironment.getCamille();
-            Document doc = camille.get(docPath);
-            CrmCredential newCrmCredential = JsonUtils.deserialize(doc.getData(), CrmCredential.class);
-            return newCrmCredential;
+            CrmCredential crmCredential = new CrmCredential();
+            CustomerSpaceInfo spaceInfo = SpaceLifecycleManager.getInfo(contractId, tenantId,
+                    CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+            if (spaceInfo != null && spaceInfo.properties != null) {
+                crmCredential.setOrgId(spaceInfo.properties.sfdcOrgId);
+            }
+            return crmCredential;
         } catch (Exception ex) {
             throw new LedpException(LedpCode.LEDP_18031, ex);
         }

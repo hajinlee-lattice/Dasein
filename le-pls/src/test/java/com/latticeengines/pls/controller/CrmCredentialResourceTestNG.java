@@ -1,8 +1,7 @@
 package com.latticeengines.pls.controller;
 
-import junit.framework.Assert;
-
 import org.apache.commons.codec.digest.DigestUtils;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -43,7 +42,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
     public void getSfdcCredential() {
         CrmCredential crmCredential = restTemplate.getForObject(getRestAPIHostPort()
                 + "/pls/verifycrm/sfdc?tenantId=tenantId&contractId=contractId", CrmCredential.class);
-        Assert.assertEquals(crmCredential.getSecurityToken(), "oIogZVEFGbL3n0qiAp6F66TC");
+        Assert.assertEquals(crmCredential.getOrgId(), "00D80000000KvZoEAK");
     }
 
     @Test(groups = { "deployment" })
@@ -58,13 +57,6 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
                 + "/pls/verifycrm/marketo?tenantId=tenantId&contractId=contractI", crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getUserName(), "latticeenginessandbox1_9026948050BD016F376AE6");
-    }
-
-    @Test(groups = { "deployment" }, dependsOnMethods = { "verifyMarketoCredential" })
-    public void getMarketoCredential() {
-        CrmCredential crmCredential = restTemplate.getForObject(getRestAPIHostPort()
-                + "/pls/verifycrm/marketo?tenantId=tenantId&contractId=contractId", CrmCredential.class);
-        Assert.assertEquals(crmCredential.getPassword(), "41802295835604145500BBDD0011770133777863CA58");
     }
 
     @Test(groups = { "deployment" })
@@ -82,10 +74,4 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         Assert.assertEquals(newCrmCredential.getUserName(), "Matt.Sable");
     }
 
-    @Test(groups = { "deployment" }, dependsOnMethods = { "verifyEloquaCredential" })
-    public void getEloquaCredential() {
-        CrmCredential crmCredential = restTemplate.getForObject(getRestAPIHostPort()
-                + "/pls/verifycrm/eloqua?tenantId=tenantId&contractId=contractId", CrmCredential.class);
-        Assert.assertEquals(crmCredential.getPassword(), "Lattice1");
-    }
 }
