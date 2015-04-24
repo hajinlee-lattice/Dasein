@@ -55,6 +55,7 @@ public class ModelSummaryDownloadServiceImpl extends QuartzJobBean implements Mo
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        log.info("ModelDownloader is ready to pick up models.");
         timeStampContainer.setTimeStamp();
         if (log.isDebugEnabled()) {
            log.debug(timeStampContainer.getTimeStamp().getSeconds());
