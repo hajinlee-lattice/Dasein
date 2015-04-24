@@ -20,7 +20,7 @@ import cascading.tuple.TupleEntry;
 public class ScrubOdrSumFunctionReplace extends BaseOperation implements Function {
 
     private static final long serialVersionUID = 7208027092973311661L;
-    private static final Logger LOGGER = Logger.getLogger(DellEBIMain.class);
+    private static final Logger LOGGER = Logger.getLogger(ScrubOdrSumFunctionReplace.class);
 
     public ScrubOdrSumFunctionReplace(Fields fieldDeclaration) {
         super(2, fieldDeclaration);
