@@ -16,7 +16,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.springframework.stereotype.Component;
 
 import com.latticeengines.scoring.runtime.mapreduce.EventDataScoringMapper;
 
@@ -24,7 +23,7 @@ public class ScoringMapperUtil {
 	
 	private static final Log log = LogFactory.getLog(EventDataScoringMapper.class);
 
-    private static final int THRESHOLD = 100000;
+    private static final int THRESHOLD = 10000;
     private static final String LEAD_SERIALIZE_TYPE_KEY = "SerializedValueAndType";
     private static final String LEAD_RECORD_LEAD_ID_COLUMN = "LeadID";
     private static final String LEAD_RECORD_MODEL_ID_COLUMN = "ModelID";
@@ -53,7 +52,7 @@ public class ScoringMapperUtil {
             ex.printStackTrace();
         }
     }
-    
+    			
     public static void manipulateLeadFile(HashMap<String, Integer> modelNumberMap, String record, HashMap<String, JSONObject> models) {
     	// find the column which contains the modelID   	
     	try {
@@ -135,7 +134,7 @@ public class ScoringMapperUtil {
 			}
 			
 			//log.info("The file it writes to is " + jsonObj.toString());
-			bw.write(jsonObj.toString());
+			bw.write(jsonObj.toString() + "\n");
 			bw.flush();
 			bw.close();
 		} catch (IOException e) {
