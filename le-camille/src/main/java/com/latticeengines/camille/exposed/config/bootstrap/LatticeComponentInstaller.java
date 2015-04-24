@@ -15,6 +15,9 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
 
     private String componentName;
 
+    // dryrun flag to turn on/off true installation steps, for functional tests.
+    private boolean dryrun = false;
+
     protected LatticeComponentInstaller(String componentName) {
         this.componentName = componentName;
     }
@@ -22,12 +25,16 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
     // the true installation steps other than writing to Camille
     protected abstract void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir);
 
+    protected void setDryrun(boolean dryrun) { this.dryrun = dryrun; }
+
     @Override
     public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(properties);
         DocumentDirectory dir = sDir.getDocumentDirectory();
         dir.makePathsLocal();
-        installCore(space, serviceName, dataVersion, dir);
+
+        if (!dryrun) { installCore(space, serviceName, dataVersion, dir); }
+
         CustomerSpaceServiceBootstrapManager.reset(serviceName, space);
         return dir;
     }
