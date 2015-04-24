@@ -21,7 +21,6 @@ public class TestLatticeComponent extends LatticeComponent {
     private CustomerSpaceServiceScope scope = null;
 
     public TestLatticeComponent() {
-        //song: override properties are stored at the /Spaces/{spaceId} node.
         Map<String, String> overrideProps = this.installer.getSerializableDefaultConfig().flatten();
         scope = new CustomerSpaceServiceScope("CONTRACT1", //
                 "TENANT1", //
