@@ -1,6 +1,7 @@
 var app = angular.module("app.tenants.directive.CamilleConfigDirective", [
     'app.tenants.service.TenantService',
     "app.tenants.util.TenantUtility",
+    "app.tenants.directive.ListEntryDirective",
     'ui.bootstrap',
     'ui.router',
     'ngSanitize'
@@ -59,6 +60,8 @@ app.service('CamilleConfigUtility', function(){
             return "boolean";
         } else if (typeof data === "object") {
             return "object";
+        } else if (typeof data === "array") {
+            return "array";
         } else {
             return "string";
         }
@@ -68,6 +71,7 @@ app.service('CamilleConfigUtility', function(){
             case "boolean":
             case "options":
             case "object":
+            case "array":
                 return false;
             default:
                 return true;
@@ -76,6 +80,7 @@ app.service('CamilleConfigUtility', function(){
     this.isBoolean = function(type) { return type === "boolean"; };
     this.isSelect = function(type) { return type === "options"; };
     this.isObject = function(type) { return type === "object"; };
+    this.isList = function(type) { return type === "array"; };
 
 });
 
@@ -187,6 +192,16 @@ app.directive('configEntry', function(){
                 $scope.objectUpdater = function() {
                     $scope.config.Data = JSON.stringify($scope.jsonData);
                 }
+            }
+
+            $scope.isList = CamilleConfigUtility.isList($scope.type);
+            if ($scope.isList) {
+                $scope.listData =
+                    _.reduce(
+                        JSON.parse($scope.config.Data),
+                        function(agg, item){ return agg + ", " + item; },
+                        "");
+                $scope.listData = $scope.listData.substring(1);
             }
 
             if ($scope.isSelect) { $scope.options = $scope.config.Metadata.Options; }

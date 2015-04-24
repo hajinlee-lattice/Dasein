@@ -1,7 +1,11 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "RootAdminEmail", "Data": "bnguyen@lattice-engines.com", "Metadata": {"Type": "email"} },
+    {
+      "Node":"AdminEmails",
+      "Data": "[\"rswarts@lattice-engines.com\"]",
+      "Metadata" : {"Type":"array"}
+    },
     { "Node": "TenantName", "Data": "LPA 2.0 Tenant" }
   ]
 }

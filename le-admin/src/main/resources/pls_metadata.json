@@ -1,6 +1,2 @@
 {
-  "RootPath": "/",
-  "Nodes": [
-    { "Node": "RootAdminEmail", "Data": {"Type": "email"} }
-  ]
 }

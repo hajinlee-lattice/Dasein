@@ -1,7 +1,9 @@
 package com.latticeengines.pls.provisioning;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,7 +18,10 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.camille.exposed.config.bootstrap.LatticeComponentInstaller;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -59,44 +64,34 @@ public class PLSInstaller extends LatticeComponentInstaller {
 
         // get tenant information
         String tenantId = space.getTenantId();
-        String adminEmail, tenantName;
+        String tenantName, emailListInJson;
+        List<String> adminEmails = new ArrayList<>();
         try {
-            adminEmail = configDir.get("/RootAdminEmail").getDocument().getData();
+            emailListInJson = configDir.get("/AdminEmails").getDocument().getData();
             tenantName = configDir.get("/TenantName").getDocument().getData();
         } catch (NullPointerException e) {
-            throw new LedpException(LedpCode.LEDP_18028, new String[]{tenantId});
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
         }
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode aNode = mapper.readTree(emailListInJson);
+            if (!aNode.isArray()) {
+                throw new IOException("AdminEmails suppose to be a list of strings");
+            }
+            for (JsonNode node : aNode) {
+                adminEmails.add(node.asText());
+            }
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse AdminEmails to a list of valid emails", e);
+        }
+
 
         Tenant tenant = new Tenant();
         tenant.setId(tenantId);
         tenant.setName(tenantName);
 
-        // construct User
-        User adminUser = new User();
-        adminUser.setUsername(adminEmail);
-        adminUser.setFirstName("Super");
-        adminUser.setLastName("Admin");
-        adminUser.setAccessLevel(AccessLevel.SUPER_ADMIN.name());
-        adminUser.setActive(true);
-        adminUser.setTitle("Lattice PLO");
-        adminUser.setEmail(adminEmail);
-
-        // construct credential
-        Credentials creds = new Credentials();
-        creds.setUsername(adminEmail);
-        creds.setPassword("EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
-
-        // construct user registration
-        UserRegistration uReg = new UserRegistration();
-        uReg.setUser(adminUser);
-        uReg.setCredentials(creds);
-
-        UserRegistrationWithTenant urt = new UserRegistrationWithTenant();
-        urt.setUserRegistration(uReg);
-        urt.setTenant(tenantId);
-
-        LOGGER.info(String.format(
-                "Provisioning tenant %s for email %s through API %s", tenantId, adminEmail, RESTAPI_HOST_PORT));
+        LOGGER.info(String.format("Provisioning tenant %s through API %s", tenantId, RESTAPI_HOST_PORT));
 
         Throwable e = new LedpException(LedpCode.LEDP_18028, new String[]{tenantId});
 
@@ -124,9 +119,8 @@ public class PLSInstaller extends LatticeComponentInstaller {
             throw new LedpException(LedpCode.LEDP_18028, "Failed to create the requested tenant " + tenantId, e);
         }
 
-        boolean adminCreated = restTemplate.postForObject(RESTAPI_HOST_PORT + "/pls/admin/users", urt, Boolean.class);
-        if (!adminCreated) {
-            throw new LedpException(LedpCode.LEDP_18028, "Failed to create the admin user " + adminEmail, e);
+        for(String adminEmail : adminEmails) {
+            createAdminUser(adminEmail, tenantId);
         }
     }
 
@@ -145,6 +139,37 @@ public class PLSInstaller extends LatticeComponentInstaller {
             requestWrapper.getHeaders().add(Constants.INTERNAL_SERVICE_HEADERNAME, headerValue);
 
             return execution.execute(requestWrapper, body);
+        }
+    }
+
+    private void createAdminUser(String username, String tenantId) {
+        // construct User
+        User adminUser = new User();
+        adminUser.setUsername(username);
+        adminUser.setFirstName("Super");
+        adminUser.setLastName("Admin");
+        adminUser.setAccessLevel(AccessLevel.SUPER_ADMIN.name());
+        adminUser.setActive(true);
+        adminUser.setTitle("Lattice PLO");
+        adminUser.setEmail(username);
+
+        // construct credential
+        Credentials creds = new Credentials();
+        creds.setUsername(username);
+        creds.setPassword("EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=");
+
+        // construct user registration
+        UserRegistration uReg = new UserRegistration();
+        uReg.setUser(adminUser);
+        uReg.setCredentials(creds);
+
+        UserRegistrationWithTenant urt = new UserRegistrationWithTenant();
+        urt.setUserRegistration(uReg);
+        urt.setTenant(tenantId);
+
+        boolean adminCreated = restTemplate.postForObject(RESTAPI_HOST_PORT + "/pls/admin/users", urt, Boolean.class);
+        if (!adminCreated) {
+            throw new LedpException(LedpCode.LEDP_18028, "Failed to create the admin user " + username, new RuntimeException());
         }
     }
 

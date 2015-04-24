@@ -6,6 +6,8 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
@@ -42,7 +44,16 @@ public class PLSConfigTestNG extends ConfigurationSchemaTestNGBase {
     public void testConfig4() throws IOException {
         DocumentDirectory dir = batonService.getDefaultConfiguration(this.component.getName());
 
-        String adminEmail = dir.get("/RootAdminEmail").getDocument().getData();
-        Assert.assertEquals(adminEmail, "bnguyen@lattice-engines.com");
+        String adminEmails = dir.get("/AdminEmails").getDocument().getData();
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode aNode = mapper.readTree(adminEmails);
+        if (!aNode.isArray()) {
+            throw new AssertionError("AdminEmails suppose to be a list of strings");
+        }
+        boolean containsRob = false;
+        for (JsonNode node : aNode) {
+            containsRob = containsRob || node.asText().equals("rswarts@lattice-engines.com");
+        }
+        Assert.assertTrue(containsRob);
     }
 }

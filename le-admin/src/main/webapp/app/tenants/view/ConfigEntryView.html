@@ -1,10 +1,11 @@
 <p class="readonly-config-entry" ng-if="readonly && !isObject">
     <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
     <span class="node">{{ config.Node }}</span> :
-    <span>{{ config.Data }}</span>
+    <span ng-show="!isList">{{ config.Data }}</span>
+    <span ng-show="isList">{{ listData }}</span>
 </p>
 
-<form name="configform" ng-hide="isObject" class="form-inline" ng-class='{"has-error": showError}' novalidate>
+<form name="configform" ng-hide="isObject || isList" class="form-inline" ng-class='{"has-error": showError}' novalidate>
     <div ng-if="!readonly">
         <label class="control-label">
             <i ng-show="expandable" class="fa" ng-class="{'fa-caret-down': isOpen, 'fa-caret-right': !isOpen}"></i>
@@ -32,6 +33,8 @@
         </label>
     </div>
 </form>
+
+<list-entry ng-if="isList" is-valid="isValid" readonly="readonly" config="config"></list-entry>
 
 <accordion-group ng-if="isObject" ng-init="isOpen = !readonly" is-open="isOpen">
     <accordion-heading class="accordion-heading" is-open="isOpen">
