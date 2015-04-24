@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.entitymgr.BardJamsEntityMgr;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.camille.exposed.config.bootstrap.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
@@ -18,7 +19,10 @@ public class BardJamsComponent extends LatticeComponent {
     @Value("${admin.bardjams.timeout}")
     private int timeout;
 
-    private CustomerSpaceServiceInstaller installer = new BardJamsInstaller();
+    @Value("${admin.bardjams.dryrun}")
+    private boolean dryrun;
+
+    private LatticeComponentInstaller installer = new BardJamsInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new BardJamsUpgrader();
     public static final String componentName = "BardJams";
 
@@ -44,6 +48,7 @@ public class BardJamsComponent extends LatticeComponent {
 
         ((BardJamsInstaller) installer).setBardJamsEntityMgr(bardJamsEntityMgr);
         ((BardJamsInstaller) installer).setTimeout(timeout);
+        installer.setDryrun(dryrun);
         return installer;
     }
 

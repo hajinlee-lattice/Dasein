@@ -25,7 +25,7 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
     // the true installation steps other than writing to Camille
     protected abstract void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory configDir);
 
-    protected void setDryrun(boolean dryrun) { this.dryrun = dryrun; }
+    public void setDryrun(boolean dryrun) { this.dryrun = dryrun; }
 
     @Override
     public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
