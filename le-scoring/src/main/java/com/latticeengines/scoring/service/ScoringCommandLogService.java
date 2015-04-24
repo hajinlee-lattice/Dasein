@@ -25,4 +25,6 @@ public interface ScoringCommandLogService {
     List<ScoringCommandLog> findByScoringCommand(ScoringCommand scoringCommand);
 
     void logException(ScoringCommand scoringCommand, String message, Exception e);
+
+    void delete(ScoringCommandLog scoringCommandLog);
 }

@@ -90,7 +90,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
             AvroJob.setInputKeySchema(mrJob, schema);
 
             String dataTypeFilePath = inputDir + "/" + dataTypeFile;
-            generateSchema(schema, dataTypeFilePath, config);
+            generateDataTypeSchema(schema, dataTypeFilePath, config);
 
             String outputDir = properties.getProperty(MapReduceProperty.OUTPUT.name());
             config.set(MapReduceProperty.OUTPUT.name(), outputDir);
@@ -107,7 +107,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
                     int idx = cachePaths[i].indexOf(customer);
                     // ${customer}/models/${table_name}/model_id
                     String id = cachePaths[i].substring(idx).split("/")[3];
-                    cacheFiles[i] = new URI(cachePaths[i] + "#" + id);
+                    cacheFiles[i] = new URI(cachePaths[i].trim() + "#" + id);
                 }
                 mrJob.setCacheFiles(cacheFiles);
             }
@@ -118,7 +118,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
                         comma);
                 URI[] cacheArchives = new URI[cacheArchivePaths.length];
                 for (int i = 0; i < cacheArchives.length; i++) {
-                    cacheArchives[i] = new URI(cacheArchivePaths[i]);
+                    cacheArchives[i] = new URI(cacheArchivePaths[i].trim());
                 }
                 mrJob.setCacheArchives(cacheArchives);
             }
@@ -130,7 +130,7 @@ public class EventDataScoringJob extends Configured implements Tool, MRJobCustom
 
     @SuppressWarnings("unchecked")
     @VisibleForTesting
-    void generateSchema(Schema schema, String dataTypeFilePath, Configuration config) {
+    void generateDataTypeSchema(Schema schema, String dataTypeFilePath, Configuration config) {
         List<Field> fields = schema.getFields();
         JSONObject jsonObj = new JSONObject();
         for(Field field : fields){

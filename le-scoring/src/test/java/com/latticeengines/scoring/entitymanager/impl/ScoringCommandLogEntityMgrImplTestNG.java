@@ -29,8 +29,6 @@ public class ScoringCommandLogEntityMgrImplTestNG extends ScoringFunctionalTestN
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        scoringCommandLogEntityMgr.deleteAll();
-        scoringCommandEntityMgr.deleteAll();
     }
 
     @Test(groups = "functional")

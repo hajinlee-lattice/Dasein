@@ -166,7 +166,7 @@ public class ScoringProcessorCallable implements Callable<Long> {
         scoringCommandLogService.logCompleteStep(scoringCommand, scoringCommandState.getScoringCommandStep(),
                 ScoringCommandStatus.SUCCESS);
         ScoringCommandStep nextScoringCommandStep = scoringCommandState.getScoringCommandStep().getNextStep();
-        if (nextScoringCommandStep.equals(ScoringCommandStep.OUTPUT_COMMAND_RESULTS)) {
+        if (nextScoringCommandStep.equals(ScoringCommandStep.FINISH)) {
             executeStep(scoringStepFinishProcessor, ScoringCommandStep.FINISH);
         } else {
             executeYarnStep(nextScoringCommandStep);

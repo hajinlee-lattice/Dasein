@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
-import com.latticeengines.scoring.entitymanager.ScoringCommandLogEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 
@@ -23,9 +22,6 @@ public class ScoringCommandResultEntityMgrImplTestNG extends ScoringFunctionalTe
 
     @Autowired
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
-
-    @Autowired
-    private ScoringCommandLogEntityMgr scoringCommandLogEntityMgr;
 
     @Autowired
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
@@ -36,9 +32,6 @@ public class ScoringCommandResultEntityMgrImplTestNG extends ScoringFunctionalTe
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        scoringCommandLogEntityMgr.deleteAll();
-        scoringCommandEntityMgr.deleteAll();
-        scoringCommandResultEntityMgr.deleteAll();
     }
 
     @Test(groups = "functional")
@@ -55,8 +48,16 @@ public class ScoringCommandResultEntityMgrImplTestNG extends ScoringFunctionalTe
         assertNotNull(retrieved);
         assertEquals(retrieved.getId(), command.getId());
 
-        retrieved.setConsumed(Timestamp.valueOf("2015-04-28 00:00:02"));
+        assertEquals(scoringCommandResultEntityMgr.getConsumed().size(), 0);
+        retrieved.setPopulated(Timestamp.valueOf("2015-04-28 00:00:02"));
         retrieved.setStatus(ScoringCommandStatus.POPULATED);
         scoringCommandResultEntityMgr.update(retrieved);
+        assertEquals(scoringCommandResultEntityMgr.getConsumed().size(), 0);
+
+        retrieved.setConsumed(Timestamp.valueOf("2015-04-28 00:00:03"));
+        retrieved.setStatus(ScoringCommandStatus.CONSUMED);
+        scoringCommandResultEntityMgr.update(retrieved);
+        assertEquals(scoringCommandResultEntityMgr.getConsumed().size(), 1);
     }
+
 }

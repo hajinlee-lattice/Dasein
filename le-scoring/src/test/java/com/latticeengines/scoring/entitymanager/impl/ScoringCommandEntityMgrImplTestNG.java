@@ -1,9 +1,7 @@
 package com.latticeengines.scoring.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 import java.sql.Timestamp;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
@@ -26,44 +24,34 @@ public class ScoringCommandEntityMgrImplTestNG extends ScoringFunctionalTestNGBa
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        scoringCommandEntityMgr.deleteAll();
     }
 
     @Test(groups = "functional")
-    public void testGetNewAndInProgress() throws Exception {
-        List<ScoringCommand> commands = scoringCommandEntityMgr.getPopulated();
-        assertEquals(commands.size(), 0);
+    public void testGetPopulatedAndConsumed() throws Exception {
+        assertEquals(scoringCommandEntityMgr.getPopulated().size(), 0);
 
         ScoringCommand scoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, "Q_Table_Nutanix", 0, 100, new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.create(scoringCommand);
-        commands = scoringCommandEntityMgr.getPopulated();
-        assertEquals(commands.size(), 1);
+        assertEquals(scoringCommandEntityMgr.getPopulated().size(), 1);
 
         ScoringCommand secondScoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.NEW, "Q_Table_Nutanix", 100, 200, new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.create(secondScoringCommand);
-        commands = scoringCommandEntityMgr.getPopulated();
-        assertEquals(commands.size(), 1);
+        assertEquals(scoringCommandEntityMgr.getPopulated().size(), 1);
 
         secondScoringCommand.setStatus(ScoringCommandStatus.POPULATED);
         scoringCommandEntityMgr.createOrUpdate(secondScoringCommand);
-        assertEquals(commands.size(), 1);
+        assertEquals(scoringCommandEntityMgr.getPopulated().size(), 2);
 
-        ScoringCommand anotherScoringCommand = new ScoringCommand("MuleSoft", ScoringCommandStatus.POPULATED, "Q_Table_MuleSoft", 10, 100, new Timestamp(System.currentTimeMillis()));
-        scoringCommandEntityMgr.create(anotherScoringCommand);
-        commands = scoringCommandEntityMgr.getPopulated();
-        assertEquals(commands.size(), 2);
+        ScoringCommand lastScoringCommand = new ScoringCommand("MuleSoft", ScoringCommandStatus.POPULATED, "Q_Table_MuleSoft", 10, 100, new Timestamp(System.currentTimeMillis()));
+        scoringCommandEntityMgr.create(lastScoringCommand);
+        assertEquals(scoringCommandEntityMgr.getPopulated().size(), 3);
 
         scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
         scoringCommandEntityMgr.createOrUpdate(scoringCommand);
-        assertEquals(commands.size(), 2);
+        assertEquals(scoringCommandEntityMgr.getPopulated().size(), 2);
 
-        ScoringCommand lastScoringCommand = new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED, "Q_Table_Nutanix", 200, 300, new Timestamp(System.currentTimeMillis()));
-        scoringCommandEntityMgr.create(lastScoringCommand);
-        commands = scoringCommandEntityMgr.getPopulated();
-        assertEquals(commands.size(), 2);
-
-        for(ScoringCommand command : commands){
-            assertTrue(command.getLower() == 100 || command.getLower() == 10);
-        }
+        assertEquals(scoringCommandEntityMgr.getConsumed().size(), 1);
+        scoringCommandEntityMgr.delete(scoringCommand);
+        assertEquals(scoringCommandEntityMgr.getConsumed().size(), 0);
     }
 }

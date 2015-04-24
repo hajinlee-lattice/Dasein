@@ -1,6 +1,5 @@
 package com.latticeengines.scoring.service.impl;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -20,13 +19,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.dataplatform.exposed.service.JobService;
 import com.latticeengines.dataplatform.exposed.service.MetadataService;
 import com.latticeengines.dataplatform.exposed.service.SqoopSyncJobService;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandLog;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandResult;
-import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
+import com.latticeengines.domain.exposed.scoring.ScoringCommandState;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
@@ -77,10 +78,6 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         log.info("ScoringManager started!");
         log.info("look at database rows:" + scoringCommandEntityMgr.getPopulated());
-        if (scoringCommandEntityMgr.findAll().isEmpty()) {
-            scoringCommandEntityMgr.create(new ScoringCommand("Nutanix", ScoringCommandStatus.POPULATED,
-                    "TestDataTable", 0, 1292, new Timestamp(System.currentTimeMillis())));
-        }
         cleanTables();
         List<Future<Long>> futures = new ArrayList<>();
         List<ScoringCommand> scoringCommands = scoringCommandEntityMgr.getPopulated();
@@ -105,14 +102,21 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         }
     }
 
-    private void cleanTables() {
+    @VisibleForTesting
+    void cleanTables() {
         int cleanUpInterval = Integer.parseInt(this.cleanUpInterval);
 
          List<ScoringCommand> consumedCommands = scoringCommandEntityMgr.getConsumed();
          for(ScoringCommand scoringCommand : consumedCommands){
-             if (scoringCommand.getConsumed().getTime() + cleanUpInterval < System.currentTimeMillis()) {
+             if (scoringCommand.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < System.currentTimeMillis()) {
                  sqoopSyncJobService.eval(metadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName()), "",
                          "drop-table", 1, metadataService.getJdbcConnectionUrl(scoringCreds));
+                 for(ScoringCommandState scoringCommandState : scoringCommandStateEntityMgr.findByScoringCommand(scoringCommand)){
+                     scoringCommandStateEntityMgr.delete(scoringCommandState);
+                 }
+                 for(ScoringCommandLog scoringCommandLog : scoringCommandLogService.findByScoringCommand(scoringCommand)){
+                     scoringCommandLogService.delete(scoringCommandLog);
+                 }
                  scoringCommandEntityMgr.delete(scoringCommand);
              }
          }
@@ -125,7 +129,6 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
                 scoringCommandResultEntityMgr.delete(scoringCommandResult);
             }
         }
-
     }
 
     public AsyncTaskExecutor getScoringProcessorExecutor() {
