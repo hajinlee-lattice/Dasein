@@ -104,7 +104,7 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
 
     @VisibleForTesting
     void cleanTables() {
-        int cleanUpInterval = Integer.parseInt(this.cleanUpInterval);
+        double cleanUpInterval = Double.parseDouble(this.cleanUpInterval);
 
          List<ScoringCommand> consumedCommands = scoringCommandEntityMgr.getConsumed();
          for(ScoringCommand scoringCommand : consumedCommands){
