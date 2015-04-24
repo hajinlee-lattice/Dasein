@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.validator.routines.EmailValidator;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,8 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
-
-import org.apache.commons.validator.routines.EmailValidator;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SerializableDocumentDirectory {
@@ -297,6 +297,8 @@ public class SerializableDocumentDirectory {
                 return "boolean";
             } else if (Metadata.isObject(data)) {
                 return "object";
+            } else if (Metadata.isArray(data)) {
+                return "array";
             }
             return "string";
         }
@@ -333,6 +335,8 @@ public class SerializableDocumentDirectory {
                     return isBoolean(data);
                 case "object":
                     return isObject(data);
+                case "array":
+                    return isArray(data);
                 case "options":
                     return this.getOptions().contains(data);
                 case "email":
@@ -371,6 +375,17 @@ public class SerializableDocumentDirectory {
             }
         }
 
+        private static boolean isArray(String str)
+        {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jNode = mapper.readTree(str);
+                return jNode.isArray();
+            } catch (IOException e) {
+                return false;
+            }
+        }
+
         public static Collection<Node> applyMetadataOnJsonArrays(JsonNode configNodes, JsonNode metaNodes)
                 throws JsonProcessingException {
             if (configNodes == null || !configNodes.isArray()) return null;
@@ -387,7 +402,7 @@ public class SerializableDocumentDirectory {
                 // read data as text
                 JsonNode dataNode = jNode.get("Data");
                 if (dataNode != null) {
-                    if (Metadata.isObject(dataNode.toString())) {
+                    if (Metadata.isObject(dataNode.toString()) || Metadata.isArray(dataNode.toString())) {
                         docNode.setData(dataNode.toString());
                     } else {
                         docNode.setData(dataNode.asText());
