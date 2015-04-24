@@ -37,7 +37,7 @@ public class PipeFactory {
             docPipe = createWarrantyPipe(fields);
         } else if ("quote_trans_Pipe".equals(pipeName)) {
             docPipe = createQuoteTransPipe(fields);
-        } {
+        } else {
             LOGGER.error(pipeName + " is not registed!");
         }
 
@@ -142,7 +142,14 @@ public class PipeFactory {
             Fields scrubArgument = new Fields(s);
             scrubArguments = scrubArguments.append(scrubArgument);
         }
-        Fields outputScrubArguments = new Fields("#QTE_NUM_VAL").append(new Fields("QTE_LN_NUM")).append(new Fields("PROCESSED_FLG"));
+        Fields outputScrubArguments = new Fields("#QTE_NUM_VAL")
+        		.append(new Fields("QUOTE_CREATE_DATE"))
+        		.append(new Fields("SLDT_CUST_NUM_VAL"))
+        		.append(new Fields("ITM_NUM_VAL"))
+        		.append(new Fields("REVN_USD_AMT"))
+        		.append(new Fields("SYS_QTY"))
+        		.append(new Fields("LEAD_SLS_REP_ASSOC_BDGE_NBR"))
+        		.append(new Fields("PROCESSED_FLG"));
 
         docPipe = new Pipe("copy");
         docPipe = new Each(docPipe, scrubArguments, new ScrubQuoteFunction(outputScrubArguments), Fields.RESULTS);
