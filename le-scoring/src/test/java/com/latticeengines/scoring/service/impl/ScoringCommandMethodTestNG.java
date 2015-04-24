@@ -70,7 +70,7 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
     private String appTimeLineWebAppAddress = "";
 
-    private static final String cleanUpInterval = "10";
+    private static final String cleanUpInterval = "0.000001";
 
     private ScoringManagerServiceImpl scoringManager;
 
@@ -84,6 +84,8 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         scoringManager.setCleanUpInterval(cleanUpInterval);
         scoringManager.setScoringCommandEntityMgr(scoringCommandEntityMgr);
         scoringManager.setScoringCommandResultEntityMgr(scoringCommandResultEntityMgr);
+        scoringManager.setScoringCommandStateEntityMgr(scoringCommandStateEntityMgr);
+        scoringManager.setScoringCommandLogService(scoringCommandLogService);
         scoringManager.setSqoopSyncJobService(sqoopSyncJobService);
         scoringManager.setMetadataService(metadataService);
         scoringManager.setScoringCreds(scoringCreds);
@@ -126,9 +128,9 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         scoringCommandResult.setConsumed(new Timestamp(System.currentTimeMillis()));
         scoringCommandEntityMgr.update(scoringCommand);
         scoringCommandResultEntityMgr.update(scoringCommandResult);
-        Thread.sleep(Long.parseLong(cleanUpInterval));
-
+        Thread.sleep(4000);
         scoringManager.cleanTables();
+        
         assertNull(scoringCommandEntityMgr.findByKey(scoringCommand));
         assertNull(scoringCommandResultEntityMgr.findByKey(scoringCommandResult));
         assertEquals(scoringJdbcTemplate.queryForList(metadataService.showTable(scoringJdbcTemplate, inputTable), String.class).size(), 0);
