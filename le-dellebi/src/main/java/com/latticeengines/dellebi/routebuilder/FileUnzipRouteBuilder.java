@@ -1,15 +1,19 @@
 package com.latticeengines.dellebi.routebuilder;
 
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.dataformat.zipfile.ZipFileDataFormat;
 import org.apache.camel.dataformat.zipfile.ZipSplitter;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -30,6 +34,9 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
     private String warrantyGlobal;
     @Value("${dellebi.quotetrans}")
     private String quoteTrans;
+    
+    @Value("${dellebi.quoteheaders}")
+    private String quoteHeaders;
 
     @Value("${dellebi.smbaccount}")
     private String smbAccount;
@@ -121,7 +128,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                     }
                 })
                 .endChoice()
-                .when(header("CamelFileName").startsWith("tgt_quote_trans"))
+                .when(header("CamelFileName").startsWith("tgt_quote_trans_global_1"))
                 .split(new ZipSplitter())
                 .streaming()
                 .to("mock:processZipEntry")
@@ -142,7 +149,43 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                             }
                         }
                     }
-                }).endChoice()
+                })
+                .endChoice()
+                .when(header("CamelFileName").startsWith("tgt_quote_trans_global"))
+                .split(new ZipSplitter())
+                .streaming()
+                .to("mock:processZipEntry")
+                .process(new Processor() {
+							public void process(Exchange exchange) throws Exception {
+								
+								Message in = exchange.getIn();
+								
+								StringWriter writer = new StringWriter();
+								IOUtils.copy(exchange.getIn().getBody(InputStream.class), writer);
+								String theString = writer.toString();
+								
+								in.setBody(quoteHeaders + "\n" + theString);
+							}
+						})
+                .to(camelUnzipOutputPath + "/" + quoteTrans + "/")
+                .process(new Processor() {
+                    public void process(Exchange exchange) throws Exception {
+                        String fileName = smbInboxPath + "/" + exchange.getIn().getHeader("CamelFileName");
+
+                        if (exchange.getIn().getHeader("CamelFileName").toString() != "") {
+                            LOGGER.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
+                                    + ".zip");
+                            if (!System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")) {
+                                SmbFile smbFile = new SmbFile(fileName.substring(0, fileName.indexOf(".txt")) + ".zip",
+                                        finalAuth);
+                                if (smbFile.canWrite()) {
+                                    smbFile.delete();
+                                }
+                            }
+                        }
+                    }
+                })
+                .endChoice()
                 .when(header("CamelFileName").startsWith("tgt_warranty_global")).split(new ZipSplitter())
                 .streaming().to("mock:processZipEntry").to(camelUnzipOutputPath + "/" + warrantyGlobal + "/")
                 .process(new Processor() {
