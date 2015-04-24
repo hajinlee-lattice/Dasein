@@ -42,7 +42,7 @@ public class VisiDBConfigTestNG extends ConfigurationSchemaTestNGBase {
      */
     @Test(groups = "unit")
     public void testConfig4() throws IOException {
-        DocumentDirectory dir = component.getInstaller().getDefaultConfiguration(this.component.getName());
+        DocumentDirectory dir = batonService.getDefaultConfiguration(this.component.getName());
 
         String config4 = dir.get("/Config4").getDocument().getData();
         Assert.assertTrue(Boolean.valueOf(config4));

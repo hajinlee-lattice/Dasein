@@ -41,7 +41,7 @@ public class BardJamsConfigTestNG extends ConfigurationSchemaTestNGBase {
      */
     @Test(groups = "unit")
     public void getDefaultConfiguration() throws IOException {
-        DocumentDirectory dir = component.getInstaller().getDefaultConfiguration(this.component.getName());
+        DocumentDirectory dir = batonService.getDefaultConfiguration(this.component.getName());
 
         String tenantType = dir.get("/TenantType").getDocument().getData();
         Assert.assertEquals(tenantType, "P");
