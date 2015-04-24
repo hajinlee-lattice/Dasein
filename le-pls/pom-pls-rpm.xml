@@ -30,7 +30,7 @@
             <properties>
                 <pls.properties.path>conf/env/devcluster</pls.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
-                <jks.name>bodcdevvcus209.dev.lattice.local.jks</jks.name>
+                <jks.name>ga209-ldap.dev.lattice.local.jks</jks.name>
             </properties>
         </profile>
         <profile>
@@ -45,7 +45,7 @@
             <properties>
                 <pls.properties.path>conf/env/intcluster</pls.properties.path>
                 <bin.env.path>bin/env/intcluster</bin.env.path>
-                <jks.name>bodcdevvcus209.dev.lattice.local.jks</jks.name>
+                <jks.name>ga209-ldap.dev.lattice.local.jks</jks.name>
             </properties>
         </profile>
         <profile>
@@ -59,7 +59,7 @@
             <properties>
                 <pls.properties.path>conf/env/qacluster</pls.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
-                <jks.name>bodcdevvcus209.dev.lattice.local.jks</jks.name>
+                <jks.name>ga209-ldap.dev.lattice.local.jks</jks.name>
             </properties>
         </profile>
         <profile>
@@ -87,7 +87,7 @@
             <properties>
                 <pls.properties.path>conf/env/loadtest</pls.properties.path>
                 <bin.env.path>bin/env/loadtest</bin.env.path>
-                <jks.name>bodcdevvcus209.dev.lattice.local.jks</jks.name>
+                <jks.name>ga209-ldap.dev.lattice.local.jks</jks.name>
             </properties>
         </profile>
     </profiles>

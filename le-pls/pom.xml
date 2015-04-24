@@ -16,7 +16,7 @@
         <hibernate.version>4.1.9.Final</hibernate.version>
         <jackson.fasterxml.version>2.1.5</jackson.fasterxml.version>
         <globalauth.base.url>https://bodcdevvcus209.dev.lattice.local/test</globalauth.base.url>
-        <certificate.name>bodcdevvcus209.dev.lattice.local.jks</certificate.name>
+        <certificate.name>ga209-ldap.dev.lattice.local.jks</certificate.name>
         <spring.security.version>3.2.5.RELEASE</spring.security.version>
     </properties>
 
