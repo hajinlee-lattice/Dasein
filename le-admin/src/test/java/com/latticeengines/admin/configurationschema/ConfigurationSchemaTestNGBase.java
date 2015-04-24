@@ -63,12 +63,12 @@ public class ConfigurationSchemaTestNGBase {
 
     protected void runFunctionalMainFlow() {
         // download from camille
-        DocumentDirectory storedDir = this.component.getInstaller().getDefaultConfiguration(this.component.getName());
+        DocumentDirectory storedDir = batonService.getDefaultConfiguration(this.component.getName());
         storedDir.makePathsLocal();
         // serialize downloaded directory
         SerializableDocumentDirectory serializableDir = new SerializableDocumentDirectory(storedDir);
         // download metadata directory
-        DocumentDirectory metaDir = this.component.getInstaller().getConfigurationSchema(this.component.getName());
+        DocumentDirectory metaDir = batonService.getConfigurationSchema(this.component.getName());
         // apply metadata to downloaded config dir
         serializableDir.applyMetadata(metaDir);
 
