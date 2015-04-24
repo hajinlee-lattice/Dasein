@@ -8,6 +8,15 @@
 // END: Base styles from UX
 
 //START: Style overrides (NOTE: This should only be done in extreme cases because it will make maintaining the css more difficult going forward)
+
+.login-body {
+  background: url(../images/bg_login.jpg) no-repeat top left fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
 .text-danger {
   color: #BD210F;
 }
