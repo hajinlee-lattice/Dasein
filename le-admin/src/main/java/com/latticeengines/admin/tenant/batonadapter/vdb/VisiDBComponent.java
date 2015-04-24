@@ -1,5 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.vdb;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -13,6 +14,9 @@ public class VisiDBComponent extends LatticeComponent {
     private LatticeComponentInstaller installer = new VisiDBInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new VisiDBUpgrader();
     public static final String componentName = "VisiDB";
+
+    @Value("${admin.vdb.dryrun}")
+    private boolean dryrun;
 
     @Override
     public boolean doRegistration() {
@@ -31,6 +35,7 @@ public class VisiDBComponent extends LatticeComponent {
 
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
+        installer.setDryrun(dryrun);
         return installer;
     }
 

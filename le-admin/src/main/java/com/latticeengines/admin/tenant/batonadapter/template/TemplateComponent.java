@@ -1,5 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.template;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -14,6 +15,9 @@ public class TemplateComponent extends LatticeComponent {
     private CustomerSpaceServiceUpgrader upgrader = new TemplateUpgrader();
     public static final String componentName = "Template";
 
+    @Value("${admin.tpl.dryrun}")
+    private boolean dryrun;
+
     @Override
     public String getName() {
         return componentName;
@@ -26,6 +30,7 @@ public class TemplateComponent extends LatticeComponent {
 
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
+        installer.setDryrun(dryrun);
         return installer;
     }
 

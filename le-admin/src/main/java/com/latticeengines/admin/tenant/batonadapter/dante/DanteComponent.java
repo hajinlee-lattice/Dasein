@@ -1,5 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.dante;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -9,6 +10,9 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceU
 @Component
 public class DanteComponent extends LatticeComponent {
     public static final String componentName = "Dante";
+
+    @Value("${admin.dante.dryrun}")
+    private boolean dryrun;
 
     @Override
     public String getName() {

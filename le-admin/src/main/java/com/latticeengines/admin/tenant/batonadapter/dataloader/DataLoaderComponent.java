@@ -1,5 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.dataloader;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -13,6 +14,9 @@ public class DataLoaderComponent extends LatticeComponent {
     private LatticeComponentInstaller installer = new DataLoaderInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new DataLoaderUpgrader();
     public static final String componentName = "DataLoader";
+
+    @Value("${admin.dataloader.dryrun}")
+    private boolean dryrun;
 
     @Override
     public boolean doRegistration() {
@@ -33,6 +37,7 @@ public class DataLoaderComponent extends LatticeComponent {
 
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
+        installer.setDryrun(dryrun);
         return installer;
     }
 

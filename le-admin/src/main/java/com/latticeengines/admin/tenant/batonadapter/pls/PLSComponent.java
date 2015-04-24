@@ -1,5 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.pls;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -9,6 +10,9 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceU
 @Component
 public class PLSComponent extends LatticeComponent {
     public static final String componentName = "PLS";
+
+    @Value("${admin.pls.dryrun}")
+    private boolean dryrun;
 
     @Override
     public String getName() { return componentName; }
