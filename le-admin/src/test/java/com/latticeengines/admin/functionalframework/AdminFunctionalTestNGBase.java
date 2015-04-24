@@ -46,9 +46,9 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     private static final Log log = LogFactory.getLog(AdminFunctionalTestNGBase.class);
 
-    protected static final String ADTesterUsername = Constants.AD_TESTER_USERNAME;
+    protected static final String ADTesterUsername = "testuser1";
 
-    protected static final String ADTesterPassword = Constants.AD_TESTER_PASSWORD;
+    protected static final String ADTesterPassword = "Lattice1";
 
     @Value("${admin.api.hostport}")
     private String hostPort;
