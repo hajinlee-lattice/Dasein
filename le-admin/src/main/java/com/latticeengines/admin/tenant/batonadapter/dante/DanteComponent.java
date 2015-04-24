@@ -44,7 +44,8 @@ public class DanteComponent extends LatticeComponent {
         String defaultJson = "dante_default.json";
         String metadataJson = "dante_metadata.json";
         uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
-        return false;
+        // register dummy installer if is in dryrun mode
+        return dryrun;
     }
 
 

@@ -42,7 +42,8 @@ public class PLSComponent extends LatticeComponent {
         String defaultJson = "pls_default.json";
         String metadataJson = "pls_metadata.json";
         uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
-        return false;
+        // register dummy installer if is in dryrun mode
+        return dryrun;
     }
 
 
