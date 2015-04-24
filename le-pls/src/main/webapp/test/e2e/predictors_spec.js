@@ -2,12 +2,9 @@
 
 describe('top predictors', function () {
 
-    var params = browser.params;
-
     var loginPage = require('./po/login.po');
     var modelList = require('./po/modellist.po');
     var modelTabs = require('./po/modeltabs.po');
-    var logoutPage = require('./po/logout.po');
 
     var tab = element(by.id("modelDetailsAttributesTab"));
     var chart = tab.element(by.id("chart"));

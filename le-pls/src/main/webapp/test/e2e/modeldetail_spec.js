@@ -8,7 +8,6 @@ describe('model detail', function() {
     var tenants = require('./po/tenantselection.po');
     var modelList = require('./po/modellist.po');
     var modelTabs = require('./po/modeltabs.po');
-    var logoutPage = require('./po/logout.po');
 
     it('should validate model details', function () {
         //==================================================
