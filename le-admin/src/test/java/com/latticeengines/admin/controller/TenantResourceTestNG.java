@@ -16,7 +16,7 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        loginAD();
+        super.setup();
     }
 
     @SuppressWarnings("unchecked")

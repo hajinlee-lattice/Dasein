@@ -25,11 +25,15 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
@@ -93,6 +97,11 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         loginAD();
+        Camille camille = CamilleEnvironment.getCamille();
+        Path path = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), testLatticeComponent.getName());
+        try {
+            camille.delete(path);
+        } catch (Exception e) { }
         testLatticeComponent.register();
         createTenant("CONTRACT1", "TENANT1");
         CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
