@@ -128,6 +128,13 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         if (ContractLifecycleManager.exists(contractId)) {
             ContractLifecycleManager.delete(contractId);
         }
+
+        Path path = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), "contractId");
+        Camille camille = CamilleEnvironment.getCamille();
+        try {
+            camille.delete(path);
+        } catch (Exception e) { }
+
         CustomerSpaceProperties props = new CustomerSpaceProperties();
         props.description = String.format("Test tenant for contract id %s and tenant id %s", contractId, tenantId);
         props.displayName = "Tenant for testing";
