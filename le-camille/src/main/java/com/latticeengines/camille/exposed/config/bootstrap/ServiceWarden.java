@@ -40,8 +40,8 @@ public class ServiceWarden {
     }
 
     /**
-     * To be invoked from code residing in baton. This will send a message to
-     * invoke service and customerspaceservice bootstrap.
+     * This will send a message to invoke service and customerspaceservice
+     * bootstrap.
      */
     public static void commandBootstrap(String serviceName, CustomerSpace space, Map<String, String> bootstrapProperties) {
         log.info("Sending bootstrap message to service {} and space {}", serviceName, space);
