@@ -114,7 +114,7 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
             method: 'GET',
             url: '/admin/services/' + service + '/default'
         }).success(function(data){
-            if (data != null && data.hasOwnProperty("RootPath")) {
+            if (data !== null && data.hasOwnProperty("RootPath")) {
                 data.Component = service;
                 result.resultObj = data;
             } else {

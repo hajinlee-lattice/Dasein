@@ -24,7 +24,7 @@ app.directive('listEntry', function(){
                 $scope.config.Data = JSON.stringify(
                     _.map($scope.list, "value")
                 );
-            }
+            };
         }
     };
 });

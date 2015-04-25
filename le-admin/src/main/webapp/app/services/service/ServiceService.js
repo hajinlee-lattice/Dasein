@@ -23,7 +23,7 @@ app.service('ServiceService', function($q, $http, $interval, _, SessionUtility){
             errMsg: null
         };
 
-        if (this.registeredServices == null) {
+        if (this.registeredServices === null) {
             $http({
                 method: 'GET',
                 url: '/admin/services'

@@ -60,7 +60,7 @@ app.service('CamilleConfigUtility', function(){
             return "boolean";
         } else if (typeof data === "object") {
             return "object";
-        } else if (typeof data === "array") {
+        } else if (Object.prototype.toString.call( data ) === '[object Array]') {
             return "array";
         } else {
             return "string";
@@ -155,7 +155,7 @@ app.directive('objectEntry', function(){
                     $scope.errorMsg = "no error";
                     $scope.updater();
                 }
-            }
+            };
         }
     };
 });
@@ -191,7 +191,7 @@ app.directive('configEntry', function(){
                 $scope.jsonData = JSON.parse($scope.config.Data);
                 $scope.objectUpdater = function() {
                     $scope.config.Data = JSON.stringify($scope.jsonData);
-                }
+                };
             }
 
             $scope.isList = CamilleConfigUtility.isList($scope.type);

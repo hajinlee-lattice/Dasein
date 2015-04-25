@@ -135,6 +135,7 @@ app.service('TenantUtility', function(_){
             case "ERROR":
                 return "Installation Failed";
             case "UNKNOWN":
+                /* falls through */
             default:
                 return "Unknown state";
         }

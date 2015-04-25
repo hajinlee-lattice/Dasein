@@ -26,7 +26,7 @@ app.controller('LoginCtrl', function($scope, $state, BrowserStorageUtility, Logi
                 $state.go('TENANT.LIST');
             } else {
                 $scope.showLoginError = true;
-                $scope.loginErrorMsg = "Authentication failed."
+                $scope.loginErrorMsg = "Authentication failed.";
             }
         });
     }

@@ -44,6 +44,7 @@ module.exports = function(grunt) {
                     'jquery/<%= app.version.jquery %>/jquery.js',
                     'angular.js/<%= app.version.angular %>/angular.js',
                     'angular.js/<%= app.version.angular %>/angular-sanitize.js',
+                    'angular.js/<%= app.version.angular %>/angular-mocks.js',
                     'angular-local-storage/<%= app.version["angular-local-storage"] %>/angular-local-storage.js',
                     'angular-ui-router/<%= app.version["angular-ui-router"] %>/angular-ui-router.js',
                     'angular-ui-bootstrap/<%= app.version["angular-ui-bootstrap"] %>/ui-bootstrap.js',
@@ -259,7 +260,7 @@ module.exports = function(grunt) {
 
         jshint: {
             options: {
-                reporter: require('jshint-stylish')
+                reporter: require('jshint-stylish-ex')
             },
 
             default: [
@@ -268,7 +269,73 @@ module.exports = function(grunt) {
                 '<%= app.dir %>/app/**/*.js',
                 '!<%= app.dir %>/app/**/*Spec.js'
             ]
+        },
+
+        // Unit tests
+        karma: {
+            options: {
+                files:      [
+                    '<%= app.dir %>/lib/js/jquery.js',
+                    '<%= app.dir %>/lib/js/angular.js',
+                    '<%= app.dir %>/lib/js/angular-mocks.js',
+                    '<%= app.dir %>/lib/js/underscore.js',
+                    '<%= app.dir %>/lib/js/le-common.js',
+                    '<%= app.dir %>/app/**/*.js'
+
+                ],
+                frameworks: ['jasmine']
+
+            },
+
+            unit:    {
+                singleRun:     true,
+                browsers:      ['PhantomJS'],
+                reporters:     ['dots', 'junit', 'coverage'],
+                junitReporter: {
+                    outputFile: 'target/karma-test-results.xml'
+                },
+                preprocessors:    {
+                    'src/main/webapp/app/**/!(*Spec).js': 'coverage'
+                },
+                coverageReporter: {
+                    dir:       'target/jscoverage',
+                    reporters: [
+                        // reporters not supporting the `file` property
+                        {type: 'html', subdir: 'report-html'},
+                        {type: 'lcov', subdir: 'report-lcov'},
+                        // reporters supporting the `file` property, use `subdir` to directly
+                        // output them in the `dir` directory
+                        {type: 'cobertura', subdir: '.', file: 'cobertura.xml'}
+                    ]
+                }
+
+            },
+
+            devunit: {
+                options: {
+                    browsers:  ['Chrome'],
+                    singleRun: false
+                }
+            },
+
+            watch:    {
+                options: {
+                    browsers:   ['PhantomJS'],
+                    singleRun:  false,
+                    background: true,
+                    autoWatch:  true
+                }
+            },
+            watchAll: {
+                options: {
+                    browsers:   ['PhantomJS'],
+                    singleRun:  false,
+                    background: false,
+                    autoWatch:  true
+                }
+            }
         }
+
     });
 
     grunt.loadNpmTasks('grunt-wget');
@@ -279,6 +346,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-karma');
 
     // main task to run before deploy the dist war
     grunt.registerTask('dist', [
@@ -301,7 +370,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('www', ['copy:www', 'clean:www']);
 
-    grunt.registerTask('unit', ['jshint']);
+    grunt.registerTask('test', ['jshint', 'karma:unit']);
 
     // restore dev setup after run a default task
     grunt.registerTask('restore', ['copy:restorewww','copy:restore', 'clean:restore', 'less:dev']);

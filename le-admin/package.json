@@ -14,6 +14,18 @@
     "grunt-contrib-less": "~1.0.1",
     "grunt-contrib-cssmin": "~0.12.2",
     "grunt-contrib-jshint": "~0.11.1",
-    "jshint-stylish": "~1.0.1"
+    "grunt-contrib-watch": "~0.6.1",
+    "karma": "~0.12.31",
+    "grunt-karma": "~0.10.1",
+    "jasmine-core": "~2.2.0",
+    "karma-jasmine": "~0.3.5",
+    "karma-chrome-launcher": "~0.1.8",
+    "karma-junit-reporter": "~0.2.2",
+    "karma-phantomjs-launcher": "~0.1.4",
+    "karma-ie-launcher": "~0.1.5",
+    "karma-safari-launcher": "~0.1.1",
+    "karma-firefox-launcher": "~0.1.4",
+    "karma-coverage": "~0.3.1",
+    "jshint-stylish-ex": "~0.2.0"
   }
 }
