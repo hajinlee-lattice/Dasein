@@ -21,7 +21,7 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>2.3</version>
                 <configuration>
-                    <shadedArtifactAttached>true</shadedArtifactAttached>
+                    <shadedArtifactAttached>false</shadedArtifactAttached>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
 
                     <transformers>
