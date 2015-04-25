@@ -11,11 +11,11 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 public interface TenantService {
     
-    Boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration);
+    boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration);
 
     List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId);
-    
-    Boolean deleteTenant(String contractId, String tenantId);
+
+    boolean deleteTenant(String contractId, String tenantId);
 
     TenantInfo getTenant(String contractId, String tenantId);
 
@@ -23,7 +23,7 @@ public interface TenantService {
 
     BootstrapState getTenantOverallState(String contractId, String tenantId);
 
-    Boolean bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties);
+    boolean bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties);
     
     SerializableDocumentDirectory getTenantServiceConfig(String contractId, String tenantId, String serviceName);
 }

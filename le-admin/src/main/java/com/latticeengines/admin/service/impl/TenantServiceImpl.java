@@ -37,7 +37,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration) {
+    public boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration) {
         ContractInfo contractInfo = tenantRegistration.getContractInfo();
         TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
         CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
@@ -78,7 +78,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Boolean deleteTenant(String contractId, String tenantId) {
+    public boolean deleteTenant(String contractId, String tenantId) {
         return tenantEntityMgr.deleteTenant(contractId, tenantId);
     }
 
@@ -104,7 +104,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public Boolean bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties) {
+    public boolean bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties) {
         return batonService.bootstrap(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName,
                 properties);
     }

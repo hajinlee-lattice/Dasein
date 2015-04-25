@@ -28,7 +28,10 @@ import org.testng.annotations.BeforeClass;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
@@ -95,10 +98,19 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         }
     }
     
-    protected void bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties) {
+    protected void bootstrap(String contractId, String tenantId, String serviceName) {
+        CustomerSpace space = new CustomerSpace();
+        space.setContractId(contractId);
+        space.setTenantId(tenantId);
+        space.setSpaceId(CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+
+        DocumentDirectory defaultConfig = batonService.getDefaultConfiguration(serviceName);
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(defaultConfig);
+        Map<String, String> bootstrapProperties = sDir.flatten();
+
         String url = String.format("%s/admin/tenants/%s/services/%s?contractId=%s",
                 getRestHostPort(), tenantId, serviceName, contractId);
-        restTemplate.put(url, properties, new HashMap<>());
+        restTemplate.put(url, bootstrapProperties, new HashMap<>());
     }
     
     protected void deleteTenant(String contractId, String tenantId) throws Exception {

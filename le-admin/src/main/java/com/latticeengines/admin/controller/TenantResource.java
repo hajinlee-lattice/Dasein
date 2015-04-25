@@ -36,7 +36,7 @@ public class TenantResource {
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Create a Lattice tenant")
-    public Boolean createTenant(@PathVariable String tenantId, //
+    public boolean createTenant(@PathVariable String tenantId, //
             @RequestParam(value = "contractId") String contractId, //
             @RequestBody TenantRegistration registration) {
         return tenantService.createTenant(contractId, tenantId, registration);
@@ -45,7 +45,7 @@ public class TenantResource {
     @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Bootstrap a Lattice tenant service")
-    public Boolean bootstrapTenant(@PathVariable String tenantId, //
+    public boolean bootstrapTenant(@PathVariable String tenantId, //
             @PathVariable String serviceName, @RequestParam(value = "contractId") String contractId, //
             @RequestBody Map<String, String> overrideProperties) {
         return tenantService.bootstrap(contractId, tenantId, serviceName, overrideProperties);
@@ -65,7 +65,7 @@ public class TenantResource {
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete tenant for a particular contract id")
-    public Boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
+    public boolean deleteTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
         return tenantService.deleteTenant(contractId, tenantId);
     }
 

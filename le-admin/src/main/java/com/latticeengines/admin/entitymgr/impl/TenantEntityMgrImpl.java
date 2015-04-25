@@ -25,12 +25,12 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 @Component("tenantEntityMgr")
 public class TenantEntityMgrImpl implements TenantEntityMgr {
-    private static final Log log = LogFactory.getLog(TenantEntityMgrImpl.class);
+    private static final Log LOGGER = LogFactory.getLog(TenantEntityMgrImpl.class);
 
     private final BatonService batonService = new BatonServiceImpl();
 
     @Override
-    public Boolean createTenant(String contractId, String tenantId,
+    public boolean createTenant(String contractId, String tenantId,
                                 ContractInfo contractInfo, TenantInfo tenantInfo, CustomerSpaceInfo customerSpaceInfo) {
         return batonService.createTenant(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
                 contractInfo, tenantInfo, customerSpaceInfo);
@@ -46,16 +46,16 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
                 entry.getValue().spaceInfoList = new ArrayList<>();
                 entry.getValue().spaceInfoList.add(spaceInfo);
             } catch (Exception e) {
-                log.error("Could not get the info of the default space for tenant " + entry.getKey());
+                LOGGER.error("Could not get the info of the default space for tenant " + entry.getKey());
             }
         }
         return tenantInfoList;
     }
 
     @Override
-    public Boolean deleteTenant(String contractId, String tenantId) {
+    public boolean deleteTenant(String contractId, String tenantId) {
         boolean success = batonService.deleteTenant(contractId, tenantId);
-        log.info(String.format("Deleting tenant %s with contract %s, success = %s", tenantId, contractId, String.valueOf(success)));
+        LOGGER.info(String.format("Deleting tenant %s with contract %s, success = %s", tenantId, contractId, String.valueOf(success)));
         return success;
     }
 
@@ -78,7 +78,7 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
                             tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName));
             return new SerializableDocumentDirectory(dir);
         } catch (Exception e) {
-            log.error(e);
+            LOGGER.error(e);
             return null;
         }
     }

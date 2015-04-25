@@ -11,12 +11,12 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 
 public interface TenantEntityMgr {
 
-    Boolean createTenant(String contractId, String tenantId,
+    boolean createTenant(String contractId, String tenantId,
                          ContractInfo contractInfo, TenantInfo tenantInfo, CustomerSpaceInfo customerSpaceInfo);
 
     List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId);
-    
-    Boolean deleteTenant(String contractId, String tenantId);
+
+    boolean deleteTenant(String contractId, String tenantId);
 
     TenantInfo getTenant(String contractId, String tenantId);
     

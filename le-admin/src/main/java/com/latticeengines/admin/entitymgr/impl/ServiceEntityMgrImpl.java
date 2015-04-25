@@ -1,7 +1,5 @@
 package com.latticeengines.admin.entitymgr.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.entitymgr.ServiceEntityMgr;
@@ -12,8 +10,6 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 @Component("serviceEntityMgr")
 public class ServiceEntityMgrImpl implements ServiceEntityMgr {
-    @SuppressWarnings("unused")
-    private static final Log log = LogFactory.getLog(ServiceEntityMgrImpl.class);
 
     private final BatonService batonService = new BatonServiceImpl();
 

@@ -1,7 +1,5 @@
 package com.latticeengines.admin.tenant.batonadapter;
 
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.annotations.AfterClass;
@@ -60,13 +58,7 @@ public abstract class BatonAdapterBaseDeploymentTestNG<T extends LatticeComponen
 
     protected abstract String getServiceName();
 
-    protected void bootstrap() {
-        DocumentDirectory defaultConfig = batonService.getDefaultConfiguration(serviceName);
-        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(defaultConfig);
-        Map<String, String> bootstrapProperties = sDir.flatten();
-
-        super.bootstrap(contractId, tenantId, serviceName, bootstrapProperties);
-    }
+    protected void bootstrap() { super.bootstrap(contractId, tenantId, serviceName); }
 
     private void testGetDefaultConfig(String expectedJson) {
         String url = String.format("%s/admin/services/%s/default", getRestHostPort(), serviceName);

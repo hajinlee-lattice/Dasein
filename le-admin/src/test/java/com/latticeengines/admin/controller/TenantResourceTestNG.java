@@ -4,20 +4,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
+import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
 
-    @BeforeClass(groups = "functional")
-    public void setup() {
-        super.setup();
-    }
+    @Autowired
+    private TestLatticeComponent testLatticeComponent;
 
     @SuppressWarnings("unchecked")
     @Test(groups = "functional")
@@ -50,7 +49,9 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
     
     @Test(groups = "functional")
     public void getServiceState() throws InterruptedException {
-        String url = getRestHostPort() + "/admin/tenants/TENANT1/services/TestComponent/state?contractId=CONTRACT1";
+        String url = getRestHostPort() + String.format("/admin/tenants/%s/services/%s/state?contractId=%s",
+                TestTenantId, testLatticeComponent.getName(), TestContractId);
+        bootstrap(TestContractId, TestTenantId, testLatticeComponent.getName());
 
         BootstrapState state;
         int numTries = 0;
@@ -64,7 +65,8 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
     
     @Test(groups = "functional")
     public void getServiceConfig() {
-        String url = getRestHostPort() + "/admin/tenants/TENANT1/services/TestComponent?contractId=CONTRACT1";
+        String url = getRestHostPort() + String.format("/admin/tenants/%s/services/%s/?contractId=%s",
+                TestTenantId, testLatticeComponent.getName(), TestContractId);
         SerializableDocumentDirectory dir = restTemplate.getForObject(url, SerializableDocumentDirectory.class, new HashMap<>());
         Assert.assertNotNull(dir);
     }
