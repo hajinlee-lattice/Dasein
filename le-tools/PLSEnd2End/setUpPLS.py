@@ -7,6 +7,7 @@ Created on Mar 25, 2015
 
 import sys
 from Properties import PLSEnvironments
+from operations import PerformanceHelpers
 from operations.TestHelpers import PLSConfigRunner
 from operations.TestHelpers import DLConfigRunner
 from operations.TestHelpers import PretzelRunner
@@ -22,7 +23,7 @@ def setUpPls():
     print runner.runCommandLocally("svn update", PLSEnvironments.svn_location_local)
 
     ''' configure Bard Tenant -- drop templates, configure DL.. '''
-    configureBardTenant(PLSEnvironments.pls_bard_1, PLSEnvironments.pls_marketing_app_ELQ)
+#     configureBardTenant(PLSEnvironments.pls_bard_1, PLSEnvironments.pls_marketing_app_ELQ)
     configureBardTenant(PLSEnvironments.pls_bard_2, PLSEnvironments.pls_marketing_app_MKTO)
 
 
@@ -57,6 +58,7 @@ def configureBardTenant(tenant, marketting_app):
     dlConfig.createMockDataProviders(tenant, marketting_app);
     dlConfig.editMockRefreshDataSources(tenant, marketting_app);
     dlConfig.loadCfgTables(tenant, marketting_app);
+    PerformanceHelpers.createPerformanceDataProviders(pls_bard, marketting_app); 
 
 
 if __name__ == '__main__':

@@ -61,7 +61,34 @@ class Test(unittest.TestCase):
         assert len(lead_faileds)==1, lead_faileds;
         
         PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_2);
+     
+    def TestHourlyScoringELQ_Dante(self):
+        elq = EloquaRequest();
+        contact_lists = elq.addEloquaContactForDante(3);        
         
+        PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_1); 
+                
+        elq_contacts = elq.getEloquaContact(contact_lists[0]);
+         
+        contact_faileds = LeadCreator.verifyResult("TestHourlyScoringELQ",elq_contacts);
+        assert len(contact_faileds)==1, contact_faileds;
+         
+        PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_1);
+   
+    def TestHourlyScoringMKTO_Dante(self):
+        mkto = MarketoRequest();
+        leads_list = mkto.addLeadToMarketoForDante(3);
+        print "======> prepare test data:";
+        print leads_list;
+        
+        PlsOperations.runHourlyScoring(PLSEnvironments.pls_bard_2);
+         
+        lead_lists = mkto.getLeadFromMarketo(leads_list[0]); 
+         
+        lead_faileds = LeadCreator.verifyResult("TestHourlyScoringMKTO",lead_lists);
+        assert len(lead_faileds)==1, lead_faileds;
+         
+        PlsOperations.runHourlyDanteProcess(PLSEnvironments.pls_bard_2);   
     def testName(self):
         pass
 

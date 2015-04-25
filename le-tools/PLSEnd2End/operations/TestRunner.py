@@ -9,7 +9,7 @@ import shutil
 from subprocess import PIPE, Popen
 import traceback
 
-import pypyodbc
+import pypyodbc as pyodbc
 import requests
 from Properties import PLSEnvironments
 
@@ -53,7 +53,7 @@ class SessionRunner(object):
 #             print "Windows:https://code.google.com/p/pyodbc/wiki/ConnectionStrings"
 #             return None
         try:
-            conn = pypyodbc.connect(connection_string)
+            conn = pyodbc.connect(connection_string)
             cur = conn.cursor()
             cur.execute(query)
             results = cur.fetchall()
@@ -68,7 +68,7 @@ class SessionRunner(object):
     def execQuery(self, connection_string, query):
         
         try:
-            conn = pypyodbc.connect(connection_string)
+            conn = pyodbc.connect(connection_string)
             cur = conn.cursor()
             results = cur.execute(query)            
 #             results = cur.fetchall()
@@ -84,7 +84,7 @@ class SessionRunner(object):
     def execProc(self, connection_string, procQuery):
         
         try:
-            conn = pypyodbc.connect(connection_string)
+            conn = pyodbc.connect(connection_string)
             cur = conn.cursor()
             results = cur.execute(procQuery)            
             results = cur.fetchall()
@@ -96,7 +96,23 @@ class SessionRunner(object):
             e = traceback.format_exc()
             print "\nFAILED:Could not fetch query results", e, "\n"
             return None
+    
+    def execBulkProc(self, connection_string, procQuery):
         
+        try:
+            conn = pyodbc.connect(connection_string)
+            cur = conn.cursor()
+            results = cur.execute(procQuery)            
+#             results = cur.fetchall();
+            cur.commit();
+            cur.close()
+            conn.close()
+            return results
+        except Exception:
+            e = traceback.format_exc()
+            print "\nFAILED:Could not fetch query results", e, "\n"
+            return None
+            
     def getSTDoutputs(self, text):
         stdo = ""
         stde = ""

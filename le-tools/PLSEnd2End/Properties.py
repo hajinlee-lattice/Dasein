@@ -19,10 +19,11 @@ class PLSEnvironments(object):
     pls_bard_1=parser.get('BuildInfo', 'tenant');
     pls_bard_2=parser.get('BuildInfo', 'tenant_2');
     svn_location_local=parser.get('TestSetup', 'svn_location');
+    pls_version=parser.get('TestSetup', 'pls_version');
 
     
-    dl_server="https://bodcdevvint187.dev.lattice.local:8080/";
-    visidb_server="bodcdevvint187.dev.lattice.local";
+    dl_server="https://bodcdevvint207.dev.lattice.local:8080/";
+    visidb_server="bodcdevvint207.dev.lattice.local";
     
     
     pls_url_1="https://%s/%s" % (pls_server, pls_bard_1);
@@ -47,7 +48,7 @@ class PLSEnvironments(object):
     visidb_server_user="admin";
     visidb_server_pwd="visid@t@b@se";
     
-    template_location="\\\\10.41.1.187\PLSTemplate";#"\\\\10.61.0.210\DevQA\share\PLSTemplate";
+    template_location="\\\\%s\PLSTemplate" % visidb_server#"\\\\10.61.0.210\DevQA\share\PLSTemplate";
     
     pls_SFDC_user="apeters-widgettech@lattice-engines.com";
     pls_SFDC_pwd="Happy2010";
@@ -76,7 +77,10 @@ class PLSEnvironments(object):
     SQL_JAMS_CFG = "DRIVER={SQL Server};SERVER=10.41.1.247;DATABASE=JAMSCFG;uid=dataloader_user;pwd=password";
     SQL_ScoringDaemon = "DRIVER={SQL Server};SERVER=%s\SQL2012STD;DATABASE=SD_%s;uid=dataloader_prod;pwd=L@ttice2" % (pls_server, pls_bard_1[3:]);
     SQL_BasicDataForIntegrationTest = "DRIVER={SQL Server};SERVER=10.41.1.187\SQL2008;DATABASE=BasicDataForIntegrationTest;uid=dataloader_user;pwd=password";
-    
+    SQL_conn_dataloader = "DRIVER={SQL Server};SERVER=10.41.1.187\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;";
+    SQL_conn_pdMatch = "DRIVER={SQL Server};SERVER=BODCPRODVSQL130;DATABASE=PropDataMatchDB;uid=dataloader_prod;pwd=L@ttice2;";
+    SQL_conn_leadscoring = "DRIVER={SQL Server};SERVER=10.41.1.187\sql2008r2;DATABASE=DataLoader;uid=dataloader_user;pwd=password;";
+        
     #dataloader providers
     SQL_PropDataForModeling = "Data Source=bodcprodvsql130;" + \
                         "Initial Catalog=PropDataMatchDB;" + \
@@ -130,6 +134,27 @@ class PLSEnvironments(object):
                         "Password=password;"
     mock_MKTO_SFDC_DataProvider = "Data Source=10.41.1.187\sql2008;" + \
                         "Initial Catalog=PLS_MKTO_SFDC_ReleaseQA_20150630;" + \
+                        "Persist Security Info=True;" + \
+                        "User ID=dataloader_user;" + \
+                        "Password=password;"
+                        
+    performance_ELQ_ELQ_DataProvider = "Data Source=10.41.1.187\sql2008;" + \
+                        "Initial Catalog=PLS_ELQ_ELQ_Performance;" + \
+                        "Persist Security Info=True;" + \
+                        "User ID=dataloader_user;" + \
+                        "Password=password;"  
+    performance_ELQ_SFDC_DataProvider = "Data Source=10.41.1.187\sql2008;" + \
+                        "Initial Catalog=PLS_ELQ_SFDC_Performance;" + \
+                        "Persist Security Info=True;" + \
+                        "User ID=dataloader_user;" + \
+                        "Password=password;"
+    performance_MKTO_MKTO_DataProvider = "Data Source=10.41.1.187\sql2008;" + \
+                        "Initial Catalog=PLS_MKTO_MKTO_Performance;" + \
+                        "Persist Security Info=True;" + \
+                        "User ID=dataloader_user;" + \
+                        "Password=password;"
+    performance_MKTO_SFDC_DataProvider = "Data Source=10.41.1.187\sql2008;" + \
+                        "Initial Catalog=PLS_MKTO_SFDC_Performance;" + \
                         "Persist Security Info=True;" + \
                         "User ID=dataloader_user;" + \
                         "Password=password;"

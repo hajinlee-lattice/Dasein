@@ -229,8 +229,8 @@ def runHourlyDanteProcess(tenant):
     return runScoringGroups(tenant, load_groups);
 
 def runBulkScoring(tenant):
-    assert runPushToBulkScoring();
-    assert waitForLeadInputQueue(cycle_times=100);
+    assert runPushToBulkScoring(tenant);
+    assert waitForLeadInputQueue(tenant, cycle_times=100);
     assert runEndBulkScoring(tenant);
     
 def runHourlyScoring(tenant):

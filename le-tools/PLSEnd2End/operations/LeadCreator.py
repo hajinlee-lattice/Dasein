@@ -310,8 +310,12 @@ class MarketoRequest():
             response = self.createOrUpdate(email, random_str());
             if response:
                 if response.status_code == 200:
-                    print response.text;
-                    created_id=json.loads(response.text)["result"][0]["id"];
+                    created = json.loads(response.text);
+                    if created["result"][0]["status"]=="skipped":
+                        failed += 1;
+                        if failed>3:
+                            continue;
+                    created_id=created["result"][0]["id"];
                     print "==>    %d    %s" % (created_id, email);
                     lead_lists[created_id] = email;
                     recordNewAdded(sequence, PLSEnvironments.pls_marketing_app_MKTO,"Lead", created_id, email);
@@ -320,7 +324,7 @@ class MarketoRequest():
             else:
                 failed += 1;
                 if failed>3:
-                    break;
+                    continue;
         return lead_lists
     def addLeadToMarketoForDante(self,leads_number=3):        
         domains = getDomains(PLSEnvironments.pls_marketing_app_MKTO, leads_number);
