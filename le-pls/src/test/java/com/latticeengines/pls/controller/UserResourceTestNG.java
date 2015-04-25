@@ -20,6 +20,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.ResponseDocument;
@@ -63,120 +64,144 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
     }
 
+//    @Test(groups = { "functional", "deployment" })
+//    public void registerUser() {
+//        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
+//        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
+//        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
+//        testRegisterUserSuccess(AccessLevel.INTERNAL_USER);
+//        testRegisterUserSuccess(AccessLevel.INTERNAL_ADMIN);
+//        testRegisterUserSuccess(AccessLevel.SUPER_ADMIN);
+//
+//        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
+//        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
+//        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
+//        testRegisterUserSuccess(AccessLevel.INTERNAL_USER);
+//        testRegisterUserSuccess(AccessLevel.INTERNAL_ADMIN);
+//        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
+//
+//        switchToAccessLevel(AccessLevel.INTERNAL_USER);
+//        testRegisterUserFail(AccessLevel.EXTERNAL_USER);
+//        testRegisterUserFail(AccessLevel.EXTERNAL_ADMIN);
+//        testRegisterUserFail(AccessLevel.INTERNAL_USER);
+//        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
+//        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
+//
+//        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+//        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
+//        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
+//        testRegisterUserFail(AccessLevel.INTERNAL_USER);
+//        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
+//        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
+//
+//        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
+//        testRegisterUserFail(AccessLevel.EXTERNAL_USER);
+//        testRegisterUserFail(AccessLevel.EXTERNAL_ADMIN);
+//        testRegisterUserFail(AccessLevel.INTERNAL_USER);
+//        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
+//        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
+//    }
+//
+//    @Test(groups = { "functional", "deployment" })
+//    public void validateNewUser() throws JsonProcessingException {
+//        // Conflict with a user in the same tenant
+//        testConflictingUserInTenant();
+//        testConflictingUserOutsideTenant();
+//    }
+//
+//    @Test(groups = { "functional", "deployment" })
+//    public void getAllUsers() {
+//        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
+//        testGetAllUsersFail();
+//
+//        switchToAccessLevel(AccessLevel.INTERNAL_USER);
+//        testGetAllUsersFail();
+//
+//        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+//        testGetAllUsersSuccess(2);
+//
+//        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
+//        testGetAllUsersSuccess(5);
+//
+//        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
+//        testGetAllUsersSuccess(5);
+//    }
+//
+//    @Test(groups = { "functional", "deployment" })
+//    public void changePassword() {
+//        testChangePassword(AccessLevel.EXTERNAL_USER);
+//        testChangePassword(AccessLevel.EXTERNAL_ADMIN);
+//        testChangePassword(AccessLevel.INTERNAL_USER);
+//        testChangePassword(AccessLevel.INTERNAL_ADMIN);
+//        testChangePassword(AccessLevel.SUPER_ADMIN);
+//    }
+//
+//    @Test(groups = { "functional", "deployment" })
+//    public void updateAccessLevel() {
+//        User user = createTestUser(AccessLevel.EXTERNAL_USER);
+//        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
+//        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
+//        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, true);
+//        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, true);
+//        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, true);
+//
+//        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
+//        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
+//        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
+//        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
+//        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, true);
+//        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, true);
+//        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+//
+//        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
+//        switchToAccessLevel(AccessLevel.INTERNAL_USER);
+//        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, false);
+//        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, false);
+//        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
+//        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
+//        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+//
+//        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
+//        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
+//        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
+//        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
+//        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
+//        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
+//        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+//
+//        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
+//        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
+//        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, false);
+//        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, false);
+//        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
+//        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
+//        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
+//
+//        makeSureUserDoesNotExist(user.getUsername());
+//    }
+
     @Test(groups = { "functional", "deployment" })
-    public void registerUser() {
+    public void deleteUser() {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserSuccess(AccessLevel.INTERNAL_USER);
-        testRegisterUserSuccess(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserSuccess(AccessLevel.SUPER_ADMIN);
-
-        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserSuccess(AccessLevel.INTERNAL_USER);
-        testRegisterUserSuccess(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
-
-        switchToAccessLevel(AccessLevel.INTERNAL_USER);
-        testRegisterUserFail(AccessLevel.EXTERNAL_USER);
-        testRegisterUserFail(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.INTERNAL_USER);
-        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
-
-        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_USER);
-        testRegisterUserSuccess(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.INTERNAL_USER);
-        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
-
-        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
-        testRegisterUserFail(AccessLevel.EXTERNAL_USER);
-        testRegisterUserFail(AccessLevel.EXTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.INTERNAL_USER);
-        testRegisterUserFail(AccessLevel.INTERNAL_ADMIN);
-        testRegisterUserFail(AccessLevel.SUPER_ADMIN);
+        testDeleteUserSuccess(AccessLevel.EXTERNAL_USER);
     }
 
     @Test(groups = { "functional", "deployment" })
-    public void validateNewUser() throws JsonProcessingException {
-        // Conflict with a user in the same tenant
-        testConflictingUserInTenant();
-        testConflictingUserOutsideTenant();
-    }
+    public void deleteUserWithShortEmail() {
+        String shortEmail = "a@b.c";
+        makeSureUserDoesNotExist(shortEmail);
+        createUser(shortEmail, shortEmail, "Short", "Email");
+        userService.assignAccessLevel(AccessLevel.INTERNAL_USER, testTenant.getId(), shortEmail);
 
-    @Test(groups = { "functional", "deployment" })
-    public void getAllUsers() {
-        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
-        testGetAllUsersFail();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
 
-        switchToAccessLevel(AccessLevel.INTERNAL_USER);
-        testGetAllUsersFail();
+        String url = getRestAPIHostPort() + "/pls/users/\"" + shortEmail + "\"";
+        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, ResponseDocument.class);
+        assertTrue(response.getBody().isSuccess());
 
-        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
-        testGetAllUsersSuccess(2);
-
-        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
-        testGetAllUsersSuccess(5);
-
-        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
-        testGetAllUsersSuccess(5);
-    }
-
-    @Test(groups = { "functional", "deployment" })
-    public void changePassword() {
-        testChangePassword(AccessLevel.EXTERNAL_USER);
-        testChangePassword(AccessLevel.EXTERNAL_ADMIN);
-        testChangePassword(AccessLevel.INTERNAL_USER);
-        testChangePassword(AccessLevel.INTERNAL_ADMIN);
-        testChangePassword(AccessLevel.SUPER_ADMIN);
-    }
-
-    @Test(groups = { "functional", "deployment" })
-    public void updateAccessLevel() {
-        User user = createTestUser(AccessLevel.EXTERNAL_USER);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, true);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, true);
-        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, true);
-
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
-        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, true);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, true);
-        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
-
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
-        switchToAccessLevel(AccessLevel.INTERNAL_USER);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, false);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, false);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
-        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
-
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
-        switchToAccessLevel(AccessLevel.EXTERNAL_ADMIN);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, true);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, true);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
-        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
-
-        userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenant.getId(), user.getUsername());
-        switchToAccessLevel(AccessLevel.EXTERNAL_USER);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_USER, false);
-        testUpdateAccessLevel(user, AccessLevel.EXTERNAL_ADMIN, false);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_USER, false);
-        testUpdateAccessLevel(user, AccessLevel.INTERNAL_ADMIN, false);
-        testUpdateAccessLevel(user, AccessLevel.SUPER_ADMIN, false);
-
-        makeSureUserDoesNotExist(user.getUsername());
+        makeSureUserDoesNotExist(shortEmail);
     }
 
     private UserRegistration createUserRegistration() {
@@ -243,6 +268,21 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
         makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
     }
+
+    private void testDeleteUserSuccess(AccessLevel accessLevel) {
+        User user = createTestUser(accessLevel);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Accept", "application/json");
+        HttpEntity<String> requestEntity = new HttpEntity<>("", headers);
+
+        String url = getRestAPIHostPort() + "/pls/users/" + user.getUsername();
+        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.DELETE, requestEntity, ResponseDocument.class);
+        assertTrue(response.getBody().isSuccess());
+
+        makeSureUserDoesNotExist(user.getUsername());
+    }
+
 
     private void testUpdateAccessLevel(User user, AccessLevel targetLevel, boolean expectSuccess) {
         if (expectSuccess)

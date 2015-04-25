@@ -181,7 +181,7 @@ public class UserResource {
                                                    HttpServletRequest request) {
         User user;
         Ticket ticket;
-        username = username.toLowerCase();
+        username = userService.getURLSafeUsername(username).toLowerCase();
         try {
             ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             user = globalUserManagementService.getUserByEmail(
@@ -236,7 +236,7 @@ public class UserResource {
         String tenantId;
         AccessLevel currentLevel;
         String loginUsername;
-        username = username.toLowerCase();
+        username = userService.getURLSafeUsername(username).toLowerCase();
         try {
             Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             Session session = sessionService.retrieve(ticket);
@@ -283,7 +283,7 @@ public class UserResource {
         String tenantId;
         AccessLevel loginLevel;
         String loginUsername;
-        username = username.toLowerCase();
+        username = userService.getURLSafeUsername(username).toLowerCase();
         try {
             Ticket ticket = new Ticket(request.getHeader(Constants.AUTHORIZATION));
             Session session = sessionService.retrieve(ticket);
