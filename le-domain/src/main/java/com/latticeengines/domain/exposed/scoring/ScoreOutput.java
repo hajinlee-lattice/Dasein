@@ -13,6 +13,8 @@ public class ScoreOutput implements HasId<String>{
 
     private String leadId;
 
+    private String requestId;
+
     private int score;
 
     private String bucketDisplayName;
@@ -35,6 +37,15 @@ public class ScoreOutput implements HasId<String>{
 
     public void setId(String leadId){
         this.leadId = leadId;
+    }
+
+    @Column(name = "Request_ID", nullable = false)
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 
     @Column(name = "Score", nullable = true)
