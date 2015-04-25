@@ -1,34 +1,22 @@
 package com.latticeengines.admin.tenant.batonadapter.template;
 
-import java.util.Map;
-
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
-import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 
 public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
     
-    @Test(groups = "functional")
+    @Test(groups = "deployment")
     public void testInstallation() {
-        
+        bootstrap();
+
+        // wait a while, then test your installation
     }
 
     @Override
-    public Class<? extends LatticeComponent> getLatticeComponentClassToTest() {
-        return TemplateComponent.class;
-    }
+    protected String getServiceName() { return TemplateComponent.componentName; }
 
     @Override
-    public Map<String, String> getOverrideProperties() {
-        return null;
-    }
-
-    @Override
-    public void testGetDefaultConfig(SerializableDocumentDirectory dir) {
-        // TODO Auto-generated method stub
-        
-    }
+    public String getExpectedJsonFile() { return "tpl_expected.json"; }
 
 }

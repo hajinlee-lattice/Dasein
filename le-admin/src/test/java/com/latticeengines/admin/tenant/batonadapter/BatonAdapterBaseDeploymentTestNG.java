@@ -1,6 +1,5 @@
 package com.latticeengines.admin.tenant.batonadapter;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -9,82 +8,80 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.admin.configurationschema.ConfigurationSchemaTestNGBase;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
-public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTestNGBase {
+import junit.framework.Assert;
+
+/**
+ * besides the same setup and teardown as AdminFunctionalTestNGBase,
+ * we also register the testing component's installer,
+ * in case it has not been registered already by ServiceServiceImpl
+ */
+public abstract class BatonAdapterBaseDeploymentTestNG<T extends LatticeComponent> extends AdminFunctionalTestNGBase {
 
     private static final Log log = LogFactory.getLog(BatonAdapterBaseDeploymentTestNG.class);
+    private String contractId, tenantId, serviceName;
 
     @BeforeClass(groups = "deployment")
-    public void setup() throws Exception {
-        LatticeComponent component = getLatticeComponent();
-        if (component == null) {
-            throw new Exception(String.format("Component with name %s is not registered."));
+    public void setup() {
+        serviceName = getServiceName();
+        contractId = serviceName + "-contract";
+        tenantId = serviceName + "-tenant";
+
+        loginAD();
+        try {
+            deleteTenant(contractId, tenantId);
+        } catch (Exception e) {
+            //ignore
         }
-        deleteTenant(component);
-        createTenant(component);
-        bootstrap(component);
+        createTenant(contractId, tenantId);
+
     }
 
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
-        LatticeComponent component = getLatticeComponent();
-        if (component == null) {
-            log.error("No component to tear down.");
+        try {
+            deleteTenant(contractId, tenantId);
+        } catch (Exception e) {
+            //ignore
         }
-        deleteTenant(component);
     }
 
     @Test(groups = "deployment")
     public void getDefaultConfig() throws Exception {
-        LatticeComponent component = getLatticeComponent();
-        if (component == null) {
-            throw new Exception(String.format("Component with name %s is not registered."));
+        if (!batonService.getRegisteredServices().contains(serviceName)) {
+            throw new AssertionError(String.format("Component with name %s is not registered.", serviceName));
         }
-        String url = String.format("%s/admin/tenants/services/%s/default", getRestHostPort(), component.getName());
-        SerializableDocumentDirectory dir = restTemplate.getForObject(url, SerializableDocumentDirectory.class);
-        testGetDefaultConfig(dir);
+        testGetDefaultConfig(getExpectedJsonFile());
     }
 
-    private LatticeComponent getLatticeComponent() throws Exception {
-        Class<? extends LatticeComponent> componentClass = getLatticeComponentClassToTest();
-        LatticeComponent comp = componentClass.newInstance();
-        Map<String, LatticeComponent> componentMap = LatticeComponent.getRegisteredServiceComponents();
+    protected abstract String getServiceName();
 
-        return componentMap.get(comp.getName());
+    protected void bootstrap() {
+        DocumentDirectory defaultConfig = batonService.getDefaultConfiguration(serviceName);
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(defaultConfig);
+        Map<String, String> bootstrapProperties = sDir.flatten();
+
+        super.bootstrap(contractId, tenantId, serviceName, bootstrapProperties);
     }
 
-    private void bootstrap(LatticeComponent component) throws Exception {
-        String contractId = getContractId(component);
-        String tenantId = getTenantId(component);
+    private void testGetDefaultConfig(String expectedJson) {
+        String url = String.format("%s/admin/services/%s/default", getRestHostPort(), serviceName);
+        SerializableDocumentDirectory serializableDir =
+                restTemplate.getForObject(url, SerializableDocumentDirectory.class);
+        Assert.assertNotNull(serializableDir);
 
-        Map<String, String> overrideProps = getOverrideProperties();
-        if (overrideProps == null) {
-            overrideProps = new HashMap<>();
-        }
-        super.bootstrap(contractId, tenantId, component.getName(), overrideProps);
+        DocumentDirectory dir = SerializableDocumentDirectory.deserialize(serializableDir);
+        dir.makePathsLocal();
+        serializableDir = new SerializableDocumentDirectory(dir);
+        DocumentDirectory metaDir = batonService.getConfigurationSchema(serviceName);
+        serializableDir.applyMetadata(metaDir);
+
+        ConfigurationSchemaTestNGBase.assertSerializableDirAndJsonAreEqual(serializableDir, expectedJson);
     }
 
-    private void deleteTenant(LatticeComponent component) throws Exception {
-        super.deleteTenant(getContractId(component), getTenantId(component));
-    }
-
-    private void createTenant(LatticeComponent component) throws Exception {
-        super.createTenant(getContractId(component), getTenantId(component));
-    }
-
-    private String getContractId(LatticeComponent component) {
-        return component.getName() + "-contract";
-    }
-
-    private String getTenantId(LatticeComponent component) {
-        return component.getName() + "-tenant";
-    }
-
-    public abstract Class<? extends LatticeComponent> getLatticeComponentClassToTest();
-
-    public abstract Map<String, String> getOverrideProperties();
-
-    public abstract void testGetDefaultConfig(SerializableDocumentDirectory dir);
+    protected abstract String getExpectedJsonFile();
 }

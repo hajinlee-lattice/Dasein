@@ -25,34 +25,36 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
-import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.security.exposed.Constants;
 
+/**
+ * This is the base class of functional tests
+ * In BeforeClass, we delete and create one test tenant
+ * In AfterClass, we delete the test tenant
+ */
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-admin-context.xml" })
 public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
+    protected static final String ADTesterUsername = "testuser1";
+    protected static final String ADTesterPassword = "Lattice1";
+    protected static final String TestContractId = "CONTRACT1";
+    protected static final String TestTenantId = "TENANT1";
+
     private static final Log log = LogFactory.getLog(AdminFunctionalTestNGBase.class);
 
-    protected static final String ADTesterUsername = "testuser1";
-
-    protected static final String ADTesterPassword = "Lattice1";
+    protected static final BatonService batonService = new BatonServiceImpl();
 
     @Value("${admin.api.hostport}")
     private String hostPort;
@@ -68,53 +70,34 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     
     public AdminFunctionalTestNGBase() {}
 
-    public static class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
-
-        private String headerValue;
-
-        public AuthorizationHeaderHttpRequestInterceptor(String headerValue) {
-            this.headerValue = headerValue;
-        }
-
-        @Override
-        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-                throws IOException {
-            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
-            requestWrapper.getHeaders().add(Constants.AUTHORIZATION, headerValue);
-
-            return execution.execute(requestWrapper, body);
-        }
-
-        public void setAuthValue(String headerValue) {
-            this.headerValue = headerValue;
-        }
-    }
-
     protected String getRestHostPort() {
         return hostPort;
     }
     
-    @BeforeClass(groups = "functional")
-    public void setup() throws Exception {
+    @BeforeClass(groups = {"functional", "deployment"})
+    public void setup() {
         loginAD();
-        Camille camille = CamilleEnvironment.getCamille();
-        Path path = PathBuilder.buildServicePath(CamilleEnvironment.getPodId(), testLatticeComponent.getName());
         try {
-            camille.delete(path);
-        } catch (Exception e) { }
-        testLatticeComponent.register();
-        createTenant("CONTRACT1", "TENANT1");
-        CustomerSpaceServiceScope scope = testLatticeComponent.getScope();
-        ServiceWarden.commandBootstrap(scope.getServiceName(), scope.getCustomerSpace(), scope.getProperties());
+            deleteTenant(TestContractId, TestTenantId);
+        } catch (Exception e) {
+            //ignore
+        }
+        createTenant(TestContractId, TestTenantId);
+
     }
     
-    @AfterClass(groups = "functional")
+    @AfterClass(groups = {"functional", "deployment"})
     public void tearDown() throws Exception {
-        testLatticeComponent.tearDown();
+        try {
+            deleteTenant(TestContractId, TestTenantId);
+        } catch (Exception e) {
+            //ignore
+        }
     }
     
     protected void bootstrap(String contractId, String tenantId, String serviceName, Map<String, String> properties) {
-        String url = String.format("%s/admin/tenants/%s/services/%s?contractId=%s", getRestHostPort(), tenantId, serviceName, contractId);
+        String url = String.format("%s/admin/tenants/%s/services/%s?contractId=%s",
+                getRestHostPort(), tenantId, serviceName, contractId);
         restTemplate.put(url, properties, new HashMap<>());
     }
     
@@ -123,31 +106,30 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         restTemplate.delete(url, new HashMap<>());
     }
     
-    protected void createTenant(String contractId, String tenantId) throws Exception {
-
-        if (ContractLifecycleManager.exists(contractId)) {
-            ContractLifecycleManager.delete(contractId);
-        }
-
-        Path path = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), "contractId");
-        Camille camille = CamilleEnvironment.getCamille();
+    protected void createTenant(String contractId, String tenantId) {
         try {
-            camille.delete(path);
-        } catch (Exception e) { }
+            if (ContractLifecycleManager.exists(contractId)) {
+                ContractLifecycleManager.delete(contractId);
+            }
+        } catch (Exception e) {
+            throw new AssertionError("Camille failed to clean up the place holder for test tenant.");
+        }
 
         CustomerSpaceProperties props = new CustomerSpaceProperties();
         props.description = String.format("Test tenant for contract id %s and tenant id %s", contractId, tenantId);
         props.displayName = "Tenant for testing";
-        CustomerSpaceInfo info = new CustomerSpaceInfo(props, "");
-        System.out.println(JsonUtils.serialize(info));
-        log.info(String.format("Creating tenant %s.%s in %s.", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID));
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(props, "");
+
+        ContractInfo contractInfo = new ContractInfo(new ContractProperties());
+        TenantInfo tenantInfo = new TenantInfo(
+                new TenantProperties(spaceInfo.properties.displayName, spaceInfo.properties.description));
 
         TenantRegistration reg = new TenantRegistration();
-        reg.setSpaceInfo(info);
-        reg.setContractInfo(new ContractInfo(new ContractProperties()));
-        reg.setTenantInfo(new TenantInfo(new TenantProperties(info.properties.displayName, info.properties.description)));
+        reg.setSpaceInfo(spaceInfo);
+        reg.setTenantInfo(tenantInfo);
+        reg.setContractInfo(contractInfo);
 
-        String url = String.format("%s/admin/tenants/%s?contractId=%s",getRestHostPort(), tenantId, contractId);
+        String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(), tenantId, contractId);
         Boolean created = restTemplate.postForObject(url, reg, Boolean.class);
         Assert.assertTrue(created);
     }
@@ -185,6 +167,28 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         assertNotNull(token);
         addAuthHeader.setAuthValue(token);
         restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+    }
+
+    public static class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
+
+        private String headerValue;
+
+        public AuthorizationHeaderHttpRequestInterceptor(String headerValue) {
+            this.headerValue = headerValue;
+        }
+
+        @Override
+        public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+                throws IOException {
+            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
+            requestWrapper.getHeaders().add(Constants.AUTHORIZATION, headerValue);
+
+            return execution.execute(requestWrapper, body);
+        }
+
+        public void setAuthValue(String headerValue) {
+            this.headerValue = headerValue;
+        }
     }
 
 }

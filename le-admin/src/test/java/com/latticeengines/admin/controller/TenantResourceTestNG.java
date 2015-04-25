@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
 
     @BeforeClass(groups = "functional")
-    public void setup() throws Exception {
+    public void setup() {
         super.setup();
     }
 

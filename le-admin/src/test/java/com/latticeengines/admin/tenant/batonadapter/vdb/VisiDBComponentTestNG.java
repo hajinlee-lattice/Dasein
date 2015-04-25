@@ -1,33 +1,21 @@
 package com.latticeengines.admin.tenant.batonadapter.vdb;
 
-import java.util.Map;
-
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
-import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
-import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 
 public class VisiDBComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
-    
-    @Test(groups = "functional")
+
+    @Test(groups = "deployment")
     public void testInstallation() {
-        
+        bootstrap();
+
+        // wait a while, then test your installation
     }
 
     @Override
-    public Map<String, String> getOverrideProperties() {
-        return null;
-    }
+    protected String getServiceName() { return VisiDBComponent.componentName; }
 
     @Override
-    public Class<? extends LatticeComponent> getLatticeComponentClassToTest() {
-        return VisiDBComponent.class;
-    }
-
-    @Override
-    public void testGetDefaultConfig(SerializableDocumentDirectory dir) {
-        // TODO Auto-generated method stub
-        
-    }
+    public String getExpectedJsonFile() { return "vdb_expected.json"; }
 }
