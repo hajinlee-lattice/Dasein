@@ -9,6 +9,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,6 +20,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
@@ -39,6 +42,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
+import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 
 @Component("scoringStepYarnProcessor")
 public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
@@ -92,7 +96,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
     @Autowired
-    private DbCreds scorngCreds;
+    private DbCreds scoringCreds;
 
     private static final String JSON_SUFFIX = ".json";
 
@@ -191,16 +195,22 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
         scoringCommandResultEntityMgr.create(result);
 
         String sourceDir = customerBaseDir + "/" + customer + "/scoring/data/" + scoringCommand.getTableName();
-        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scorngCreds, queue, customer, 4);
+        ApplicationId appId = sqoopSyncJobService.exportData(targetTable, sourceDir, scoringCreds, queue, customer, 4);
 
         return appId;
     }
 
     private String createNewTable(String customer, ScoringCommand scoringCommand) {
+//        scoringCreds.setDb("ScoringDB_buildmachine");
+//        scoringCreds.setDBType("SQLServer");
+//        scoringCreds.setHost("10.41.1.250");
+//        scoringCreds.setPort(1433);
+//        DataSource dataSource = new DriverManagerDataSource("jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine", "root", "welcome");
+//        scoringJdbcTemplate.setDataSource(dataSource);
         String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
         String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
         sqoopSyncJobService.eval(metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable), //
-                queue, jobNameService.createJobName(customer, "create-table"), 1, metadataService.getJdbcConnectionUrl(scorngCreds)); //
+                queue, jobNameService.createJobName(customer, "create-table"), 1, metadataService.getJdbcConnectionUrl(scoringCreds)); //
         return newTable;
     }
 }

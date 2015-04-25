@@ -67,7 +67,6 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
     @Autowired
     private JdbcTemplate scoringJdbcTemplate;
 
-
     private String outputTable;
 
     @BeforeMethod(groups = "functional")

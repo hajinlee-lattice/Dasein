@@ -25,7 +25,7 @@
                 <entry key="appTimeLineWebAppAddress" value="${dataplatform.yarn.timeline-service.webapp.address}" />
                 <entry key="scoringJdbcTemplate" value-ref="scoringJdbcTemplate" />
                 <entry key="cleanUpInterval" value="${scoring.cleanup.timeinternval}" />
-                <entry key="scoringCreds" value-ref="scorngCreds" />
+                <entry key="scoringCreds" value-ref="scoringCreds" />
             </map>
         </property>
     </bean>
