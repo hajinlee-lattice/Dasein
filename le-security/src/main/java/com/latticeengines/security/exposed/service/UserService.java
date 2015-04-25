@@ -30,4 +30,6 @@ public interface UserService {
     boolean isSuperior(AccessLevel loginLevel, AccessLevel targetLevel);
 
     boolean inTenant(String tenantId, String username);
+
+    String getURLSafeUsername(String username);
 }

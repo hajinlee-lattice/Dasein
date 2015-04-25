@@ -231,6 +231,13 @@ public class UserServiceImpl implements UserService {
         return !globalUserManagementService.getRights(username, tenantId).isEmpty();
     }
 
+    @Override
+    public String getURLSafeUsername(String username) {
+        if (username.endsWith("\"") && username.startsWith("\""))
+            return username.substring(1, username.length() - 1);
+        return username;
+    }
+
     private boolean hasPLSRights(List<String> rights) {
         for (String right : rights) {
             if (right.contains("_PLS_")) { return true; }
