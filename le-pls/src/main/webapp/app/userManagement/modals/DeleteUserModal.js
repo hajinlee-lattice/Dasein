@@ -51,8 +51,8 @@ app.controller('DeleteUserController', function ($scope, $rootScope, _, Resource
 
         UserManagementService.DeleteUser($scope.user).then(function(result){
             if(result.Success) {
-                $("#modalContainer").modal('hide');
                 $rootScope.$broadcast(NavUtility.USER_MANAGEMENT_NAV_EVENT);
+                $("#modalContainer").modal('hide');
             } else {
                 //TODO:song handle error
                 alert(result.Errors[0]);
