@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.service.impl.metadata;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -57,17 +58,17 @@ public class MySQLServerMetadataProvider extends MetadataProvider {
     }
 
     @Override
-    public String createNewEmptyTableFromExistingOne(String newTable, String oldTable){
-        return "create table " + newTable + " select * from " + oldTable + " where 1 = 0";
+    public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable){
+        jdbcTemplate.execute("create table " + newTable + " select * from " + oldTable + " where 1 = 0");
     }
 
     @Override
-    public String dropTable(String table) {
-        return "drop table if exists " + table;
+    public void dropTable(JdbcTemplate jdbcTemplate, String table) {
+        jdbcTemplate.execute("drop table if exists " + table);
     }
 
     @Override
-    public String showTable(String table){
-        return "show tables like '" + table + "'";
+    public List<String> showTable(JdbcTemplate jdbcTemplate, String table){
+        return jdbcTemplate.queryForList("show tables like '" + table + "'", String.class);
     }
 }

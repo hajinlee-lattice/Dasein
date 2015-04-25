@@ -2,6 +2,7 @@ package com.latticeengines.dataplatform.service.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema;
@@ -89,20 +90,20 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public String createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable){
+    public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable){
         MetadataProvider provider = getProvider(jdbcTemplate);
-        return provider.createNewEmptyTableFromExistingOne(newTable, oldTable);
+        provider.createNewEmptyTableFromExistingOne(jdbcTemplate, newTable, oldTable);
     }
 
     @Override
-    public String dropTable(JdbcTemplate jdbcTemplate, String table){
+    public void dropTable(JdbcTemplate jdbcTemplate, String table){
         MetadataProvider provider = getProvider(jdbcTemplate);
-        return provider.dropTable(table);
+        provider.dropTable(jdbcTemplate, table);
     }
 
     @Override
-    public String showTable(JdbcTemplate jdbcTemplate, String table){
+    public List<String> showTable(JdbcTemplate jdbcTemplate, String table){
         MetadataProvider provider = getProvider(jdbcTemplate);
-        return provider.showTable(table);
+        return provider.showTable(jdbcTemplate, table);
     }
 }

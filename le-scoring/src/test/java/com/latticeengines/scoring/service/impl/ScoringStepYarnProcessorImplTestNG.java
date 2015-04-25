@@ -91,8 +91,7 @@ public class ScoringStepYarnProcessorImplTestNG extends ScoringFunctionalTestNGB
     @AfterMethod(enabled = true, lastTimeOnly = true, alwaysRun = true)
     public void afterEachTest() {
         if (outputTable != null) {
-            sqoopSyncJobService.eval(metadataService.dropTable(scoringJdbcTemplate, outputTable), "", "drop-table", 1,
-                    metadataService.getJdbcConnectionUrl(scoringCreds));
+            metadataService.dropTable(scoringJdbcTemplate, outputTable);
             clearTables();
         }
     }

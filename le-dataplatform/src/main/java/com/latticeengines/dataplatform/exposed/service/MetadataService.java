@@ -1,5 +1,7 @@
 package com.latticeengines.dataplatform.exposed.service;
 
+import java.util.List;
+
 import org.apache.avro.Schema;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -22,9 +24,9 @@ public interface MetadataService {
 
     Long getPositiveEventCount(JdbcTemplate jdbcTemplate, String tableName, String eventColName);
 
-    String createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
+    void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
 
-    String dropTable(JdbcTemplate jdbcTemplate, String table);
+    void dropTable(JdbcTemplate jdbcTemplate, String table);
 
-    String showTable(JdbcTemplate jdbcTemplate, String table);
+    List<String> showTable(JdbcTemplate jdbcTemplate, String table);
 }

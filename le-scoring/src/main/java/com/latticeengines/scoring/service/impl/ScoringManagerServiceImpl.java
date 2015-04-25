@@ -109,8 +109,7 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
          List<ScoringCommand> consumedCommands = scoringCommandEntityMgr.getConsumed();
          for(ScoringCommand scoringCommand : consumedCommands){
              if (scoringCommand.getConsumed().getTime() + cleanUpInterval * 3600 * 1000 < System.currentTimeMillis()) {
-                 sqoopSyncJobService.eval(metadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName()), "",
-                         "drop-table", 1, metadataService.getJdbcConnectionUrl(scoringCreds));
+                 metadataService.dropTable(scoringJdbcTemplate, scoringCommand.getTableName());
                  for(ScoringCommandState scoringCommandState : scoringCommandStateEntityMgr.findByScoringCommand(scoringCommand)){
                      scoringCommandStateEntityMgr.delete(scoringCommandState);
                  }
@@ -124,8 +123,7 @@ public class ScoringManagerServiceImpl extends QuartzJobBean implements ScoringM
         List<ScoringCommandResult> consumedResultCommands = scoringCommandResultEntityMgr.getConsumed();
         for (ScoringCommandResult scoringCommandResult : consumedResultCommands) {
             if (scoringCommandResult.getConsumed().getTime() + cleanUpInterval < System.currentTimeMillis()) {
-                sqoopSyncJobService.eval(metadataService.dropTable(scoringJdbcTemplate, scoringCommandResult.getTableName()), "",
-                        "drop-table", 1, metadataService.getJdbcConnectionUrl(scoringCreds));
+                metadataService.dropTable(scoringJdbcTemplate, scoringCommandResult.getTableName());
                 scoringCommandResultEntityMgr.delete(scoringCommandResult);
             }
         }

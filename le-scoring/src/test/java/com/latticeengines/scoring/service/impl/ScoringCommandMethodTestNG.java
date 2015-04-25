@@ -102,25 +102,21 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         scoringManager.cleanTables();
         assertEquals(scoringCommandEntityMgr.findAll().size(), 1);
 
-        sqoopSyncJobService.eval(metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, inputTable, testInputTable), //
-                "", "create-table", 1, metadataService.getJdbcConnectionUrl(scoringCreds));
+        metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, inputTable, testInputTable);
         scoringCommand.setStatus(ScoringCommandStatus.POPULATED);
         scoringCommandEntityMgr.update(scoringCommand);
         scoringManager.cleanTables();
         assertEquals(scoringCommandEntityMgr.findAll().size(), 1);
-        assertEquals(scoringJdbcTemplate.queryForList(metadataService.showTable(scoringJdbcTemplate, inputTable), String.class).get(0),
-                inputTable);
+        assertEquals(metadataService.showTable(scoringJdbcTemplate, inputTable).get(0), inputTable);
 
-        ScoringCommandResult scoringCommandResult = new ScoringCommandResult("Nutanix", ScoringCommandStatus.NEW, outputTable, 100,
-                new Timestamp(System.currentTimeMillis()));
+        ScoringCommandResult scoringCommandResult = new ScoringCommandResult("Nutanix", ScoringCommandStatus.NEW,
+                outputTable, 100, new Timestamp(System.currentTimeMillis()));
         scoringCommandResultEntityMgr.create(scoringCommandResult);
         scoringManager.cleanTables();
         assertEquals(scoringCommandResultEntityMgr.findAll().size(), 1);
 
-        sqoopSyncJobService.eval( metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, outputTable, testOutputTable), //
-                "", "create-table", 1, metadataService.getJdbcConnectionUrl(scoringCreds));
-        assertEquals(scoringJdbcTemplate.queryForList(metadataService.showTable(scoringJdbcTemplate, outputTable), String.class).get(0),
-                outputTable);
+        metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, outputTable, testOutputTable);
+        assertEquals(metadataService.showTable(scoringJdbcTemplate, outputTable).get(0), outputTable);
 
         scoringCommand.setStatus(ScoringCommandStatus.CONSUMED);
         scoringCommand.setConsumed(new Timestamp(System.currentTimeMillis()));
@@ -130,11 +126,11 @@ public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
         scoringCommandResultEntityMgr.update(scoringCommandResult);
         Thread.sleep(4000);
         scoringManager.cleanTables();
-        
+
         assertNull(scoringCommandEntityMgr.findByKey(scoringCommand));
         assertNull(scoringCommandResultEntityMgr.findByKey(scoringCommandResult));
-        assertEquals(scoringJdbcTemplate.queryForList(metadataService.showTable(scoringJdbcTemplate, inputTable), String.class).size(), 0);
-        assertEquals(scoringJdbcTemplate.queryForList(metadataService.showTable(scoringJdbcTemplate, outputTable), String.class).size(), 0);
+        assertEquals(metadataService.showTable(scoringJdbcTemplate, inputTable).size(), 0);
+        assertEquals(metadataService.showTable(scoringJdbcTemplate, outputTable).size(), 0);
     }
 
     @Test(groups = "functional", enabled = false)

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.apache.avro.Schema;
 import org.apache.sqoop.orm.AvroSchemaGenerator;
@@ -33,11 +34,11 @@ public abstract class MetadataProvider {
     
     public abstract Long getDataSize(JdbcTemplate jdbcTemplate, String tableName);
 
-    public abstract String createNewEmptyTableFromExistingOne(String newTable, String oldTable);
+    public abstract void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable);
 
-    public abstract String dropTable(String table);
+    public abstract void dropTable(JdbcTemplate jdbcTemplate, String table);
 
-    public abstract String showTable(String table);
+    public abstract List<String> showTable(JdbcTemplate jdbcTemplate, String table);
 
     public Schema getSchema(DbCreds dbCreds, String tableName) {
         SqoopOptions options = new SqoopOptions();

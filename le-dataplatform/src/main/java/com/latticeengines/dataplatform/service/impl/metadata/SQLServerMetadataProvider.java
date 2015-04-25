@@ -1,5 +1,6 @@
 package com.latticeengines.dataplatform.service.impl.metadata;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -56,17 +57,17 @@ public class SQLServerMetadataProvider extends MetadataProvider {
     }
 
     @Override
-    public String createNewEmptyTableFromExistingOne(String newTable, String oldTable) {
-        return "SELECT * INTO " + newTable + " FROM " + oldTable + " WHERE 1 = 0";
+    public void createNewEmptyTableFromExistingOne(JdbcTemplate jdbcTemplate, String newTable, String oldTable) {
+        jdbcTemplate.execute("SELECT * INTO " + newTable + " FROM " + oldTable + " WHERE 1 = 0");
     }
 
     @Override
-    public String dropTable(String table) {
-        return "IF OBJECT_ID('" + table + "', 'U') IS NOT NULL DROP TABLE " + table;
+    public void dropTable(JdbcTemplate jdbcTemplate, String table) {
+        jdbcTemplate.execute("IF OBJECT_ID('" + table + "', 'U') IS NOT NULL DROP TABLE " + table);
     }
 
     @Override
-    public String showTable(String table){
-        return "SELECT [name] FROM SYS.TABLES WHERE [name] = '" + table + "'";
+    public List<String> showTable(JdbcTemplate jdbcTemplate, String table){
+        return jdbcTemplate.queryForList("SELECT [name] FROM SYS.TABLES WHERE [name] = '" + table + "'", String.class);
     }
 }

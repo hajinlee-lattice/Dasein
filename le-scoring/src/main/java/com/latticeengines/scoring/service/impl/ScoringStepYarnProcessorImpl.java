@@ -42,7 +42,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scheduler.exposed.fairscheduler.LedpQueueAssigner;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.service.ScoringStepYarnProcessor;
-import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 
 @Component("scoringStepYarnProcessor")
 public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
@@ -208,9 +207,7 @@ public class ScoringStepYarnProcessorImpl implements ScoringStepYarnProcessor {
 //        DataSource dataSource = new DriverManagerDataSource("jdbc:sqlserver://10.41.1.250:1433;databaseName=ScoringDB_buildmachine", "root", "welcome");
 //        scoringJdbcTemplate.setDataSource(dataSource);
         String newTable = OUTPUT_TABLE_PREFIX + UUID.randomUUID().toString().replace("-", "");
-        String queue = LedpQueueAssigner.getMRQueueNameForSubmission();
-        sqoopSyncJobService.eval(metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable), //
-                queue, jobNameService.createJobName(customer, "create-table"), 1, metadataService.getJdbcConnectionUrl(scoringCreds)); //
+        metadataService.createNewEmptyTableFromExistingOne(scoringJdbcTemplate, newTable, targetRawTable);
         return newTable;
     }
 }
