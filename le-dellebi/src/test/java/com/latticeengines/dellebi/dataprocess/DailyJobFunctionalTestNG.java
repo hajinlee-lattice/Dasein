@@ -107,6 +107,8 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 		} catch (Exception e) {
 			System.out.println("HDFS file not found");
 		}
+		
+		new ClassPathXmlApplicationContext("dellebi-properties-context.xml", "dellebi-context-camel.xml");
 
 	}
 
