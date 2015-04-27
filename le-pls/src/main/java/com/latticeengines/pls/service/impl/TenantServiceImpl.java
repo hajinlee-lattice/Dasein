@@ -34,6 +34,14 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    public void updateTenant(Tenant tenant) {
+        Tenant oldTenant = tenantEntityMgr.findByTenantId(tenant.getId());
+        oldTenant.setName(tenant.getName());
+        oldTenant.setRegisteredTime(tenant.getRegisteredTime());
+        tenantEntityMgr.update(oldTenant);
+    }
+
+    @Override
     public void discardTenant(Tenant tenant) {
         try {
             tenantEntityMgr.delete(tenant);
@@ -52,6 +60,16 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public List<Tenant> getAllTenants() {
         return tenantEntityMgr.findAll();
+    }
+
+    @Override
+    public boolean hasTenantId(String tenantId) {
+        return tenantEntityMgr.findByTenantId(tenantId) != null;
+    }
+
+    @Override
+    public Tenant findByTenantId(String tenantId) {
+        return tenantEntityMgr.findByTenantId(tenantId);
     }
 
 }

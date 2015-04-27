@@ -8,7 +8,13 @@ public interface TenantService {
 
     void registerTenant(Tenant tenant);
 
+    void updateTenant(Tenant tenant);
+
     void discardTenant(Tenant tenant);
     
     List<Tenant> getAllTenants();
+
+    boolean hasTenantId(String tenantId);
+
+    Tenant findByTenantId(String tenantId);
 }

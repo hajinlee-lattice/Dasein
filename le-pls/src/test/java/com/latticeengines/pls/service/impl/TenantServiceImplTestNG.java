@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -20,13 +21,9 @@ public class TenantServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired
     GlobalTenantManagementService globalTenantManagementService;
 
-    private Tenant tenant;
-
     @BeforeClass(groups = "functional")
     public void setup() {
-        tenant = new Tenant();
-        tenant.setName("TenantService Test Tenant");
-        tenant.setId("TenantService_Test_Tenant");
+        Tenant tenant = createNewTenant();
         try {
             tenantService.discardTenant(tenant);
             globalTenantManagementService.discardTenant(tenant);
@@ -37,6 +34,7 @@ public class TenantServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @AfterClass(groups = {"functional"})
     public void tearDown() {
+        Tenant tenant = createNewTenant();
         try {
             tenantService.discardTenant(tenant);
             globalTenantManagementService.discardTenant(tenant);
@@ -47,9 +45,42 @@ public class TenantServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testRegisterAndDiscardTenant() {
-        tenantService.discardTenant(tenant);
+        Tenant tenant = createNewTenant();
+
         tenantService.registerTenant(tenant);
         tenantService.discardTenant(tenant);
+    }
+
+    @Test(groups = "functional")
+    public void testHasTenantWithId() {
+        Tenant tenant = createNewTenant();
+
+        Assert.assertFalse(tenantService.hasTenantId(tenant.getId()));
+        tenantService.registerTenant(tenant);
+        Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
+        tenantService.discardTenant(tenant);
+        Assert.assertFalse(tenantService.hasTenantId(tenant.getId()));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = {"testRegisterAndDiscardTenant", "testHasTenantWithId"})
+    public void testUpdateInsteadOfCreate() {
+        Tenant tenant = createNewTenant();
+
+        tenantService.registerTenant(tenant);
+        Tenant newTenant = tenantService.findByTenantId(tenant.getId());
+        Assert.assertEquals(newTenant.getName(), tenant.getName());
+
+        tenant.setName("New Name");
+        tenantService.updateTenant(tenant);
+        newTenant = tenantService.findByTenantId(tenant.getId());
+        Assert.assertEquals(newTenant.getName(), "New Name");
+    }
+
+    private Tenant createNewTenant() {
+        Tenant tenant = new Tenant();
+        tenant.setName("TenantService Test Tenant");
+        tenant.setId("TenantService_Test_Tenant");
+        return tenant;
     }
 
 }

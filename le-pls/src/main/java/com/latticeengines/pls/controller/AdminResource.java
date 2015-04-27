@@ -40,7 +40,11 @@ public class AdminResource extends InternalResourceBase {
     @ApiOperation(value = "Add a PLS tenant")
     public Boolean addTenant(@RequestBody Tenant tenant, HttpServletRequest request) {
         checkHeader(request);
-        tenantService.registerTenant(tenant);
+        if (!tenantService.hasTenantId(tenant.getId())) {
+            tenantService.registerTenant(tenant);
+        } else {
+            tenantService.updateTenant(tenant);
+        }
         return true;
     }
 

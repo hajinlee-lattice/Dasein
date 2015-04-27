@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -44,7 +45,12 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
         tenant.setId("T1");
         tenant.setName("T1");
     }
-    
+
+    @AfterClass(groups = { "functional", "deployment" })
+    public void teardown() {
+        tenantEntityMgr.deleteAll();
+    }
+
     @Test(groups = { "functional", "deployment" })
     public void addTenantWithProperMagicAuthenticationHeader() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
@@ -71,6 +77,21 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBase {
             assertEquals(code, "401");
         }
         assertTrue(exception);
+    }
+
+    @Test(groups = { "functional", "deployment" })
+    public void addExistingTenant() {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
+        Boolean result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class, new HashMap<>());
+        assertTrue(result);
+
+        tenant.setName("new name");
+        result = restTemplate.postForObject(getRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class, new HashMap<>());
+        assertTrue(result);
+        Tenant t = tenantEntityMgr.findByTenantId("T1");
+        assertNotNull(t);
+        assertEquals(t.getName(), "new name");
     }
 
     @SuppressWarnings("unchecked")
