@@ -22,18 +22,8 @@ public class DailyJob implements Job {
 
         // Get files and unzip them.
         LOGGER.info("Start to process files from inbox.");
-
-        // Apache Camel starts to process data when Spring ApplicationContext starts.
-        // Apache Camel will not stop once it starts.
         ApplicationContext springContext = new ClassPathXmlApplicationContext("dellebi-properties-context.xml",
-                "dellebi-context.xml");
-        
-        //Wait for a while to let Camel process data.
-        try {
-            Thread.sleep(100000);
-        } catch (InterruptedException e) {
-            LOGGER.info("Thread sleep has be interrupted. ", e);
-        }
+                "dellebi-context.xml");       
         
         // Process data using Cascading 
         // Note Camel scans input folder intermittently so it archive and unzip data continuously if there's new data incomes.
