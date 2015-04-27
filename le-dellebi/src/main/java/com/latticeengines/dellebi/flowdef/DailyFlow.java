@@ -1,29 +1,22 @@
 package com.latticeengines.dellebi.flowdef;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
-import com.latticeengines.dellebi.util.FileSystemOperations;
-import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
-import com.latticeengines.dellebi.util.NormalFileSystemOperations;
-
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
 import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
+import cascading.flow.planner.PlannerException;
 import cascading.property.AppProps;
+
+import com.latticeengines.dellebi.util.FileSystemOperations;
+import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
+import com.latticeengines.dellebi.util.NormalFileSystemOperations;
 
 public class DailyFlow {
 
@@ -94,6 +87,8 @@ public class DailyFlow {
                     fileSystem.cleanFolder(dataHadoopInPath + "/" + quoteTrans);
                 }
             }
+        } catch(PlannerException e){
+        	LOGGER.error("Seems there is corrupt data!", e);
         } catch (Exception e) {
             LOGGER.warn("Failed!", e);
         }
