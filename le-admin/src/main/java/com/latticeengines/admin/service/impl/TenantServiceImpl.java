@@ -1,6 +1,6 @@
 package com.latticeengines.admin.service.impl;
 
-import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +14,7 @@ import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -64,17 +65,17 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public List<SimpleEntry<String, TenantInfo>> getTenants(String contractId) {
-        List<SimpleEntry<String, TenantInfo>> tenants = tenantEntityMgr.getTenants(contractId);
-        if (tenants != null) {
-            for (SimpleEntry<String, TenantInfo> entry :  tenants) {
-                String cId = entry.getValue().contractId;
-                String tId = entry.getKey();
-                entry.getValue().bootstrapState = getTenantOverallState(cId, tId);
-            }
-            return tenants;
-        }
-        return null;
+    public Collection<TenantDocument> getTenants(String contractId) {
+//        List<SimpleEntry<String, TenantInfo>> tenants = tenantEntityMgr.getTenants(contractId);
+//        if (tenants != null) {
+//            for (SimpleEntry<String, TenantInfo> entry :  tenants) {
+//                String cId = entry.getValue().contractId;
+//                String tId = entry.getKey();
+//                entry.getValue().bootstrapState = getTenantOverallState(cId, tId);
+//            }
+//            return tenants;
+//        }
+        return tenantEntityMgr.getTenants(contractId);
     }
 
     @Override
@@ -83,7 +84,7 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public TenantInfo getTenant(String contractId, String tenantId) {
+    public TenantDocument getTenant(String contractId, String tenantId) {
         return tenantEntityMgr.getTenant(contractId, tenantId);
     }
 

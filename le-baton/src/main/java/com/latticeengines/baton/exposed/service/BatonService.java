@@ -1,10 +1,12 @@
 package com.latticeengines.baton.exposed.service;
 
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -19,7 +21,7 @@ public interface BatonService {
     boolean createTenant(String contractId, String tenantId, String defaultSpaceId,
                          ContractInfo contractInfo, TenantInfo tenantInfo, CustomerSpaceInfo spaceInfo);
 
-    TenantInfo getTenant(String contractId, String tenantId);
+    TenantDocument getTenant(String contractId, String tenantId);
 
     boolean loadDirectory(String source, String destination);
 
@@ -28,7 +30,7 @@ public interface BatonService {
     boolean bootstrap(String contractId, String tenantId, String spaceId, String serviceName,
             Map<String, String> properties);
 
-    List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId);
+    Collection<TenantDocument> getTenants(String contractId);
 
     boolean deleteTenant(String contractId, String tenantId);
 

@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.admin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
@@ -12,34 +13,39 @@ public class TenantDocument {
     private TenantInfo tenantInfo;
     private CustomerSpaceInfo spaceInfo;
     private CustomerSpace space;
+    private BootstrapState bootstrapState;
 
     @JsonProperty("CustomerSpace")
     public CustomerSpace getSpace() { return space; }
 
     @JsonProperty("CustomerSpace")
-    public void setSpace(CustomerSpace space) {
-        this.space = space;
-    }
+    public void setSpace(CustomerSpace space1) { this.space = space1; }
 
     @JsonProperty("ContractInfo")
     public ContractInfo getContractInfo() { return contractInfo; }
 
     @JsonProperty("ContractInfo")
-    public void setContractInfo(ContractInfo contractInfo) {
-        this.contractInfo = contractInfo;
-    }
+    public void setContractInfo(ContractInfo contractInfo1) { this.contractInfo = contractInfo1; }
 
     @JsonProperty("TenantInfo")
     public TenantInfo getTenantInfo() { return tenantInfo; }
 
     @JsonProperty("TenantInfo")
-    public void setTenantInfo(TenantInfo tenantInfo) {
-        this.tenantInfo = tenantInfo;
+    public void setTenantInfo(TenantInfo tenantInfo1) {
+        this.tenantInfo = tenantInfo1;
     }
 
     @JsonProperty("CustomerSpaceInfo")
     public CustomerSpaceInfo getSpaceInfo() { return spaceInfo; }
 
     @JsonProperty("CustomerSpaceInfo")
-    public void setSpaceInfo(CustomerSpaceInfo spaceInfo) { this.spaceInfo = spaceInfo; }
+    public void setSpaceInfo(CustomerSpaceInfo spaceInfo1) { this.spaceInfo = spaceInfo1; }
+
+    @JsonProperty("BootstrapState")
+    public BootstrapState getBootstrapState() { return bootstrapState; }
+
+    @JsonProperty("BootstrapState")
+    public void setBootstrapState(BootstrapState bootstrapState1) {
+        this.bootstrapState = bootstrapState1;
+    }
 }

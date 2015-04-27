@@ -2,6 +2,7 @@ package com.latticeengines.admin.entitymgr.impl;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -16,6 +17,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -36,20 +38,8 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
                 contractInfo, tenantInfo, customerSpaceInfo);
     }
 
-    public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId) {
-        List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantInfoList = batonService.getTenants(contractId);
-        for (AbstractMap.SimpleEntry<String, TenantInfo> entry : tenantInfoList) {
-            try {
-                CustomerSpaceInfo spaceInfo =
-                        SpaceLifecycleManager.getInfo(
-                                entry.getValue().contractId, entry.getKey(), CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-                entry.getValue().spaceInfoList = new ArrayList<>();
-                entry.getValue().spaceInfoList.add(spaceInfo);
-            } catch (Exception e) {
-                LOGGER.error("Could not get the info of the default space for tenant " + entry.getKey());
-            }
-        }
-        return tenantInfoList;
+    public Collection<TenantDocument> getTenants(String contractId) {
+        return batonService.getTenants(contractId);
     }
 
     @Override
@@ -60,7 +50,7 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
     }
 
     @Override
-    public TenantInfo getTenant(String contractId, String tenantId) {
+    public TenantDocument getTenant(String contractId, String tenantId) {
         return batonService.getTenant(contractId, tenantId);
     }
 

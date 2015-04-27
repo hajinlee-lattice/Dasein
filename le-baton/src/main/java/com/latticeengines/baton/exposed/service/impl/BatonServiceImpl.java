@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +25,7 @@ import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -131,25 +133,18 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
-    public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(String contractId) {
-        List<AbstractMap.SimpleEntry<String, TenantInfo>> tenants = new ArrayList<>();
-        try {
-            CamilleEnvironment.getCamille();
-
-            if (contractId != null) {
-                return TenantLifecycleManager.getAll(contractId);
+    public Collection<TenantDocument> getTenants(String contractId) {
+        if (contractId != null) {
+            try {
+                ContractInfo contractInfo = ContractLifecycleManager.getInfo(contractId);
+                return getTenants(contractId, contractInfo);
+            } catch (Exception e) {
+                log.error(String.format("Error retrieving tenants in contract %s.", contractId), e);
+                return null;
             }
-
-            List<AbstractMap.SimpleEntry<String, ContractInfo>> contracts = ContractLifecycleManager.getAll();
-
-            for (AbstractMap.SimpleEntry<String, ContractInfo> contract : contracts) {
-                tenants.addAll(TenantLifecycleManager.getAll(contract.getKey()));
-            }
-
-        } catch (Exception e) {
-            log.error("Error retrieving tenants", e);
+        } else {
+            return getTenants(null, null);
         }
-        return tenants;
     }
 
     @Override
@@ -170,23 +165,38 @@ public class BatonServiceImpl implements BatonService {
     }
 
     @Override
-    public TenantInfo getTenant(String contractId, String tenantId) {
-        TenantInfo tenantInfo = null;
+    public TenantDocument getTenant(String contractId, String tenantId) {
+        TenantDocument doc = new TenantDocument();
         try {
-            tenantInfo = TenantLifecycleManager.getInfo(contractId, tenantId);
+            TenantInfo tenantInfo = TenantLifecycleManager.getInfo(contractId, tenantId);
+
+            if (tenantInfo == null) return null;
+
+            doc.setTenantInfo(tenantInfo);
+
             try {
-                CustomerSpaceInfo spaceInfo =
-                        SpaceLifecycleManager.getInfo(contractId, tenantId,
-                                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-                tenantInfo.spaceInfoList = new ArrayList<>();
-                tenantInfo.spaceInfoList.add(spaceInfo);
+                ContractInfo contractInfo = ContractLifecycleManager.getInfo(contractId);
+                doc.setContractInfo(contractInfo);
             } catch (Exception e) {
                 log.error("Could not get the info of the default space for tenant " + tenantId);
             }
+
+            String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
+
+            try {
+                CustomerSpaceInfo spaceInfo =
+                        SpaceLifecycleManager.getInfo(contractId, tenantId, spaceId);
+                doc.setSpaceInfo(spaceInfo);
+            } catch (Exception e) {
+                log.error("Could not get the info of the default space for tenant " + tenantId);
+            }
+
+            CustomerSpace space = new CustomerSpace(contractId, tenantId, spaceId);
+            doc.setSpace(space);
         } catch (Exception e) {
             log.error("Error retrieving tenant " + tenantId + " in " + contractId, e);
         }
-        return tenantInfo;
+        return doc;
     }
 
     @Override
@@ -255,6 +265,69 @@ public class BatonServiceImpl implements BatonService {
             log.error("Error retrieving configuration schema for service " + serviceName, e);
             return null;
         }
+    }
+
+    public Collection<TenantDocument> getTenants(String contractId, ContractInfo contractInfo) {
+        List<TenantDocument> tenantDocs = new ArrayList<>();
+        if (contractId != null) {
+            try {
+                List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantEntries
+                        = TenantLifecycleManager.getAll(contractId);
+                return constructTenantDocsWithDefaultSpaceId(tenantEntries, contractId, contractInfo);
+            } catch (Exception e) {
+                log.error(String.format("Error retrieving tenants in contract %s.", contractId), e);
+            }
+        } else {
+            List<AbstractMap.SimpleEntry<String, ContractInfo>> contracts = new ArrayList<>();
+            try {
+                contracts = ContractLifecycleManager.getAll();
+            } catch (Exception e) {
+                log.error("Error retrieving all contracts.", e);
+            }
+            if (!contracts.isEmpty()) {
+                for (Map.Entry<String, ContractInfo> contract : contracts) {
+                    try {
+                        tenantDocs.addAll(getTenants(contract.getKey(), contract.getValue()));
+                    } catch (Exception e) {
+                        log.error(String.format("Error retrieving tenants in contract %s.", contract.getKey()), e);
+                    }
+                }
+            }
+        }
+
+        return tenantDocs;
+    }
+
+
+    private List<TenantDocument> constructTenantDocsWithDefaultSpaceId(
+            List<AbstractMap.SimpleEntry<String, TenantInfo>> tenantEntries,
+            String contractId, ContractInfo contractInfo) {
+        if (tenantEntries == null) return null;
+
+        List<TenantDocument> docs = new ArrayList<>();
+        for (Map.Entry<String, TenantInfo> tenantEntry :  tenantEntries) {
+            TenantDocument doc = new TenantDocument();
+
+            String tenantId = tenantEntry.getKey();
+            String spaceId = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
+
+            CustomerSpace space =  new CustomerSpace(contractId, tenantId, spaceId);
+            CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo();
+            try {
+                spaceInfo = SpaceLifecycleManager.getInfo(contractId, tenantId, spaceId);
+            } catch (Exception e) {
+                log.error(String.format("Error retrieving space info for contract %s, tenant %s, and space %s.",
+                        contractId, tenantId, spaceId), e);
+            }
+
+            doc.setSpace(space);
+            doc.setTenantInfo(tenantEntry.getValue());
+            doc.setContractInfo(contractInfo);
+            doc.setSpaceInfo(spaceInfo);
+            docs.add(doc);
+        }
+
+        return docs;
     }
 
 }
