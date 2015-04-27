@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.admin;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
@@ -12,7 +13,14 @@ public class TenantRegistration {
     private ContractInfo contractInfo;
     private TenantInfo tenantInfo;
     private CustomerSpaceInfo spaceInfo;
+    private CustomerSpace space;
     private List<SerializableDocumentDirectory> configDirectories;
+
+    @JsonProperty("CustomerSpace")
+    public CustomerSpace getSpace() { return space; }
+
+    @JsonProperty("CustomerSpace")
+    public void setSpace(CustomerSpace space1) { this.space = space1; }
 
     @JsonProperty("ContractInfo")
     public ContractInfo getContractInfo() { return contractInfo; }
