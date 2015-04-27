@@ -34,7 +34,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setPassword("Happy2010");
         crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/credentials/sfdc?tenantId=tenantId&contractId=contractI", crmCredential, CrmCredential.class);
+                + "/pls/credentials/sfdc?tenantId=tenantId&contractId=contractId", crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
     }
 
