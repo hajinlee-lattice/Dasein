@@ -9,11 +9,14 @@
             <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{forgotPasswordErrorMessage}}</span>
             <button class="close btn btn-link" data-ng-click="showForgotPasswordError = false;"><i class="fa fa-times fa-inverse"></i></button>
         </div>
+        <div class="global-error" data-ng-show="showLoginError">
+            <span><i class="fa fa-exclamation-circle fa-inverse"></i> {{loginErrorMessage}}</span>
+            <button class="close btn btn-link" data-ng-click="showLoginError = false;"><i class="fa fa-times fa-inverse"></i></button>
+        </div>
 
         <!-- Login form -->
         <div class="form-signin" data-ng-show="showLoginForm">
             <h2 class="form-signin-heading"><img src="assets/images/logo_login.png" alt="Lattice"></h2>
-            <p class="error-message" data-ng-show="showLoginError">{{loginErrorMessage}}</p>
             <div class="login-wrap">
                 <div class="user-login-info">
                     <label>{{ResourceUtility.getString('LOGIN_USERNAME')}}</label>
