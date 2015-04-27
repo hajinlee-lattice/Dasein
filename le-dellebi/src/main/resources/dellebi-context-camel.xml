@@ -17,10 +17,8 @@
 	<context:component-scan base-package="com.latticeengines.dellebi" />
 
 	<camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
-		<!-- <errorHandler id="defaultEH" >
-			<redeliveryPolicy maximumRedeliveries="3"
-				redeliveryDelay="10000" retryAttemptedLogLevel="ERROR" />
-		</errorHandler>-->
+		<!-- <errorHandler id="defaultEH" > <redeliveryPolicy maximumRedeliveries="3" 
+			redeliveryDelay="10000" retryAttemptedLogLevel="ERROR" /> </errorHandler> -->
 		<routeBuilder ref="filearchiver" />
 		<routeBuilder ref="fileunzipper" />
 	</camelContext>
@@ -29,4 +27,6 @@
 		class="com.latticeengines.dellebi.routebuilder.FileArchiveRouteBuilder" />
 	<bean id="fileunzipper"
 		class="com.latticeengines.dellebi.routebuilder.FileUnzipRouteBuilder" />
+
+	<bean id="mail" class="com.latticeengines.dellebi.util.MailSender" />
 </beans>
