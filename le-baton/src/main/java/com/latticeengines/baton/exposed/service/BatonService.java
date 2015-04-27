@@ -1,8 +1,6 @@
 package com.latticeengines.baton.exposed.service;
 
-import java.util.AbstractMap;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
