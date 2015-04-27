@@ -13,14 +13,7 @@ public class TenantRegistration {
     private ContractInfo contractInfo;
     private TenantInfo tenantInfo;
     private CustomerSpaceInfo spaceInfo;
-    private CustomerSpace space;
     private List<SerializableDocumentDirectory> configDirectories;
-
-    @JsonProperty("CustomerSpace")
-    public CustomerSpace getSpace() { return space; }
-
-    @JsonProperty("CustomerSpace")
-    public void setSpace(CustomerSpace space1) { this.space = space1; }
 
     @JsonProperty("ContractInfo")
     public ContractInfo getContractInfo() { return contractInfo; }
