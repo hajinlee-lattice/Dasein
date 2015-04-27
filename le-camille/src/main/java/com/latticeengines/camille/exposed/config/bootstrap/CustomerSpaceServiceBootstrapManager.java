@@ -19,7 +19,6 @@ import com.latticeengines.camille.exposed.lifecycle.SpaceLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
-import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
@@ -53,22 +52,6 @@ public class CustomerSpaceServiceBootstrapManager {
                     + scope.getServiceName());
         }
         bootstrapper.bootstrap(scope.getCustomerSpace(), scope.getProperties());
-    }
-
-    public static DocumentDirectory getDefaultConfiguration(String serviceName) throws Exception {
-        Bootstrapper bootstrapper = bootstrappers.get(serviceName);
-        if (bootstrapper == null) {
-            throw new IllegalArgumentException("Must register an upgrader and an installer for service " + serviceName);
-        }
-        return bootstrapper.getInstaller().getDefaultConfiguration(serviceName);
-    }
-
-    public static DocumentDirectory getConfigurationSchema(String serviceName) throws Exception {
-        Bootstrapper bootstrapper = bootstrappers.get(serviceName);
-        if (bootstrapper == null) {
-            throw new IllegalArgumentException("Must register an upgrader and an installer for service " + serviceName);
-        }
-        return bootstrapper.getInstaller().getConfigurationSchema(serviceName);
     }
 
     public static void reset(String serviceName, CustomerSpace space) {

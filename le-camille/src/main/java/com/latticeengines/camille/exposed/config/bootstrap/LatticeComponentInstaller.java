@@ -39,25 +39,19 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
         return dir;
     }
 
-    @Override
-    public DocumentDirectory getDefaultConfiguration(String serviceName) {
+    public DocumentDirectory getDefaultConfiguration() {
         Camille camille = CamilleEnvironment.getCamille();
         String podId = CamilleEnvironment.getPodId();
-        Path defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(podId, serviceName);
+        Path defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(podId, componentName);
         return camille.getDirectory(defaultConfigPath);
     }
 
-    @Override
-    public DocumentDirectory getConfigurationSchema(String serviceName) {
+    public DocumentDirectory getConfigurationSchema() {
         Camille camille = CamilleEnvironment.getCamille();
         String podId = CamilleEnvironment.getPodId();
-        Path metadataPath = PathBuilder.buildServiceConfigSchemaPath(podId, serviceName);
+        Path metadataPath = PathBuilder.buildServiceConfigSchemaPath(podId, componentName);
         return camille.getDirectory(metadataPath);
     }
-
-    public DocumentDirectory getDefaultConfiguration() { return getDefaultConfiguration(componentName); }
-
-    public DocumentDirectory getConfigurationSchema() { return getConfigurationSchema(componentName); }
 
     public SerializableDocumentDirectory getSerializableDefaultConfig() {
         DocumentDirectory configDir = getDefaultConfiguration();

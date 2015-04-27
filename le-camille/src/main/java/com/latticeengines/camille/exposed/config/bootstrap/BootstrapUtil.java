@@ -113,8 +113,8 @@ public class BootstrapUtil {
 
                     state = BootstrapStateUtil.getState(serviceDirectoryPath);
                     if (state.installedVersion < executableVersion) {
-                        log.info("{}Running upgrade from version {} to version {}", new Object[] { logPrefix,
-                                state.installedVersion, executableVersion });
+                        log.info("{}Running upgrade from version {} to version {}", logPrefix,
+                                state.installedVersion, executableVersion);
 
                         DocumentDirectory source = camille.getDirectory(serviceDirectoryPath);
 
@@ -265,32 +265,6 @@ public class BootstrapUtil {
                     toReturn = new DocumentDirectory();
                 }
 
-                BootstrapUtil.removeSystemFiles(toReturn);
-                toReturn.makePathsAbsolute(serviceDirectoryPath);
-                return toReturn;
-            }
-
-            @Override
-            public DocumentDirectory getDefaultConfiguration(String serviceName) {
-                DocumentDirectory toReturn;
-                if (installer == null) {
-                    toReturn = new DocumentDirectory();
-                } else {
-                    toReturn = installer.getDefaultConfiguration(serviceName);
-                }
-                BootstrapUtil.removeSystemFiles(toReturn);
-                toReturn.makePathsAbsolute(serviceDirectoryPath);
-                return toReturn;
-            }
-
-            @Override
-            public DocumentDirectory getConfigurationSchema(String serviceName) {
-                DocumentDirectory toReturn;
-                if (installer == null) {
-                    toReturn = new DocumentDirectory();
-                } else {
-                    toReturn = installer.getConfigurationSchema(serviceName);
-                }
                 BootstrapUtil.removeSystemFiles(toReturn);
                 toReturn.makePathsAbsolute(serviceDirectoryPath);
                 return toReturn;
