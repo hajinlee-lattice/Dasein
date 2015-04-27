@@ -6,18 +6,18 @@ app.service('TenantUtility', function(_){
 
     function convertTenantRecordToGridData (record) {
         var result = {
-            TenantId: record.key,
-            ContractId: record.value.contractId,
-            DisplayName: record.value.properties.displayName,
-            Status: record.value.bootstrapState.state,
-            CreatedDate: new Date(record.value.properties.created),
-            LastModifiedDate: new Date(record.value.properties.lastModified)
+            TenantId: record.CustomerSpace.tenantId,
+            ContractId: record.CustomerSpace.contractId,
+            DisplayName: record.TenantInfo.properties.displayName,
+            Status: record.BootstrapState.state,
+            CreatedDate: new Date(record.TenantInfo.properties.created),
+            LastModifiedDate: new Date(record.TenantInfo.properties.lastModified)
         };
-        var spaceInfo = record.value.spaceInfoList[0];
+        var spaceInfo = record.CustomerSpaceInfo;
         result.Product = spaceInfo.properties.product;
 
         if (result.Status === 'ERROR') {
-            console.warn("ERROR in the tenant " + result.TenantId + " : " + record.value.bootstrapState.errorMessage);
+            console.warn("ERROR in the tenant " + result.TenantId + " : " + record.BootstrapState.errorMessage);
         }
         result.Status = getStatusDisplayName(result.Status);
 
@@ -64,8 +64,7 @@ app.service('TenantUtility', function(_){
                 properties: {
                     displayName: "Test LPA tenant",
                     description: "A LPA tenant under the contract " + contractId
-                },
-                contractId: contractId
+                }
             };
         }
 

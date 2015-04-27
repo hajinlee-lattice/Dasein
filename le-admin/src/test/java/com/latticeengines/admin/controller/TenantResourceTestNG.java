@@ -1,5 +1,6 @@
 package com.latticeengines.admin.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
 public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
@@ -32,19 +35,22 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
         assertSingleTenant(restTemplate.getForObject(url, List.class, new HashMap<>()));
     }
     
-    private void assertSingleTenant(List<Map<String, Object>> tenants) {
-        // Deserialization of List<AbstractMap.Entry> is strange from the testing perspective
-        // In practice, only JS will be accessing this REST endpoint, so will let JS figure out how to best
-        // handle this deserialization
-        Assert.assertTrue(tenants.size() >= 1);
+    private void assertSingleTenant(List<Map<String, Object>> tenantObjs) {
+        Assert.assertTrue(tenantObjs.size() >= 1);
         boolean existTENANT1 = false;
-        for (Map<String, Object> map : tenants) {
-            if (map.get("key").equals("TENANT1")) {
-                existTENANT1 = true;
-                break;
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            for (Map<String, Object> obj : tenantObjs) {
+                TenantDocument tenant = mapper.treeToValue(mapper.valueToTree(obj), TenantDocument.class);
+                if (tenant.getSpace().getTenantId().equals("TENANT1")) {
+                    existTENANT1 = true;
+                    break;
+                }
             }
+            Assert.assertTrue(existTENANT1);
+        } catch (IOException e) {
+            Assert.fail();
         }
-        Assert.assertTrue(existTENANT1);
     }
     
     @Test(groups = "functional")
@@ -67,7 +73,8 @@ public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
     public void getServiceConfig() {
         String url = getRestHostPort() + String.format("/admin/tenants/%s/services/%s/?contractId=%s",
                 TestTenantId, testLatticeComponent.getName(), TestContractId);
-        SerializableDocumentDirectory dir = restTemplate.getForObject(url, SerializableDocumentDirectory.class, new HashMap<>());
+        SerializableDocumentDirectory dir =
+                restTemplate.getForObject(url, SerializableDocumentDirectory.class, new HashMap<>());
         Assert.assertNotNull(dir);
     }
     

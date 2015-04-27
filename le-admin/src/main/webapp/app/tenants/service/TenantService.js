@@ -146,11 +146,11 @@ app.service('TenantService', function($q, $http, _, TenantUtility, SessionUtilit
             data.RootPath = response.RootPath;
             data.Nodes = [];
             _.each(response.Nodes, function(node){
-                switch (node.Node) {
+                switch (node.Node.toLowerCase()) {
                     case "state.json":
                         data.State = JSON.parse(node.Data);
                         break;
-                    case "Lock":
+                    case "lock":
                         break;
                     default:
                         data.Nodes.push(node);

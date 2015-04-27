@@ -66,9 +66,9 @@ app.controller('TenantConfigCtrl', function($scope, $state, $stateParams, $modal
     } else {
         TenantService.GetTenantInfo($scope.tenantId, $scope.contractId).then(function(result1){
             if (result1.success) {
-                $scope.spaceInfo = result1.resultObj.spaceInfoList[0];
-                $scope.contractInfo = result1.resultObj.contractInfo;
-                $scope.tenantInfo = result1.resultObj;
+                $scope.spaceInfo = result1.resultObj.CustomerSpaceInfo;
+                $scope.contractInfo = result1.resultObj.ContractInfo;
+                $scope.tenantInfo = result1.resultObj.TenantInfo;
                 ServiceService.GetRegisteredServices().then( function(result2) {
                     if (result2.success) {
                         $scope.services = result2.resultObj;
