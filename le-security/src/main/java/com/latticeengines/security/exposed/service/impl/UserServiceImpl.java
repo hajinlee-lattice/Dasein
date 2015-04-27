@@ -57,7 +57,9 @@ public class UserServiceImpl implements UserService {
         User userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
 
         if (userByEmail != null) {
-            LOGGER.warn(String.format("A user with the same email address %s already exists. Update instead of create user.", userByEmail));
+            LOGGER.warn(String.format(
+                    "A user with the same email address %s already exists. Update instead of create user.",
+                    userByEmail));
         } else {
             try {
                 globalUserManagementService.registerUser(userRegistration.getUser(), userRegistration.getCredentials());
@@ -91,7 +93,9 @@ public class UserServiceImpl implements UserService {
         User userByEmail = globalUserManagementService.getUserByEmail(userRegistration.getUser().getEmail());
 
         if (userByEmail != null) {
-            LOGGER.warn(String.format("A user with the same email address %s already exists. Update instead of create user.", userByEmail));
+            LOGGER.warn(String.format(
+                    "A user with the same email address %s already exists. Update instead of create user.",
+                    userByEmail));
         } else {
             try {
                 globalUserManagementService.registerUser(userRegistration.getUser(), userRegistration.getCredentials());
@@ -183,6 +187,11 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+    @Override
+    public User findByEmail(String email) {
+        return globalUserManagementService.getUserByEmail(email);
+    }
+
     /**
      *
      * @param tenantId
@@ -217,8 +226,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean isVisible(AccessLevel loginLevel, AccessLevel targetLevel) {
         return (loginLevel != null && targetLevel != null)
-                && ( loginLevel.compareTo(AccessLevel.INTERNAL_USER) >= 0
-                || targetLevel.compareTo(AccessLevel.INTERNAL_USER) < 0 );
+                && (loginLevel.compareTo(AccessLevel.INTERNAL_USER) >= 0
+                || targetLevel.compareTo(AccessLevel.INTERNAL_USER) < 0);
     }
 
     @Override

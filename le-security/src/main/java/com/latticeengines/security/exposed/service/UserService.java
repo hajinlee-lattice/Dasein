@@ -13,6 +13,8 @@ public interface UserService {
 
     boolean createUser(UserRegistration userRegistration);
 
+    User findByEmail(String email);
+
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username);
 
     boolean resignAccessLevel(String tenantId, String username);
