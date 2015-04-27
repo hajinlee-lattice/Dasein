@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 @Component("modelDownloaderMBean")
 @ManagedResource(objectName = "Diagnostics:name=ModelDownloaderCheck")
-public class ModelDownloaderMBean{
+public class ModelDownloaderMBean {
 
 	@Autowired
     private ApplicationContext applicationContext;
@@ -25,13 +25,15 @@ public class ModelDownloaderMBean{
 	@ManagedOperation(description = "Check if ModelDownloader is Running")
     public String checkModelDownloader() {
         try {
-            if (applicationContext.containsBean("modelSummaryDownloadJob")){
+            if (applicationContext.containsBean("modelSummaryDownloadJob")) {
                 TimeStamp timeStamp = TimeStamp.getCurrentTime();
-                if (timeStamp.getSeconds() - timeStampContainer.getTimeStamp().getSeconds() <= downloaderInvokeInterval){
+                if (timeStamp.getSeconds() - timeStampContainer.getTimeStamp().getSeconds()
+                        <= downloaderInvokeInterval) {
                     long diff = timeStamp.getSeconds() - timeStampContainer.getTimeStamp().getSeconds();
                     return String.format("[SUCCESS] ModelDownloader job has been running for %d seconds.", diff);
                 }
-                return String.format("[FAILURE] ModelDownloaderJob has been running for more than %d seconds.", downloaderInvokeInterval);
+                return String.format("[FAILURE] ModelDownloaderJob has been running for more than %d seconds.",
+                        downloaderInvokeInterval);
             }
             return "[FAILURE] ModelDownloaderJob is not loaded into application context.";
         } catch (Exception e) {

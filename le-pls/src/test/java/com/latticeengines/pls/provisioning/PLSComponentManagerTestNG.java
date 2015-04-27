@@ -1,0 +1,66 @@
+package com.latticeengines.pls.provisioning;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.pls.service.TenantService;
+import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.service.UserService;
+
+public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
+
+    @Autowired
+    private PLSComponentManager componentManager;
+
+    @Autowired
+    private TenantService tenantService;
+
+    @Autowired
+    private UserService userService;
+
+    @Test(groups= {"functional"})
+    public void testProvisionTenant() {
+        Tenant tenant = createTestTenant();
+        List<String> emails = Arrays.asList("ysong@lattice-engines.com", "bnguyen@lattice-engines.com");
+        componentManager.provisionTenant(tenant, emails);
+        Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
+
+        Tenant newTenant = tenantService.findByTenantId(tenant.getId());
+        Assert.assertEquals(newTenant.getName(), tenant.getName());
+
+        for (String email : emails) {
+            AccessLevel level = userService.getAccessLevel(tenant.getId(), email);
+            Assert.assertEquals(level, AccessLevel.SUPER_ADMIN);
+        }
+
+        tenant = createTestTenant();
+        tenant.setName("new name");
+        componentManager.provisionTenant(tenant, new ArrayList<String>());
+        Assert.assertTrue(tenantService.hasTenantId(tenant.getId()));
+
+        newTenant = tenantService.findByTenantId(tenant.getId());
+        Assert.assertEquals(newTenant.getName(), "new name");
+
+        componentManager.discardTenant(tenant);
+        Assert.assertFalse(tenantService.hasTenantId(tenant.getId()));
+
+        for (String email : emails) {
+            Assert.assertFalse(userService.inTenant(tenant.getId(), email));
+        }
+    }
+
+    private Tenant createTestTenant(){
+        Tenant tenant = new Tenant();
+        tenant.setId("PLS_COMPONENT_TEST_TENANT");
+        tenant.setName("Pls component test tenant");
+        return tenant;
+    }
+
+}
