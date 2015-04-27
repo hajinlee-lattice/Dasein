@@ -237,7 +237,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean inTenant(String tenantId, String username) {
-        return !globalUserManagementService.getRights(username, tenantId).isEmpty();
+        try {
+            return !globalUserManagementService.getRights(username, tenantId).isEmpty();
+        } catch (LedpException e) {
+            return false;
+        }
     }
 
     @Override
