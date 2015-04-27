@@ -111,13 +111,14 @@ public class PLSInstaller extends LatticeComponentInstaller {
             //ignore
         }
 
-        boolean tenantCreated = restTemplate.postForObject(RESTAPI_HOST_PORT + "/pls/admin/tenants", tenant, Boolean.class);
+        boolean tenantCreated =
+                restTemplate.postForObject(RESTAPI_HOST_PORT + "/pls/admin/tenants", tenant, Boolean.class);
 
         if (!tenantCreated) {
             throw new LedpException(LedpCode.LEDP_18028, "Failed to create the requested tenant " + tenantId, e);
         }
 
-        for(String adminEmail : adminEmails) {
+        for (String adminEmail : adminEmails) {
             createAdminUser(adminEmail, tenantId);
         }
     }
@@ -167,7 +168,8 @@ public class PLSInstaller extends LatticeComponentInstaller {
 
         boolean adminCreated = restTemplate.postForObject(RESTAPI_HOST_PORT + "/pls/admin/users", urt, Boolean.class);
         if (!adminCreated) {
-            throw new LedpException(LedpCode.LEDP_18028, "Failed to create the admin user " + username, new RuntimeException());
+            throw new LedpException(
+                    LedpCode.LEDP_18028, "Failed to create the admin user " + username, new RuntimeException());
         }
     }
 
