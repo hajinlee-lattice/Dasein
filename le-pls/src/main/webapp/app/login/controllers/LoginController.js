@@ -44,8 +44,8 @@ angular.module('mainApp.login.controllers.LoginController', [
             return;
         }
         
-        $scope.usernameInvalid = $scope.username === "" ? true : false;
-        $scope.passwordInvalid = $scope.password === "" ? true : false;
+        $scope.usernameInvalid = $scope.username === "";
+        $scope.passwordInvalid = $scope.password === "";
         if ($scope.usernameInvalid || $scope.passwordInvalid) {
             return;
         }
@@ -130,7 +130,11 @@ angular.module('mainApp.login.controllers.LoginController', [
         if (message == null) {
             return;
         }
-        
+
+        if (message.indexOf("Global Auth") > -1) {
+            message = ResourceUtility.getString("LOGIN_GLOBAL_AUTH_ERROR");
+        }
+
         $scope.loginErrorMessage = message;
         $scope.showLoginError = true;
     };
@@ -155,7 +159,7 @@ angular.module('mainApp.login.controllers.LoginController', [
     $scope.forgotPasswordOkClick = function () {
         $scope.resetPasswordSuccess = false;
         $scope.showForgotPasswordError = false;
-        $scope.forgotPasswordUsernameInvalid = $scope.forgotPasswordUsername === "" ? true : false;
+        $scope.forgotPasswordUsernameInvalid = $scope.forgotPasswordUsername === "";
         if ($scope.forgotPasswordUsernameInvalid) {
             return;
         }
