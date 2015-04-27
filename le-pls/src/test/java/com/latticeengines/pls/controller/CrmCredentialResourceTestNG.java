@@ -34,14 +34,14 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setPassword("Happy2010");
         crmCredential.setSecurityToken("oIogZVEFGbL3n0qiAp6F66TC");
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/verifycrm/sfdc?tenantId=tenantId&contractId=contractI", crmCredential, CrmCredential.class);
+                + "/pls/credentials/sfdc?tenantId=tenantId&contractId=contractI", crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getOrgId(), "00D80000000KvZoEAK");
     }
 
     @Test(groups = { "deployment" }, dependsOnMethods = { "verifySfdcCredential" })
     public void getSfdcCredential() {
         CrmCredential crmCredential = restTemplate.getForObject(getRestAPIHostPort()
-                + "/pls/verifycrm/sfdc?tenantId=tenantId&contractId=contractId", CrmCredential.class);
+                + "/pls/credentials/sfdc?tenantId=tenantId&contractId=contractId", CrmCredential.class);
         Assert.assertEquals(crmCredential.getOrgId(), "00D80000000KvZoEAK");
     }
 
@@ -55,7 +55,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setUserName("latticeenginessandbox1_9026948050BD016F376AE6");
         crmCredential.setPassword("41802295835604145500BBDD0011770133777863CA58");
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/verifycrm/marketo?tenantId=tenantId&contractId=contractI", crmCredential, CrmCredential.class);
+                + "/pls/credentials/marketo?tenantId=tenantId&contractId=contractI", crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getUserName(), "latticeenginessandbox1_9026948050BD016F376AE6");
     }
 
@@ -70,7 +70,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBase {
         crmCredential.setPassword("Lattice1");
         crmCredential.setCompany("TechnologyPartnerLatticeEngines");
         CrmCredential newCrmCredential = restTemplate.postForObject(getRestAPIHostPort()
-                + "/pls/verifycrm/eloqua?tenantId=tenantId&contractId=contractI", crmCredential, CrmCredential.class);
+                + "/pls/credentials/eloqua?tenantId=tenantId&contractId=contractI", crmCredential, CrmCredential.class);
         Assert.assertEquals(newCrmCredential.getUserName(), "Matt.Sable");
     }
 
