@@ -1,5 +1,6 @@
 module.exports = function(grunt) {
     var sourceDir = 'src/main/webapp';
+    var testDir = 'src/test/webapp';
     // Configurable paths for the application
     var appConfig = {
         dir:  sourceDir,
@@ -24,15 +25,42 @@ module.exports = function(grunt) {
 
             kendo: '2015.1.408'
         },
-        env: {
-            dev: {
-                url: 'http://localhost:8080'
+        env:  {
+            dev:         {
+                url:            'http://localhost:8080',
+                protractorConf: testDir + '/e2e/conf/protractor.conf.dev.js'
+            },
+            integration: {
+                url:            'http://bodcdevhdpweb52.dev.lattice.local:8080',
+                protractorConf: testDir + '/e2e/conf/protractor.conf.js'
+            },
+            qa:          {
+                url:            'http://bodcdevhdpweb53.dev.lattice.local:8080',
+                protractorConf: testDir + '/e2e/conf/protractor.conf.js'
+            },
+            prod:        {
+                url:            'https://app.lattice-engines.com',
+                protractorConf: testDir + '/e2e/conf/protractor.conf.js'
             }
         }
     };
 
+    var env = grunt.option('env') || 'dev';
+    var chosenEnv;
+    if (env === 'dev') {
+        chosenEnv = appConfig.env.dev;
+        process.env.plstest = chosenEnv;
+    } else if (env === 'int') {
+        chosenEnv = appConfig.env.integration;
+    } else if (env === 'qa') {
+        chosenEnv = appConfig.env.qa;
+    } else if (env === 'prod') {
+        chosenEnv = appConfig.env.prod;
+    }
+
     grunt.initConfig({
-        app: appConfig,
+        app:     appConfig,
+        testenv: chosenEnv,
 
         wget: {
             // download un-minimized version of vendor javascript libraries from CDN
@@ -334,6 +362,54 @@ module.exports = function(grunt) {
                     autoWatch:  true
                 }
             }
+        },
+
+        // End to End (e2e) tests (aka UI automation)
+        protractor: {
+            options:          {
+                configFile: '<%= testenv.protractorConf %>',
+                noColor:    false,
+                keepAlive:  false // don't keep browser process alive after failures
+            },
+            chrome:           {
+                options: {
+                    args: {
+                        browser:       'chrome',
+                        baseUrl:       '<%= testenv.url %>',
+                        directConnect: true
+                    }
+                }
+            },
+            firefox:          {
+                options: {
+                    args: {
+                        browser:       'firefox',
+                        baseUrl:       '<%= testenv.url %>',
+                        directConnect: true
+                    }
+                }
+            },
+            internetexplorer: {
+                options: {
+                    args: {
+                        browser: 'internet explorer',
+                        baseUrl: '<%= testenv.url %>'
+                    }
+                }
+            },
+            safari:           {
+                options: {
+                    args: {
+                        browser: 'safari',
+                        baseUrl: '<%= testenv.url %>'
+                    }
+                }
+            }
+        },
+
+        concurrent: {
+            wget: ['wget:js', 'wget:css', 'wget:fonts', 'wget:kendojs', 'wget:kendocss', 'wget:kendofonts', 'wget:kendoimages'],
+            test: ['jshint', 'karma:unit']
         }
 
     });
@@ -348,9 +424,12 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-karma');
+    grunt.loadNpmTasks('grunt-concurrent');
+    grunt.loadNpmTasks('grunt-protractor-runner');
 
     // main task to run before deploy the dist war
     grunt.registerTask('dist', [
+        'concurrent:test',
         'copy:backup',
         'clean:dist',
         'uglify',
@@ -364,8 +443,7 @@ module.exports = function(grunt) {
     grunt.registerTask('init', [
         'clean:vendor',
         'copy:lecommon',
-        'wget:js', 'wget:css', 'wget:fonts',
-        'wget:kendojs', 'wget:kendocss', 'wget:kendofonts', 'wget:kendoimages',
+        'concurrent:wget',
         'less:dev']);
 
     grunt.registerTask('www', ['copy:www', 'clean:www']);
@@ -374,5 +452,23 @@ module.exports = function(grunt) {
 
     // restore dev setup after run a default task
     grunt.registerTask('restore', ['copy:restorewww','copy:restore', 'clean:restore', 'less:dev']);
+
+    var e2eChromeText = 'Runs selenium end to end (protractor) unit tests on Chrome';
+    grunt.registerTask('e2eChrome', e2eChromeText, ['protractor:chrome']);
+
+    var e2eFirefoxText = 'Runs selenium end to end (protractor) unit tests on Firefox';
+    grunt.registerTask('e2eFirefox', e2eFirefoxText, ['protractor:firefox']);
+
+    var e2eInternetExplorerText = 'Runs selenium end to end (protractor) unit tests on Internet Explorer';
+    grunt.registerTask('e2eInternetExplorer', e2eInternetExplorerText, ['protractor:internetexplorer']);
+
+    var e2eSafariText = 'Runs selenium end to end (protractor) unit tests on Safari';
+    grunt.registerTask('e2eSafari', e2eSafariText, ['protractor:safari']);
+
+    var e2eMacText = 'Runs selenium end to end (protractor) Mac tests';
+    grunt.registerTask('e2eMac', e2eMacText, ['concurrent:mac']);
+
+    var e2eWinText = 'Runs selenium end to end (protractor) Windows tests';
+    grunt.registerTask('e2eWin', e2eWinText, ['concurrent:windows']);
 
 };
