@@ -1,6 +1,5 @@
 package com.latticeengines.admin.controller;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
-import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
@@ -42,7 +41,8 @@ public class TenantResource {
         return tenantService.createTenant(contractId, tenantId, registration);
     }
 
-    @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantId}/services/{serviceName}",
+            method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Bootstrap a Lattice tenant service")
     public boolean bootstrapTenant(@PathVariable String tenantId, //
@@ -54,12 +54,15 @@ public class TenantResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenants for a particular contract id, or all tenants if contractId is null")
-    public List<AbstractMap.SimpleEntry<String, TenantInfo>> getTenants(
+    public List<TenantDocument> getTenants(
             @RequestParam(value = "contractId", required = false) String contractId) {
+        String parsedContractId;
         if (StringUtils.isEmpty(contractId)) {
-            contractId = null;
+            parsedContractId = null;
+        } else {
+            parsedContractId = contractId;
         }
-        return tenantService.getTenants(contractId);
+        return new ArrayList<>(tenantService.getTenants(parsedContractId));
     }
 
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -72,11 +75,13 @@ public class TenantResource {
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete tenant for a particular contract id")
-    public TenantInfo getTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
+    public TenantDocument getTenant(@RequestParam(value = "contractId") String contractId,
+                                    @PathVariable String tenantId) {
         return tenantService.getTenant(contractId, tenantId);
     }
 
-    @RequestMapping(value = "/{tenantId}/services/{serviceName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantId}/services/{serviceName}",
+            method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get config for currently provisioned tenant service")
     public SerializableDocumentDirectory getServiceConfig(@RequestParam(value = "contractId") String contractId, //
@@ -91,7 +96,8 @@ public class TenantResource {
         return new ArrayList<>();
     }
 
-    @RequestMapping(value = "/{tenantId}/services/{serviceName}/state", method = RequestMethod.GET, headers = "Accept=application/json")
+    @RequestMapping(value = "/{tenantId}/services/{serviceName}/state",
+            method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get state for tenant service")
     public BootstrapState getServiceState(@RequestParam(value = "contractId") String contractId, //

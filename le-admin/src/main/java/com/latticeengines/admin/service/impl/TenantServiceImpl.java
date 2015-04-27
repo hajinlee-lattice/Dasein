@@ -43,7 +43,9 @@ public class TenantServiceImpl implements TenantService {
         TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
         CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
 
-        boolean tenantCreationSuccess = tenantEntityMgr.createTenant(contractId, tenantId, contractInfo, tenantInfo, spaceInfo);
+        boolean tenantCreationSuccess =
+                tenantEntityMgr.createTenant(contractId, tenantId, contractInfo, tenantInfo, spaceInfo);
+
         if (!tenantCreationSuccess) {
             tenantEntityMgr.deleteTenant(contractId, tenantId);
             return false;
@@ -54,8 +56,8 @@ public class TenantServiceImpl implements TenantService {
         for (SerializableDocumentDirectory configSDir: configSDirs) {
             String serviceName = configSDir.getRootPath().substring(1);
             Map<String, String> flatDir = configSDir.flatten();
-            serviceBootstrapSuccess = serviceBootstrapSuccess &&
-                    bootstrap(contractId, tenantId, serviceName, flatDir);
+            serviceBootstrapSuccess = serviceBootstrapSuccess
+                    && bootstrap(contractId, tenantId, serviceName, flatDir);
         }
         if (!serviceBootstrapSuccess) {
             tenantEntityMgr.deleteTenant(contractId, tenantId);
@@ -66,16 +68,16 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public Collection<TenantDocument> getTenants(String contractId) {
-//        List<SimpleEntry<String, TenantInfo>> tenants = tenantEntityMgr.getTenants(contractId);
-//        if (tenants != null) {
-//            for (SimpleEntry<String, TenantInfo> entry :  tenants) {
-//                String cId = entry.getValue().contractId;
-//                String tId = entry.getKey();
-//                entry.getValue().bootstrapState = getTenantOverallState(cId, tId);
-//            }
-//            return tenants;
-//        }
-        return tenantEntityMgr.getTenants(contractId);
+        Collection<TenantDocument> tenants = tenantEntityMgr.getTenants(contractId);
+        if (tenants != null) {
+            for (TenantDocument doc :  tenants) {
+                String cId = doc.getSpace().getContractId();
+                String tId = doc.getSpace().getTenantId();
+                doc.setBootstrapState(getTenantOverallState(cId, tId));
+            }
+            return tenants;
+        }
+        return null;
     }
 
     @Override
