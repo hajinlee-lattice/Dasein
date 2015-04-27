@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.camille.exposed.config.bootstrap.LatticeComponentInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
@@ -13,6 +14,9 @@ public class DanteComponent extends LatticeComponent {
 
     @Value("${admin.dante.dryrun}")
     private boolean dryrun;
+
+    private LatticeComponentInstaller installer = new DanteInstaller();
+    private CustomerSpaceServiceUpgrader upgrader = new DanteUpgrader();
 
     @Override
     public String getName() {
@@ -26,12 +30,13 @@ public class DanteComponent extends LatticeComponent {
 
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
-        return null;
+        installer.setDryrun(dryrun);
+        return installer;
     }
 
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() {
-        return null;
+        return upgrader;
     }
 
     @Override
