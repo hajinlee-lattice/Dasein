@@ -1,8 +1,5 @@
 package com.latticeengines.dellebi.dataprocess;
 
-import java.io.File;
-import java.io.FilenameFilter;
-
 import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -15,6 +12,9 @@ import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.util.MailSender;
 
 public class DailyJob implements Job {
+	
+	@Value("${dellebi.mailreceivelist}")
+    private String mailReceiveList;
 
     public final static Logger LOGGER = Logger.getLogger(DailyJob.class);
 
@@ -34,6 +34,8 @@ public class DailyJob implements Job {
         
         //Send notifications to inform Daily refresh is done.
         LOGGER.info("EBI daily refresh just finished successfully.");
+        MailSender mailSender = springContext.getBean("mail", MailSender.class);
+        mailSender.sendEmail(mailReceiveList,"Dell EBI daily refresh just finished!","Dell EBI daily refresh just finished!");
     }
 
     @Override
