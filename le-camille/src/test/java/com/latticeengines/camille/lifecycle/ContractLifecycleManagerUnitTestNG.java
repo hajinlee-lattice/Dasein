@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.Assert;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -19,6 +17,8 @@ import com.latticeengines.camille.exposed.lifecycle.ContractLifecycleManager;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
+
+import junit.framework.Assert;
 
 public class ContractLifecycleManagerUnitTestNG {
     @SuppressWarnings("unused")

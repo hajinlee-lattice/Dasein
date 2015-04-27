@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Iterator;
 
-import junit.framework.Assert;
-
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,8 @@ import com.latticeengines.camille.exposed.paths.FileSystemGetChildrenFunction;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
 import com.latticeengines.domain.exposed.camille.Path;
+
+import junit.framework.Assert;
 
 public class FileSystemGetChildrenFunctionUnitTestNG {
 

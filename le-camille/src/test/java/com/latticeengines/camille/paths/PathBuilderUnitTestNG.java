@@ -3,9 +3,9 @@ package com.latticeengines.camille.paths;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
+import com.latticeengines.domain.exposed.camille.Path;
 
 public class PathBuilderUnitTestNG {
 

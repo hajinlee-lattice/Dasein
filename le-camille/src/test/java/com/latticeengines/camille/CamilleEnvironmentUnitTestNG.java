@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleConfiguration;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.CamilleEnvironment.Mode;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Document;
