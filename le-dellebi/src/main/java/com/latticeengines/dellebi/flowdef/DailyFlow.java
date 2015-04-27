@@ -16,6 +16,7 @@ import cascading.property.AppProps;
 
 import com.latticeengines.dellebi.util.FileSystemOperations;
 import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
+import com.latticeengines.dellebi.util.MailSender;
 import com.latticeengines.dellebi.util.NormalFileSystemOperations;
 
 public class DailyFlow {
@@ -37,6 +38,9 @@ public class DailyFlow {
     
     @Value("${dellebi.datahadoopworkingpath}")
     private String dataHadoopWorkingPath;
+    
+    @Value("${dellebi.mailreceivelist}")
+    private String mailReceiveList;
 
     private ArrayList<FlowDef> flowList;
 
@@ -48,6 +52,7 @@ public class DailyFlow {
         
         LOGGER.info("All daily refresh files arrive!");
         LOGGER.info("Start process data on HDFS!");
+        MailSender mailSender = springContent.getBean("mail", MailSender.class);
         
 
         Properties properties = new Properties();
@@ -63,8 +68,7 @@ public class DailyFlow {
         }else{
             fileSystem = springContent.getBean("hadoopoperation", HadoopFileSystemOperations.class);
         }
-   
-
+        
         try {
             for (Iterator<FlowDef> flow = flowList.iterator(); flow.hasNext();) {
                 FlowDef item = flow.next();
@@ -91,6 +95,7 @@ public class DailyFlow {
         	LOGGER.error("Seems there is corrupt data!", e);
         } catch (Exception e) {
             LOGGER.warn("Failed!", e);
+            mailSender.sendEmail(mailReceiveList,"Dell EBI daily refresh just failed for some reasons!","Please check Dell EBI logs.");
         }
 
     }
