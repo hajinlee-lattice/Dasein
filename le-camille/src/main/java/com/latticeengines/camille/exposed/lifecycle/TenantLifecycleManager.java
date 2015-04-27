@@ -3,6 +3,7 @@ package com.latticeengines.camille.exposed.lifecycle;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
@@ -36,6 +37,7 @@ public class TenantLifecycleManager {
             camille.create(tenantsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Tenants path @ {}", tenantsPath);
         } catch (KeeperException.NodeExistsException e) {
+            // ignore
         }
 
         Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
@@ -114,7 +116,7 @@ public class TenantLifecycleManager {
                 PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId));
     }
 
-    public static List<AbstractMap.SimpleEntry<String, TenantInfo>> getAll(String contractId) throws IllegalArgumentException, Exception {
+    public static List<AbstractMap.SimpleEntry<String, TenantInfo>> getAll(String contractId) throws Exception {
         LifecycleUtils.validateIds(contractId);
         List<AbstractMap.SimpleEntry<String, TenantInfo>> toReturn = new ArrayList<AbstractMap.SimpleEntry<String, TenantInfo>>();
 
@@ -122,7 +124,7 @@ public class TenantLifecycleManager {
         List<AbstractMap.SimpleEntry<Document, Path>> childPairs = c.getChildren(PathBuilder.buildTenantsPath(
                 CamilleEnvironment.getPodId(), contractId));
 
-        for (AbstractMap.SimpleEntry<Document, Path> childPair : childPairs) {
+        for (Map.Entry<Document, Path> childPair : childPairs) {
             TenantProperties properties = null;
             try {
                 Document tenantPropertiesDocument = c.get(childPair.getValue().append(PathConstants.PROPERTIES_FILE));
@@ -133,7 +135,6 @@ public class TenantLifecycleManager {
 
             if (properties != null) {
                 TenantInfo tenantInfo = new TenantInfo(properties);
-                tenantInfo.contractId = contractId;
                 toReturn.add(new AbstractMap.SimpleEntry<>(childPair.getValue().getSuffix(), tenantInfo));
             }
         }
@@ -148,11 +149,9 @@ public class TenantLifecycleManager {
 
         Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);
         Document tenantPropertiesDocument = c.get(tenantPath.append(PathConstants.PROPERTIES_FILE));
-        TenantProperties properties = DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
+        TenantProperties properties =
+                DocumentUtils.toTypesafeDocument(tenantPropertiesDocument, TenantProperties.class);
 
-        TenantInfo tenantInfo = new TenantInfo(properties);
-        tenantInfo.contractId = contractId;
-        tenantInfo.contractInfo = ContractLifecycleManager.getInfo(contractId);
-        return tenantInfo;
+        return new TenantInfo(properties);
     }
 }
