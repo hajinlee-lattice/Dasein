@@ -16,7 +16,7 @@
 	<context:annotation-config />
 	<context:component-scan base-package="com.latticeengines.dellebi" />
 
-	<camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+	<!--  <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
 	 <errorHandler id="defaultEH">
 			<redeliveryPolicy maximumRedeliveries="3"
 				redeliveryDelay="10000" retryAttemptedLogLevel="WARN" />
@@ -28,7 +28,7 @@
 	<bean id="filearchiver"
 		class="com.latticeengines.dellebi.routebuilder.FileArchiveRouteBuilder" />
 	<bean id="fileunzipper"
-		class="com.latticeengines.dellebi.routebuilder.FileUnzipRouteBuilder" />
+		class="com.latticeengines.dellebi.routebuilder.FileUnzipRouteBuilder" />-->
 
 	<bean id="dailyFlow" class="com.latticeengines.dellebi.flowdef.DailyFlow">
 		<constructor-arg>
