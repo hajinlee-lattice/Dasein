@@ -104,7 +104,7 @@ public class SerializableDocumentDirectoryUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testDeserialize() throws JsonProcessingException {
+    public void testSerializePath() throws JsonProcessingException {
         DocumentDirectory configDir = new DocumentDirectory(new Path("/"));
         configDir.add("/prop", "");
         configDir.add("/prop/prop1", "1.23");
@@ -114,6 +114,29 @@ public class SerializableDocumentDirectoryUnitTestNG {
         SerializableDocumentDirectory serializedConfigDir = new SerializableDocumentDirectory(configDir);
         DocumentDirectory deserializedDir = SerializableDocumentDirectory.deserialize(serializedConfigDir);
         Assert.assertTrue(deserializedDir.equals(configDir));
+    }
+
+    @Test(groups = "unit")
+    public void testDeserialize() throws JsonProcessingException {
+        DocumentDirectory configDir = new DocumentDirectory(new Path("/"));
+        configDir.add("/prop", "/var/logs");
+        SerializableDocumentDirectory serializedConfigDir = new SerializableDocumentDirectory(configDir);
+        DocumentDirectory deserializedDir = SerializableDocumentDirectory.deserialize(serializedConfigDir);
+        Assert.assertTrue(deserializedDir.equals(configDir));
+
+        DocumentDirectory metaDir = new DocumentDirectory(new Path("/"));
+        metaDir.add("/prop", "{\"Type\":\"path\"}");
+
+        serializedConfigDir.applyMetadata(metaDir);
+
+        for (SerializableDocumentDirectory.Node node : serializedConfigDir.getNodes()) {
+            if (node.getNode().equals("prop")) {
+                SerializableDocumentDirectory.Metadata metadata = node.getMetadata();
+                Assert.assertNotNull(metadata);
+                Assert.assertEquals(metadata.getType(), "path");
+            }
+        }
+
     }
 
     @Test(groups = "unit")

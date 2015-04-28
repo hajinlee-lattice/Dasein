@@ -152,6 +152,16 @@ public class SerializableDocumentDirectory {
         }
     }
 
+    @Override
+    public String toString() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(this);
+        } catch (IOException e) {
+            return "Failed to serialize " + super.toString();
+        }
+    }
+
     @JsonIgnore
     public DocumentDirectory getDocumentDirectory() {
         return documentDirectory;
@@ -183,7 +193,7 @@ public class SerializableDocumentDirectory {
         private int version = -1;
         private Collection<Node> children;
 
-        public Node(){}
+        public Node() { }
 
         public Node(DocumentDirectory.Node documentNode) {
             this.node = documentNode.getPath().getSuffix();
@@ -230,7 +240,7 @@ public class SerializableDocumentDirectory {
         @JsonProperty("Children")
         public void setChildren(Collection<Node> children) { this.children = children; }
 
-        public void applyMetadata (DocumentDirectory.Node metaNode) {
+        public void applyMetadata(DocumentDirectory.Node metaNode) {
             if (this.getData() == null || metaNode == null) return;
 
             Metadata metadataProvided;
@@ -253,7 +263,7 @@ public class SerializableDocumentDirectory {
             }
         }
 
-        public void applySingleMetadata (Metadata metadata) {
+        public void applySingleMetadata(Metadata metadata) {
             if (this.getData() == null) return;
 
             if (metadata != null && metadata.getType() != null && !metadata.getType().equals("")) {
@@ -274,7 +284,7 @@ public class SerializableDocumentDirectory {
             }
         }
 
-        public void writeMetadataToDir(DocumentDirectory dir, String parentPath){
+        public void writeMetadataToDir(DocumentDirectory dir, String parentPath) {
             String nodePath = parentPath + "/" + this.node;
 
             if (this.metadata != null && this.metadata.getType() != null
@@ -307,12 +317,13 @@ public class SerializableDocumentDirectory {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Metadata {
+        private static EmailValidator emailValidator = EmailValidator.getInstance();
+
         private String type;
         private Collection<String> options;
 
         private ObjectMapper mapper = new ObjectMapper();
-        public Metadata(){}
-        private static EmailValidator emailValidator = EmailValidator.getInstance();
+        public Metadata() { }
 
         @JsonProperty("Type")
         public String getType() { return type; }
@@ -341,6 +352,10 @@ public class SerializableDocumentDirectory {
                     return this.getOptions().contains(data);
                 case "email":
                     return emailValidator.isValid(data);
+                case "path":
+                    return isPath(data);
+                case "string":
+                    return true;
                 default:
                     return false;
             }
@@ -362,6 +377,16 @@ public class SerializableDocumentDirectory {
         private static boolean isBoolean(String str)
         {
             return str.toLowerCase().equals("true") || str.toLowerCase().equals("false");
+        }
+
+        private static boolean isPath(String str)
+        {
+            try {
+                new Path(str);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
         }
 
         private static boolean isObject(String str)
