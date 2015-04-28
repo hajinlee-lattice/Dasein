@@ -1,13 +1,13 @@
 package com.latticeengines.pls.service.impl;
 
-import junit.framework.Assert;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.CrmCredentialService;
+
+import junit.framework.Assert;
 
 public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 
