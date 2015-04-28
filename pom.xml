@@ -21,6 +21,7 @@
         <module>le-parent</module>
         <module>le-db</module>
         <module>le-dataplatform</module>
+        <module>le-scoring</module>
         <module>le-eai</module>
         <module>le-camille</module>
         <module>le-api</module>
