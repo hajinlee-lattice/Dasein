@@ -39,6 +39,9 @@
                 <propdata.properties.path>
                     ../le-propdata/conf/env/devcluster
                 </propdata.properties.path>
+                <score.properties.path>
+                    ../le-scoring/conf/env/devcluster
+                </score.properties.path>
                 <bin.env.path>bin/env/devcluster</bin.env.path>
             </properties>
 	    </profile>
@@ -62,6 +65,9 @@
                 <propdata.properties.path>
                     ../le-propdata/conf/env/intcluster
                 </propdata.properties.path>
+                 <score.properties.path>
+                    ../le-scoring/conf/env/intcluster
+                </score.properties.path>
 				<bin.env.path>bin/env/intcluster</bin.env.path>
 			</properties>
 		</profile>
@@ -84,6 +90,9 @@
                 <propdata.properties.path>
                     ../le-propdata/conf/env/qacluster
                 </propdata.properties.path>
+                <score.properties.path>
+                    ../le-scoring/conf/env/qacluster
+                </score.properties.path>
                 <bin.env.path>bin/env/qacluster</bin.env.path>
             </properties>
         </profile>
@@ -106,6 +115,9 @@
                 <propdata.properties.path>
                     ../le-propdata/conf/env/prodcluster
                 </propdata.properties.path>
+                 <score.properties.path>
+                    ../le-scoring/conf/env/prodcluster
+                </score.properties.path>
                 <bin.env.path>bin/env/prodcluster</bin.env.path>
             </properties>
         </profile>
@@ -154,6 +166,9 @@
                                 </source>
                                 <source>
                                     <location>${propdata.properties.path}/propdata.properties</location>
+                                </source>
+                                <source>
+                                    <location>${score.properties.path}/scoring.properties</location>
                                 </source>
                             </sources>
                         </mapping>
