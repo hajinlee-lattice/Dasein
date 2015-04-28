@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 public class PLSComponent {
 
     @Autowired
-    private PLSComponentManager PLSComponentManager;
+    private PLSComponentManager componentManager;
 
     public static final String componentName = "PLS";
     private static final String versionString = "2.0";
@@ -25,7 +25,7 @@ public class PLSComponent {
     public static String getVersionString() { return versionString; }
 
     @PostConstruct
-    public void registerBootStrapper() {
+    private void registerBootStrapper() {
         ServiceProperties serviceProps = new ServiceProperties();
         serviceProps.dataVersion = 1;
         serviceProps.versionString = getVersionString();
@@ -37,7 +37,7 @@ public class PLSComponent {
     }
 
     private CustomerSpaceServiceInstaller getInstaller() {
-        installer.setComponentManager(PLSComponentManager);
+        installer.setComponentManager(componentManager);
         return installer;
     }
 }
