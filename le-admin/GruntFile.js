@@ -159,7 +159,9 @@ module.exports = function(grunt) {
                 files: {
                     '<%= app.dir %>/assets/js/app.min.js': [
                         '<%= app.distDir %>/lib/js/le-common.js',
+                        '<%= app.distDir %>/app/core/util/RecursionCompiler.js',
                         '<%= app.distDir %>/app/core/util/SessionUtility.js',
+                        '<%= app.distDir %>/app/core/directive/FileDownloaderDirective.js',
                         '<%= app.distDir %>/app/core/directive/MainNavDirective.js',
                         '<%= app.distDir %>/app/login/service/LoginService.js',
                         '<%= app.distDir %>/app/login/controller/LoginCtrl.js',
@@ -448,7 +450,9 @@ module.exports = function(grunt) {
 
     grunt.registerTask('www', ['copy:www', 'clean:www']);
 
-    grunt.registerTask('test', ['jshint', 'karma:unit']);
+    grunt.registerTask('unit', ['jshint', 'karma:unit']);
+
+    grunt.registerTask('lint', ['jshint']);
 
     // restore dev setup after run a default task
     grunt.registerTask('restore', ['copy:restorewww','copy:restore', 'clean:restore', 'less:dev']);

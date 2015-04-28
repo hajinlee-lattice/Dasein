@@ -1,53 +1,13 @@
 var app = angular.module("app.tenants.directive.CamilleConfigDirective", [
     'app.tenants.service.TenantService',
     "app.tenants.util.TenantUtility",
+    "app.core.util.RecursionCompiler",
+    "app.core.directive.FileDownloaderDirective",
     "app.tenants.directive.ListEntryDirective",
     'ui.bootstrap',
     'ui.router',
     'ngSanitize'
 ]);
-
-app.factory('RecursionHelper', ['$compile', function($compile){
-    return {
-        /**
-         * Manually compiles the element, fixing the recursion loop.
-         * @param element
-         * @param [link] A post-link function, or an object with function(s) registered via pre and post properties.
-         * @returns An object containing the linking functions.
-         */
-        compile: function(element, link){
-            // Normalize the link parameter
-            if(angular.isFunction(link)){
-                link = { post: link };
-            }
-
-            // Break the recursion loop by removing the contents
-            var contents = element.contents().remove();
-            var compiledContents;
-            return {
-                pre: (link && link.pre) ? link.pre : null,
-                /**
-                 * Compiles and re-adds the contents
-                 */
-                post: function(scope, element){
-                    // Compile the contents
-                    if(!compiledContents){
-                        compiledContents = $compile(contents);
-                    }
-                    // Re-add the compiled contents to the element
-                    compiledContents(scope, function(clone){
-                        element.append(clone);
-                    });
-
-                    // Call the post-linking function, if any
-                    if(link && link.post){
-                        link.post.apply(null, arguments);
-                    }
-                }
-            };
-        }
-    };
-}]);
 
 app.service('CamilleConfigUtility', function(){
     this.getDataType = function(config) {
@@ -81,6 +41,7 @@ app.service('CamilleConfigUtility', function(){
     this.isSelect = function(type) { return type === "options"; };
     this.isObject = function(type) { return type === "object"; };
     this.isList = function(type) { return type === "array"; };
+    this.isPath = function(type) { return type === "path"; };
 
 });
 
@@ -98,7 +59,7 @@ app.directive('componentsConfig', function(){
     };
 });
 
-app.directive('camilleConfig', function(RecursionHelper, TenantUtility){
+app.directive('camilleConfig', function(RecursionCompiler, TenantUtility){
     return {
         restrict: 'AE',
         templateUrl: 'app/tenants/view/CamilleConfigView.html',
@@ -116,7 +77,7 @@ app.directive('camilleConfig', function(RecursionHelper, TenantUtility){
         compile: function(element) {
             // Use the compile function from the RecursionHelper,
             // And return the linking function(s) which it returns
-            return RecursionHelper.compile(element);
+            return RecursionCompiler.compile(element);
         }
     };
 });
@@ -138,6 +99,12 @@ app.directive('objectEntry', function(){
                 }
             }
             $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);
+
+            $scope.isPath = CamilleConfigUtility.isPath($scope.type);
+            if ($scope.isPath) {
+                $scope.fileName = "test.txt";
+                $scope.downloadError = false;
+            }
 
             $scope.validateInput = function() {
                 if ($scope.configform.$dirty && $scope.configform.$invalid) {
@@ -205,6 +172,8 @@ app.directive('configEntry', function(){
             }
 
             if ($scope.isSelect) { $scope.options = $scope.config.Metadata.Options; }
+
+            $scope.isPath = CamilleConfigUtility.isPath($scope.type);
 
             $scope.validateInput = function() {
                 if ($scope.configform.$dirty && $scope.configform.$invalid) {

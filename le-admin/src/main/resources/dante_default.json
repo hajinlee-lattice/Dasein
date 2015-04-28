@@ -1,6 +1,6 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "ConfigFilePath", "Data": "/etc/ledp/config.json" }
+    { "Node": "ConfigFilePath", "Data": "/test/test.txt" }
   ]
 }
