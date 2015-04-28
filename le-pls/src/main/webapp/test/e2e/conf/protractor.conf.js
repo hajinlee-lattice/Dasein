@@ -13,8 +13,8 @@ exports.config = {
     ],
 
 	params: {
-		tenantIndex:            0,
-        alternativeTenantIndex: 1,
+		tenantIndex:            1,
+        alternativeTenantIndex: 0,
         superAdminUsername:     'pls-super-admin-tester@test.lattice-engines.com',
         internalAdminUsername:  'pls-internal-admin-tester@test.lattice-engines.com',
         internalUserUsername:   'pls-internal-user-tester@test.lattice-engines.com',
