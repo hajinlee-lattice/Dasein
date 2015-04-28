@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
 
-public class VisiDBComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
+public class VisiDBComponentTestNG extends BatonAdapterBaseDeploymentTestNG<VisiDBComponent> {
 
     @Test(groups = "deployment")
     public void testInstallation() {

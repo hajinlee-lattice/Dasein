@@ -4,7 +4,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
 
-public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
+public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG<TemplateComponent> {
     
     @Test(groups = "deployment")
     public void testInstallation() {
