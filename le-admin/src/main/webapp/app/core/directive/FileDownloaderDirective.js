@@ -48,7 +48,7 @@
                         $scope.fetching = false;
                         if ($scope.firstFetch) {
                             $scope.firstFetch = false;
-                            setTimeout(function(){$event.target.click()}, 500);
+                            setTimeout(function(){ $event.target.click(); }, 500);
                         }
                     }, function () {
                         $scope.error = true;
