@@ -8,4 +8,6 @@ public interface ServerFileService {
     void downloadFile(HttpServletRequest request, HttpServletResponse response,
                       String path, String filename, String mimeType);
 
+    String getRootPath();
+
 }

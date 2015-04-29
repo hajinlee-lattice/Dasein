@@ -6,12 +6,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
+import java.io.IOException;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
@@ -22,15 +28,35 @@ public class ServerFileServiceImplTestNG extends AdminFunctionalTestNGBase {
     @Autowired
     private ServerFileService serverFileService;
 
+    public String testFilePath = "/test/test.txt";
+    public String testFileName = "test.txt";
+    public String testFileType = "text/plain";
+    public String testFileContent = "April 2015";
+
+    @BeforeMethod(groups = "functional")
+    public void createTestFile() throws IOException {
+        String fullPath = serverFileService.getRootPath() + testFilePath;
+        File file = new File(fullPath);
+        FileUtils.forceMkdir(file);
+        FileUtils.write(file, testFileContent);
+    }
+
+    @AfterMethod(groups = "functional")
+    public void deleteTestFile() throws IOException {
+        String fullPath = serverFileService.getRootPath() + testFilePath;
+        File file = new File(fullPath);
+        FileUtils.deleteQuietly(file);
+    }
+
     @Test(groups = "functional")
     public void getServiceFile() throws Exception {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         ServletOutputStream os = mock(ServletOutputStream.class);
 
-        String mimeType = "text/plain";
-        String filename = "test.txt";
-        String path = "/test/" + filename;
+        String mimeType = testFileType;
+        String filename = testFileName;
+        String path = testFilePath;
 
         try {
             when(response.getOutputStream()).thenReturn(os);
@@ -50,8 +76,8 @@ public class ServerFileServiceImplTestNG extends AdminFunctionalTestNGBase {
         HttpServletResponse response = mock(HttpServletResponse.class);
         ServletOutputStream os = mock(ServletOutputStream.class);
 
-        String mimeType = "text/plain";
-        String path = "/test/test.txt";
+        String mimeType = testFileType;
+        String path = testFilePath;
 
         try {
             when(response.getOutputStream()).thenReturn(os);

@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component("serverFileService")
 public class ServerFileServiceImpl implements ServerFileService {
 
-    @Value("${admin.dataloader.config.rootpath}")
+    @Value("${admin.config.rootpath}")
     private String rootPath;
 
     @Override
@@ -72,5 +72,8 @@ public class ServerFileServiceImpl implements ServerFileService {
 
         return path.substring(lastSlash, path.length());
     }
+
+    @Override
+    public String getRootPath() { return rootPath; }
 
 }
