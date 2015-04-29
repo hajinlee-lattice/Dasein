@@ -451,13 +451,13 @@ public class PlsFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
             userService.assignAccessLevel(AccessLevel.SUPER_ADMIN, tenant.getId(), adminUsername);
             userService.assignAccessLevel(AccessLevel.INTERNAL_USER, tenant.getId(), generalUsername);
             userService.resignAccessLevel(tenant.getId(), "admin");
-        }
 
-        for (AccessLevel level : AccessLevel.values()) {
-            User user = getTheTestingUserAtLevel(level);
-            if (user != null) {
-                userService.assignAccessLevel(level, mainTestingTenant.getId(), user.getUsername());
+            for (AccessLevel level : AccessLevel.values()) {
+                User user = getTheTestingUserAtLevel(level);
+                if (user != null) {
+                    userService.assignAccessLevel(level, tenant.getId(), user.getUsername());
 
+                }
             }
         }
 
