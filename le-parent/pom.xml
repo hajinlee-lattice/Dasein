@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.latticeengines</groupId>
@@ -76,6 +77,53 @@
 
     <profiles>
         <profile>
+            <id>shaded</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>2.3</version>
+                        <configuration>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.hibernate:*</exclude>
+                                    <exclude>org.apache.hadoop:*</exclude>
+                                    <exclude>org.springframework:*</exclude>
+                                    <exclude>org.apache.avro:*</exclude>
+                                    <exclude>com.google.http-client:*</exclude>
+                                </excludes>
+                            </artifactSet>
+
+                            <filters>
+                                <!-- Strip any signatures to avoid security 
+                                    errors running the shaded JAR. -->
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>unit</id>
             <build>
                 <plugins>
@@ -137,7 +185,8 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
+                                    <argLine>-XX:MaxPermSize=256m
+                                        ${argLine}</argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${functional.classes.include}</include>
@@ -193,7 +242,8 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
+                                    <argLine>-XX:MaxPermSize=256m
+                                        ${argLine}</argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${deployment.classes.include}</include>
@@ -250,7 +300,8 @@
                                 </goals>
                                 <phase>integration-test</phase>
                                 <configuration>
-                                    <argLine>-XX:MaxPermSize=256m ${argLine}</argLine>
+                                    <argLine>-XX:MaxPermSize=256m
+                                        ${argLine}</argLine>
                                     <skip>false</skip>
                                     <includes>
                                         <include>${infrastructure.classes.include}</include>
@@ -350,30 +401,44 @@
                                 <configuration>
                                     <target>
                                         <!-- Execute an ant task within maven -->
-                                        <echo message="Generating jacoco reports..." />
-                                        <taskdef name="report" classname="org.jacoco.ant.ReportTask">
-                                            <classpath path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar" />
+                                        <echo
+                                            message="Generating jacoco reports..." />
+                                        <taskdef name="report"
+                                            classname="org.jacoco.ant.ReportTask">
+                                            <classpath
+                                                path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar" />
                                         </taskdef>
-                                        <mkdir dir="${jacoco.coverage.dir}/site/jacoco" />
+                                        <mkdir
+                                            dir="${jacoco.coverage.dir}/site/jacoco" />
                                         <report>
                                             <executiondata>
-                                                <fileset dir="${jacoco.coverage.dir}/jacoco">
-                                                    <include name="*.exec" />
+                                                <fileset
+                                                    dir="${jacoco.coverage.dir}/jacoco">
+                                                    <include
+                                                        name="*.exec" />
                                                 </fileset>
                                             </executiondata>
-                                            <structure name="Jacoco Multi-Run Coverage Project">
-                                                <group name="jacoco-multi-run-coverage">
+                                            <structure
+                                                name="Jacoco Multi-Run Coverage Project">
+                                                <group
+                                                    name="jacoco-multi-run-coverage">
                                                     <classfiles>
-                                                        <fileset dir="${project.build.directory}/classes" />
+                                                        <fileset
+                                                            dir="${project.build.directory}/classes" />
                                                     </classfiles>
-                                                    <sourcefiles encoding="UTF-8">
-                                                        <fileset dir="${project.build.sourceDirectory}" />
+                                                    <sourcefiles
+                                                        encoding="UTF-8">
+                                                        <fileset
+                                                            dir="${project.build.sourceDirectory}" />
                                                     </sourcefiles>
                                                 </group>
                                             </structure>
-                                            <html destdir="${jacoco.coverage.dir}/site/jacoco" />
-                                            <xml destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml" />
-                                            <csv destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv" />
+                                            <html
+                                                destdir="${jacoco.coverage.dir}/site/jacoco" />
+                                            <xml
+                                                destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml" />
+                                            <csv
+                                                destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv" />
                                         </report>
                                     </target>
                                 </configuration>
@@ -404,13 +469,13 @@
         <defaultGoal>install</defaultGoal>
         <pluginManagement>
             <plugins>
-                <!-- The Jetty Maven plugin is useful for rapid development
-                    and testing. You can add it to any webapp project that is structured according
-                    to the usual Maven defaults. The plugin can then periodically scan your project
-                    for changes and automatically redeploy the webapp if any are found. This
-                    makes the development cycle more productive by eliminating the build and
-                    deploy steps: you use your IDE to make changes to the project, and the running
-                    web container automatically picks them up, allowing you to test them straight
+                <!-- The Jetty Maven plugin is useful for rapid development 
+                    and testing. You can add it to any webapp project that is structured according 
+                    to the usual Maven defaults. The plugin can then periodically scan your project 
+                    for changes and automatically redeploy the webapp if any are found. This 
+                    makes the development cycle more productive by eliminating the build and 
+                    deploy steps: you use your IDE to make changes to the project, and the running 
+                    web container automatically picks them up, allowing you to test them straight 
                     away. To run - mvn jetty:run -->
                 <plugin>
                     <groupId>org.eclipse.jetty</groupId>
@@ -451,7 +516,7 @@
                     </configuration>
                 </plugin>
                 <!-- -->
-                <!-- jar plugin to produce 3 jars: impl (default), interface,
+                <!-- jar plugin to produce 3 jars: impl (default), interface, 
                     tests -->
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
@@ -745,7 +810,7 @@
             <artifactId>aspectjweaver</artifactId>
             <version>1.8.2</version>
         </dependency>
-        
+
         <!-- TEST dependencies -->
 
         <dependency>
@@ -769,9 +834,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-        	<groupId>commons-cli</groupId>
-        	<artifactId>commons-cli</artifactId>
-        	<version>1.2</version>
+            <groupId>commons-cli</groupId>
+            <artifactId>commons-cli</artifactId>
+            <version>1.2</version>
         </dependency>
     </dependencies>
 
