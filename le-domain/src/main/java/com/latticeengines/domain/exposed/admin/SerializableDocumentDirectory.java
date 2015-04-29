@@ -119,7 +119,7 @@ public class SerializableDocumentDirectory {
 
     @JsonIgnore
     public DocumentDirectory getMetadataAsDirectory() {
-        Path rootPath = new Path("/dummyroot");
+        Path rootPath = new Path("/");
         DocumentDirectory dir =  new DocumentDirectory(rootPath);
         if (this.getNodes() != null) {
             for (Node node : this.getNodes()) {
@@ -287,15 +287,16 @@ public class SerializableDocumentDirectory {
         public void writeMetadataToDir(DocumentDirectory dir, String parentPath) {
             String nodePath = parentPath + "/" + this.node;
 
+            if (this.getChildren() != null) {
+                for (Node child : this.getChildren()) {
+                    dir.add(nodePath, "");
+                    child.writeMetadataToDir(dir, nodePath);
+                }
+            }
+
             if (this.metadata != null && this.metadata.getType() != null
                     && !(this.metadata.getType().equals("") || this.metadata.getType().equals("string"))) {
                 dir.add(nodePath, this.metadata.toString());
-            }
-
-            if (this.getChildren() != null) {
-                for (Node child : this.getChildren()) {
-                    child.writeMetadataToDir(dir, nodePath);
-                }
             }
         }
 
