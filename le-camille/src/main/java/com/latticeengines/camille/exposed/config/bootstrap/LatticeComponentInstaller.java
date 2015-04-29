@@ -29,7 +29,7 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
 
     @Override
     public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion, Map<String, String> properties) {
-        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(properties);
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(properties.get("Configuration"));
         DocumentDirectory dir = sDir.getDocumentDirectory();
         dir.makePathsLocal();
 

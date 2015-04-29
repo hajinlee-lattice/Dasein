@@ -1,12 +1,18 @@
 package com.latticeengines.admin.tenant.batonadapter.template;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
-    
+
+    @Autowired
+    private TenantService tenantService;
+
     @Test(groups = "deployment")
     public void testInstallation() {
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
@@ -19,6 +25,11 @@ public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
         // wait a while, then test your installation
         // ...
+
+        SerializableDocumentDirectory resultDir =
+                tenantService.getTenantServiceConfig(contractId, tenantId, TemplateComponent.componentName);
+
+
     }
 
     @Override

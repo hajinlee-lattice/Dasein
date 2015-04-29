@@ -34,8 +34,8 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
     @BeforeClass(groups = "deployment")
     public void setup() {
         serviceName = getServiceName();
-        contractId = serviceName + "-contract";
-        tenantId = serviceName + "-tenant";
+        contractId = serviceName + "Contract";
+        tenantId = serviceName + "Tenant";
 
         loginAD();
         try {

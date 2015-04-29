@@ -287,16 +287,15 @@ public class SerializableDocumentDirectory {
         public void writeMetadataToDir(DocumentDirectory dir, String parentPath) {
             String nodePath = parentPath + "/" + this.node;
 
-            if (this.getChildren() != null) {
-                for (Node child : this.getChildren()) {
-                    dir.add(nodePath, "");
-                    child.writeMetadataToDir(dir, nodePath);
-                }
-            }
-
             if (this.metadata != null && this.metadata.getType() != null
                     && !(this.metadata.getType().equals("") || this.metadata.getType().equals("string"))) {
                 dir.add(nodePath, this.metadata.toString());
+            }
+
+            if (this.getChildren() != null) {
+                for (Node child : this.getChildren()) {
+                    child.writeMetadataToDir(dir, nodePath);
+                }
             }
         }
 
