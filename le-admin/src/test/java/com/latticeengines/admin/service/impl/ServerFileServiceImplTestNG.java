@@ -28,7 +28,7 @@ public class ServerFileServiceImplTestNG extends AdminFunctionalTestNGBase {
     @Autowired
     private ServerFileService serverFileService;
 
-    public String testFilePath = "/test/test.txt";
+    public String testFilePath = "/test/";
     public String testFileName = "test.txt";
     public String testFileType = "text/plain";
     public String testFileContent = "April 2015";
@@ -36,14 +36,15 @@ public class ServerFileServiceImplTestNG extends AdminFunctionalTestNGBase {
     @BeforeMethod(groups = "functional")
     public void createTestFile() throws IOException {
         String fullPath = serverFileService.getRootPath() + testFilePath;
-        File file = new File(fullPath);
-        FileUtils.forceMkdir(file);
+        File dir = new File(fullPath);
+        FileUtils.forceMkdir(dir);
+        File file = new File(fullPath + testFileName);
         FileUtils.write(file, testFileContent);
     }
 
     @AfterMethod(groups = "functional")
     public void deleteTestFile() throws IOException {
-        String fullPath = serverFileService.getRootPath() + testFilePath;
+        String fullPath = serverFileService.getRootPath() + testFilePath + testFileName;
         File file = new File(fullPath);
         FileUtils.deleteQuietly(file);
     }
@@ -56,7 +57,7 @@ public class ServerFileServiceImplTestNG extends AdminFunctionalTestNGBase {
 
         String mimeType = testFileType;
         String filename = testFileName;
-        String path = testFilePath;
+        String path = testFilePath + testFileName;
 
         try {
             when(response.getOutputStream()).thenReturn(os);
@@ -77,7 +78,7 @@ public class ServerFileServiceImplTestNG extends AdminFunctionalTestNGBase {
         ServletOutputStream os = mock(ServletOutputStream.class);
 
         String mimeType = testFileType;
-        String path = testFilePath;
+        String path = testFilePath + testFileName;
 
         try {
             when(response.getOutputStream()).thenReturn(os);
