@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 
 import com.latticeengines.dellebi.dataprocess.DailyJob;
+import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrDtlFunction;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrDtlFunctionReplace;
 import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubOdrSumFunction;
@@ -21,7 +23,7 @@ import com.latticeengines.dellebi.process.dailyrefresh.function.ScrubWarFunction
 
 public class PipeFactory {
 
-    private final static Logger LOGGER = Logger.getLogger(DailyJob.class);
+	private static final Log log = LogFactory.getLog(PipeFactory.class);
 
     public static Pipe getPipe(String pipeName, String fields) {
 
@@ -38,7 +40,7 @@ public class PipeFactory {
         } else if ("quote_trans_Pipe".equals(pipeName)) {
             docPipe = createQuoteTransPipe(fields);
         } else {
-            LOGGER.error(pipeName + " is not registed!");
+            log.error(pipeName + " is not registed!");
         }
 
         return docPipe;
