@@ -4,9 +4,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.stereotype.Component;
 
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
@@ -19,9 +25,11 @@ import com.latticeengines.dellebi.util.HadoopFileSystemOperations;
 import com.latticeengines.dellebi.util.MailSender;
 import com.latticeengines.dellebi.util.NormalFileSystemOperations;
 
-public class DailyFlow {
+//@Component("dailyFlow")
+public class DailyFlow{
 
-    private final static Logger LOGGER = Logger.getLogger(DailyFlow.class);
+    private static final Log log = LogFactory.getLog(DailyFlow.class);
+    
     @Value("${dellebi.datahadoopinpath}")
     private String dataHadoopInPath;
 
@@ -41,32 +49,30 @@ public class DailyFlow {
     
     @Value("${dellebi.mailreceivelist}")
     private String mailReceiveList;
-
+    
     private ArrayList<FlowDef> flowList;
-
-    public DailyFlow(ArrayList<FlowDef> flowList) {
-        this.flowList = flowList;
+    
+    public DailyFlow(ArrayList<FlowDef> flowList){
+    	this.flowList = flowList;
     }
 
-    public void doDailyFlow(ApplicationContext springContent) {
+    public void doDailyFlow() {  	
         
-        LOGGER.info("All daily refresh files arrive!");
-        LOGGER.info("Start process data on HDFS!");
-        MailSender mailSender = springContent.getBean("mail", MailSender.class);
+    	log.info("All daily refresh files arrive!");
+    	log.info("Start process data on HDFS!");
         
-
         Properties properties = new Properties();
         AppProps.setApplicationJarClass(properties, DailyFlow.class);
         FlowConnector flowConnector = new Hadoop2MR1FlowConnector(properties);
 
-        LOGGER.info("Start to process income files.");
+        log.info("Start to process income files.");
         
         FileSystemOperations fileSystem = null;
 
-        if(System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")){
-            fileSystem = springContent.getBean("normaloperation", NormalFileSystemOperations.class);
+        if(System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")){        	
+            fileSystem = new NormalFileSystemOperations();
         }else{
-            fileSystem = springContent.getBean("hadoopoperation", HadoopFileSystemOperations.class);
+            fileSystem = new HadoopFileSystemOperations();
         }
         
         try {
@@ -92,12 +98,11 @@ public class DailyFlow {
                 }
             }
         } catch(PlannerException e){
-        	LOGGER.error("Seems there is corrupt data!", e);
+        	log.error("Seems there is corrupt data!", e);
         } catch (Exception e) {
-            LOGGER.warn("Failed!", e);
-            mailSender.sendEmail(mailReceiveList,"Dell EBI daily refresh just failed for some reasons!","Please check Dell EBI logs.");
+        	log.warn("Failed!", e);
+            //mailSender.sendEmail(mailReceiveList,"Dell EBI daily refresh just failed for some reasons!","Please check Dell EBI logs.");
         }
-
     }
     
     public void setDataHadoopInPath(String s){
