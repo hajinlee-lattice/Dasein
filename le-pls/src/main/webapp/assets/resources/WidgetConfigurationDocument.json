@@ -45,7 +45,7 @@
                                             "Type" : "SimpleGridWidget",
                                             "TitleString": "DECILE_GRID_TITLE",
                                             "DataProvider": "ThresholdDecileData",
-                                            "CustomGridClass": "threshold-data","CustomGridClass": "threshold-data",
+                                            "CustomGridClass": "threshold-data",
                                             "Columns": [{
                                                     "TitleString": "",
                                                     "SubtitleString": "DECILE_GRID_LEADS_LABEL",
