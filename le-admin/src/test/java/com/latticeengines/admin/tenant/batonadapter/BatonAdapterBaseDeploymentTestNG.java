@@ -1,8 +1,11 @@
 package com.latticeengines.admin.tenant.batonadapter;
 
+import java.util.Arrays;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -11,6 +14,7 @@ import com.latticeengines.admin.configurationschema.ConfigurationSchemaTestNGBas
 import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.security.exposed.Constants;
 
 import junit.framework.Assert;
 
@@ -41,6 +45,9 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
         }
         createTenant(contractId, tenantId);
 
+        // setup magic rest template
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
     }
 
     @AfterClass(groups = "deployment")
