@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-4.0.xsd
+           http://www.springframework.org/schema/util
+           http://www.springframework.org/schema/util/spring-util-4.0.xsd
+           http://camel.apache.org/schema/spring
+		   http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+	<context:annotation-config />
+	<context:component-scan base-package="com.latticeengines.dellebi" />
+
+	<bean name="dellebiManagerJob"
+		class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass" value="com.latticeengines.dellebi.dataprocess.DailyJob" />
+		<property name="durability" value="true" />
+		<property name="jobDataMap">
+        <map>
+            <entry key="dailyFlow" value-ref="dailyFlow" />
+        </map>
+    </property>
+
+	</bean>
+
+	<bean id="dellebiManagerCronTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="dellebiManagerJob" />
+		<property name="cronExpression" value="0 0 16 ? * MON-FRI" />
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="dellebiManagerCronTrigger" />
+			</list>
+		</property>
+		<property name="jobDetails">
+            <list>
+                <ref bean="dellebiManagerJob" />
+            </list>
+        </property>
+	</bean>
+	
+		<bean id="dailyFlow" class="com.latticeengines.dellebi.flowdef.DailyFlow">
+		<constructor-arg>
+			<util:list list-class="java.util.ArrayList">
+				<ref bean="getOrderSumDailyFlow" />
+				<ref bean="getOrderDetailDailyFlow" />
+				<ref bean="getShipDailyFlow" />
+				<ref bean="getWarrantyDailyFlow" />
+				<ref bean="getQuoteDailyFlow" />
+			</util:list>
+		</constructor-arg>
+	</bean>
+		
+
+
+
+
+</beans>
