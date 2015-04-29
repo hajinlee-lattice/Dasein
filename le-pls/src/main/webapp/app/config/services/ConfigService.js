@@ -127,7 +127,7 @@ angular.module('mainApp.config.services.ConfigService', [
         
         $http({
             method: "POST", 
-            url: "./GriotService.svc/ValidateApiConfiguration",
+            url: "/pls/credentials/sfdc/",
             data: JSON.stringify(apiObj)
         })
         .success(function(data, status, headers, config) {

@@ -1,10 +1,11 @@
 angular.module('mainApp.config.controllers.ManageCredentialsController', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
-    'mainApp.core.utilities.NavUtility'
+    'mainApp.core.utilities.NavUtility',
+    'mainApp.config.modals.EnterCredentialsModal'
 ])
 
-.controller('ManageCredentialsController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility) {
+.controller('ManageCredentialsController', function ($scope, $rootScope, ResourceUtility, BrowserStorageUtility, NavUtility, EnterCredentialsModal) {
     $scope.ResourceUtility = ResourceUtility;
     
     $scope.crmCredentialsCompleteClass = "";
@@ -17,11 +18,15 @@ angular.module('mainApp.config.controllers.ManageCredentialsController', [
     }
     
     $scope.enterCrmCredentialsClicked = function () {
-        
+        EnterCredentialsModal.show("SFDC", null, function () {
+            
+        });
     };
     
     $scope.enterMapCredentialsClicked = function () {
-        
+        EnterCredentialsModal.show("Marketo", null, function () {
+            
+        });
     };
     
     function checkIfSystemCredentialsComplete () {

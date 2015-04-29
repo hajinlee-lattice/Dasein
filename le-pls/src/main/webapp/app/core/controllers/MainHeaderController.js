@@ -47,8 +47,8 @@ angular.module('mainApp.core.controllers.MainHeaderController', [
         if ($event != null) {
             $event.preventDefault();
         }
-        //TODO:song to be finished
-        //$rootScope.$broadcast(NavUtility.MODEL_CREATION_HISTORY_NAV_EVENT);
+
+        $rootScope.$broadcast(NavUtility.MANAGE_CREDENTIALS_NAV_EVENT);
     };
 
     $scope.showModelCreationHistory = function ($event) {

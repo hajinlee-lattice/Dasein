@@ -304,6 +304,7 @@ module.exports = function (grunt) {
                         '<%= pls.app %>/app/core/controllers/MainViewController.js',
                         '<%= pls.app %>/app/core/controllers/MainHeaderController.js',
                         '<%= pls.app %>/app/config/controllers/ManageCredentialsController.js',
+                        '<%= pls.app %>/app/config/modals/EnterCredentialsModal.js',
                         '<%= pls.app %>/app/userManagement/controllers/UserManagementController.js',
                         '<%= pls.app %>/app/models/controllers/ModelCreationHistoryController.js',
                         '<%= pls.app %>/app/models/controllers/MultipleModelSetupController.js',
