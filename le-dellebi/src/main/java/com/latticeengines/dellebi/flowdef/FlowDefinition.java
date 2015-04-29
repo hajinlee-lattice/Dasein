@@ -1,6 +1,7 @@
 package com.latticeengines.dellebi.flowdef;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,7 +54,7 @@ public class FlowDefinition {
     @Value("${dellebi.quotefields}")
     private String quoteFields;
 
-    private final static Logger LOGGER = Logger.getLogger(DailyJob.class);
+    private static final Log log = LogFactory.getLog(FlowDefinition.class);
 
     @Bean
     public FlowDef getOrderSumDailyFlow() {
@@ -66,7 +67,7 @@ public class FlowDefinition {
         try {
             filePipe = PipeFactory.getPipe("order_summary_Pipe", orderSummaryFields);
         } catch (Exception e) {
-            LOGGER.error("Failed to get order summary pipe!", e);
+        	log.error("Failed to get order summary pipe!", e);
         }
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
@@ -75,7 +76,7 @@ public class FlowDefinition {
 
         return flowDef_fileType;
     }
-    
+
     @Bean
     public FlowDef getOrderDetailDailyFlow() {
 
@@ -87,7 +88,7 @@ public class FlowDefinition {
         try {
             filePipe = PipeFactory.getPipe("order_detail_Pipe", orderDetailFields);
         } catch (Exception e) {
-            LOGGER.error("Failed to get order detail pipe!", e);
+        	log.error("Failed to get order detail pipe!", e);
         }
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
@@ -95,7 +96,7 @@ public class FlowDefinition {
         flowDef_fileType.setName("OrderDetailDailyFlow");
         return flowDef_fileType;
     }
-    
+
     @Bean
     public FlowDef getShipDailyFlow() {
 
@@ -107,7 +108,7 @@ public class FlowDefinition {
         try {
             filePipe = PipeFactory.getPipe("ship_to_addr_lattice_Pipe", shipToAddrFields);
         } catch (Exception e) {
-            LOGGER.error("Failed to get ship to addr pipe!", e);
+        	log.error("Failed to get ship to addr pipe!", e);
         }
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
@@ -115,7 +116,7 @@ public class FlowDefinition {
         flowDef_fileType.setName("ShipDailyFlow");
         return flowDef_fileType;
     }
-    
+
     @Bean
     public FlowDef getWarrantyDailyFlow() {
 
@@ -127,7 +128,7 @@ public class FlowDefinition {
         try {
             filePipe = PipeFactory.getPipe("warranty_global_Pipe", warrantyFields);
         } catch (Exception e) {
-            LOGGER.error("Failed to get ship to addr pipe!", e);
+        	log.error("Failed to get ship to addr pipe!", e);
         }
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
@@ -135,7 +136,7 @@ public class FlowDefinition {
         flowDef_fileType.setName("WarrantyDailyFlow");
         return flowDef_fileType;
     }
-    
+
     @Bean
     public FlowDef getQuoteDailyFlow() {
 
@@ -147,7 +148,7 @@ public class FlowDefinition {
         try {
             filePipe = PipeFactory.getPipe("quote_trans_Pipe", quoteFields);
         } catch (Exception e) {
-            LOGGER.error("Failed to get quote data pipe!", e);
+        	log.error("Failed to get quote data pipe!", e);
         }
 
         FlowDef flowDef_fileType = FlowDef.flowDef().addSource(copyFilePipe, inTapFile)
