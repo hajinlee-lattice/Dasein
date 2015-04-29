@@ -26,7 +26,7 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         String testAdminUsername = "pls-installer-tester@lattice-engines.com";
         String testAdminPassword = "admin";
 
-        deletePLSAdminUser(testAdminUsername, tenantId);
+        deletePLSAdminUser(tenantId, testAdminUsername);
 
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
@@ -51,7 +51,7 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
         Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, tenantId));
 
-        deletePLSAdminUser(testAdminUsername, tenantId);
+        deletePLSAdminUser(tenantId, testAdminUsername);
     }
 
     @Override
