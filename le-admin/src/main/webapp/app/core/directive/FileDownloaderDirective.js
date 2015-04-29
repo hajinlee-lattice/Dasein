@@ -6,7 +6,8 @@
         return {
             restrict:    'E',
             template:   '<a class="file-downloader" href="" data-ng-click="downloadFile($event)" data-ng-hide="fetching">download</a>' +
-            '<span class="file-downloader" data-ng-show="fetching">fetching ...</span>',
+            '<span class="file-downloader" data-ng-show="fetching && !error">fetching ...</span>' +
+            '<span class="file-downloader text-danger" data-ng-show="error">Downloading file error.</span>',
             scope:       {url: '@', filename: '@', filetype: '@', error: '='},
             link:        function (scope, element) {
                 var anchor = element.children()[0];
@@ -39,7 +40,7 @@
                     $scope.error = false;
                     $scope.$emit('download-start');
 
-                    $http.get('/admin/serverfiles?path=' + $scope.url).then(function (response) {
+                    $http.get($scope.url).then(function (response) {
                         if ($scope.filetype === "application/json") {
                             $scope.$emit('downloaded', btoa(decodeURI(encodeURIComponent(JSON.stringify(response.data)))));
                         } else {

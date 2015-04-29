@@ -100,12 +100,6 @@ app.directive('objectEntry', function(){
             }
             $scope.isBoolean = CamilleConfigUtility.isBoolean($scope.type);
 
-            $scope.isPath = CamilleConfigUtility.isPath($scope.type);
-            if ($scope.isPath) {
-                $scope.filename = "download.txt";
-                $scope.downloadError = false;
-            }
-
             $scope.validateInput = function() {
                 if ($scope.configform.$dirty && $scope.configform.$invalid) {
                     $scope.showError = true;
@@ -174,6 +168,11 @@ app.directive('configEntry', function(){
             if ($scope.isSelect) { $scope.options = $scope.config.Metadata.Options; }
 
             $scope.isPath = CamilleConfigUtility.isPath($scope.type);
+            if ($scope.isPath) {
+                $scope.fileurl = "/admin/serverfiles?path=" + encodeURI($scope.config.Data);
+                $scope.filename = "download.txt";
+                $scope.downloadError = false;
+            }
 
             $scope.validateInput = function() {
                 if ($scope.configform.$dirty && $scope.configform.$invalid) {
