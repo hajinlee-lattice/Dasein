@@ -2,13 +2,16 @@ package com.latticeengines.dellebi.util;
 
 import java.net.URI;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.dellebi.flowdef.DailyFlow;
@@ -17,7 +20,7 @@ public class HadoopFileSystemOperations implements FileSystemOperations {
     @Value("${dellebi.datahadooprootpath}")
     private String dataHadoopRootPath;
 
-    private final static Logger LOGGER = Logger.getLogger(HadoopFileSystemOperations.class);
+    private static final Log log = LogFactory.getLog(HadoopFileSystemOperations.class);
 
     @Override
     public void cleanFolder(String folderName) {
@@ -29,7 +32,7 @@ public class HadoopFileSystemOperations implements FileSystemOperations {
                 fs.delete(path, true); // Delete existing Directory
             }
         } catch (Exception e) {
-            LOGGER.warn("Failed!", e);
+        	log.warn("Failed!", e);
         }
 
     }
@@ -45,13 +48,13 @@ public class HadoopFileSystemOperations implements FileSystemOperations {
             for (FileStatus s : status) {
                 String name = s.getPath().getName();
                 if( name.contains(".txt")){
-                    LOGGER.info("Cascading found txt file: " + name + " and starts to process it.");
+                	log.info("Cascading found txt file: " + name + " and starts to process it.");
                     fileNumber++;
                 }
             }
 
         } catch (Exception e) {
-            LOGGER.warn("Failed!", e);
+        	log.warn("Failed!", e);
         }
         return fileNumber;
     }
