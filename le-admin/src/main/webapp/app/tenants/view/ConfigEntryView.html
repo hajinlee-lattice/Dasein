@@ -3,8 +3,8 @@
     <span class="node">{{ config.Node }}</span> :
     <span ng-show="!isList">{{ config.Data }}</span>
     <span ng-show="isList">{{ listData }}</span>
-    <file-downloader url="{{ config.Data }}" filename="{{ filename }}" filetype="text/plain" error="downloadError" ></file-downloader>
-    <span ng-show="downloadError" class="text-danger">Download failed.</span>
+    <file-downloader ng-if="isPath" url="{{ config.Data }}" filename="{{ filename }}" filetype="text/plain" error="downloadError" ></file-downloader>
+    <span ng-if="downloadError" class="text-danger">Download failed.</span>
 </p>
 
 <form name="configform" ng-hide="isObject || isList" class="form-inline" ng-class='{"has-error": showError}' novalidate>

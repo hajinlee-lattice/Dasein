@@ -102,7 +102,7 @@ app.directive('objectEntry', function(){
 
             $scope.isPath = CamilleConfigUtility.isPath($scope.type);
             if ($scope.isPath) {
-                $scope.fileName = "test.txt";
+                $scope.filename = "download.txt";
                 $scope.downloadError = false;
             }
 
