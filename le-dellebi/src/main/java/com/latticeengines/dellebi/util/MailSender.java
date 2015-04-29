@@ -5,12 +5,15 @@ import java.util.*;
 import javax.mail.*;
 import javax.mail.internet.*;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
+
+import com.latticeengines.dellebi.flowdef.DailyFlow;
 
 public class MailSender {
 
-    private final static Logger LOGGER = Logger.getLogger(MailSender.class);
+	private static final Log log = LogFactory.getLog(MailSender.class);
 
     @Value("${dellebi.mailhost}")
     private String mailHost;
@@ -31,7 +34,7 @@ public class MailSender {
             Transport.send(message);
             return true;
         } catch (MessagingException ex) {
-            LOGGER.warn("Cannot send email. " + ex);
+            log.warn("Cannot send email. " + ex);
             return false;
         }
     }
