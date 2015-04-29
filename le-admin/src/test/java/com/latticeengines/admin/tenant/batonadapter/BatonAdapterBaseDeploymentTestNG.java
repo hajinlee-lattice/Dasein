@@ -2,6 +2,7 @@ package com.latticeengines.admin.tenant.batonadapter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -21,7 +22,10 @@ import junit.framework.Assert;
 public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     private static final Log log = LogFactory.getLog(BatonAdapterBaseDeploymentTestNG.class);
-    private String contractId, tenantId, serviceName;
+    protected String contractId, tenantId, serviceName;
+
+    @Value("${pls.api.hostport}")
+    private String plsHostPort;
 
     @BeforeClass(groups = "deployment")
     public void setup() {
@@ -73,4 +77,6 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
     }
 
     protected abstract String getExpectedJsonFile();
+
+    protected String getPlsHostPort() { return plsHostPort; }
 }

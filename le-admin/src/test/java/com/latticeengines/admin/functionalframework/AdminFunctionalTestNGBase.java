@@ -66,6 +66,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
     private TestLatticeComponent testLatticeComponent;
 
     protected RestTemplate restTemplate = new RestTemplate();
+    protected RestTemplate magicRestTemplate = new RestTemplate();
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
             "");
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
@@ -87,6 +88,9 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         }
         createTenant(TestContractId, TestTenantId);
 
+        // setup magic rest template
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader}));
     }
     
     @AfterClass(groups = {"functional", "deployment"})
@@ -167,7 +171,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
                 throws IOException {
             HttpRequestWrapper requestWrapper = new HttpRequestWrapper(request);
-            requestWrapper.getHeaders().add("MagicAuthentication", headerValue);
+            requestWrapper.getHeaders().add(Constants.INTERNAL_SERVICE_HEADERNAME, headerValue);
 
             return execution.execute(requestWrapper, body);
         }
