@@ -1,12 +1,12 @@
-package com.latticeengines.admin.tenant.batonadapter.bardjams;
+package com.latticeengines.admin.tenant.batonadapter.pls;
 
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
-public class BardJamsComponentDeploymentTestNG extends BatonAdapterBaseDeploymentTestNG<BardJamsComponent> {
-
+public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
+    
     @Test(groups = "deployment")
     public void testInstallation() {
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
@@ -22,8 +22,9 @@ public class BardJamsComponentDeploymentTestNG extends BatonAdapterBaseDeploymen
     }
 
     @Override
-    protected String getServiceName() { return BardJamsComponent.componentName; }
+    protected String getServiceName() { return PLSComponent.componentName; }
 
     @Override
-    public String getExpectedJsonFile() { return "bardjams_expected.json"; }
+    public String getExpectedJsonFile() { return "pls_expected.json"; }
+
 }

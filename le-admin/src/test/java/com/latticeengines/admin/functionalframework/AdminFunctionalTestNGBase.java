@@ -105,7 +105,16 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         space.setSpaceId(CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
 
         DocumentDirectory defaultConfig = batonService.getDefaultConfiguration(serviceName);
-        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(defaultConfig);
+        bootstrap(contractId, tenantId, serviceName, defaultConfig);
+    }
+
+    protected void bootstrap(String contractId, String tenantId, String serviceName, DocumentDirectory configDir) {
+        CustomerSpace space = new CustomerSpace();
+        space.setContractId(contractId);
+        space.setTenantId(tenantId);
+        space.setSpaceId(CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+
+        SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
         Map<String, String> bootstrapProperties = sDir.flatten();
 
         String url = String.format("%s/admin/tenants/%s/services/%s?contractId=%s",

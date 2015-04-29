@@ -50,15 +50,12 @@ public abstract class BatonAdapterBaseDeploymentTestNG<T extends LatticeComponen
 
     @Test(groups = "deployment")
     public void getDefaultConfig() throws Exception {
-        if (!batonService.getRegisteredServices().contains(serviceName)) {
-            throw new AssertionError(String.format("Component with name %s is not registered.", serviceName));
-        }
         testGetDefaultConfig(getExpectedJsonFile());
     }
 
     protected abstract String getServiceName();
 
-    protected void bootstrap() { super.bootstrap(contractId, tenantId, serviceName); }
+    protected void bootstrap(DocumentDirectory confDir) { super.bootstrap(contractId, tenantId, serviceName, confDir); }
 
     private void testGetDefaultConfig(String expectedJson) {
         String url = String.format("%s/admin/services/%s/default", getRestHostPort(), serviceName);
