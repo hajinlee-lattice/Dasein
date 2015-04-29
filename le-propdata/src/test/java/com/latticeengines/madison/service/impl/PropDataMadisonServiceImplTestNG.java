@@ -54,8 +54,8 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     @BeforeClass(groups = "functional")
     public void beforeClass() throws Exception {
         today = new Date();
-        today = DateUtils.addDays(today, -3);
-        yesterday = DateUtils.addDays(today, -1);
+        yesterday = DateUtils.addDays(today, -3);
+        today = DateUtils.addDays(today, -2);
         ReflectionTestUtils.setField(propDataService, "numOfPastDays", 1);
 
         dailyProgress1 = new MadisonLogicDailyProgress();
