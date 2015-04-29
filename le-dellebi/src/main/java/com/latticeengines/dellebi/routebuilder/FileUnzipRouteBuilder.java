@@ -2,7 +2,9 @@ package com.latticeengines.dellebi.routebuilder;
 
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.MalformedURLException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbFile;
@@ -17,9 +19,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.latticeengines.dellebi.flowdef.DailyFlow;
+
 public class FileUnzipRouteBuilder extends RouteBuilder {
 
-    private final static Logger LOGGER = Logger.getLogger(FileUnzipRouteBuilder.class);
+    private static final Log log = LogFactory.getLog(FileUnzipRouteBuilder.class);
 
     @Value("${dellebi.camelunzipoutputpath}")
     private String camelUnzipOutputPath;
@@ -48,7 +52,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
     @SuppressWarnings("unchecked")
     public void configure() {
         // Unzip files to separated folders according to the file type.
-        LOGGER.info("Unzipping files and put files to seperated file folders according to file type.");
+        log.info("Unzipping files and put files to seperated file folders according to file type.");
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
 
         final NtlmPasswordAuthentication finalAuth = auth;
@@ -69,7 +73,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                         String fileName = smbInboxPath + "/" + exchange.getIn().getHeader("CamelFileName").toString();
 
                         if (exchange.getIn().getHeader("CamelFileName").toString() != "") {
-                            LOGGER.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
+                            log.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
                                     + ".zip");
                             if (!System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")) {
                                 SmbFile smbFile = new SmbFile(fileName.substring(0, fileName.indexOf(".txt")) + ".zip",
@@ -92,7 +96,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                         String fileName = smbInboxPath + "/" + exchange.getIn().getHeader("CamelFileName");
 
                         if (exchange.getIn().getHeader("CamelFileName").toString() != "") {
-                            LOGGER.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
+                            log.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
                                     + ".zip");
                             if (!System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")) {
                                 SmbFile smbFile = new SmbFile(fileName.substring(0, fileName.indexOf(".txt")) + ".zip",
@@ -115,7 +119,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                         String fileName = smbInboxPath + "/" + exchange.getIn().getHeader("CamelFileName");
 
                         if (exchange.getIn().getHeader("CamelFileName").toString() != "") {
-                            LOGGER.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
+                            log.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
                                     + ".zip");
                             if (!System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")) {
                                 SmbFile smbFile = new SmbFile(fileName.substring(0, fileName.indexOf(".txt")) + ".zip",
@@ -138,7 +142,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                         String fileName = smbInboxPath + "/" + exchange.getIn().getHeader("CamelFileName");
 
                         if (exchange.getIn().getHeader("CamelFileName").toString() != "") {
-                            LOGGER.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
+                            log.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
                                     + ".zip");
                             if (!System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")) {
                                 SmbFile smbFile = new SmbFile(fileName.substring(0, fileName.indexOf(".txt")) + ".zip",
@@ -173,7 +177,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                         String fileName = smbInboxPath + "/" + exchange.getIn().getHeader("CamelFileName");
 
                         if (exchange.getIn().getHeader("CamelFileName").toString() != "") {
-                            LOGGER.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
+                            log.info("Removing Dell EBI file: " + fileName.substring(0, fileName.indexOf(".txt"))
                                     + ".zip");
                             if (!System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")) {
                                 SmbFile smbFile = new SmbFile(fileName.substring(0, fileName.indexOf(".txt")) + ".zip",
@@ -193,7 +197,7 @@ public class FileUnzipRouteBuilder extends RouteBuilder {
                         String fileName = smbInboxPath + "/" + exchange.getIn().getHeader("CamelFileName");
 
                         if (exchange.getIn().getHeader("CamelFileName").toString() != "") {
-                            LOGGER.info("Adding headers to Dell EBI file: " + fileName);
+                            log.info("Adding headers to Dell EBI file: " + fileName);
                             if (!System.getProperty("DELLEBI_PROPDIR").contains("conf/env/local")) {
                                 SmbFile smbFile = new SmbFile(fileName.substring(0, fileName.indexOf(".txt")) + ".zip",
                                         finalAuth);
