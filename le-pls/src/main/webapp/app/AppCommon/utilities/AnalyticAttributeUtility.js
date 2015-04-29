@@ -216,7 +216,14 @@ angular.module('mainApp.appCommon.utilities.AnalyticAttributeUtility', [
         return abbreviatedNumber;
     };
 
-
+    this.IsPredictorBoolean = function (attributeMetadata) {
+    	if (attributeMetadata == null) {
+    		return false;
+    	}
+    	var fundamentalType = attributeMetadata.FundamentalType != null ? attributeMetadata.FundamentalType.toUpperCase() : null;
+    	return fundamentalType == this.FundamentalType.Boolean;
+    };
+    
     this.FormatBucketValue = function (value, attributeMetadata) {
         if (value == null || attributeMetadata == null) {
             return value;

@@ -10492,6 +10492,39 @@ angular.module('test.testData.TopPredictorTestDataService', [])
                 {
                     "Elements": [
                         {
+                            "CorrelationSign": 1,
+                            "Count": 19900,
+                            "Lift": 0.8,
+                            "Values": [
+                                "False"
+                            ],
+                            "IsVisible": true
+                        },
+                        {
+                            "CorrelationSign": 1,
+                            "Count": 80,
+                            "Lift": 0.5,
+                            "Values": [
+                                "True"
+                            ],
+                            "IsVisible": true
+                        },
+                        {
+                            "CorrelationSign": -1,
+                            "Count": 20,
+                            "Lift": 202,
+                            "Values": [
+                                "null"
+                            ],
+                            "IsVisible": true
+                        }
+                    ],
+                    "Name": "BooleanAttribute3",
+                    "FundamentalType": "boolean"
+                },
+                {
+                    "Elements": [
+                        {
                             "CorrelationSign": -1,
                             "Count": 20000,
                             "Lift": 1,

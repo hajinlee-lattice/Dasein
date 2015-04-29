@@ -414,6 +414,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         
         return null;
     };
+    
    
     this.FormatDataForAttributeValueChart = function (attributeName, attributeColor, modelSummary) {
         if (attributeName == null || modelSummary == null) {
@@ -439,22 +440,25 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         var otherBucketElements = [];
         var topBucketCandidates = [];
         
-        // Do "Other" bucketing if discrete and more than 0 elements
+        // Do "Other" bucketing if discrete and not boolean
         var doOtherBucket = false;
+        var isContinuous = false;
         var i = 0;
         var bucket = null;
         var bucketName = null;
-        for (i = 0; i < predictor.Elements.length; i++) {
-        	bucket = predictor.Elements[i];
-          	if (this.IsPredictorElementCategorical(bucket)) {
-          		doOtherBucket = true;
-          		break;
-          	} else if (bucket.LowerInclusive != null || bucket.UpperExclusive != null) {
-          		doOtherBucket = false;
-          		break;
-          	}
-        }
 
+        if (!AnalyticAttributeUtility.IsPredictorBoolean(predictor)) {
+	        for (i = 0; i < predictor.Elements.length; i++) {
+	        	bucket = predictor.Elements[i];
+	          	if (this.IsPredictorElementCategorical(bucket)) {
+	          		doOtherBucket = true;
+	          		break;
+	          	} else if (bucket.LowerInclusive != null || bucket.UpperExclusive != null) {
+	          		isContinuous = true;
+	          		break;
+	          	}
+	        }
+        }
         
         if (doOtherBucket) {
             // Group elements less than 1% frequency into "Other" bucket
@@ -490,7 +494,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             };
             
             // Set sort property based on whether it is a discrete versus a continuous value
-            if (bucket.LowerInclusive != null || bucket.UpperExclusive != null) {
+            if (isContinuous) {
                 bucketToDisplay.SortProperty = bucket.LowerInclusive != null ? bucket.LowerInclusive : bucket.UpperExclusive;
                 // Only when the attribute is continuous, sorting is increasing order
             } else {
@@ -512,13 +516,13 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
         // sort the list of buckets
         toReturn.elementList.sort(function (a, b)  {
             if (a.SortProperty < b.SortProperty) {
-                return !doOtherBucket ? -1 : 1;
+                return isContinuous ? -1 : 1;
             }
             if (a.SortProperty == b.SortProperty) {
                 return 0;
             }
             if (a.SortProperty > b.SortProperty) {
-                return !doOtherBucket ? 1 : -1;
+                return isContinuous ? 1 : -1;
             }
                 return 0;
         });

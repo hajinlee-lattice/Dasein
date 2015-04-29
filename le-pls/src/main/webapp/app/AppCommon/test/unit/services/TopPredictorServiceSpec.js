@@ -311,8 +311,19 @@ describe('TopPredictorServiceSpec Tests', function () {
             expect(chartData.elementList[0].name).toEqual('No');
             expect(chartData.elementList[1].name).toEqual('Yes');
             expect(chartData.elementList[2].name).toEqual('N/A');
+            
         });
 
+        it('should not apply doOtherBucket to Boolean type bucekts', function () {
+        	var chartData = topPredictorService.FormatDataForAttributeValueChart("BooleanAttribute3", "#FFFFFF", hoverTestModelSummary);
+            expect(chartData.elementList[0].name).toEqual('No');
+            expect(chartData.elementList[1].name).toEqual('Yes');
+            expect(chartData.elementList[2].name).toEqual('N/A');
+            expect(chartData.elementList[0].percentTotal) == 99.5;
+            expect(chartData.elementList[1].percentTotal) == 0.4;
+            expect(chartData.elementList[2].percentTotal) == 0.1;
+        });
+        
         it('should put "Other" and "N/A" at bottom', function () {
             var chartData = topPredictorService.FormatDataForAttributeValueChart("CategoricalAttribute", "#FFFFFF", hoverTestModelSummary);
             expect(chartData.elementList[chartData.elementList.length - 1].name).toEqual('N/A');
