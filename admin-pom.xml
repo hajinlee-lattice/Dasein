@@ -23,6 +23,5 @@
         <module>le-db</module>
         <module>le-camille</module>
         <module>le-security</module>
-        <module>le-pls</module>
     </modules>
 </project>
