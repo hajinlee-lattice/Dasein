@@ -16,7 +16,5 @@
     <mvc:annotation-driven/>
     
  
-    <import resource="classpath:dataplatform-component-context.xml"/>
-    <import resource="classpath:propdata-madison-context.xml"/>
-    <import resource="classpath:dataflow-context.xml"/>
+    <import resource="classpath:dataplatform-context.xml"/>
 </beans>

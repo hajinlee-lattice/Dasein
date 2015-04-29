@@ -17,6 +17,3 @@ export HADOOP_MAPRED_HOME=/usr/hdp/current/hadoop-mapreduce-client
 export HADOOP_CONF=/etc/hadoop/conf
 export SQOOP_HOME=/usr/hdp/current/sqoop-server
 export JAVA_HOME=/usr/java/default
-export DPQUARTZ_ENABLED=enabled
-export DPDL_QUARTZ_ENABLED=enabled
-export PROPDATA_MADISON_QUARTZ_ENABLED=enabled
