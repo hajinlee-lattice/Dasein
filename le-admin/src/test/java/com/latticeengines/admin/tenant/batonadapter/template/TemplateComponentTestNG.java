@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
-public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG<TemplateComponent> {
+public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
     
     @Test(groups = "deployment")
     public void testInstallation() {

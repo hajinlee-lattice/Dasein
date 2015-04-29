@@ -18,7 +18,7 @@ import junit.framework.Assert;
  * we also register the testing component's installer,
  * in case it has not been registered already by ServiceServiceImpl
  */
-public abstract class BatonAdapterBaseDeploymentTestNG<T extends LatticeComponent> extends AdminFunctionalTestNGBase {
+public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTestNGBase {
 
     private static final Log log = LogFactory.getLog(BatonAdapterBaseDeploymentTestNG.class);
     private String contractId, tenantId, serviceName;
