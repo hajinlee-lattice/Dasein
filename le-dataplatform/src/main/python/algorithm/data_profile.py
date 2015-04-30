@@ -221,9 +221,10 @@ def retrieveOtherMetadata(columnsMetadata, attributeStats):
             fundamentalType = ""
             if columnMetadata.has_key("FundamentalType"):
                 fundamentalType = columnMetadata["FundamentalType"]
-            for extension in extensions:
-                if extension["Key"] == "Category":
-                    category = extension["Value"]
+            if (extensions is not None and isinstance(extensions, list)):
+                for extension in extensions:
+                    if extension["Key"] == "Category":
+                        category = extension["Value"]
 
             if displayName is None:
                 attributeStats["NULLDisplayName"].append(colName)
