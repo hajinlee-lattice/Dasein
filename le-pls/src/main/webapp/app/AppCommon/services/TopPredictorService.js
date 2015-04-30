@@ -605,7 +605,7 @@ angular.module('mainApp.appCommon.services.TopPredictorService', [
             	}
             }
         }
-        percentList[index] = topPercentage;
+        percentList[index] = topPercentage.toFixed(1);
         
         return percentList;
     };
