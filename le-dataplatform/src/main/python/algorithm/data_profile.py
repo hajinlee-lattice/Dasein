@@ -176,7 +176,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     configMetadata = schema["config_metadata"]
 
     
-    attributeStats = {"ApprovedUsage_Model":[], "ApprovedUsage_EmptyOrUnrecorgnized":[], "NULLDisplayName":[], 
+    attributeStats = {"ApprovedUsage_Model":[], "ApprovedUsage_EmptyOrUnrecognized":[], "NULLDisplayName":[], 
                       "NULLCategory":[], "HighNullValueRate":[], "GT200_DiscreteValue":[]}
 
     otherMetadata = retrieveOtherMetadata(configMetadata, attributeStats)
@@ -203,7 +203,7 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     return None
 
 def retrieveOtherMetadata(columnsMetadata, attributeStats):
-    qualifiedApprovedUsage = ["None," "Model", "ModelAndModelInsights", "ModelAndAllInsights"]
+    qualifiedApprovedUsage = ["None", "Model", "ModelAndModelInsights", "ModelAndAllInsights"]
 
     otherMetadata = dict()
     if columnsMetadata is None or not columnsMetadata.has_key("Metadata"):
@@ -231,10 +231,10 @@ def retrieveOtherMetadata(columnsMetadata, attributeStats):
                 displayName = colName
             if approvedUsage is None:
                 approvedUsage = ""
-                attributeStats["ApprovedUsage_EmptyOrUnrecorgnized"].append(colName)
+                attributeStats["ApprovedUsage_EmptyOrUnrecognized"].append(colName)
             if isinstance(approvedUsage, list):
                 for value in approvedUsage:
-                    if value not in qualifiedApprovedUsage: attributeStats["ApprovedUsage_EmptyOrUnrecorgnized"].append(colName)
+                    if value not in qualifiedApprovedUsage: attributeStats["ApprovedUsage_EmptyOrUnrecognized"].append(colName)
                 approvedUsage = ",".join(approvedUsage)
             otherMetadata[colName] = (displayName, approvedUsage, category, fundamentalType)
         except:
@@ -337,7 +337,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
     diagnostics = OrderedDict()
     diagnostics["Colname"] = colName
     diagnostics["DisplayName"] = otherMetadata[0]
-    filtered = True if colName in attributeStats["ApprovedUsage_EmptyOrUnrecorgnized"] else False
+    filtered = True if colName in attributeStats["ApprovedUsage_EmptyOrUnrecognized"] else False
     if otherMetadata[1] == "Model" and not filtered: 
         attributeStats["ApprovedUsageModel"].append(colName)
         filtered = True
