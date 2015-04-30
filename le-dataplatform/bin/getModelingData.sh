@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function usage {
-	echo $'usage: ./getModelingData.sh <appId> <customer> <environment> \nenvironment should be one of the following: prod, integ, local'
+	echo $'usage: ./getModelingData.sh <appId> <customer> <environment> <user> \nenvironment should be one of the following: prod, integ, local'
 	exit
 }
 
@@ -9,8 +9,9 @@ function usage {
 appId=$1
 customer=$2
 environment=$3
+user=$4
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 4 ]; then
 usage
 fi
 
@@ -37,9 +38,9 @@ commands="rm -rf /tmp/modelingData; mkdir /tmp/modelingData; hadoop fs -copyToLo
 case $localEnv in
 	false)
 		echo "running commands in $environment"
-		ssh $host $commands
+		ssh $user@$host $commands
 		# copy to local
-		scp $host:/tmp/modelingData/$appId-$customer-data.tar  ./
+		scp $user@$host:/tmp/modelingData/$appId-$customer-data.tar  ./
 		;;
 	true)
 		echo "running commands in local"
