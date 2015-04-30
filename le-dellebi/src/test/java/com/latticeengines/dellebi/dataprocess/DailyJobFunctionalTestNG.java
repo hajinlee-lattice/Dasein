@@ -157,7 +157,7 @@ public class DailyJobFunctionalTestNG extends AbstractTestNGSpringContextTests {
 		// Process data using Cascading
 		DailyFlow dailFlow = springContext
 				.getBean("dailyFlow", DailyFlow.class);
-		dailFlow.doDailyFlow(springContext);
+		dailFlow.doDailyFlow(); // todo: springContext);
 
 		try {
 			Thread.sleep(60000);
