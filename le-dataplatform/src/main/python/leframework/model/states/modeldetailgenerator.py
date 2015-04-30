@@ -17,10 +17,11 @@ class ModelDetailGenerator(State):
         mediator = self.mediator
         schema = mediator.schema
         result = OrderedDict()
+        mediator.modelId = self.generateModelID()
 
         result["Name"] = mediator.schema["name"]
         result["LookupID"] = self.lookupID()
-
+        result["ModelID"] = mediator.modelId
         # Leads
         result["TotalLeads"] = mediator.allDataPreTransform.shape[0]
         result["TestingLeads"] = mediator.data.shape[0]
@@ -41,6 +42,12 @@ class ModelDetailGenerator(State):
 
     def now(self):
         return calendar.timegm(time.gmtime())
+
+    def generateModelID(self):
+        schema = self.mediator.schema
+        idx = schema["model_data_dir"].rfind('/') + 1
+        modelId = "ms__" + schema["model_data_dir"][idx:] + "-" + schema["name"]
+        return modelId if len(modelId) <= 49 else modelId[:49]
 
     # Current Path Structure: /user/s-analytics/customers/<customer>/models/<eventTableName>/<guid>/
     def lookupID(self):

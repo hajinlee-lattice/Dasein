@@ -27,7 +27,8 @@ class SummaryGenerator(State, JsonGenBase):
         self.summary["SegmentChart"] = self.__getSegmentChart(mediator.probRange, mediator.widthRange, mediator.buckets, mediator.averageProbability)
         self.summary["DLEventTableData"] = self.__getDLEventTableData(self.mediator.provenanceProperties, mediator.allDataPreTransform.shape[0])
         self.summary["ConstructionInfo"] = self.__getConstructionInfo()
-        
+        self.summary["ModelID"] = mediator.modelId
+
     @overrides(JsonGenBase)
     def getKey(self):
         return "Summary"
