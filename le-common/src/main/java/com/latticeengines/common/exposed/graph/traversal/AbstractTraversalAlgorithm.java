@@ -11,7 +11,7 @@ public abstract class AbstractTraversalAlgorithm {
     protected Stack<VisitorContext> stack;
 
     public AbstractTraversalAlgorithm () {
-        stack = new Stack<VisitorContext>();
+        stack = new Stack<>();
     }
 
     public void run(GraphNode node, Visitor visitor) {

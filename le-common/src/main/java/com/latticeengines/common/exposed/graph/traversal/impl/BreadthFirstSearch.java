@@ -32,7 +32,7 @@ public class BreadthFirstSearch extends AbstractTraversalAlgorithm {
             preRun(visitor);
             n.accept(visitor, ctx);
             postRun(visitor);
-            List<GraphNode> children = n.getChildren();
+            List<? extends GraphNode> children = n.getChildren();
 
             ctx = new VisitorContext();
             ctx.setProperty("parent", n);

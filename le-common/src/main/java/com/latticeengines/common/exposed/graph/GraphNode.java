@@ -6,5 +6,5 @@ import com.latticeengines.common.exposed.visitor.Visitable;
 
 public interface GraphNode extends Visitable {
 
-    List<GraphNode> getChildren();
+    List<? extends GraphNode> getChildren();
 }

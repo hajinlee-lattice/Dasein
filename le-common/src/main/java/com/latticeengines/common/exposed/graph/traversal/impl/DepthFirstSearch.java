@@ -19,14 +19,14 @@ public class DepthFirstSearch extends AbstractTraversalAlgorithm {
 
     public DepthFirstSearch () {
         super();
-        seenNodes = new Stack<GraphNode>();
-        cycles = new HashSet<Cycle>();
+        seenNodes = new Stack<>();
+        cycles = new HashSet<>();
     }
 
     @Override
     public void runSearch(GraphNode node, Visitor visitor) {
         node.accept(visitor, stack.peek());
-        List<GraphNode> children = node.getChildren();
+        List<? extends GraphNode> children = node.getChildren();
         VisitorContext ctx = new VisitorContext();
         ctx.setProperty("parent", node);
 
@@ -37,7 +37,7 @@ public class DepthFirstSearch extends AbstractTraversalAlgorithm {
                 runSearch(child, visitor);
             }
             else {
-                List<GraphNode> cycle = new ArrayList<GraphNode>();
+                List<GraphNode> cycle = new ArrayList<>();
                 for (int i = seenNodes.size() - 1; i >= 0; i--) {
                     GraphNode el = seenNodes.get(i);
                     cycle.add(el);
