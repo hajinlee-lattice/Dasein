@@ -14,5 +14,3 @@ class DP1089ProfilingTest(ProfilingTestBase):
         results = learningExecutor.retrieveMetadata("./results/profile.avro", False)
         self.assertTrue(results is not None)
         
-        metadata = json.load(open("metadata-dp1089.avsc", "r"))
-        print(metadata)
