@@ -117,6 +117,21 @@ public class SerializableDocumentDirectoryUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testEnforcedString() throws JsonProcessingException {
+        DocumentDirectory configDir = new DocumentDirectory(new Path("/"));
+        configDir.add("/prop", "true");
+        SerializableDocumentDirectory serializedConfigDir = new SerializableDocumentDirectory(configDir);
+
+        DocumentDirectory metaDir = new DocumentDirectory(new Path("/"));
+        metaDir.add("/prop", "{\"Type\":\"string\"}");
+
+        serializedConfigDir.applyMetadata(metaDir);
+
+        DocumentDirectory deserializedDir = SerializableDocumentDirectory.deserialize(serializedConfigDir);
+        Assert.assertTrue(deserializedDir.equals(configDir));
+    }
+
+    @Test(groups = "unit")
     public void testDeserialize() throws JsonProcessingException {
         DocumentDirectory configDir = new DocumentDirectory(new Path("/"));
         configDir.add("/prop", "/var/logs");

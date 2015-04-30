@@ -1,8 +1,46 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "Config1", "Data": "{\"Type\":\"options\",\"Options\":[\"1\",\"2\",\"3\"]}", "Version": -1},
-    { "Node": "Config2", "Data": "{\"Type\":\"object\"}", "Version": -1},
-    { "Node": "Config4", "Data": "{\"Type\":\"boolean\"}", "Version": -1}
+    {
+      "Node": "Config1",
+      "Data": "{\"Type\":\"options\",\"Options\":[\"1\",\"2\",\"3\"]}",
+      "Version": -1
+    },
+    {
+      "Node": "Config2",
+      "Data": "{\"Type\":\"object\"}",
+      "Version": -1
+    },
+    {
+      "Node": "Config3",
+      "Data": "",
+      "Version": -1
+    },
+    {
+      "Node": "Config4",
+      "Data": "{\"Type\":\"boolean\"}",
+      "Version": -1
+    },
+    {
+      "Node": "Config5",
+      "Version": -1,
+      "Children": [
+        {
+          "Node": "Config5.1",
+          "Data": "",
+          "Version": -1
+        },
+        {
+          "Node": "Config5.2",
+          "Data": "",
+          "Version": -1
+        }
+      ]
+    },
+    {
+      "Node": "Config6",
+      "Version": -1,
+      "Data": "{\"Type\":\"string\"}"
+    }
   ]
 }

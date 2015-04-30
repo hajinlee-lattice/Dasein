@@ -288,8 +288,10 @@ public class SerializableDocumentDirectory {
             String nodePath = parentPath + "/" + this.node;
 
             if (this.metadata != null && this.metadata.getType() != null
-                    && !(this.metadata.getType().equals("") || this.metadata.getType().equals("string"))) {
+                    && !(this.metadata.getType().equals(""))) {
                 dir.add(nodePath, this.metadata.toString());
+            } else {
+                dir.add(nodePath, "");
             }
 
             if (this.getChildren() != null) {
@@ -418,7 +420,6 @@ public class SerializableDocumentDirectory {
             ObjectMapper mapper = new ObjectMapper();
 
             Collection<Node> docNodes = new ArrayList<>();
-            JsonNode metaNode = null;
             for (JsonNode jNode : configNodes) {
                 Node docNode = new Node();
 
@@ -426,9 +427,13 @@ public class SerializableDocumentDirectory {
 
                 // read data as text
                 JsonNode dataNode = jNode.get("Data");
+                boolean mustBeString = false;
                 if (dataNode != null) {
                     if (Metadata.isObject(dataNode.toString()) || Metadata.isArray(dataNode.toString())) {
                         docNode.setData(dataNode.toString());
+                    } else if (dataNode.toString().startsWith("\"") && dataNode.toString().endsWith("\"")) {
+                        docNode.setData(dataNode.toString().substring(1, dataNode.toString().length() - 1));
+                        mustBeString = isNumber(dataNode.asText()) || isBoolean(dataNode.asText());
                     } else {
                         docNode.setData(dataNode.asText());
                     }
@@ -436,6 +441,7 @@ public class SerializableDocumentDirectory {
 
                 // sync with metadata
                 Metadata metadata = null;
+                JsonNode metaNode = null;
                 if (metaNodes != null && metaNodes.isArray()) {
                     for (JsonNode thisMetaNode : metaNodes) {
                         if (thisMetaNode.isObject() && thisMetaNode.has("Node") &&
@@ -446,6 +452,11 @@ public class SerializableDocumentDirectory {
                         }
                     }
                 }
+                if (metaNode == null && mustBeString) {
+                    metadata = new Metadata();
+                    metadata.setType("string");
+                }
+
                 docNode.applySingleMetadata(metadata);
 
                 // process children
