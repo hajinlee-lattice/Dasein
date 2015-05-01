@@ -339,7 +339,7 @@ def profileColumn(columnData, colName, otherMetadata, stringcols, eventVector, b
     diagnostics["DisplayName"] = otherMetadata[0]
     filtered = True if colName in attributeStats["ApprovedUsage_EmptyOrUnrecognized"] else False
     if otherMetadata[1] == "Model" and not filtered: 
-        attributeStats["ApprovedUsageModel"].append(colName)
+        attributeStats["ApprovedUsage_Model"].append(colName)
         filtered = True
     if (isnull(otherMetadata[2]) or otherMetadata[2] == "") and not filtered: 
         attributeStats["NULLCategory"].append(colName)
