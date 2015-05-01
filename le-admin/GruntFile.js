@@ -28,19 +28,23 @@ module.exports = function(grunt) {
         env:  {
             dev:         {
                 url:            'http://localhost:8081',
-                protractorConf: testDir + '/e2e/conf/protractor.conf.dev.js'
+                protractorConf: testDir + '/e2e/conf/protractor.conf.dev.js',
+                protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.dev.js'
             },
             integration: {
                 url:            'http://bodcdevhdpweb52.dev.lattice.local',
-                protractorConf: testDir + '/e2e/conf/protractor.conf.js'
+                protractorConf: testDir + '/e2e/conf/protractor.conf.js',
+                protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.js'
             },
             qa:          {
                 url:            'http://bodcdevhdpweb53.dev.lattice.local',
-                protractorConf: testDir + '/e2e/conf/protractor.conf.js'
+                protractorConf: testDir + '/e2e/conf/protractor.conf.js',
+                protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.js'
             },
             prod:        {
                 url:            'https://app.lattice-engines.com',
-                protractorConf: testDir + '/e2e/conf/protractor.conf.js'
+                protractorConf: testDir + '/e2e/conf/protractor.conf.js',
+                protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.js'
             }
         }
     };
@@ -269,7 +273,6 @@ module.exports = function(grunt) {
                 src: '**/*',
                 dest: '<%= app.dir %>'
             },
-
             instrumented: {
                 files: [{
                     expand: true,
@@ -424,7 +427,7 @@ module.exports = function(grunt) {
                 keepAlive: false,
                 noColor: false,
                 coverageDir: 'target/protractor_coverage',
-                configFile: '<%= testenv.protractorConf %>'
+                configFile: '<%= testenv.protractorCcConf %>'
             },
             chrome:           {
                 options: {
@@ -494,11 +497,20 @@ module.exports = function(grunt) {
         'concurrent:wget',
         'less:dev']);
 
+    var instrumentJsText = 'Instrument javascript code for code coverage';
+    grunt.registerTask('instrumentJs', instrumentJsText, [
+        'less:dev',
+        'instrument',
+        'copy:instrumented'
+    ]);
+
     grunt.registerTask('www', ['copy:www', 'clean:www']);
 
-    grunt.registerTask('unit', ['jshint', 'karma:unit']);
+    grunt.registerTask('unit', ['karma:unit']);
 
     grunt.registerTask('lint', ['jshint']);
+
+    grunt.registerTask('lintunit', ['concurrent:test']);
 
     // restore dev setup after run a default task
     grunt.registerTask('restore', ['copy:restorewww','copy:restore', 'clean:restore', 'less:dev']);
@@ -524,12 +536,6 @@ module.exports = function(grunt) {
     var e2eChromeCcText = 'Runs selenium end to end (protractor) unit tests on Chrome with code coverage';
     grunt.registerTask('e2eChromeCc', e2eChromeCcText, [
         'protractor_coverage:chrome'
-    ]);
-
-    var instrumentJsText = 'Instrument javascript code for code coverage';
-    grunt.registerTask('instrumentJs', instrumentJsText, [
-        'instrument',
-        'copy:instrumented'
     ]);
 
 };

@@ -10,11 +10,11 @@ exports.config = {
         adtesterpassword: "Lattice1"
     },
 
-    allScriptsTimeout: 60000,
+    allScriptsTimeout: 110000,
 
     jasmineNodeOpts: {
         showColors: true,
-        defaultTimeoutInterval: 60000
+        defaultTimeoutInterval: 120000
     },
 
     onPrepare: function() {

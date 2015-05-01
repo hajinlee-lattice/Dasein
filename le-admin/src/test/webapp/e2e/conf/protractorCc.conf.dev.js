@@ -5,17 +5,17 @@ exports.config = {
         'src/test/webapp/e2e/mainflow_spec.js'
     ],
 
-    params: {
-        adtesterusername: "testuser1",
+	params: {
+		adtesterusername: "testuser1",
         adtesterpassword: "Lattice1"
-    },
+	},
 
-    allScriptsTimeout: 60000,
+    allScriptsTimeout: 110000,
 
     jasmineNodeOpts: {
         showColors: true,
-        defaultTimeoutInterval: 60000
-    },
+        defaultTimeoutInterval: 120000
+    },  
 
     onPrepare: function() {
         var jasmineReporters = require('jasmine-reporters');

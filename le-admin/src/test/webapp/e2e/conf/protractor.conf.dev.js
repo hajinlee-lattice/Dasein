@@ -2,7 +2,7 @@ exports.config = {
     // Spec patterns are relative to the current working directly when
     // protractor is called.
     specs: [
-        '../**/mainflow_spec.js'
+        '../mainflow_spec.js'
     ],
 
 	params: {
@@ -10,11 +10,11 @@ exports.config = {
         adtesterpassword: "Lattice1"
 	},
 
-    allScriptsTimeout: 110000,
+    allScriptsTimeout: 60000,
 
     jasmineNodeOpts: {
         showColors: true,
-        defaultTimeoutInterval: 120000
+        defaultTimeoutInterval: 60000
     },  
 
     onPrepare: function() {
