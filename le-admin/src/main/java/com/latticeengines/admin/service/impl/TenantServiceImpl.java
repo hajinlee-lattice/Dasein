@@ -1,7 +1,6 @@
 package com.latticeengines.admin.service.impl;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,10 +55,9 @@ public class TenantServiceImpl implements TenantService {
         boolean serviceBootstrapSuccess = true;
         for (SerializableDocumentDirectory configSDir: configSDirs) {
             String serviceName = configSDir.getRootPath().substring(1);
-            Map<String, String> bootstrapProps = new HashMap<>();
-            bootstrapProps.put("Configuration", configSDir.toString());
+            Map<String, String> flatDir = configSDir.flatten();
             serviceBootstrapSuccess = serviceBootstrapSuccess
-                    && bootstrap(contractId, tenantId, serviceName, bootstrapProps);
+                    && bootstrap(contractId, tenantId, serviceName, flatDir);
         }
         if (!serviceBootstrapSuccess) {
             tenantEntityMgr.deleteTenant(contractId, tenantId);
