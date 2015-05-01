@@ -77,4 +77,7 @@ public class TenantServiceImpl implements TenantService {
         return tenantEntityMgr.findByTenantId(tenantId);
     }
 
+    @Override
+    public Tenant findByTenantName(String tenantName) { return tenantEntityMgr.findByTenantName(tenantName); }
+
 }

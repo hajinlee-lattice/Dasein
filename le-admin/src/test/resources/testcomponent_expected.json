@@ -10,6 +10,7 @@
         { "Node" : "Config5.1", "Data": "value5.1"},
         { "Node" : "Config5.2", "Data": "value5.2"}
       ]
-    }
+    },
+    { "Node": "Config6", "Data": "[\"string1\",\"string2\"]", "Metadata": {"Type": "array"}}
   ]
 }

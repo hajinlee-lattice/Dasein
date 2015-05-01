@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -349,7 +350,8 @@ public class SerializableDocumentDirectory {
                 case "object":
                     return isObject(data);
                 case "array":
-                    return isArray(data);
+                    String unescaped = StringEscapeUtils.unescapeJava(data);
+                    return isArray(unescaped);
                 case "options":
                     return this.getOptions().contains(data);
                 case "email":
@@ -429,9 +431,11 @@ public class SerializableDocumentDirectory {
                 JsonNode dataNode = jNode.get("Data");
                 boolean mustBeString = false;
                 if (dataNode != null) {
-                    if (Metadata.isObject(dataNode.toString()) || Metadata.isArray(dataNode.toString())) {
+                    if (Metadata.isObject(dataNode.toString())) {
                         docNode.setData(dataNode.toString());
-                    } else if (dataNode.toString().startsWith("\"") && dataNode.toString().endsWith("\"")) {
+                    } else if (Metadata.isArray(dataNode.toString())) {
+                        docNode.setData(dataNode.toString());
+                    }else if (dataNode.toString().startsWith("\"") && dataNode.toString().endsWith("\"")) {
                         docNode.setData(dataNode.toString().substring(1, dataNode.toString().length() - 1));
                         mustBeString = isNumber(dataNode.asText()) || isBoolean(dataNode.asText());
                     } else {

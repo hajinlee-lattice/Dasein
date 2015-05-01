@@ -7,6 +7,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -52,6 +53,18 @@ public class TestComponentConfigTestNG extends ConfigurationSchemaTestNGBase {
         Properties properties = new ObjectMapper().readValue(config2, Properties.class);
         Assert.assertEquals(properties.property1, "value1");
         Assert.assertEquals(properties.property2, "value2");
+
+        String config6 = dir.get("/Config6").getDocument().getData();
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode aNode = mapper.readTree(config6);
+        if (!aNode.isArray()) {
+            throw new AssertionError("Config6 should be a json array.");
+        }
+        for (JsonNode node : aNode) {
+            Assert.assertTrue(node.asText().equals("string1")
+                    || node.asText().equals("string2"));
+        }
     }
 
     private static class Properties {

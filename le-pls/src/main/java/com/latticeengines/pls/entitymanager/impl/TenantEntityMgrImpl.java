@@ -28,6 +28,12 @@ public class TenantEntityMgrImpl extends BasePLSEntityMgrImpl<Tenant> implements
     public Tenant findByTenantId(String tenantId) {
         return tenantDao.findByTenantId(tenantId);
     }
+
+    @Override
+    @Transactional(value = "pls", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Tenant findByTenantName(String tenantName) {
+        return tenantDao.findByTenantName(tenantName);
+    }
     
     @Override
     @Transactional(value = "pls", propagation = Propagation.REQUIRED)

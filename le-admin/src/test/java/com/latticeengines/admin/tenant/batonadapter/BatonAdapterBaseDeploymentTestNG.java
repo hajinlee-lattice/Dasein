@@ -31,7 +31,7 @@ public abstract class BatonAdapterBaseDeploymentTestNG extends AdminFunctionalTe
     @Value("${pls.api.hostport}")
     private String plsHostPort;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = {"deployment", "functional"})
     public void setup() {
         serviceName = getServiceName();
         contractId = serviceName + "Contract";

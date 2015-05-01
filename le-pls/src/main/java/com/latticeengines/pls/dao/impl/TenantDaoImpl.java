@@ -30,4 +30,18 @@ public class TenantDaoImpl extends BaseDaoImpl<Tenant> implements TenantDao {
         return (Tenant) list.get(0);
     }
 
+    @SuppressWarnings("rawtypes")
+    @Override
+    public Tenant findByTenantName(String tenantName) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<Tenant> entityClz = getEntityClass();
+        String queryStr = String.format("from %s where name = '%s'", entityClz.getSimpleName(), tenantName);
+        Query query = session.createQuery(queryStr);
+        List list = query.list();
+        if (list.size() == 0) {
+            return null;
+        }
+        return (Tenant) list.get(0);
+    }
+
 }

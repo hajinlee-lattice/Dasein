@@ -17,4 +17,6 @@ public interface TenantService {
     boolean hasTenantId(String tenantId);
 
     Tenant findByTenantId(String tenantId);
+
+    Tenant findByTenantName(String tenantName);
 }

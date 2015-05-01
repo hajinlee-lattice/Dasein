@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -41,7 +42,8 @@ public class PLSInstaller extends LatticeComponentInstaller {
 
         try {
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode aNode = mapper.readTree(emailListInJson);
+            String unescaped = StringEscapeUtils.unescapeJava(emailListInJson);
+            JsonNode aNode = mapper.readTree(unescaped);
             if (!aNode.isArray()) {
                 throw new IOException("AdminEmails suppose to be a list of strings");
             }
@@ -49,7 +51,8 @@ public class PLSInstaller extends LatticeComponentInstaller {
                 adminEmails.add(node.asText());
             }
         } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse AdminEmails to a list of valid emails", e);
+            throw new LedpException(LedpCode.LEDP_18028,
+                    "Cannot parse AdminEmails to a list of valid emails: " + emailListInJson, e);
         }
 
 

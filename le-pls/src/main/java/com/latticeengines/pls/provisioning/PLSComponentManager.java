@@ -23,6 +23,9 @@ public class PLSComponentManager {
     private UserService userService;
 
     public void provisionTenant(Tenant tenant, List<String> adminEmails) {
+
+        incrementTenantName(tenant);
+
         if (tenantService.hasTenantId(tenant.getId())) {
             tenantService.updateTenant(tenant);
         } else {
@@ -76,6 +79,18 @@ public class PLSComponentManager {
         uReg.setCredentials(creds);
 
         return uReg;
+    }
+
+    private synchronized void incrementTenantName(Tenant tenant) {
+        int duplicateOrdinal = 0;
+        String name = tenant.getName();
+        Tenant oldTenant = tenantService.findByTenantName(name);
+        while (oldTenant != null && !oldTenant.getId().equals(tenant.getId())) {
+            duplicateOrdinal++;
+            name = tenant.getName() + String.format(" (%03d)", duplicateOrdinal);
+            oldTenant = tenantService.findByTenantName(name);
+        }
+        tenant.setName(name);
     }
 
 }

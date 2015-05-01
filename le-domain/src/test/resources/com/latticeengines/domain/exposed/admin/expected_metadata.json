@@ -41,6 +41,7 @@
       "Node": "Config6",
       "Version": -1,
       "Data": "{\"Type\":\"string\"}"
-    }
+    },
+    {"Node":"Config7","Data":"{\"Type\":\"array\"}","Version":-1}
   ]
 }

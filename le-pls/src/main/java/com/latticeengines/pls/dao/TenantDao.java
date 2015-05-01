@@ -7,4 +7,5 @@ public interface TenantDao extends BaseDao<Tenant> {
 
     Tenant findByTenantId(String tenantId);
 
+    Tenant findByTenantName(String tenantName);
 }

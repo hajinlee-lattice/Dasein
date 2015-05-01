@@ -1,16 +1,23 @@
 package com.latticeengines.admin.tenant.batonadapter.pls;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -21,12 +28,16 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
+    @Autowired
+    private TenantService tenantService;
+
     @Test(groups = "deployment")
     public void testInstallation() throws InterruptedException {
         String testAdminUsername = "pls-installer-tester@lattice-engines.com";
         String testAdminPassword = "admin";
 
         deletePLSAdminUser(tenantId, testAdminUsername);
+        deletePLSTestTenant(tenantId);
 
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
@@ -52,6 +63,50 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, tenantId));
 
         deletePLSAdminUser(tenantId, testAdminUsername);
+        deletePLSTestTenant(tenantId);
+    }
+
+    @Test(groups = "functional")
+    public void testInstallationFunctional() throws InterruptedException {
+        String testAdminUsername = "pls-installer-tester@lattice-engines.com";
+
+        DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
+        confDir.makePathsLocal();
+
+        // modify the default config
+        DocumentDirectory.Node node = confDir.get(new Path("/AdminEmails"));
+        node.getDocument().setData("[\"" + testAdminUsername + "\"]");
+
+        // send to bootstrapper message queue
+        bootstrap(confDir);
+
+        // wait a while, then test your installation
+        int numOfRetries = 10;
+        BootstrapState.State state;
+        do {
+            state = batonService.getTenantServiceBootstrapState(contractId, tenantId, "PLS").state;
+            numOfRetries--;
+            Thread.sleep(1000L);
+        } while (!state.equals(BootstrapState.State.OK) && numOfRetries > 0);
+
+        Assert.assertEquals(state, BootstrapState.State.OK);
+
+        SerializableDocumentDirectory sDir = tenantService.getTenantServiceConfig(contractId, tenantId, "PLS");
+
+        for (SerializableDocumentDirectory.Node sNode : sDir.getNodes()) {
+            if (sNode.getNode().equals("AdminEmails")) {
+                String unescaped = StringEscapeUtils.unescapeJavaScript(sNode.getData());
+                ObjectMapper mapper = new ObjectMapper();
+                try {
+                    JsonNode jNode = mapper.readTree(unescaped);
+                    Assert.assertTrue(jNode.isArray());
+                    Assert.assertEquals(jNode.get(0).asText(), testAdminUsername);
+                } catch (IOException e) {
+                    throw new AssertionError("Could not parse the data stored in ZK.");
+                }
+            }
+        }
+
     }
 
     @Override
@@ -69,6 +124,11 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         } catch (URIException e) {
             Assert.fail("could not encode the username");
         }
+    }
+
+    private void deletePLSTestTenant(String tenantId) {
+        magicRestTemplate.delete(getPlsHostPort()
+                + String.format( "/pls/admin/tenants/%s", tenantId));
     }
 
     private UserDocument loginAndAttach(String username, String password, String tenantId) {
