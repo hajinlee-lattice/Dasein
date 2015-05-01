@@ -95,7 +95,8 @@ public enum LedpCode {
     LEDP_18028("Provisioning PLS/GA tenant {0} through Camille failed."), //
     LEDP_18029("Can not find Org Id."), //
     LEDP_18030("Can not verify CRM credential."), //
-    LEDP_18031("Can not get CRM credential.");
+    LEDP_18031("Can not get CRM credential."), //
+    LEDP_18032("Provision VisiDB/DL failed.");
     private String message;
 
     LedpCode(String message) {

@@ -1,5 +1,6 @@
 package com.latticeengines.camille.exposed.config.bootstrap;
 
+import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.camille.exposed.Camille;
@@ -7,8 +8,10 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory.Node;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceInstaller;
 
 public abstract class LatticeComponentInstaller implements CustomerSpaceServiceInstaller {
@@ -59,5 +62,25 @@ public abstract class LatticeComponentInstaller implements CustomerSpaceServiceI
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
         sDir.applyMetadata(metaDir);
         return sDir;
+    }
+
+    public Document getDocument(DocumentDirectory configDir, String field){
+        Node node = configDir.get("/" + field);
+        return node != null ? node.getDocument() : null;
+    }
+
+    public String getData(DocumentDirectory configDir, String field) {
+        Document doc = getDocument(configDir, field);
+        return doc != null ? doc.getData() : null;
+    }
+
+    public Node getChild(DocumentDirectory configDir, String field, String childName){
+        Node node = configDir.get("/" + field);
+        return node.getChild(childName);
+    }
+ 
+    public List<Node> getChildren(DocumentDirectory configDir, String field){
+        Node node = configDir.get("/" + field);
+        return node.getChildren();
     }
 }
