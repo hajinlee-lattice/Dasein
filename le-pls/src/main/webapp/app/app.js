@@ -2,6 +2,7 @@
 var mainApp = angular.module('mainApp', [
     'mainApp.appCommon.utilities.EvergageUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
+    'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.services.ResourceStringsService',
     'mainApp.login.services.LoginService',
     'mainApp.core.services.SessionService',
@@ -11,7 +12,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.login.controllers.LoginController'
 ])
 
-.controller('MainController', function ($scope, $http, $rootScope, $compile, BrowserStorageUtility, 
+.controller('MainController', function ($scope, $http, $rootScope, $compile, BrowserStorageUtility, ResourceUtility,
     EvergageUtility, ResourceStringsService, LoginService, SessionService, ConfigService) {
     
     ResourceStringsService.GetResourceStrings().then(function(result) {
@@ -57,12 +58,8 @@ var mainApp = angular.module('mainApp', [
     
     $scope.getLocaleSpecificResourceStrings = function (locale) {
         ResourceStringsService.GetResourceStrings(locale).then(function(result) {
-            $scope.getWidgetConfigDoc();
-        });
-    };
-    
-    $scope.getConfigDoc = function () {
-        ConfigService.GetConfigDocument().then(function(result) {
+            $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
+            $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
             $scope.getWidgetConfigDoc();
         });
     };

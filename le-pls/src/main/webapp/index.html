@@ -14,9 +14,14 @@
 <body data-ng-controller="MainController" class="blue-background">
     <!-- Used for all modals. Be sure to clear HTML before and after using it. -->
     <div aria-hidden="true" role="dialog" tabindex="-1" id="modalContainer" class="modal fade"></div>
-    <div id="mainView">
-        <div id="mainHeaderView"></div>
-        <div data-ng-view class="container"></div>
+    <div class="content-wrap">
+        <div id="mainView">
+            <div id="mainHeaderView"></div>
+            <div data-ng-view class="container"></div>
+        </div>
+    </div>
+    <div class="footer">
+        © {{copyrightString}} <a href="#" data-ng-click="privacyPolicyClick($event)">{{privacyPolicyString}}
     </div>
     
     <!-- 

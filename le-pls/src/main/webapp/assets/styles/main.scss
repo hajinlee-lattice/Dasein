@@ -21,6 +21,10 @@
   color: #BD210F;
 }
 
+#mainView {
+  overflow:auto;
+  padding-bottom: 28px;
+}
 
 .local-error {
   border-radius: 4px;
