@@ -528,7 +528,8 @@ module.exports = function(grunt) {
 
     var instrumentJsText = 'Instrument javascript code for code coverage';
     grunt.registerTask('instrumentJs', instrumentJsText, [
-        'instrument'
+        'instrument',
+        'copy:instrumented'
     ]);
 
 };
