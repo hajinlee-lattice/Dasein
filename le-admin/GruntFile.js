@@ -499,7 +499,6 @@ module.exports = function(grunt) {
 
     var instrumentJsText = 'Instrument javascript code for code coverage';
     grunt.registerTask('instrumentJs', instrumentJsText, [
-        'less:dev',
         'instrument',
         'copy:instrumented'
     ]);
