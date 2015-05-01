@@ -79,7 +79,7 @@ public class DepthFirstSearch extends AbstractTraversalAlgorithm {
         currentPath.pop();
         seenNodes.add(node);
 
-        if (reverse) {
+        if (reverse && cycles.isEmpty()) {
             node.accept(visitor, originalCtx);
         }
     }

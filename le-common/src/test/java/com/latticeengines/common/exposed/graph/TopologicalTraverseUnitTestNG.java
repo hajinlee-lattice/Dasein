@@ -89,6 +89,42 @@ public class TopologicalTraverseUnitTestNG {
         }
     }
 
+    @Test(groups = "unit")
+    public void topTraverseWithCycle() {
+        //========================================
+        // construct a single-connected graph
+        //========================================
+
+        IntegerNode node1 = new IntegerNode(1);
+        IntegerNode node2 = new IntegerNode(2);
+        IntegerNode node3 = new IntegerNode(3);
+        IntegerNode node4 = new IntegerNode(4);
+        IntegerNode node5 = new IntegerNode(5);
+
+        node1.children.add(node2);
+
+        node1.children.add(node3);
+        node3.children.add(node4);
+        node4.children.add(node5);
+        node5.children.add(node1);
+
+        List<IntegerNode> nodes = Arrays.asList(node1, node2, node3, node4, node5);
+
+        //========================================
+        // traverse from root
+        //========================================
+        TopologicalTraverse topTrav = new TopologicalTraverse();
+        IntegerNodeVistor visitor = new IntegerNodeVistor();
+        boolean exception = false;
+        try {
+            topTrav.traverse(nodes, visitor);
+        } catch (IllegalArgumentException e) {
+            exception = true;
+        }
+        Assert.assertTrue(exception);
+        Assert.assertTrue(visitor.trace.size() <= 1);
+    }
+
     private static class IntegerNodeVistor implements Visitor {
         public List<Integer> trace = new ArrayList<>();
 
