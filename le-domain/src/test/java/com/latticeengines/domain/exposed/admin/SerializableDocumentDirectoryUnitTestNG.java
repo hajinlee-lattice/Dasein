@@ -78,14 +78,6 @@ public class SerializableDocumentDirectoryUnitTestNG {
         oNode.put("Field2", 1.23);
 
         testSingleValueNode(oNode.toString(), metadata, expectedJson);
-
-        exception = false;
-        try {
-            testSingleValueNode("string", metadata, expectedJson);
-        } catch (IllegalArgumentException e) {
-            exception = true;
-        }
-        Assert.assertTrue(exception);
     }
 
     private void testSingleValueNode(String value, SerializableDocumentDirectory.Metadata metadata, String expectedJson) throws JsonProcessingException {

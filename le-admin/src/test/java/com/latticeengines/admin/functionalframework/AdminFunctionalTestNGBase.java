@@ -119,8 +119,7 @@ public class AdminFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         space.setSpaceId(CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
 
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
-        Map<String, String> bootstrapProperties = new HashMap<>();
-        bootstrapProperties.put("Configuration", sDir.toString());
+        Map<String, String> bootstrapProperties = sDir.flatten();
 
         String url = String.format("%s/admin/tenants/%s/services/%s?contractId=%s",
                 getRestHostPort(), tenantId, serviceName, contractId);

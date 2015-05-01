@@ -13,7 +13,7 @@ public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
     @Autowired
     private TenantService tenantService;
 
-    @Test(groups = "deployment")
+    @Test(groups = "functional")
     public void testInstallation() {
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
 
@@ -25,10 +25,14 @@ public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
         // wait a while, then test your installation
         // ...
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            //ignore
+        }
 
         SerializableDocumentDirectory resultDir =
                 tenantService.getTenantServiceConfig(contractId, tenantId, TemplateComponent.componentName);
-
 
     }
 

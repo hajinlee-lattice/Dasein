@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
@@ -95,10 +94,9 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
         for (SerializableDocumentDirectory.Node sNode : sDir.getNodes()) {
             if (sNode.getNode().equals("AdminEmails")) {
-                String unescaped = StringEscapeUtils.unescapeJavaScript(sNode.getData());
                 ObjectMapper mapper = new ObjectMapper();
                 try {
-                    JsonNode jNode = mapper.readTree(unescaped);
+                    JsonNode jNode = mapper.readTree(sNode.getData());
                     Assert.assertTrue(jNode.isArray());
                     Assert.assertEquals(jNode.get(0).asText(), testAdminUsername);
                 } catch (IOException e) {

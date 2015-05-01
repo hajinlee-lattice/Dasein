@@ -40,7 +40,8 @@ public class SerializableDocumentDirectory {
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             try {
                 Path nodePath = new Path(entry.getKey());
-                docDir.add(nodePath, new Document(entry.getValue()));
+                docDir.add(nodePath,
+                        new Document(StringEscapeUtils.unescapeJava(entry.getValue())));
             } catch (IllegalArgumentException e) {
                 //ignore
             }
@@ -348,10 +349,9 @@ public class SerializableDocumentDirectory {
                 case "boolean":
                     return isBoolean(data);
                 case "object":
-                    return isObject(data);
+                    return true; //isObject(data);
                 case "array":
-                    String unescaped = StringEscapeUtils.unescapeJava(data);
-                    return isArray(unescaped);
+                    return true; // isArray(data);
                 case "options":
                     return this.getOptions().contains(data);
                 case "email":
@@ -431,9 +431,7 @@ public class SerializableDocumentDirectory {
                 JsonNode dataNode = jNode.get("Data");
                 boolean mustBeString = false;
                 if (dataNode != null) {
-                    if (Metadata.isObject(dataNode.toString())) {
-                        docNode.setData(dataNode.toString());
-                    } else if (Metadata.isArray(dataNode.toString())) {
+                    if (Metadata.isObject(dataNode.toString()) || Metadata.isArray(dataNode.toString())) {
                         docNode.setData(dataNode.toString());
                     }else if (dataNode.toString().startsWith("\"") && dataNode.toString().endsWith("\"")) {
                         docNode.setData(dataNode.toString().substring(1, dataNode.toString().length() - 1));
