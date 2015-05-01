@@ -1,8 +1,8 @@
 package com.latticeengines.common.exposed.graph.traversal.impl;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
@@ -13,7 +13,7 @@ import com.latticeengines.common.exposed.visitor.VisitorContext;
 
 public class BreadthFirstSearch extends AbstractTraversalAlgorithm {
 
-    private final Queue<GraphNode> queue = new LinkedList<GraphNode>();
+    private final Queue<GraphNode> queue = new LinkedList<>();
     private final Set<GraphNode> seenNodes = new HashSet<GraphNode>();
 
     @Override
@@ -32,7 +32,7 @@ public class BreadthFirstSearch extends AbstractTraversalAlgorithm {
             preRun(visitor);
             n.accept(visitor, ctx);
             postRun(visitor);
-            List<? extends GraphNode> children = n.getChildren();
+            Collection<? extends GraphNode> children = n.getChildren();
 
             ctx = new VisitorContext();
             ctx.setProperty("parent", n);
