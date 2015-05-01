@@ -1,5 +1,7 @@
 package com.latticeengines.admin.functionalframework;
 
+import java.util.Collection;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
@@ -10,11 +12,13 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceU
 @Component
 public class TestLatticeComponent extends LatticeComponent {
 
-    private final LatticeComponentInstaller installer = new TestLatticeComponentInstaller();
-    private final CustomerSpaceServiceUpgrader upgrader = new TestLatticeComponentUpgrader();
-    public static final String componentName = "TestComponent";
+    private CustomerSpaceServiceUpgrader upgrader = new TestLatticeComponentUpgrader();
+    public String componentName = "TestComponent";
+    public boolean dryrun = true;
 
     public TestLatticeComponent() { }
+
+    public TestLatticeComponent(boolean dryrun) { this.dryrun = dryrun; }
 
     @Override
     public boolean doRegistration() {
@@ -30,12 +34,18 @@ public class TestLatticeComponent extends LatticeComponent {
     public void setName(String name) { }
 
     @Override
-    public CustomerSpaceServiceInstaller getInstaller() { return installer; }
+    public CustomerSpaceServiceInstaller getInstaller() {
+        LatticeComponentInstaller installer = new TestLatticeComponentInstaller(getName());
+        installer.setDryrun(dryrun);
+        return installer;
+    }
 
     @Override
     public CustomerSpaceServiceUpgrader getUpgrader() { return upgrader; }
 
     @Override
     public String getVersionString() { return "1.0"; }
+
+    public void setDependencies(Collection<? extends LatticeComponent> dependencies) { this.dependencies = dependencies; }
 
 }

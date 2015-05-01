@@ -1,17 +1,12 @@
 package com.latticeengines.admin.service.impl;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-
-import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.entitymgr.ServiceEntityMgr;
 import com.latticeengines.admin.service.ServiceService;
-import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
@@ -25,21 +20,10 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Autowired
-    List<LatticeComponent> components;
-
-    private static Set<String> serviceNames;
-
-    @PostConstruct
-    public void postConstruct() {
-        serviceNames = new HashSet<>();
-        for (LatticeComponent component : components) {
-            component.register();
-            serviceNames.add(component.getName());
-        }
-    }
+    private ComponentOrchestrator orchestrator;
 
     @Override
-    public Set<String> getRegisteredServices() { return serviceNames; }
+    public Set<String> getRegisteredServices() { return orchestrator.getServiceNames(); }
 
     @Override
     public SerializableDocumentDirectory getDefaultServiceConfig(String serviceName) {

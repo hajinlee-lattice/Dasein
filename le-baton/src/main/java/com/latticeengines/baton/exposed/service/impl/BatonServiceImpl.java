@@ -231,8 +231,14 @@ public class BatonServiceImpl implements BatonService {
 
     @Override
     public BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String serviceName) {
-        CustomerSpace customerSpace = new CustomerSpace(contractId, tenantId,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        return getTenantServiceBootstrapState(contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, serviceName);
+    }
+
+    @Override
+    public BootstrapState getTenantServiceBootstrapState(
+            String contractId, String tenantId, String spaceId, String serviceName) {
+        CustomerSpace customerSpace = new CustomerSpace(contractId, tenantId,spaceId);
         try {
             return CustomerSpaceServiceBootstrapManager.getBootstrapState(serviceName, customerSpace);
         } catch (Exception e) {

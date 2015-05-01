@@ -7,8 +7,12 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
 public class TestLatticeComponentInstaller extends LatticeComponentInstaller {
 
-    public TestLatticeComponentInstaller() { super(TestLatticeComponent.componentName); }
+    public TestLatticeComponentInstaller() { super("TestComponent"); }
+
+    public TestLatticeComponentInstaller(String componentName) { super(componentName); }
 
     @Override
-    public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory autoGenDocDir) {}
+    public void installCore(CustomerSpace space, String serviceName, int dataVersion, DocumentDirectory autoGenDocDir) {
+        throw new RuntimeException("This installation is meant to be failed.");
+    }
 }

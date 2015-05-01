@@ -1,14 +1,14 @@
 package com.latticeengines.admin.tenant.batonadapter;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.reflections.Reflections;
 
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
@@ -16,6 +16,9 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.visitor.Visitor;
+import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -25,8 +28,10 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ServiceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 
-public abstract class LatticeComponent implements HasName {
+public abstract class LatticeComponent implements HasName, GraphNode {
     private static Log log = LogFactory.getLog(LatticeComponent.class);
+
+    protected Collection<? extends LatticeComponent> dependencies = new HashSet<>();
 
     protected static BatonService batonService = new BatonServiceImpl();
 
@@ -51,28 +56,6 @@ public abstract class LatticeComponent implements HasName {
             return true;
         }
         return false;
-    }
-
-    public static Map<String, LatticeComponent> getRegisteredServiceComponents() {
-        return scanLatticeComponents();
-    }
-
-    private static Map<String, LatticeComponent> scanLatticeComponents() {
-        Map<String, LatticeComponent> componentMap = new HashMap<>();
-        Reflections reflections = new Reflections("com.latticeengines.admin");
-        Set<Class<? extends LatticeComponent>> latticeComponentClasses = reflections
-                .getSubTypesOf(LatticeComponent.class);
-
-        for (Class<? extends LatticeComponent> c : latticeComponentClasses) {
-            try {
-                LatticeComponent instance = c.newInstance();
-                componentMap.put(instance.getName(), instance);
-            } catch (InstantiationException | IllegalAccessException e) {
-                log.error(String.format("Error instantating LatticeComponent instance %s.", c));
-            }
-        }
-
-        return componentMap;
     }
 
     protected boolean uploadDefaultConfigAndSchemaByJson(String defaultJson, String metadataJson) {
@@ -145,4 +128,11 @@ public abstract class LatticeComponent implements HasName {
             throw new AssertionError("Could not deserialize the input json to a directory.", e);
         }
     }
+
+    @Override
+    public List<? extends LatticeComponent> getChildren(){ return new ArrayList<>(dependencies); }
+
+    @Override
+    public void accept(Visitor visitor, VisitorContext ctx) { visitor.visit(this, ctx); }
+
 }

@@ -38,6 +38,8 @@ public interface BatonService {
 
     BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String serviceName);
 
+    BootstrapState getTenantServiceBootstrapState(String contractId, String tenantId, String spaceId, String serviceName);
+
     DocumentDirectory getDefaultConfiguration(String serviceName);
 
     DocumentDirectory getConfigurationSchema(String serviceName);
