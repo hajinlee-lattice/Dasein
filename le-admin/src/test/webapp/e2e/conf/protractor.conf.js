@@ -15,11 +15,13 @@ exports.config = {
     jasmineNodeOpts: {
         showColors: true,
         defaultTimeoutInterval: 120000
-    },    
+    },
 
     onPrepare: function() {
-    	require('jasmine-reporters');
-	    jasmine.getEnv().addReporter(
-	        new jasmine.JUnitXmlReporter('target/protractor-test-results', true, true, 'protractor-test-results', true));
+        var jasmineReporters = require('jasmine-reporters');
+        var junitReporter = new jasmineReporters.JUnitXmlReporter(
+            'target/protractor-test-results', true, true, 'protractor-test-results', true
+        );
+        jasmine.getEnv().addReporter(junitReporter);
     }
 };

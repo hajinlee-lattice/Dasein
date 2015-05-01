@@ -1,3 +1,5 @@
+'use strict';
+
 describe('smoketest main flow of app', function() {
 
     var login = require('./po/login.po');

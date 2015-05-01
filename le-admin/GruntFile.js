@@ -27,15 +27,15 @@ module.exports = function(grunt) {
         },
         env:  {
             dev:         {
-                url:            'http://localhost:8080',
+                url:            'http://localhost:8081',
                 protractorConf: testDir + '/e2e/conf/protractor.conf.dev.js'
             },
             integration: {
-                url:            'http://bodcdevhdpweb52.dev.lattice.local:8080',
+                url:            'http://bodcdevhdpweb52.dev.lattice.local',
                 protractorConf: testDir + '/e2e/conf/protractor.conf.js'
             },
             qa:          {
-                url:            'http://bodcdevhdpweb53.dev.lattice.local:8080',
+                url:            'http://bodcdevhdpweb53.dev.lattice.local',
                 protractorConf: testDir + '/e2e/conf/protractor.conf.js'
             },
             prod:        {
@@ -268,6 +268,15 @@ module.exports = function(grunt) {
                 cwd: '<%= app.dist %>/<%= app.dir %>',
                 src: '**/*',
                 dest: '<%= app.dir %>'
+            },
+
+            instrumented: {
+                files: [{
+                    expand: true,
+                    cwd: 'target/protractor_coverage/instrumented/src/main/webapp/',
+                    src: ['**/*'],
+                    dest: 'src/main/webapp/'
+                }]
             }
         },
 
@@ -409,6 +418,41 @@ module.exports = function(grunt) {
             }
         },
 
+        // E2E UI Automation with code coverage
+        protractor_coverage: {
+            options: {
+                keepAlive: false,
+                noColor: false,
+                coverageDir: 'target/protractor_coverage',
+                configFile: '<%= testenv.protractorConf %>'
+            },
+            chrome:           {
+                options: {
+                    args: {
+                        browser: 'chrome',
+                        baseUrl: '<%= testenv.url %>'
+                    }
+                }
+            }
+        },
+
+        instrument: {
+            files: 'src/main/webapp/**/*.js',
+            options: {
+                lazy: true,
+                basePath: "target/protractor_coverage/instrumented"
+            }
+        },
+
+        makeReport: {
+            src: 'target/protractor_coverage/*.json',
+            options: {
+                type: 'cobertura',
+                dir: 'target/protractor_coverage/reports',
+                print: 'detail'
+            }
+        },
+
         concurrent: {
             wget: ['wget:js', 'wget:css', 'wget:fonts', 'wget:kendojs', 'wget:kendocss', 'wget:kendofonts', 'wget:kendoimages'],
             test: ['jshint', 'karma:unit']
@@ -428,6 +472,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-karma');
     grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-protractor-runner');
+    grunt.loadNpmTasks('grunt-protractor-coverage');
+    grunt.loadNpmTasks('grunt-istanbul');
 
     // main task to run before deploy the dist war
     grunt.registerTask('dist', [
@@ -458,7 +504,7 @@ module.exports = function(grunt) {
     grunt.registerTask('restore', ['copy:restorewww','copy:restore', 'clean:restore', 'less:dev']);
 
     var e2eChromeText = 'Runs selenium end to end (protractor) unit tests on Chrome';
-    grunt.registerTask('e2eChrome', e2eChromeText, ['protractor:chrome']);
+    grunt.registerTask('e2eChrome', e2eChromeText, ['protractor:chrome', 'makeReport']);
 
     var e2eFirefoxText = 'Runs selenium end to end (protractor) unit tests on Firefox';
     grunt.registerTask('e2eFirefox', e2eFirefoxText, ['protractor:firefox']);
@@ -474,5 +520,15 @@ module.exports = function(grunt) {
 
     var e2eWinText = 'Runs selenium end to end (protractor) Windows tests';
     grunt.registerTask('e2eWin', e2eWinText, ['concurrent:windows']);
+
+    var e2eChromeCcText = 'Runs selenium end to end (protractor) unit tests on Chrome with code coverage';
+    grunt.registerTask('e2eChromeCc', e2eChromeCcText, [
+        'protractor_coverage:chrome'
+    ]);
+
+    var instrumentJsText = 'Instrument javascript code for code coverage';
+    grunt.registerTask('instrumentJs', instrumentJsText, [
+        'instrument'
+    ]);
 
 };
