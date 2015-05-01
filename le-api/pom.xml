@@ -12,7 +12,6 @@
         <component-name>le-api</component-name>
         <le.dataplatform.version>1.0.32-SNAPSHOT</le.dataplatform.version>
         <le.domain.version>1.0.32-SNAPSHOT</le.domain.version>
-        <le.propdata.version>1.0.32-SNAPSHOT</le.propdata.version>
         <sqoop.version>1.4.5.2.2.0.0-2041</sqoop.version>
         <hadoop.version>2.6.0.2.2.0.0-2041</hadoop.version>
     </properties>
