@@ -15,22 +15,25 @@ import com.latticeengines.common.exposed.visitor.VisitorContext;
 
 public class DepthFirstSearch extends AbstractTraversalAlgorithm {
 
-    private Stack<GraphNode> seenNodes;
+    private Set<GraphNode> seenNodes;
+    private Stack<GraphNode> currentPath;
     private final Set<Cycle> cycles;
 
     public DepthFirstSearch () {
         super();
-        seenNodes = new Stack<>();
+        seenNodes = new HashSet<>();
+        currentPath = new Stack<>();
         cycles = new HashSet<>();
     }
 
     public void run(GraphNode node, Visitor visitor, boolean reverse) {
+        currentPath = new Stack<>();
         if (reverse) {
             VisitorContext ctx = new VisitorContext();
             ctx.setProperty("parent", null);
             stack.push(ctx);
             preRun(visitor);
-            runSearch(node, visitor, reverse);
+            runSearch(node, visitor, true);
             postRun(visitor);
         } else {
             run(node, visitor);
@@ -55,15 +58,15 @@ public class DepthFirstSearch extends AbstractTraversalAlgorithm {
         ctx.setProperty("parent", node);
 
         stack.push(ctx);
-        seenNodes.push(node);
+        currentPath.push(node);
         for (GraphNode child : children) {
-            if (!seenNodes.contains(child)) {
+            if (!currentPath.contains(child) && !seenNodes.contains(child)) {
                 runSearch(child, visitor, reverse);
             }
-            else {
+            else if (currentPath.contains(child)) {
                 List<GraphNode> cycle = new ArrayList<>();
-                for (int i = seenNodes.size() - 1; i >= 0; i--) {
-                    GraphNode el = seenNodes.get(i);
+                for (int i = currentPath.size() - 1; i >= 0; i--) {
+                    GraphNode el = currentPath.get(i);
                     cycle.add(el);
                     if (el.equals(child)) {
                         break;
@@ -73,7 +76,8 @@ public class DepthFirstSearch extends AbstractTraversalAlgorithm {
             }
         }
         stack.pop();
-        seenNodes.pop();
+        currentPath.pop();
+        seenNodes.add(node);
 
         if (reverse) {
             node.accept(visitor, originalCtx);
@@ -90,8 +94,8 @@ public class DepthFirstSearch extends AbstractTraversalAlgorithm {
 
     public Set<Cycle> getCycles() { return cycles; }
 
-    protected Stack<GraphNode> getSeenNodes() { return seenNodes; }
+    protected Set<GraphNode> getSeenNodes() { return seenNodes; }
 
-    protected void setSeenNodes(Stack<GraphNode> seenNodes) { this.seenNodes = seenNodes; }
+    protected void setSeenNodes(Set<GraphNode> seenNodes) { this.seenNodes = seenNodes; }
 
 }

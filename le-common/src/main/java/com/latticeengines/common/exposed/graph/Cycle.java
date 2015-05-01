@@ -1,18 +1,16 @@
 package com.latticeengines.common.exposed.graph;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 public class Cycle {
 
-    private final List<GraphNode> graphNodes = new ArrayList<GraphNode>();
+    private final List<GraphNode> graphNodes;
 
     public Cycle (List<GraphNode> graphNodes) {
-        graphNodes.addAll(graphNodes);
+        this.graphNodes = graphNodes;
     }
 
     @Override
@@ -27,13 +25,20 @@ public class Cycle {
             return false;
         }
 
-        EqualsBuilder eb = new EqualsBuilder();
         Cycle castOther = (Cycle) other;
 
+        if (this.getNodes().size() != castOther.getNodes().size()) return false;
+
+        int size = this.getNodes().size();
+        int commonHead = castOther.getNodes().indexOf(this.getNodes().get(0));
+        if (commonHead == -1) return false;
+
         for (int i = 0; i < graphNodes.size(); i++) {
-            eb.append(graphNodes.get(i), castOther.graphNodes.get(i));
+            GraphNode thisNode = graphNodes.get(i);
+            GraphNode thatNode = castOther.getNodes().get((i + commonHead) % size);
+            if (!thisNode.equals(thatNode)) return false;
         }
-        return eb.isEquals();
+        return true;
     }
 
     @Override

@@ -65,6 +65,9 @@ public class TopologicalTraverseUnitTestNG {
         visitor = new IntegerNodeVistor();
         topTrav.traverse(nodes, visitor);
 
+        System.out.println(visitor.trace);
+
+        Assert.assertEquals(visitor.trace.size(), nodes.size());
         Assert.assertTrue(visitor.trace.contains(1));
         Assert.assertTrue(visitor.trace.contains(2));
         Assert.assertTrue(visitor.trace.contains(3));

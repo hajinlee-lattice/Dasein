@@ -13,6 +13,9 @@ public class TopologicalTraverse extends DepthFirstSearch {
         for (GraphNode node : nodes) {
             TopologicalVisitor topVisitor = new TopologicalVisitor(visitor);
             run(node, topVisitor, true);
+            if (!getCycles().isEmpty()) {
+                throw new IllegalArgumentException("Can not topologically traverse a cyclic graph.");
+            }
             getSeenNodes().addAll(topVisitor.topologicalTrace);
         }
     }
