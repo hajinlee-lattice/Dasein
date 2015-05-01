@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
@@ -35,8 +36,11 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         String testAdminUsername = "pls-installer-tester@lattice-engines.com";
         String testAdminPassword = "admin";
 
-        deletePLSAdminUser(tenantId, testAdminUsername);
-        deletePLSTestTenant(tenantId);
+        String PLSTenantId = String.format("%s.%s.%s",
+                contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+
+        deletePLSAdminUser(PLSTenantId, testAdminUsername);
+        deletePLSTestTenant(PLSTenantId);
 
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
         confDir.makePathsLocal();
@@ -59,10 +63,10 @@ public class PLSComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
         Assert.assertEquals(state, BootstrapState.State.OK);
 
-        Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, tenantId));
+        Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, PLSTenantId));
 
-        deletePLSAdminUser(tenantId, testAdminUsername);
-        deletePLSTestTenant(tenantId);
+        deletePLSAdminUser(PLSTenantId, testAdminUsername);
+        deletePLSTestTenant(PLSTenantId);
     }
 
     @Test(groups = "functional")
