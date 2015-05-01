@@ -4,6 +4,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.core.services.ResourceStringsService',
+    'mainApp.core.services.HelpService',
     'mainApp.login.services.LoginService',
     'mainApp.core.services.SessionService',
     'mainApp.config.services.ConfigService',
@@ -13,7 +14,7 @@ var mainApp = angular.module('mainApp', [
 ])
 
 .controller('MainController', function ($scope, $http, $rootScope, $compile, BrowserStorageUtility, ResourceUtility,
-    EvergageUtility, ResourceStringsService, LoginService, SessionService, ConfigService) {
+    EvergageUtility, ResourceStringsService, HelpService, LoginService, SessionService, ConfigService) {
     
     ResourceStringsService.GetResourceStrings().then(function(result) {
         
@@ -62,6 +63,13 @@ var mainApp = angular.module('mainApp', [
             $scope.privacyPolicyString = ResourceUtility.getString('HEADER_PRIVACY_POLICY');
             $scope.getWidgetConfigDoc();
         });
+    };
+    
+    $scope.privacyPolicyClick = function ($event) {
+        if ($event != null) {
+            $event.preventDefault();
+        }
+        HelpService.OpenPrivacyPolicy();
     };
     
     $scope.getWidgetConfigDoc = function () {

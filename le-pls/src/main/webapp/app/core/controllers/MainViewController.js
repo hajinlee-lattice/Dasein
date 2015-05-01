@@ -3,7 +3,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.appCommon.utilities.MetadataUtility',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.utilities.NavUtility',
-    'mainApp.core.services.HelpService',
     'mainApp.config.services.ConfigService',
     'mainApp.core.controllers.MainHeaderController',
     'mainApp.config.controllers.ManageCredentialsController',
@@ -16,8 +15,7 @@ angular.module('mainApp.core.controllers.MainViewController', [
     'mainApp.models.controllers.MultipleModelSetupController'
 ])
 
-.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, NavUtility, HelpService, ConfigService) {
-    $scope.copyrightString = ResourceUtility.getString('FOOTER_COPYRIGHT', [(new Date()).getFullYear()]);
+.controller('MainViewController', function ($scope, $http, $rootScope, $compile, ResourceUtility, BrowserStorageUtility, NavUtility, ConfigService) {
     $scope.ResourceUtility = ResourceUtility;
     var directToPassword = $scope.directToPassword;
     if (directToPassword) {
@@ -31,13 +29,6 @@ angular.module('mainApp.core.controllers.MainViewController', [
         var scope = $rootScope.$new();
         $compile($("#mainHeaderView").html(html))(scope);
     });
-    
-    $scope.privacyPolicyClick = function ($event) {
-        if ($event != null) {
-            $event.preventDefault();
-        }
-        HelpService.OpenPrivacyPolicy();
-    };
     
     // Handle when the Manage Credentials link is clicked
     $scope.$on(NavUtility.MANAGE_CREDENTIALS_NAV_EVENT, function (event, data) {
