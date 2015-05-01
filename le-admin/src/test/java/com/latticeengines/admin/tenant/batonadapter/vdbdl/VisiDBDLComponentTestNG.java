@@ -1,11 +1,12 @@
-package com.latticeengines.admin.tenant.batonadapter.dataloader;
+package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
+import com.latticeengines.admin.tenant.batonadapter.vdbdl.VisiDBDLComponent;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
-public class DataLoaderComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
+public class VisiDBDLComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
 
     @Test(groups = "deployment")
     public void testInstallation() {
@@ -19,11 +20,12 @@ public class DataLoaderComponentTestNG extends BatonAdapterBaseDeploymentTestNG 
 
         // wait a while, then test your installation
         // ...
+
     }
 
     @Override
-    protected String getServiceName() { return DataLoaderComponent.componentName; }
+    protected String getServiceName() { return VisiDBDLComponent.componentName; }
 
     @Override
-    public String getExpectedJsonFile() { return "dl_expected.json"; }
+    public String getExpectedJsonFile() { return "vdbdl_expected.json"; }
 }

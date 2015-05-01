@@ -1,4 +1,4 @@
-package com.latticeengines.admin.tenant.batonadapter.template;
+package com.latticeengines.admin.tenant.batonadapter.template.visidb;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -9,11 +9,11 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceI
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
 @Component
-public class TemplateComponent extends LatticeComponent {
+public class VisiDBTemplateComponent extends LatticeComponent {
     
-    private LatticeComponentInstaller installer = new TemplateInstaller();
-    private CustomerSpaceServiceUpgrader upgrader = new TemplateUpgrader();
-    public static final String componentName = "Template";
+    private LatticeComponentInstaller installer = new VisiDBTemplateInstaller();
+    private CustomerSpaceServiceUpgrader upgrader = new VisiDBTemplateUpgrader();
+    public static final String componentName = "VisiDBTemplate";
 
     @Value("${admin.tpl.dryrun}")
     private boolean dryrun;
@@ -47,8 +47,8 @@ public class TemplateComponent extends LatticeComponent {
     
     @Override
     public boolean doRegistration() {
-        String defaultJson = "tpl_default.json";
-        String metadataJson = "tpl_metadata.json";
+        String defaultJson = "visidb_tpl_default.json";
+        String metadataJson = "visidb_tpl_metadata.json";
         return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
     }
 

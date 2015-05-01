@@ -18,9 +18,9 @@ public class TemplateConfigTestNG extends ConfigurationSchemaTestNGBase {
     protected void setUp() throws Exception {
         super.setUp();
         this.component = new TestLatticeComponent();
-        this.defaultJson = "tpl_default.json";
-        this.metadataJson = "tpl_metadata.json";  // optional
-        this.expectedJson = "tpl_expected.json";
+        this.defaultJson = "dl_tpl_default.json";
+        this.metadataJson = "dl_tpl_metadata.json";  // optional
+        this.expectedJson = "dl_tpl_expected.json";
         setupPaths();
         uploadDirectory();
     }

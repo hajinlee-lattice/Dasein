@@ -1,0 +1,47 @@
+{
+  "RootPath": "/",
+  "Nodes": [
+    {
+      "Node": "ContractExternalID",
+      "Data": "ContractExternalID"
+    },
+    {
+      "Node": "DL",
+      "Children": [
+        {
+          "Node": "OwnerEmail",
+          "Data": "richard.liu@lattice-engines.com"
+        }
+      ]
+    },
+    {
+      "Node": "DMDeployment",
+      "Data": "DMDeployment"
+    },
+    {
+      "Node": "Tenant",
+      "Data": "test_tenant"
+    },
+    {
+      "Node": "TenantAlias",
+      "Data": "ht"
+    },
+    {
+      "Node": "VisiDB",
+      "Children": [
+        {
+          "Node": "CreateNewVisiDB",
+          "Data": "true"
+        },
+        {
+          "Node": "ServerName",
+          "Data": "bodcdevvint187.dev.lattice.local"
+        },
+        {
+          "Node": "VisiDBName",
+          "Data": "test_tenant"
+        }
+      ]
+    }
+  ]
+}

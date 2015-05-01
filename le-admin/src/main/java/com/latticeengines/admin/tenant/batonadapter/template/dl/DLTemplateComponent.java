@@ -1,4 +1,4 @@
-package com.latticeengines.admin.tenant.batonadapter.vdb;
+package com.latticeengines.admin.tenant.batonadapter.template.dl;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -9,24 +9,19 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceI
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
 @Component
-public class VisiDBComponent extends LatticeComponent {
+public class DLTemplateComponent extends LatticeComponent {
     
-    private LatticeComponentInstaller installer = new VisiDBInstaller();
-    private CustomerSpaceServiceUpgrader upgrader = new VisiDBUpgrader();
-    public static final String componentName = "VisiDB";
+    private LatticeComponentInstaller installer = new DLTemplateInstaller();
+    private CustomerSpaceServiceUpgrader upgrader = new DLTemplateUpgrader();
+    public static final String componentName = "DLTemplate";
 
-    @Value("${admin.vdb.dryrun}")
+    @Value("${admin.tpl.dryrun}")
     private boolean dryrun;
 
     @Override
-    public boolean doRegistration() {
-        String defaultJson = "vdb_default.json";
-        String metadataJson = "vdb_metadata.json";
-        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+    public String getName() {
+        return componentName;
     }
-
-    @Override
-    public String getName() { return componentName; }
 
     @Override
     public void setName(String name) {
@@ -49,4 +44,13 @@ public class VisiDBComponent extends LatticeComponent {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    public boolean doRegistration() {
+        String defaultJson = "dl_tpl_default.json";
+        String metadataJson = "dl_tpl_metadata.json";
+        return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
+    }
+
+
 }

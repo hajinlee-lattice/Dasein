@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterBaseDeploymentTestNG;
+import com.latticeengines.admin.tenant.batonadapter.template.dl.DLTemplateComponent;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
@@ -14,7 +15,7 @@ public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
     private TenantService tenantService;
 
     @Test(groups = "functional")
-    public void testInstallation() {
+    public void testDLInstallation() {
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
 
         // modify the default config
@@ -32,12 +33,12 @@ public class TemplateComponentTestNG extends BatonAdapterBaseDeploymentTestNG {
         }
 
         SerializableDocumentDirectory resultDir =
-                tenantService.getTenantServiceConfig(contractId, tenantId, TemplateComponent.componentName);
+                tenantService.getTenantServiceConfig(contractId, tenantId, DLTemplateComponent.componentName);
 
     }
 
     @Override
-    protected String getServiceName() { return TemplateComponent.componentName; }
+    protected String getServiceName() { return DLTemplateComponent.componentName; }
 
     @Override
     public String getExpectedJsonFile() { return "tpl_expected.json"; }

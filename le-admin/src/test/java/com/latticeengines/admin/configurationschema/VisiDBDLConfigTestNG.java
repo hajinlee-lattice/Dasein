@@ -5,22 +5,19 @@ import java.io.IOException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 
-public class VisiDBConfigTestNG extends ConfigurationSchemaTestNGBase {
+public class VisiDBDLConfigTestNG extends ConfigurationSchemaTestNGBase {
 
     @Override
     @BeforeMethod(groups = {"unit", "functional"})
     protected void setUp() throws Exception {
         super.setUp();
         this.component = new TestLatticeComponent();
-        this.defaultJson = "vdb_default.json";
-        this.metadataJson = "vdb_metadata.json";  // optional
-        this.expectedJson = "vdb_expected.json";
+        this.defaultJson = "vdbdl_default.json";
+        this.metadataJson = "vdbdl_metadata.json";  // optional
+        this.expectedJson = "vdbdl_expected.json";
         setupPaths();
         uploadDirectory();
     }
@@ -41,24 +38,19 @@ public class VisiDBConfigTestNG extends ConfigurationSchemaTestNGBase {
      * this test demonstrate how to get configuration using DocumentDirectory
      */
     @Test(groups = "unit")
-    public void testConfig4() throws IOException {
+    public void getDefaultConfiguration() throws IOException {
         DocumentDirectory dir = batonService.getDefaultConfiguration(this.component.getName());
 
-        String config4 = dir.get("/Config4").getDocument().getData();
-        Assert.assertTrue(Boolean.valueOf(config4));
+        String tenant = dir.get("/DMDeployment").getDocument().getData();
+        Assert.assertEquals(tenant, "DMDeployment");
 
-        String config2 = dir.get("/Config2").getDocument().getData();
-        Properties properties = new ObjectMapper().readValue(config2, Properties.class);
-        Assert.assertEquals(properties.property1, "value1");
-        Assert.assertEquals(properties.property2, "value2");
-    }
+        String visiDBName = dir.get("/VisiDB").getChild("VisiDBName").getDocument().getData();
+        Assert.assertEquals(visiDBName, "test_tenant");
+        String createNewVisiDB = dir.get("/VisiDB").getChild("CreateNewVisiDB").getDocument().getData();
+        Assert.assertEquals(Boolean.parseBoolean(createNewVisiDB), true);
 
-    private static class Properties {
-        @JsonProperty("property1")
-        public String property1;
-
-        @JsonProperty("property2")
-        public String property2;
+        String ownerEmail = dir.get("/DL").getChild("OwnerEmail").getDocument().getData();
+        Assert.assertEquals(ownerEmail, "richard.liu@lattice-engines.com");
     }
 
 }

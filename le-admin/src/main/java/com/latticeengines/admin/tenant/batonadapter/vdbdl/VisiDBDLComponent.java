@@ -1,4 +1,4 @@
-package com.latticeengines.admin.tenant.batonadapter.dataloader;
+package com.latticeengines.admin.tenant.batonadapter.vdbdl;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -9,26 +9,27 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceI
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 
 @Component
-public class DataLoaderComponent extends LatticeComponent {
-    
-    private LatticeComponentInstaller installer = new DataLoaderInstaller();
-    private CustomerSpaceServiceUpgrader upgrader = new DataLoaderUpgrader();
-    public static final String componentName = "DataLoader";
+public class VisiDBDLComponent extends LatticeComponent {
 
-    @Value("${admin.dataloader.dryrun}")
+    private LatticeComponentInstaller installer = new VisiDBDLInstaller();
+    private CustomerSpaceServiceUpgrader upgrader = new VisiDBDLUpgrader();
+    public static final String componentName = "VisiDB";
+
+    @Value("${admin.vdb.dryrun}")
     private boolean dryrun;
+
+    @Value("${admin.dl.url}")
+    private String dlUrl;
 
     @Override
     public boolean doRegistration() {
-        String defaultJson = "dl_default.json";
-        String metadataJson = "dl_metadata.json";
+        String defaultJson = "vdbdl_default.json";
+        String metadataJson = "vdbdl_metadata.json";
         return uploadDefaultConfigAndSchemaByJson(defaultJson, metadataJson);
     }
-    
+
     @Override
-    public String getName() {
-        return componentName;
-    }
+    public String getName() { return componentName; }
 
     @Override
     public void setName(String name) {
@@ -38,6 +39,7 @@ public class DataLoaderComponent extends LatticeComponent {
     @Override
     public CustomerSpaceServiceInstaller getInstaller() {
         installer.setDryrun(dryrun);
+        ((VisiDBDLInstaller)installer).setDLUrl(dlUrl);
         return installer;
     }
 
@@ -48,8 +50,6 @@ public class DataLoaderComponent extends LatticeComponent {
 
     @Override
     public String getVersionString() {
-        // TODO Auto-generated method stub
-        return null;
+        return "2.7";
     }
-
 }
