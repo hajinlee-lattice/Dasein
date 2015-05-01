@@ -13,7 +13,7 @@ public class VisiDBDLComponent extends LatticeComponent {
 
     private LatticeComponentInstaller installer = new VisiDBDLInstaller();
     private CustomerSpaceServiceUpgrader upgrader = new VisiDBDLUpgrader();
-    public static final String componentName = "VisiDB";
+    public static final String componentName = "VisiDBDL";
 
     @Value("${admin.vdb.dryrun}")
     private boolean dryrun;
