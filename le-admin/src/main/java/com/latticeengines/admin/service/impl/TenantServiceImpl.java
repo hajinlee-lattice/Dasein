@@ -1,9 +1,12 @@
 package com.latticeengines.admin.service.impl;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,11 +37,16 @@ public class TenantServiceImpl implements TenantService {
     @Autowired
     private ServiceService serviceService;
 
+    @Autowired
+    private ComponentOrchestrator orchestrator;
+
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
+
     public TenantServiceImpl() {
     }
 
     @Override
-    public boolean createTenant(String contractId, String tenantId, TenantRegistration tenantRegistration) {
+    public boolean createTenant(final String contractId, final String tenantId, TenantRegistration tenantRegistration) {
         ContractInfo contractInfo = tenantRegistration.getContractInfo();
         TenantInfo tenantInfo = tenantRegistration.getTenantInfo();
         CustomerSpaceInfo spaceInfo = tenantRegistration.getSpaceInfo();
@@ -50,19 +58,25 @@ public class TenantServiceImpl implements TenantService {
             tenantEntityMgr.deleteTenant(contractId, tenantId);
             return false;
         }
+        final Map<String, Map<String, String>> orchestrationMap = new HashMap<>();
         List<SerializableDocumentDirectory> configSDirs = tenantRegistration.getConfigDirectories();
-        if (configSDirs == null) { return true; }
-        boolean serviceBootstrapSuccess = true;
+
+        if (configSDirs == null) return true;
+
         for (SerializableDocumentDirectory configSDir: configSDirs) {
             String serviceName = configSDir.getRootPath().substring(1);
             Map<String, String> flatDir = configSDir.flatten();
-            serviceBootstrapSuccess = serviceBootstrapSuccess
-                    && bootstrap(contractId, tenantId, serviceName, flatDir);
+            orchestrationMap.put(serviceName, flatDir);
         }
-        if (!serviceBootstrapSuccess) {
-            tenantEntityMgr.deleteTenant(contractId, tenantId);
-            return false;
-        }
+
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                orchestrator.orchestrate(
+                        contractId,tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, orchestrationMap);
+            }
+        });
+
         return true;
     }
 
