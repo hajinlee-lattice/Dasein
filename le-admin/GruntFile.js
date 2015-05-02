@@ -28,11 +28,11 @@ module.exports = function(grunt) {
         env:  {
             dev:         {
                 url:            'http://localhost:8081',
-                protractorConf: testDir + '/e2e/conf/protractor.conf.dev.js',
-                protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.dev.js'
+                protractorConf: testDir + '/e2e/conf/protractor.conf.js',
+                protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.js'
             },
             integration: {
-                url:            'http://bodcdevhdpweb52.dev.lattice.local',
+                url:            'http://bodcdevhdpweb52.dev.lattice.local:8080/le-admin',
                 protractorConf: testDir + '/e2e/conf/protractor.conf.js',
                 protractorCcConf: testDir + '/e2e/conf/protractorCc.conf.js'
             },
@@ -227,8 +227,7 @@ module.exports = function(grunt) {
             restore: [
                 '<%= app.dir %>/assets/js',
                 '<%= app.dir %>/assets/css/main_*.min.css',
-                '<%= app.dist %>',
-                '<%= app.www %>'
+                '<%= app.dist %>'
             ]
         },
 
@@ -515,7 +514,7 @@ module.exports = function(grunt) {
     grunt.registerTask('restore', ['copy:restorewww','copy:restore', 'clean:restore', 'less:dev']);
 
     var e2eChromeText = 'Runs selenium end to end (protractor) unit tests on Chrome';
-    grunt.registerTask('e2eChrome', e2eChromeText, ['protractor:chrome', 'makeReport']);
+    grunt.registerTask('e2eChrome', e2eChromeText, ['protractor:chrome']);
 
     var e2eFirefoxText = 'Runs selenium end to end (protractor) unit tests on Firefox';
     grunt.registerTask('e2eFirefox', e2eFirefoxText, ['protractor:firefox']);
@@ -534,7 +533,8 @@ module.exports = function(grunt) {
 
     var e2eChromeCcText = 'Runs selenium end to end (protractor) unit tests on Chrome with code coverage';
     grunt.registerTask('e2eChromeCc', e2eChromeCcText, [
-        'protractor_coverage:chrome'
+        'protractor_coverage:chrome',
+        'makeReport'
     ]);
 
 };
