@@ -26,8 +26,9 @@ var Config = function() {
             onPrepare: function() {
                 var jasmineReporters = require('jasmine-reporters');
                 var junitReporter = new jasmineReporters.JUnitXmlReporter({
-                    savePath: 'target/protractor-test-results',
-                    consolidateAll: false
+                    consolidateAll: true,
+                    filePrefix: 'protractor',
+                    savePath: 'target/protractor-test-results'
                 });
                 jasmine.getEnv().addReporter(junitReporter);
             }
