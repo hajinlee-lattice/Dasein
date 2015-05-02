@@ -56,7 +56,7 @@ public class AdminResource extends InternalResourceBase {
         return tenantService.getAllTenants();
     }
 
-    @RequestMapping(value = "/tenants/{tenantId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @RequestMapping(value = "/tenants/{tenantId:.+}", method = RequestMethod.DELETE, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Delete a tenant.")
     public Boolean deleteTenant(@PathVariable String tenantId, HttpServletRequest request) {
