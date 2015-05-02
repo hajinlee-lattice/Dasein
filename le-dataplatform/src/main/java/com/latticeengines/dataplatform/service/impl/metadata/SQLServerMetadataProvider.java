@@ -3,6 +3,7 @@ package com.latticeengines.dataplatform.service.impl.metadata;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.cloudera.sqoop.SqoopOptions;
@@ -24,6 +25,11 @@ public class SQLServerMetadataProvider extends MetadataProvider {
 
     public String getConnectionString(DbCreds creds) {
         String url = "jdbc:sqlserver://$$HOST$$:$$PORT$$;databaseName=$$DB$$;user=$$USER$$;password=$$PASSWD$$";
+    
+        if (!StringUtils.isEmpty(creds.getInstance())) {
+            url += ";instanceName=$$INSTANCE$$";
+        }
+        
         String driverClass = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
         try {
             Class.forName(driverClass);
