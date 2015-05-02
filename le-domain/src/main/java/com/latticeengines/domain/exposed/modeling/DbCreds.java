@@ -10,6 +10,7 @@ public class DbCreds {
     private int port;
     private String db;
     private String dbType;
+    private String instance;
     
     public DbCreds() {
     }
@@ -20,7 +21,8 @@ public class DbCreds {
         this.host = builder.host;
         this.port = builder.port;
         this.db = builder.db;
-        this.setDBType(builder.dbType);
+        this.dbType = builder.dbType;
+        this.instance = builder.instance;
     }
 
     public String getUser() {
@@ -72,6 +74,15 @@ public class DbCreds {
         this.dbType = dbType;
     }
 
+    @JsonProperty(value = "instance", required = false)
+    public String getInstance() {
+        return instance;
+    }
+
+    public void setInstance(String instance) {
+        this.instance = instance;
+    }
+
     public static class Builder {
 
         private String user;
@@ -80,6 +91,7 @@ public class DbCreds {
         private int port;
         private String db;
         private String dbType = "SQLServer";
+        private String instance;
 
         public Builder() {
         }
@@ -113,6 +125,12 @@ public class DbCreds {
             this.dbType = dbType;
             return this;
         }
-}
+        
+        public Builder instance(String instance) {
+            this.instance = instance;
+            return this;
+        }
+        
+    }
 
 }
