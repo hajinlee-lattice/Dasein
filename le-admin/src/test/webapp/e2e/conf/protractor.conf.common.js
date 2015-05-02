@@ -21,11 +21,14 @@ var Config = function() {
                 defaultTimeoutInterval: 120000
             },
 
+            framework: "jasmine2",
+
             onPrepare: function() {
                 var jasmineReporters = require('jasmine-reporters');
-                var junitReporter = new jasmineReporters.JUnitXmlReporter(
-                    'target/protractor-test-results', true, true, 'protractor-test-results', true
-                );
+                var junitReporter = new jasmineReporters.JUnitXmlReporter({
+                    savePath: 'target/protractor-test-results',
+                    consolidateAll: false
+                });
                 jasmine.getEnv().addReporter(junitReporter);
             }
         };
